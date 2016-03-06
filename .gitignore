@@ -38,4 +38,5 @@
 *.ipch
 *.ilk
 *.iobj
+*.opendb
 *.ipdb
