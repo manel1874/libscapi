@@ -1,0 +1,175 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{9C703BA5-F97D-4C6A-9655-CD1305889089}</ProjectGuid>
+    <Keyword>MakeFileProj</Keyword>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <NMakeBuildCommandLine>make</NMakeBuildCommandLine>
+    <NMakeOutput>ScapiTests.exe</NMakeOutput>
+    <NMakeCleanCommandLine>make clean</NMakeCleanCommandLine>
+    <NMakeReBuildCommandLine>make</NMakeReBuildCommandLine>
+    <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <IncludePath>C:\code\gmp-static;C:\Program Files %28x86%29\Boost\boost_1_58_0;$(IncludePath)</IncludePath>
+    <OutDir>$(SolutionDir)obj\</OutDir>
+    <IntDir>obj\</IntDir>
+    <LibraryPath>C:\code\gmp-static;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <NMakeBuildCommandLine>make</NMakeBuildCommandLine>
+    <NMakeOutput>ScapiTests.exe</NMakeOutput>
+    <NMakeCleanCommandLine>make clean</NMakeCleanCommandLine>
+    <NMakeReBuildCommandLine>make</NMakeReBuildCommandLine>
+    <NMakePreprocessorDefinitions>WIN32;NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\lib\MiraclWin64\source;C:\OpenSSL-Win64\include;..\..\lib;C:\local\boost_1_60_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PreprocessorDefinitions>_SCL_SECURE_NO_WARNINGS;_WIN32_WINNT=0x06030000;__WINSOCK_DEPRECATED_NO_WARNINGS</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>C:\code\Builds\CryptoPP\Output\Debug;C:\Program Files\Boost\boost_1_55_0\stage\lib;C:\OpenSSL-Win64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>C:\code\Builds\CryptoPP\Output\Debug\cryptlib.lib;C:\code\Builds\Miracl Build\test_folder\miracl.lib;C:\OpenSSL-Win64\lib\libeay32.lib;C:\code\scapi\lib\ScGarbledCircuitNoFixedKey\ScGarbledCircuitNoFixedKey1\Debug\ScGarbledCircuitNoFixedKey1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\lib;C:\OpenSSL-Win64\include;C:\local\boost_1_60_0;..\..\lib\MiraclWin64\source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_SCL_SECURE_NO_WARNINGS;_WIN32_WINNT=0x06030000;__WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\circuits\BooleanCircuits.cpp" />
+    <ClCompile Include="..\..\src\circuits\FastGarbledBooleanCircuit.cpp" />
+    <ClCompile Include="..\..\src\comm\TwoPartyComm.cpp" />
+    <ClCompile Include="..\..\src\infra\Common.cpp" />
+    <ClCompile Include="..\..\src\infra\ConfigFile.cpp" />
+    <ClCompile Include="..\..\src\infra\MathAlgorithms.cpp" />
+    <ClCompile Include="..\..\src\infra\Scanner.cpp" />
+    <ClCompile Include="..\..\src\interactive_mid_protocols\CommitmentSchemePedersen.cpp" />
+    <ClCompile Include="..\..\src\interactive_mid_protocols\OTSemiHonestExtension.cpp" />
+    <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocol.cpp" />
+    <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolAnd.cpp" />
+    <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolDlog.cpp" />
+    <ClCompile Include="..\..\src\interactive_mid_protocols\ZeroKnowledge.cpp" />
+    <ClCompile Include="..\..\src\primitives\Dlog.cpp" />
+    <ClCompile Include="..\..\src\primitives\DlogCryptopp.cpp" />
+    <ClCompile Include="..\..\src\primitives\DlogOpenSSL.cpp" />
+    <ClCompile Include="..\..\src\primitives\HashOpenSSL.cpp" />
+    <ClCompile Include="..\..\src\primitives\Kdf.cpp" />
+    <ClCompile Include="..\..\src\primitives\prf.cpp" />
+    <ClCompile Include="..\..\src\primitives\PrfOpenSSL.cpp" />
+    <ClCompile Include="..\..\src\primitives\Prg.cpp" />
+    <ClCompile Include="..\..\src\primitives\RandomOracle.cpp" />
+    <ClCompile Include="..\..\src\primitives\TrapdoorPermutation.cpp" />
+    <ClCompile Include="..\..\src\primitives\TrapdoorPermutationOpenSSL.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\circuits\BooleanCircuits.hpp" />
+    <ClInclude Include="..\..\include\circuits\FastGarbledBooleanCircuit.hpp" />
+    <ClInclude Include="..\..\include\comm\Comm.hpp" />
+    <ClInclude Include="..\..\include\comm\Message.hpp" />
+    <ClInclude Include="..\..\include\comm\TwoPartyComm.hpp" />
+    <ClInclude Include="..\..\include\infra\Common.hpp" />
+    <ClInclude Include="..\..\include\infra\ConfigFile.hpp" />
+    <ClInclude Include="..\..\include\infra\File.hpp" />
+    <ClInclude Include="..\..\include\infra\Log.hpp" />
+    <ClInclude Include="..\..\include\infra\MathAlgorithms.hpp" />
+    <ClInclude Include="..\..\include\infra\Scanner.hpp" />
+    <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentScheme.hpp" />
+    <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentSchemePedersen.hpp" />
+    <ClInclude Include="..\..\include\interactive_mid_protocols\OTSemiHonestExtension.hpp" />
+    <ClInclude Include="..\..\include\interactive_mid_protocols\RandomValue.hpp" />
+    <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocol.hpp" />
+    <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolAnd.hpp" />
+    <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolDlog.hpp" />
+    <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolPedersen.hpp" />
+    <ClInclude Include="..\..\include\interactive_mid_protocols\ZeroKnowledge.hpp" />
+    <ClInclude Include="..\..\include\mid_layer\PlainText.hpp" />
+    <ClInclude Include="..\..\include\primitives\Dlog.hpp" />
+    <ClInclude Include="..\..\include\primitives\DlogOpenSSL.hpp" />
+    <ClInclude Include="..\..\include\primitives\Hash.hpp" />
+    <ClInclude Include="..\..\include\primitives\HashOpenSSL.hpp" />
+    <ClInclude Include="..\..\include\primitives\Kdf.hpp" />
+    <ClInclude Include="..\..\include\primitives\Key.hpp" />
+    <ClInclude Include="..\..\include\primitives\mac.hpp" />
+    <ClInclude Include="..\..\include\primitives\Prf.hpp" />
+    <ClInclude Include="..\..\include\primitives\PrfOpenSSL.hpp" />
+    <ClInclude Include="..\..\include\primitives\Prg.hpp" />
+    <ClInclude Include="..\..\include\primitives\RandomOracle.hpp" />
+    <ClInclude Include="..\..\include\primitives\SecurityLevel.hpp" />
+    <ClInclude Include="..\..\include\primitives\TrapdoorPermutationOpenSSL.hpp" />
+    <ClInclude Include="..\..\include\primitives\TrapdoorPermutations.hpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

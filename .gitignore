@@ -26,3 +26,16 @@
 *.exe
 *.out
 *.app
+*.suo
+*.opensdf
+*.sdf
+*.idb
+*.log
+*.pdb
+*.tlog
+*.lastbuildstate
+*unsuccessfulbuild
+*.ipch
+*.ilk
+*.iobj
+*.ipdb
