@@ -90,7 +90,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <PreprocessorDefinitions>_WIN32_WINNT=0x06030000;_SCL_SECURE_NO_WARNINGS;_DBOOST_SYSTEM_NO_DEPRECATED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\code\scapi\lib\CryptoPP;C:\local\boost_1_60_0;C:\OpenSSL-Win64\include;C:\code\scapi\lib;C:\code\scapi\lib\MiraclCompilation\MiraclWin64\source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\local\boost_1_60_0;C:\OpenSSL-Win64\include;..\..\lib;..\..\lib\MiraclWin64\source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
