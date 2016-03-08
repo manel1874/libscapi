@@ -3,7 +3,7 @@
 #include <thread>         // std::this_thread::sleep_for
 #include <chrono>         // std::chrono::seconds
 
-int main8(int argc, char* argv[])
+int main(int argc, char* argv[])
 {
 	try
 	{
@@ -18,7 +18,7 @@ int main8(int argc, char* argv[])
 
 		SocketPartyData me(IpAdress::from_string("127.0.0.1"), atoi(argv[1]));
 		SocketPartyData other(IpAdress::from_string(argv[2]), atoi(argv[3]));
-		auto server = make_unique<ChannelServer>(io_service, me, other);
+		auto server = make_shared<ChannelServer>(io_service, me, other);
 		boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 
 		int i;

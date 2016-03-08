@@ -1,10 +1,10 @@
 #include "../include/primitives/HashOpenSSL.hpp"
 #include <iostream>
 
-int main2()
+int main()
 {
         string input_msg = "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq";
-        auto hash = make_unique<OpenSSLSHA1>();
+        auto hash = make_shared<OpenSSLSHA1>();
         const char *cstr = input_msg.c_str();
         int len = input_msg.size();
         vector<byte> vec(cstr, cstr + len);

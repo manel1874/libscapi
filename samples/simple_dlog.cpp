@@ -1,10 +1,10 @@
 #include "../include/primitives/DlogOpenSSL.hpp"
 #include <iostream>
 
-int main20(){
+int main(){
 	// initiate a discrete log group
 	// (in this case the OpenSSL implementation of the elliptic curve group K-233)
-	auto dlog = make_unique<OpenSSLDlogZpSafePrime>(128);
+	auto dlog = make_shared<OpenSSLDlogZpSafePrime>(128);
 
 	// get the group generator and order
 	auto g = dlog->getGenerator();
