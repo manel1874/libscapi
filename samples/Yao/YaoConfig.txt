@@ -1,14 +1,14 @@
-number_of_iterations = 100
+number_of_iterations = 1
 print_output = false
 sender_ip = 127.0.0.1
 receiver_ip = 127.0.0.1
-input_section = SHA1
+input_section = AES
 circuit_type = NoFixedKey
 
 [AES]
-circuit_file = /home/ubuntu/scapi/src/java/edu/biu/SCProtocols/MaliciousYao/assets/circuits/AES/NigelAes.txt
-input_file_party_1 = /home/ubuntu/scapi/src/java/edu/biu/SCProtocols/MaliciousYao/assets/circuits/AES/AESPartyOneInputs.txt
-input_file_party_2 = /home/ubuntu/scapi/src/java/edu/biu/SCProtocols/MaliciousYao/assets/circuits/AES/AESPartyTwoInputs.txt
+circuit_file = /home/ubuntu/libscapi/samples/assets/circuits/AES/NigelAes.txt
+input_file_party_1 = /home/ubuntu/libscapi/samples/assets/circuits/AES/AESPartyOneInputs.txt
+input_file_party_2 = /home/ubuntu/libscapi/samples/assets/circuits/AES/AESPartyTwoInputs.txt
 
 [SHA1]
 circuit_file = C:/code/scapi/src/java/edu/biu/SCProtocols/MaliciousYao/assets/circuits/SHA1/NigelSHA1.txt
