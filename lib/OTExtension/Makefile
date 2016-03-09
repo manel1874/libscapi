@@ -15,7 +15,8 @@ endif
 
 # external libs (linking options)
 LIBRARIES=$(INCLUDE_ARCHIVES_START) -lpthread -lmiracl -lssl -lcrypto $(INCLUDE_ARCHIVES_END) #-lgmp -lgmpxx 
-LIBRARIES_DIR=-L$(prefix)/ssl/lib -L$(prefix)/lib
+#LIBRARIES_DIR=-L$(prefix)/ssl/lib -L$(prefix)/lib
+LIBRARIES_DIR=-L$(prefix)/lib
 
 # target names
 OT_MAIN=otmain
@@ -33,7 +34,7 @@ OBJECTS_OT=ot/*.o
 # includes
 MIRACL_PATH=-I$(includedir)
 OPENSSL_INCLUDES=-I$(prefix)/ssl/include
-INCLUDE=-I.. $(OPENSSL_INCLUDES) $(MIRACL_PATH)
+INCLUDE=-I.. $(MIRACL_PATH)
 
 ## targets ##
 all: ${OT_LIBRARY}
@@ -48,7 +49,7 @@ otmain: ${OBJECTS_UTIL}  ${OBJECTS_OT} ${OBJECTS_OTMAIN}
 ${OBJECTS_OTMAIN}: ${SOURCES_OTMAIN}$
 	@cd mains; ${CXX} -c ${INCLUDE} ${CFLAGS} otmain.cpp 
 
-${OBJECTS_UTIL}: ${SOURCES_UTIL}$  
+${OBJECTS_UTIL}: ${SOURCES_UTIL}$ 
 	@cd util; ${CXX} -c ${CFLAGS} ${INCLUDE} ${BATCH} *.cpp
 
 ${OBJECTS_OT}: ${SOURCES_OT}$

@@ -12,8 +12,15 @@
 *.so
 *.dylib
 *.dll
+
+#scapi build
 install/*
 build/*
+compile-miracl
+compile-otextension
+compile-miracl-cpp
+compile-scgarbledcircuit
+test/config_for_test.txt
 
 # Fortran module files
 *.mod

@@ -3,8 +3,21 @@ export prefix=$(abspath ./install)
 CXX=g++
 uname_S := $(shell sh -c 'uname -s 2>/dev/null || echo not')
 ARCH := $(shell getconf LONG_BIT)
+SHARED_LIB_EXT:=.so
+INCLUDE_ARCHIVES_START = -Wl,-whole-archive # linking options, we prefer our generated shared object will be self-contained.
+INCLUDE_ARCHIVES_END = -Wl,-no-whole-archive -Wl,--no-undefined
+SHARED_LIB_OPT:=-shared
+
 export uname_S
 export ARCH
+export SHARED_LIB_EXT
+export INCLUDE_ARCHIVES_START
+export INCLUDE_ARCHIVES_END
+export SHARED_LIB_OPT
+export exec_prefix=$(prefix)
+export includedir=$(prefix)/include
+export bindir=$(exec_prefix)/bin
+export libdir=$(prefix)/lib
 
 SLib           = scapi.a
 CPP_FILES     := $(wildcard src/*/*.cpp)
@@ -21,7 +34,7 @@ directories: $(OUT_DIR)
 $(OUT_DIR):
 	mkdir -p $(OUT_DIR)
 
-$(SLib): compile-miracl compile-miracl-cpp $(OBJ_FILES)
+$(SLib): compile-miracl compile-scgarbledcircuit compile-otextension $(OBJ_FILES)
 	ar ru $@ $^ 
 	ranlib $@
 
@@ -63,6 +76,20 @@ compile-miracl-cpp::
 	@$(MAKE) -C $(builddir)/MiraclCPP MIRACL_TARGET_LANG=cpp CXX=$(CXX) install
 	@touch compile-miracl-cpp
 
+compile-otextension: compile-miracl-cpp
+	@echo "Compiling the OtExtension library..."
+	@cp -r lib/OTExtension $(builddir)/OTExtension
+	@$(MAKE) -C $(builddir)/OTExtension CXX=$(CXX)
+	@$(MAKE) -C $(builddir)/OTExtension CXX=$(CXX) SHARED_LIB_EXT=$(SHARED_LIB_EXT) install
+	@touch compile-otextension
+
+compile-scgarbledcircuit:
+	@echo "Compiling the ScGarbledCircuit library..."
+	@cp -r lib/ScGarbledCircuit $(builddir)/ScGarbledCircuit
+	@$(MAKE) -C $(builddir)/ScGarbledCircuit
+	@$(MAKE) -C $(builddir)/ScGarbledCircuit install
+	@touch compile-scgarbledcircuit
+
 clean-miracl:
 	@echo "Cleaning the miracl build dir..."
 	@rm -rf $(builddir)/Miracl
@@ -73,6 +100,16 @@ clean-miracl-cpp:
 	@rm -rf $(builddir)/MiraclCPP
 	@rm -f compile-miracl-cpp
 
+clean-otextension:
+	@echo "Cleaning the otextension build dir..."
+	@rm -rf $(builddir)/OTExtension
+	@rm -f compile-otextension
+
+clean-scgarbledcircuit:
+	@echo "Cleaning the ScGarbledCircuit build dir..."
+	@rm -rf $(builddir)/ScGarbledCircuit
+	@rm -f compile-scgarbledcircuit
+
 clean-cpp:
 	@echo "cleaning .obj files"
 	@rm -rf $(OUT_DIR)
@@ -82,4 +119,4 @@ clean-cpp:
 clean-install:
 	@rm -rf install/*
 
-clean: clean-miracl clean-miracl-cpp clean-cpp clean-install
+clean: clean-otextension clean-scgarbledcircuit clean-miracl clean-miracl-cpp clean-cpp clean-install
