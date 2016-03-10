@@ -41,7 +41,7 @@ public:
 /**
 * This class implements a Dlog group over Zp* utilizing OpenSSL's implementation.<p>
 */
-class OpenSSLDlogZpSafePrime : public DlogGroupAbs, public DDH {
+class OpenSSLDlogZpSafePrime : public DlogGroup, public DDH {
 private:
 	shared_ptr<OpenSSLDlogZpAdapter> dlog; // Pointer to the native group object.
 	shared_ptr<OpenSSLDlogZpAdapter> createOpenSSLDlogZpAdapter(biginteger p, biginteger q, biginteger g);

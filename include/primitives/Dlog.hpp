@@ -93,8 +93,96 @@ inline GroupParams::~GroupParams() { };
 *
 *  The first two work as a pair and decodeGroupElementToByteArray is the inverse of encodeByteArrayToGroupElement, whereas the last one works alone and does not have an inverse.
 */
-class DlogGroup
+class DlogGroup : public enable_shared_from_this<DlogGroup>  
 {
+protected:
+	std::shared_ptr<GroupParams> groupParams;  // group parameters
+	std::shared_ptr<GroupElement> generator;	// generator of the group
+	mt19937 random_element_gen;
+
+	int k; // k is the maximum length of a string to be converted to a Group Element of this group.
+		   // If a string exceeds the k length it cannot be converted.
+
+		   /*
+		   * Computes the simultaneousMultiplyExponentiate using a naive algorithm
+		   */
+	std::shared_ptr<GroupElement> computeNaive(vector<std::shared_ptr<GroupElement>> groupElements,
+		vector<biginteger> exponentiations);
+
+	/*
+	* Compute the simultaneousMultiplyExponentiate by LL algorithm.
+	* The code is taken from the pseudo code of LL algorithm in http://dasan.sejong.ac.kr/~chlim/pub/multi_exp.ps.
+	*/
+	std::shared_ptr<GroupElement> computeLL(vector<std::shared_ptr<GroupElement>> groupElements,
+		vector<biginteger> exponentiations);
+
+private:
+	/**
+	* The class GroupElementExponentiations is a nested class of DlogGroupAbs.<p>
+	* It performs the actual work of pre-computation of the exponentiations for one base.
+	* It is composed of two main elements. The group element for which the optimized computations
+	* are built for, called the base and a vector of group elements that are the result of
+	* exponentiations of order 1,2,4,8,
+	*/
+	class GroupElementsExponentiations {
+	private:
+		vector<std::shared_ptr<GroupElement>> exponentiations; //vector of group elements that are the result of exponentiations
+		std::shared_ptr<GroupElement> base;  //group element for which the optimized computations are built for
+		std::shared_ptr<DlogGroup> parent;
+		/**
+		* Calculates the necessary additional exponentiations and fills the exponentiations vector with them.
+		* @param size - the required exponent
+		* @throws IllegalArgumentException
+		*/
+		void prepareExponentiations(biginteger size);
+
+	public:
+		/**
+		* The constructor creates a map structure in memory.
+		* Then calculates the exponentiations of order 1,2,4,8 for the given base and save them in the map.
+		* @param base
+		* @throws IllegalArgumentException
+		*/
+		GroupElementsExponentiations(std::shared_ptr<DlogGroup> parent_,
+			std::shared_ptr<GroupElement> base_);
+
+		/**
+		* Checks if the exponentiations had already been calculated for the required size.
+		* If so, returns them, else it calls the private function prepareExponentiations with the given size.
+		* @param size - the required exponent
+		* @return groupElement - the exponentiate result
+		*/
+		shared_ptr<GroupElement> getExponentiation(biginteger size);
+	};
+	// using pointer as key mean different element ==> different keys even if they are 'equal' in other sense
+	std::unordered_map<std::shared_ptr<GroupElement>,
+		std::shared_ptr<GroupElementsExponentiations >> exponentiationsMap; //map for multExponentiationsWithSameBase calculations
+
+	/*
+	* Computes the loop the repeats in the algorithm.
+	* for k=0 to h-1
+	* 		e=0
+	* 		for i=kw to kw+w-1
+	*			if the bitIndex bit in ci is set:
+	*			calculate e += 2^(i-kw)
+	*		result = result *preComp[k][e]
+	*
+	*/
+	std::shared_ptr<GroupElement> computeLoop(vector<biginteger> exponentiations, int w, int h,
+		vector<vector<std::shared_ptr<GroupElement>>> preComp, std::shared_ptr<GroupElement> result,
+		int bitIndex);
+
+	/*
+	* Creates the preComputation table.
+	*/
+	vector<vector<std::shared_ptr<GroupElement>>> createLLPreCompTable(
+		vector<std::shared_ptr<GroupElement>> groupElements, int w, int h);
+
+	/*
+	* returns the w value according to the given t
+	*/
+	int getLLW(int t);
+
 public:
 	/**
 	* Each concrete class implementing this interface returns a string with a meaningful name for this type of Dlog group.
@@ -107,22 +195,22 @@ public:
 	* The generator g of the group is an element of the group such that, when written multiplicatively, every element of the group is a power of g.
 	* @return the generator of this Dlog group
 	*/
-	virtual std::shared_ptr<GroupElement> getGenerator() = 0;
-
+	shared_ptr<GroupElement> getGenerator() { return generator; }
+	
 	/**
 	* GroupParams is a structure that holds the actual data that makes this group a specific Dlog group.<p>
 	* For example, for a Dlog group over Zp* what defines the group is p.
 	*
 	* @return the GroupParams of that Dlog group
 	*/
-	virtual std::shared_ptr<GroupParams> getGroupParams() = 0;
+	shared_ptr<GroupParams> getGroupParams() { return groupParams; }
 
 	/**
-	*
+	* If this group has been initialized then it returns the group's order. Otherwise throws exception.
 	* @return the order of this Dlog group
 	*/
-	virtual biginteger getOrder() = 0;
-
+	biginteger getOrder() { return groupParams->getQ(); };
+	
 	/**
 	*
 	* @return the identity of this Dlog group
@@ -139,21 +227,19 @@ public:
 	virtual bool isMember(shared_ptr<GroupElement> element) = 0;
 
 	/**
-	* Checks if the order is a prime number
-	* @return <code>true<code> if the order is a prime number; <p>
-	* 		   <code>false</code> otherwise.
-	*
+	* Checks if the order is a prime number.<p>
+	* Primality checking can be an expensive operation and it should be performed only when absolutely necessary.
+	* @return true if the order is a prime number. false, otherwise.
 	*/
-	virtual bool isPrimeOrder() = 0;
-
+	virtual bool isPrimeOrder() { return isPrime(getOrder()); }
+	
 	/**
-	* Checks if the order of this group is greater than 2^numBits
+	* Checks if the order is greater than 2^numBits
 	* @param numBits
-	* @return <code>true</code> if the order is greater than 2^numBits;<p>
-	* 		   <code>false</code> otherwise.
+	* @return true if the order is greater than 2^numBits, false - otherwise.
 	*/
-	virtual bool isOrderGreaterThan(int numBits) = 0;
-
+	bool isOrderGreaterThan(int numBits) { return (getOrder() > boost::multiprecision::pow(biginteger(2), numBits)); }
+	
 	/**
 	* Checks if the element set as the generator is indeed the generator of this group.
 	* @return <code>true</code> if the generator is valid;<p>
@@ -199,13 +285,13 @@ public:
 	* Creates a random member of this Dlog group
 	* @return the random element
 	*/
-	virtual std::shared_ptr<GroupElement> createRandomElement() = 0;
+	virtual std::shared_ptr<GroupElement> createRandomElement();
 
 	/**
 	* Creates a random generator of this Dlog group
 	* @return the random generator
 	*/
-	virtual std::shared_ptr<GroupElement> createRandomGenerator() = 0;
+	std::shared_ptr<GroupElement> createRandomGenerator();
 
 	/**
 	* This function allows the generation of a group element by a protocol that holds a Dlog Group but does not know if it is a Zp Dlog Group or an Elliptic Curve Dlog Group.
@@ -255,7 +341,7 @@ public:
 	* @return the exponentiation result
 	*/
 	virtual std::shared_ptr<GroupElement> exponentiateWithPreComputedValues(
-		std::shared_ptr<GroupElement> base, biginteger exponent) = 0;
+		std::shared_ptr<GroupElement> base, biginteger exponent);
 
 	/**
 	* This function cleans up any resources used by exponentiateWithPreComputedValues for the requested base.
@@ -263,8 +349,10 @@ public:
 	*
 	* @param base
 	*/
-	virtual void endExponentiateWithPreComputedValues(std::shared_ptr<GroupElement> base) = 0;
-
+	void endExponentiateWithPreComputedValues(std::shared_ptr<GroupElement> base) {
+		exponentiationsMap.erase(base);
+	}
+	
 	/**
 	* This function takes any string of length up to k bytes and encodes it to a Group Element.
 	* k can be obtained by calling getMaxLengthOfByteArrayForEncoding() and it is calculated upon construction of this group; it depends on the length in bits of p.<p>
@@ -293,14 +381,17 @@ public:
 
 
 	/**
-	* This function returns the value <I>k</I> which is the maximum length of a string to be encoded to a Group Element of this group.<p>
-	* Any string of length <I>k</I> has a numeric value that is less than (p-1)/2 - 1.
-	* <I>k</I> is the maximum length a binary string is allowed to be in order to encode the said binary string to a group element and vice-versa.<p>
-	* If a string exceeds the <I>k</I> length it cannot be encoded.
+	* This function returns the value k which is the maximum length of a string to be encoded to a Group Element of this group.
+	* Any string of length k has a numeric value that is less than (p-1)/2 - 1.
+	* k is the maximum length a binary string is allowed to be in order to encode the said binary string to a group element and vice-versa.
+	* If a string exceeds the k length it cannot be encoded.
 	* @return k the maximum length of a string to be encoded to a Group Element of this group. k can be zero if there is no maximum.
 	*/
-	virtual int getMaxLengthOfByteArrayForEncoding() = 0;
-
+	virtual int getMaxLengthOfByteArrayForEncoding() {
+		//Return member variable k, which was calculated upon construction of this Dlog group, once the group got the p value. 
+		return k;
+	};
+	
 	/**
 	* This function maps a group element of this dlog group to a byte array.<p>
 	* This function does not have an inverse function, that is, it is not possible to re-construct the original group element from the resulting byte array.
@@ -314,177 +405,6 @@ public:
 * Marker interface for Dlog groups that has a prime order sub-group.
 */
 class primeOrderSubGroup : public virtual DlogGroup {};
-
-/**
-* DlogGroupAbs is an abstract class that implements common functionality of the Dlog group.
-*/
-class DlogGroupAbs : public virtual primeOrderSubGroup, public enable_shared_from_this<DlogGroupAbs> {
-
-protected:
-	std::shared_ptr<GroupParams> groupParams;  // group parameters
-	std::shared_ptr<GroupElement> generator;	// generator of the group
-	mt19937 random_element_gen; 
-
-	int k; // k is the maximum length of a string to be converted to a Group Element of this group.
-	       // If a string exceeds the k length it cannot be converted.
-
-	/*
-	* Computes the simultaneousMultiplyExponentiate using a naive algorithm
-	*/
-	std::shared_ptr<GroupElement> computeNaive(vector<std::shared_ptr<GroupElement>> groupElements,
-		vector<biginteger> exponentiations);
-	
-	/*
-	* Compute the simultaneousMultiplyExponentiate by LL algorithm.
-	* The code is taken from the pseudo code of LL algorithm in http://dasan.sejong.ac.kr/~chlim/pub/multi_exp.ps.
-	*/
-	std::shared_ptr<GroupElement> computeLL(vector<std::shared_ptr<GroupElement>> groupElements,
-		vector<biginteger> exponentiations);
-
-private:
-	/**
-	* The class GroupElementExponentiations is a nested class of DlogGroupAbs.<p>
-	* It performs the actual work of pre-computation of the exponentiations for one base.
-	* It is composed of two main elements. The group element for which the optimized computations
-	* are built for, called the base and a vector of group elements that are the result of
-	* exponentiations of order 1,2,4,8,
-	*/
-	class GroupElementsExponentiations {
-	private:
-		vector<std::shared_ptr<GroupElement>> exponentiations; //vector of group elements that are the result of exponentiations
-		std::shared_ptr<GroupElement> base;  //group element for which the optimized computations are built for
-		std::shared_ptr<DlogGroupAbs> parent;
-		/**
-		* Calculates the necessary additional exponentiations and fills the exponentiations vector with them.
-		* @param size - the required exponent
-		* @throws IllegalArgumentException
-		*/
-		void prepareExponentiations(biginteger size);
-
-	public:
-		/**
-		* The constructor creates a map structure in memory.
-		* Then calculates the exponentiations of order 1,2,4,8 for the given base and save them in the map.
-		* @param base
-		* @throws IllegalArgumentException
-		*/
-		GroupElementsExponentiations(std::shared_ptr<DlogGroupAbs> parent_, 
-			std::shared_ptr<GroupElement> base_);
-
-		/**
-		* Checks if the exponentiations had already been calculated for the required size.
-		* If so, returns them, else it calls the private function prepareExponentiations with the given size.
-		* @param size - the required exponent
-		* @return groupElement - the exponentiate result
-		*/
-		shared_ptr<GroupElement> getExponentiation(biginteger size);
-	};
-	// using pointer as key mean different element ==> different keys even if they are 'equal' in other sense
-    std::unordered_map<std::shared_ptr<GroupElement>, 
-		std::shared_ptr<GroupElementsExponentiations>> exponentiationsMap; //map for multExponentiationsWithSameBase calculations
-
-	/*
-	* Computes the loop the repeats in the algorithm.
-	* for k=0 to h-1
-	* 		e=0
-	* 		for i=kw to kw+w-1
-	*			if the bitIndex bit in ci is set:
-	*			calculate e += 2^(i-kw)
-	*		result = result *preComp[k][e]
-	*
-	*/
-	std::shared_ptr<GroupElement> computeLoop(vector<biginteger> exponentiations, int w, int h, 
-		vector<vector<std::shared_ptr<GroupElement>>> preComp, std::shared_ptr<GroupElement> result,
-		int bitIndex);
-
-	/*
-	* Creates the preComputation table.
-	*/
-	vector<vector<std::shared_ptr<GroupElement>>> createLLPreCompTable(
-		vector<std::shared_ptr<GroupElement>> groupElements, int w, int h);
-
-	/*
-	* returns the w value according to the given t
-	*/
-	int getLLW(int t);
-
-public:
-	/**
-	* If this group has been initialized then it returns the group's generator. Otherwise throws exception.
-	* @return the generator of this Dlog group
-	*/
-	virtual std::shared_ptr<GroupElement> getGenerator() override { return generator; };
-
-	/**
-	* GroupParams are the parameters of the group that define the actual group. That is, different parameters will create a different group.
-	* @return the GroupDesc of this Dlog group
-	*/
-	std::shared_ptr<GroupParams> getGroupParams() override { return groupParams; };
-
-	/**
-	* If this group has been initialized then it returns the group's order. Otherwise throws exception.
-	* @return the order of this Dlog group
-	*/
-	biginteger getOrder() override { return groupParams->getQ(); };
-
-	/**
-	* Checks if the order is a prime number.<p>
-	* Primality checking can be an expensive operation and it should be performed only when absolutely necessary.
-	* @return true if the order is a prime number. false, otherwise.
-	*/
-	bool isPrimeOrder() override { return isPrime(getOrder()); };
-
-	/**
-	* Checks if the order is greater than 2^numBits
-	* @param numBits
-	* @return true if the order is greater than 2^numBits, false - otherwise.
-	*/
-	bool isOrderGreaterThan(int numBits) override { return (getOrder() > boost::multiprecision::pow(biginteger(2), numBits)); }
-
-	/**
-	* Creates a random member of this Dlog group.
-	*
-	* @return the random element
-	*/
-	std::shared_ptr<GroupElement> createRandomElement() override;
-
-	/**
-	* Creates a random generator of this Dlog group
-	*
-	* @return the random generator
-	*/
-	std::shared_ptr<GroupElement> createRandomGenerator()override;
-	
-	/**
-	* @return the maximum length of a string to be converted to a Group Element of this group. If a string exceeds this length it cannot be converted.
-	*/
-	int getMaxLengthOfByteArrayForEncoding() override {
-		//Return member variable k, which was calculated upon construction of this Dlog group, once the group got the p value. 
-		return k;
-	};
-
-	/*
-	* Computes the product of several exponentiations of the same base and
-	* distinct exponents. An optimization is used to compute it more quickly by
-	* keeping in memory the result of h1, h2, h4,h8,... and using it in the
-	* calculation.<p> Note that if we want a one-time exponentiation of h it is
-	* preferable to use the basic exponentiation function since there is no
-	* point to keep anything in memory if we have no intention to use it.
-	*
-	* @param groupElement
-	* @param exponent
-	* @return the exponentiation result
-	*/
-	std::shared_ptr<GroupElement> exponentiateWithPreComputedValues(
-		std::shared_ptr<GroupElement> groupElement, biginteger exponent) override;
-
-	/* 
-	* @see edu.biu.scapi.primitives.dlog.DlogGroup#endExponentiateWithPreComputedValues(edu.biu.scapi.primitives.dlog.GroupElement)
-	*/
-	void endExponentiateWithPreComputedValues(std::shared_ptr<GroupElement> base) override {
-		exponentiationsMap.erase(base); 
-	}
-};
 
 /**********DlogZP hierechy***********************/
 
