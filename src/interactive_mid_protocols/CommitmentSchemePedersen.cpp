@@ -32,9 +32,8 @@ void CmtPedersenReceiverCore::preProcess() {
 	trapdoor = getRandomInRange(0, qMinusOne, random);
 	h = dlog->exponentiate(dlog->getGenerator(), trapdoor);
 	auto sendableData = h->generateSendableData();
-	auto raw_msg = sendableData->toByteArray();
-	int len = sendableData->getSerializedSize();
-	channel->write_fast(raw_msg.get(), len);
+	auto raw_msg = sendableData->toString();
+	channel->write_fast(raw_msg);
 }
 
 shared_ptr<CmtRCommitPhaseOutput> CmtPedersenReceiverCore::receiveCommitment() {
@@ -43,7 +42,7 @@ shared_ptr<CmtRCommitPhaseOutput> CmtPedersenReceiverCore::receiveCommitment() {
 	// read encoded CmtPedersenCommitmentMessage from channel
 	auto v = channel->read_one();
 	// init the empy CmtPedersenCommitmentMessage using the encdoed data
-	msg->initFromByteVector(v);
+	msg->initFromByteVector(*v);
 	auto cm = msg->getCommitment();
 	auto cmtCommitMsg = std::static_pointer_cast<ZpElementSendableData>(cm);
 	commitmentMap[msg->getId()] = msg;
@@ -54,7 +53,7 @@ shared_ptr<CmtRCommitPhaseOutput> CmtPedersenReceiverCore::receiveCommitment() {
 shared_ptr<CmtCommitValue> CmtPedersenReceiverCore::receiveDecommitment(long id) {
 	auto v = channel->read_one();
 	shared_ptr<CmtPedersenDecommitmentMessage> msg = make_shared<CmtPedersenDecommitmentMessage>();
-	msg->initFromByteVector(v);
+	msg->initFromByteVector(*v);
 	auto receivedCommitment = commitmentMap[id];
 	auto cmtCommitMsg = std::static_pointer_cast<CmtCCommitmentMsg>(receivedCommitment);
 	return verifyDecommitment(cmtCommitMsg, msg);
@@ -131,7 +130,7 @@ shared_ptr<CmtPedersenPreprocessMessage> CmtPedersenCommitterCore::waitForMessag
 	auto v = channel->read_one();
 	auto emptySendableData = make_shared<ZpElementSendableData>(0);
 	auto msg = make_shared<CmtPedersenPreprocessMessage>(emptySendableData);
-	msg->initFromByteVector(v);
+	msg->initFromByteVector(*v);
 	return msg;
 }
 
@@ -166,9 +165,8 @@ shared_ptr<CmtCCommitmentMsg> CmtPedersenCommitterCore::generateCommitmentMsg(
 
 void CmtPedersenCommitterCore::commit(shared_ptr<CmtCommitValue> in, long id) {
 	auto msg = generateCommitmentMsg(in, id);
-	auto bArray = msg->toByteArray();
-	int bSize = msg->getSerializedSize();
-	channel->write_fast(bArray.get(), bSize);
+	auto msgStr = msg->toString();
+	channel->write_fast(msgStr);
 }
 
 shared_ptr<CmtCDecommitmentMessage> CmtPedersenCommitterCore::generateDecommitmentMsg(long id) {
@@ -184,9 +182,8 @@ shared_ptr<CmtCDecommitmentMessage> CmtPedersenCommitterCore::generateDecommitme
 void CmtPedersenCommitterCore::decommit(long id) {
 	// fetch the commitment according to the requested ID
 	auto msg = generateDecommitmentMsg(id);
-	auto bMsg = msg->toByteArray();
-	int size = msg->getSerializedSize();
-	channel->write_fast(bMsg.get(), size);
+	auto bMsg = msg->toString();
+	channel->write_fast(bMsg);
 }
 
 void** CmtPedersenCommitterCore::getPreProcessValues() {

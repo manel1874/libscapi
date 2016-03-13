@@ -55,16 +55,8 @@ public:
 	*/
 	long getCommitmentId() override { return commitmentId; };
 	// network serialization implementation:
-	int getSerializedSize() override {return sizeof(long); };
-	std::shared_ptr<byte> toByteArray() override {
-		byte * result = new byte[sizeof(long)];
-		copy(((byte*)&commitmentId), ((byte*)&commitmentId) + sizeof(long), result);
-		std::shared_ptr<byte> result_shared(result, std::default_delete<byte[]>());
-		return result_shared;
-	}
-	void initFromByteArray(byte * arr, int size) override {
-		memcpy(&commitmentId, arr, sizeof(long));
-	};
+	string toString() override { return to_string(commitmentId); }
+	void initFromString(const string & s) { commitmentId = stol(s); }
 };
 
 /**
@@ -74,8 +66,6 @@ public:
 class CmtRTrapdoorCommitPhaseOutput : public CmtRBasicCommitPhaseOutput {
 private:
 	biginteger trap;
-	int serialized_size;
-	int trapSize;
 public:
 	CmtRTrapdoorCommitPhaseOutput() : CmtRTrapdoorCommitPhaseOutput(0, 0) {};
 	/**
@@ -86,8 +76,6 @@ public:
 	CmtRTrapdoorCommitPhaseOutput(biginteger trapdoor, long commitmentId) :
 		CmtRBasicCommitPhaseOutput(commitmentId) {
 		this->trap = trapdoor;
-		this->trapSize = bytesCount(trap);
-		this->serialized_size = trapSize + sizeof(long);
 	};
 	/**
 	* Returns the trapdoor of this commitment.
@@ -95,20 +83,14 @@ public:
 	biginteger getTrap() { return trap; };
 	
 	// network serialization implementation:
-
-	std::shared_ptr<byte> toByteArray() override {
-		byte * result = new byte[serialized_size];
-		copy(((byte*)&commitmentId), ((byte*)&commitmentId) + sizeof(long), result);
-		encodeBigInteger(trap, result + sizeof(long), trapSize);
-		std::shared_ptr<byte> result_shared(result, std::default_delete<byte[]>());
-		return result_shared;
+	string toString() override {
+		return to_string(commitmentId) + ':' + trap.str();
 	}
-	int getSerializedSize() override { return serialized_size; };
-	void initFromByteArray(byte * arr, int size) override {
-		memcpy(&commitmentId, arr, sizeof(long));
-		trapSize = size - sizeof(long);
-		trap = decodeBigInteger(arr + sizeof(long), trapSize);
-		serialized_size = trapSize + sizeof(long);
+	void initFromString(const string & raw) override {
+		auto vec = explode(raw, ':');
+		assert(vec.size() == 2);
+		commitmentId = stol(vec[0]);
+		trap = biginteger(vec[1]);
 	};
 };
 
@@ -128,11 +110,6 @@ public:
 	* @return the plaintext contains this commit value.
 	*/
 	virtual shared_ptr<Plaintext> convertToPlaintext() = 0;
-	/**
-	* Returns a serializable byte * from this object. Size can be fetched using sendableDataSize()
-	*/
-	virtual shared_ptr<byte> generateSendableData() = 0;
-	virtual int sendableDataSize() = 0;
 };
 
 /**
@@ -157,14 +134,6 @@ public:
 		auto res = make_shared<GroupElementPlaintext>(x);
 		return res; 
 	};
-
-	/**
-	* Returns a serialized object representing this commit value.
-	*/
-	shared_ptr<byte> generateSendableData() override {
-		return x->generateSendableData()->toByteArray(); };
-	virtual int sendableDataSize() override {
-		return x->generateSendableData()->getSerializedSize(); };
 };
 
 /**
@@ -221,16 +190,6 @@ public:
 		auto res = make_shared<BigIntegerPlainText>(x);
 		return res;
 	};
-
-	/**
-	* Returns a serialized object representing this commit value.
-	*/
-	shared_ptr<byte> generateSendableData() override {
-		std::shared_ptr<byte> output(new byte[byteCount], std::default_delete<byte[]>());
-		encodeBigInteger(x, output.get(), byteCount);
-		return output;
-	};
-	int sendableDataSize() override { return byteCount; }
 };
 
 /**
@@ -261,11 +220,6 @@ public:
 		auto res = make_shared<ByteArrayPlaintext>(x, len);
 		return res;
 	};
-	/**
-	* Returns a serialized object representing this commit value.
-	*/
-	std::shared_ptr<byte> generateSendableData() override {return x;}
-	int sendableDataSize() override { return len; }
 };
 
 /**
@@ -293,12 +247,6 @@ public:
 */
 class CmtCDecommitmentMessage : public NetworkSerialized{
 public:
-	/**
-	* Returns the committed value.
-	* @return the serializable committed value.
-	*/
-	virtual shared_ptr<byte> getSerializedX() = 0;
-	virtual int getSerializedXSize() = 0;
 	/**
 	* Returns the random value used to commit.
 	*/

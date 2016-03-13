@@ -144,6 +144,7 @@ public:
 	vector<byte> * read_one() { return channel->read_one(); };
 	//vector<Message> read_all() { return channel->read_all(); };
 	void write_fast(byte* data, int size);
+	void write_fast(const string & data);
 
 private:
 	void handle_accept(shared_ptr<NativeChannel> new_channel, const boost::system::error_code& error) {

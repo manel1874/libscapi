@@ -93,17 +93,20 @@ std::chrono::time_point<std::chrono::system_clock> scapi_now();
 biginteger getRandomInRange(biginteger min, biginteger max, std::mt19937 random);
 void print_byte_array(byte * arr, int len, string message);
 
+const vector<string> explode(const string& s, const char& c);
+
 bool isPrime(biginteger bi);
 /**
 * Abstract marker interface that allow serialization and deserialization from byte array and size
 */
 class NetworkSerialized {
 public:
-	virtual int getSerializedSize() = 0;
-	virtual shared_ptr<byte> toByteArray() = 0;
-	virtual void initFromByteArray(byte* arr, int size) = 0;
-	virtual void initFromByteVector(vector<byte> * byteVectorPtr) {
-		initFromByteArray(&(byteVectorPtr->at(0)), byteVectorPtr->size());
+	virtual string toString() = 0;
+	virtual void initFromString(const string & raw) = 0;
+	virtual void initFromByteVector(const vector<byte> & byteVector) {
+		const byte * uc = &(byteVector[0]);
+		std::string s(reinterpret_cast<char const*>(uc), byteVector.size());
+		initFromString(s);
 	}
 };
 

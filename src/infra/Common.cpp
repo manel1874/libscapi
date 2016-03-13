@@ -70,6 +70,7 @@ size_t bytesCount(biginteger value)
 
 void encodeBigInteger(biginteger value, byte* output, size_t length)
 {
+
 	if (value.is_zero())
 		*output = 0;
 	else if (value.sign() > 0)
@@ -85,6 +86,22 @@ void encodeBigInteger(biginteger value, byte* output, size_t length)
 		}
 	}
 }
+
+const vector<string> explode(const string& s, const char& c)
+{
+	string buff{ "" };
+	vector<string> v;
+
+	for (auto n : s)
+	{
+		if (n != c) buff += n; else
+			if (n == c && buff != "") { v.push_back(buff); buff = ""; }
+	}
+	if (buff != "") v.push_back(buff);
+
+	return v;
+}
+
 
 biginteger decodeBigInteger(byte* input, size_t length)
 {

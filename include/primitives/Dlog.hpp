@@ -16,10 +16,7 @@ public:
 */
 class GroupElementSendableData : public NetworkSerialized {
 public:
-	virtual int getSerializedSize() override { return serialized_size; };
 	virtual ~GroupElementSendableData() = 0; // making this an abstract class
-protected:
-	int serialized_size;
 };
 
 inline GroupElementSendableData::~GroupElementSendableData() {}; // must provide implemeantion to allow destruction of base classes
@@ -586,19 +583,9 @@ protected:
 public:
 	ZpElementSendableData(biginteger x_): GroupElementSendableData(){ 
 		x = x_; 
-		serialized_size = bytesCount(x_);
 	};
 	biginteger getX() { return x; }
-	string toString() { return "ZpElementSendableData [x=" + (string) x + "]"; }
-	std::shared_ptr<byte> toByteArray() override {
-		serialized_size = bytesCount(x);
-		std::shared_ptr<byte> result(new byte[serialized_size], std::default_delete<byte[]>());
-		encodeBigInteger(x, result.get(), serialized_size);
-		return result;
-	};
-	void initFromByteArray(byte* arr, int size) override {
-		serialized_size = size;
-		x = decodeBigInteger(arr, size);
-	};
+	string toString() override { return (string) x; }
+	void initFromString(const string & raw) override { x = biginteger(raw); };
 
 };

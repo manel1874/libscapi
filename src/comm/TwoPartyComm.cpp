@@ -200,3 +200,10 @@ void ChannelServer::write_fast(byte* data, int size) {
 	msg.encode_header();
 	channel->write_fast(msg);
 }
+
+void ChannelServer::write_fast(const string & data) {
+	msg.body_length(data.size());
+	memcpy(msg.body(), data.c_str(), msg.body_length());
+	msg.encode_header();
+	channel->write_fast(msg);
+}

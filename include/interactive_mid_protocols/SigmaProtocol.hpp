@@ -311,9 +311,8 @@ private:
 	* Sends the given message to the verifier.
 	*/
 	void sendMsgToVerifier(shared_ptr<SigmaProtocolMsg> message) { 
-		auto raw_message = message->toByteArray();
-		int message_size = message->getSerializedSize();
-		channel->write_fast(raw_message.get(), message_size);
+		auto raw_message = message->toString();
+		channel->write_fast(raw_message);
 	};
 };
 
@@ -389,9 +388,8 @@ class SigmaMultipleMsg : public SigmaProtocolMsg {
 public:
 	SigmaMultipleMsg(vector<shared_ptr<SigmaProtocolMsg>> messages) { this->messages = messages; };
 	vector<shared_ptr<SigmaProtocolMsg>> getMessages() { return messages; };
-	void initFromByteArray(byte* arr, int size) override;
-	shared_ptr<byte> toByteArray() override;
-	int getSerializedSize() override;
+	void initFromString(const string & s) override;
+	string toString() override;
 
 private:
 	vector<shared_ptr<SigmaProtocolMsg>> messages;
@@ -404,22 +402,12 @@ private:
 class SigmaBIMsg : public SigmaProtocolMsg {
 private:
 	biginteger z;
-	int size_;
 public:
 	SigmaBIMsg() { this->z = -100; };
 	SigmaBIMsg(biginteger z) { this->z = z; };
 	biginteger getMsg() { return z; };
 
 	// SerializedNetwork implementation:
-	void initFromByteArray(byte* arr, int size) override {
-		z = decodeBigInteger(arr, size); 
-		size_ = size;
-	};
-	shared_ptr<byte> toByteArray() override {
-		size_ = bytesCount(this->z);
-		std::shared_ptr<byte> res(new byte[size_], std::default_delete<byte[]>());
-		encodeBigInteger(this->z, res.get(), size_);
-		return res;
-	}
-	int getSerializedSize() override { return size_; };
+	void initFromString(const string & s) override { z = biginteger(s); };
+	string toString() override { return z.str(); };
 };

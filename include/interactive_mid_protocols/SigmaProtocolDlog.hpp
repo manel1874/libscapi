@@ -11,9 +11,8 @@ public:
 	SigmaGroupElementMsg(shared_ptr<GroupElementSendableData> el) {  this->element = el;  };
 	shared_ptr<GroupElementSendableData> getElement() { return element; };
 	// SerializedNetwork implementation:
-	void initFromByteArray(byte* arr, int size) override { element->initFromByteArray(arr, size); };
-	shared_ptr<byte> toByteArray() override{ return element->toByteArray();  };
-	int getSerializedSize() override { return element->getSerializedSize(); };
+	void initFromString(const string & s) override { element->initFromString(s); };
+	string toString() override{ return element->toString();  };
 
 private:
 	shared_ptr<GroupElementSendableData> element=NULL;

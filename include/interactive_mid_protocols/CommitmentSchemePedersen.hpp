@@ -15,7 +15,6 @@ class CmtPedersenCommitmentMessage : public CmtCCommitmentMsg{
 private:
 	std::shared_ptr<GroupElementSendableData> c=NULL;
 	long id=0; // the id of the commitment
-	int serializedSize_;
 public:
 	/**
 	* Empty constructor - used to allow initialization from byte array
@@ -39,20 +38,14 @@ public:
 
 	// SerializedNetwork implementation:
 
-	std::shared_ptr<byte> toByteArray() override {
-		auto byteGe = c->toByteArray();
-		int geSize = c->getSerializedSize();
-		serializedSize_ = sizeof(long) + geSize;
-		byte * result = new byte[serializedSize_];
-		copy(((byte*)&id), ((byte*)&id) + sizeof(long), result);
-		copy(byteGe.get(), byteGe.get() + geSize, result+sizeof(long));
-		std::shared_ptr<byte> result_shared(result, std::default_delete<byte[]>());
-		return result_shared;
+	string toString() override {
+		return to_string(id) + ':' + c->toString();
 	}
-	int getSerializedSize() override { return serializedSize_; };
-	void initFromByteArray(byte * arr, int size) override {
-		memcpy(&id, arr, sizeof(long));
-		c->initFromByteArray(arr + sizeof(long), size - sizeof(long));
+	void initFromString(const string & raw) override {
+		auto str_vec = explode(raw, ':');
+		assert(str_vec.size() == 2);
+		id = stol(str_vec[0]);
+		c->initFromString(str_vec[1]);
 	};
 };
 
@@ -62,7 +55,6 @@ public:
 class CmtPedersenDecommitmentMessage : public CmtCDecommitmentMessage {
 private:
 	biginteger x; // committer's private input x in Zq
-	int lenX, lenR, serializedSize;
 	shared_ptr<BigIntegerRandomValue> r; // random value sampled during the sampleRandomValues stage;
 public:
 	CmtPedersenDecommitmentMessage() : CmtPedersenDecommitmentMessage(0, NULL) {};
@@ -74,41 +66,19 @@ public:
 	CmtPedersenDecommitmentMessage(biginteger x, shared_ptr<BigIntegerRandomValue> r) {
 		this->x = x;
 		this->r = r;
-		this->lenX = bytesCount(x);
-		this->lenR = r? bytesCount(r->getR()) : 0;
-		this->serializedSize = lenX + lenR + 2*sizeof(int);
 	};
-	/**
-	* Returns the committed value.
-	*/
-	shared_ptr<byte> getSerializedX() override{
-		std::shared_ptr<byte> res(new byte[lenX], std::default_delete<byte[]>());
-		encodeBigInteger(x, res.get(), lenX);
-		return res;
-	}
 	shared_ptr<RandomValue> getR() override { return r; };
 	biginteger getRValue() { return r->getR(); }
-	int getSerializedXSize() override { return lenX; };
 	biginteger getX() { return x; };
+
 	// network serialization implementation:
-	void initFromByteArray(byte* arr, int size) override {
-		memcpy(&lenX, arr, sizeof(int));
-		x = decodeBigInteger(arr + sizeof(int), lenX);
-		memcpy(&lenR, arr + sizeof(int) + lenX, sizeof(int));
-		biginteger rVal = decodeBigInteger(arr + 2* sizeof(int) + lenX, lenR);
+	void initFromString(const string & s) override {
+		auto vec = explode(s, ':');
+		x = biginteger(vec[0]);
+		biginteger rVal(vec[1]);
 		r = make_shared<BigIntegerRandomValue>(rVal);
-		serializedSize = lenX + lenR + 2*sizeof(int);
 	}
-	shared_ptr<byte> toByteArray() override {
-		byte * result = new byte[serializedSize];
-		copy(((byte*)&lenX), ((byte*)&lenX) + sizeof(int), result);
-		encodeBigInteger(x, result+sizeof(int), lenX);
-		copy(((byte*)&lenR), ((byte*)&lenR) + sizeof(int), result+lenX+sizeof(int));
-		encodeBigInteger(r->getR(), result+lenX+2*sizeof(int), lenR);
-		std::shared_ptr<byte> result_shared(result, std::default_delete<byte[]>());
-		return result_shared;
-	}
-	int getSerializedSize() override { return serializedSize; };
+	string toString() override { return x.str() + ':' + getRValue().str(); };
 };
 
 /**
@@ -134,9 +104,8 @@ public:
 	shared_ptr<GroupElementSendableData> getH() { return h; };
 	
 	// SerializedNetwork implementation:
-	std::shared_ptr<byte> toByteArray() override { return h->toByteArray(); };
-	int getSerializedSize() override { return h->getSerializedSize(); };
-	void initFromByteArray(byte * arr, int size) override { h->initFromByteArray(arr, size); };
+	string toString() override { return h->toString(); };
+	void initFromString(const string & s) override { h->initFromString(s); };
 };
 
 /**

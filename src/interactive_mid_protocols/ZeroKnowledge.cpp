@@ -89,7 +89,7 @@ bool ZKFromSigmaVerifier::verify(shared_ptr<ZKCommonInput> input,
 
 void ZKFromSigmaVerifier::receiveMsgFromProver(shared_ptr<SigmaProtocolMsg> concreteMsg) {
 	auto raw_msg = channel->read_one();
-	concreteMsg->initFromByteVector(raw_msg);
+	concreteMsg->initFromByteVector(*raw_msg);
 }
 
 /************************************************/
@@ -123,14 +123,12 @@ void ZKPOKFromSigmaCmtPedersenProver::processSecondMsg(shared_ptr<byte> e, int e
 	auto z = sProver->computeSecondMsg(e.get(), eSize);
 
 	// send the second message.
-	auto raw_z = z->toByteArray();
-	int raw_z_size = z->getSerializedSize();
-	sendMsgToVerifier(raw_z.get(), raw_z_size);
+	auto raw_z = z->toString();
+	sendMsgToVerifier(raw_z);
 
 	// send the trap.
-	auto raw_trap = trap->toByteArray();
-	int raw_trap_size = trap->getSerializedSize();
-	sendMsgToVerifier(raw_trap.get(), raw_trap_size);
+	auto raw_trap = trap->toString();
+	sendMsgToVerifier(raw_trap);
 }
 
 
