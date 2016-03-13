@@ -3,7 +3,11 @@
 #define WIN32_LEAN_AND_MEAN
 
 #include <boost/random.hpp>
+#ifdef _WIN32
 #include <boost/multiprecision/cpp_int.hpp>
+#else
+#include <boost/multiprecision/gmp.hpp>
+#endif
 #include <boost/algorithm/hex.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/timer/timer.hpp>
@@ -38,7 +42,12 @@ public:
 
 // using boost::multiprecision:cpp_int - Arbitrary precision integer type.
 namespace mp = boost::multiprecision;     // reduce the typing a bit later...
+
+#ifdef _WIN32
 using biginteger = boost::multiprecision::cpp_int;
+#else
+using biginteger = boost::multiprecision::mpz_int;
+#endif
 
 typedef unsigned char byte;		// put in global namespace to avoid ambiguity with other byte typedefs
 

@@ -1,7 +1,7 @@
 #include "../include/primitives/DlogOpenSSL.hpp"
 #include <iostream>
 
-int main(){
+int main235(){
 	// initiate a discrete log group
 	// (in this case the OpenSSL implementation of the elliptic curve group K-233)
 	auto dlog = make_shared<OpenSSLDlogZpSafePrime>(128);

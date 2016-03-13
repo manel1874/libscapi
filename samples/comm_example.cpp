@@ -3,7 +3,7 @@
 #include <thread>         // std::this_thread::sleep_for
 #include <chrono>         // std::chrono::seconds
 
-int main(int argc, char* argv[])
+int main123(int argc, char* argv[])
 {
 	try
 	{
