@@ -83,6 +83,7 @@ biginteger convert_hex_to_biginteger(const string & hex);
 string hexStr(vector<byte> const & data);
 
 void print_elapsed_ms(std::chrono::time_point<std::chrono::system_clock> start, string message);
+void print_elapsed_micros(std::chrono::time_point<std::chrono::system_clock> start, string message);
 
 std::chrono::time_point<std::chrono::system_clock> scapi_now();
 

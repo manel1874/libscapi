@@ -132,6 +132,12 @@ void print_elapsed_ms(std::chrono::time_point<std::chrono::system_clock> start, 
 	cout << message << " took: " << elapsed_ms << " ms" << endl;
 }
 
+void print_elapsed_micros(std::chrono::time_point<std::chrono::system_clock> start, string message) {
+	auto end = std::chrono::system_clock::now();
+	int elapsed_ms = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+	cout << message << " took: " << elapsed_ms << " microsseconds" << endl;
+}
+
 std::chrono::time_point<std::chrono::system_clock> scapi_now() {
 	return chrono::system_clock::now();
 }
