@@ -22,7 +22,7 @@ void run_verifier(shared_ptr<ChannelServer> server, SigmaDlogParams sdp, ProverV
 	auto commonInput = make_shared<SigmaDlogCommonInput>(h);
 	auto verifierComputation = make_shared<SigmaDlogVerifierComputation>(
 		dg, sdp.t, get_seeded_random());
-	auto msg1 = make_shared<SigmaGroupElementMsg>(h->generateSendableData());
+	auto msg1 = make_shared<SigmaGroupElementMsg>(dg->getIdentity());
 	auto msg2 = make_shared<SigmaBIMsg>();
 	bool verificationPassed = pe.verify(server, verifierComputation, msg1, msg2, commonInput, openSSLdg);
 	cout << "Verifer output: " << (verificationPassed ? "Success" : "Failure") << endl;
