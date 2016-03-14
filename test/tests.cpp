@@ -571,22 +571,22 @@ TEST_CASE("serialization", "[SerializedData, CmtCCommitmentMsg]")
 		long id = 123123123123123;
 		
 		// create serialize, and verify original values untouched
-		auto es = make_shared<ZpElementSendableData>(birsa100);
+		auto es = make_shared<OpenSSLZpSafePrimeElement>(birsa100);
 		CmtPedersenCommitmentMessage cmtMsg(es, id);
 		auto serialized = cmtMsg.toByteArray();
 		int serializedSize = cmtMsg.getSerializedSize();
 		REQUIRE(cmtMsg.getId() == id);
-		REQUIRE(((ZpElementSendableData*)cmtMsg.getCommitment().get())->getX() == birsa100);
+		REQUIRE(((ZpElement*)cmtMsg.getCommitment().get())->getElementValue() == birsa100);
 
 		// verify new one is created with empty values
-		CmtPedersenCommitmentMessage cmtMsg2;
+		CmtPedersenCommitmentMessage cmtMsg2(make_shared<OpenSSLZpSafePrimeElement>(biginteger(0)));
 		REQUIRE(cmtMsg2.getId() == 0);
-		REQUIRE(((ZpElementSendableData*)cmtMsg2.getCommitment().get())->getX() == 0);
+		REQUIRE(((ZpElement*)cmtMsg2.getCommitment().get())->getElementValue() == 0);
 
 		// deserialize and verify original values in the new object
 		cmtMsg2.initFromByteArray(serialized.get(), serializedSize);
 		REQUIRE(cmtMsg2.getId() == id);
-		REQUIRE(((ZpElementSendableData*)cmtMsg2.getCommitment().get())->getX() == birsa100);
+		REQUIRE(((ZpElement*)cmtMsg2.getCommitment().get())->getElementValue() == birsa100);
 	}
 	SECTION("SigmaBIMsg") {
 		biginteger value = 123456789;
