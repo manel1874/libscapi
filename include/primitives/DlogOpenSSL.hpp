@@ -28,10 +28,10 @@ public:
 */
 class OpenSSLZpSafePrimeElement : public ZpSafePrimeElement {
 public:
-	OpenSSLZpSafePrimeElement(biginteger x, biginteger p, bool bCheckMembership) : 
+	OpenSSLZpSafePrimeElement(const biginteger & x, const biginteger & p, bool bCheckMembership) : 
 		ZpSafePrimeElement(x, p, bCheckMembership) {};
-	OpenSSLZpSafePrimeElement(biginteger p, mt19937 prg) : ZpSafePrimeElement(p, prg) {};
-	OpenSSLZpSafePrimeElement(biginteger elementValue) : ZpSafePrimeElement(elementValue) {};
+	OpenSSLZpSafePrimeElement(const biginteger & p, mt19937 prg) : ZpSafePrimeElement(p, prg) {};
+	OpenSSLZpSafePrimeElement(const biginteger & elementValue) : ZpSafePrimeElement(elementValue) {};
 	virtual string toString() {
 		return "OpenSSLZpSafePrimeElement  [element value=" + string(element) + "]";
 	};
@@ -44,9 +44,9 @@ public:
 class OpenSSLDlogZpSafePrime : public DlogGroup, public DDH {
 private:
 	shared_ptr<OpenSSLDlogZpAdapter> dlog; // Pointer to the native group object.
-	shared_ptr<OpenSSLDlogZpAdapter> createOpenSSLDlogZpAdapter(biginteger p, biginteger q, biginteger g);
+	shared_ptr<OpenSSLDlogZpAdapter> createOpenSSLDlogZpAdapter(const biginteger & p, const biginteger & q, const biginteger & g);
 	shared_ptr<OpenSSLDlogZpAdapter> createRandomOpenSSLDlogZpAdapter(int numBits);
-	int calcK(biginteger p);
+	int calcK(const biginteger & p);
 
 public:
 	//virtual ~OpenSSLDlogZpSafePrime();
@@ -71,9 +71,9 @@ public:
 	bool isGenerator() override;
 	bool validateGroup() override;
 	shared_ptr<GroupElement> getInverse(shared_ptr<GroupElement> groupElement) override;
-	shared_ptr<GroupElement> exponentiate(shared_ptr<GroupElement> base, biginteger exponent) override;
+	shared_ptr<GroupElement> exponentiate(shared_ptr<GroupElement> base, const biginteger & exponent) override;
 	shared_ptr<GroupElement> exponentiateWithPreComputedValues(shared_ptr<GroupElement> groupElement, 
-		biginteger exponent) override { return exponentiate(groupElement, exponent); };
+		const biginteger & exponent) override { return exponentiate(groupElement, exponent); };
 	shared_ptr<GroupElement> multiplyGroupElements(shared_ptr<GroupElement> groupElement1, 
 		shared_ptr<GroupElement> groupElement2) override;
 	shared_ptr<GroupElement> simultaneousMultipleExponentiations(vector<shared_ptr<GroupElement>> groupElements,

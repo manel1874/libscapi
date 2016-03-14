@@ -3,7 +3,7 @@
 /*************************************************/
 /*ZpSafePrimeElement*/
 /*************************************************/
-ZpSafePrimeElement::ZpSafePrimeElement(biginteger x, biginteger p, bool bCheckMembership) {
+ZpSafePrimeElement::ZpSafePrimeElement(const biginteger & x, const biginteger & p, bool bCheckMembership) {
 	if (bCheckMembership) {
 		biginteger q = (p - 1) / 2;
 		//if the element is in the expected range, set it. else, throw exception
@@ -25,7 +25,7 @@ ZpSafePrimeElement::ZpSafePrimeElement(biginteger x, biginteger p, bool bCheckMe
 	}
 }
 
-ZpSafePrimeElement::ZpSafePrimeElement(biginteger p, mt19937 prg)
+ZpSafePrimeElement::ZpSafePrimeElement(const biginteger & p, mt19937 prg)
 {
 	// find a number in the range [1, ..., p-1]
 	biginteger rand_in_range = getRandomInRange(1, p - 1, prg);
@@ -63,7 +63,7 @@ DlogGroup::GroupElementsExponentiations::GroupElementsExponentiations(
 	}
 }
 
-void DlogGroup::GroupElementsExponentiations::prepareExponentiations(biginteger size)
+void DlogGroup::GroupElementsExponentiations::prepareExponentiations(const biginteger & size)
 {
 	//find log of the number - this is the index of the size-exponent in the exponentiation array 
 	int index = find_log2_floor(size);
@@ -76,7 +76,7 @@ void DlogGroup::GroupElementsExponentiations::prepareExponentiations(biginteger 
 	}
 }
 
-shared_ptr<GroupElement> DlogGroup::GroupElementsExponentiations::getExponentiation(biginteger size) {
+shared_ptr<GroupElement> DlogGroup::GroupElementsExponentiations::getExponentiation(const biginteger & size) {
 	/**
 	* The exponents in the exponents vector are all power of 2.
 	* In order to achieve the exponent size, we calculate its closest power 2 in the exponents vector
@@ -212,7 +212,7 @@ int DlogGroup::getLLW(int t) {
 }
 
 shared_ptr<GroupElement> DlogGroup::exponentiateWithPreComputedValues(
-	shared_ptr<GroupElement> groupElement, biginteger exponent){
+	shared_ptr<GroupElement> groupElement, const biginteger & exponent){
 	//extracts from the map the GroupElementsExponentiations object corresponding to the accepted base
 	auto it = exponentiationsMap.find(groupElement);
 	

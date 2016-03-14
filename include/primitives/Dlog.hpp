@@ -119,7 +119,7 @@ private:
 		* @param size - the required exponent
 		* @throws IllegalArgumentException
 		*/
-		void prepareExponentiations(biginteger size);
+		void prepareExponentiations(const biginteger & size);
 
 	public:
 		/**
@@ -137,7 +137,7 @@ private:
 		* @param size - the required exponent
 		* @return groupElement - the exponentiate result
 		*/
-		shared_ptr<GroupElement> getExponentiation(biginteger size);
+		shared_ptr<GroupElement> getExponentiation(const biginteger & size);
 	};
 	// using pointer as key mean different element ==> different keys even if they are 'equal' in other sense
 	std::unordered_map<std::shared_ptr<GroupElement>,
@@ -254,7 +254,7 @@ public:
 	* @return the result of the exponentiation
 	* @throws IllegalArgumentException
 	*/
-	virtual std::shared_ptr<GroupElement> exponentiate(std::shared_ptr<GroupElement> base, biginteger exponent) = 0;
+	virtual std::shared_ptr<GroupElement> exponentiate(std::shared_ptr<GroupElement> base, const biginteger & exponent) = 0;
 
 	/**
 	* Multiplies two GroupElements
@@ -315,7 +315,7 @@ public:
 	* @return the exponentiation result
 	*/
 	virtual std::shared_ptr<GroupElement> exponentiateWithPreComputedValues(
-		std::shared_ptr<GroupElement> base, biginteger exponent);
+		std::shared_ptr<GroupElement> base, const biginteger & exponent);
 
 	/**
 	* This function cleans up any resources used by exponentiateWithPreComputedValues for the requested base.
@@ -402,7 +402,7 @@ public:
 	* @param xG - generator of the group
 	* @param p - modulus of the group
 	*/
-	ZpGroupParams(biginteger q_, biginteger xG_, biginteger p_) {
+	ZpGroupParams(const biginteger & q_, const biginteger & xG_, const biginteger & p_) {
 		q = q_;
 		xG = xG_;
 		p = p_;
@@ -452,7 +452,7 @@ public:
 	* This constructor accepts x value and DlogGroup (represented by p).
 	* If x is valid, sets it; else, throws exception
 	*/
-	ZpSafePrimeElement(biginteger x, biginteger p, bool bCheckMembership);
+	ZpSafePrimeElement(const biginteger & x, const biginteger & p, bool bCheckMembership);
 	/**
 	* Constructor that gets DlogGroup and chooses random element with order q.
 	* The algorithm is:
@@ -460,11 +460,11 @@ public:
 	* choose a random element between 1 to p-1
 	* calculate element^2 mod p
 	*/
-	ZpSafePrimeElement(biginteger p, mt19937 prg);
+	ZpSafePrimeElement(const biginteger & p, mt19937 prg);
 	/*
 	* Constructor that simply create element using the given value
 	*/
-	ZpSafePrimeElement(biginteger elementValue) { 
+	ZpSafePrimeElement(const biginteger & elementValue) { 
 		element = elementValue; 
 		serialized_size = bytesCount(element);
 	};

@@ -66,7 +66,7 @@ bool OpenSSLDlogZpAdapter::validateElement(BIGNUM* el) {
 /*************************************************/
 /**** OpenSSLDlogZpSafePrime ***/
 /*************************************************/
-shared_ptr<OpenSSLDlogZpAdapter> OpenSSLDlogZpSafePrime::createOpenSSLDlogZpAdapter(biginteger p, biginteger q, biginteger g)
+shared_ptr<OpenSSLDlogZpAdapter> OpenSSLDlogZpSafePrime::createOpenSSLDlogZpAdapter(const biginteger & p, const biginteger & q, const biginteger & g)
 {
 	// Create OpenSSL Dlog group with p, , q, g.
 	// The validity of g will be checked after the creation of the group because the check need the pointer to the group
@@ -186,7 +186,7 @@ OpenSSLDlogZpSafePrime::OpenSSLDlogZpSafePrime(int numBits, mt19937 prg) {
 
 }
 
-int OpenSSLDlogZpSafePrime::calcK(biginteger p) {
+int OpenSSLDlogZpSafePrime::calcK(const biginteger & p) {
 	int bitsInp = NumberOfBits(p);
 	// Any string of length k has a numeric value that is less than (p-1)/2 - 1.
 	int k = (bitsInp - 3) / 8;
@@ -266,7 +266,7 @@ shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::getInverse(shared_ptr<GroupElem
 }
 
 shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::exponentiate(shared_ptr<GroupElement> base,
-	biginteger exponent) {
+	const biginteger & exponent) {
 	OpenSSLZpSafePrimeElement * zp_element = dynamic_cast<OpenSSLZpSafePrimeElement *>(base.get());
 	// check if element is ZpElementCryptoPp
 	if (!zp_element)
