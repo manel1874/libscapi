@@ -9,16 +9,20 @@ ZpSafePrimeElement::ZpSafePrimeElement(biginteger x, biginteger p, bool bCheckMe
 		//if the element is in the expected range, set it. else, throw exception
 		if (x > 0 && x <= (p - 1))
 		{
-			if (boost::multiprecision::powm(x, q, p) == 1) // x^q mod p == 1
+			if (boost::multiprecision::powm(x, q, p) == 1) {// x^q mod p == 1
 				element = x;
+				serialized_size = bytesCount(x);
+			} 
 			else
 				throw invalid_argument("Cannot create Zp element. Requested value " + (string)x + " is not in the range of this group.");
 		}
 		else
 			throw invalid_argument("Cannot create Zp element. Requested value " + (string)x + " is not in the range of this group.");
 	}
-	else
+	else {
 		element = x;
+		serialized_size = bytesCount(x);
+	}
 }
 
 ZpSafePrimeElement::ZpSafePrimeElement(biginteger p, mt19937 prg)
@@ -27,6 +31,7 @@ ZpSafePrimeElement::ZpSafePrimeElement(biginteger p, mt19937 prg)
 	biginteger rand_in_range = getRandomInRange(1, p - 1, prg);
 	// calculate its power to get a number in the subgroup and set the power as the element. 
 	element = boost::multiprecision::powm(rand_in_range, 2, p);
+	serialized_size = bytesCount(element);
 }
 
 bool ZpSafePrimeElement::operator==(const GroupElement &other) const {
@@ -39,11 +44,9 @@ bool ZpSafePrimeElement::operator!=(const GroupElement &other) const {
 	return !(*this == other);
 }
 
-shared_ptr<GroupElementSendableData> ZpSafePrimeElement::generateSendableData() {
-	return make_shared<ZpElementSendableData>(getElementValue());
-}
+
 /**************************************/ 
-/**** DlogGroupAbs Implementation *****/
+/**** DlogGroup Implementation ********/
 /**************************************/
 
 DlogGroup::GroupElementsExponentiations::GroupElementsExponentiations(

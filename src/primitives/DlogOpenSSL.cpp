@@ -333,15 +333,6 @@ shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::generateElement(bool bCheckMemb
 	return make_shared<OpenSSLZpSafePrimeElement>(values[0], ((ZpGroupParams *)groupParams.get())->getP(), bCheckMembership);
 }
 
-shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::reconstructElement(bool bCheckMembership, 
-	shared_ptr<GroupElementSendableData> data) {
-	ZpElementSendableData * zp_data = dynamic_cast<ZpElementSendableData *>(data.get());
-	if (!zp_data)
-		throw invalid_argument("groupElement doesn't match the group type");
-	vector<biginteger> values = { zp_data->getX() };
-	return generateElement(bCheckMembership, values);
-}
-
 //OpenSSLDlogZpSafePrime::~OpenSSLDlogZpSafePrime()
 //{
 //

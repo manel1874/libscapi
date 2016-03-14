@@ -10,19 +10,6 @@ public:
 	InvalidDlogGroupException(const string & msg) : logic_error(msg) {};
 };
 
-/**
-* This is a marker interface. It allows the generation of a GroupElement at an abstract level without knowing the actual type of Dlog Group.
-*
-*/
-class GroupElementSendableData : public NetworkSerialized {
-public:
-	virtual int getSerializedSize() override { return serialized_size; };
-	virtual ~GroupElementSendableData() = 0; // making this an abstract class
-protected:
-	int serialized_size;
-};
-
-inline GroupElementSendableData::~GroupElementSendableData() {}; // must provide implemeantion to allow destruction of base classes
 
 /**
 * This is the main interface of the Group element hierarchy.<p>
@@ -30,8 +17,12 @@ inline GroupElementSendableData::~GroupElementSendableData() {}; // must provide
 * is a point and an element of a Zp group is a number between 0 and p-1.
 *
 */
-class GroupElement
+class GroupElement : public NetworkSerialized
 {
+
+protected:
+	int serialized_size;
+
 public:
 	/**
 	* checks if this element is the identity of the group.
@@ -40,17 +31,11 @@ public:
 	*/
 	virtual bool isIdentity() = 0;
 
-	/**
-	* This function is used when a group element needs to be sent via a {@link edu.biu.scapi.comm.Channel} or any other means of sending data (including serialization).
-	* It retrieves all the data needed to reconstruct this Group Element at a later time and/or in a different VM.
-	* It puts all the data in an instance of the relevant class that implements the GroupElementSendableData interface.
-	* @return the GroupElementSendableData object
-	*/
-	virtual shared_ptr<GroupElementSendableData> generateSendableData() = 0;	
-
 	virtual bool operator==(const GroupElement &other) const=0;
 	virtual bool operator!=(const GroupElement &other) const=0;
 	virtual ~GroupElement() {};
+
+	virtual int getSerializedSize() override { return serialized_size; };
 };
 
 /*
@@ -306,17 +291,6 @@ public:
 	*/
 	virtual std::shared_ptr<GroupElement> generateElement(bool bCheckMembership, vector<biginteger> values) = 0;
 
-
-	/**
-	* Reconstructs a GroupElement given the GroupElementSendableData data, which might have been received through a Channel open between the party holding this DlogGroup and
-	* some other party.
-	* @param bCheckMembership whether to check that the data provided can actually reconstruct an element of this DlogGroup. Since this action is expensive it should be used only if necessary.
-	* @param data the GroupElementSendableData from which we wish to "reconstruct" an element of this DlogGroup
-	* @return the reconstructed GroupElement
-	*/
-	virtual std::shared_ptr<GroupElement> reconstructElement(bool bCheckMembership,
-		std::shared_ptr<GroupElementSendableData> data) = 0;
-
 	/**
 	* Computes the product of several exponentiations with distinct bases
 	* and distinct exponents.
@@ -472,7 +446,7 @@ public:
 */
 class ZpSafePrimeElement : public ZpElement {
 protected:
-	biginteger element;
+	biginteger element = 0;
 public:
 	/**
 	* This constructor accepts x value and DlogGroup (represented by p).
@@ -490,35 +464,25 @@ public:
 	/*
 	* Constructor that simply create element using the given value
 	*/
-	ZpSafePrimeElement(biginteger elementValue) { element = elementValue; };
+	ZpSafePrimeElement(biginteger elementValue) { 
+		element = elementValue; 
+		serialized_size = bytesCount(element);
+	};
 	biginteger getElementValue() override { return element; };
 	bool isIdentity() override { return element == 1; }
 	bool operator==(const GroupElement &other) const override;
 	bool operator!=(const GroupElement &other) const override;
 	virtual string toString() = 0; 
-	shared_ptr<GroupElementSendableData> generateSendableData() override;
-};
 
-class ZpElementSendableData : public GroupElementSendableData {
-protected:
-	biginteger x=0;
-
-public:
-	ZpElementSendableData(biginteger x_): GroupElementSendableData(){ 
-		x = x_; 
-		serialized_size = bytesCount(x_);
-	};
-	biginteger getX() { return x; }
-	string toString() { return "ZpElementSendableData [x=" + (string) x + "]"; }
 	std::shared_ptr<byte> toByteArray() override {
-		serialized_size = bytesCount(x);
+		serialized_size = bytesCount(element);
 		std::shared_ptr<byte> result(new byte[serialized_size], std::default_delete<byte[]>());
-		encodeBigInteger(x, result.get(), serialized_size);
+		encodeBigInteger(element, result.get(), serialized_size);
 		return result;
 	};
 	void initFromByteArray(byte* arr, int size) override {
 		serialized_size = size;
-		x = decodeBigInteger(arr, size);
+		element = decodeBigInteger(arr, size);
 	};
-
 };
+
