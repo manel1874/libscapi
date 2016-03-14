@@ -13,15 +13,15 @@ class CmtPedersenCommitmentMessage : public CmtCCommitmentMsg{
 	// in Pedersen schemes the commitment object is a groupElement. 
 	// in order to this class be a serializable, we get it as GroupElementSendableData.
 private:
-	std::shared_ptr<GroupElementSendableData> c=NULL;
+	std::shared_ptr<GroupElement> c=NULL;
 	long id=0; // the id of the commitment
 	int serializedSize_;
 public:
 	/**
 	* Empty constructor - used to allow initialization from byte array
 	*/
-	CmtPedersenCommitmentMessage() {
-		c = make_shared<ZpElementSendableData>(0);
+	CmtPedersenCommitmentMessage(std::shared_ptr<GroupElement> c) {
+		this->c = c;
 	};
 
 	/**
@@ -29,7 +29,7 @@ public:
 	* @param c the actual commitment object. In Pedersen schemes the commitment object is a groupElement.
 	* @param id the commitment id.
 	*/
-	CmtPedersenCommitmentMessage(std::shared_ptr<GroupElementSendableData> c, long id) {
+	CmtPedersenCommitmentMessage(std::shared_ptr<GroupElement> c, long id) {
 		this->c = c;
 		this->id = id;
 	}
@@ -117,13 +117,13 @@ public:
 */
 class CmtPedersenPreprocessMessage : public NetworkSerialized{
 private:
-	shared_ptr<GroupElementSendableData> h;
+	shared_ptr<GroupElement> h;
 public:
 	/**
 	* Constructor that sets the given groupElement.
 	* @param h the value sent by the receiver to the committer in the pre-process phase
 	*/
-	CmtPedersenPreprocessMessage(shared_ptr<GroupElementSendableData> h) { this->h = h; };
+	CmtPedersenPreprocessMessage(shared_ptr<GroupElement> h) { this->h = h; };
 	/**
 	* This function return the h values which is calculated by the receiver in the pre-process
 	* phase as follows:
@@ -131,7 +131,7 @@ public:
 	* COMPUTE h = g^a
 	* SEND h to Committer.
 	*/
-	shared_ptr<GroupElementSendableData> getH() { return h; };
+	shared_ptr<GroupElement> getH() { return h; };
 	
 	// SerializedNetwork implementation:
 	std::shared_ptr<byte> toByteArray() override { return h->toByteArray(); };
