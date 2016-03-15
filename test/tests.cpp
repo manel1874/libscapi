@@ -309,8 +309,8 @@ void test_encode_decode(shared_ptr<DlogGroup> dg)
 	auto ge = dg->encodeByteArrayToGroupElement(v);
 	vector<byte> res = dg->decodeGroupElementToByteArray(ge);
 
-	for (int i = 0; i < k; i++)
-		REQUIRE(v[i] == res[i]);
+	for (int i = 0; i < k; i++){
+		REQUIRE(v[i] == res[i]);}
 }
 
 void test_all(shared_ptr<DlogGroup> dg)

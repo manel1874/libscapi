@@ -50,8 +50,13 @@ void copy_byte_array_to_byte_vector(const byte* src, int src_len, vector<byte>& 
 /*
 * Length of biginteger in bytes
 */
-size_t bytesCount(biginteger value)
+size_t bytesCount(biginteger raw_value)
 {
+#ifdef _WIN32
+	auto value = raw_value;
+#else
+	auto value = raw_value.convert_to<mp::cpp_int>();
+#endif
 	if (value.is_zero())
 		return 1;
 	if (value.sign() < 0)
@@ -68,8 +73,13 @@ size_t bytesCount(biginteger value)
 	return length;
 }
 
-void encodeBigInteger(biginteger value, byte* output, size_t length)
+void encodeBigInteger(biginteger raw_value, byte* output, size_t length)
 {
+#ifdef _WIN32
+	auto value = raw_value;
+#else
+	auto value = raw_value.convert_to<mp::cpp_int>();
+#endif
 
 	if (value.is_zero())
 		*output = 0;
@@ -114,6 +124,13 @@ biginteger decodeBigInteger(byte* input, size_t length)
 	if (a >= 0x80)
 		result |= (biginteger) - 1 << (bits + 8);
 	return result;
+	
+#ifdef _WIN32
+	auto res_value = result;
+#else
+	auto res_value = result.convert_to<mp::mpz_int>();
+#endif
+	return res_value;
 }
 
 biginteger convert_hex_to_biginteger(const string & input) {
