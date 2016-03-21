@@ -1,4 +1,10 @@
 #pragma once
+#include <NTL/GF2X.h>
+#include <NTL/GF2E.h>
+#include <NTL/GF2XFactoring.h>
+#include <NTL/vec_GF2E.h>
+#include <NTL/GF2EX.h>
+#include <NTL/ZZ.h>
 #include "SigmaProtocol.hpp"
 #include <map>
 

@@ -25,15 +25,14 @@ SigmaORMultipleProverComputation::SigmaORMultipleProverComputation(
 	this->t = t;
 	this->random = random;
 	// Initialize the field GF2E with a random irreducible polynomial with degree t.
-	/*initField(t, random.nextInt());*/
-	//int randomNum = random();
-	//GF2X irredPoly = BuildSparseIrred_GF2X(t);
+	int randomNum = random();
+	NTL_NAMESPACE::GF2X irredPoly = NTL_NAMESPACE::BuildSparseIrred_GF2X(t);
 
-	//// init the field with the newly generated polynomial.
-	//GF2E::init(irredPoly);
+	// init the field with the newly generated polynomial.
+	NTL_NAMESPACE::GF2E::init(irredPoly);
 
 	////Sets the seed to the random calculations.
-	//ZZ seed;
-	//seed = randomNum;
-	//SetSeed(seed);
+	NTL_NAMESPACE::ZZ seed;
+	seed = randomNum;
+	NTL_NAMESPACE::SetSeed(seed);
 }
