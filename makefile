@@ -117,6 +117,11 @@ clean-scgarbledcircuit:
 	@echo "Cleaning the ScGarbledCircuit build dir..."
 	@rm -rf $(builddir)/ScGarbledCircuit
 	@rm -f compile-scgarbledcircuit
+	
+clean-ntl:
+	@echo "Cleaning the ntl build dir..."
+	@rm -rf $(builddir)/NTL
+	@rm -f compile-ntl	
 
 clean-cpp:
 	@echo "cleaning .obj files"
@@ -127,4 +132,4 @@ clean-cpp:
 clean-install:
 	@rm -rf install/*
 
-clean: clean-otextension clean-scgarbledcircuit clean-miracl clean-miracl-cpp clean-cpp clean-install
+clean: clean-otextension clean-ntl clean-scgarbledcircuit clean-miracl clean-miracl-cpp clean-cpp clean-install
