@@ -3,6 +3,8 @@
 #include "../infra/Common.hpp"
 #include "SecurityLevel.hpp"
 #include "../infra/MathAlgorithms.hpp"
+#include "../../include/infra/ConfigFile.hpp"
+
 
 class InvalidDlogGroupException : public logic_error
 {
@@ -31,9 +33,8 @@ public:
 	*/
 	virtual bool isIdentity() = 0;
 
-	virtual bool operator==(const GroupElement &other) const=0;
-	virtual bool operator!=(const GroupElement &other) const=0;
-	virtual ~GroupElement() {};
+	virtual bool operator==(const GroupElement &other) const = 0;
+	virtual bool operator!=(const GroupElement &other) const = 0;
 
 	virtual int getSerializedSize() override { return serialized_size; };
 };
@@ -81,8 +82,8 @@ inline GroupParams::~GroupParams() { };
 class DlogGroup : public enable_shared_from_this<DlogGroup>  
 {
 protected:
-	std::shared_ptr<GroupParams> groupParams;  // group parameters
-	std::shared_ptr<GroupElement> generator;	// generator of the group
+	shared_ptr<GroupParams> groupParams;  // group parameters
+	shared_ptr<GroupElement> generator;	// generator of the group
 	mt19937 random_element_gen;
 
 	int k; // k is the maximum length of a string to be converted to a Group Element of this group.
@@ -200,7 +201,7 @@ public:
 	*
 	* @return the identity of this Dlog group
 	*/
-	virtual std::shared_ptr<GroupElement> getIdentity() = 0;
+	virtual shared_ptr<GroupElement> getIdentity() = 0;
 
 	/**
 	* Checks if the given element is a member of this Dlog group
@@ -245,7 +246,7 @@ public:
 	* @return the inverse element of the given GroupElement
 	* @throws IllegalArgumentException
 	**/
-	virtual std::shared_ptr<GroupElement> getInverse(std::shared_ptr<GroupElement> groupElement) = 0;
+	virtual shared_ptr<GroupElement> getInverse(shared_ptr<GroupElement> groupElement) = 0;
 
 	/**
 	* Raises the base GroupElement to the exponent. The result is another GroupElement.
@@ -254,7 +255,7 @@ public:
 	* @return the result of the exponentiation
 	* @throws IllegalArgumentException
 	*/
-	virtual std::shared_ptr<GroupElement> exponentiate(std::shared_ptr<GroupElement> base, const biginteger & exponent) = 0;
+	virtual shared_ptr<GroupElement> exponentiate(shared_ptr<GroupElement> base, const biginteger & exponent) = 0;
 
 	/**
 	* Multiplies two GroupElements
@@ -263,20 +264,20 @@ public:
 	* @return the multiplication result
 	* @throws IllegalArgumentException
 	*/
-	virtual std::shared_ptr<GroupElement> multiplyGroupElements(std::shared_ptr<GroupElement> groupElement1, 
-		std::shared_ptr<GroupElement> groupElement2) = 0;
+	virtual shared_ptr<GroupElement> multiplyGroupElements(shared_ptr<GroupElement> groupElement1, 
+		shared_ptr<GroupElement> groupElement2) = 0;
 
 	/**
 	* Creates a random member of this Dlog group
 	* @return the random element
 	*/
-	virtual std::shared_ptr<GroupElement> createRandomElement();
+	virtual shared_ptr<GroupElement> createRandomElement();
 
 	/**
 	* Creates a random generator of this Dlog group
 	* @return the random generator
 	*/
-	std::shared_ptr<GroupElement> createRandomGenerator();
+	shared_ptr<GroupElement> createRandomGenerator();
 
 	/**
 	* This function allows the generation of a group element by a protocol that holds a Dlog Group but does not know if it is a Zp Dlog Group or an Elliptic Curve Dlog Group.
@@ -289,7 +290,7 @@ public:
 	* @return the generated GroupElement
 	* @throws IllegalArgumentException
 	*/
-	virtual std::shared_ptr<GroupElement> generateElement(bool bCheckMembership, vector<biginteger> values) = 0;
+	virtual shared_ptr<GroupElement> generateElement(bool bCheckMembership, vector<biginteger> values) = 0;
 
 	/**
 	* Computes the product of several exponentiations with distinct bases
@@ -300,8 +301,8 @@ public:
 	* @param exponentiations
 	* @return the exponentiation result
 	*/
-	virtual std::shared_ptr<GroupElement> simultaneousMultipleExponentiations(
-		vector<std::shared_ptr<GroupElement>> groupElements, vector<biginteger> exponentiations) = 0;
+	virtual shared_ptr<GroupElement> simultaneousMultipleExponentiations(
+		vector<shared_ptr<GroupElement>> groupElements, vector<biginteger> exponentiations) = 0;
 
 	/**
 	* Computes the product of several exponentiations of the same base
@@ -314,8 +315,8 @@ public:
 	* @param exponent
 	* @return the exponentiation result
 	*/
-	virtual std::shared_ptr<GroupElement> exponentiateWithPreComputedValues(
-		std::shared_ptr<GroupElement> base, const biginteger & exponent);
+	virtual shared_ptr<GroupElement> exponentiateWithPreComputedValues(
+		shared_ptr<GroupElement> base, const biginteger & exponent);
 
 	/**
 	* This function cleans up any resources used by exponentiateWithPreComputedValues for the requested base.
@@ -337,7 +338,7 @@ public:
 	* @param binaryString the byte array to encode
 	* @return the encoded group Element <B> or null </B>if element could not be encoded
 	*/
-	virtual  std::shared_ptr<GroupElement> encodeByteArrayToGroupElement(
+	virtual shared_ptr<GroupElement> encodeByteArrayToGroupElement(
 		const vector<unsigned char> & binaryString) = 0;
 
 	/**
@@ -351,7 +352,7 @@ public:
 	* @return the decoded byte array
 	*/
 	virtual const vector<unsigned char> decodeGroupElementToByteArray(
-		std::shared_ptr<GroupElement> groupElement) = 0;
+		shared_ptr<GroupElement> groupElement) = 0;
 
 
 	/**
@@ -372,7 +373,7 @@ public:
 	* @return a byte array representation of the given group element
 	*/
 	virtual const vector<byte> mapAnyGroupElementToByteArray(
-		std::shared_ptr<GroupElement> groupElement) = 0;
+		shared_ptr<GroupElement> groupElement) = 0;
 };
 
 /**
@@ -380,7 +381,7 @@ public:
 */
 class primeOrderSubGroup : public virtual DlogGroup {};
 
-/**********DlogZP hierechy***********************/
+/**********DlogZP hierarchy***********************/
 
 /**
 * Marker interface. Every class that implements it is signed as Zp*
@@ -486,3 +487,324 @@ public:
 	};
 };
 
+/***************Dlog Elliptic Curve hierarchy******************/
+
+/**********************EC Params*******************************/
+
+class ECGroupParams : public GroupParams {
+protected:
+	biginteger a; // coefficient a of the elliptic curve equation
+	biginteger b; // coefficient b of the elliptic curve equation
+	biginteger xG; // x coordinate of the generator point
+	biginteger yG; // y coordinate of the generator point
+	biginteger h; // cofactor of the group
+	 
+public:
+	ECGroupParams(const biginteger & q, const biginteger & a, const biginteger & b, const biginteger & xG, const biginteger & yG, const biginteger & h) {
+		this->q = q;
+		this->a = a;
+		this->b = b;
+		this->xG = xG;
+		this->yG = yG;
+		this->h = h;
+	}
+
+	virtual string toString() = 0; //making this class abstrast
+
+	/*
+	* Returns coefficient a of the elliptic curves equation
+	* @return coefficient a
+	*/
+	biginteger getA() {	return a; }
+
+	/*
+	* Returns coefficient b of the elliptic curves equation
+	* @return coefficient b
+	*/
+	biginteger getB() {	return b; }
+
+	/*
+	* Returns the x coordinate of the generator point
+	* @return the x value of the generator point
+	*/
+	biginteger getXg() { return xG; }
+
+	/*
+	* Returns the y coordinate of the generator point
+	* @return the y value of the generator point
+	*/
+	biginteger getYg() { return yG;	}
+
+	/*
+	* Returns the cofactor of the group
+	* @return the cofactor of the group
+	*/
+	biginteger getCofactor() { return h; }
+};
+
+class ECFpGroupParams : public ECGroupParams {
+private: 
+	biginteger p; //modulus
+public:
+	ECFpGroupParams(const biginteger & q, const biginteger & xG, const biginteger & yG, 
+		const biginteger & p, const biginteger & a, const biginteger & b, const biginteger & h) : 
+		ECGroupParams(q, a, b, xG, yG, h)	{
+		this->p = p;
+	}
+
+	string toString() override {	
+		return "ECFpGroupParams [p=" + (string) p + ", a=" + (string) a + ", b=" + (string)b + ", xG="
+			+ (string)xG + ", yG=" + (string)yG + ", h=" + (string)h + ", q=" + (string)q + "]";
+	}
+
+	biginteger getP() { return p; }
+
+};
+
+class ECF2mGroupParams :public ECGroupParams {
+protected:
+	int m; //specifying the finite field F2m
+public:
+	ECF2mGroupParams(const biginteger & q, const biginteger & xG, const biginteger & yG, int m, const biginteger & a, const biginteger & b, const biginteger & h) :
+		ECGroupParams(q, a, b, xG, yG, h) {
+		this->m = m;
+	}
+
+	int getM() { return m; }
+	virtual int getK1() = 0;
+	virtual string toString() = 0; //making this class abstrast
+};
+
+class ECF2mTrinomialBasis : public ECF2mGroupParams {
+private:
+	int k; //the integer k where x^m + x^k + 1 represents the reduction polynomial f(z)
+public:
+	/*
+	* Constructor that sets the parameters
+	* @param q  group order
+	* @param xG x coordinate of the generator point
+	* @param yG y coordinate of the generator point
+	* @param m the exponent <code>m</code> of <code>F<sub>2<sup>m</sup></sub></code>.
+	* @param k the integer <code>k</code> where <code>x<sup>m</sup> + x<sup>k</sup> + 1</code>
+	* represents the reduction polynomial <code>f(z)</code>.
+	* @param a the a coefficient of the elliptic curve equation
+	* @param b the b coefficient of the elliptic curve equation
+	* @param h the group cofactor
+	*/
+	ECF2mTrinomialBasis(const biginteger & q, const biginteger & xG, const biginteger & yG, int m, int k, const biginteger & a, const biginteger & b, const biginteger & h) :
+		ECF2mGroupParams(q, xG, yG, m, a, b, h)	{
+		this->k = k;
+	}
+
+	/*
+	* Returns the integer <code>k</code> where <code>x<sup>m</sup> + x<sup>k</sup> + 1</code>
+	* @return k
+	*/
+	int getK1() override { return k; }
+
+	string toString() override {
+		string s = "ECF2mTrinomialBasis [k=" + k;
+		s += ", m=" + m;
+		s+= ", a=" + (string)a + ", b="	+ (string) b + ", xG=" + (string) xG + ", yG=" + (string) yG + ", h=" + (string) h + ", q=" + (string) q + "]";
+		return s;
+	}
+};
+
+class ECF2mPentanomialBasis : public ECF2mGroupParams {
+private:
+	// x^m + x^k3 + x^k2 + x^k1 + 1 represents the reduction polynomial f(z)
+	int k1;
+	int k2;
+	int k3;
+public:
+	/*
+	* Sets the parameters
+	* @param q the group order
+	* @param xG x coordinate of the generator point
+	* @param yG y coordinate of the generator point
+	* @param m  the exponent m of F2m.
+	* @param k1 the integer k1 where x^m + x^k3 + x^k2 + x^k1 + 1 represents the reduction polynomial f(z).
+	* @param k2 the integer k2 where x^m + x^k3 + x^k2 + x^k1 + 1 represents the reduction polynomial f(z).
+	* @param k3 the integer k3 where x^m + x^k3 + x^k2 + x^k1 + 1 represents the reduction polynomial f(z).
+	* @param a the a coefficient of the elliptic curve equation
+	* @param b the b coefficient of the elliptic curve equation
+	* @param h the group cofactor
+	*/
+	ECF2mPentanomialBasis(const biginteger & q, const biginteger & xG, const biginteger & yG, int m, int k1, int k2, int k3, const biginteger & a, const biginteger & b, const biginteger & h)
+		: ECF2mGroupParams(q, xG, yG, m, a, b, h) {
+		this->k1 = k1;
+		this->k2 = k2;
+		this->k3 = k3;
+	}
+
+	/*
+	* Returns the integer k1 where x^m + x^k3 + x^k2 + x^k1 + 1represents the reduction polynomial f(z).
+	* @return k1
+	*/
+	int getK1() override { return k1; }
+
+	/*
+	* Returns the integer k2 where x^m + x^k3 + x^k2 + x^k1 + 1represents the reduction polynomial f(z).
+	* @return k2
+	*/
+	int getK2() { return k2; }
+
+	/*
+	* Returns the integer k3 where x^m + x^k3 + x^k2 + x^k1 + 1represents the reduction polynomial f(z).
+	* @return k3
+	*/
+	int getK3() { return k3; }
+
+	string toString() override; 
+};
+
+class ECF2mKoblitz : public ECF2mGroupParams {
+private:
+	biginteger n; 	//order of the main subgroup
+	shared_ptr<ECF2mGroupParams> curve; //underlying curve
+public:
+	
+	/*
+	* Constructor that sets the underlying curve and the additional parameters
+	* @param curve the underlying curve
+	* @param n order of the sub group
+	* @param h the cofactor
+	*/
+	ECF2mKoblitz(shared_ptr<ECF2mGroupParams> curve, const biginteger &  n, const biginteger & h) : ECF2mGroupParams(curve->getQ(), curve->getXg(), curve->getYg(), curve->getM(), curve->getA(), curve->getB(), curve->getCofactor()) {
+		this->curve = curve;
+		this->n = n;
+		this->h = h;
+	}
+
+	/*
+	* Returns the exponent of the underlying curve
+	* @return m
+	*/
+	int getM() { return curve->getM(); }
+
+	/*
+	* Returns the integer k1 of the underlying curve where x^m + x^k3 + x^k2 + x^k1 + 1
+	* represents the reduction polynomial f(z).
+	* @return k1 of the underlying curve
+	*/
+	int getK1() override { return curve->getK1(); }
+
+	/**
+	* Returns the integer <code>k2</code> of the underlying curve where x^m + x^k3 + x^k2 + x^k1 + 1
+	* represents the reduction polynomial f(z).
+	* @return k2 of the underlying curve
+	*/
+	int getK2(); 
+
+	/**
+	* Returns the integer <code>k3</code> where x^m + x^k3 + x^k2 + x^k1 + 1
+	* represents the reduction polynomial f(z).
+	* @return k3 of the underlying curve
+	*/
+	int getK3();
+
+	/**
+	* Returns the subgroup order of this group
+	* @return n the subgroup order
+	*/
+	biginteger getSubGroupOrder() {	return n; }
+
+	/**
+	* Returns the underlying curve
+	* @return the underlying curve
+	*/
+	shared_ptr<ECF2mGroupParams> getCurve() { return curve; }
+
+	string toString() override;
+};
+
+class ECElement : public GroupElement {
+public:
+	/*
+	* This function returns the x coordinate of the (x,y) point which is an element of a given elliptic curve.
+	* In case of infinity point, returns null.
+	* @return x coordinate of (x,y) point
+	*/
+	virtual biginteger getX() = 0;
+
+	/*
+	* This function returns the y coordinate of the (x,y) point which is an element of a given elliptic curve.
+	* In case of infinity point, returns null.
+	* @return y coordinate of (x,y) point
+	*/
+	virtual biginteger getY() = 0;
+
+	/**
+	* Elliptic curve has a unique point called infinity.
+	* In order to know if this object is an infinity point, this function should be called.
+	* @return true if this point is the infinity, false, otherwise.
+	*/
+	virtual bool isInfinity() = 0;
+
+	bool isIdentity() override { return isInfinity(); }
+	
+	bool operator==(const GroupElement &other) const override;
+	bool operator!=(const GroupElement &other) const override;
+
+};
+
+class ECF2mPoint : public ECElement {};
+
+class ECFpPoint : ECElement {};
+
+
+class DlogEllipticCurve : public DlogGroup {
+
+protected:
+	string curveName;
+	string fileName;
+	shared_ptr<ConfigFile> ecConfig; // properties object to hold the given config file's parameters
+	const string NISTEC_PROPERTIES_FILE = "C:/Github/libscapi_deleteDlogAbs/include/configFiles/NISTEC.txt";
+	virtual void init(string fileName, string curveName, mt19937 random);
+
+public:
+	DlogEllipticCurve(string fileName, string curveName, mt19937 random) { init(fileName, curveName, random); }
+
+	DlogEllipticCurve(string curveName, mt19937 random) { init(NISTEC_PROPERTIES_FILE, curveName, random); }
+	
+	virtual shared_ptr<ECElement> getInfinity() = 0;
+
+	string getCurveName() { return curveName; }
+
+	string getFileName() { return fileName; }
+
+	/*
+	* Checks parameters of this group to see if they conform to the type this group is supposed to be.<p>
+	* Parameters are uploaded from a configuration file upon construction of concrete instance of an Elliptic Curve Dlog group.
+	* By default, SCAPI uploads a file with NIST recommended curves. In this case we assume the parameters are always correct.
+	* It is also possible to upload a user-defined configuration file (with format specified in the "Elliptic Curves Parameters File Format" section of the FirstLevelSDK_SDD.docx file). In this case,
+	* it is the user's responsibility to check the validity of the parameters.
+	* In both ways, the parameters we set should be correct. Therefore, currently the function validateGroup does not perform any validity check and always returns true.
+	* In the future we may add the validity checks.
+	* @return true.
+	*/
+	bool validateGroup() override { return true; }
+
+	/*
+	* Checks if the element set as the generator is indeed the generator of this group.
+	* The generator is set upon construction of this group. <p>
+	* For Elliptic curves there are two ways to set the generator. One way is to load it from NIST file, so the generator is correct.
+	* The second way is to get the generator values from the user in the init function. In that way, it is the user's responsibility to check the validity of the parameters.
+	* In both ways, the generator we set must be correct. However, currently the function isGenerator does not operate the validity check and always returns true.
+	* Maybe in the future we will add the validity checks.
+	* @return <code>true</code> is the generator is valid;<p>
+	* 		   <code>false</code> otherwise.
+	*
+	*/
+	bool isGenerator() override { return true; }
+
+	/*
+	* For Elliptic Curves, the identity is equivalent to the infinity.
+	* @return the identity of this Dlog group
+	*/
+	shared_ptr<GroupElement> getIdentity() override { return getInfinity();	}
+};
+
+class DlogECFp : public DlogEllipticCurve {};
+
+class DlogECF2m : public DlogEllipticCurve {};

@@ -406,3 +406,898 @@ const vector<byte> OpenSSLDlogZpSafePrime::mapAnyGroupElementToByteArray(
 	string res = string(zp_element->getElementValue());
 	return vector<unsigned char>(res.begin(), res.end());
 }
+
+
+/********************************************************/
+/*******************OpenSSL EC classes*******************/
+/********************************************************/
+
+bool OpenSSLDlogEC::validateGroup() {
+	//call the openssl's function that validate the group.
+	return EC_GROUP_check(curve.get(), ctx.get());
+}
+
+shared_ptr<GroupElement> OpenSSLDlogEC::getInverse(shared_ptr<GroupElement> groupElement) {
+
+	OpenSSLPoint* element = dynamic_cast<OpenSSLPoint*>(groupElement.get());
+	if (!(element))
+		throw invalid_argument("element type doesn't match the group type");
+	
+	// The inverse of infinity point is infinity.
+	if (element->isInfinity()) {
+		return groupElement;
+	}
+
+	//Create an inverse point and copy the given point to it.
+	//create the result point.
+	shared_ptr<EC_POINT> inverse(EC_POINT_new(curve.get()), EC_POINT_free);
+	if (NULL == inverse) return NULL;
+
+	if (0 == (EC_POINT_copy(inverse.get(), element->getPoint().get()))) {
+		return NULL;
+	}
+
+	//Inverse the given value and set the inversed value instead.
+	if (0 == (EC_POINT_invert(curve.get(), inverse.get(), ctx.get()))) {
+		return NULL;
+	}
+
+	//Create the concrete OpenSSl point using the result value.
+	return createPoint(inverse); 
+}
+
+shared_ptr<GroupElement> OpenSSLDlogEC::exponentiate(shared_ptr<GroupElement> base, const biginteger & exponent) {
+	
+	OpenSSLPoint* basePoint = dynamic_cast<OpenSSLPoint*>(base.get());
+	if (!(basePoint))
+		throw invalid_argument("element type doesn't match the group type");
+
+	// The inverse of infinity point is infinity.
+	if (basePoint->isInfinity()) {
+		return base;
+	}
+
+	//If the exponent is negative, convert it to be the exponent modulus q.
+	biginteger modExp;
+	if (exponent < 0) {
+		modExp = exponent % getOrder();
+	} else {
+		modExp = exponent;
+	}
+
+	//create the result point.
+	shared_ptr<EC_POINT> result(EC_POINT_new(curve.get()), EC_POINT_free);
+	if (NULL == result) return NULL;
+
+	//Compute the exponentiate.
+	BIGNUM* exp = biginteger_to_opensslbignum(modExp);
+	if (0 == (EC_POINT_mul(curve.get(), result.get(), NULL, basePoint->getPoint().get(), exp, ctx.get()))) {
+		return NULL;
+	}
+
+
+	//Create the concrete OpenSSl point using the result value.
+	return createPoint(result); 
+}
+
+shared_ptr<GroupElement> OpenSSLDlogEC::multiplyGroupElements(shared_ptr<GroupElement> groupElement1,
+	shared_ptr<GroupElement> groupElement2) {
+
+	OpenSSLPoint* point1 = dynamic_cast<OpenSSLPoint*>(groupElement1.get());
+	OpenSSLPoint* point2 = dynamic_cast<OpenSSLPoint*>(groupElement2.get());
+	if (!(point1) || !(point2))
+		throw invalid_argument("element type doesn't match the group type");
+
+
+	//If one of the points is the infinity point, the second one is the multiplication result.
+	if (point1->isInfinity()) {
+		return groupElement2;
+	}
+	if (point2->isInfinity()) {
+		return groupElement1;
+	}
+
+	//create the result point.
+	shared_ptr<EC_POINT> result(EC_POINT_new(curve.get()), EC_POINT_free);
+	if (NULL == result) return NULL;
+
+	//Compute the multiplication.
+	if (0 == (EC_POINT_add(curve.get(), result.get(), point1->getPoint().get(), point2->getPoint().get(), ctx.get()))) {
+		return NULL;
+	}
+
+	//Create the concrete OpenSSl point using the result value.
+	return createPoint(result); 
+}
+
+std::shared_ptr<GroupElement> OpenSSLDlogEC::exponentiateWithPreComputedValues(
+	shared_ptr<GroupElement> base, const biginteger & exponent){
+	//The exponentiate with pre computed values implemented by OpenSSL deals only with the group generator.
+	if (base != getGenerator()) {
+		return exponentiate(base, exponent);
+	}
+
+	//If the exponent is negative, convert it to be the exponent modulus q.
+	biginteger modExp;
+	if (exponent < 0) {
+		modExp = exponent % getOrder();
+	} else {
+		modExp = exponent;
+	}
+
+	//create the point.
+	shared_ptr<EC_POINT> result(EC_POINT_new(curve.get()), EC_POINT_free);
+	if (NULL == result) return NULL;
+
+	//If there are no pre computes values, calculate them.
+	if (EC_GROUP_have_precompute_mult(curve.get()) == 0) {
+		if (0 == (EC_GROUP_precompute_mult(curve.get(), ctx.get()))) {
+			return NULL;
+		}
+	}
+
+	//Calculate the exponentiate with the pre computed values.
+	BIGNUM* exp = biginteger_to_opensslbignum(modExp);
+	if (0 == (EC_POINT_mul(curve.get(), result.get(), exp, NULL, NULL, ctx.get()))) {
+		return NULL;
+	}
+
+	//Create the concrete OpenSSl point using the result value.
+	return createPoint(result);
+}
+
+shared_ptr<GroupElement> OpenSSLDlogEC::simultaneousMultipleExponentiations(
+	vector<shared_ptr<GroupElement>> groupElements, vector<biginteger> exponentiations) {
+	int size = groupElements.size(); //Number of points.
+	vector<BIGNUM*> exponentsArr;//Create an array to hold the exponents.
+	vector<EC_POINT*> pointsArr;
+	
+	//Convert each exponent bytes to a BIGNUM object.
+	for (int i = 0; i<size; i++) {
+		//Convert to BIGNUM.
+		pointsArr.push_back((dynamic_pointer_cast<OpenSSLPoint>(groupElements[i]))->getPoint().get());
+		BIGNUM* exponent = biginteger_to_opensslbignum(exponentiations[i]);
+		if (NULL == exponent) 
+			return NULL;
+		exponentsArr.push_back(exponent);
+	}
+
+	//Prepare a point that will contain the multiplication result.
+	shared_ptr<EC_POINT> result(EC_POINT_new(curve.get()), EC_POINT_free);
+	if (NULL == result) return NULL;
+
+	//Computes the simultaneous multiply.
+	if (0 == (EC_POINTs_mul(curve.get(), result.get(), NULL, size, (const EC_POINT**)pointsArr.data(), (const BIGNUM **)exponentsArr.data(), ctx.get()))) {
+		return NULL;
+	}
+
+	//Create the concrete OpenSSl point using the result value.
+	return createPoint(result);
+}
+
+const vector<byte> OpenSSLDlogEC::mapAnyGroupElementToByteArray(std::shared_ptr<GroupElement> groupElement) {
+	//This function simply returns an array which is the result of concatenating 
+	//the byte array representation of x with the byte array representation of y.
+	ECElement * element = dynamic_cast<ECElement*>(groupElement.get());
+	if (!(element))
+		throw invalid_argument("element type doesn't match the group type");
+
+	biginteger x = element->getX();
+	biginteger y = element->getY();
+
+	int xBytesSize = bytesCount(x);
+	int yBytesSize = bytesCount(y);
+	shared_ptr<byte> result(new byte[xBytesSize + yBytesSize], default_delete<byte[]>());
+	encodeBigInteger(x, result.get(), xBytesSize);
+	encodeBigInteger(y, result.get()+xBytesSize, yBytesSize);
+	
+	return vector<byte>(result.get(), result.get() + xBytesSize + yBytesSize - 1);
+}
+
+shared_ptr<ECElement> OpenSSLDlogEC::getInfinity() {
+	//create the point.
+	shared_ptr<EC_POINT> point(EC_POINT_new(curve.get()), EC_POINT_free);
+	if (NULL == point) return NULL;
+
+	//Set the point to be the infinity.
+	if (0 == (EC_POINT_set_to_infinity(curve.get(), point.get()))) {
+		return NULL;
+	}
+
+	//Create the concrete OpenSSl point using the result value.
+	return createPoint(point);
+}
+
+/************************concrete classes***********************/
+void OpenSSLDlogECFp::init(string fileName, string curveName, mt19937 random) {
+	// check that the given curve is in the field that matches the group.
+	size_t index = curveName.find("P-");
+	if (index != 0) {
+		throw invalid_argument("curveName is not a curve over Fp field and doesn't match the DlogGroup type");
+	}
+
+	// get the curve parameters
+	biginteger p(ecConfig->Value(curveName, curveName));
+	biginteger a(ecConfig->Value(curveName,"a"));
+	biginteger b = convert_hex_to_biginteger(ecConfig->Value(curveName, "b"));
+	biginteger x = convert_hex_to_biginteger(ecConfig->Value(curveName, "x"));
+	biginteger y = convert_hex_to_biginteger(ecConfig->Value(curveName, "y"));
+	biginteger q(ecConfig->Value(curveName, "r"));
+	biginteger h(ecConfig->Value(curveName, "h"));
+
+	// create the GroupParams
+	auto fpParams = make_shared<ECFpGroupParams>(q, x, y, p, a, b, h);
+	
+	//Now that we have p, we can calculate k which is the maximum length in bytes of a string to be converted to a Group Element of this group. 
+	k = calcK(p);
+
+	// Create the ECCurve.
+	createCurve(p, a, b);
+	
+	groupParams = fpParams;
+	
+	// Create the generator.
+	OpenSSLECFpPoint* temp = new OpenSSLECFpPoint(fpParams->getXg(), fpParams->getYg(), this, true);
+	generator = shared_ptr<OpenSSLECFpPoint>(temp);
+	groupParams = fpParams;
+	//Initialize the curve with the generator and order.
+	initCurve(q);
+}
+
+void OpenSSLDlogECFp::initCurve(const biginteger & q) {
+	//Convert the order into BIGNUM object.
+	BIGNUM *order = biginteger_to_opensslbignum(q);
+	if (order == NULL)
+		throw runtime_error("failed to create OpenSSL Dlog group");
+
+	// Set the generator and the order.
+	if (1 != EC_GROUP_set_generator(curve.get(), (dynamic_pointer_cast<OpenSSLECFpPoint>(generator))->getPoint().get(), order, NULL)) {
+		throw runtime_error("failed to create OpenSSL Dlog group");
+	}
+}
+
+void OpenSSLDlogECFp::createCurve(const biginteger & p, const biginteger & a, const biginteger & b) {
+	ctx = shared_ptr<BN_CTX>(BN_CTX_new(), BN_CTX_free);
+	if (ctx == NULL)
+		throw runtime_error("failed to create OpenSSL Dlog group");
+
+	BIGNUM * pOssl = biginteger_to_opensslbignum(p);
+	BIGNUM * aOssl = biginteger_to_opensslbignum(a);
+	BIGNUM * bOssl = biginteger_to_opensslbignum(b);
+	if (pOssl == NULL || aOssl == NULL || bOssl == NULL)
+		throw runtime_error("failed to create OpenSSL Dlog group");
+
+	curve = shared_ptr<EC_GROUP>(EC_GROUP_new_curve_GFp(pOssl, aOssl, bOssl, ctx.get()), EC_GROUP_free);
+	if (curve == NULL)
+		throw runtime_error("failed to create OpenSSL Dlog group");
+}
+
+int OpenSSLDlogECFp::calcK(biginteger p){
+	int bitsInp = NumberOfBits(p);
+	int k = floor((0.4 * bitsInp) / 8) - 1;
+	//For technical reasons of how we chose to do the padding for encoding and decoding (the least significant byte of the encoded string contains the size of the 
+	//the original binary string sent for encoding, which is used to remove the padding when decoding) k has to be <= 255 bytes so that the size can be encoded in the padding.
+	if (k > 255) {
+		k = 255;
+	}
+	return k;
+}
+
+shared_ptr<ECElement> OpenSSLDlogECFp::createPoint(shared_ptr<EC_POINT> point) {
+	OpenSSLECFpPoint* newPoint = new OpenSSLECFpPoint(point, this);
+	return shared_ptr<OpenSSLECFpPoint>(newPoint);
+}
+
+string OpenSSLDlogECFp::getGroupType() {
+	return "ECFp";
+}
+
+bool OpenSSLDlogECFp::isMember(shared_ptr<GroupElement> element) {
+	// Checks that the element is the correct object.
+	auto point = dynamic_pointer_cast<OpenSSLECFpPoint>(element);
+	if (point == NULL) {
+		throw invalid_argument("groupElement doesn't match the DlogGroup");
+	}
+
+	// Infinity point is a valid member.
+	if (point->isInfinity()) {
+		return true;
+	}
+
+	// A point (x, y) is a member of a Dlog group with prime order q over an Elliptic Curve if it meets the following two conditions:
+	// 1)	P = (x,y) is a point in the Elliptic curve, i.e (x,y) is a solution of the curves equation.
+	// 2)	P = (x,y) is a point in the q-order group which is a sub-group of the Elliptic Curve.
+	// Those two checks are done in two steps:
+	// 1.	Checking that the point is on the curve, performed by EC_POINT_is_on_curve.
+	// 2.	Checking that the point is in the Dlog group,performed by checkSubGroupMembership.
+	boolean valid = EC_POINT_is_on_curve(curve.get(), point->getPoint().get(), ctx.get());
+
+	//The second check is implemented in ECFpUtility since it is independent of the underlying library (BC, Miracl, or other)
+	//If we ever decide to change the implementation there will only be one place to change it.
+	valid = valid && checkSubGroupMembership(point);
+
+	return valid;
+}
+
+/**
+* checks if the given point is in the given dlog group with the q prime order.
+* A point is in the group if it in the q-order group which is a sub-group of the Elliptic Curve.
+* Base assumption of this function is that checkCurveMembership function is already been called and returned true.
+* @param curve
+* @param point
+* @return true if the given point is in the given dlog group.
+*/
+bool OpenSSLDlogECFp::checkSubGroupMembership(shared_ptr<OpenSSLECFpPoint> point) {
+	//we assume that the point is on the curve group
+	//get the cofactor of the group
+	biginteger h = (dynamic_pointer_cast<ECGroupParams>(groupParams))->getCofactor();
+
+	//if the cofactor is 1 the sub-group is same as the elliptic curve equation which the point is in.
+	if (h == 1) {
+		return true;
+	}
+
+	biginteger y = point->getY();
+
+	//if the cofactor is greater than 1, the point must have order q (same as the order of the group)
+
+	//if the cofactor is 2 and the y coefficient is 0, the point has order 2 and is not in the group
+	if (h == 2) {
+		if (y == 0) return false;
+		else return true;
+	}
+
+	// if the cofactor is 3 and p^2 = p^(-1), the point has order 3 and is not in the group
+	if (h == 3) {
+		auto power = exponentiate(point, 2);
+		auto inverse = getInverse(point);
+		if (power == inverse) return false;
+		else return true;
+	}
+
+	// if the cofactor is 4, the point has order 2 if the y coefficient of the point is 0, 
+	// or the the point has order 4 if the y coefficient of the point raised to two is 0.
+	// in both cases the point is not in the group.
+	if (h == 4) {
+		if (y == 0) {
+			return false;
+		}
+		auto power = exponentiate(point, 2);
+		auto powerY = (dynamic_pointer_cast<ECElement>(power))->getY();
+		if (powerY == 0) return false;
+		else return true;
+	}
+
+	// if the cofactor is bigger than 4, there is no optimized way to check the order, so we operates the naive:
+	// if the point raised to q (order of the group) is the identity, the point has order q too and is in the group. 
+	// else, it is not in the group
+	auto r = (dynamic_pointer_cast<ECGroupParams>(groupParams))->getQ();
+	auto pointPowR = exponentiate(point, r);
+	if (pointPowR->isIdentity()) return true;
+	else return false;	
+}
+
+shared_ptr<GroupElement> OpenSSLDlogECFp::generateElement(bool bCheckMembership, vector<biginteger> values) {
+	if (values.size() != 2) {
+		throw invalid_argument("To generate an ECElement you should pass the x and y coordinates of the point");
+	}
+	OpenSSLECFpPoint* point = new OpenSSLECFpPoint(values[0], values[1], this, bCheckMembership);
+	return shared_ptr<OpenSSLECFpPoint>(point);
+}
+
+shared_ptr<GroupElement> OpenSSLDlogECFp::encodeByteArrayToGroupElement(const vector<unsigned char> & binaryString) {
+	//Pseudo-code:
+	/*If the length of binaryString exceeds k then return null.
+
+	Let L be the length in bytes of p
+
+	Choose a random byte array r of length L – k – 2 bytes
+
+	Prepare a string newString of the following form: r || binaryString || binaryString.length (where || denotes concatenation) (i.e., the least significant byte of newString is the length of binaryString in bytes)
+
+	Convert the result to a BigInteger (bIString)
+
+	Compute the elliptic curve equation for this x and see if there exists a y such that (x,y) satisfies the equation.
+
+	If yes, return (x,y)
+
+	Else, go back to step 3 (choose a random r etc.) up to 80 times (This is an arbitrary hard-coded number).
+
+	If did not find y such that (x,y) satisfies the equation after 80 trials then return null.
+	*/
+
+	int len = binaryString.size();
+	if (len > k) return NULL;
+
+	biginteger p = (dynamic_pointer_cast<ECFpGroupParams>(groupParams))->getP();
+	int l = bytesCount(p);
+
+	std::shared_ptr<char> randomArray(new char[l - k - 2], default_delete<char[]>());
+	std::shared_ptr<char> newString(new char[l - k - 1 + len], default_delete<char[]>());
+	//copy the given string into the right place within the new string and put it length at the end of the new string.
+	memcpy(newString.get() + l - k - 2, binaryString.data(), len);
+	newString.get()[l - k - 2 + len] = (char)len;
+	randomArray.get()[0] = 1; // we fix the first bytes in the random array in order to fix the x value to be positive.
+	//Create the openssl point. This point should contain the calculated value according to the given input.
+	shared_ptr<EC_POINT> point(EC_POINT_new(curve.get()), EC_POINT_free);
+	if (NULL == point) {
+		return NULL;
+	}
+
+	int counter = 0;
+	bool success = 0;
+	BIGNUM * x = BN_new();
+	do {
+		RAND_bytes((unsigned char*)randomArray.get() +1, l - k - 3);
+		memcpy(newString.get(), randomArray.get(), l - k - 2);
+
+		//Convert the result to a BigInteger (bIString)
+		if (NULL == (x = BN_bin2bn((unsigned char*)newString.get(), l - k - 1 + len, NULL))) break;
+
+		//Try to create a point aith the generated x value.
+		//if failed, go back to choose a random r etc.
+		success = EC_POINT_set_compressed_coordinates_GFp(curve.get(), point.get(), x, 0, ctx.get());
+		counter++;
+	} while ((!success) && (counter <= 80)); //we limit the amount of times we try to 80 which is an arbitrary number.
+
+											 //Delete the allocated memory.
+	BN_free(x);
+	
+	//If a point could not be created, return 0;
+	if (!success) return NULL;
+
+	//Return the created point.
+	return createPoint(point);
+}
+
+const vector<unsigned char> OpenSSLDlogECFp::decodeGroupElementToByteArray(shared_ptr<GroupElement> groupElement) {
+	auto point = dynamic_pointer_cast<OpenSSLECFpPoint>(groupElement);
+	// Checks that the element is the correct object.
+	if (point == NULL) {
+		throw invalid_argument("element type doesn't match the group type");
+	}
+	
+	int size = bytesCount(point->getX());
+	shared_ptr<byte> xByteArray(new byte[size], default_delete<byte[]>());
+	BN_bn2bin(biginteger_to_opensslbignum(point->getX()), xByteArray.get());
+	
+	//The original size is placed in the last byte of x.
+	int bOriginalSize = (int)(xByteArray.get()[size - 1]);
+	std::shared_ptr<byte> b2(new byte[bOriginalSize], std::default_delete<byte[]>());
+
+	//Copy the original byte array.
+	memcpy(b2.get(), xByteArray.get() + size - 1 - bOriginalSize, bOriginalSize);
+	return vector<byte>(b2.get(), b2.get()+ bOriginalSize);
+}
+
+
+void OpenSSLDlogECF2m::init(string fileName, string curveName, mt19937 random) {
+	//Get the parameters of the group from the config file and create the groupParams member.
+	createGroupParams(ecConfig);
+
+	//Create the openSSL curve using the given curve parameters.
+	createCurve();
+
+	//Create the generator.
+	OpenSSLECF2mPoint* temp = new OpenSSLECF2mPoint(dynamic_pointer_cast<ECF2mGroupParams>(groupParams)->getXg(), dynamic_pointer_cast<ECF2mGroupParams>(groupParams)->getYg(), this, true);
+	generator = shared_ptr<OpenSSLECF2mPoint>(temp);
+	
+	/*Initialize the native curve with the generator, order and cofactor.*/
+	//Convert the order and cofactor into BIGNUM objects.
+	BIGNUM *order, *cofactor;
+	order = biginteger_to_opensslbignum(groupParams->getQ());
+	cofactor = biginteger_to_opensslbignum(dynamic_pointer_cast<ECF2mGroupParams>(groupParams)->getCofactor());
+	if (order == NULL || cofactor == NULL)
+		throw runtime_error("failed to create OpenSSL Dlog group");
+
+	// Set the generator, cofactor and the order.
+	if (1 != EC_GROUP_set_generator(curve.get(), (dynamic_pointer_cast<OpenSSLECF2mPoint>(generator))->getPoint().get(), order, cofactor)) {
+		BN_free(order);
+		BN_free(cofactor);
+		throw runtime_error("failed to create OpenSSL Dlog group");
+	}
+	//Release the allocated memory.
+	BN_free(order);
+	BN_free(cofactor);
+}
+
+void OpenSSLDlogECF2m::createCurve() {
+	shared_ptr<ECGroupParams> params = dynamic_pointer_cast<ECF2mGroupParams>(groupParams);
+	if (dynamic_pointer_cast<ECF2mKoblitz>(params)) {
+		params = dynamic_pointer_cast<ECF2mKoblitz>(params)->getCurve();
+	}
+	// Open SSL accepts p, a, b to create the curve. 
+	// In this case p represents the irreducible polynomial - each bit represents a term in the polynomial x^m + x^k3 + x^k2 + x^k1 + 1.
+	biginteger p(0);
+	p |= 1; //set the first bit.
+			//In both cases of trinomial and pentanomial basis, set the bits in m and k1 indexes.
+	p |= 1 << dynamic_pointer_cast<ECF2mGroupParams>(params)->getM();
+	p |= 1 << dynamic_pointer_cast<ECF2mGroupParams>(params)->getK1();
+	if (dynamic_pointer_cast<ECF2mPentanomialBasis>(params)) {
+		//In case of trinomial basis, set the bits in k2 and k3 indexes.
+		p |= 1 << dynamic_pointer_cast<ECF2mPentanomialBasis>(params)->getK2();
+		p |= 1 << dynamic_pointer_cast<ECF2mPentanomialBasis>(params)->getK3();
+	}
+
+	//Create the native curve.
+	shared_ptr<BN_CTX> ctx(BN_CTX_new(), BN_CTX_free);
+	if (ctx == NULL)
+		throw runtime_error("failed to create OpenSSL Dlog group");
+
+	BIGNUM *a, *b, *pOssl;
+	a = biginteger_to_opensslbignum(params->getA());
+	b = biginteger_to_opensslbignum(params->getB());
+	pOssl = biginteger_to_opensslbignum(p);
+	if (a == NULL || b == NULL || pOssl == NULL)
+		throw runtime_error("failed to create OpenSSL Dlog group");
+
+	// Create the curve using a, b, p.
+	shared_ptr<EC_GROUP>curve(EC_GROUP_new_curve_GF2m(pOssl, a, b, ctx.get()), EC_GROUP_free);
+	if (curve == NULL)
+		throw runtime_error("failed to create OpenSSL Dlog group");
+
+	//Release the allocated memory.
+	BN_free(pOssl);
+	BN_free(b);
+	BN_free(a);
+}
+
+void OpenSSLDlogECF2m::createGroupParams(shared_ptr<ConfigFile> ecConfig) {
+	// check that the given curve is in the field that matches the group.
+	size_t index1 = curveName.find("B-");
+	size_t index2 = curveName.find("K-");
+	if (index1 != 0 && index2 != 0) {
+		throw invalid_argument("curveName is not a curve over F2m field and doesn't match the DlogGroup type");
+	}
+	/* Get the curve parameters*/
+	// The degree of the field.
+	int m = stoi(ecConfig->Value(curveName, curveName));
+	//If an irreducible trinomial t^m + t^k + 1 exists over GF(2), then the field polynomial p(t) is chosen to be the irreducible 
+	//trinomial with the lowest degree middle term t^k. 
+	//If no irreducible trinomial exists, then one selects instead a pentanomial t^m+t^k+t^k2+t^k3+1. The particular pentanomial 
+	//chosen has the following properties: the second term t^k has the lowest degree among all irreducible pentanomials of degree m; 
+	//the third term t^k2 has the lowest degree among all irreducible pentanomials of degree m and second term t^k; 
+	//and the fourth term t^k3 has the lowest degree among all irreducible pentanomials of degree m, second term t^k, and third term t^k2.
+	int k = stoi(ecConfig->Value(curveName, "k"));
+	int k2 = 0;
+	int k3 = 0;
+	bool trinomialBasis = false;
+	try {
+		k2 = stoi(ecConfig->Value(curveName, "k2")); //we hold that as a string an not as int because is can be null.
+		k3 = stoi(ecConfig->Value(curveName, "k3"));
+	}
+	catch (string s) {
+		trinomialBasis = true;
+	}
+
+	//Coefficients of the curve equaltion.
+	biginteger a(ecConfig->Value(curveName, "a"));
+	biginteger b = convert_hex_to_biginteger(ecConfig->Value(curveName, "b"));
+
+	//Coordinates x, y, of the base point (generator).
+	biginteger x = convert_hex_to_biginteger(ecConfig->Value(curveName, "x"));
+	biginteger y = convert_hex_to_biginteger(ecConfig->Value(curveName, "y"));
+
+	//The order of the group.
+	biginteger q(ecConfig->Value(curveName, "r"));
+
+	//the cofactor of the curve.
+	biginteger h(ecConfig->Value(curveName, "h"));
+	// for trinomial basis, where there is just one value represents the irreducible polynomial.
+	if (trinomialBasis) {
+		groupParams = make_shared<ECF2mTrinomialBasis>(q, x, y, m, k, a, b, h);
+
+	}
+	else { // pentanomial basis must have three k values.
+		groupParams = make_shared<ECF2mPentanomialBasis>(q, x, y, m, k, k2, k3, a, b, h);
+	}
+
+	// koblitz curve
+	if (index2 == 0) {
+		groupParams = make_shared<ECF2mKoblitz>(dynamic_pointer_cast<ECF2mGroupParams>(groupParams), q, h);
+	}
+}
+
+
+shared_ptr<ECElement> OpenSSLDlogECF2m::createPoint(shared_ptr<EC_POINT> point) {
+	OpenSSLECF2mPoint* newPoint = new OpenSSLECF2mPoint(point, this);
+	return shared_ptr<OpenSSLECF2mPoint>(newPoint);
+}
+
+string OpenSSLDlogECF2m::getGroupType() {
+	return "ECF2m";
+}
+
+bool OpenSSLDlogECF2m::isMember(shared_ptr<GroupElement> element) {
+	// Checks that the element is the correct object.
+	auto point = dynamic_pointer_cast<OpenSSLECF2mPoint>(element);
+	if (point == NULL) {
+		throw invalid_argument("groupElement doesn't match the DlogGroup");
+	}
+
+	// Infinity point is a valid member.
+	if (point->isInfinity()) {
+		return true;
+	}
+
+	// A point (x, y) is a member of a Dlog group with prime order q over an Elliptic Curve if it meets the following two conditions:
+	// 1)	P = (x,y) is a point in the Elliptic curve, i.e (x,y) is a solution of the curves equation.
+	// 2)	P = (x,y) is a point in the q-order group which is a sub-group of the Elliptic Curve.
+	// Those two checks are done in two steps:
+	// 1.	Checking that the point is on the curve, performed by EC_POINT_is_on_curve.
+	// 2.	Checking that the point is in the Dlog group,performed by checkSubGroupMembership.
+	boolean valid = EC_POINT_is_on_curve(curve.get(), point->getPoint().get(), ctx.get());
+
+	//The second check is implemented in ECFpUtility since it is independent of the underlying library (BC, Miracl, or other)
+	//If we ever decide to change the implementation there will only be one place to change it.
+	valid = valid && checkSubGroupMembership(point);
+
+	return valid;
+}
+
+/**
+* checks if the given point is in the given dlog group with the q prime order.
+* A point is in the group if it in the q-order group which is a sub-group of the Elliptic Curve.
+* Base assumption of this function is that checkCurveMembership function is already been called and returned true.
+* @param curve
+* @param point
+* @return true if the given point is in the given dlog group.
+*/
+bool OpenSSLDlogECF2m::checkSubGroupMembership(shared_ptr<OpenSSLECF2mPoint> point) {
+	//we assume that the point is on the curve group
+	//get the cofactor of the group
+	biginteger h = (dynamic_pointer_cast<ECGroupParams>(groupParams))->getCofactor();
+
+	//if the cofactor is 1 the sub-group is same as the elliptic curve equation which the point is in.
+	if (h == 1) {
+		return true;
+	}
+
+	biginteger x = point->getX();
+
+	//if the cofactor is greater than 1, the point must have order q (same as the order of the group)
+
+	//if the cofactor is 2 and the x coefficient is 0, the point has order 2 and is not in the group
+	if (h == 2) {
+		if (x == 0) return false;
+		else return true;
+	}
+
+	// if the cofactor is 3 and p^2 = p^(-1), the point has order 3 and is not in the group
+	if (h == 3) {
+		auto power = exponentiate(point, 2);
+		auto inverse = getInverse(point);
+		if (power == inverse) return false;
+		else return true;
+	}
+
+	// if the cofactor is 4, the point has order 2 if the x coefficient of the point is 0, 
+	// or the the point has order 4 if the x coefficient of the point raised to two is 0.
+	// in both cases the point is not in the group.
+	if (h == 4) {
+		if (x == 0) {
+			return false;
+		}
+		auto power = exponentiate(point, 2);
+		auto powerX = (dynamic_pointer_cast<ECElement>(power))->getX();
+		if (powerX == 0) return false;
+		else return true;
+	}
+
+	// if the cofactor is bigger than 4, there is no optimized way to check the order, so we operates the naive:
+	// if the point raised to q (order of the group) is the identity, the point has order q too and is in the group. 
+	// else, it is not in the group
+	auto r = (dynamic_pointer_cast<ECGroupParams>(groupParams))->getQ();
+	auto pointPowR = exponentiate(point, r);
+	if (pointPowR->isIdentity()) return true;
+	else return false;
+}
+
+shared_ptr<GroupElement> OpenSSLDlogECF2m::generateElement(bool bCheckMembership, vector<biginteger> values) {
+	if (values.size() != 2) {
+		throw invalid_argument("To generate an ECElement you should pass the x and y coordinates of the point");
+	}
+	OpenSSLECF2mPoint* point = new OpenSSLECF2mPoint(values[0], values[1], this, bCheckMembership);
+	return shared_ptr<OpenSSLECF2mPoint>(point);
+}
+
+shared_ptr<GroupElement> OpenSSLDlogECF2m::simultaneousMultipleExponentiations(
+	vector<shared_ptr<GroupElement>> groupElements, vector<biginteger> exponentiations) {
+	//Our tests showed that for ECF2m the naive algorithm is faster than the simultaneousMultipleExponentiations algorithm.
+	//TODO check if that is still true in the c++ implementation.
+	return computeNaive(groupElements, exponentiations);
+}
+
+/*
+ * Currently we don't support this conversion.</B> It will be implemented in the future. 
+ * Meanwhile we return null.
+*/
+shared_ptr<GroupElement> OpenSSLDlogECF2m::encodeByteArrayToGroupElement(const vector<unsigned char> & binaryString) {
+	
+	return NULL;
+}
+
+/*
+* Currently we don't support this conversion.</B> It will be implemented in the future.
+* Meanwhile we return empty vector.
+*/
+const vector<unsigned char> OpenSSLDlogECF2m::decodeGroupElementToByteArray(shared_ptr<GroupElement> groupElement) {
+	auto point = dynamic_pointer_cast<OpenSSLECF2mPoint>(groupElement);
+	// Checks that the element is the correct object.
+	if (point == NULL) {
+		throw invalid_argument("element type doesn't match the group type");
+	}
+
+	return vector<byte>();
+}
+
+/************************************************************/
+/****************EC Group elements classes*******************/
+/************************************************************/
+
+
+bool OpenSSLPoint::isInfinity() {
+	if ((x == NULL) && (y == NULL)) 
+		return true;
+	else 
+		return false;
+}
+
+shared_ptr<byte> OpenSSLPoint::toByteArray() {
+	return NULL;
+}
+
+void OpenSSLECFpPoint::initFromByteArray(byte* arr, int size) {
+
+}
+
+void OpenSSLECF2mPoint::initFromByteArray(byte* arr, int size) {
+
+}
+
+OpenSSLECFpPoint::OpenSSLECFpPoint(const biginteger & x, const biginteger & y, OpenSSLDlogECFp* curve, bool bCheckMembership) {
+	if (bCheckMembership) {
+		auto params = dynamic_pointer_cast<ECFpGroupParams>(curve->getGroupParams());
+		//checks if the given parameters are valid point on the curve.
+		bool valid = checkCurveMembership(params, x, y);
+		// checks validity
+		if (valid == false) // if not valid, throws exception
+			throw invalid_argument("x, y values are not a point on this curve");
+	}
+	//Create a point in the field with the given parameters, done by OpenSSL's native code.
+	BIGNUM *xOssl = biginteger_to_opensslbignum(x);
+	BIGNUM *yOssl = biginteger_to_opensslbignum(y);
+	if (x == NULL || y == NULL) 
+		throw runtime_error("Failed to create the point");
+	
+	// Create the element.
+	point = shared_ptr<EC_POINT>(EC_POINT_new(curve->getCurve().get()), EC_POINT_free);
+	if (NULL == point) 
+		throw runtime_error("Failed to create the point");
+
+	//If the validity check done by OpenSSL did succeed, the function return 1.
+	if (1 != EC_POINT_set_affine_coordinates_GFp(curve->getCurve().get(), point.get(), xOssl, yOssl, curve->getCTX().get())) {
+		BN_free(xOssl);
+		BN_free(yOssl);
+		throw runtime_error("Failed to create the point");
+	}
+	//Release the allocated memory.
+	BN_free(xOssl);
+	BN_free(yOssl);
+
+	//Keep the coordinates for performance reasons. See long comment above next to declaration.
+	this->x = x;
+	this->y = y;
+}
+
+/**
+* Checks if the given x and y represent a valid point on the given curve,
+* i.e. if the point (x, y) is a solution of the curves equation.
+* @param params elliptic curve over Fp parameters
+* @param x coefficient of the point
+* @param y coefficient of the point
+* @return true if the given x and y represented a valid point on the given curve
+*/
+bool OpenSSLECFpPoint::checkCurveMembership(shared_ptr<ECFpGroupParams> params, const biginteger & x, const biginteger & y) {
+
+	/* get a, b, p from group params */
+	biginteger a = params->getA();
+	biginteger b = params->getB();
+	biginteger p = params->getP();
+
+	//Calculates the curve equation with the given x,y.
+
+	// compute x^3
+	biginteger x3 = mp::powm(x, 3, p);
+	// compute x^3+ax+b
+	biginteger rightSide = (x3 + (a*x) + b) % p;
+	// compute y^2
+	biginteger leftSide = mp::powm(y, 2, p);
+	// if the the equation is solved - the point is in the elliptic curve and return true
+	if (leftSide == rightSide)
+		return true;
+	else return false;
+}
+
+OpenSSLECFpPoint::OpenSSLECFpPoint(shared_ptr<EC_POINT> point, OpenSSLDlogECFp* curve) {
+
+	this->point = point;
+
+	//Set x,y values.
+	if (EC_POINT_is_at_infinity(curve->getCurve().get(), point.get())) {
+		x = NULL;
+		y = NULL;
+	} else {
+		auto xBN = BN_new();
+		auto yBN = BN_new();
+		if (xBN == NULL || yBN == NULL) 
+			throw runtime_error("Failed to create the point");
+
+		//Get x and y values.
+		EC_POINT_get_affine_coordinates_GFp(curve->getCurve().get(), point.get(), xBN, yBN, curve->getCTX().get());
+
+		x = opensslbignum_to_biginteger(xBN);
+		y = opensslbignum_to_biginteger(yBN);
+	}
+}
+
+OpenSSLECF2mPoint::OpenSSLECF2mPoint(const biginteger & x, const biginteger & y, OpenSSLDlogECF2m* curve, bool bCheckMembership) {
+	//Create a point in the field with the given parameters, done by OpenSSL's native code.
+	BIGNUM *xOssl = biginteger_to_opensslbignum(x);
+	BIGNUM *yOssl = biginteger_to_opensslbignum(y);
+	if (x == NULL || y == NULL)
+		throw runtime_error("Failed to create the point");
+
+	// Create the element.
+	point = shared_ptr<EC_POINT> (EC_POINT_new(curve->getCurve().get()), EC_POINT_free);
+	if (NULL == point)
+		throw runtime_error("Failed to create the point");
+
+	//If the validity check done by OpenSSL did not succeed, then EC_POINT_set_affine_coordinates_GF2m returns 0,
+	//indicating that this is not a valid point
+	if (1 != EC_POINT_set_affine_coordinates_GF2m(curve->getCurve().get(), point.get(), xOssl, yOssl, curve->getCTX().get())) {
+		BN_free(xOssl);
+		BN_free(yOssl);
+		throw invalid_argument("x, y values are not a point on this curve");
+	}
+
+	//Release the allocated memory.
+	BN_free(xOssl);
+	BN_free(yOssl);
+
+	//Keep the coordinates for performance reasons. See long comment above next to declaration.
+	this->x = x;
+	this->y = y;
+
+	if (bCheckMembership) {
+		//check if the given parameters are valid point on the curve.
+		boolean valid = curve->isMember(shared_from_this());
+		// checks validity
+		if (valid == false) {// if not valid, throws exception
+			
+			throw new invalid_argument("x, y values are not a point on this curve");
+		}
+	}
+}
+
+OpenSSLECF2mPoint::OpenSSLECF2mPoint(shared_ptr<EC_POINT> point, OpenSSLDlogECF2m* curve) {
+	this->point = point;
+
+	//Set x,y values.
+	if (EC_POINT_is_at_infinity(curve->getCurve().get(), point.get())) {
+		x = NULL;
+		y = NULL;
+	}
+	else {
+		auto xBN = BN_new();
+		auto yBN = BN_new();
+		if (xBN == NULL || yBN == NULL)
+			throw runtime_error("Failed to create the point");
+
+		//Get x and y values.
+		EC_POINT_get_affine_coordinates_GF2m(curve->getCurve().get(), point.get(), xBN, yBN, curve->getCTX().get());
+
+		x = opensslbignum_to_biginteger(xBN);
+		y = opensslbignum_to_biginteger(yBN);
+	}
+}

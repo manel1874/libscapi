@@ -302,3 +302,95 @@ shared_ptr<GroupElement> DlogGroup::computeLL(
 /*END of DlogGroup Implementation *********************************/
 /*********************************************************************/
 
+/**************************************/
+/**** EC GroupParams Implementation ***/
+/**************************************/
+
+string ECF2mPentanomialBasis::toString() {
+	string s = "ECF2mPentanomialBasis [k1=" + k1;
+	s += ", k2=" + k2;
+	s += ", k3=" + k3;
+	s += ", m=" + m;
+	s += ", a=" + (string)a + ", b=" + (string)b + ", xG=" + (string)xG + ", yG=" + (string)yG + ", h=" + (string)h + ", q=" + (string)q + "]";
+	return s;
+}
+
+/**
+* Returns the integer <code>k2</code> of the underlying curve where x^m + x^k3 + x^k2 + x^k1 + 1
+* represents the reduction polynomial f(z).
+* @return k2 of the underlying curve
+*/
+int ECF2mKoblitz::getK2() {
+	int k2 = 0;
+	shared_ptr<ECF2mPentanomialBasis> pentaCurve = dynamic_pointer_cast<ECF2mPentanomialBasis>(curve);
+	if (pentaCurve)
+		k2 = pentaCurve->getK2();
+
+	return k2;
+}
+
+/**
+* Returns the integer <code>k3</code> where x^m + x^k3 + x^k2 + x^k1 + 1
+* represents the reduction polynomial f(z).
+* @return k3 of the underlying curve
+*/
+int ECF2mKoblitz::getK3() {
+	int k3 = 0;
+	shared_ptr<ECF2mPentanomialBasis> pentaCurve = dynamic_pointer_cast<ECF2mPentanomialBasis>(curve);
+	if (pentaCurve)
+		k3 = pentaCurve->getK3();
+
+	return k3;
+}
+
+string ECF2mKoblitz::toString() {
+	string s = "ECF2mKoblitz [getM()=" + getM();
+	s += ", getK1()=" + getK1();
+	s += ", getK2()=" + getK2();
+	s += ", getK3()=" + getK3();
+	s += ", getQ()=" + (string)getQ() + ", getXg()=" + (string)getXg() + ", getYg()=" + (string)getYg()
+		+ ", getA()=" + (string)getA() + ", getB()=" + (string)getB()
+		+ ", getSubGroupOrder()=" + (string)getSubGroupOrder()
+		+ ", getCurve()=[" + getCurve()->toString() + "], getCofactor()="
+		+ (string)getCofactor() + "]";
+	return s;
+}
+
+/*********************************************************************/
+/*END of GroupParams Implementation *********************************/
+/*********************************************************************/
+
+/**************************************/
+/******* Dlog EC Implementation *******/
+/**************************************/
+
+bool ECElement::operator==(const GroupElement &other) const {
+	if (typeid(*this) != typeid(other))
+		return false;
+	if (((ECElement*)this)->getX() != ((ECElement*)&other)->getX())
+		return false;
+	return ((ECElement*)this)->getY() == ((ECElement*)&other)->getY();
+}
+
+bool ECElement::operator!=(const GroupElement &other) const {
+	return !(*this == other);
+}
+
+/**
+* Constructor that initializes this DlogGroup with a curve that is not necessarily one of NIST recommended elliptic curves.
+* @param fileName - name of the elliptic curves file. This file has to comply with
+* @param curveName - name of curve to initialized
+* @throws IOException
+*/
+void DlogEllipticCurve::init(string fileName, string curveName, mt19937 random) {
+	
+	ecConfig = make_shared<ConfigFile>(fileName); //get ConfigFile object containing the curves data
+																//EC_FILE_PATH = fileName;
+	//In case there is no such curve in the file, an exception will be thrown.
+	ecConfig->Value(curveName, curveName);
+
+	this->curveName = curveName;
+	this->fileName = fileName;
+
+	random_element_gen = random;
+}

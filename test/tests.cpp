@@ -321,6 +321,35 @@ TEST_CASE("DlogGroup", "[Dlog, DlogGroup, CryptoPpDlogZpSafePrime]")
 		auto dg = make_shared<OpenSSLDlogZpSafePrime>(64); 
 		test_all(dg);
 	}
+
+	SECTION("test OpenSSLDlogECFp implementation")
+	{
+		cout << "before create Dlog" << endl;
+		auto dg = make_shared<OpenSSLDlogECFp>();
+		cout << "after create Dlog" << endl;
+		test_all(dg);
+	}
+	SECTION("test OpenSSLDlogECF2m implementation")
+	{
+		cout << "before create Dlog" << endl;
+		auto dg = make_shared<OpenSSLDlogECF2m>();
+		cout << "after create Dlog" << endl;
+		test_multiply_group_elements(dg);
+		test_simultaneous_multiple_exponentiations(dg);
+		test_exponentiate(dg);
+		test_exponentiate_with_pre_computed_values(dg);
+	}
+
+	SECTION("test OpenSSLDlogECF2m implementation")
+	{
+		cout << "before create Dlog" << endl;
+		auto dg = make_shared<OpenSSLDlogECF2m>("B-233");
+		cout << "after create Dlog" << endl;
+		test_multiply_group_elements(dg);
+		test_simultaneous_multiple_exponentiations(dg);
+		test_exponentiate(dg);
+		test_exponentiate_with_pre_computed_values(dg);
+	}
 }
 
 template<typename T>
