@@ -101,7 +101,13 @@ biginteger decodeBigInteger(byte* input, size_t length)
 
 biginteger convert_hex_to_biginteger(const string & input) {
 	string s = "0x" + input;
-	return boost::lexical_cast<biginteger>(s);
+	int index = s.find(" ");
+	while (index != string::npos) {
+		s = s.substr(0, index) + s.substr(index + 1);
+		index = s.find(" ");
+	}
+	const char *str = s.c_str();
+	return biginteger(str);
 }
 
 string hexStr(vector<byte> const & data)
