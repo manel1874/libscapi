@@ -1,9 +1,39 @@
 #include <boost/thread/thread.hpp>
 #include "../include/comm/TwoPartyComm.hpp"
-#include <thread>         // std::this_thread::sleep_for
-#include <chrono>         // std::chrono::seconds
 
-int main123(int argc, char* argv[])
+
+void print_send_message(const string  &s, int i) {
+	cout << "sending message number " << i << " message: " << s << endl;
+}
+void print_recv_message(const string &s, int i) {
+	cout << "receievd message number " << i << " message: " << s << endl;
+}
+
+void send_messages(CommParty* commParty, string * messages, int start, int end) {
+	for (int i = start; i < end; i++) {
+		auto s = messages[i];
+		print_send_message(s, i);
+		commParty->write((const byte *)s.c_str(), s.size());
+	}
+}
+
+void recv_messages(CommParty* commParty, string * messages, int start, int end, 
+	byte * buffer, int expectedSize) {
+	auto sizeRead = commParty->read(buffer, expectedSize);
+	// the size of all strings is 2. Parse the message to get the original strings
+	int j = 0;
+	for (int i = start; i < end; i++, j++) {
+		unsigned char* uc = buffer;
+		auto s = string(reinterpret_cast<char const*>(buffer+j*2), 2);
+		print_recv_message(s, i);
+		messages[i] = s;
+	}
+}
+
+/*
+* Testing Communication 
+*/
+int main(int argc, char* argv[])
 {
 	try
 	{
@@ -12,52 +42,27 @@ int main123(int argc, char* argv[])
 			std::cerr << "Usage: chat_server <server port> <client ip> <client port>";
 			return 1;
 		}
-
-		Logger::configure_logging();
 		boost::asio::io_service io_service;
 
 		SocketPartyData me(IpAdress::from_string("127.0.0.1"), atoi(argv[1]));
 		SocketPartyData other(IpAdress::from_string(argv[2]), atoi(argv[3]));
-		auto server = make_shared<ChannelServer>(io_service, me, other);
+		std::unique_ptr<CommPartyTCPSynced> commParty(new CommPartyTCPSynced(io_service, me, other));
 		boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 
-		int i;
-		cout << "please click 0 when ready" << endl;
-		cin >> i;
-		server->connect();
-		this_thread::sleep_for(chrono::seconds(2));
-		if (!server->is_connected())
-		{
-			cout << "sorry. connection failed" << endl;
-			return -1;
-		}
-		else
-		{
-			cout << "connected. starting to send" << endl;
-		}
-			
-		cin.clear();
-		bool first = true;
-		char line[Message::max_body_length + 1];
-		vector<byte> * v;
-		while (std::cin.getline(line, Message::max_body_length + 1))
-		{
-			if (!first)
-			{
-				using namespace std; // For strlen and memcpy.
-				shared_ptr<byte> sLine((byte*)line);
-				server->write(sLine, strlen(line));
-				cout << "checking for recieved messages" << endl;
-				while ((v = server->read_one()) != NULL)
-				{
-					cout << "GOT MESSAGE: " << string(v->begin(), v->end()) << endl; 
-				}
-			}
-			else
-				first = false;
-		}
-
-
+		cout << "tring to connect to: " << argv[2] << " port: " << argv[3] << endl;
+		commParty->join();
+		string sendMessages[6] = { "s0", "s1", "s2", "s3", "s4", "s5" };
+		string recvMessages[6];
+		byte buffer[100];
+		// send 3 message. get 3. send additional 2 get 2. send 1 get 1
+		send_messages(commParty.get(), sendMessages, 0, 3);
+		recv_messages(commParty.get(), recvMessages, 0, 3, buffer, 6);
+		send_messages(commParty.get(), sendMessages, 3, 5);
+		recv_messages(commParty.get(), recvMessages, 3, 5, buffer, 4);
+		send_messages(commParty.get(), sendMessages, 5, 6);
+		recv_messages(commParty.get(), recvMessages, 5, 6, buffer, 2);
+		io_service.stop();
+		t.join();
 	}
 	catch (std::exception& e)
 	{

@@ -137,6 +137,7 @@ void NativeChannel::handle_read_header(const boost::system::error_code& error)
 	{
 		Logger::log("Channel( " + me.to_log_string() + "error when reading message header: "
 			+ error.message());
+		cout << "Channel( " + me.to_log_string() + "error when reading message header: " + error.message() << endl;
 		m_IsConnected = false;
 		do_close();
 	}
@@ -206,4 +207,58 @@ void ChannelServer::write_fast(const string & data) {
 	memcpy(msg.body(), data.c_str(), msg.body_length());
 	msg.encode_header();
 	channel->write_fast(msg);
+}
+
+/*****************************************/
+/* CommPartyTCPSynced                    */
+/*****************************************/
+
+void CommPartyTCPSynced::join(int sleepBetweenAttempts, int timeout) {
+	int     totalSleep = 0;
+	bool    isAccepted  = false;
+	bool    isConnected = false;
+	// establish connections
+	while (!isConnected || !isAccepted) {
+		try {
+			if (!isConnected) {
+				tcp::resolver resolver(ioServiceClient);
+				tcp::resolver::query query(other.getIpAddress().to_string(), to_string(other.getPort()));
+				tcp::resolver::iterator endpointIterator = resolver.resolve(query);
+				boost::asio::connect(clientSocket, endpointIterator);
+				isConnected = true;
+			}
+		}
+		catch (const boost::system::system_error& ex)
+		{
+			if (totalSleep > timeout)
+			{
+				cerr << "Failed to connect after timeout, aboting!";
+				throw ex;
+			}
+			cout << "Failed to connect. sleeping for " << sleepBetweenAttempts << " milliseconds, " << ex.what() << endl;
+			this_thread::sleep_for(chrono::milliseconds(sleepBetweenAttempts));
+			totalSleep += sleepBetweenAttempts;
+		}
+		if (!isAccepted) {
+			boost::system::error_code ec;
+			acceptor_.accept(serverSocket, ec);
+			isAccepted = true;
+		}
+	}
+	setSocketOptions();
+}
+
+void CommPartyTCPSynced::setSocketOptions() {
+	boost::asio::ip::tcp::no_delay option(true);
+	serverSocket.set_option(option);
+	clientSocket.set_option(option);
+}
+
+void CommPartyTCPSynced::write(const byte* data, int size) {
+	boost::system::error_code ec;
+	boost::asio::write(clientSocket,
+		boost::asio::buffer(data, size),
+		boost::asio::transfer_all(), ec);
+	if (ec)
+		throw PartyCommunicationException("Error while writing. " + ec.message());
 }

@@ -22,19 +22,6 @@ struct YaoConfig {
 	};
 };
 
-void connect(ChannelServer * channel_server) {
-	cout << "PartyOne: Connecting to Receiver..." << endl;
-	int sleep_time = 50;
-	this_thread::sleep_for(chrono::milliseconds(sleep_time));
-	channel_server->connect();
-	while(!channel_server->is_connected())
-	{
-		cout << "Failed to connect. sleeping for " << sleep_time << " milliseconds" << endl;
-		this_thread::sleep_for(chrono::milliseconds(sleep_time));
-	}
-	cout << "Sender Connected!" << endl;
-}
-
 vector<byte> * readInputAsVector(string input_file) {
 	cout << "reading from file " << input_file << endl;;
 	auto sc = scannerpp::Scanner(new scannerpp::File(input_file));
@@ -77,7 +64,7 @@ void execute_party_one(YaoConfig yao_config) {
 	OTBatchSender * otSender = new OTSemiHonestExtensionSender(senderParty, 163, 1);
 
 	// connect to party two
-	connect(channel_server);
+	channel_server->try_connecting();
 	
 	// get the inputs of P1 
 	vector<byte>* ungarbledInput = readInputAsVector(yao_config.input_file_1);

@@ -63,9 +63,9 @@ size_t bytesCount(biginteger value);
 
 mt19937 get_seeded_random();
 mt19937_64 get_seeded_random64();
-void gen_random_bytes_vector(vector<byte> &v, const int len, mt19937 random = get_seeded_random());
 void copy_byte_vector_to_byte_array(const vector<byte> &source_vector, byte * dest, int beginIndex);
 void copy_byte_array_to_byte_vector(const byte* src, int src_len, vector<byte>& target_vector, int beginIndex);
+
 /*
 * Converting big integer to a byte array. Array must be allocated already
 * Number can be postive or negative - the sign will be preserved in the encoding
@@ -80,22 +80,26 @@ biginteger decodeBigInteger(byte* input, size_t length);
 
 biginteger convert_hex_to_biginteger(const string & hex);
 
-string hexStr(vector<byte> const & data);
-
-void print_elapsed_ms(std::chrono::time_point<std::chrono::system_clock> start, string message);
-void print_elapsed_micros(std::chrono::time_point<std::chrono::system_clock> start, string message);
-
-std::chrono::time_point<std::chrono::system_clock> scapi_now();
-
 /*
 * Returns a random biginteger uniformly distributed in [min, max]
 */
 biginteger getRandomInRange(biginteger min, biginteger max, std::mt19937 random);
-void print_byte_array(byte * arr, int len, string message);
 
 const vector<string> explode(const string& s, const char& c);
 
 bool isPrime(biginteger bi);
+
+/********************/
+/* Debugging Methods*/
+/********************/
+
+void print_elapsed_ms(std::chrono::time_point<std::chrono::system_clock> start, string message);
+void print_elapsed_micros(std::chrono::time_point<std::chrono::system_clock> start, string message);
+std::chrono::time_point<std::chrono::system_clock> scapi_now();
+string hexStr(vector<byte> const & data);
+void print_byte_array(byte * arr, int len, string message);
+void gen_random_bytes_vector(vector<byte> &v, const int len, mt19937 random = get_seeded_random());
+
 /**
 * Abstract marker interface that allow serialization and deserialization from byte array and size
 */

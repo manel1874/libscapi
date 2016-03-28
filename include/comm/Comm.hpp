@@ -7,14 +7,18 @@ class TimeoutException : public logic_error
 {
 public:
 	TimeoutException(const string & msg) : logic_error(msg) {};
-	virtual char const * what() const throw() { return "Timeout Occured"; }
 };
 
 class DuplicatePartyException : public logic_error
 {
 public:
 	DuplicatePartyException(const string & msg) : logic_error(msg) {};
-	virtual char const * what() const throw() { return "Duplicate Party"; }
+};
+
+class PartyCommunicationException : public logic_error
+{
+public:
+	PartyCommunicationException(const string & msg) : logic_error(msg) {};
 };
 
 /**
