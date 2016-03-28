@@ -324,16 +324,12 @@ TEST_CASE("DlogGroup", "[Dlog, DlogGroup, CryptoPpDlogZpSafePrime]")
 
 	SECTION("test OpenSSLDlogECFp implementation")
 	{
-		cout << "before create Dlog" << endl;
 		auto dg = make_shared<OpenSSLDlogECFp>();
-		cout << "after create Dlog" << endl;
 		test_all(dg);
 	}
 	SECTION("test OpenSSLDlogECF2m implementation")
 	{
-		cout << "before create Dlog" << endl;
 		auto dg = make_shared<OpenSSLDlogECF2m>();
-		cout << "after create Dlog" << endl;
 		test_multiply_group_elements(dg);
 		test_simultaneous_multiple_exponentiations(dg);
 		test_exponentiate(dg);
@@ -342,9 +338,7 @@ TEST_CASE("DlogGroup", "[Dlog, DlogGroup, CryptoPpDlogZpSafePrime]")
 
 	SECTION("test OpenSSLDlogECF2m implementation")
 	{
-		cout << "before create Dlog" << endl;
 		auto dg = make_shared<OpenSSLDlogECF2m>("B-233");
-		cout << "after create Dlog" << endl;
 		test_multiply_group_elements(dg);
 		test_simultaneous_multiple_exponentiations(dg);
 		test_exponentiate(dg);
@@ -600,22 +594,22 @@ TEST_CASE("serialization", "[SerializedData, CmtCCommitmentMsg]")
 		long id = 123123123123123;
 		
 		// create serialize, and verify original values untouched
-		auto es = make_shared<OpenSSLZpSafePrimeElement>(birsa100);
+		auto es = make_shared<ZpElementSendableData>(birsa100);
 		CmtPedersenCommitmentMessage cmtMsg(es, id);
 		auto serialized = cmtMsg.toByteArray();
 		int serializedSize = cmtMsg.getSerializedSize();
 		REQUIRE(cmtMsg.getId() == id);
-		REQUIRE(((ZpElement*)cmtMsg.getCommitment().get())->getElementValue() == birsa100);
+		REQUIRE(((ZpElementSendableData*)cmtMsg.getCommitment().get())->getX() == birsa100);
 
 		// verify new one is created with empty values
-		CmtPedersenCommitmentMessage cmtMsg2(make_shared<OpenSSLZpSafePrimeElement>(biginteger(0)));
+		CmtPedersenCommitmentMessage cmtMsg2;
 		REQUIRE(cmtMsg2.getId() == 0);
-		REQUIRE(((ZpElement*)cmtMsg2.getCommitment().get())->getElementValue() == 0);
+		REQUIRE(((ZpElementSendableData*)cmtMsg2.getCommitment().get())->getX() == 0);
 
 		// deserialize and verify original values in the new object
 		cmtMsg2.initFromByteArray(serialized.get(), serializedSize);
 		REQUIRE(cmtMsg2.getId() == id);
-		REQUIRE(((ZpElement*)cmtMsg2.getCommitment().get())->getElementValue() == birsa100);
+		REQUIRE(((ZpElementSendableData*)cmtMsg2.getCommitment().get())->getX() == birsa100);
 	}
 	SECTION("SigmaBIMsg") {
 		biginteger value = 123456789;
@@ -674,6 +668,45 @@ TEST_CASE("serialization", "[SerializedData, CmtCCommitmentMsg]")
 		cmtTrapOut2.initFromByteArray(serialized.get(), serializedSize);
 		REQUIRE(cmtTrapOut2.getCommitmentId() == commitmentId);
 		REQUIRE(cmtTrapOut2.getTrap() == trap);
+	}
+	SECTION("ECFp Point sendable data") {
+		OpenSSLDlogECFp dlog;
+		shared_ptr<GroupElement> point = dlog.createRandomElement();
+		
+		shared_ptr<ECElementSendableData> data = dynamic_pointer_cast<ECElementSendableData>(point->generateSendableData());
+		REQUIRE(dynamic_pointer_cast<ECElement>(point)->getX() == data->getX());
+		REQUIRE(dynamic_pointer_cast<ECElement>(point)->getY() == data->getY());
+		
+		shared_ptr<byte> dataBytes = data->toByteArray();
+		ECElementSendableData point2Data(0,0);
+		point2Data.initFromByteArray(dataBytes.get(), data->getSerializedSize());
+
+		REQUIRE(point2Data.getX() == data->getX());
+		REQUIRE(point2Data.getY() == data->getY());
+		
+		shared_ptr<GroupElement> point2 = dlog.reconstructElement(false, &point2Data);
+		REQUIRE(dlog.isMember(point2));
+		REQUIRE(*point2.get() == *point.get());
+	}
+
+	SECTION("ECF2m Point sendable data") {
+		OpenSSLDlogECF2m dlog;
+		shared_ptr<GroupElement> point = dlog.createRandomElement();
+
+		shared_ptr<ECElementSendableData> data = dynamic_pointer_cast<ECElementSendableData>(point->generateSendableData());
+		REQUIRE(dynamic_pointer_cast<ECElement>(point)->getX() == data->getX());
+		REQUIRE(dynamic_pointer_cast<ECElement>(point)->getY() == data->getY());
+
+		shared_ptr<byte> dataBytes = data->toByteArray();
+		ECElementSendableData point2Data(0, 0);
+		point2Data.initFromByteArray(dataBytes.get(), data->getSerializedSize());
+
+		REQUIRE(point2Data.getX() == data->getX());
+		REQUIRE(point2Data.getY() == data->getY());
+
+		shared_ptr<GroupElement> point2 = dlog.reconstructElement(false, &point2Data);
+		REQUIRE(dlog.isMember(point2));
+		REQUIRE(*point2.get() == *point.get());
 	}
 	
 }
