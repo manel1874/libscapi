@@ -162,9 +162,9 @@ public:
 	* Returns a serialized object representing this commit value.
 	*/
 	shared_ptr<byte> generateSendableData() override {
-		return x->toByteArray(); };
+		return x->generateSendableData()->toByteArray(); };
 	virtual int sendableDataSize() override {
-		return x->getSerializedSize(); };
+		return x->generateSendableData()->getSerializedSize(); };
 };
 
 /**

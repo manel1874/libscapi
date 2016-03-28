@@ -12,6 +12,20 @@ public:
 	InvalidDlogGroupException(const string & msg) : logic_error(msg) {};
 };
 
+/**
+ * This is a marker interface. It allows the generation of a GroupElement at an abstract level without knowing the actual type of Dlog Group.
+ *
+ */
+class GroupElementSendableData : public NetworkSerialized {
+public:
+	virtual int getSerializedSize() override { return serialized_size; };
+	virtual ~GroupElementSendableData() = 0; // making this an abstract class		
+protected:
+	int serialized_size;
+		
+};
+
+inline GroupElementSendableData::~GroupElementSendableData() {}; // must provide implemeantion to allow destruction of base classes
 
 /**
 * This is the main interface of the Group element hierarchy.<p>
@@ -19,11 +33,8 @@ public:
 * is a point and an element of a Zp group is a number between 0 and p-1.
 *
 */
-class GroupElement : public NetworkSerialized
+class GroupElement 
 {
-
-protected:
-	int serialized_size;
 
 public:
 	/**
@@ -33,10 +44,16 @@ public:
 	*/
 	virtual bool isIdentity() = 0;
 
+	/**
+	* This function is used when a group element needs to be sent via a {@link edu.biu.scapi.comm.Channel} or any other means of sending data (including serialization).
+	* It retrieves all the data needed to reconstruct this Group Element at a later time and/or in a different VM.
+	* It puts all the data in an instance of the relevant class that implements the GroupElementSendableData interface.
+	* @return the GroupElementSendableData object
+	*/
+	virtual shared_ptr<GroupElementSendableData> generateSendableData() = 0;
+
 	virtual bool operator==(const GroupElement &other) const = 0;
 	virtual bool operator!=(const GroupElement &other) const = 0;
-
-	virtual int getSerializedSize() override { return serialized_size; };
 };
 
 /*
@@ -293,6 +310,16 @@ public:
 	virtual shared_ptr<GroupElement> generateElement(bool bCheckMembership, vector<biginteger> values) = 0;
 
 	/**
+	* Reconstructs a GroupElement given the GroupElementSendableData data, which might have been received through a Channel open between the party holding this DlogGroup and
+	* some other party.
+	* @param bCheckMembership whether to check that the data provided can actually reconstruct an element of this DlogGroup. Since this action is expensive it should be used only if necessary.
+	* @param data the GroupElementSendableData from which we wish to "reconstruct" an element of this DlogGroup
+	* @return the reconstructed GroupElement
+	*/
+	virtual shared_ptr<GroupElement> reconstructElement(bool bCheckMembership,
+		GroupElementSendableData* data) = 0;
+
+	/**
 	* Computes the product of several exponentiations with distinct bases
 	* and distinct exponents.
 	* Instead of computing each part separately, an optimization is used to
@@ -465,26 +492,37 @@ public:
 	/*
 	* Constructor that simply create element using the given value
 	*/
-	ZpSafePrimeElement(const biginteger & elementValue) { 
-		element = elementValue; 
-		serialized_size = bytesCount(element);
-	};
+	ZpSafePrimeElement(biginteger elementValue) { element = elementValue; };
 	biginteger getElementValue() override { return element; };
 	bool isIdentity() override { return element == 1; }
 	bool operator==(const GroupElement &other) const override;
 	bool operator!=(const GroupElement &other) const override;
-	virtual string toString() = 0; 
+	virtual string toString() = 0;
+	shared_ptr<GroupElementSendableData> generateSendableData() override;
+};
 
-	std::shared_ptr<byte> toByteArray() override {
-		serialized_size = bytesCount(element);
-		std::shared_ptr<byte> result(new byte[serialized_size], std::default_delete<byte[]>());
-		encodeBigInteger(element, result.get(), serialized_size);
-		return result;
+class ZpElementSendableData : public GroupElementSendableData {
+protected:
+	biginteger x = 0;
+
+public:
+	ZpElementSendableData(biginteger x_) : GroupElementSendableData() {
+		x = x_;
+		serialized_size = bytesCount(x_);
 	};
+	biginteger getX() { return x; }
+	string toString() { return "ZpElementSendableData [x=" + (string)x + "]"; }
+	std::shared_ptr<byte> toByteArray() override {
+			serialized_size = bytesCount(x);		
+			std::shared_ptr<byte> result(new byte[serialized_size], std::default_delete<byte[]>());		  	
+			encodeBigInteger(x, result.get(), serialized_size);		
+			return result;		  	
+	}
 	void initFromByteArray(byte* arr, int size) override {
 		serialized_size = size;
-		element = decodeBigInteger(arr, size);
-	};
+		x = decodeBigInteger(arr, size);
+	}
+	
 };
 
 /***************Dlog Elliptic Curve hierarchy******************/
@@ -746,6 +784,27 @@ public:
 	bool operator==(const GroupElement &other) const override;
 	bool operator!=(const GroupElement &other) const override;
 
+	shared_ptr<GroupElementSendableData> generateSendableData() override;
+
+};
+
+class ECElementSendableData : public GroupElementSendableData {
+private:
+	biginteger x;
+	biginteger y;
+public:
+	ECElementSendableData(const biginteger & x, const biginteger & y) {
+		this->x = x;
+		this->y = y;
+	}
+
+	biginteger getX() { return x; }
+	biginteger getY() { return y; }
+	string toString() { return "ECElementSendableData [x=" + string(x) + ", y=" + string(y) + "]"; }
+	
+	shared_ptr<byte> toByteArray() override;
+
+	void initFromByteArray(byte* arr, int size) override;
 };
 
 class ECF2mPoint : public ECElement {};

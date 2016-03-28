@@ -8,15 +8,15 @@
 */
 class SigmaGroupElementMsg : public SigmaProtocolMsg {
 public:
-	SigmaGroupElementMsg(shared_ptr<GroupElement> el) {  this->element = el;  };
-	shared_ptr<GroupElement> getElement() { return element; };
+	SigmaGroupElementMsg(shared_ptr<GroupElementSendableData> el) {  this->element = el;  };
+	shared_ptr<GroupElementSendableData> getElement() { return element; };
 	// SerializedNetwork implementation:
 	void initFromByteArray(byte* arr, int size) override { element->initFromByteArray(arr, size); };
 	shared_ptr<byte> toByteArray() override{ return element->toByteArray();  };
 	int getSerializedSize() override { return element->getSerializedSize(); };
 
 private:
-	shared_ptr<GroupElement> element=NULL;
+	shared_ptr<GroupElementSendableData> element=NULL;
 };
 
 /**

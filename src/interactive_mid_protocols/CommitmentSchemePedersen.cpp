@@ -31,14 +31,15 @@ void CmtPedersenReceiverCore::doConstruct(shared_ptr<ChannelServer> channel,
 void CmtPedersenReceiverCore::preProcess() {
 	trapdoor = getRandomInRange(0, qMinusOne, random);
 	h = dlog->exponentiate(dlog->getGenerator(), trapdoor);
-	auto raw_msg = h->toByteArray();
-	int len = h->getSerializedSize();
+	auto sendableData = h->generateSendableData();		
+	auto raw_msg = sendableData->toByteArray();		 
+	int len = sendableData->getSerializedSize();
 	channel->write_fast(raw_msg.get(), len);
 }
 
 shared_ptr<CmtRCommitPhaseOutput> CmtPedersenReceiverCore::receiveCommitment() {
 	// create an empty CmtPedersenCommitmentMessage 
-	auto msg = make_shared<CmtPedersenCommitmentMessage>(dlog->getIdentity());
+	auto msg = make_shared<CmtPedersenCommitmentMessage>();
 	// read encoded CmtPedersenCommitmentMessage from channel
 	auto v = channel->read_one();
 	// init the empy CmtPedersenCommitmentMessage using the encdoed data
@@ -72,9 +73,11 @@ shared_ptr<CmtCommitValue> CmtPedersenReceiverCore::verifyDecommitment(
 	// calculate c = g^r * h^x
 	auto gTor = dlog->exponentiate(dlog->getGenerator(), r);
 	auto hTox = dlog->exponentiate(h, x);
+
 	auto cmt = commitmentMsgPedersen->getCommitment();
-	auto ge = static_pointer_cast<GroupElement>(cmt);
-	if(*ge == *(dlog->multiplyGroupElements(gTor, hTox)))
+	auto ge = static_pointer_cast<GroupElementSendableData>(cmt);
+	auto commitmentElement = dlog->reconstructElement(true, ge.get());
+	if (*commitmentElement == *(dlog->multiplyGroupElements(gTor, hTox)))
 		return make_shared<CmtBigIntegerCommitValue>(x);
 	// in the pseudocode it says to return X and ACCEPT if valid commitment else, REJECT.
 	// for now we return null as a mode of reject. If the returned value of this function is not
@@ -117,14 +120,14 @@ void CmtPedersenCommitterCore::doConstruct(shared_ptr<ChannelServer> channel,
 
 void CmtPedersenCommitterCore::preProcess() {
 	auto msg = waitForMessageFromReceiver();
-	h = msg->getH();
+	h = dlog->reconstructElement(true, msg->getH().get());
 	if (!dlog->isMember(h))
 		throw CheatAttemptException("h element is not a member of the current DlogGroup");
 }
 
 shared_ptr<CmtPedersenPreprocessMessage> CmtPedersenCommitterCore::waitForMessageFromReceiver() {
 	auto v = channel->read_one();
-	auto emptySendableData = dlog->getIdentity();
+	auto emptySendableData = make_shared<ZpElementSendableData>(0);
 	auto msg = make_shared<CmtPedersenPreprocessMessage>(emptySendableData);
 	msg->initFromByteVector(v);
 	return msg;
@@ -155,7 +158,7 @@ shared_ptr<CmtCCommitmentMsg> CmtPedersenCommitterCore::generateCommitmentMsg(
 	commitmentMap[id] = make_shared<CmtPedersenCommitmentPhaseValues>(sharedR, cmtBIValue, c);
 
 	// send c
-	auto res = make_shared<CmtPedersenCommitmentMessage>(c, id);
+	auto res = make_shared<CmtPedersenCommitmentMessage>(c->generateSendableData(), id);
 	return res;
 }
 

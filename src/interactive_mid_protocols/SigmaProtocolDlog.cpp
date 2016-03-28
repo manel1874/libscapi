@@ -40,7 +40,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaDlogSimulator::simulate(shared_ptr<SigmaCo
 	auto a = dlog->multiplyGroupElements(gToZ, hToE);
 
 	// OUTPUT (a,e,eSize,z).
-	auto SigmaGEMsg = make_shared<SigmaGroupElementMsg>(a);
+	auto SigmaGEMsg = make_shared<SigmaGroupElementMsg>(a->generateSendableData());
 	auto SigmaBMsg = make_shared<SigmaBIMsg>(z);
 	return make_shared<SigmaDlogSimulatorOutput>(SigmaGEMsg, challenge, challenge_size, SigmaBMsg);
 }
@@ -80,9 +80,9 @@ shared_ptr<SigmaProtocolMsg> SigmaDlogProverComputation::computeFirstMsg(shared_
 	r = getRandomInRange(0, qMinusOne, random);
 	// compute a = g^r.
 	auto a = dlog->exponentiate(dlog->getGenerator(), r);
-	
+	auto x = a->generateSendableData();
 	// create and return SigmaGroupElementMsg with a.
-	return make_shared<SigmaGroupElementMsg>(a);
+	return make_shared<SigmaGroupElementMsg>(x);
 
 }
 
@@ -144,7 +144,7 @@ bool SigmaDlogVerifierComputation::verify(shared_ptr<SigmaCommonInput> input,
 	if (!exponent)
 		throw invalid_argument("second message to Dlog verifier should always be instance of SigmaBIMsg");
 
-	auto aElement = firstMsg->getElement();
+	auto aElement = dlog->reconstructElement(true, firstMsg->getElement().get());
 	
 	// get the h from the input and verify that it is in the Dlog Group.
 	auto h = cInput->getH();

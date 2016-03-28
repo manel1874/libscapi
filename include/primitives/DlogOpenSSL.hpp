@@ -81,6 +81,7 @@ public:
 	shared_ptr<GroupElement> simultaneousMultipleExponentiations(vector<shared_ptr<GroupElement>> groupElements,
 		vector<biginteger> exponentiations) override;
 	shared_ptr<GroupElement> generateElement(bool bCheckMembership, vector<biginteger> values) override;
+	shared_ptr<GroupElement> reconstructElement(bool bCheckMembership, GroupElementSendableData* data) override;
 	const vector<byte> decodeGroupElementToByteArray(shared_ptr<GroupElement> groupElement) override;
 	shared_ptr<GroupElement> encodeByteArrayToGroupElement(const vector<unsigned char> & binaryString) override;
 	virtual const vector<byte>  mapAnyGroupElementToByteArray(shared_ptr<GroupElement> groupElement) override;
@@ -152,6 +153,8 @@ public:
 	shared_ptr<GroupElement> encodeByteArrayToGroupElement(const vector<unsigned char> & binaryString) override;
 
 	const vector<unsigned char> decodeGroupElementToByteArray(shared_ptr<GroupElement> groupElement) override;
+
+	shared_ptr<GroupElement> reconstructElement(bool bCheckMembership, GroupElementSendableData* data) override;
 	
 	friend class OpenSSLECFpPoint;
 };
@@ -188,6 +191,8 @@ public:
 
 	const vector<unsigned char> decodeGroupElementToByteArray(shared_ptr<GroupElement> groupElement) override;
 
+	shared_ptr<GroupElement> reconstructElement(bool bCheckMembership, GroupElementSendableData* data) override;
+
 	friend class OpenSSLECF2mPoint;
 };
 
@@ -201,7 +206,6 @@ public:
 	bool isInfinity() override;
 	biginteger getX() override { return x; }
 	biginteger getY() override { return y; }
-	shared_ptr<byte> toByteArray() override;
 	friend class OpenSSLDlogEC;
 };
 
@@ -210,9 +214,8 @@ private:
 	OpenSSLECFpPoint(const biginteger & x, const biginteger & y, OpenSSLDlogECFp* curve, bool bCheckMembership);
 	OpenSSLECFpPoint(shared_ptr<EC_POINT> point, OpenSSLDlogECFp* curve);
 
-	bool checkCurveMembership(shared_ptr<ECFpGroupParams> params, const biginteger & x, const biginteger & y);
+	bool checkCurveMembership(ECFpGroupParams* params, const biginteger & x, const biginteger & y);
 public:
-	void initFromByteArray(byte* arr, int size) override;
 	friend class OpenSSLDlogECFp;
 };
 
@@ -221,6 +224,5 @@ private:
 	OpenSSLECF2mPoint(const biginteger & x, const biginteger & y, OpenSSLDlogECF2m* curve, bool bCheckMembership);
 	OpenSSLECF2mPoint(shared_ptr<EC_POINT> point, OpenSSLDlogECF2m* curve);
 public:
-	void initFromByteArray(byte* arr, int size) override;
 	friend class OpenSSLDlogECF2m;
 };

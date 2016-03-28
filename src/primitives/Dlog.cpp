@@ -9,20 +9,16 @@ ZpSafePrimeElement::ZpSafePrimeElement(const biginteger & x, const biginteger & 
 		//if the element is in the expected range, set it. else, throw exception
 		if (x > 0 && x <= (p - 1))
 		{
-			if (boost::multiprecision::powm(x, q, p) == 1) {// x^q mod p == 1
+			if (boost::multiprecision::powm(x, q, p) == 1) // x^q mod p == 1
 				element = x;
-				serialized_size = bytesCount(x);
-			} 
 			else
 				throw invalid_argument("Cannot create Zp element. Requested value " + (string)x + " is not in the range of this group.");
 		}
 		else
 			throw invalid_argument("Cannot create Zp element. Requested value " + (string)x + " is not in the range of this group.");
 	}
-	else {
-		element = x;
-		serialized_size = bytesCount(x);
-	}
+	else element = x;
+		
 }
 
 ZpSafePrimeElement::ZpSafePrimeElement(const biginteger & p, mt19937 prg)
@@ -31,7 +27,6 @@ ZpSafePrimeElement::ZpSafePrimeElement(const biginteger & p, mt19937 prg)
 	biginteger rand_in_range = getRandomInRange(1, p - 1, prg);
 	// calculate its power to get a number in the subgroup and set the power as the element. 
 	element = boost::multiprecision::powm(rand_in_range, 2, p);
-	serialized_size = bytesCount(element);
 }
 
 bool ZpSafePrimeElement::operator==(const GroupElement &other) const {
@@ -44,6 +39,10 @@ bool ZpSafePrimeElement::operator!=(const GroupElement &other) const {
 	return !(*this == other);
 }
 
+shared_ptr<GroupElementSendableData> ZpSafePrimeElement::generateSendableData() {
+	return make_shared<ZpElementSendableData>(getElementValue());
+
+}
 
 /**************************************/ 
 /**** DlogGroup Implementation ********/
@@ -374,6 +373,35 @@ bool ECElement::operator==(const GroupElement &other) const {
 
 bool ECElement::operator!=(const GroupElement &other) const {
 	return !(*this == other);
+}
+
+shared_ptr<GroupElementSendableData> ECElement::generateSendableData() {
+	return make_shared<ECElementSendableData>(getX(), getY());
+}
+
+shared_ptr<byte> ECElementSendableData::toByteArray() {
+	int sizeX = bytesCount(x);
+	unique_ptr<byte[]> xBytes(new byte[sizeX], std::default_delete<byte[]>());
+	encodeBigInteger(x, xBytes.get(), sizeX);
+	int sizeY = bytesCount(y);
+	unique_ptr<byte[]> yBytes(new byte[sizeY], std::default_delete<byte[]>());
+	encodeBigInteger(y, yBytes.get(), sizeY);
+	serialized_size = sizeX + sizeY + 2 * sizeof(int);
+	byte * result = new byte[serialized_size];
+	copy(((byte*)&sizeX), ((byte*)&sizeX) + sizeof(int), result);
+	copy(xBytes.get(), xBytes.get() + sizeX, result + sizeof(int));
+	copy(((byte*)&sizeY), ((byte*)&sizeY) + sizeof(int), result + sizeof(int) + sizeX);
+	copy(yBytes.get(), yBytes.get() + sizeY, result + 2 * sizeof(int) + sizeX);
+	shared_ptr<byte> result_shared(result, std::default_delete<byte[]>());
+	return result_shared;
+}
+
+void ECElementSendableData::initFromByteArray(byte* arr, int size) {
+	int sizeX, sizeY;
+	memcpy(&sizeX, arr, sizeof(int));
+	x = decodeBigInteger(arr + sizeof(int), sizeX);
+	memcpy(&sizeY, arr+ sizeof(int) + sizeX, sizeof(int));
+	y = decodeBigInteger(arr + 2 * sizeof(int) + sizeX, sizeY);
 }
 
 /**
