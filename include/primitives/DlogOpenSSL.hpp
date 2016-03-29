@@ -12,18 +12,6 @@
 biginteger opensslbignum_to_biginteger(BIGNUM* bint);
 BIGNUM* biginteger_to_opensslbignum(biginteger bi);
 
-class OpenSSLDlogZpAdapter {
-private:
-	shared_ptr<DH> dlog;
-	shared_ptr<BN_CTX> ctx;
-public:
-	OpenSSLDlogZpAdapter(shared_ptr<DH> dlog, shared_ptr<BN_CTX> ctx);
-	//~OpenSSLDlogZpAdapter();
-	shared_ptr<DH> getDlog() { return dlog; };
-	shared_ptr<BN_CTX> getCTX() { return ctx; };
-	bool validateElement(BIGNUM* element);
-};
-
 class OpenSSLDlogZpSafePrime;
 /**
 * This class is an adapter to ZpElement in OpenSSL library.<p>
@@ -31,15 +19,18 @@ class OpenSSLDlogZpSafePrime;
 */
 class OpenSSLZpSafePrimeElement : public ZpSafePrimeElement {
 private:
+	shared_ptr<BIGNUM> openSSLElement;
+	void createOpenSSLElement() { openSSLElement = shared_ptr<BIGNUM>(biginteger_to_opensslbignum(element), BN_free); }
+
 	OpenSSLZpSafePrimeElement(const biginteger & x, const biginteger & p, bool bCheckMembership) :
-		ZpSafePrimeElement(x, p, bCheckMembership) {};
-	OpenSSLZpSafePrimeElement(const biginteger & p, mt19937 prg) : ZpSafePrimeElement(p, prg) {};
-	OpenSSLZpSafePrimeElement(const biginteger & elementValue) : ZpSafePrimeElement(elementValue) {};
+		ZpSafePrimeElement(x, p, bCheckMembership) { createOpenSSLElement(); };
+	OpenSSLZpSafePrimeElement(const biginteger & p, mt19937 prg) : ZpSafePrimeElement(p, prg) { createOpenSSLElement(); };
+	OpenSSLZpSafePrimeElement(const biginteger & elementValue) : ZpSafePrimeElement(elementValue) { createOpenSSLElement(); };
 public:
 	virtual string toString() {
 		return "OpenSSLZpSafePrimeElement  [element value=" + string(element) + "]";
 	};
-	~OpenSSLZpSafePrimeElement() {};
+	shared_ptr<BIGNUM> getOpenSSLElement() { return openSSLElement; }
 	friend OpenSSLDlogZpSafePrime;
 };
 
@@ -48,9 +39,12 @@ public:
 */
 class OpenSSLDlogZpSafePrime : public DlogZpSafePrime, public DDH {
 private:
-	shared_ptr<OpenSSLDlogZpAdapter> dlog; // Pointer to the native group object.
-	shared_ptr<OpenSSLDlogZpAdapter> createOpenSSLDlogZpAdapter(const biginteger & p, const biginteger & q, const biginteger & g);
-	shared_ptr<OpenSSLDlogZpAdapter> createRandomOpenSSLDlogZpAdapter(int numBits);
+	shared_ptr<DH> dlog;
+	shared_ptr<BN_CTX> ctx;
+	void createOpenSSLDlogZp(const biginteger & p, const biginteger & q, const biginteger & g);
+	void createRandomOpenSSLDlogZp(int numBits);
+
+	bool validateElement(BIGNUM* element);
 	int calcK(const biginteger & p);
 
 public:
