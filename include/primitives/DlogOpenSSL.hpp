@@ -69,22 +69,22 @@ public:
 	string getGroupType() override { return "Zp*"; }
 	shared_ptr<GroupElement> getIdentity() override;
 	shared_ptr<GroupElement> createRandomElement() override;
-	bool isMember(shared_ptr<GroupElement> element) override;
+	bool isMember(GroupElement* element) override;
 	bool isGenerator() override;
 	bool validateGroup() override;
-	shared_ptr<GroupElement> getInverse(shared_ptr<GroupElement> groupElement) override;
-	shared_ptr<GroupElement> exponentiate(shared_ptr<GroupElement> base, const biginteger & exponent) override;
+	shared_ptr<GroupElement> getInverse(GroupElement* groupElement) override;
+	shared_ptr<GroupElement> exponentiate(GroupElement* base, const biginteger & exponent) override;
 	shared_ptr<GroupElement> exponentiateWithPreComputedValues(shared_ptr<GroupElement> groupElement, 
-		const biginteger & exponent) override { return exponentiate(groupElement, exponent); };
-	shared_ptr<GroupElement> multiplyGroupElements(shared_ptr<GroupElement> groupElement1, 
-		shared_ptr<GroupElement> groupElement2) override;
+		const biginteger & exponent) override { return exponentiate(groupElement.get(), exponent); };
+	shared_ptr<GroupElement> multiplyGroupElements(GroupElement* groupElement1, 
+		GroupElement* groupElement2) override;
 	shared_ptr<GroupElement> simultaneousMultipleExponentiations(vector<shared_ptr<GroupElement>> groupElements,
 		vector<biginteger> exponentiations) override;
 	shared_ptr<GroupElement> generateElement(bool bCheckMembership, vector<biginteger> values) override;
 	shared_ptr<GroupElement> reconstructElement(bool bCheckMembership, GroupElementSendableData* data) override;
-	const vector<byte> decodeGroupElementToByteArray(shared_ptr<GroupElement> groupElement) override;
+	const vector<byte> decodeGroupElementToByteArray(GroupElement* groupElement) override;
 	shared_ptr<GroupElement> encodeByteArrayToGroupElement(const vector<unsigned char> & binaryString) override;
-	virtual const vector<byte>  mapAnyGroupElementToByteArray(shared_ptr<GroupElement> groupElement) override;
+	virtual const vector<byte>  mapAnyGroupElementToByteArray(GroupElement* groupElement) override;
 };
 
 class OpenSSLDlogEC : public DlogEllipticCurve{
@@ -103,12 +103,12 @@ public:
 
 	bool validateGroup() override;
 
-	shared_ptr<GroupElement> getInverse(std::shared_ptr<GroupElement> groupElement) override;
+	shared_ptr<GroupElement> getInverse(GroupElement* groupElement) override;
 
-	shared_ptr<GroupElement> exponentiate(std::shared_ptr<GroupElement> base, const biginteger & exponent) override;
+	shared_ptr<GroupElement> exponentiate(GroupElement* base, const biginteger & exponent) override;
 
-	shared_ptr<GroupElement> multiplyGroupElements(std::shared_ptr<GroupElement> groupElement1,
-		shared_ptr<GroupElement> groupElement2) override;
+	shared_ptr<GroupElement> multiplyGroupElements(GroupElement* groupElement1,
+		GroupElement* groupElement2) override;
 
 	shared_ptr<GroupElement> exponentiateWithPreComputedValues(
 		shared_ptr<GroupElement> base, const biginteger & exponent) override;
@@ -116,7 +116,7 @@ public:
 	shared_ptr<GroupElement> simultaneousMultipleExponentiations(
 		vector<shared_ptr<GroupElement>> groupElements, vector<biginteger> exponentiations) override;
 
-	const vector<byte> mapAnyGroupElementToByteArray(std::shared_ptr<GroupElement> groupElement) override;
+	const vector<byte> mapAnyGroupElementToByteArray(GroupElement* groupElement) override;
 
 	shared_ptr<ECElement> getInfinity() override;
 
@@ -130,7 +130,7 @@ private:
 	int calcK(biginteger p);
 	void createCurve(const biginteger & p, const biginteger & a, const biginteger & b);
 	void initCurve(const biginteger & q);
-	bool checkSubGroupMembership(shared_ptr<OpenSSLECFpPoint>  point);
+	bool checkSubGroupMembership(OpenSSLECFpPoint* point);
 	
 
 protected:
@@ -146,13 +146,13 @@ public:
 
 	string getGroupType() override;
 
-	bool isMember(shared_ptr<GroupElement> element) override;
+	bool isMember(GroupElement* element) override;
 
 	shared_ptr<GroupElement> generateElement(bool bCheckMembership, vector<biginteger> values) override;
 
 	shared_ptr<GroupElement> encodeByteArrayToGroupElement(const vector<unsigned char> & binaryString) override;
 
-	const vector<unsigned char> decodeGroupElementToByteArray(shared_ptr<GroupElement> groupElement) override;
+	const vector<unsigned char> decodeGroupElementToByteArray(GroupElement* groupElement) override;
 
 	shared_ptr<GroupElement> reconstructElement(bool bCheckMembership, GroupElementSendableData* data) override;
 	
@@ -163,9 +163,9 @@ class OpenSSLECF2mPoint;
 
 class OpenSSLDlogECF2m : public OpenSSLDlogEC {
 private:
-	void createGroupParams(shared_ptr<ConfigFile> ecConfig);
+	void createGroupParams();
 	void createCurve();
-	bool checkSubGroupMembership(shared_ptr<OpenSSLECF2mPoint>  point);
+	bool checkSubGroupMembership(OpenSSLECF2mPoint*  point);
 protected:
 	void init(string fileName, string curveName, mt19937 random) override;
 	shared_ptr<ECElement> createPoint(shared_ptr<EC_POINT>) override;
@@ -180,7 +180,7 @@ public:
 
 	string getGroupType() override;
 
-	bool isMember(shared_ptr<GroupElement> element) override;
+	bool isMember(GroupElement* element) override;
 
 	shared_ptr<GroupElement> generateElement(bool bCheckMembership, vector<biginteger> values) override;
 
@@ -189,7 +189,7 @@ public:
 
 	shared_ptr<GroupElement> encodeByteArrayToGroupElement(const vector<unsigned char> & binaryString) override;
 
-	const vector<unsigned char> decodeGroupElementToByteArray(shared_ptr<GroupElement> groupElement) override;
+	const vector<unsigned char> decodeGroupElementToByteArray(GroupElement* groupElement) override;
 
 	shared_ptr<GroupElement> reconstructElement(bool bCheckMembership, GroupElementSendableData* data) override;
 

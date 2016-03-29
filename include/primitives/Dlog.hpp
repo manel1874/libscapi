@@ -227,7 +227,7 @@ public:
 	* 		   <code>false</code> otherwise.
 	* @throws IllegalArgumentException
 	*/
-	virtual bool isMember(shared_ptr<GroupElement> element) = 0;
+	virtual bool isMember(GroupElement* element) = 0;
 
 	/**
 	* Checks if the order is a prime number.<p>
@@ -263,7 +263,7 @@ public:
 	* @return the inverse element of the given GroupElement
 	* @throws IllegalArgumentException
 	**/
-	virtual shared_ptr<GroupElement> getInverse(shared_ptr<GroupElement> groupElement) = 0;
+	virtual shared_ptr<GroupElement> getInverse(GroupElement* groupElement) = 0;
 
 	/**
 	* Raises the base GroupElement to the exponent. The result is another GroupElement.
@@ -272,7 +272,7 @@ public:
 	* @return the result of the exponentiation
 	* @throws IllegalArgumentException
 	*/
-	virtual shared_ptr<GroupElement> exponentiate(shared_ptr<GroupElement> base, const biginteger & exponent) = 0;
+	virtual shared_ptr<GroupElement> exponentiate(GroupElement* base, const biginteger & exponent) = 0;
 
 	/**
 	* Multiplies two GroupElements
@@ -281,8 +281,8 @@ public:
 	* @return the multiplication result
 	* @throws IllegalArgumentException
 	*/
-	virtual shared_ptr<GroupElement> multiplyGroupElements(shared_ptr<GroupElement> groupElement1, 
-		shared_ptr<GroupElement> groupElement2) = 0;
+	virtual shared_ptr<GroupElement> multiplyGroupElements(GroupElement* groupElement1, 
+		GroupElement* groupElement2) = 0;
 
 	/**
 	* Creates a random member of this Dlog group
@@ -316,8 +316,7 @@ public:
 	* @param data the GroupElementSendableData from which we wish to "reconstruct" an element of this DlogGroup
 	* @return the reconstructed GroupElement
 	*/
-	virtual shared_ptr<GroupElement> reconstructElement(bool bCheckMembership,
-		GroupElementSendableData* data) = 0;
+	virtual shared_ptr<GroupElement> reconstructElement(bool bCheckMembership, GroupElementSendableData* data) = 0;
 
 	/**
 	* Computes the product of several exponentiations with distinct bases
@@ -351,7 +350,7 @@ public:
 	*
 	* @param base
 	*/
-	void endExponentiateWithPreComputedValues(std::shared_ptr<GroupElement> base) {
+	void endExponentiateWithPreComputedValues(shared_ptr<GroupElement> base) {
 		exponentiationsMap.erase(base);
 	}
 	
@@ -378,8 +377,7 @@ public:
 	* @param groupElement the element to decode
 	* @return the decoded byte array
 	*/
-	virtual const vector<unsigned char> decodeGroupElementToByteArray(
-		shared_ptr<GroupElement> groupElement) = 0;
+	virtual const vector<unsigned char> decodeGroupElementToByteArray(GroupElement* groupElement) = 0;
 
 
 	/**
@@ -399,8 +397,7 @@ public:
 	* This function does not have an inverse function, that is, it is not possible to re-construct the original group element from the resulting byte array.
 	* @return a byte array representation of the given group element
 	*/
-	virtual const vector<byte> mapAnyGroupElementToByteArray(
-		shared_ptr<GroupElement> groupElement) = 0;
+	virtual const vector<byte> mapAnyGroupElementToByteArray(GroupElement* groupElement) = 0;
 };
 
 /**
@@ -512,9 +509,9 @@ public:
 	};
 	biginteger getX() { return x; }
 	string toString() { return "ZpElementSendableData [x=" + (string)x + "]"; }
-	std::shared_ptr<byte> toByteArray() override {
+	shared_ptr<byte> toByteArray() override {
 			serialized_size = bytesCount(x);		
-			std::shared_ptr<byte> result(new byte[serialized_size], std::default_delete<byte[]>());		  	
+			shared_ptr<byte> result(new byte[serialized_size], std::default_delete<byte[]>());		  	
 			encodeBigInteger(x, result.get(), serialized_size);		
 			return result;		  	
 	}

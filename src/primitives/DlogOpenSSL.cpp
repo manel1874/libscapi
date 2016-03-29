@@ -211,8 +211,8 @@ shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::createRandomElement() {
 }
 
 
-bool OpenSSLDlogZpSafePrime::isMember(shared_ptr<GroupElement> element) {
-	OpenSSLZpSafePrimeElement * zp_element = dynamic_cast<OpenSSLZpSafePrimeElement *>(element.get());
+bool OpenSSLDlogZpSafePrime::isMember(GroupElement* element) {
+	OpenSSLZpSafePrimeElement * zp_element = dynamic_cast<OpenSSLZpSafePrimeElement *>(element);
 	// check if element is ZpElementCryptoPp
 	if (!zp_element)
 		throw invalid_argument("type doesn't match the group type");
@@ -248,8 +248,8 @@ bool OpenSSLDlogZpSafePrime::validateGroup() {
 	return result == 0;
 }
 
-shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::getInverse(shared_ptr<GroupElement> groupElement) {
-	OpenSSLZpSafePrimeElement * zp_element = dynamic_cast<OpenSSLZpSafePrimeElement *>(groupElement.get());
+shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::getInverse(GroupElement* groupElement) {
+	OpenSSLZpSafePrimeElement * zp_element = dynamic_cast<OpenSSLZpSafePrimeElement *>(groupElement);
 	// check if element is ZpElementCryptoPp
 	if (!zp_element)
 		throw invalid_argument("type doesn't match the group type");
@@ -265,9 +265,9 @@ shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::getInverse(shared_ptr<GroupElem
 	return inverseElement;
 }
 
-shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::exponentiate(shared_ptr<GroupElement> base,
+shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::exponentiate(GroupElement* base,
 	const biginteger & exponent) {
-	OpenSSLZpSafePrimeElement * zp_element = dynamic_cast<OpenSSLZpSafePrimeElement *>(base.get());
+	OpenSSLZpSafePrimeElement * zp_element = dynamic_cast<OpenSSLZpSafePrimeElement *>(base);
 	// check if element is ZpElementCryptoPp
 	if (!zp_element)
 		throw invalid_argument("type doesn't match the group type");
@@ -292,10 +292,9 @@ shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::exponentiate(shared_ptr<GroupEl
 	return exponentiateElement;
 }
 
-shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::multiplyGroupElements(
-	shared_ptr<GroupElement> groupElement1, shared_ptr<GroupElement> groupElement2) {
-	OpenSSLZpSafePrimeElement * zp1 = dynamic_cast<OpenSSLZpSafePrimeElement *>(groupElement1.get());
-	OpenSSLZpSafePrimeElement * zp2 = dynamic_cast<OpenSSLZpSafePrimeElement *>(groupElement2.get());
+shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::multiplyGroupElements(GroupElement* groupElement1, GroupElement* groupElement2) {
+	OpenSSLZpSafePrimeElement * zp1 = dynamic_cast<OpenSSLZpSafePrimeElement *>(groupElement1);
+	OpenSSLZpSafePrimeElement * zp2 = dynamic_cast<OpenSSLZpSafePrimeElement *>(groupElement2);
 	if (!zp1 || !zp2)
 		throw invalid_argument("element type doesn't match the group type");
 
@@ -379,8 +378,8 @@ shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::encodeByteArrayToGroupElement(
 	return element;
 }
 
-const vector<byte> OpenSSLDlogZpSafePrime::decodeGroupElementToByteArray(shared_ptr<GroupElement> groupElement) {
-	OpenSSLZpSafePrimeElement * zp_element = dynamic_cast<OpenSSLZpSafePrimeElement *>(groupElement.get());
+const vector<byte> OpenSSLDlogZpSafePrime::decodeGroupElementToByteArray(GroupElement* groupElement) {
+	OpenSSLZpSafePrimeElement * zp_element = dynamic_cast<OpenSSLZpSafePrimeElement *>(groupElement);
 	if (!(zp_element))
 		throw invalid_argument("element type doesn't match the group type");
 
@@ -408,9 +407,8 @@ const vector<byte> OpenSSLDlogZpSafePrime::decodeGroupElementToByteArray(shared_
 	return res;
 }
 
-const vector<byte> OpenSSLDlogZpSafePrime::mapAnyGroupElementToByteArray(
-	shared_ptr<GroupElement> groupElement) {
-	OpenSSLZpSafePrimeElement * zp_element = dynamic_cast<OpenSSLZpSafePrimeElement *>(groupElement.get());
+const vector<byte> OpenSSLDlogZpSafePrime::mapAnyGroupElementToByteArray(GroupElement* groupElement) {
+	OpenSSLZpSafePrimeElement * zp_element = dynamic_cast<OpenSSLZpSafePrimeElement *>(groupElement);
 	if (!(zp_element))
 		throw invalid_argument("element type doesn't match the group type");
 	string res = string(zp_element->getElementValue());
@@ -427,15 +425,15 @@ bool OpenSSLDlogEC::validateGroup() {
 	return EC_GROUP_check(curve.get(), ctx.get());
 }
 
-shared_ptr<GroupElement> OpenSSLDlogEC::getInverse(shared_ptr<GroupElement> groupElement) {
+shared_ptr<GroupElement> OpenSSLDlogEC::getInverse(GroupElement* groupElement) {
 
-	OpenSSLPoint* element = dynamic_cast<OpenSSLPoint*>(groupElement.get());
+	OpenSSLPoint* element = dynamic_cast<OpenSSLPoint*>(groupElement);
 	if (!(element))
 		throw invalid_argument("element type doesn't match the group type");
 	
 	// The inverse of infinity point is infinity.
 	if (element->isInfinity()) {
-		return groupElement;
+		return createPoint(element->getPoint());
 	}
 
 	//Create an inverse point and copy the given point to it.
@@ -456,15 +454,15 @@ shared_ptr<GroupElement> OpenSSLDlogEC::getInverse(shared_ptr<GroupElement> grou
 	return createPoint(inverse); 
 }
 
-shared_ptr<GroupElement> OpenSSLDlogEC::exponentiate(shared_ptr<GroupElement> base, const biginteger & exponent) {
+shared_ptr<GroupElement> OpenSSLDlogEC::exponentiate(GroupElement* base, const biginteger & exponent) {
 	
-	OpenSSLPoint* basePoint = dynamic_cast<OpenSSLPoint*>(base.get());
+	OpenSSLPoint* basePoint = dynamic_cast<OpenSSLPoint*>(base);
 	if (!(basePoint))
 		throw invalid_argument("element type doesn't match the group type");
 
 	// The inverse of infinity point is infinity.
 	if (basePoint->isInfinity()) {
-		return base;
+		return createPoint(basePoint->getPoint());
 	}
 
 	//If the exponent is negative, convert it to be the exponent modulus q.
@@ -490,21 +488,20 @@ shared_ptr<GroupElement> OpenSSLDlogEC::exponentiate(shared_ptr<GroupElement> ba
 	return createPoint(result); 
 }
 
-shared_ptr<GroupElement> OpenSSLDlogEC::multiplyGroupElements(shared_ptr<GroupElement> groupElement1,
-	shared_ptr<GroupElement> groupElement2) {
+shared_ptr<GroupElement> OpenSSLDlogEC::multiplyGroupElements(GroupElement* groupElement1,	GroupElement* groupElement2) {
 
-	OpenSSLPoint* point1 = dynamic_cast<OpenSSLPoint*>(groupElement1.get());
-	OpenSSLPoint* point2 = dynamic_cast<OpenSSLPoint*>(groupElement2.get());
+	OpenSSLPoint* point1 = dynamic_cast<OpenSSLPoint*>(groupElement1);
+	OpenSSLPoint* point2 = dynamic_cast<OpenSSLPoint*>(groupElement2);
 	if (!(point1) || !(point2))
 		throw invalid_argument("element type doesn't match the group type");
 
 
 	//If one of the points is the infinity point, the second one is the multiplication result.
 	if (point1->isInfinity()) {
-		return groupElement2;
+		return createPoint(point2->getPoint());
 	}
 	if (point2->isInfinity()) {
-		return groupElement1;
+		return createPoint(point1->getPoint());
 	}
 
 	//create the result point.
@@ -524,7 +521,7 @@ std::shared_ptr<GroupElement> OpenSSLDlogEC::exponentiateWithPreComputedValues(
 	shared_ptr<GroupElement> base, const biginteger & exponent){
 	//The exponentiate with pre computed values implemented by OpenSSL deals only with the group generator.
 	if (base != getGenerator()) {
-		return exponentiate(base, exponent);
+		return exponentiate(base.get(), exponent);
 	}
 
 	//If the exponent is negative, convert it to be the exponent modulus q.
@@ -585,10 +582,10 @@ shared_ptr<GroupElement> OpenSSLDlogEC::simultaneousMultipleExponentiations(
 	return createPoint(result);
 }
 
-const vector<byte> OpenSSLDlogEC::mapAnyGroupElementToByteArray(std::shared_ptr<GroupElement> groupElement) {
+const vector<byte> OpenSSLDlogEC::mapAnyGroupElementToByteArray(GroupElement* groupElement) {
 	//This function simply returns an array which is the result of concatenating 
 	//the byte array representation of x with the byte array representation of y.
-	ECElement * element = dynamic_cast<ECElement*>(groupElement.get());
+	ECElement * element = dynamic_cast<ECElement*>(groupElement);
 	if (!(element))
 		throw invalid_argument("element type doesn't match the group type");
 
@@ -702,9 +699,9 @@ string OpenSSLDlogECFp::getGroupType() {
 	return "ECFp";
 }
 
-bool OpenSSLDlogECFp::isMember(shared_ptr<GroupElement> element) {
+bool OpenSSLDlogECFp::isMember(GroupElement* element) {
 	// Checks that the element is the correct object.
-	auto point = dynamic_pointer_cast<OpenSSLECFpPoint>(element);
+	auto point = dynamic_cast<OpenSSLECFpPoint*>(element);
 	if (point == NULL) {
 		throw invalid_argument("groupElement doesn't match the DlogGroup");
 	}
@@ -737,7 +734,7 @@ bool OpenSSLDlogECFp::isMember(shared_ptr<GroupElement> element) {
 * @param point
 * @return true if the given point is in the given dlog group.
 */
-bool OpenSSLDlogECFp::checkSubGroupMembership(shared_ptr<OpenSSLECFpPoint> point) {
+bool OpenSSLDlogECFp::checkSubGroupMembership(OpenSSLECFpPoint* point) {
 	//we assume that the point is on the curve group
 	//get the cofactor of the group
 	biginteger h = (dynamic_pointer_cast<ECGroupParams>(groupParams))->getCofactor();
@@ -860,8 +857,8 @@ shared_ptr<GroupElement> OpenSSLDlogECFp::encodeByteArrayToGroupElement(const ve
 	return createPoint(point);
 }
 
-const vector<unsigned char> OpenSSLDlogECFp::decodeGroupElementToByteArray(shared_ptr<GroupElement> groupElement) {
-	auto point = dynamic_pointer_cast<OpenSSLECFpPoint>(groupElement);
+const vector<unsigned char> OpenSSLDlogECFp::decodeGroupElementToByteArray(GroupElement* groupElement) {
+	auto point = dynamic_cast<OpenSSLECFpPoint*>(groupElement);
 	// Checks that the element is the correct object.
 	if (point == NULL) {
 		throw invalid_argument("element type doesn't match the group type");
@@ -889,7 +886,7 @@ shared_ptr<GroupElement> OpenSSLDlogECFp::reconstructElement(bool bCheckMembersh
 
 void OpenSSLDlogECF2m::init(string fileName, string curveName, mt19937 random) {
 	//Get the parameters of the group from the config file and create the groupParams member.
-	createGroupParams(ecConfig);
+	createGroupParams();
 
 	//Create the openSSL curve using the given curve parameters.
 	createCurve();
@@ -956,7 +953,7 @@ void OpenSSLDlogECF2m::createCurve() {
 	BN_free(a);
 }
 
-void OpenSSLDlogECF2m::createGroupParams(shared_ptr<ConfigFile> ecConfig) {
+void OpenSSLDlogECF2m::createGroupParams() {
 	// check that the given curve is in the field that matches the group.
 	size_t index1 = curveName.find("B-");
 	size_t index2 = curveName.find("K-");
@@ -1022,9 +1019,9 @@ string OpenSSLDlogECF2m::getGroupType() {
 	return "ECF2m";
 }
 
-bool OpenSSLDlogECF2m::isMember(shared_ptr<GroupElement> element) {
+bool OpenSSLDlogECF2m::isMember(GroupElement* element) {
 	// Checks that the element is the correct object.
-	auto point = dynamic_pointer_cast<OpenSSLECF2mPoint>(element);
+	auto point = dynamic_cast<OpenSSLECF2mPoint*>(element);
 	if (point == NULL) {
 		throw invalid_argument("groupElement doesn't match the DlogGroup");
 	}
@@ -1057,7 +1054,7 @@ bool OpenSSLDlogECF2m::isMember(shared_ptr<GroupElement> element) {
 * @param point
 * @return true if the given point is in the given dlog group.
 */
-bool OpenSSLDlogECF2m::checkSubGroupMembership(shared_ptr<OpenSSLECF2mPoint> point) {
+bool OpenSSLDlogECF2m::checkSubGroupMembership(OpenSSLECF2mPoint* point) {
 	//we assume that the point is on the curve group
 	//get the cofactor of the group
 	biginteger h = (dynamic_pointer_cast<ECGroupParams>(groupParams))->getCofactor();
@@ -1135,8 +1132,8 @@ shared_ptr<GroupElement> OpenSSLDlogECF2m::encodeByteArrayToGroupElement(const v
 * Currently we don't support this conversion.</B> It will be implemented in the future.
 * Meanwhile we return empty vector.
 */
-const vector<unsigned char> OpenSSLDlogECF2m::decodeGroupElementToByteArray(shared_ptr<GroupElement> groupElement) {
-	auto point = dynamic_pointer_cast<OpenSSLECF2mPoint>(groupElement);
+const vector<unsigned char> OpenSSLDlogECF2m::decodeGroupElementToByteArray(GroupElement* groupElement) {
+	auto point = dynamic_cast<OpenSSLECF2mPoint*>(groupElement);
 	// Checks that the element is the correct object.
 	if (point == NULL) {
 		throw invalid_argument("element type doesn't match the group type");
@@ -1279,7 +1276,7 @@ OpenSSLECF2mPoint::OpenSSLECF2mPoint(const biginteger & x, const biginteger & y,
 
 	if (bCheckMembership) {
 		//check if the given parameters are valid point on the curve.
-		boolean valid = curve->isMember(make_shared<OpenSSLECF2mPoint>(*this));
+		boolean valid = curve->isMember(this);
 		// checks validity
 		if (valid == false) {// if not valid, throws exception
 

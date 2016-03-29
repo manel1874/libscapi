@@ -57,7 +57,7 @@ DlogGroup::GroupElementsExponentiations::GroupElementsExponentiations(
 
 	biginteger two(2);
 	for (int i = 1; i<4; i++) {
-		auto multI = parent->exponentiate(exponentiations[i - 1], two);
+		auto multI = parent->exponentiate(exponentiations[i - 1].get(), two);
 		exponentiations.push_back(multI);
 	}
 }
@@ -70,7 +70,7 @@ void DlogGroup::GroupElementsExponentiations::prepareExponentiations(const bigin
 	/* calculates the necessary exponentiations and put them in the exponentiations vector */
 	/* size of the vector stars with 4 in the constructor so we can always subtract */
 	for (int i = exponentiations.size(); i <= index; i++) {
-		auto multI = parent->exponentiate(exponentiations[i - 1], biginteger(2));
+		auto multI = parent->exponentiate(exponentiations[i - 1].get(), biginteger(2));
 		exponentiations.push_back(multI);
 	}
 }
@@ -96,7 +96,7 @@ shared_ptr<GroupElement> DlogGroup::GroupElementsExponentiations::getExponentiat
 	biginteger difference = size - lastExp;
 	if (difference > 0) {
 		auto diff = getExponentiation(size - lastExp);
-		exponent = parent->multiplyGroupElements(diff, exponent);
+		exponent = parent->multiplyGroupElements(diff.get(), exponent.get());
 	}
 
 	return exponent;
@@ -109,7 +109,7 @@ shared_ptr<GroupElement> DlogGroup::createRandomElement() {
 	biginteger randNum = getRandomInRange(1, groupParams->getQ() - 1, random_element_gen);
 
 	// compute g^x to get a new element
-	return exponentiate(generator, randNum);
+	return exponentiate(generator.get(), randNum);
 }
 
 shared_ptr<GroupElement> DlogGroup::createRandomGenerator() {
@@ -138,7 +138,7 @@ shared_ptr<GroupElement> DlogGroup::computeLoop(vector<biginteger> exponentiatio
 			}
 		}
 		//multiply result with preComp[k][e]
-		result = multiplyGroupElements(result, preComp[k][e]);
+		result = multiplyGroupElements(result.get(), preComp[k][e].get());
 		e = 0;
 	}
 	return result;
@@ -169,7 +169,7 @@ vector<vector<shared_ptr<GroupElement>>> DlogGroup::createLLPreCompTable(
 					base = groupElements[baseIndex];
 					//if bit i in e is set, change preComp[k][e]
 					if ((e & (1 << i)) != 0) { //bit i is set
-						preComp[k][e] = multiplyGroupElements(preComp[k][e], base);
+						preComp[k][e] = multiplyGroupElements(preComp[k][e].get(), base.get());
 					}
 				}
 			}
@@ -234,14 +234,14 @@ shared_ptr<GroupElement> DlogGroup::computeNaive(
 
 	// raises each element to the corresponding power
 	for (int i = 0; i < n; i++) {
-		exponentsResult[i] = exponentiate(groupElements[i], exponentiations[i]);
+		exponentsResult[i] = exponentiate(groupElements[i].get(), exponentiations[i]);
 	}
 
 	auto result = getIdentity(); //initialized to the identity element
 
 	//multiplies every exponentiate
 	for (int i = 0; i<n; i++) {
-		result = multiplyGroupElements(exponentsResult[i], result);
+		result = multiplyGroupElements(exponentsResult[i].get(), result.get());
 	}
 
 	//return the final result
@@ -289,7 +289,7 @@ shared_ptr<GroupElement> DlogGroup::computeLL(
 	//computes the third part of the algorithm
 	for (int j = t - 2; j >= 0; j--) {
 		//Y = Y^2
-		result = exponentiate(result, 2);
+		result = exponentiate(result.get(), 2);
 
 		//computes the inner loop
 		result = computeLoop(exponentiations, w, h, preComp, result, j);
