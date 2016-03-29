@@ -24,20 +24,23 @@ public:
 	bool validateElement(BIGNUM* element);
 };
 
+class OpenSSLDlogZpSafePrime;
 /**
 * This class is an adapter to ZpElement in OpenSSL library.<p>
 * It holds a pointer to an OpenSSL's Zp element and implements all the functionality of a Zp element.
 */
 class OpenSSLZpSafePrimeElement : public ZpSafePrimeElement {
-public:
-	OpenSSLZpSafePrimeElement(const biginteger & x, const biginteger & p, bool bCheckMembership) : 
+private:
+	OpenSSLZpSafePrimeElement(const biginteger & x, const biginteger & p, bool bCheckMembership) :
 		ZpSafePrimeElement(x, p, bCheckMembership) {};
 	OpenSSLZpSafePrimeElement(const biginteger & p, mt19937 prg) : ZpSafePrimeElement(p, prg) {};
 	OpenSSLZpSafePrimeElement(const biginteger & elementValue) : ZpSafePrimeElement(elementValue) {};
+public:
 	virtual string toString() {
 		return "OpenSSLZpSafePrimeElement  [element value=" + string(element) + "]";
 	};
 	~OpenSSLZpSafePrimeElement() {};
+	friend OpenSSLDlogZpSafePrime;
 };
 
 /**
@@ -125,7 +128,7 @@ public:
 
 class OpenSSLECFpPoint;
 
-class OpenSSLDlogECFp : public OpenSSLDlogEC {
+class OpenSSLDlogECFp : public OpenSSLDlogEC, public DDH {
 private:
 	int calcK(biginteger p);
 	void createCurve(const biginteger & p, const biginteger & a, const biginteger & b);
@@ -161,7 +164,7 @@ public:
 
 class OpenSSLECF2mPoint;
 
-class OpenSSLDlogECF2m : public OpenSSLDlogEC {
+class OpenSSLDlogECF2m : public OpenSSLDlogEC, public DDH {
 private:
 	void createGroupParams();
 	void createCurve();
