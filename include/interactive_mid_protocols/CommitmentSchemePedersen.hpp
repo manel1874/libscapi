@@ -20,8 +20,8 @@ public:
 	/**
 	* Empty constructor - used to allow initialization from byte array
 	*/
-	CmtPedersenCommitmentMessage() {
-		c = make_shared<ZpElementSendableData>(0);
+	CmtPedersenCommitmentMessage(shared_ptr<GroupElementSendableData> c) {
+		this->c = c;
 	};
 
 	/**

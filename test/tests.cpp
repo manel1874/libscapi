@@ -602,7 +602,7 @@ TEST_CASE("serialization", "[SerializedData, CmtCCommitmentMsg]")
 		REQUIRE(((ZpElementSendableData*)cmtMsg.getCommitment().get())->getX() == birsa100);
 
 		// verify new one is created with empty values
-		CmtPedersenCommitmentMessage cmtMsg2;
+		CmtPedersenCommitmentMessage cmtMsg2(make_shared<ZpElementSendableData>(0));
 		REQUIRE(cmtMsg2.getId() == 0);
 		REQUIRE(((ZpElementSendableData*)cmtMsg2.getCommitment().get())->getX() == 0);
 

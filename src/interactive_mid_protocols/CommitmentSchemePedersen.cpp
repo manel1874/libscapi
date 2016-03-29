@@ -39,7 +39,7 @@ void CmtPedersenReceiverCore::preProcess() {
 
 shared_ptr<CmtRCommitPhaseOutput> CmtPedersenReceiverCore::receiveCommitment() {
 	// create an empty CmtPedersenCommitmentMessage 
-	auto msg = make_shared<CmtPedersenCommitmentMessage>();
+	auto msg = make_shared<CmtPedersenCommitmentMessage>(dlog->getGenerator()->generateSendableData());
 	// read encoded CmtPedersenCommitmentMessage from channel
 	auto v = channel->read_one();
 	// init the empy CmtPedersenCommitmentMessage using the encdoed data
@@ -127,8 +127,8 @@ void CmtPedersenCommitterCore::preProcess() {
 
 shared_ptr<CmtPedersenPreprocessMessage> CmtPedersenCommitterCore::waitForMessageFromReceiver() {
 	auto v = channel->read_one();
-	auto emptySendableData = make_shared<ZpElementSendableData>(0);
-	auto msg = make_shared<CmtPedersenPreprocessMessage>(emptySendableData);
+	auto dummySendableData = dlog->getGenerator()->generateSendableData();
+	auto msg = make_shared<CmtPedersenPreprocessMessage>(dummySendableData);
 	msg->initFromByteVector(v);
 	return msg;
 }
