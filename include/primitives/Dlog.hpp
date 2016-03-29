@@ -470,9 +470,10 @@ public:
 * This is a marker interface. Every class that implements it is marked as an element of a sub-group of prime order of Zp* where p is a safe prime.
 */
 class ZpSafePrimeElement : public ZpElement {
+	
 protected:
 	biginteger element = 0;
-public:
+
 	/**
 	* This constructor accepts x value and DlogGroup (represented by p).
 	* If x is valid, sets it; else, throws exception
@@ -490,6 +491,7 @@ public:
 	* Constructor that simply create element using the given value
 	*/
 	ZpSafePrimeElement(biginteger elementValue) { element = elementValue; };
+public:
 	biginteger getElementValue() override { return element; };
 	bool isIdentity() override { return element == 1; }
 	bool operator==(const GroupElement &other) const override;
