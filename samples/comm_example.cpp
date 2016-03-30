@@ -33,7 +33,7 @@ void recv_messages(CommParty* commParty, string * messages, int start, int end,
 /*
 * Testing Communication 
 */
-int main(int argc, char* argv[])
+int main1(int argc, char* argv[])
 {
 	try
 	{

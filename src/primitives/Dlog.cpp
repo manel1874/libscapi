@@ -3,7 +3,7 @@
 /*************************************************/
 /*ZpSafePrimeElement*/
 /*************************************************/
-ZpSafePrimeElement::ZpSafePrimeElement(biginteger x, biginteger p, bool bCheckMembership) {
+ZpSafePrimeElement::ZpSafePrimeElement(const biginteger & x, const biginteger & p, bool bCheckMembership) {
 	if (bCheckMembership) {
 		biginteger q = (p - 1) / 2;
 		//if the element is in the expected range, set it. else, throw exception
@@ -17,11 +17,11 @@ ZpSafePrimeElement::ZpSafePrimeElement(biginteger x, biginteger p, bool bCheckMe
 		else
 			throw invalid_argument("Cannot create Zp element. Requested value " + (string)x + " is not in the range of this group.");
 	}
-	else
-		element = x;
+	else element = x;
+		
 }
 
-ZpSafePrimeElement::ZpSafePrimeElement(biginteger p, mt19937 prg)
+ZpSafePrimeElement::ZpSafePrimeElement(const biginteger & p, mt19937 prg)
 {
 	// find a number in the range [1, ..., p-1]
 	biginteger rand_in_range = getRandomInRange(1, p - 1, prg);
@@ -41,13 +41,15 @@ bool ZpSafePrimeElement::operator!=(const GroupElement &other) const {
 
 shared_ptr<GroupElementSendableData> ZpSafePrimeElement::generateSendableData() {
 	return make_shared<ZpElementSendableData>(getElementValue());
+
 }
+
 /**************************************/ 
-/**** DlogGroupAbs Implementation *****/
+/**** DlogGroup Implementation ********/
 /**************************************/
 
-DlogGroupAbs::GroupElementsExponentiations::GroupElementsExponentiations(
-	shared_ptr<DlogGroupAbs> parent_, shared_ptr<GroupElement> base_) {
+DlogGroup::GroupElementsExponentiations::GroupElementsExponentiations(
+	shared_ptr<DlogGroup> parent_, shared_ptr<GroupElement> base_) {
 	base = base_;
 	parent = parent_;
 	// build new vector of exponentiations
@@ -55,12 +57,12 @@ DlogGroupAbs::GroupElementsExponentiations::GroupElementsExponentiations(
 
 	biginteger two(2);
 	for (int i = 1; i<4; i++) {
-		auto multI = parent->exponentiate(exponentiations[i - 1], two);
+		auto multI = parent->exponentiate(exponentiations[i - 1].get(), two);
 		exponentiations.push_back(multI);
 	}
 }
 
-void DlogGroupAbs::GroupElementsExponentiations::prepareExponentiations(biginteger size)
+void DlogGroup::GroupElementsExponentiations::prepareExponentiations(const biginteger & size)
 {
 	//find log of the number - this is the index of the size-exponent in the exponentiation array 
 	int index = find_log2_floor(size);
@@ -68,12 +70,12 @@ void DlogGroupAbs::GroupElementsExponentiations::prepareExponentiations(biginteg
 	/* calculates the necessary exponentiations and put them in the exponentiations vector */
 	/* size of the vector stars with 4 in the constructor so we can always subtract */
 	for (int i = exponentiations.size(); i <= index; i++) {
-		auto multI = parent->exponentiate(exponentiations[i - 1], biginteger(2));
+		auto multI = parent->exponentiate(exponentiations[i - 1].get(), biginteger(2));
 		exponentiations.push_back(multI);
 	}
 }
 
-shared_ptr<GroupElement> DlogGroupAbs::GroupElementsExponentiations::getExponentiation(biginteger size) {
+shared_ptr<GroupElement> DlogGroup::GroupElementsExponentiations::getExponentiation(const biginteger & size) {
 	/**
 	* The exponents in the exponents vector are all power of 2.
 	* In order to achieve the exponent size, we calculate its closest power 2 in the exponents vector
@@ -94,23 +96,23 @@ shared_ptr<GroupElement> DlogGroupAbs::GroupElementsExponentiations::getExponent
 	biginteger difference = size - lastExp;
 	if (difference > 0) {
 		auto diff = getExponentiation(size - lastExp);
-		exponent = parent->multiplyGroupElements(diff, exponent);
+		exponent = parent->multiplyGroupElements(diff.get(), exponent.get());
 	}
 
 	return exponent;
 }
 
-shared_ptr<GroupElement> DlogGroupAbs::createRandomElement() {
+shared_ptr<GroupElement> DlogGroup::createRandomElement() {
 	// This is a default implementation that is valid for all the Dlog Groups and relies on mathematical properties of the generators.
 	// However, if a specific Dlog Group has a more efficient implementation then is it advised to override this function in that concrete
 	// Dlog group. For example we do so in CryptoPpDlogZpSafePrime.
 	biginteger randNum = getRandomInRange(1, groupParams->getQ() - 1, random_element_gen);
 
 	// compute g^x to get a new element
-	return exponentiate(generator, randNum);
+	return exponentiate(generator.get(), randNum);
 }
 
-shared_ptr<GroupElement> DlogGroupAbs::createRandomGenerator() {
+shared_ptr<GroupElement> DlogGroup::createRandomGenerator() {
 	// in prime order groups every element except the identity is a generator.
 	// get a random element in the group
 	auto randGen = createRandomElement();
@@ -121,7 +123,7 @@ shared_ptr<GroupElement> DlogGroupAbs::createRandomGenerator() {
 	return randGen;
 }
 
-shared_ptr<GroupElement> DlogGroupAbs::computeLoop(vector<biginteger> exponentiations, int w,
+shared_ptr<GroupElement> DlogGroup::computeLoop(vector<biginteger> exponentiations, int w,
 	int h, vector<vector<shared_ptr<GroupElement>>> preComp, shared_ptr<GroupElement> result, int bitIndex){
 	int e = 0;
 	for (int k = 0; k<h; k++) {
@@ -136,13 +138,13 @@ shared_ptr<GroupElement> DlogGroupAbs::computeLoop(vector<biginteger> exponentia
 			}
 		}
 		//multiply result with preComp[k][e]
-		result = multiplyGroupElements(result, preComp[k][e]);
+		result = multiplyGroupElements(result.get(), preComp[k][e].get());
 		e = 0;
 	}
 	return result;
 }
 
-vector<vector<shared_ptr<GroupElement>>> DlogGroupAbs::createLLPreCompTable(
+vector<vector<shared_ptr<GroupElement>>> DlogGroup::createLLPreCompTable(
 	vector<shared_ptr<GroupElement>> groupElements, int w, int h){
 	int twoPowW = (int)(pow(2, w));
 	//create the pre-computation table of size h*(2^(w))
@@ -167,7 +169,7 @@ vector<vector<shared_ptr<GroupElement>>> DlogGroupAbs::createLLPreCompTable(
 					base = groupElements[baseIndex];
 					//if bit i in e is set, change preComp[k][e]
 					if ((e & (1 << i)) != 0) { //bit i is set
-						preComp[k][e] = multiplyGroupElements(preComp[k][e], base);
+						preComp[k][e] = multiplyGroupElements(preComp[k][e].get(), base.get());
 					}
 				}
 			}
@@ -178,7 +180,7 @@ vector<vector<shared_ptr<GroupElement>>> DlogGroupAbs::createLLPreCompTable(
 
 }
 
-int DlogGroupAbs::getLLW(int t) {
+int DlogGroup::getLLW(int t) {
 		int w;
 		//choose w according to the value of t
 		if (t <= 10) {
@@ -208,14 +210,14 @@ int DlogGroupAbs::getLLW(int t) {
 		return w;
 }
 
-shared_ptr<GroupElement> DlogGroupAbs::exponentiateWithPreComputedValues(
-	shared_ptr<GroupElement> groupElement, biginteger exponent){
+shared_ptr<GroupElement> DlogGroup::exponentiateWithPreComputedValues(
+	shared_ptr<GroupElement> groupElement, const biginteger & exponent){
 	//extracts from the map the GroupElementsExponentiations object corresponding to the accepted base
 	auto it = exponentiationsMap.find(groupElement);
 	
 	// if there is no object that matches this base - create it and add it to the map
 	if (it == exponentiationsMap.end()) {
-		auto exponentiations = make_shared<GroupElementsExponentiations>(shared_from_this(), groupElement);
+		auto exponentiations = make_shared<GroupElementsExponentiations>(shared_ptr<DlogGroup>(this), groupElement);
 		//TODO: free allocated memory
 		exponentiationsMap[groupElement] = exponentiations;
 	}
@@ -224,7 +226,7 @@ shared_ptr<GroupElement> DlogGroupAbs::exponentiateWithPreComputedValues(
 	return exponentiationsMap.find(groupElement)->second->getExponentiation(exponent);
 }
 
-shared_ptr<GroupElement> DlogGroupAbs::computeNaive(
+shared_ptr<GroupElement> DlogGroup::computeNaive(
 	vector<shared_ptr<GroupElement>> groupElements, vector<biginteger> exponentiations)
 {
 	int n = groupElements.size(); //number of bases and exponents
@@ -232,21 +234,21 @@ shared_ptr<GroupElement> DlogGroupAbs::computeNaive(
 
 	// raises each element to the corresponding power
 	for (int i = 0; i < n; i++) {
-		exponentsResult[i] = exponentiate(groupElements[i], exponentiations[i]);
+		exponentsResult[i] = exponentiate(groupElements[i].get(), exponentiations[i]);
 	}
 
 	auto result = getIdentity(); //initialized to the identity element
 
 	//multiplies every exponentiate
 	for (int i = 0; i<n; i++) {
-		result = multiplyGroupElements(exponentsResult[i], result);
+		result = multiplyGroupElements(exponentsResult[i].get(), result.get());
 	}
 
 	//return the final result
 	return result;
 }
 
-shared_ptr<GroupElement> DlogGroupAbs::computeLL(
+shared_ptr<GroupElement> DlogGroup::computeLL(
 	vector<shared_ptr<GroupElement>> groupElements, vector<biginteger> exponentiations)
 {
 	int n = groupElements.size(); //number of bases and exponents
@@ -287,7 +289,7 @@ shared_ptr<GroupElement> DlogGroupAbs::computeLL(
 	//computes the third part of the algorithm
 	for (int j = t - 2; j >= 0; j--) {
 		//Y = Y^2
-		result = exponentiate(result, 2);
+		result = exponentiate(result.get(), 2);
 
 		//computes the inner loop
 		result = computeLoop(exponentiations, w, h, preComp, result, j);
@@ -296,6 +298,113 @@ shared_ptr<GroupElement> DlogGroupAbs::computeLL(
 	return result;
 }
 /*********************************************************************/
-/*END of DlogGroupAbs Implementation *********************************/
+/*END of DlogGroup Implementation *********************************/
 /*********************************************************************/
 
+/**************************************/
+/**** EC GroupParams Implementation ***/
+/**************************************/
+
+string ECF2mPentanomialBasis::toString() {
+	string s = "ECF2mPentanomialBasis [k1=" + k1;
+	s += ", k2=" + k2;
+	s += ", k3=" + k3;
+	s += ", m=" + m;
+	s += ", a=" + (string)a + ", b=" + (string)b + ", xG=" + (string)xG + ", yG=" + (string)yG + ", h=" + (string)h + ", q=" + (string)q + "]";
+	return s;
+}
+
+/**
+* Returns the integer <code>k2</code> of the underlying curve where x^m + x^k3 + x^k2 + x^k1 + 1
+* represents the reduction polynomial f(z).
+* @return k2 of the underlying curve
+*/
+int ECF2mKoblitz::getK2() {
+	int k2 = 0;
+	shared_ptr<ECF2mPentanomialBasis> pentaCurve = dynamic_pointer_cast<ECF2mPentanomialBasis>(curve);
+	if (pentaCurve)
+		k2 = pentaCurve->getK2();
+
+	return k2;
+}
+
+/**
+* Returns the integer <code>k3</code> where x^m + x^k3 + x^k2 + x^k1 + 1
+* represents the reduction polynomial f(z).
+* @return k3 of the underlying curve
+*/
+int ECF2mKoblitz::getK3() {
+	int k3 = 0;
+	shared_ptr<ECF2mPentanomialBasis> pentaCurve = dynamic_pointer_cast<ECF2mPentanomialBasis>(curve);
+	if (pentaCurve)
+		k3 = pentaCurve->getK3();
+
+	return k3;
+}
+
+string ECF2mKoblitz::toString() {
+	string s = "ECF2mKoblitz [getM()=" + getM();
+	s += ", getK1()=" + getK1();
+	s += ", getK2()=" + getK2();
+	s += ", getK3()=" + getK3();
+	s += ", getQ()=" + (string)getQ() + ", getXg()=" + (string)getXg() + ", getYg()=" + (string)getYg()
+		+ ", getA()=" + (string)getA() + ", getB()=" + (string)getB()
+		+ ", getSubGroupOrder()=" + (string)getSubGroupOrder()
+		+ ", getCurve()=[" + getCurve()->toString() + "], getCofactor()="
+		+ (string)getCofactor() + "]";
+	return s;
+}
+
+/*********************************************************************/
+/*END of GroupParams Implementation *********************************/
+/*********************************************************************/
+
+/**************************************/
+/******* Dlog EC Implementation *******/
+/**************************************/
+
+bool ECElement::operator==(const GroupElement &other) const {
+	if (typeid(*this) != typeid(other))
+		return false;
+	if (((ECElement*)this)->getX() != ((ECElement*)&other)->getX())
+		return false;
+	return ((ECElement*)this)->getY() == ((ECElement*)&other)->getY();
+}
+
+bool ECElement::operator!=(const GroupElement &other) const {
+	return !(*this == other);
+}
+
+shared_ptr<GroupElementSendableData> ECElement::generateSendableData() {
+	return make_shared<ECElementSendableData>(getX(), getY());
+}
+
+string ECElementSendableData::toString() {
+	return string(x) + ":" + string(y);
+}
+
+void ECElementSendableData::initFromString(const string & raw) {
+	auto str_vec = explode(raw, ':');
+	assert(str_vec.size() == 2);
+	x = biginteger(str_vec[0]);
+	y = biginteger(str_vec[1]);
+}
+
+/**
+* Constructor that initializes this DlogGroup with a curve that is not necessarily one of NIST recommended elliptic curves.
+* @param fileName - name of the elliptic curves file. This file has to comply with
+* @param curveName - name of curve to initialized
+* @throws IOException
+*/
+void DlogEllipticCurve::init(string fileName, string curveName, mt19937 random) {
+	
+	ecConfig = make_shared<ConfigFile>(fileName); //get ConfigFile object containing the curves data
+																//EC_FILE_PATH = fileName;
+	//In case there is no such curve in the file, an exception will be thrown.
+	ecConfig->Value(curveName, curveName);
+
+	this->curveName = curveName;
+	this->fileName = fileName;
+
+	random_element_gen = random;
+}

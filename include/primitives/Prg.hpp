@@ -5,7 +5,6 @@
 #include "Key.hpp"
 #include "Prf.hpp"
 #include <openssl/rc4.h>
-#include <openssl/rand.h>
 
 /**
 * Parameters for PrgFromPrf key generation.

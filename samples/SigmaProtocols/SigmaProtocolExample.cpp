@@ -5,7 +5,7 @@ void run_prover(std::shared_ptr<ChannelServer> server, SigmaDlogParams sdp, Prov
 	auto dg = make_shared<OpenSSLDlogZpSafePrime>(zp_params);
 	server->try_connecting(500, 5000); // sleep time=500, timeout = 5000 (ms);
 	auto g = dg->getGenerator();
-	auto h = dg->exponentiate(g, sdp.w);
+	auto h = dg->exponentiate(g.get(), sdp.w);
 	auto proverComputation = make_shared<SigmaDlogProverComputation>(dg, sdp.t,
 		get_seeded_random());
 	auto proverInput = make_shared<SigmaDlogProverInput>(h, sdp.w);
@@ -18,18 +18,18 @@ void run_verifier(shared_ptr<ChannelServer> server, SigmaDlogParams sdp, ProverV
 	auto dg = std::static_pointer_cast<DlogGroup>(openSSLdg);
 	server->try_connecting(500, 5000); // sleep time=500, timeout = 5000 (ms);
 	auto g = dg->getGenerator();
-	auto h = dg->exponentiate(g, sdp.w);
+	auto h = dg->exponentiate(g.get(), sdp.w);
 	auto commonInput = make_shared<SigmaDlogCommonInput>(h);
 	auto verifierComputation = make_shared<SigmaDlogVerifierComputation>(
 		dg, sdp.t, get_seeded_random());
-	auto msg1 = make_shared<SigmaGroupElementMsg>(h->generateSendableData());
+	auto msg1 = make_shared<SigmaGroupElementMsg>(dg->getIdentity()->generateSendableData());
 	auto msg2 = make_shared<SigmaBIMsg>();
 	bool verificationPassed = pe.verify(server, verifierComputation, msg1, msg2, commonInput, openSSLdg);
 	cout << "Verifer output: " << (verificationPassed ? "Success" : "Failure") << endl;
 
 }
 
-int main999(int argc, char* argv[]) {
+int main(int argc, char* argv[]) {
 	if (argc != 3) {
 		SigmaUsage(argv[0]);
 		return 1;

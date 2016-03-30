@@ -189,6 +189,6 @@ bool CmtPedersenTrapdoorCommitter::validate(shared_ptr<CmtRCommitPhaseOutput> tr
 	if (!trapdoor)
 		throw invalid_argument("the given trapdor should be an instance of CmtRTrapdoorCommitPhaseOutput");
 	// check that g^trapdoor equals to h.
-	auto gToTrap = dlog->exponentiate(dlog->getGenerator(), trapdoor->getTrap());
+	auto gToTrap = dlog->exponentiate(dlog->getGenerator().get(), trapdoor->getTrap());
 	return (*gToTrap == *h); 
 }

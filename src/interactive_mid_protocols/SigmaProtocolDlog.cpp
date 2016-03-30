@@ -33,11 +33,11 @@ shared_ptr<SigmaSimulatorOutput> SigmaDlogSimulator::simulate(shared_ptr<SigmaCo
 	biginteger z = getRandomInRange(0, qMinusOne, random);
 
 	// COMPUTE a = g^z*h^(-e)  (where -e here means -e mod q)
-	auto gToZ = dlog->exponentiate(dlog->getGenerator(), z);
+	auto gToZ = dlog->exponentiate(dlog->getGenerator().get(), z);
 	biginteger e = decodeBigInteger(challenge.get(), challenge_size);
 	biginteger minusE = dlog->getOrder() - e;
-	auto hToE = dlog->exponentiate(dlogInput->getH(), minusE);
-	auto a = dlog->multiplyGroupElements(gToZ, hToE);
+	auto hToE = dlog->exponentiate(dlogInput->getH().get(), minusE);
+	auto a = dlog->multiplyGroupElements(gToZ.get(), hToE.get());
 
 	// OUTPUT (a,e,eSize,z).
 	auto SigmaGEMsg = make_shared<SigmaGroupElementMsg>(a->generateSendableData());
@@ -79,10 +79,9 @@ shared_ptr<SigmaProtocolMsg> SigmaDlogProverComputation::computeFirstMsg(shared_
 	// sample random r in Zq
 	r = getRandomInRange(0, qMinusOne, random);
 	// compute a = g^r.
-	auto a = dlog->exponentiate(dlog->getGenerator(), r);
+	auto a = dlog->exponentiate(dlog->getGenerator().get(), r);
 	auto x = a->generateSendableData();
 	// create and return SigmaGroupElementMsg with a.
-	auto xz = dynamic_pointer_cast<ZpElementSendableData>(x);
 	return make_shared<SigmaGroupElementMsg>(x);
 
 }
@@ -125,8 +124,6 @@ SigmaDlogVerifierComputation::SigmaDlogVerifierComputation(shared_ptr<DlogGroup>
 
 void SigmaDlogVerifierComputation::sampleChallenge() {
 	biginteger e_number = getRandomInRange(0, mp::pow(biginteger(2), t) - 1, random);
-	cout << "sampled challenge between 0 and: " << mp::pow(biginteger(2), t)-1 << 
-		" got: " << e_number << endl;
 	eSize = bytesCount(e_number);
 	// create a new byte array of size t/8, to get the required byte size.
 	e = std::shared_ptr<byte>(new byte[eSize], std::default_delete<byte[]>());
@@ -135,34 +132,33 @@ void SigmaDlogVerifierComputation::sampleChallenge() {
 
 bool SigmaDlogVerifierComputation::verify(shared_ptr<SigmaCommonInput> input, 
 	shared_ptr<SigmaProtocolMsg> a, shared_ptr<SigmaProtocolMsg> z) {
-	auto cInput = std::dynamic_pointer_cast<SigmaDlogCommonInput>(input);
+	auto cInput = dynamic_pointer_cast<SigmaDlogCommonInput>(input);
 	if (!cInput)
 		throw invalid_argument("input to Dlog verifier should always be instance of SigmaDlogCommonInput");
+	
 	bool verified = true;
-	auto firstMsg = std::dynamic_pointer_cast<SigmaGroupElementMsg>(a);
+	auto firstMsg = dynamic_pointer_cast<SigmaGroupElementMsg>(a);
 	if (!firstMsg)
 		throw invalid_argument("first message to Dlog verifier should always be instance of SigmaGroupElementMsg");
-	auto exponent = std::dynamic_pointer_cast<SigmaBIMsg>(z);
+	auto exponent = dynamic_pointer_cast<SigmaBIMsg>(z);
 	if (!exponent)
 		throw invalid_argument("second message to Dlog verifier should always be instance of SigmaBIMsg");
 
-	auto aElement = dlog->reconstructElement(true, firstMsg->getElement());
-
+	auto aElement = dlog->reconstructElement(true, firstMsg->getElement().get());
+	
 	// get the h from the input and verify that it is in the Dlog Group.
 	auto h = cInput->getH();
 	// if h is not member in the group, set verified to false.
-	verified = verified && dlog->isMember(h);
+	verified = verified && dlog->isMember(h.get());
 
 	// compute g^z (left size of the verify equation).
-	auto left = dlog->exponentiate(dlog->getGenerator(), exponent->getMsg());
-
+	auto left = dlog->exponentiate(dlog->getGenerator().get(), exponent->getMsg());
+	
 	// compute a*h^e (right side of the verify equation).
 	biginteger eBI = decodeBigInteger(e.get(), eSize); 	// convert e to biginteger.
-	auto hToe = dlog->exponentiate(h, eBI); // calculate h^e.
-
+	auto hToe = dlog->exponentiate(h.get(), eBI); // calculate h^e.
 	// calculate a*h^e.
-	auto right = dlog->multiplyGroupElements(aElement, hToe);
-
+	auto right = dlog->multiplyGroupElements(aElement.get(), hToe.get());
 	// if left and right sides of the equation are not equal, set verified to false.
 	verified = verified && (*left==*right);
 

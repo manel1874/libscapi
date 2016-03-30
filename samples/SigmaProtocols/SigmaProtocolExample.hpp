@@ -62,21 +62,21 @@ class ProverVerifierExample {
 public:
 	virtual void prove(shared_ptr<ChannelServer> server, 
 		shared_ptr<SigmaDlogProverComputation> proverComputation, 
-		shared_ptr<OpenSSLDlogZpSafePrime> dg, 
+		shared_ptr<DlogGroup> dg,
 		shared_ptr<SigmaDlogProverInput> proverinput) = 0;
 	virtual bool verify(shared_ptr<ChannelServer> server, 
 		shared_ptr<SigmaDlogVerifierComputation> verifierComputation,
 		shared_ptr<SigmaGroupElementMsg> msgA,
 		shared_ptr<SigmaBIMsg> msgZ,
 		shared_ptr<SigmaDlogCommonInput> commonInput,
-		shared_ptr<OpenSSLDlogZpSafePrime> dg) = 0;
+		shared_ptr<DlogGroup> dg) = 0;
 };
 
 class SimpleDlogSigma : public ProverVerifierExample {
 public:
 	virtual void prove(shared_ptr<ChannelServer> server,
 		shared_ptr<SigmaDlogProverComputation> proverComputation,
-		shared_ptr<OpenSSLDlogZpSafePrime> dg,
+		shared_ptr<DlogGroup> dg,
 		shared_ptr<SigmaDlogProverInput> proverinput) override {
 		auto sp = new SigmaProver(server, proverComputation);
 		cout << "--> running simple sigma dlog prover" << endl;
@@ -87,7 +87,7 @@ public:
 		shared_ptr<SigmaGroupElementMsg> msgA,
 		shared_ptr<SigmaBIMsg> msgZ,
 		shared_ptr<SigmaDlogCommonInput> commonInput,
-		shared_ptr<OpenSSLDlogZpSafePrime> dg) override{
+		shared_ptr<DlogGroup> dg) override{
 		auto v = new SigmaVerifier(server, verifierComputation, msgA, msgZ);
 		cout << "--> running simple sigma dlog verify" << endl;
 		bool verificationPassed = v->verify(commonInput);
@@ -100,7 +100,7 @@ class PedersenZKSigma : public ProverVerifierExample {
 public:
 	virtual void prove(shared_ptr<ChannelServer> server,
 		shared_ptr<SigmaDlogProverComputation> proverComputation,
-		shared_ptr<OpenSSLDlogZpSafePrime> dg,
+		shared_ptr<DlogGroup> dg,
 		shared_ptr<SigmaDlogProverInput> proverinput) {
 		auto sp = new ZKPOKFromSigmaCmtPedersenProver(server, proverComputation, dg);
 		cout << "--> running pedersen prover" << endl;
@@ -111,7 +111,7 @@ public:
 		shared_ptr<SigmaGroupElementMsg> msgA,
 		shared_ptr<SigmaBIMsg> msgZ,
 		shared_ptr<SigmaDlogCommonInput> commonInput,
-		shared_ptr<OpenSSLDlogZpSafePrime> dg) override {
+		shared_ptr<DlogGroup> dg) override {
 		auto emptyTrap = make_shared<CmtRTrapdoorCommitPhaseOutput>();
 		auto v = new ZKPOKFromSigmaCmtPedersenVerifier(server, verifierComputation,
 			get_seeded_random64(), emptyTrap, dg);

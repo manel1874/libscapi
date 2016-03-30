@@ -19,8 +19,8 @@ public:
 	/**
 	* Empty constructor - used to allow initialization from byte array
 	*/
-	CmtPedersenCommitmentMessage() {
-		c = make_shared<ZpElementSendableData>(0);
+	CmtPedersenCommitmentMessage(shared_ptr<GroupElementSendableData> c) {
+		this->c = c;
 	};
 
 	/**
@@ -37,7 +37,6 @@ public:
 	long getId() override { return id; };
 
 	// SerializedNetwork implementation:
-
 	string toString() override {
 		return to_string(id) + ':' + c->toString();
 	}

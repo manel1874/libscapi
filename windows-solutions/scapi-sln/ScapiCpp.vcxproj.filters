@@ -120,9 +120,6 @@
     <ClCompile Include="..\..\src\primitives\TrapdoorPermutationOpenSSL.cpp">
       <Filter>Source Files\primitives</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolOr.cpp">
-      <Filter>Source Files\InteractiveMidProtocols</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\circuits\BooleanCircuits.hpp">
@@ -229,9 +226,6 @@
     </ClInclude>
     <ClInclude Include="..\..\include\primitives\TrapdoorPermutations.hpp">
       <Filter>Header Files\Primitives</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolOr.hpp">
-      <Filter>Header Files\InteractiveMidProtocols</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

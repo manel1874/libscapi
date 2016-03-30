@@ -107,19 +107,19 @@ public:
 	};
 
 	shared_ptr<PlaintextSendableData> generateSendableData() override {
-		return make_shared<GroupElementPlaintextSendableData>(element->generateSendableData());
+		return make_shared<GroupElementPlaintextSendableData>(element);
 	}
 
 	// Nested class that holds the sendable data of the outer class
 	class GroupElementPlaintextSendableData : public PlaintextSendableData {
 	private:
-		shared_ptr<GroupElementSendableData>  groupElementData;
+		shared_ptr<GroupElement>  groupElementData;
 	public:
-		GroupElementPlaintextSendableData(shared_ptr<GroupElementSendableData> groupElementData) {
+		GroupElementPlaintextSendableData(shared_ptr<GroupElement> groupElementData) {
 			this->groupElementData = groupElementData;
 		};
 
-		shared_ptr<GroupElementSendableData> getGroupElement() { return groupElementData; };
+		shared_ptr<GroupElement> getGroupElement() { return groupElementData; };
 	};
 };
 

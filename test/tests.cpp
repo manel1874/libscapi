@@ -252,14 +252,14 @@ TEST_CASE("MathAlgorithm", "[crt, sqrt_mod_3_4, math]")
 void test_multiply_group_elements(shared_ptr<DlogGroup> dg, bool check_membership=false)
 {
 	auto ge = dg->createRandomElement();
-	auto ige = dg->getInverse(ge);
-	auto mul = dg->multiplyGroupElements(ge, ige);
+	auto ige = dg->getInverse(ge.get());
+	auto mul = dg->multiplyGroupElements(ge.get(), ige.get());
 	auto identity = dg->getIdentity();
 
 	vector <shared_ptr<GroupElement>> vs{ ge, ige, mul, identity };
 	if (check_membership)
 		for (auto tge : vs)
-			REQUIRE(dg->isMember(tge));
+			REQUIRE(dg->isMember(tge.get()));
 
 	REQUIRE(mul->isIdentity());
 }
@@ -267,8 +267,8 @@ void test_multiply_group_elements(shared_ptr<DlogGroup> dg, bool check_membershi
 void test_exponentiate(shared_ptr<DlogGroup> dg)
 {
 	auto ge = dg->createRandomElement();
-	auto res_exp = dg->exponentiate(ge, 3);
-	auto res_mul = dg->multiplyGroupElements(dg->multiplyGroupElements(ge, ge), ge);
+	auto res_exp = dg->exponentiate(ge.get(), 3);
+	auto res_mul = dg->multiplyGroupElements(dg->multiplyGroupElements(ge.get(), ge.get()).get(), ge.get());
 	REQUIRE(*res_exp == *res_mul); // testing the == operator overloading and override
 }
 
@@ -281,8 +281,8 @@ void test_simultaneous_multiple_exponentiations(shared_ptr<DlogGroup> dg)
 	vector<biginteger> exponentArray = { 3, 4 };
 
 	auto res1 = dg->simultaneousMultipleExponentiations(baseArray, exponentArray);
-	auto expected_res = dg->multiplyGroupElements(dg->exponentiate(ge1, 3),
-		dg->exponentiate(ge2, 4));
+	auto expected_res = dg->multiplyGroupElements(dg->exponentiate(ge1.get(), 3).get(),
+		dg->exponentiate(ge2.get(), 4).get());
 
 	REQUIRE(*res1 == *expected_res);
 }
@@ -291,7 +291,7 @@ void test_exponentiate_with_pre_computed_values(shared_ptr<DlogGroup> dg)
 {
 	auto base = dg->createRandomElement();
 	auto res = dg->exponentiateWithPreComputedValues(base, 32);
-	auto expected_res = dg->exponentiate(base, 32);
+	auto expected_res = dg->exponentiate(base.get(), 32);
 	dg->endExponentiateWithPreComputedValues(base);
 
 	REQUIRE(*expected_res == *res);
@@ -307,10 +307,11 @@ void test_encode_decode(shared_ptr<DlogGroup> dg)
 	gen_random_bytes_vector(v, k);
 
 	auto ge = dg->encodeByteArrayToGroupElement(v);
-	vector<byte> res = dg->decodeGroupElementToByteArray(ge);
-
-	for (int i = 0; i < k; i++){
-		REQUIRE(v[i] == res[i]);}
+	vector<byte> res = dg->decodeGroupElementToByteArray(ge.get());
+	
+	for (int i = 0; i < k; i++) {
+		REQUIRE(v[i] == res[i]);
+	}
 }
 
 void test_all(shared_ptr<DlogGroup> dg)
@@ -329,6 +330,29 @@ TEST_CASE("DlogGroup", "[Dlog, DlogGroup, CryptoPpDlogZpSafePrime]")
 		// testing with the default 1024 take too much time. 64 bit is good enough to test conversion with big numbers
 		auto dg = make_shared<OpenSSLDlogZpSafePrime>(64); 
 		test_all(dg);
+	}
+
+	SECTION("test OpenSSLDlogECFp implementation")
+	{
+		auto dg = make_shared<OpenSSLDlogECFp>();
+		test_all(dg);
+	}
+	SECTION("test OpenSSLDlogECF2m implementation")
+	{
+		auto dg = make_shared<OpenSSLDlogECF2m>();
+		test_multiply_group_elements(dg);
+		test_simultaneous_multiple_exponentiations(dg);
+		test_exponentiate(dg);
+		test_exponentiate_with_pre_computed_values(dg);
+	}
+
+	SECTION("test OpenSSLDlogECF2m implementation")
+	{
+		auto dg = make_shared<OpenSSLDlogECF2m>("B-233");
+		test_multiply_group_elements(dg);
+		test_simultaneous_multiple_exponentiations(dg);
+		test_exponentiate(dg);
+		test_exponentiate_with_pre_computed_values(dg);
 	}
 }
 
@@ -587,7 +611,7 @@ TEST_CASE("serialization", "[SerializedData, CmtCCommitmentMsg]")
 		REQUIRE(((ZpElementSendableData*)cmtMsg.getCommitment().get())->getX() == birsa100);
 
 		// verify new one is created with empty values
-		CmtPedersenCommitmentMessage cmtMsg2;
+		CmtPedersenCommitmentMessage cmtMsg2(make_shared<ZpElementSendableData>(0));
 		REQUIRE(cmtMsg2.getId() == 0);
 		REQUIRE(((ZpElementSendableData*)cmtMsg2.getCommitment().get())->getX() == 0);
 
@@ -651,5 +675,43 @@ TEST_CASE("serialization", "[SerializedData, CmtCCommitmentMsg]")
 		REQUIRE(cmtTrapOut2.getCommitmentId() == commitmentId);
 		REQUIRE(cmtTrapOut2.getTrap() == trap);
 	}
-	
-}
+	SECTION("ECFp Point sendable data") {
+		OpenSSLDlogECFp dlog;
+		shared_ptr<GroupElement> point = dlog.createRandomElement();
+		
+		shared_ptr<ECElementSendableData> data = dynamic_pointer_cast<ECElementSendableData>(point->generateSendableData());
+		REQUIRE(dynamic_pointer_cast<ECElement>(point)->getX() == data->getX());
+		REQUIRE(dynamic_pointer_cast<ECElement>(point)->getY() == data->getY());
+		
+		string dataBytes = data->toString();
+		ECElementSendableData point2Data(0,0);
+		point2Data.initFromString(dataBytes);
+
+		REQUIRE(point2Data.getX() == data->getX());
+		REQUIRE(point2Data.getY() == data->getY());
+		
+		shared_ptr<GroupElement> point2 = dlog.reconstructElement(false, &point2Data);
+		REQUIRE(dlog.isMember(point2.get()));
+		REQUIRE(*point2.get() == *point.get());
+	}
+
+	SECTION("ECF2m Point sendable data") {
+		OpenSSLDlogECF2m dlog;
+		shared_ptr<GroupElement> point = dlog.createRandomElement();
+
+		shared_ptr<ECElementSendableData> data = dynamic_pointer_cast<ECElementSendableData>(point->generateSendableData());
+		REQUIRE(dynamic_pointer_cast<ECElement>(point)->getX() == data->getX());
+		REQUIRE(dynamic_pointer_cast<ECElement>(point)->getY() == data->getY());
+
+		string dataBytes = data->toString();
+		ECElementSendableData point2Data(0, 0);
+		point2Data.initFromString(dataBytes);
+
+		REQUIRE(point2Data.getX() == data->getX());
+		REQUIRE(point2Data.getY() == data->getY());
+
+		shared_ptr<GroupElement> point2 = dlog.reconstructElement(false, &point2Data);
+		REQUIRE(dlog.isMember(point2.get()));
+		REQUIRE(*point2.get() == *point.get());
+	}
+	}

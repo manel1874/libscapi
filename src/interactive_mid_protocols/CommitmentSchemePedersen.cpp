@@ -30,21 +30,19 @@ void CmtPedersenReceiverCore::doConstruct(shared_ptr<ChannelServer> channel,
 
 void CmtPedersenReceiverCore::preProcess() {
 	trapdoor = getRandomInRange(0, qMinusOne, random);
-	h = dlog->exponentiate(dlog->getGenerator(), trapdoor);
-	auto sendableData = h->generateSendableData();
+	h = dlog->exponentiate(dlog->getGenerator().get(), trapdoor);
+	auto sendableData = h->generateSendableData();	
 	auto raw_msg = sendableData->toString();
-	channel->write_fast(raw_msg);
-}
+	channel->write_fast(raw_msg);}
 
 shared_ptr<CmtRCommitPhaseOutput> CmtPedersenReceiverCore::receiveCommitment() {
 	// create an empty CmtPedersenCommitmentMessage 
-	auto msg = make_shared<CmtPedersenCommitmentMessage>();
+	auto msg = make_shared<CmtPedersenCommitmentMessage>(dlog->getGenerator()->generateSendableData());
 	// read encoded CmtPedersenCommitmentMessage from channel
 	auto v = channel->read_one();
 	// init the empy CmtPedersenCommitmentMessage using the encdoed data
 	msg->initFromByteVector(*v);
 	auto cm = msg->getCommitment();
-	auto cmtCommitMsg = std::static_pointer_cast<ZpElementSendableData>(cm);
 	commitmentMap[msg->getId()] = msg;
 	delete v; // no need to hold it anymore - already decoded and copied
 	return make_shared<CmtRBasicCommitPhaseOutput>(msg->getId());
@@ -71,12 +69,13 @@ shared_ptr<CmtCommitValue> CmtPedersenReceiverCore::verifyDecommitment(
 	if (x<0 || x>dlog->getOrder()) 
 		return NULL;
 	// calculate c = g^r * h^x
-	auto gTor = dlog->exponentiate(dlog->getGenerator(), r);
-	auto hTox = dlog->exponentiate(h, x);
+	auto gTor = dlog->exponentiate(dlog->getGenerator().get(), r);
+	auto hTox = dlog->exponentiate(h.get(), x);
+
 	auto cmt = commitmentMsgPedersen->getCommitment();
 	auto ge = static_pointer_cast<GroupElementSendableData>(cmt);
-	auto commitmentElement = dlog->reconstructElement(true, ge);
-	if(*commitmentElement == *(dlog->multiplyGroupElements(gTor, hTox)))
+	auto commitmentElement = dlog->reconstructElement(true, ge.get());
+	if (*commitmentElement == *(dlog->multiplyGroupElements(gTor.get(), hTox.get())))
 		return make_shared<CmtBigIntegerCommitValue>(x);
 	// in the pseudocode it says to return X and ACCEPT if valid commitment else, REJECT.
 	// for now we return null as a mode of reject. If the returned value of this function is not
@@ -94,7 +93,7 @@ int CmtPedersenReceiverCore::getPreProcessedValuesSize() {
 shared_ptr<void> CmtPedersenReceiverCore::getCommitmentPhaseValues(long id) {
 	auto voidPtr = commitmentMap[id]->getCommitment();
 	auto ge = static_pointer_cast<GroupElementSendableData>(voidPtr);
-	return dlog->reconstructElement(true, ge);
+	return dlog->reconstructElement(true, ge.get());
 }
 
 /*********************************/
@@ -121,15 +120,15 @@ void CmtPedersenCommitterCore::doConstruct(shared_ptr<ChannelServer> channel,
 
 void CmtPedersenCommitterCore::preProcess() {
 	auto msg = waitForMessageFromReceiver();
-	h = dlog->reconstructElement(true, msg->getH());
-	if (!dlog->isMember(h))
+	h = dlog->reconstructElement(true, msg->getH().get());
+	if (!dlog->isMember(h.get()))
 		throw CheatAttemptException("h element is not a member of the current DlogGroup");
 }
 
 shared_ptr<CmtPedersenPreprocessMessage> CmtPedersenCommitterCore::waitForMessageFromReceiver() {
 	auto v = channel->read_one();
-	auto emptySendableData = make_shared<ZpElementSendableData>(0);
-	auto msg = make_shared<CmtPedersenPreprocessMessage>(emptySendableData);
+	auto dummySendableData = dlog->getGenerator()->generateSendableData();
+	auto msg = make_shared<CmtPedersenPreprocessMessage>(dummySendableData);
 	msg->initFromByteVector(*v);
 	return msg;
 }
@@ -149,9 +148,9 @@ shared_ptr<CmtCCommitmentMsg> CmtPedersenCommitterCore::generateCommitmentMsg(
 	biginteger r = getRandomInRange(0, qMinusOne, random);
 
 	// compute  c = g^r * h^x
-	auto gToR = dlog->exponentiate(dlog->getGenerator(), r);
-	auto hToX = dlog->exponentiate(h, x);
-	auto c = dlog->multiplyGroupElements(gToR, hToX);
+	auto gToR = dlog->exponentiate(dlog->getGenerator().get(), r);
+	auto hToX = dlog->exponentiate(h.get(), x);
+	auto c = dlog->multiplyGroupElements(gToR.get(), hToX.get());
 
 	// keep the committed value in the map together with its ID.
 	auto sharedR = make_shared<BigIntegerRandomValue>(r);
