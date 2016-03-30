@@ -21,13 +21,13 @@ SigmaDlogSimulator::SigmaDlogSimulator(shared_ptr<DlogGroup> dlog, int t, std::m
 	qMinusOne = dlog->getOrder() - 1;
 }
 
-shared_ptr<SigmaSimulatorOutput> SigmaDlogSimulator::simulate(shared_ptr<SigmaCommonInput> input,
+shared_ptr<SigmaSimulatorOutput> SigmaDlogSimulator::simulate(SigmaCommonInput* input,
 	shared_ptr<byte> challenge, int challenge_size) {
 	//check the challenge validity.
 	if (!checkChallengeLength(challenge, challenge_size))
 		throw CheatAttemptException(
 			"the length of the given challenge is different from the soundness parameter");
-	SigmaDlogCommonInput* dlogInput = (SigmaDlogCommonInput*)input.get();
+	SigmaDlogCommonInput* dlogInput = (SigmaDlogCommonInput*)input;
 
 	// SAMPLE a random z <- Zq
 	biginteger z = getRandomInRange(0, qMinusOne, random);
@@ -45,10 +45,9 @@ shared_ptr<SigmaSimulatorOutput> SigmaDlogSimulator::simulate(shared_ptr<SigmaCo
 	return make_shared<SigmaDlogSimulatorOutput>(SigmaGEMsg, challenge, challenge_size, SigmaBMsg);
 }
 
-shared_ptr<SigmaSimulatorOutput> SigmaDlogSimulator::simulate(
-	shared_ptr<SigmaCommonInput> input) {
+shared_ptr<SigmaSimulatorOutput> SigmaDlogSimulator::simulate(SigmaCommonInput* input) {
 	// create a new byte array of size t/8, to get the required byte size.
-	std::shared_ptr<byte> e(new byte[t/8], std::default_delete<byte[]>());
+	shared_ptr<byte> e(new byte[t/8], default_delete<byte[]>());
 	if (!RAND_bytes(e.get(), t / 8)) // fill the byte array with random values.
 		throw runtime_error("key generation failed");
 
@@ -74,8 +73,8 @@ SigmaDlogProverComputation::SigmaDlogProverComputation(shared_ptr<DlogGroup> dlo
 	qMinusOne = dlog->getOrder() - 1;
 }
 
-shared_ptr<SigmaProtocolMsg> SigmaDlogProverComputation::computeFirstMsg(shared_ptr<SigmaProverInput> input) {
-	this->input = shared_ptr<SigmaDlogProverInput>((SigmaDlogProverInput*)input.get());
+shared_ptr<SigmaProtocolMsg> SigmaDlogProverComputation::computeFirstMsg(SigmaProverInput* input) {
+	this->input = shared_ptr<SigmaDlogProverInput>((SigmaDlogProverInput*)input);
 	// sample random r in Zq
 	r = getRandomInRange(0, qMinusOne, random);
 	// compute a = g^r.
@@ -130,17 +129,17 @@ void SigmaDlogVerifierComputation::sampleChallenge() {
 	encodeBigInteger(e_number, e.get(), eSize);
 }
 
-bool SigmaDlogVerifierComputation::verify(shared_ptr<SigmaCommonInput> input, 
-	shared_ptr<SigmaProtocolMsg> a, shared_ptr<SigmaProtocolMsg> z) {
-	auto cInput = dynamic_pointer_cast<SigmaDlogCommonInput>(input);
+bool SigmaDlogVerifierComputation::verify(SigmaCommonInput* input, 
+	SigmaProtocolMsg* a, SigmaProtocolMsg* z) {
+	auto cInput = dynamic_cast<SigmaDlogCommonInput*>(input);
 	if (!cInput)
 		throw invalid_argument("input to Dlog verifier should always be instance of SigmaDlogCommonInput");
 	
 	bool verified = true;
-	auto firstMsg = dynamic_pointer_cast<SigmaGroupElementMsg>(a);
+	auto firstMsg = dynamic_cast<SigmaGroupElementMsg*>(a);
 	if (!firstMsg)
 		throw invalid_argument("first message to Dlog verifier should always be instance of SigmaGroupElementMsg");
-	auto exponent = dynamic_pointer_cast<SigmaBIMsg>(z);
+	auto exponent = dynamic_cast<SigmaBIMsg*>(z);
 	if (!exponent)
 		throw invalid_argument("second message to Dlog verifier should always be instance of SigmaBIMsg");
 

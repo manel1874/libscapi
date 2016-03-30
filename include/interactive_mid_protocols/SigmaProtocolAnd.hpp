@@ -75,7 +75,7 @@ public:
 	* @param input MUST be an instance of SigmaANDInput.
 	* @return SigmaMultipleMsg contains a1, ..., am.
 	*/
-	shared_ptr<SigmaProtocolMsg> computeFirstMsg(shared_ptr<SigmaProverInput> in) override;
+	shared_ptr<SigmaProtocolMsg> computeFirstMsg(SigmaProverInput* in) override;
 	/**
 	* Computes the second message of the protocol.<p>
 	* "COMPUTE all second prover messages z1,...,zm".
@@ -98,7 +98,7 @@ private:
 	* Sets the inputs for each one of the underlying prover.
 	* @param input MUST be an instance of SigmaANDProverInput.
 	*/
-	shared_ptr<SigmaANDProverInput> checkInput(shared_ptr<SigmaProverInput> in);
+	shared_ptr<SigmaANDProverInput> checkInput(SigmaProverInput* in);
 };
 
 /**
@@ -131,14 +131,14 @@ public:
 	* @param challenge
 	* @return the output of the computation - (a, e, z).
 	*/
-	shared_ptr<SigmaSimulatorOutput> simulate(shared_ptr<SigmaCommonInput>input, 
+	shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input, 
 		shared_ptr<byte> challenge, int challenge_size) override;
 	/**
 	* Computes the simulator computation with a randomly chosen challenge.
 	* @param input MUST be an instance of SigmaANDCommonInput.
 	* @return the output of the computation - (a, e, z).
 	*/
-	shared_ptr<SigmaSimulatorOutput> simulate(shared_ptr<SigmaCommonInput> input) override;
+	shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input) override;
 
 private:
 	vector<shared_ptr<SigmaSimulator>> simulators;	// Underlying Sigma protocol's simulators to the AND calculation.
@@ -229,8 +229,7 @@ class SigmaANDVerifierComputation : public SigmaVerifierComputation {
 	* @param z second message from prover
 	* @return true if the proof has been verified; false, otherwise.
 	*/
-	bool verify(shared_ptr<SigmaCommonInput> input, shared_ptr<SigmaProtocolMsg> a,
-		shared_ptr<SigmaProtocolMsg> z) override;
+	bool verify(SigmaCommonInput* input, SigmaProtocolMsg* a, SigmaProtocolMsg* z) override;
 
 private:
 	vector<shared_ptr<SigmaVerifierComputation>> verifiers;	// underlying Sigma protocol's verifier to the AND calculation
@@ -243,7 +242,7 @@ private:
 	* Sets the inputs for each one of the underlying verifier.
 	* @param input MUST be an instance of SigmaANDCommonInput.
 	*/
-	void checkInput(shared_ptr<SigmaCommonInput> in);
+	void checkInput(SigmaCommonInput* in);
 };
 
 

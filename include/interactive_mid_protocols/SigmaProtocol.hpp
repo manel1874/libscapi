@@ -106,13 +106,13 @@ public:
 	/**
 	* Computes the simulator computation.
 	*/
-	virtual shared_ptr<SigmaSimulatorOutput> simulate(shared_ptr<SigmaCommonInput> input,
+	virtual shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input,
 		shared_ptr<byte> challenge, int challenge_size)  =0;
 
 	/**
 	* Chooses random challenge and computes the simulator computation.
 	*/
-	virtual shared_ptr<SigmaSimulatorOutput> simulate(shared_ptr<SigmaCommonInput> input) = 0;
+	virtual shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input) = 0;
 	/**
 	* Returns the soundness parameter for this Sigma simulator.
 	*/
@@ -128,7 +128,7 @@ public:
 	/**
 	* Computes the first message of the sigma protocol.
 	*/
-	virtual shared_ptr<SigmaProtocolMsg> computeFirstMsg(shared_ptr<SigmaProverInput> input) =0;
+	virtual shared_ptr<SigmaProtocolMsg> computeFirstMsg(SigmaProverInput* input) =0;
 	/**
 	* Computes the second message of the sigma protocol.
 	*/
@@ -159,8 +159,7 @@ public:
 	* @param input
 	* @return true if the proof has been verified; false, otherwise.
 	*/
-	virtual bool verify(shared_ptr<SigmaCommonInput> input, 
-		shared_ptr<SigmaProtocolMsg> a, shared_ptr<SigmaProtocolMsg> z) =0;
+	virtual bool verify(SigmaCommonInput* input, SigmaProtocolMsg* a, SigmaProtocolMsg* z) =0;
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
 	* @return t soundness parameter
@@ -218,7 +217,7 @@ public:
 	* This function can be called when a user does not want to save time by
 	* doing operations in parallel. <p>
 	*/
-	void prove(shared_ptr<SigmaProverInput> input) {
+	void prove(SigmaProverInput* input) {
 		processFirstMsg(input); // step one of the protocol.
 		processSecondMsg(); // step two of the protocol.
 	}
@@ -230,7 +229,7 @@ public:
 	* 	 SEND the computed message to the verifier".<p>
 	* It computes the first message and sends it to the verifier.
 	*/
-	void processFirstMsg(shared_ptr<SigmaProverInput> input);
+	void processFirstMsg(SigmaProverInput* input);
 
 	/**
 	* Processes the second step of the sigma protocol.<p>
@@ -249,7 +248,7 @@ private:
 	/**
 	* Sends the given message to the verifier.
 	*/
-	void sendMsgToVerifier(shared_ptr<SigmaProtocolMsg> message) {
+	void sendMsgToVerifier(SigmaProtocolMsg* message) {
 		auto raw_message = message->toString();
 		channel->write_fast(raw_message);
 	}
@@ -296,7 +295,7 @@ public:
 	* This function can be called when a user does not want to save time by doing operations
 	* in parallel.
 	*/
-	bool verify(shared_ptr<SigmaCommonInput> input);
+	bool verify(SigmaCommonInput* input);
 
 	/**
 	* Samples the challenge for this protocol.
@@ -315,7 +314,7 @@ public:
 	* Waits to the prover's second message and then verifies the proof.	<p>
 	* This is a blocking function!
 	*/
-	bool processVerify(shared_ptr<SigmaCommonInput> input);
+	bool processVerify(SigmaCommonInput* input);
 	/**
 	* Sets the given challenge
 	*/
@@ -342,7 +341,7 @@ private:
 	* Waits for message from receiver and returns it.
 	* Fills an instance of SigmaProtocolMsg with body from the received message
 	*/
-	void receiveMsgFromProver(shared_ptr<SigmaProtocolMsg> msg);
+	void receiveMsgFromProver(SigmaProtocolMsg* msg);
 	/**
 	* Sends the challenge to the prover.
 	*/

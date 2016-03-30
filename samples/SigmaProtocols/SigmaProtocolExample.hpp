@@ -80,7 +80,7 @@ public:
 		shared_ptr<SigmaDlogProverInput> proverinput) override {
 		auto sp = new SigmaProtocolProver(server, proverComputation);
 		cout << "--> running simple sigma dlog prover" << endl;
-		sp->prove(proverinput);
+		sp->prove(proverinput.get());
 	}
 	virtual bool verify(shared_ptr<ChannelServer> server,
 		shared_ptr<SigmaDlogVerifierComputation> verifierComputation,
@@ -90,7 +90,7 @@ public:
 		shared_ptr<DlogGroup> dg) override{
 		auto v = new SigmaProtocolVerifier(server, verifierComputation, msgA, msgZ);
 		cout << "--> running simple sigma dlog verify" << endl;
-		bool verificationPassed = v->verify(commonInput);
+		bool verificationPassed = v->verify(commonInput.get());
 		delete v;
 		return verificationPassed;
 	}

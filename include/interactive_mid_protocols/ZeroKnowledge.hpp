@@ -148,7 +148,7 @@ private:
 	*/
 	void processFirstMsg(shared_ptr<SigmaProverInput> input) {
 		// compute the first message by the underlying proverComputation.
-		auto a = sProver->computeFirstMsg(input);
+		auto a = sProver->computeFirstMsg(input.get());
 		// send the first message.
 		sendMsgToVerifier(a);
 	}
@@ -285,7 +285,7 @@ private:
 		// if transcript (a, e, z) is accepting in sigma on input x, output ACC
 		// else outupt REJ
 		receiveMsgFromProver(z);
-		return sVerifier->verify(input, a, z);
+		return sVerifier->verify(input.get(), a.get(), z.get());
 	};
 };
 
@@ -541,7 +541,7 @@ private:
 	*/
 	void processFirstMsg(shared_ptr<SigmaProverInput>  input) {
 		// compute the first message by the underlying proverComputation.
-		auto a = sProver->computeFirstMsg(input);
+		auto a = sProver->computeFirstMsg(input.get());
 		auto msg = a->toString();
 		// send the first message.
 		sendMsgToVerifier(msg);
@@ -619,7 +619,7 @@ private:
 	bool proccessVerify(shared_ptr<SigmaCommonInput> input,
 		shared_ptr<SigmaProtocolMsg> a, shared_ptr<SigmaProtocolMsg> z) {
 		// run transcript (a, e, z) is accepting in sigma on input x
-		return sVerifier->verify(input, a, z);
+		return sVerifier->verify(input.get(), a.get(), z.get());
 	};
 
 public:

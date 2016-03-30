@@ -4,11 +4,11 @@
 /*   SigmaProtocolProver   */
 /***************************/
 
-void SigmaProtocolProver::processFirstMsg(shared_ptr<SigmaProverInput> input) {
+void SigmaProtocolProver::processFirstMsg(SigmaProverInput* input) {
 	// compute the first message by the underlying proverComputation.
 	auto a = proverComputation->computeFirstMsg(input);
 	// send the first message.
-	sendMsgToVerifier(a);
+	sendMsgToVerifier(a.get());
 	// save the state of this protocol.
 	doneFirstMsg = true;
 }
@@ -23,7 +23,7 @@ void SigmaProtocolProver::processSecondMsg() {
 	auto z = proverComputation->computeSecondMsg(&(v->at(0)), v->size());
 
 	// send the second message.
-	sendMsgToVerifier(z);
+	sendMsgToVerifier(z.get());
 
 	// save the state of this sigma protocol.
 	doneFirstMsg = false;
@@ -34,7 +34,7 @@ void SigmaProtocolProver::processSecondMsg() {
 /***************************/
 /*   SigmaProtocolVerifier */
 /***************************/
-bool SigmaProtocolVerifier::verify(shared_ptr<SigmaCommonInput> input) {
+bool SigmaProtocolVerifier::verify(SigmaCommonInput* input) {
 	// samples the challenge.
 	sampleChallenge();
 	// sends the challenge.
@@ -46,7 +46,7 @@ bool SigmaProtocolVerifier::verify(shared_ptr<SigmaCommonInput> input) {
 void SigmaProtocolVerifier::sendChallenge() {
 
 	// wait for first message from the prover.
-	receiveMsgFromProver(a);
+	receiveMsgFromProver(a.get());
 
 	// get the challenge from the verifierComputation.
 	auto challengePair = verifierComputation->getChallenge();
@@ -60,19 +60,19 @@ void SigmaProtocolVerifier::sendChallenge() {
 	doneChallenge = true;
 }
 
-bool SigmaProtocolVerifier::processVerify(shared_ptr<SigmaCommonInput> input) {
+bool SigmaProtocolVerifier::processVerify(SigmaCommonInput* input) {
 	if (!doneChallenge)
 		throw IllegalStateException("sampleChallenge and sendChallenge should be called before processVerify");
 	// wait for second message from the prover.
-	receiveMsgFromProver(z);
+	receiveMsgFromProver(z.get());
 	// verify the proof
-	bool verified = verifierComputation->verify(input, a, z);
+	bool verified = verifierComputation->verify(input, a.get(), z.get());
 	// save the state of the protocol.
 	doneChallenge = false;
 	return verified;
 }
 
-void SigmaProtocolVerifier::receiveMsgFromProver(shared_ptr<SigmaProtocolMsg> msg) {
+void SigmaProtocolVerifier::receiveMsgFromProver(SigmaProtocolMsg* msg) {
 	auto v = channel->read_one();
 	msg->initFromByteVector(*v);
 }

@@ -62,7 +62,7 @@ public:
 	* @param challenge
 	* @return the output of the computation - (a, e, eSize, z).
 	*/
-	shared_ptr<SigmaSimulatorOutput> simulate(shared_ptr<SigmaCommonInput> input, 
+	shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input, 
 		shared_ptr<byte> challenge, int challenge_size) override;
 	/**
 	* Computes the simulator computation, using random challenge.<p>
@@ -72,12 +72,12 @@ public:
 	* @param input MUST be an instance of SigmaDlogCommonInput.
 	* @return the output of the computation - (a, e, z).
 	*/
-	shared_ptr<SigmaSimulatorOutput> simulate(shared_ptr<SigmaCommonInput> input) override;
+	shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input) override;
 
 private:
 	shared_ptr<DlogGroup> dlog; 		//Underlying DlogGroup.
 	int t;					//Soundness parameter.
-	std::mt19937 random;
+	mt19937 random;
 	biginteger qMinusOne;
 	/**
 	* Checks if the given challenge length is equal to the soundness parameter.
@@ -145,7 +145,7 @@ public:
 	* @param input MUST be an instance of SigmaDlogProverInput.
 	* @return the computed message
 	*/
-	shared_ptr<SigmaProtocolMsg> computeFirstMsg(shared_ptr<SigmaProverInput> input) override;
+	shared_ptr<SigmaProtocolMsg> computeFirstMsg(SigmaProverInput* input) override;
 	/**
 	* Computes the secong message from the protocol.<p>
 	* "COMPUTE z = (r + ew) mod q".<p>
@@ -272,8 +272,7 @@ public:
 	* @param input MUST be an instance of SigmaDlogCommonInput.
 	* @return true if the proof has been verified; false, otherwise.
 	*/
-	bool verify(shared_ptr<SigmaCommonInput> input, shared_ptr<SigmaProtocolMsg> a,
-		shared_ptr<SigmaProtocolMsg> z) override;
+	bool verify(SigmaCommonInput* input, SigmaProtocolMsg* a, SigmaProtocolMsg* z) override;
 
 private:
 	shared_ptr<DlogGroup> dlog;		// Underlying DlogGroup.
