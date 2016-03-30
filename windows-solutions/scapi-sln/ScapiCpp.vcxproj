@@ -104,11 +104,27 @@
       <AdditionalIncludeDirectories>..\..\lib;C:\OpenSSL-Win64\include;C:\local\boost_1_60_0;..\..\lib\MiraclWin64\source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_SCL_SECURE_NO_WARNINGS;_WIN32_WINNT=0x06030000;__WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\circuits\BooleanCircuits.cpp" />
-    <ClCompile Include="..\..\src\circuits\FastGarbledBooleanCircuit.cpp" />
+    <ClCompile Include="..\..\src\circuits\FourToTwoGarbledBoleanCircuitNoAssumptions.cpp" />
+    <ClCompile Include="..\..\src\circuits\HalfGatesGarbledBoleanCircuitNoFixedKey.cpp" />
+    <ClCompile Include="..\..\src\circuits\FreeXorGarbledBooleanCircuit.cpp" />
+    <ClCompile Include="..\..\src\circuits\GarbledBooleanCircuit.cpp" />
+    <ClCompile Include="..\..\src\circuits\GarbledBooleanCircuitFixedKey.cpp" />
+    <ClCompile Include="..\..\src\circuits\GarbledBooleanCircuitNoFixedKey.cpp" />
+    <ClCompile Include="..\..\src\circuits\GarbledCircuitFactory.cpp" />
+    <ClCompile Include="..\..\src\circuits\HalfGatesGarbledBooleanCircuit.cpp" />
+    <ClCompile Include="..\..\src\circuits\intrin_sequential_ks1_enc1.c" />
+    <ClCompile Include="..\..\src\circuits\intrin_sequential_ks2_enc2.c" />
+    <ClCompile Include="..\..\src\circuits\intrin_sequential_ks4_enc4.c" />
+    <ClCompile Include="..\..\src\circuits\intrin_sequential_ks4_enc8.c" />
+    <ClCompile Include="..\..\src\circuits\RowReductionGarbledBooleanCircuit.cpp" />
+    <ClCompile Include="..\..\src\circuits\StandardGarbledBooleanCircuit.cpp" />
+    <ClCompile Include="..\..\src\circuits\TedKrovetzAesNiWrapperC.cpp" />
     <ClCompile Include="..\..\src\comm\TwoPartyComm.cpp" />
     <ClCompile Include="..\..\src\infra\Common.cpp" />
     <ClCompile Include="..\..\src\infra\ConfigFile.cpp" />
@@ -134,7 +150,23 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\circuits\BooleanCircuits.hpp" />
-    <ClInclude Include="..\..\include\circuits\FastGarbledBooleanCircuit.hpp" />
+    <ClInclude Include="..\..\include\circuits\Compat.h" />
+    <ClInclude Include="..\..\include\circuits\Config.h" />
+    <ClInclude Include="..\..\include\circuits\FourToTwoGarbledBoleanCircuitNoAssumptions.h" />
+    <ClInclude Include="..\..\include\circuits\HalfGatesGarbledBoleanCircuitNoFixedKey.h" />
+    <ClInclude Include="..\..\include\circuits\FreeXorGarbledBooleanCircuit.h" />
+    <ClInclude Include="..\..\include\circuits\GarbledBooleanCircuit.h" />
+    <ClInclude Include="..\..\include\circuits\GarbledBooleanCircuitFixedKey.h" />
+    <ClInclude Include="..\..\include\circuits\GarbledBooleanCircuitNoFixedKey.h" />
+    <ClInclude Include="..\..\include\circuits\GarbledCircuitFactory.hpp" />
+    <ClInclude Include="..\..\include\circuits\GarbledGate.h" />
+    <ClInclude Include="..\..\include\circuits\HalfGatesGarbledBooleanCircuit.h" />
+    <ClInclude Include="..\..\include\circuits\intrinsic.h" />
+    <ClInclude Include="..\..\include\circuits\RowReductionGarbledBooleanCircuit.h" />
+    <ClInclude Include="..\..\include\circuits\StandardGarbledBooleanCircuit.h" />
+    <ClInclude Include="..\..\include\circuits\stdafx.h" />
+    <ClInclude Include="..\..\include\circuits\targetver.h" />
+    <ClInclude Include="..\..\include\circuits\TedKrovetzAesNiWrapperC.h" />
     <ClInclude Include="..\..\include\comm\Comm.hpp" />
     <ClInclude Include="..\..\include\comm\Message.hpp" />
     <ClInclude Include="..\..\include\comm\TwoPartyComm.hpp" />

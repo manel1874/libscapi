@@ -2,8 +2,9 @@
 
 #include <boost/thread/thread.hpp>
 #include "../../include/comm/TwoPartyComm.hpp"
-#define AES_KEY BC_AES_KEY // AES_KEY is defined both in FastGarbledBooleanCircuit and in OTSemiHonestExtension
-#include "../../include/circuits/FastGarbledBooleanCircuit.hpp"
+#define AES_KEY BC_AES_KEY // AES_KEY is defined both in GarbledBooleanCircuit and in OTSemiHonestExtension
+//#include "../../include/circuits/FastGarbledBooleanCircuit.hpp"
+#include "../../include/circuits/GarbledBooleanCircuit.h"
 #undef AES_KEY
 #define AES_KEY OT_AES_KEY
 #include "../../include/interactive_mid_protocols/OTSemiHonestExtension.hpp"
@@ -20,9 +21,10 @@
 class PartyOne {
 private:
 	OTBatchSender * otSender;			//The OT object that used in the protocol.	
-	FastGarbledBooleanCircuit * circuit;	//The garbled circuit used in the protocol.
+	GarbledBooleanCircuit * circuit;	//The garbled circuit used in the protocol.
 	ChannelServer * channel;				//The channel between both parties.
-	FastCircuitCreationValues values;
+	tuple<block*, block*, vector<byte> > values;//this tuple includes the input and output keys (block*) and the translation table (vector)
+														 //to be used after filled by garbling the circuit
 
 	/**
 	* Sends p1 input keys to p2.
@@ -39,7 +41,7 @@ public:
 	* @param otSender The OT object to use in the protocol.
 	* @param inputForTest
 	*/
-	PartyOne(ChannelServer * channel, OTBatchSender * otSender, FastGarbledBooleanCircuit * circuit) {
+	PartyOne(ChannelServer * channel, OTBatchSender * otSender, GarbledBooleanCircuit * circuit) {
 		this->channel = channel;
 		this->otSender = otSender;
 		this->circuit = circuit;
@@ -62,7 +64,7 @@ public:
 class PartyTwo {
 private:
 	OTBatchReceiver * otReceiver;			//The OT object that used in the protocol.	
-	FastGarbledBooleanCircuit * circuit;	//The garbled circuit used in the protocol.
+	GarbledBooleanCircuit * circuit;	//The garbled circuit used in the protocol.
 	ChannelServer * channel;				//The channel between both parties.
 	byte* p1Inputs;
 	int p1InputsSize;
@@ -82,7 +84,7 @@ public:
 	* @param otSender The OT object to use in the protocol.
 	* @param inputForTest
 	*/
-	PartyTwo(ChannelServer * channel, OTBatchReceiver * otReceiver, FastGarbledBooleanCircuit * circuit) {
+	PartyTwo(ChannelServer * channel, OTBatchReceiver * otReceiver, GarbledBooleanCircuit * circuit) {
 		this->channel = channel;
 		this->otReceiver = otReceiver;
 		this->circuit = circuit;

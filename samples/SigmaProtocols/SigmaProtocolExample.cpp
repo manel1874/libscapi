@@ -29,7 +29,7 @@ void run_verifier(shared_ptr<ChannelServer> server, SigmaDlogParams sdp, ProverV
 
 }
 
-int main(int argc, char* argv[]) {
+int mainSigma(int argc, char* argv[]) {
 	if (argc != 3) {
 		SigmaUsage(argv[0]);
 		return 1;

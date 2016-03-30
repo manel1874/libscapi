@@ -1,4 +1,5 @@
 #include "YaoExample.hpp"
+#include "../../include/circuits/GarbledCircuitFactory.hpp"
 
 struct YaoConfig {
 	int number_of_iterations;
@@ -22,6 +23,19 @@ struct YaoConfig {
 	};
 };
 
+void connect(ChannelServer * channel_server) {
+	cout << "PartyOne: Connecting to Receiver..." << endl;
+	int sleep_time = 50;
+	this_thread::sleep_for(chrono::milliseconds(sleep_time));
+	channel_server->connect();
+	while(!channel_server->is_connected())
+	{
+		cout << "Failed to connect. sleeping for " << sleep_time << " milliseconds" << endl;
+		this_thread::sleep_for(chrono::milliseconds(sleep_time));
+	}
+	cout << "Sender Connected!" << endl;
+}
+
 vector<byte> * readInputAsVector(string input_file) {
 	cout << "reading from file " << input_file << endl;;
 	auto sc = scannerpp::Scanner(new scannerpp::File(input_file));
@@ -32,10 +46,9 @@ vector<byte> * readInputAsVector(string input_file) {
 	return inputVector;
 }
 
-FastGarbledBooleanCircuit * create_circuit(YaoConfig yao_config) {
+GarbledBooleanCircuit * create_circuit(YaoConfig yao_config) {
 	//return new ScNativeGarbledBooleanCircuitNoFixedKey(yao_config.circuit_file, true);
-	return new ScNativeGarbledBooleanCircuit(yao_config.circuit_file, 
-		ScNativeGarbledBooleanCircuit::CircuitType::FREE_XOR_HALF_GATES, false);
+	return GarbledCircuitFactory::createCircuit(yao_config.circuit_file, GarbledCircuitFactory::CircuitType::FIXED_KEY_FREE_XOR_HALF_GATES, false);
 	//if (yao_config.circuit_type == "FixedKey")
 	//	return new ScNativeGarbledBooleanCircuit(yao_config.circuit_file, 
 	//		ScNativeGarbledBooleanCircuit::CircuitType::FREE_XOR_HALF_GATES, false);
@@ -56,15 +69,18 @@ void execute_party_one(YaoConfig yao_config) {
 	
 	// create the garbled circuit
 	start = chrono::system_clock::now();
-	FastGarbledBooleanCircuit * circuit = create_circuit(yao_config);
-	print_elapsed_ms(start, "PartyOne: Creating FastGarbledBooleanCircuit");
+	//FastGarbledBooleanCircuit * circuit = create_circuit(yao_config);
+
+	GarbledBooleanCircuit* circuit = GarbledCircuitFactory::createCircuit(yao_config.circuit_file, GarbledCircuitFactory::CircuitType::FIXED_KEY_FREE_XOR_HALF_GATES, false);
+
+	print_elapsed_ms(start, "PartyOne: Creating GarbledBooleanCircuit");
 
 	// create the semi honest OT extension sender
 	SocketPartyData senderParty(yao_config.sender_ip, 7766);
 	OTBatchSender * otSender = new OTSemiHonestExtensionSender(senderParty, 163, 1);
 
 	// connect to party two
-	channel_server->try_connecting();
+	connect(channel_server);
 	
 	// get the inputs of P1 
 	vector<byte>* ungarbledInput = readInputAsVector(yao_config.input_file_1);
@@ -102,7 +118,7 @@ void execute_party_two(YaoConfig yao_config) {
 
 	// create the garbled circuit
 	start = scapi_now();
-	FastGarbledBooleanCircuit * circuit = create_circuit(yao_config);
+	GarbledBooleanCircuit * circuit = create_circuit(yao_config);
 	print_elapsed_ms(start, "PartyTwo: creating FastGarbledBooleanCircuit");
 
 	// create the OT receiver.
@@ -156,7 +172,7 @@ void Usage(char * argv0) {
 	std::cerr << "Usage: " << argv0 << " party_number config_path" << std::endl;
 }
 
-int main99898(int argc, char* argv[]) {
+int main(int argc, char* argv[]) {
 	Logger::configure_logging();
 	if (argc != 3) {
 		Usage(argv[0]);
@@ -172,6 +188,8 @@ int main99898(int argc, char* argv[]) {
 		Usage(argv[0]);
 		return 1;
 	}
+
+	//system("pause");
 	return 0;
 }
 

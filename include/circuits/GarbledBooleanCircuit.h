@@ -27,12 +27,15 @@
 
 #include "Config.h"
 #include "TedKrovetzAesNiWrapperC.h"
+#include "../infra/Common.hpp"
+#include <tuple>
+#include <vector>
 
 
 struct GarbledGate;
 
 /*
- * GarbledBooleanCircuit is a general abstract class for garbled circuits with fixed key. 
+ * GarbledBooleanCircuit is a general abstract class for garbled circuits. 
  * All garbled circuits have four main operations: 
  * 1. The garble function that creates the garbled table
  * 2. The compute function that computes a result on a garbled circuit on the input which is the keys that were chosen for each input wire. 
@@ -47,31 +50,34 @@ struct GarbledGate;
 class GarbledBooleanCircuit
 {
 public:
+	
 	/*
-	 * This method generates both keys for each wire. Then, creates the garbled table according to those values.
-	 * It is a virtual function since each derived class generates the garbled table differently.
-	 * The keys for each wire are not saved. The input keys and the output keys that were created are returned to the 
-	 * user. The user usually saves these value for later use. The user also gets the generated translation table, which is
-	 * the signal bits of the output wires.
-	 *
-	 * emptyBothInputKeys : An empty block array that will be filled with both input keys generated in garble.
-	 * emptyBothOutputKeys : An empty block array that will be filled with both output keys generated in garble.
-	 * emptyTranslationTable : An empty int array that will be filled with 0/1 signal bits that we chosen in random in this function.
-	 */
-	 virtual void garble(block *emptyBothInputKeys, block *emptyBothOutputKeys, unsigned char *emptyTranslationTable, block seed) = 0;
+	* This method generates calls the undelying implementation of garble in the derived classes using the seed.
+	* It generates inputs outputs and tranlation table and passes that to the underlying garble to fill.
+	* The keys for each wire are not saved. The input keys and the output keys that were created are returned to the
+	* user. The user usually saves these value for later use. The user also gets the generated translation table, which is
+	* the signal bits of the output wires.
+	*
+	* return values in the tuple:
+	* block * : A block array that will be filled with both input keys generated in garble.
+	* block * : An empty block array that will be filled with both output keys generated in garble.
+	* byte : An char array that will be filled with 0/1 signal bits that we chosen in random in this function.
+	*/
+	 std::tuple<block*, block*, std::vector<byte> > garble(block *seed = nullptr);
+
 
 	/**
 	 * This method computes the circuit for the given input singleWiresInputKeys. 
 	 * It returns a the garbled values keys for the output wires. This output can be translated via the translate() method
 	 * if the translation table is set.
 	 */
-	void compute(block *singleWiresInputKeys,block * Output);
+	virtual void compute(block *singleWiresInputKeys,block * Output) = 0;
 
 	/**
      * The verify method is used in the case of malicious adversaries.
      * For example, Alice can constructs n circuits and Bob can verify n-1 of them (of his choice) to confirm that they are indeed garbling of the 
      * agreed upon non garbled circuit. In order to verify, Alice has to give Bob both keys for each of the input wires.
-	 *
+
      * bothInputKeys: An array containing both keys for each input wire. For each input wire , 
 	 * the first garbled value is the 0 encoding, that is the 0 garbled value, and the second value is the 1 encoding.
      * returns:  true, if this GarbledBooleanCircuit is a garbling the given keys, false otherwise.
@@ -102,17 +108,11 @@ public:
 	virtual bool internalVerify(block *bothWiresInputKeys, block *emptyBothWireOutputKeys) = 0;
 	
 
-
-
 protected:
 
 	bool isFreeXor;//A flag indicating if the user wants to use the optimization of FreeXor.
-
-	bool isRowReduction;//A flag that indicates that the row reduction optimization is used, that is, only 3 blocks per gate instead of 4 in the garbled table
-
+	
 	bool isNonXorOutputsRequired;//A flag that indicates that the output wires randomized rather than have a common delta between the 0-wire and the 1-wire.
-
-	bool isTwoRows;
 
 	int numberOfInputs;//The total number of inputs for all parties
 	int numberOfOutputs;//Number of outputs
@@ -125,23 +125,20 @@ protected:
 	int numOfNotGates;//The number of NOT gates. This is used when the free xor optimization is used in order to use garbled table just 
 					   //for the non-XOR gates.
 
+	bool NOTgateOptimization;
+
 	int numberOfParties;//The number parties participating in the protocol that uses the circuit.
-	int* numOfInputsForEachParty;//An array that holds for each party the number of inputs it has in the circuit.
+	std::vector<int> numOfInputsForEachParty;//An array that holds for each party the number of inputs it has in the circuit.
 
-	int* inputIndices;//The indices of the input wires.
-	int* outputIndices;//The indices of the output wires.
-
-	block* fixedKey;//ﬁxed-key AES used for the garbling process. This will be hardcoded unless the user changes it. The fixed key
-				   //optimization reduses the number of the costly setKey function of the AES prp and thus optimize the performance.
-					//We use a pointer since new with 32 bit does not 16-align the variable by default
-
+	std::vector<int> inputIndices;//The indices of the input wires.
+	std::vector<int> outputIndices;//The indices of the output wires.
 	
-	block* seed;//The seed is used to create the garbled value via AES. The seed is the key of the AES that generates random values.
-				//We use a pointer since new with 32 bit does not 16-align the variable by default
+	block seed;//The seed is used to create the garbled value via AES. The seed is the key of the AES that generates random values.
 
 	 /*
-  	 * We store the garbled tables in a one dimensional array of blocks. 
-	 * GarbleTable is an array of blocks(128 bit variable), the garbled in the array corresponds to the gate.
+  	 * We store the garbled tables in a one dimensional array of GarbleTable. 
+	 * GarbleTable is an array of blocks(128 bit variable), the garbled in the array corresponds to the gate 
+  	 * Each table of each gate is a one dimensional array of bytes rather than an array of ciphertexts. 
   	 * This is for time/space efficiency reasons: If a single garbled table is an array of ciphertext that holds a byte array the space
   	 * stored by java is big. The main array holds references for each item (4 bytes). Each array in java has an overhead of 12 bytes. 
   	 * Thus the garbled table with ciphertexts has at least (12+4)*number of rows overhead.
@@ -151,8 +148,7 @@ protected:
 	 block* garbledTables;
 
 	
-	 GarbledGate *garbledGates;//An array that holds the garbled gates. 
-
+	 GarbledGate *garbledGates;//An array that holds the garbled gates. This is fiiled by the derived classes according to the derived class needs
 	/*
 	 * The translation table stores the signal bit for the output wires. Thus, it just tells you whether the wire coming out is a 
 	 * 0 or 1 but does not reveal information about the 2 keys of the wire. This is good since it is possible that a circuit output 
@@ -161,15 +157,14 @@ protected:
 	 * privacy and/or correctness will not be preserved. Therefore, we only reveal the signal bit, and the other
 	 * possible value for the wire is not stored on the translation table.
 	 */
-	unsigned char* translationTable;
+	 std::vector<byte> translationTable;
 
 	/*
-	/two aes encryption schemes that will be used in all the derived classes.
+	/two aes encryption schemes that will be used in all the derived classes
 	/The seed is given by the user of the garbled circuit and the fixedKey is hardcoded
 	*/
 	
-	AES_KEY* aesFixedKey;//We use a pointer since new with 32 bit does not 16-align the variable by default
-	AES_KEY* aesSeedKey;//We use a pointer since new with 32 bit does not 16-align the variable by default
+	AES_KEY aesSeedKey;//We use a pointer since new with 32 bit does not 16-align the variable by default
 
 
 	//These values could have been defined locally in the functions that use them, however, if we define and allocate
@@ -179,7 +174,6 @@ protected:
 	block* garbledWires;
 	block* computedWires;
 
-
 public:
 	
 	GarbledBooleanCircuit(void);
@@ -187,12 +181,12 @@ public:
 
 	/**
 	* Reads a file and fill the gates, number of parties, input indices, output indices and so on.
-	* In addition initializes the member variables such as isFreeXor, isRowReduction and other variables that are set to NULL.
-	* It uses a fixed pre-defined fixed key and initializes the object accordingly.
+	* In addition initializes the member variables such as isFreeXor, isRowReduction and other variables that are set to nullptr.
+	* It uses a fixed pre-defined fixed key and initializes the openSsl object accordingly.
 	* It also allocates memory according to the circuit it creates, such as computedWires, garbledWires and so on. This
-	* is done in the construction, rather than in the relevant function to reduce cache misses.
+	* is done in the construction, rather than in the relevant function to reduce the cache misses.
 	*/
-	void createCircuit(const char* fileName, bool isFreeXor, bool isRowReduction, bool isNonXorOutputsRequired);
+	virtual void createCircuit(const char* fileName, bool isFreeXor, bool isNonXorOutputsRequired=false);
 
 	/**
 	* This method read text file and creates an object of GarbledBooleanCircuit according to the file.
@@ -207,11 +201,6 @@ public:
 	* For two party it should be called for each party seperatly.
 	*/
 	int * readInputsFromFile(char* fileName);
-
-	/**
-	* A virtual function used to allocate memory by the derived classes. 
-	*/
-	virtual void createCircuitMemory(const char* fileName, bool isNonXorOutputsRequired) = 0;
 
 	
 	/**
@@ -230,14 +219,14 @@ public:
      * and needs the translation table as well to complete the computation of the circuit.
      * returns : the translation table of the circuit..
 	 */
-	unsigned char* getTranslationTable();
+	std::vector<byte> getTranslationTable() { return translationTable; };
 
 	/**
 	 * Sets the translation table of the circuit. 
 	 * This is necessary when the garbled tables were set and we would like to compute the circuit later on. 
 	 * translationTable : This value should match the garbled tables of the circuit.
 	 */
-	void setTranslationTable(unsigned char* translationTable);
+	void setTranslationTable(std::vector<unsigned char> translationTable);
 	
 	/**
 	 * The garbled tables are stored in the circuit for all the gates. This method returns the garbled tables which is a GarbledTable array 
@@ -264,59 +253,25 @@ public:
 	/**
 	* Get function for class members that may be needed by users of the class, rather than a derived class.
 	*/
-	int* getNumOfInputsForEachParty();
-	int* getOutputIndices() { return outputIndices;};
+	std::vector<int> getNumOfInputsForEachParty();
+	std::vector<int> getOutputIndices() { return outputIndices;};
 	int getNumberOfOutputs() {return numberOfOutputs;};
 	int getNumberOfInputs() { return numberOfInputs;};
-	int* getInputIndices() {return inputIndices;};
+	int getNumberOfInputs(int partyNumber) { return numOfInputsForEachParty[partyNumber - 1]; };
+	std::vector<int> getInputIndices() {return inputIndices;};
 	int getNumberOfParties() { return numberOfParties;};
 	int getNumberOfGates() { return numberOfGates;};
 	int getNumOfXorGates() { return numOfXorGates;};
+	int getNumOfNotGates() { return numOfNotGates; };
 	int getLastWireIndex() const { return lastWireIndex; };
-	bool getIsRowReduction();
-	bool getIsNonXorOutputsRequired() const{ return isNonXorOutputsRequired; };
-	bool getIsTwoRows() const { return isTwoRows; };
+	bool getIsFreeXor() const { return isFreeXor; };
+	virtual int getGarbledTableSize() = 0;
+	std::vector<int> getInputWireIndices(int partyNumber);
 
 
 	protected:
 
-
-		/*
-		* In some cases it is important that the output keys of each wire will not all have the same fixed delta xor
-		* between the 0-wire and the 1-wire (for example when the (constructor of the circuit) garbler needs to send both outputs
-		* to the party that computes the circuit, if the delta is the same it breaks the security since the delta of the
-		* the entire circuit is revealed.
-		*
-		* This function garbles the output keys using identity gates, the computing party will need to use the version 
-		* that decrypts these identity gates by turning the flag isNonXorOutputsRequired to true.
-		* Garble calls this function only when this flag is true.
-		*/
-		void garbleOutputWiresToNoFixedDelta(block *deltaFreeXor, int nonXorIndex, block *emptyBothOutputKeys);
-
-		/*
-		* In some cases it is important that the output keys of each wire will not all have the same fixed delta xor
-		* between the 0-wire and the 1-wire (for example when the (constructor of the circuit) garbler needs to send the both outputs
-		* to the party that computes the circuit, if the delta is the same it breaks the security since the delta of the
-		* the entire circuit is revealed.
-		*
-		* This function computes the identity gates that the garbeler had created.
-		*/
-		void computeOutputWiresToNoFixedDelta(int nonXorIndex, block * Output);
-
-		
-		/*
-		* In some cases it is important that the output keys of each wire will not all have the same fixed delta xor
-		* between the 0-wire and the 1-wire (for example when the (constructor of the circuit) garbler needs to send the both outputs
-		* to the party that computes the circuit, if the delta is the same it breaks the security since the delta of the
-		* the entire circuit is revealed.
-		*
-		* This function just turns the keys with fixed delta between them to the keys without delta using the seed in the same way that
-		* the garble function does. It does not create a garbled table for thes identity gates since there is no use.
-		* The last verification will be done in verifyTranslationTable that makes sure that the new outputs with no fixed delta
-		* have signal bits matching the corresponding bit in the translation table.
-		*/
-		void verifyOutputWiresToNoFixedDelta(block *bothOutputsKeys);
-
+		virtual void createCircuitMemory(const char* fileName, bool isNonXorOutputsRequired) = 0;
 
 		/**
 		* turns the string of the truth table that was taken as a decimal number into a number between 0 and 15 which represents the truth table
@@ -353,16 +308,22 @@ public:
 		*Sets the signal of wire1 to be the complement of wire0.
 		*/
 		void setSignalBit(block *wire0, block *wire1){ *((unsigned char *)(wire1)) = *((unsigned char *)(wire0)) ^ 1; };
-
 		
+
+		private:
+
 		/*
-		* Deletes memory without using the destructor.
+		* This method generates both keys for each wire. Then, creates the garbled table according to those values.
+		* It is a virtual function since each derived class generates the garbled table differently.
+		* The keys for each wire are not saved. The input keys and the output keys that were created are returned to the
+		* user. The user usually saves these value for later use. The user also gets the generated translation table, which is
+		* the signal bits of the output wires.
+		*
+		* emptyBothInputKeys : An empty block array that will be filled with both input keys generated in garble.
+		* emptyBothOutputKeys : An empty block array that will be filled with both output keys generated in garble.
+		* emptyTranslationTable : An empty int array that will be filled with 0/1 signal bits that we chosen in random in this function.
 		*/
-		void deleteMemory();
-
-
-	
-
+		virtual void garble(block * emptyBothInputKeys, block * emptyBothOutputKeys, std::vector<unsigned char> emptyTranslationTable, block seed) = 0;
 		
 };
 

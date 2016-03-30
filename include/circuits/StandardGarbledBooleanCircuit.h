@@ -24,7 +24,8 @@
 */
 
 #pragma once
-#include "GarbledBooleanCircuit.h"
+#include "GarbledBooleanCircuitFixedKey.h"
+#include <vector>
 
 /**
 *The StandardGarbledBooleanCircuit is a standard garbled circuit that does not use optimizations such as FreeXor and row reduction, only fixed key.
@@ -37,7 +38,7 @@
 *
 */
 class StandardGarbledBooleanCircuit :
-	public GarbledBooleanCircuit
+	public GarbledBooleanCircuitFixedKey
 {
 public:
 	StandardGarbledBooleanCircuit(const char* fileName);
@@ -50,30 +51,7 @@ private:
 	
 	block* indexArray;
 
-private :
-
-	
-
-
 public:
-
-
-	/*
-	* Creates the memory needed for this class in addition to the memory that is allocated by the base class.
-	*/
-	void createCircuitMemory(const char* fileName, bool isNonXorOutputsRequired = false);
-
-	/*
-	* This method generates both keys for each wire and creates the garbled table according to those values.
-	* The keys for each wire are not saved. The input keys and the output keys that were created are returned to the
-	* user. The user usually saves these value for later use. The user also gets the generated translation table, which is
-	* the signal bits of the output wires.
-	*
-	* emptyBothInputKeys : An empty block array that will be filled with both input keys generated in garble.
-	* emptyBothOutputKeys : An empty block array that will be filled with both output keys generated in garble.
-	* emptyTranslationTable : An empty char array that will be filled with 0/1 signal bits that we chosen in random in this function.
-	*/
-	void garble(block *emptyBothInputKeys, block *emptyBothOutputKeys, unsigned char *emptyTranslationTable, block seed);
 
 	/**
 	* This function behaves exactly as the verify method except the last phase.
@@ -85,9 +63,30 @@ public:
 	*
 	* returns : true if the garbled table of this circuit is complied with the given input keys, false otherwise.
 	*/
-	bool internalVerify(block *bothInputKeys, block *emptyBothWireOutputKeys);
+	bool internalVerify(block *bothInputKeys, block *emptyBothWireOutputKeys) override;
 
+	int getGarbledTableSize() override;
+
+protected:
+
+
+	/*
+	* Creates the memory needed for this class in addition to the memory that is allocated by the base class.
+	*/
+	void createCircuitMemory(const char* fileName, bool isNonXorOutputsRequired = false) override;
 private:
+
+	/*
+	* This method generates both keys for each wire and creates the garbled table according to those values.
+	* The keys for each wire are not saved. The input keys and the output keys that were created are returned to the
+	* user. The user usually saves these value for later use. The user also gets the generated translation table, which is
+	* the signal bits of the output wires.
+	*
+	* emptyBothInputKeys : An empty block array that will be filled with both input keys generated in garble.
+	* emptyBothOutputKeys : An empty block array that will be filled with both output keys generated in garble.
+	* emptyTranslationTable : An empty char array that will be filled with 0/1 signal bits that we chosen in random in this function.
+	*/
+	void garble(block *emptyBothInputKeys, block *emptyBothOutputKeys, std::vector<unsigned char> emptyTranslationTable, block seed) override;
 
 	/*
 	* This function inits the keys for all the wires in the circuit and initializes the seed aes encryptions. It also choses

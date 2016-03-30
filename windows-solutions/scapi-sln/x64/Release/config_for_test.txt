@@ -1,0 +1,5 @@
+no_section_arg=text_for_no_section_arg
+[section_1]
+foo=text_for_foo
+[section_2]
+water=text_for_water

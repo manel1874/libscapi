@@ -23,7 +23,8 @@
 *
 */
 #pragma once
-#include "GarbledBooleanCircuit.h"
+#include "GarbledBooleanCircuitFixedKey.h"
+#include <vector>
 
 
 /**
@@ -40,7 +41,7 @@
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Meital Levy)
 */
 class FreeXorGarbledBooleanCircuit :
-	public GarbledBooleanCircuit
+	public GarbledBooleanCircuitFixedKey
 {
 public:
 	FreeXorGarbledBooleanCircuit(void);
@@ -49,7 +50,7 @@ public:
 	
 	FreeXorGarbledBooleanCircuit(const char* fileName, bool isNonXorOutputsRequired=false);
 private:
-	block *deltaFreeXor;//This is used to get the second garbled value in freeXor optimization. The second garbled value is the XOR 
+	block deltaFreeXor;//This is used to get the second garbled value in freeXor optimization. The second garbled value is the XOR 
 						//of the first key and the delta. The delta is chosen at random.
 						//We use a pointer since new with 32 bit does not 16-align the variable by default.
 
@@ -60,13 +61,32 @@ private:
 					  //with one chuck gaining pipelining	
 	
 
-public:
 
+
+
+public:
+	/**
+	* This function behaves exactly as the verify method except the last phase.
+	* The verify function verifies that the translation table matches the resulted output garbled values, while this function does not, rather,
+	* it returns the resulted output garbled values.
+	*
+	* bothWiresInputKeys : both keys for each input wire. This array must be filled with both input keys
+	* emptyBothWireOutputKeys :This array will be filled with both output keys during the process of the function. It must be empty.
+	*
+	* returns : true if the garbled table of this circuit is complied with the given input keys, false otherwise.
+	*/
+	bool internalVerify(block *bothInputKeys, block *emptyBothWireOutputKeys) override;
+
+protected:
 	/*
 	* Creates the memory needed for this class in addition to the memory that is allocated by the base class.
 	*/
 
-	void createCircuitMemory(const char* fileName, bool isNonXorOutputsRequired);
+	void createCircuitMemory(const char* fileName, bool isNonXorOutputsRequired) override;
+
+
+private: 
+
 	/*
 	* This method generates both keys for each wire using the seed in one chunk and only then creates the garbled table according to those values.
 	* It uses the ecb mode so the array to encrypt contains different values for each key to avoid duplications.
@@ -78,21 +98,8 @@ public:
 	* emptyBothOutputKeys : An empty block array that will be filled with both output keys generated in garble.
 	* emptyTranslationTable : An empty char array that will be filled with 0/1 signal bits that we chosen in random in this function.
 	*/
-	void garble(block *emptyBothInputKeys, block *emptyBothOutputKeys, unsigned char *emptyTranslationTable, block seed);
+	void garble(block *emptyBothInputKeys, block *emptyBothOutputKeys, std::vector<byte> emptyTranslationTable, block seed) override;
 
-
-	/**
-	* This function behaves exactly as the verify method except the last phase.
-	* The verify function verifies that the translation table matches the resulted output garbled values, while this function does not, rather,
-	* it returns the resulted output garbled values.
-	*
-	* bothWiresInputKeys : both keys for each input wire. This array must be filled with both input keys
-	* emptyBothWireOutputKeys :This array will be filled with both output keys during the process of the function. It must be empty.
-	*
-	* returns : true if the garbled table of this circuit is complied with the given input keys, false otherwise.
-	*/
-	bool internalVerify(block *bothInputKeys, block *emptyBothWireOutputKeys);
-private: 
 
 	/*
 	* This function inits the keys for all the wires in the circuit and initializes the two aes encryptions (seed and fixedKey as keys). It also choses

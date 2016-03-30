@@ -1,14 +1,14 @@
-#include "StandardGarbledBooleanCircuit.h"
-#include "GarbledBooleanCircuit.h"
-#include "GarbledGate.h"
+#include "../../include/circuits/StandardGarbledBooleanCircuit.h"
+#include "../../include/circuits/GarbledBooleanCircuitFixedKey.h"
+#include "../../include/circuits/GarbledGate.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>
-#include "TedKrovetzAesNiWrapperC.h"
+#include "../../include/circuits/TedKrovetzAesNiWrapperC.h"
 
 #ifdef _WIN32
-#include "StdAfx.h"
+//#include "StdAfx.h"
 #else
 #include "Compat.h"
 #endif
@@ -23,7 +23,7 @@ StandardGarbledBooleanCircuit::StandardGarbledBooleanCircuit()
 
 StandardGarbledBooleanCircuit::~StandardGarbledBooleanCircuit()
 {
-	if (garbledWires == NULL){
+	if (garbledWires == nullptr){
 		garbledWires--;
 		garbledWires--;
 		_aligned_free(garbledWires);
@@ -34,15 +34,18 @@ StandardGarbledBooleanCircuit::StandardGarbledBooleanCircuit(const char* fileNam
 {
 	//create the needed memory for this circuit
 	createCircuitMemory(fileName);
+	isFreeXor = false;
 }
 void StandardGarbledBooleanCircuit::createCircuitMemory(const char* fileName, bool isNonXorOutputsRequired){
 
-	createCircuit(fileName, false, false,false);
+	createCircuit(fileName, false, false);
 	this->isNonXorOutputsRequired = false;
+
+	numOfRows = 4;
 
 	//create this memory and initialize it in construction time to gain performance
 	garbledTables = (block *)_aligned_malloc(sizeof(block) * numberOfGates * 4, 16);
-	if (garbledTables == NULL) {
+	if (garbledTables == nullptr) {
 		cout << "garbledTables could not be allocated";
 		exit(0);
 	}
@@ -51,7 +54,7 @@ void StandardGarbledBooleanCircuit::createCircuitMemory(const char* fileName, bo
 
 	garbledWires = (block *)_aligned_malloc(sizeof(block) * ((lastWireIndex +1) * 2 + 2), 16);
 
-	if (garbledWires == NULL) {
+	if (garbledWires == nullptr) {
 		cout << "garbledWires could not be allocated";
 		exit(0);
 	}
@@ -60,7 +63,7 @@ void StandardGarbledBooleanCircuit::createCircuitMemory(const char* fileName, bo
 	garbledWires++;
 
 	indexArray = (block *)_aligned_malloc(sizeof(block) *  ((lastWireIndex + 1) * 2 + 2), 16);
-	if (indexArray == NULL) {
+	if (indexArray == nullptr) {
 		cout << "arrayToEncrypt could not be allocated";
 		exit(0);
 	}
@@ -74,9 +77,9 @@ void StandardGarbledBooleanCircuit::createCircuitMemory(const char* fileName, bo
 
 }
 
-void StandardGarbledBooleanCircuit::garble(block *emptyBothInputKeys, block *emptyBothOutputKeys, unsigned char *emptyTranslationTable, block seed){
+void StandardGarbledBooleanCircuit::garble(block *emptyBothInputKeys, block *emptyBothOutputKeys, vector<unsigned char> emptyTranslationTable, block seed){
 	
-	*(this->seed) = seed;
+	this->seed = seed;
 
 	//init encryption key of the seed and calc all the wire keys
 	initAesEncryptionsAndAllKeys(emptyBothInputKeys);
@@ -131,7 +134,7 @@ void StandardGarbledBooleanCircuit::garble(block *emptyBothInputKeys, block *emp
 		//generate the keys array as well as the encryptedKeys array
 		block encryptedKeys[4];
 		//Encrypt the 4 keys in one chunk to gain pipelining and puts the answer in encryptedKeys block array
-		AES_ecb_encrypt_blks_4_in_out(keys, encryptedKeys, aesFixedKey);
+		AES_ecb_encrypt_blks_4_in_out(keys, encryptedKeys, &aesFixedKey);
 
 			
 		//save the output to a local array
@@ -183,27 +186,41 @@ void StandardGarbledBooleanCircuit::garble(block *emptyBothInputKeys, block *emp
 		emptyBothOutputKeys[2 * i] = garbledWires[outputIndices[i] *2];
 		emptyBothOutputKeys[2 * i + 1] = garbledWires[outputIndices[i] *2 +1];
 
-		translationTable[i] =  emptyTranslationTable[i] = getSignalBitOf(emptyBothOutputKeys[2 * i]);
+		//update the translation table
+		
+		translationTable.push_back(getSignalBitOf(emptyBothOutputKeys[2 * i]));
+		emptyTranslationTable.push_back(getSignalBitOf(emptyBothOutputKeys[2 * i]));
+		
 	}
 
 }
 
 
+int StandardGarbledBooleanCircuit::getGarbledTableSize()
+{
+
+	if (isNonXorOutputsRequired == true) {
+		return sizeof(block) * (numberOfGates * getNumOfRows() + 2 * numberOfOutputs);
+	}
+	else {
+		return sizeof(block) * numberOfGates * getNumOfRows();
+	}
+
+
+}
 
 void StandardGarbledBooleanCircuit::initAesEncryptionsAndAllKeys(block* emptyBothInputKeys){
 
 	//clock_t stop , start;
-	//create the translation table
-	if (translationTable != NULL){
-		translationTable = new unsigned char[numberOfOutputs];
-	}
+	//reserve memory for the translation table
+	translationTable.reserve(numberOfOutputs);
 
 	///create the aes with the seed as the key. This will be used for encrypting the input keys
-	AES_set_encrypt_key((const unsigned char *)seed, 128, aesSeedKey);
+	AES_set_encrypt_key((const unsigned char *)&seed, 128, &aesSeedKey);
 
 	
 	//encrypt all the keys in one call with large arrays
-	AES_ecb_encrypt_chunk_in_out(indexArray, garbledWires-2, (lastWireIndex + 1) * 2+2, aesSeedKey);
+	AES_ecb_encrypt_chunk_in_out(indexArray, garbledWires-2, (lastWireIndex + 1) * 2+2, &aesSeedKey);
 	
 
 	//put in the 1-wire 0 this is the value of the computed wire in position -1 and thus the thruth table for XOR produced from NOT gate will be computed to NOT
@@ -294,7 +311,7 @@ bool StandardGarbledBooleanCircuit::internalVerify(block *bothInputKeys, block *
 		//generate the keys array as well as the encryptedKeys array
 		block encryptedKeys[4];
 		//Encrypt the 4 keys in one chunk to gain pipelining and puts the answer in encryptedKeys block array
-		AES_ecb_encrypt_blks_4_in_out(keys, encryptedKeys, aesFixedKey);
+		AES_ecb_encrypt_blks_4_in_out(keys, encryptedKeys, &aesFixedKey);
 
 		//declare temp variables to store the 0-wire key and the 1-wire key
 		block k0;

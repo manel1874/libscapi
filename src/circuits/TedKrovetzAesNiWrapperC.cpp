@@ -1,7 +1,7 @@
-#include "TedKrovetzAesNiWrapperC.h"
+#include "../../include/circuits/TedKrovetzAesNiWrapperC.h"
 
 #ifdef _WIN32
-#include "StdAfx.h"
+//#include "StdAfx.h"
 #endif
 
 void AES_128_Key_Expansion(const unsigned char *userkey, AES_KEY *aesKey)

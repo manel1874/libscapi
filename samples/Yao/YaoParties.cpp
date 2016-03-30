@@ -1,9 +1,11 @@
 #include "YaoExample.hpp"
+#include <tuple>
+
 /*********************************/
 /*          PartyOne             */
 /*********************************/
 void PartyOne::sendP1Inputs(byte* ungarbledInput) {
-	byte* allInputs = values.getAllInputWireValues();
+	byte* allInputs = (byte*)std::get<0>(values);
 	// get the size of party one inputs
 	int numberOfp1Inputs = 0;
 	numberOfp1Inputs = circuit->getNumberOfInputs(1);
@@ -22,11 +24,17 @@ void PartyOne::sendP1Inputs(byte* ungarbledInput) {
 }
 
 void PartyOne::run(byte* ungarbledInput) {
+	
+	//byte * seed = new byte[16];
+	//if (!RAND_bytes(seed, 16))
+	//	throw runtime_error("key generation failed");
+
 	values = circuit->garble();
+
 	// send garbled tables and the translation table to p2.
-	GarbledTablesHolder * tables = circuit->getGarbledTables();
-	channel->write_fast(tables->toDoubleByteArray()[0], tables->getArraySize(0));
-	channel->write_fast(circuit->getTranslationTable(), circuit->getTranslationTableSize());
+	auto garbledTables = circuit->getGarbledTables();
+	channel->write_fast((byte *) garbledTables, circuit->getGarbledTableSize());
+	channel->write_fast(circuit->getTranslationTable().data(), circuit->getNumberOfOutputs());
 	// send p1 input keys to p2.
 	sendP1Inputs(ungarbledInput);
 
@@ -38,7 +46,7 @@ void PartyOne::runOTProtocol() {
 	//Get the indices of p2 input wires.
 	int p1InputSize = 0;
 	int p2InputSize = 0;
-	byte* allInputWireValues = values.getAllInputWireValues();
+	byte* allInputWireValues = (byte*)std::get<0>(values);
 	p1InputSize = circuit->getNumberOfInputs(1);
 	p2InputSize = circuit->getNumberOfInputs(2);
 	auto x0Arr = new vector<byte>();
@@ -71,21 +79,23 @@ byte* PartyTwo::computeCircuit(OTBatchROutput * otOutput) {
 	byte* p2Inputs = ((OTOnByteArrayROutput *)otOutput)->getXSigma();
 	int p2InputsSize = ((OTOnByteArrayROutput *)otOutput)->getLength();
 	// Get party two input wires' indices.
-	int* labels = NULL;
-	labels = circuit->getInputWireIndices(2);
+	//int* labels = NULL;
+	//labels = circuit->getInputWireIndices(2);
 	vector<byte> allInputs(p1InputsSize + p2InputsSize);
 	memcpy(&allInputs[0], p1Inputs, p1InputsSize);
 	memcpy(&allInputs[p1InputsSize], p2Inputs, p2InputsSize);
 	
 	// set the input to the circuit.
-	circuit->setInputs(allInputs);
+	//circuit->setInputs(allInputs);
 	
 	// compute the circuit.
-	byte* garbledOutput;
-	garbledOutput = circuit->compute();
+	block* garbledOutput = (block *)_aligned_malloc(sizeof(block) * 2 * circuit->getNumberOfOutputs(), SIZE_OF_BLOCK); ;
+	circuit->compute((block *)&allInputs[0], garbledOutput);
 
 	// translate the result from compute.
-	byte* circuitOutput = circuit->translate(garbledOutput);
+	byte* circuitOutput = new byte[circuit->getNumberOfOutputs()];
+	circuit->translate(garbledOutput, circuitOutput);
+
 	return circuitOutput;
 }
 
@@ -114,13 +124,21 @@ void PartyTwo::run(byte * ungarbledInput, int inputSize, bool print_output) {
 void PartyTwo::receiveCircuit() {
 	// receive garbled tables.
 	auto msg = channel->read_one();
-	GarbledTablesHolder * garbledTables = new JustGarbledGarbledTablesHolder(&(msg->at(0)), msg->size());
+	auto garbledTables = &(msg->at(0));
 	
 	// receive translation table.
 	msg = channel->read_one();
-	byte* translationTable = &(msg->at(0));
+	//byte*  translationTable = &(msg->at(0));
+	vector<byte> translationTable = *msg;
 	// set garbled tables and translation table to the circuit.
-	circuit->setGarbledTables(garbledTables);
+
+	//TODO MEITAL remove after the comm layer changes
+	//block* garbledTabledAligned = (block *)_aligned_malloc(circuit->getGarbledTableSize(), SIZE_OF_BLOCK);
+
+	//copy to the aligned memory
+	//memcpy(garbledTabledAligned, garbledTables, circuit->getGarbledTableSize());
+
+	circuit->setGarbledTables((block*)garbledTables);
 	circuit->setTranslationTable(translationTable);
 }
 
