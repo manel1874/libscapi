@@ -798,7 +798,7 @@ protected:
 	string curveName;
 	string fileName;
 	shared_ptr<ConfigFile> ecConfig; // properties object to hold the given config file's parameters
-	const string NISTEC_PROPERTIES_FILE = "C:/Github/libscapi_deleteDlogAbs/include/configFiles/NISTEC.txt";
+	const string NISTEC_PROPERTIES_FILE = "../../../../include/configFiles/NISTEC.txt";
 	virtual void init(string fileName, string curveName, mt19937 random);
 
 public:
