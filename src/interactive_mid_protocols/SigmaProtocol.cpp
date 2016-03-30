@@ -32,7 +32,7 @@ void SigmaProtocolProver::processSecondMsg() {
 
 
 /***************************/
-/*   SigmaVerifier         */
+/*   SigmaProtocolVerifier */
 /***************************/
 bool SigmaProtocolVerifier::verify(shared_ptr<SigmaCommonInput> input) {
 	// samples the challenge.
