@@ -23,18 +23,6 @@ struct YaoConfig {
 	};
 };
 
-void connect(ChannelServer * channel_server) {
-	cout << "PartyOne: Connecting to Receiver..." << endl;
-	int sleep_time = 50;
-	this_thread::sleep_for(chrono::milliseconds(sleep_time));
-	channel_server->connect();
-	while(!channel_server->is_connected())
-	{
-		cout << "Failed to connect. sleeping for " << sleep_time << " milliseconds" << endl;
-		this_thread::sleep_for(chrono::milliseconds(sleep_time));
-	}
-	cout << "Sender Connected!" << endl;
-}
 
 vector<byte> * readInputAsVector(string input_file) {
 	cout << "reading from file " << input_file << endl;;
@@ -63,7 +51,7 @@ void execute_party_one(YaoConfig yao_config) {
 	boost::asio::io_service io_service;
 	SocketPartyData me(yao_config.sender_ip, 1213);
 	SocketPartyData other(yao_config.receiver_ip, 1212);
-	ChannelServer * channel_server = new ChannelServer(io_service, me, other);
+	CommPartyTCPSynced * channel = new CommPartyTCPSynced(io_service, me, other);
 	boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 	print_elapsed_ms(start, "PartyOne: Init");
 	
@@ -80,7 +68,7 @@ void execute_party_one(YaoConfig yao_config) {
 	OTBatchSender * otSender = new OTSemiHonestExtensionSender(senderParty, 163, 1);
 
 	// connect to party two
-	connect(channel_server);
+	channel->join();
 	
 	// get the inputs of P1 
 	vector<byte>* ungarbledInput = readInputAsVector(yao_config.input_file_1);
@@ -88,7 +76,7 @@ void execute_party_one(YaoConfig yao_config) {
 	PartyOne * p1;
 	auto all = scapi_now();
 	// create Party one with the previous created objects.
-	p1 = new PartyOne(channel_server, otSender, circuit);
+	p1 = new PartyOne(channel, otSender, circuit);
 	for (int i = 0; i < yao_config.number_of_iterations ; i++) {
 		// run Party one
 		p1->run(&(ungarbledInput->at(0)));
@@ -100,7 +88,7 @@ void execute_party_one(YaoConfig yao_config) {
 		<< "Average time per iteration: " << elapsed_ms / (float)yao_config.number_of_iterations << " milliseconds" << endl;
 	
 	// exit cleanly
-	delete p1, channel_server, circuit, otSender, ungarbledInput;
+	delete p1, channel, circuit, otSender, ungarbledInput;
 	io_service.stop();
 	t.join();
 }
@@ -112,7 +100,7 @@ void execute_party_two(YaoConfig yao_config) {
 	SocketPartyData me(yao_config.receiver_ip, 1212);
 	SocketPartyData other(yao_config.sender_ip, 1213);
 	SocketPartyData receiverParty(yao_config.receiver_ip, 7766);
-	ChannelServer * server = new ChannelServer(io_service, me, other);
+	CommPartyTCPSynced * channel = new CommPartyTCPSynced(io_service, me, other);
 	boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 	print_elapsed_ms(start, "PartyTwo: Init");
 
@@ -121,17 +109,23 @@ void execute_party_two(YaoConfig yao_config) {
 	GarbledBooleanCircuit * circuit = create_circuit(yao_config);
 	print_elapsed_ms(start, "PartyTwo: creating FastGarbledBooleanCircuit");
 
+
+
 	// create the OT receiver.
 	start = scapi_now();
 	OTBatchReceiver * otReceiver = new OTSemiHonestExtensionReceiver(receiverParty, 163, 1);
 	print_elapsed_ms(start, "PartyTwo: creating OTSemiHonestExtensionReceiver");
+
+	// connect to party one
+	channel->join();
+
 
 	// create Party two with the previous created objec ts			
 	vector<byte> * ungarbledInput = readInputAsVector(yao_config.input_file_2);
 
 	PartyTwo * p2;
 	auto all = scapi_now();
-	p2 = new PartyTwo(server, otReceiver, circuit);
+	p2 = new PartyTwo(channel, otReceiver, circuit);
 	for (int i = 0; i < yao_config.number_of_iterations ; i++) {
 		// init the P1 yao protocol and run party two of Yao protocol.
 		p2->run(&(ungarbledInput->at(0)), ungarbledInput->size(), yao_config.print_output);
@@ -142,7 +136,7 @@ void execute_party_two(YaoConfig yao_config) {
 		" iterations took: " << elapsed_ms << " milliseconds" << endl;
 	cout << "Average time per iteration: " << elapsed_ms / (float)yao_config.number_of_iterations 
 		<< " milliseconds" << endl;
-	delete p2, server, circuit, otReceiver, ungarbledInput;
+	delete p2, channel, circuit, otReceiver, ungarbledInput;
 	io_service.stop();
 	t.join();
 }

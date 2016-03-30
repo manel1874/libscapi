@@ -22,7 +22,7 @@ class PartyOne {
 private:
 	OTBatchSender * otSender;			//The OT object that used in the protocol.	
 	GarbledBooleanCircuit * circuit;	//The garbled circuit used in the protocol.
-	ChannelServer * channel;				//The channel between both parties.
+	CommPartyTCPSynced * channel;				//The channel between both parties.
 	tuple<block*, block*, vector<byte> > values;//this tuple includes the input and output keys (block*) and the translation table (vector)
 														 //to be used after filled by garbling the circuit
 
@@ -41,7 +41,7 @@ public:
 	* @param otSender The OT object to use in the protocol.
 	* @param inputForTest
 	*/
-	PartyOne(ChannelServer * channel, OTBatchSender * otSender, GarbledBooleanCircuit * circuit) {
+	PartyOne(CommPartyTCPSynced * channel, OTBatchSender * otSender, GarbledBooleanCircuit * circuit) {
 		this->channel = channel;
 		this->otSender = otSender;
 		this->circuit = circuit;
@@ -65,7 +65,7 @@ class PartyTwo {
 private:
 	OTBatchReceiver * otReceiver;			//The OT object that used in the protocol.	
 	GarbledBooleanCircuit * circuit;	//The garbled circuit used in the protocol.
-	ChannelServer * channel;				//The channel between both parties.
+	CommPartyTCPSynced * channel;				//The channel between both parties.
 	byte* p1Inputs;
 	int p1InputsSize;
 
@@ -84,7 +84,7 @@ public:
 	* @param otSender The OT object to use in the protocol.
 	* @param inputForTest
 	*/
-	PartyTwo(ChannelServer * channel, OTBatchReceiver * otReceiver, GarbledBooleanCircuit * circuit) {
+	PartyTwo(CommPartyTCPSynced * channel, OTBatchReceiver * otReceiver, GarbledBooleanCircuit * circuit) {
 		this->channel = channel;
 		this->otReceiver = otReceiver;
 		this->circuit = circuit;

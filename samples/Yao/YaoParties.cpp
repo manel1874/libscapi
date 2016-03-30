@@ -19,7 +19,7 @@ void PartyOne::sendP1Inputs(byte* ungarbledInput) {
 		memcpy(p1Inputs + i*SIZE_OF_BLOCK, allInputs + inputStartIndex, SIZE_OF_BLOCK);
 	}
 	// send the keys to p2.
-	channel->write_fast(p1Inputs, inputsSize);
+	channel->write(p1Inputs, inputsSize);
 	delete p1Inputs;
 }
 
@@ -31,10 +31,15 @@ void PartyOne::run(byte* ungarbledInput) {
 
 	values = circuit->garble();
 
+
+	//write one byte
+	byte test;
+	channel->write(&test, 1);
+
 	// send garbled tables and the translation table to p2.
 	auto garbledTables = circuit->getGarbledTables();
-	channel->write_fast((byte *) garbledTables, circuit->getGarbledTableSize());
-	channel->write_fast(circuit->getTranslationTable().data(), circuit->getNumberOfOutputs());
+	channel->write((byte *) garbledTables, circuit->getGarbledTableSize());
+	channel->write(circuit->getTranslationTable().data(), circuit->getNumberOfOutputs());
 	// send p1 input keys to p2.
 	sendP1Inputs(ungarbledInput);
 
@@ -122,14 +127,24 @@ void PartyTwo::run(byte * ungarbledInput, int inputSize, bool print_output) {
 }
 
 void PartyTwo::receiveCircuit() {
+
+	//read one byte
+	byte test;
+	channel->read(&test, 1);
+
 	// receive garbled tables.
-	auto msg = channel->read_one();
-	auto garbledTables = &(msg->at(0));
+	channel->read((byte*)circuit->getGarbledTables(), circuit->getGarbledTableSize());
+	//auto garbledTables = &(msg->at(0));
 	
+
+	byte * translationTable = new byte[circuit->getNumberOfOutputs()];
+
 	// receive translation table.
-	msg = channel->read_one();
+	channel->read(translationTable, circuit->getNumberOfOutputs());
+
+	std::vector<byte> translationTableVec(translationTable, translationTable + circuit->getNumberOfOutputs());
 	//byte*  translationTable = &(msg->at(0));
-	vector<byte> translationTable = *msg;
+	//vector<byte> translationTable = *msg;
 	// set garbled tables and translation table to the circuit.
 
 	//TODO MEITAL remove after the comm layer changes
@@ -138,12 +153,14 @@ void PartyTwo::receiveCircuit() {
 	//copy to the aligned memory
 	//memcpy(garbledTabledAligned, garbledTables, circuit->getGarbledTableSize());
 
-	circuit->setGarbledTables((block*)garbledTables);
-	circuit->setTranslationTable(translationTable);
+	//circuit->setGarbledTables((block*)garbledTables);
+	circuit->setTranslationTable(translationTableVec);
 }
 
 void PartyTwo::receiveP1Inputs() {
-	auto msg = channel->read_one();
-	p1Inputs = &(msg->at(0));
-	p1InputsSize = msg->size();
+	p1InputsSize = circuit->getNumberOfInputs(1)*SIZE_OF_BLOCK;
+
+	p1Inputs = new byte[p1InputsSize];
+
+	channel->read(p1Inputs, p1InputsSize);
 }

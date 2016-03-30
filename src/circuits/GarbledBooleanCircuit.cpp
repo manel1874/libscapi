@@ -9,6 +9,7 @@
 #include "../../include/circuits/TedKrovetzAesNiWrapperC.h"
 #include <string.h>
 #include <memory>
+#include <openssl/rand.h>
 
 #ifdef _WIN32
 //#include "StdAfx.h"
@@ -110,9 +111,10 @@ tuple<block*, block*, vector<unsigned char> > GarbledBooleanCircuit::garble(bloc
 
 	if (seed == nullptr) {
 
-		//if (!RAND_bytes(&seed, 16)) //TODO uncomment when inserted into scapi that already uses openSSL
-		//	throw runtime_error("key generation failed");
-		block seedLocl = ZERO_BLOCK;
+		block seedLocl;
+
+		if (!RAND_bytes((byte *)&seedLocl, 16)) //TODO uncomment when inserted into scapi that already uses openSSL
+			throw runtime_error("key generation failed");
 		seed = &seedLocl;
 	}
 	
@@ -336,8 +338,10 @@ void GarbledBooleanCircuit::readCircuitFromFile(const char* fileName)
 		//allocate memory for the output number of wires and get each wire number into the array of outputs indices
 		outputIndices.reserve(numberOfOutputs);
 
+		int currentOutput;
 		for(int i=0;i < numberOfOutputs;i++){
-			myfile >> outputIndices[i];
+			myfile >> currentOutput;
+			outputIndices.push_back(currentOutput);
 		}
 
 
