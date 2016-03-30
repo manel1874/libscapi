@@ -51,7 +51,7 @@ void execute_party_one(YaoConfig yao_config) {
 	boost::asio::io_service io_service;
 	SocketPartyData me(yao_config.sender_ip, 1213);
 	SocketPartyData other(yao_config.receiver_ip, 1212);
-	CommPartyTCPSynced * channel = new CommPartyTCPSynced(io_service, me, other);
+	CommParty * channel = new CommPartyTCPSynced(io_service, me, other);
 	boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 	print_elapsed_ms(start, "PartyOne: Init");
 	
@@ -68,7 +68,7 @@ void execute_party_one(YaoConfig yao_config) {
 	OTBatchSender * otSender = new OTSemiHonestExtensionSender(senderParty, 163, 1);
 
 	// connect to party two
-	channel->join();
+	channel->join(500, 5000);
 	
 	// get the inputs of P1 
 	vector<byte>* ungarbledInput = readInputAsVector(yao_config.input_file_1);
@@ -100,7 +100,7 @@ void execute_party_two(YaoConfig yao_config) {
 	SocketPartyData me(yao_config.receiver_ip, 1212);
 	SocketPartyData other(yao_config.sender_ip, 1213);
 	SocketPartyData receiverParty(yao_config.receiver_ip, 7766);
-	CommPartyTCPSynced * channel = new CommPartyTCPSynced(io_service, me, other);
+	CommParty * channel = new CommPartyTCPSynced(io_service, me, other);
 	boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 	print_elapsed_ms(start, "PartyTwo: Init");
 
@@ -117,7 +117,7 @@ void execute_party_two(YaoConfig yao_config) {
 	print_elapsed_ms(start, "PartyTwo: creating OTSemiHonestExtensionReceiver");
 
 	// connect to party one
-	channel->join();
+	channel->join(500, 5000);
 
 
 	// create Party two with the previous created objec ts			
@@ -148,7 +148,6 @@ YaoConfig read_yao_config(string config_file) {
 	string str_print_output = cf.Value("", "print_output");
 	bool print_output;
 	istringstream(str_print_output) >> std::boolalpha >> print_output;
-	cout << "\nprintoutput:" << print_output << endl;
 	string input_section = cf.Value("", "input_section");
 	string circuit_file = cf.Value(input_section, "circuit_file");
 	string input_file_1 = cf.Value(input_section, "input_file_party_1");
@@ -166,7 +165,7 @@ void Usage(char * argv0) {
 	std::cerr << "Usage: " << argv0 << " party_number config_path" << std::endl;
 }
 
-int main(int argc, char* argv[]) {
+int main9999(int argc, char* argv[]) {
 	Logger::configure_logging();
 	if (argc != 3) {
 		Usage(argv[0]);
