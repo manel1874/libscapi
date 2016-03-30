@@ -113,7 +113,7 @@ tuple<block*, block*, vector<unsigned char> > GarbledBooleanCircuit::garble(bloc
 
 		block seedLocl;
 
-		if (!RAND_bytes((byte *)&seedLocl, 16)) //TODO uncomment when inserted into scapi that already uses openSSL
+		if (!RAND_bytes((byte *)&seedLocl, 16)) 
 			throw runtime_error("key generation failed");
 		seed = &seedLocl;
 	}
@@ -123,17 +123,6 @@ tuple<block*, block*, vector<unsigned char> > GarbledBooleanCircuit::garble(bloc
 
 	return make_tuple(allInputWireValues, allOutputWireValues, translationTable);
 }
-
-/*void GarbledBooleanCircuit::garble(block *emptyBothInputKeys, block *emptyBothOutputKeys, unsigned char *emptyTranslationTable) {
-
-	block seed;
-	//if (!RAND_bytes(&seed, 16)) //TODO uncomment when inserted into scapi that already uses openSSL
-	//	throw runtime_error("key generation failed");
-	garble(emptyBothInputKeys, emptyBothOutputKeys, emptyTranslationTable, seed);
-
-}*/
-
-
 
 int GarbledBooleanCircuit::binaryTodecimal(int n){
 	
@@ -229,8 +218,8 @@ void GarbledBooleanCircuit::setTranslationTable(vector<unsigned char> translatio
 
 void GarbledBooleanCircuit::setGarbledTables(block* garbledTables) {
 
-	//if (this->garbledTables != nullptr && this->garbledTables != garbledTables)
-	//	_aligned_free(this->garbledTables);
+	if (this->garbledTables != nullptr && this->garbledTables != garbledTables)
+		_aligned_free(this->garbledTables);
 
 	this->garbledTables = garbledTables;
 }
