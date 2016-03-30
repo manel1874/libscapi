@@ -18,11 +18,9 @@
 #include <ctype.h>
 
 biginteger endcode_decode(biginteger bi) {
-	size_t len = bytesCount(bi);
-	std::shared_ptr<byte> output(new byte[len], std::default_delete<byte[]>());
-	encodeBigInteger(bi, output.get(), len);
-	auto res = decodeBigInteger(output.get(), len);
-	return res;
+	auto s = bi.str();
+	s.c_str();
+	return biginteger(s);
 }
 
 string rsa100 = "1522605027922533360535618378132637429718068114961380688657908494580122963258952897654000350692006139";
@@ -139,6 +137,17 @@ TEST_CASE("Common methods", "[boost, common, math, log, bitLength, helper]") {
 		REQUIRE(water == textforwater);
 	}
 }
+
+//TEST_CASE("perfromance") {
+//	int exp;
+//	cin >> exp;
+//	auto start0 = scapi_now();
+//	biginteger bignumber = mp::pow(biginteger(2), exp);
+//	print_elapsed_micros(start0, "compute pow");
+//	auto start = scapi_now();
+//	bool res_80 = isPrime(bignumber);
+//	print_elapsed_micros(start, "miller_rabin");
+//}
 
 TEST_CASE("boosts multiprecision", "[boost, multiprecision]") {
 
@@ -299,9 +308,10 @@ void test_encode_decode(shared_ptr<DlogGroup> dg)
 
 	auto ge = dg->encodeByteArrayToGroupElement(v);
 	vector<byte> res = dg->decodeGroupElementToByteArray(ge.get());
-
-	for (int i = 0; i < k; i++)
+	
+	for (int i = 0; i < k; i++) {
 		REQUIRE(v[i] == res[i]);
+	}
 }
 
 void test_all(shared_ptr<DlogGroup> dg)
@@ -596,8 +606,7 @@ TEST_CASE("serialization", "[SerializedData, CmtCCommitmentMsg]")
 		// create serialize, and verify original values untouched
 		auto es = make_shared<ZpElementSendableData>(birsa100);
 		CmtPedersenCommitmentMessage cmtMsg(es, id);
-		auto serialized = cmtMsg.toByteArray();
-		int serializedSize = cmtMsg.getSerializedSize();
+		auto serialized = cmtMsg.toString();
 		REQUIRE(cmtMsg.getId() == id);
 		REQUIRE(((ZpElementSendableData*)cmtMsg.getCommitment().get())->getX() == birsa100);
 
@@ -607,15 +616,14 @@ TEST_CASE("serialization", "[SerializedData, CmtCCommitmentMsg]")
 		REQUIRE(((ZpElementSendableData*)cmtMsg2.getCommitment().get())->getX() == 0);
 
 		// deserialize and verify original values in the new object
-		cmtMsg2.initFromByteArray(serialized.get(), serializedSize);
+		cmtMsg2.initFromString(serialized);
 		REQUIRE(cmtMsg2.getId() == id);
 		REQUIRE(((ZpElementSendableData*)cmtMsg2.getCommitment().get())->getX() == birsa100);
 	}
 	SECTION("SigmaBIMsg") {
 		biginteger value = 123456789;
 		SigmaBIMsg sMsg(value);
-		auto serialized = sMsg.toByteArray();
-		int serializedSize = sMsg.getSerializedSize();
+		auto serialized = sMsg.toString();
 		REQUIRE(sMsg.getMsg() == value);
 
 		// verify new one is created with empty values
@@ -623,7 +631,7 @@ TEST_CASE("serialization", "[SerializedData, CmtCCommitmentMsg]")
 		REQUIRE(sMsg2.getMsg() == -100);
 
 		// deserialize and verify original values in the new object
-		sMsg2.initFromByteArray(serialized.get(), serializedSize);
+		sMsg2.initFromString(serialized);
 		REQUIRE(sMsg2.getMsg() == value);
 	}
 	SECTION("CmtPedersenDecommitmentMessage") {
@@ -631,8 +639,7 @@ TEST_CASE("serialization", "[SerializedData, CmtCCommitmentMsg]")
 		biginteger xvalue(95612134554333);
 		auto r = make_shared<BigIntegerRandomValue>(rvalue);
 		CmtPedersenDecommitmentMessage cpdm(xvalue, r);
-		auto serialized = cpdm.toByteArray();
-		int serializedSize = cpdm.getSerializedSize();
+		auto serialized = cpdm.toString();
 		auto biR = dynamic_pointer_cast<BigIntegerRandomValue>(cpdm.getR());
 		REQUIRE(biR->getR() == rvalue);
 		REQUIRE(cpdm.getX() == xvalue);
@@ -645,7 +652,7 @@ TEST_CASE("serialization", "[SerializedData, CmtCCommitmentMsg]")
 		REQUIRE(cpdm2.getX() == 0);
 
 		// deserialize and verify original values in the new object
-		cpdm2.initFromByteArray(serialized.get(), serializedSize);
+		cpdm2.initFromString(serialized);
 		auto biR3 = dynamic_pointer_cast<BigIntegerRandomValue>(cpdm2.getR());
 		REQUIRE(biR3->getR() == rvalue);
 		REQUIRE(cpdm2.getX() == xvalue);
@@ -654,8 +661,7 @@ TEST_CASE("serialization", "[SerializedData, CmtCCommitmentMsg]")
 		biginteger trap(rsa100);
 		long commitmentId = 123456789;
 		CmtRTrapdoorCommitPhaseOutput cmtTrapOut(trap, commitmentId);
-		auto serialized = cmtTrapOut.toByteArray();
-		int serializedSize = cmtTrapOut.getSerializedSize();
+		auto serialized = cmtTrapOut.toString();
 		REQUIRE(cmtTrapOut.getCommitmentId() == commitmentId);
 		REQUIRE(cmtTrapOut.getTrap() == trap);
 
@@ -665,7 +671,7 @@ TEST_CASE("serialization", "[SerializedData, CmtCCommitmentMsg]")
 		REQUIRE(cmtTrapOut2.getTrap() == 0);
 
 		// deserialize and verify original values in the new object
-		cmtTrapOut2.initFromByteArray(serialized.get(), serializedSize);
+		cmtTrapOut2.initFromString(serialized);
 		REQUIRE(cmtTrapOut2.getCommitmentId() == commitmentId);
 		REQUIRE(cmtTrapOut2.getTrap() == trap);
 	}
@@ -677,9 +683,9 @@ TEST_CASE("serialization", "[SerializedData, CmtCCommitmentMsg]")
 		REQUIRE(dynamic_pointer_cast<ECElement>(point)->getX() == data->getX());
 		REQUIRE(dynamic_pointer_cast<ECElement>(point)->getY() == data->getY());
 		
-		shared_ptr<byte> dataBytes = data->toByteArray();
+		string dataBytes = data->toString();
 		ECElementSendableData point2Data(0,0);
-		point2Data.initFromByteArray(dataBytes.get(), data->getSerializedSize());
+		point2Data.initFromString(dataBytes);
 
 		REQUIRE(point2Data.getX() == data->getX());
 		REQUIRE(point2Data.getY() == data->getY());
@@ -697,9 +703,9 @@ TEST_CASE("serialization", "[SerializedData, CmtCCommitmentMsg]")
 		REQUIRE(dynamic_pointer_cast<ECElement>(point)->getX() == data->getX());
 		REQUIRE(dynamic_pointer_cast<ECElement>(point)->getY() == data->getY());
 
-		shared_ptr<byte> dataBytes = data->toByteArray();
+		string dataBytes = data->toString();
 		ECElementSendableData point2Data(0, 0);
-		point2Data.initFromByteArray(dataBytes.get(), data->getSerializedSize());
+		point2Data.initFromString(dataBytes);
 
 		REQUIRE(point2Data.getX() == data->getX());
 		REQUIRE(point2Data.getY() == data->getY());
@@ -708,5 +714,4 @@ TEST_CASE("serialization", "[SerializedData, CmtCCommitmentMsg]")
 		REQUIRE(dlog.isMember(point2.get()));
 		REQUIRE(*point2.get() == *point.get());
 	}
-	
-}
+	}

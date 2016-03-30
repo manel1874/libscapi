@@ -90,7 +90,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\lib\MiraclWin64\source;C:\OpenSSL-Win64\include;..\..\lib;C:\local\boost_1_60_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\lib\MiraclWin64\source;C:\OpenSSL-Win64\include;C:\code\libscapi\lib\NTL\windows\include;..\..\lib;C:\local\boost_1_60_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PreprocessorDefinitions>_SCL_SECURE_NO_WARNINGS;_WIN32_WINNT=0x06030000;__WINSOCK_DEPRECATED_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>

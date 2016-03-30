@@ -185,9 +185,8 @@ private:
 	* @param message to send to the verifier.
 	*/
 	void sendMsgToVerifier(shared_ptr<SigmaProtocolMsg> message) {
-		shared_ptr<byte> raw_message = message->toByteArray();
-		int message_size = message->getSerializedSize();
-		channel->write_fast(raw_message.get(), message_size);
+		auto raw_message = message->toString();
+		channel->write_fast(raw_message);
 	};
 };
 
@@ -543,10 +542,9 @@ private:
 	void processFirstMsg(shared_ptr<SigmaProverInput>  input) {
 		// compute the first message by the underlying proverComputation.
 		auto a = sProver->computeFirstMsg(input);
-		auto msg = a->toByteArray();
-		int len = a->getSerializedSize();
+		auto msg = a->toString();
 		// send the first message.
-		sendMsgToVerifier(msg.get(), len);
+		sendMsgToVerifier(msg);
 	}
 
 	/**
@@ -566,7 +564,7 @@ private:
 	* Sends the given message to the verifier.
 	* @param message to send to the verifier.
 	*/
-	void sendMsgToVerifier(byte* msg, int size) { channel->write_fast(msg, size); };
+	void sendMsgToVerifier(string msg) { channel->write_fast(msg); };
 };
 
 
@@ -602,7 +600,7 @@ private:
 	*/
 	void receiveMsgFromProver(shared_ptr<SigmaProtocolMsg> emptyMsg) {
 		auto v = channel->read_one();
-		emptyMsg->initFromByteVector(v);
+		emptyMsg->initFromByteVector(*v);
 	};
 
 	/**
@@ -610,7 +608,7 @@ private:
 	*/
 	void receiveTrapFromProver(shared_ptr<CmtRCommitPhaseOutput> emptyOutput) {
 		auto v = channel->read_one();
-		emptyOutput->initFromByteVector(v);
+		emptyOutput->initFromByteVector(*v);
 	}
 	/**
 	* Verifies the proof.

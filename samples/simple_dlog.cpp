@@ -1,7 +1,7 @@
 #include "../include/primitives/DlogOpenSSL.hpp"
 #include <iostream>
 
-int main(){
+int main235(){
 	// initiate a discrete log group
 	// (in this case the OpenSSL implementation of the elliptic curve group K-233)
 	auto dlog = make_shared<OpenSSLDlogZpSafePrime>(128);
@@ -15,11 +15,11 @@ int main(){
 	biginteger r = getRandomInRange(0, q - 1, gen);
 
 	// exponentiate g in r to receive a new group element
-	auto g1 = dlog->exponentiate(g, r);
+	auto g1 = dlog->exponentiate(g.get(), r);
 	// create a random group element
 	auto h = dlog->createRandomElement();
 	// multiply elements
-	auto gMult = dlog->multiplyGroupElements(g1, h);
+	auto gMult = dlog->multiplyGroupElements(g1.get(), h.get());
 
 	cout << "genrator value is:              " << ((OpenSSLZpSafePrimeElement *)g.get())->getElementValue() << endl;
 	cout << "exponentiate value is:          " << r << endl;

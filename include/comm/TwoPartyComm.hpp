@@ -56,7 +56,29 @@ public:
 	bool operator<(const SocketPartyData &other) const { return (compare(other) < 0); };
 };
 
-
+/**
+* A simple interface that encapsulate all network operations of one peer in a two peers (or more) 
+* setup.
+*/
+class CommParty {
+public:
+	/**
+	* This method setups a double edge connection with another party.
+	* It connects to the other party, and also accepts connections from it.
+	* The method blocks until boths side are connected to each other.
+	*/
+	virtual void join(int sleep_between_attempts, int timeout)=0;
+	/**
+	* Write data from @param data to the other party.
+	* Will write exactly @param size bytes
+	*/
+	virtual void write(const byte* data, int size) = 0;
+	/**
+	* Read exactly @param sizeToRead bytes int @param buffer
+	* Will block until all bytes are read.
+	*/
+	virtual size_t read(byte* buffer, int sizeToRead) = 0;
+};
 
 class NativeChannel {
 public:
@@ -65,9 +87,6 @@ public:
 		io_service_client_(io_service_client), serverSocket(io_service_server), clientSocket(io_service_client)	{
 		this->me = me;
 		this->other = other;
-		Logger::log("Native channel created. My IP: " + me.getIpAddress().to_string() + 
-			" my port: " + to_string(me.getPort()) + " Peer's ip: " +
-			other.getIpAddress().to_string() + " Peer's port: " + to_string(other.getPort()));
 	};
 	tcp::socket& getServerSocket() { return serverSocket; };
 	void connect(bool bSynced);
@@ -119,7 +138,7 @@ public:
 			this, channel, boost::asio::placeholders::error));
 	};
 	void connect(bool bSynced=false) { channel->connect(bSynced); };
-	void try_connecting(int sleep_between_attempts, int timeout) {
+	void try_connecting(int sleep_between_attempts=500, int timeout=5000) {
 		int total_sleep = 0;
 		while (!channel->is_connected())
 		{
@@ -144,10 +163,41 @@ public:
 	vector<byte> * read_one() { return channel->read_one(); };
 	//vector<Message> read_all() { return channel->read_all(); };
 	void write_fast(byte* data, int size);
+	void write_fast(const string & data);
 
 private:
 	void handle_accept(shared_ptr<NativeChannel> new_channel, const boost::system::error_code& error) {
-		if (!error)
-			new_channel->start_listening();
+		if (error) 
+			throw PartyCommunicationException("Failed to accept " + error.message());
+		new_channel->start_listening();
 	};
+};
+
+
+class CommPartyTCPSynced : public CommParty {
+public:
+	CommPartyTCPSynced(boost::asio::io_service& ioService, SocketPartyData me, SocketPartyData other) :
+		ioServiceServer(ioService), ioServiceClient(ioService),
+		acceptor_(ioService, tcp::endpoint(tcp::v4(), me.getPort())),
+		serverSocket(ioService), clientSocket(ioService)
+	{
+		this->me = me;
+		this->other = other;
+	};
+	void join(int sleepBetweenAttempts = 500, int timeout = 5000) override;
+
+	void write(const byte* data, int size) override;
+	size_t read(byte* data, int sizeToRead) override {
+		return boost::asio::read(serverSocket, boost::asio::buffer(data, sizeToRead));
+	}
+
+private:
+	tcp::acceptor acceptor_;
+	boost::asio::io_service& ioServiceServer;
+	boost::asio::io_service& ioServiceClient;
+	tcp::socket serverSocket;
+	tcp::socket clientSocket;
+	SocketPartyData me;
+	SocketPartyData other;
+	void setSocketOptions();
 };

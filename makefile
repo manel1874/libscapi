@@ -34,7 +34,7 @@ directories: $(OUT_DIR)
 $(OUT_DIR):
 	mkdir -p $(OUT_DIR)
 
-$(SLib): compile-miracl compile-scgarbledcircuit compile-otextension $(OBJ_FILES)
+$(SLib): compile-ntl compile-miracl compile-scgarbledcircuit compile-otextension $(OBJ_FILES)
 	ar ru $@ $^ 
 	ranlib $@
 
@@ -51,6 +51,14 @@ obj/primitives/%.o: src/primitives/%.cpp
 
 tests:: all
 	$(Program)
+
+compile-ntl:
+	@echo "Compiling the NTL library..."
+	@cp -r lib/NTL/unix $(builddir)/NTL
+	@cd $(builddir)/NTL/src/ && ./configure CXX=$(CXX)
+	@$(MAKE) -C $(builddir)/NTL/src/
+	@$(MAKE) -C $(builddir)/NTL/src/ PREFIX=$(prefix) install
+	@touch compile-ntl
 
 prepare-miracl::
 	@echo "Copying the miracl source files into the miracl build dir..."
@@ -109,6 +117,11 @@ clean-scgarbledcircuit:
 	@echo "Cleaning the ScGarbledCircuit build dir..."
 	@rm -rf $(builddir)/ScGarbledCircuit
 	@rm -f compile-scgarbledcircuit
+	
+clean-ntl:
+	@echo "Cleaning the ntl build dir..."
+	@rm -rf $(builddir)/NTL
+	@rm -f compile-ntl	
 
 clean-cpp:
 	@echo "cleaning .obj files"
@@ -119,4 +132,4 @@ clean-cpp:
 clean-install:
 	@rm -rf install/*
 
-clean: clean-otextension clean-scgarbledcircuit clean-miracl clean-miracl-cpp clean-cpp clean-install
+clean: clean-otextension clean-ntl clean-scgarbledcircuit clean-miracl clean-miracl-cpp clean-cpp clean-install

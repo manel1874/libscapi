@@ -5,24 +5,17 @@
 #include "../infra/MathAlgorithms.hpp"
 #include "../../include/infra/ConfigFile.hpp"
 
-
 class InvalidDlogGroupException : public logic_error
 {
 public:
 	InvalidDlogGroupException(const string & msg) : logic_error(msg) {};
 };
 
-/**
- * This is a marker interface. It allows the generation of a GroupElement at an abstract level without knowing the actual type of Dlog Group.
- *
+/** * This is a marker interface. It allows the generation of a GroupElement at an abstract level without knowing the actual type of Dlog Group.*
  */
 class GroupElementSendableData : public NetworkSerialized {
 public:
-	virtual int getSerializedSize() override { return serialized_size; };
 	virtual ~GroupElementSendableData() = 0; // making this an abstract class		
-protected:
-	int serialized_size;
-		
 };
 
 inline GroupElementSendableData::~GroupElementSendableData() {}; // must provide implemeantion to allow destruction of base classes
@@ -51,7 +44,6 @@ public:
 	* @return the GroupElementSendableData object
 	*/
 	virtual shared_ptr<GroupElementSendableData> generateSendableData() = 0;
-
 	virtual bool operator==(const GroupElement &other) const = 0;
 	virtual bool operator!=(const GroupElement &other) const = 0;
 };
@@ -96,7 +88,7 @@ inline GroupParams::~GroupParams() { };
 *
 *  The first two work as a pair and decodeGroupElementToByteArray is the inverse of encodeByteArrayToGroupElement, whereas the last one works alone and does not have an inverse.
 */
-class DlogGroup : public enable_shared_from_this<DlogGroup>  
+class DlogGroup
 {
 protected:
 	shared_ptr<GroupParams> groupParams;  // group parameters
@@ -129,9 +121,9 @@ private:
 	*/
 	class GroupElementsExponentiations {
 	private:
-		vector<std::shared_ptr<GroupElement>> exponentiations; //vector of group elements that are the result of exponentiations
-		std::shared_ptr<GroupElement> base;  //group element for which the optimized computations are built for
-		std::shared_ptr<DlogGroup> parent;
+		vector<shared_ptr<GroupElement>> exponentiations; //vector of group elements that are the result of exponentiations
+		shared_ptr<GroupElement> base;  //group element for which the optimized computations are built for
+		shared_ptr<DlogGroup> parent;
 		/**
 		* Calculates the necessary additional exponentiations and fills the exponentiations vector with them.
 		* @param size - the required exponent
@@ -146,8 +138,7 @@ private:
 		* @param base
 		* @throws IllegalArgumentException
 		*/
-		GroupElementsExponentiations(std::shared_ptr<DlogGroup> parent_,
-			std::shared_ptr<GroupElement> base_);
+		GroupElementsExponentiations(shared_ptr<DlogGroup> parent_,	shared_ptr<GroupElement> base_);
 
 		/**
 		* Checks if the exponentiations had already been calculated for the required size.
@@ -157,9 +148,9 @@ private:
 		*/
 		shared_ptr<GroupElement> getExponentiation(const biginteger & size);
 	};
+
 	// using pointer as key mean different element ==> different keys even if they are 'equal' in other sense
-	std::unordered_map<std::shared_ptr<GroupElement>,
-		std::shared_ptr<GroupElementsExponentiations >> exponentiationsMap; //map for multExponentiationsWithSameBase calculations
+	unordered_map<shared_ptr<GroupElement>,	shared_ptr<GroupElementsExponentiations >> exponentiationsMap; //map for multExponentiationsWithSameBase calculations
 
 	/*
 	* Computes the loop the repeats in the algorithm.
@@ -171,15 +162,15 @@ private:
 	*		result = result *preComp[k][e]
 	*
 	*/
-	std::shared_ptr<GroupElement> computeLoop(vector<biginteger> exponentiations, int w, int h,
-		vector<vector<std::shared_ptr<GroupElement>>> preComp, std::shared_ptr<GroupElement> result,
+	shared_ptr<GroupElement> computeLoop(vector<biginteger> exponentiations, int w, int h,
+		vector<vector<shared_ptr<GroupElement>>> preComp, shared_ptr<GroupElement> result,
 		int bitIndex);
 
 	/*
 	* Creates the preComputation table.
 	*/
-	vector<vector<std::shared_ptr<GroupElement>>> createLLPreCompTable(
-		vector<std::shared_ptr<GroupElement>> groupElements, int w, int h);
+	vector<vector<shared_ptr<GroupElement>>> createLLPreCompTable(
+		vector<shared_ptr<GroupElement>> groupElements, int w, int h);
 
 	/*
 	* returns the w value according to the given t
@@ -237,7 +228,7 @@ public:
 	virtual bool isPrimeOrder() { return isPrime(getOrder()); }
 	
 	/**
-	* Checks if the order is greater than 2^numBits
+	* Checks if the order of this group is greater than 2^numBits
 	* @param numBits
 	* @return true if the order is greater than 2^numBits, false - otherwise.
 	*/
@@ -405,6 +396,7 @@ public:
 */
 class primeOrderSubGroup : public virtual DlogGroup {};
 
+
 /**********DlogZP hierarchy***********************/
 
 /**
@@ -507,20 +499,11 @@ protected:
 public:
 	ZpElementSendableData(biginteger x_) : GroupElementSendableData() {
 		x = x_;
-		serialized_size = bytesCount(x_);
 	};
+
 	biginteger getX() { return x; }
-	string toString() { return "ZpElementSendableData [x=" + (string)x + "]"; }
-	shared_ptr<byte> toByteArray() override {
-			serialized_size = bytesCount(x);		
-			shared_ptr<byte> result(new byte[serialized_size], std::default_delete<byte[]>());		  	
-			encodeBigInteger(x, result.get(), serialized_size);		
-			return result;		  	
-	}
-	void initFromByteArray(byte* arr, int size) override {
-		serialized_size = size;
-		x = decodeBigInteger(arr, size);
-	}
+	string toString() override { return (string) x; }
+	void initFromString(const string & raw) override { x = biginteger(raw); }
 	
 };
 
@@ -799,11 +782,9 @@ public:
 
 	biginteger getX() { return x; }
 	biginteger getY() { return y; }
-	string toString() { return "ECElementSendableData [x=" + string(x) + ", y=" + string(y) + "]"; }
-	
-	shared_ptr<byte> toByteArray() override;
+	string toString() override;
 
-	void initFromByteArray(byte* arr, int size) override;
+	void initFromString(const string & raw) override;
 };
 
 class ECF2mPoint : public ECElement {};

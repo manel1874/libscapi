@@ -20,6 +20,7 @@ compile-miracl
 compile-otextension
 compile-miracl-cpp
 compile-scgarbledcircuit
+compile-ntl
 test/config_for_test.txt
 
 # Fortran module files

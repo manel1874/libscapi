@@ -217,7 +217,7 @@ shared_ptr<GroupElement> DlogGroup::exponentiateWithPreComputedValues(
 	
 	// if there is no object that matches this base - create it and add it to the map
 	if (it == exponentiationsMap.end()) {
-		auto exponentiations = make_shared<GroupElementsExponentiations>(shared_from_this(), groupElement);
+		auto exponentiations = make_shared<GroupElementsExponentiations>(shared_ptr<DlogGroup>(this), groupElement);
 		//TODO: free allocated memory
 		exponentiationsMap[groupElement] = exponentiations;
 	}
@@ -379,29 +379,15 @@ shared_ptr<GroupElementSendableData> ECElement::generateSendableData() {
 	return make_shared<ECElementSendableData>(getX(), getY());
 }
 
-shared_ptr<byte> ECElementSendableData::toByteArray() {
-	int sizeX = bytesCount(x);
-	unique_ptr<byte[]> xBytes(new byte[sizeX], std::default_delete<byte[]>());
-	encodeBigInteger(x, xBytes.get(), sizeX);
-	int sizeY = bytesCount(y);
-	unique_ptr<byte[]> yBytes(new byte[sizeY], std::default_delete<byte[]>());
-	encodeBigInteger(y, yBytes.get(), sizeY);
-	serialized_size = sizeX + sizeY + 2 * sizeof(int);
-	byte * result = new byte[serialized_size];
-	copy(((byte*)&sizeX), ((byte*)&sizeX) + sizeof(int), result);
-	copy(xBytes.get(), xBytes.get() + sizeX, result + sizeof(int));
-	copy(((byte*)&sizeY), ((byte*)&sizeY) + sizeof(int), result + sizeof(int) + sizeX);
-	copy(yBytes.get(), yBytes.get() + sizeY, result + 2 * sizeof(int) + sizeX);
-	shared_ptr<byte> result_shared(result, std::default_delete<byte[]>());
-	return result_shared;
+string ECElementSendableData::toString() {
+	return string(x) + ":" + string(y);
 }
 
-void ECElementSendableData::initFromByteArray(byte* arr, int size) {
-	int sizeX, sizeY;
-	memcpy(&sizeX, arr, sizeof(int));
-	x = decodeBigInteger(arr + sizeof(int), sizeX);
-	memcpy(&sizeY, arr+ sizeof(int) + sizeX, sizeof(int));
-	y = decodeBigInteger(arr + 2 * sizeof(int) + sizeX, sizeY);
+void ECElementSendableData::initFromString(const string & raw) {
+	auto str_vec = explode(raw, ':');
+	assert(str_vec.size() == 2);
+	x = biginteger(str_vec[0]);
+	y = biginteger(str_vec[1]);
 }
 
 /**
