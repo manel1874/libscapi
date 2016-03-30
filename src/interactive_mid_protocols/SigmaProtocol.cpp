@@ -1,10 +1,10 @@
 #include "../../include/interactive_mid_protocols/SigmaProtocol.hpp"
 
 /***************************/
-/*   SigmaProver           */
+/*   SigmaProtocolProver   */
 /***************************/
 
-void SigmaProver::processFirstMsg(shared_ptr<SigmaProverInput> input) {
+void SigmaProtocolProver::processFirstMsg(shared_ptr<SigmaProverInput> input) {
 	// compute the first message by the underlying proverComputation.
 	auto a = proverComputation->computeFirstMsg(input);
 	// send the first message.
@@ -13,7 +13,7 @@ void SigmaProver::processFirstMsg(shared_ptr<SigmaProverInput> input) {
 	doneFirstMsg = true;
 }
 
-void SigmaProver::processSecondMsg() {
+void SigmaProtocolProver::processSecondMsg() {
 	if (!doneFirstMsg)
 		throw IllegalStateException("processFirstMsg should be called before processSecondMsg");
 	// receive the challenge.
@@ -34,7 +34,7 @@ void SigmaProver::processSecondMsg() {
 /***************************/
 /*   SigmaVerifier         */
 /***************************/
-bool SigmaVerifier::verify(shared_ptr<SigmaCommonInput> input) {
+bool SigmaProtocolVerifier::verify(shared_ptr<SigmaCommonInput> input) {
 	// samples the challenge.
 	sampleChallenge();
 	// sends the challenge.
@@ -43,7 +43,7 @@ bool SigmaVerifier::verify(shared_ptr<SigmaCommonInput> input) {
 	return processVerify(input);
 }
 
-void SigmaVerifier::sendChallenge() {
+void SigmaProtocolVerifier::sendChallenge() {
 
 	// wait for first message from the prover.
 	receiveMsgFromProver(a);
@@ -60,7 +60,7 @@ void SigmaVerifier::sendChallenge() {
 	doneChallenge = true;
 }
 
-bool SigmaVerifier::processVerify(shared_ptr<SigmaCommonInput> input) {
+bool SigmaProtocolVerifier::processVerify(shared_ptr<SigmaCommonInput> input) {
 	if (!doneChallenge)
 		throw IllegalStateException("sampleChallenge and sendChallenge should be called before processVerify");
 	// wait for second message from the prover.
@@ -72,7 +72,7 @@ bool SigmaVerifier::processVerify(shared_ptr<SigmaCommonInput> input) {
 	return verified;
 }
 
-void SigmaVerifier::receiveMsgFromProver(shared_ptr<SigmaProtocolMsg> msg) {
+void SigmaProtocolVerifier::receiveMsgFromProver(shared_ptr<SigmaProtocolMsg> msg) {
 	auto v = channel->read_one();
 	msg->initFromByteVector(*v);
 }

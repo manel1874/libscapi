@@ -78,7 +78,7 @@ public:
 		shared_ptr<SigmaDlogProverComputation> proverComputation,
 		shared_ptr<DlogGroup> dg,
 		shared_ptr<SigmaDlogProverInput> proverinput) override {
-		auto sp = new SigmaProver(server, proverComputation);
+		auto sp = new SigmaProtocolProver(server, proverComputation);
 		cout << "--> running simple sigma dlog prover" << endl;
 		sp->prove(proverinput);
 	}
@@ -88,7 +88,7 @@ public:
 		shared_ptr<SigmaBIMsg> msgZ,
 		shared_ptr<SigmaDlogCommonInput> commonInput,
 		shared_ptr<DlogGroup> dg) override{
-		auto v = new SigmaVerifier(server, verifierComputation, msgA, msgZ);
+		auto v = new SigmaProtocolVerifier(server, verifierComputation, msgA, msgZ);
 		cout << "--> running simple sigma dlog verify" << endl;
 		bool verificationPassed = v->verify(commonInput);
 		delete v;

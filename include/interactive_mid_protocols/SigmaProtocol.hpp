@@ -59,40 +59,6 @@ class DlogBasedSigma {};
 class SigmaProtocolMsg : public NetworkSerialized {};
 
 /**
-* General interface for Sigma Protocol prover. Every class that implements it is signed as 
-* Sigma Protocol prover.<p>
-*
-* Sigma protocols are a basic building block for zero-knowledge, 
-* zero-knowledge proofs of knowledge and more. <p>
-* A sigma protocol is a 3-round proof, comprised of a first message from
-* the prover to the verifier, a random challenge from the verifier and a second message 
-* from the prover. <p>
-* See Hazay-Lindell (chapter 6) for more information.
-*/
-class SigmaProtocolProver {
-public:
-	/**
-	* Runs the proof of this protocol. <p>
-	* This function executes the proof at once by calling the following functions one by one. <p>
-	* This function can be called when a user does not want to save time by 
-	* doing operations in parallel. <p>
-	*/
-	virtual void prove(shared_ptr<SigmaProverInput> input) = 0;
-	/**
-	* Processes the first step of the sigma protocol. <p>
-	* It computes the first message and sends it to the verifier.
-	*/
-	virtual void processFirstMsg(shared_ptr<SigmaProverInput> input)=0;
-	/**
-	* Processes the second step of the sigma protocol. <p>
-	* It receives the challenge from the verifier, computes the second message and then 
-	* sends it to the verifier. <p>
-	* This is a blocking function!
-	*/
-	virtual void processSecondMsg() =0;
-};
-
-/**
  * Every sigma simulator outputs the result in the end of it's compute function, but each 
  * one can outputs different values. <p>
  * This interface is a marker interface for Sigma simulator output, where there is an 
@@ -154,49 +120,6 @@ public:
 };
 
 /**
-* General interface for Sigma Protocol verifier. Every class that implements it is
-* signed as Sigma Protocol verifier.<p>
-* Sigma protocols are a basic building block for zero-knowledge, zero-knowledge proofs
-* of knowledge and more. <p>
-* A sigma protocol is a 3-round proof, comprised of a first message from the prover to
-* the verifier,
-* a random challenge from the verifier and a second message from the prover. <p>
-* See Hazay-Lindell (chapter 6) for more information.
-*/
-class SigmaProtocolVerifier {
-	/**
-	* Runs the verification of this protocol. <p>
-	* This function executes the verification protocol at once by calling the following.
-	* functions one by one.<p>
-	* This function can be called when a user does not want to save time by doing operations
-	* in parallel.
-	*/
-	virtual bool verify(shared_ptr<SigmaCommonInput> input) = 0;
-	/**
-	* Samples the challenge for this protocol.
-	*/
-	virtual void sampleChallenge()=0;
-	/**
-	* Waits for the prover's first message and then sends the chosen challenge to the prover.<p>
-	* This is a blocking function!
-	*/
-	virtual void sendChallenge() = 0;
-	/**
-	* Waits to the prover's second message and then verifies the proof.	<p>
-	* This is a blocking function!
-	*/
-	virtual bool processVerify(shared_ptr<SigmaCommonInput> input) = 0;
-	/**
-	* Sets the given challenge 
-	*/
-	virtual void setChallenge(shared_ptr<byte> challenge, int challenge_size)=0;
-	/**
-	* Return the challenge byte array
-	*/
-	virtual pair<shared_ptr<byte>, int> getChallenge()=0;
-};
-
-/**
 * This interface manages the mathematical calculations of the prover side in the sigma protocol.<p>
 * It samples random values and computes the messages.
 */
@@ -255,12 +178,20 @@ public:
 };
 
 /**
+* Sigma protocols are a basic building block for zero - knowledge,
+*zero - knowledge proofs of knowledge and more. <p>
+* A sigma protocol is a 3 - round proof, comprised of a first message from
+* the prover to the verifier, a random challenge from the verifier and a second message
+* from the prover. <p>
+* See Hazay - Lindell(chapter 6) for more information.
+*
 * This class manages the communication functionality of all the sigma protocol provers.<p>
 * It sends the first message, receives the challenge from the prover and sends the second message.<p>
 * It uses SigmaComputation instance of a concrete sigma protocol to compute the actual messages.
 */
-class SigmaProver : public SigmaProtocolProver {
+class SigmaProtocolProver {
 public:
+
 	/*
 	* This class manages the structure of all sigma provers:
 	* Prover message 1 (a):	SAMPLE a random values
@@ -276,15 +207,22 @@ public:
 	/**
 	* Constructor that sets the given channel and sigmaProverComputation.
 	*/
-	SigmaProver(std::shared_ptr<ChannelServer> channel,
-		std::shared_ptr<SigmaProverComputation> proverComputation) {
+	SigmaProtocolProver(shared_ptr<ChannelServer> channel,
+		shared_ptr<SigmaProverComputation> proverComputation) {
 		this->channel = channel;
 		this->proverComputation = proverComputation;
 	}
-	void prove(shared_ptr<SigmaProverInput> input) override{
+	/**
+	* Runs the proof of this protocol. <p>
+	* This function executes the proof at once by calling the following functions one by one. <p>
+	* This function can be called when a user does not want to save time by
+	* doing operations in parallel. <p>
+	*/
+	void prove(shared_ptr<SigmaProverInput> input) {
 		processFirstMsg(input); // step one of the protocol.
 		processSecondMsg(); // step two of the protocol.
-	};
+	}
+
 	/**
 	* Processes the first step of the sigma protocol.<p>
 	*  "SAMPLE a random values <p>
@@ -292,7 +230,8 @@ public:
 	* 	 SEND the computed message to the verifier".<p>
 	* It computes the first message and sends it to the verifier.
 	*/
-	void processFirstMsg(shared_ptr<SigmaProverInput> input) override;
+	void processFirstMsg(shared_ptr<SigmaProverInput> input);
+
 	/**
 	* Processes the second step of the sigma protocol.<p>
 	* 	"RECEIVE challenge from verifier<p>
@@ -300,30 +239,35 @@ public:
 	* 	 SEND the computed message to the verifier".<p>
 	* This is a blocking function!
 	*/
-	 void processSecondMsg() override;
-
+	void processSecondMsg();
 
 private:
-	std::shared_ptr<ChannelServer> channel;
-	std::shared_ptr<SigmaProverComputation> proverComputation;	// underlying sigma computation.
+	shared_ptr<ChannelServer> channel;
+	shared_ptr<SigmaProverComputation> proverComputation;	// underlying sigma computation.
 	bool doneFirstMsg;
+
 	/**
 	* Sends the given message to the verifier.
 	*/
-	void sendMsgToVerifier(shared_ptr<SigmaProtocolMsg> message) { 
+	void sendMsgToVerifier(shared_ptr<SigmaProtocolMsg> message) {
 		auto raw_message = message->toString();
 		channel->write_fast(raw_message);
-	};
+	}
 };
 
-
 /**
+* Sigma protocols are a basic building block for zero-knowledge, zero-knowledge proofs
+* of knowledge and more. <p>
+* A sigma protocol is a 3-round proof, comprised of a first message from the prover to
+* the verifier,
+* a random challenge from the verifier and a second message from the prover. <p>
+* See Hazay-Lindell (chapter 6) for more information.
+*
 * This class manages the communication functionality of all the sigma protocol verifiers,
 * such as send the challenge to the prover and receive the prover messages. <p>
 * It uses SigmaVerifierComputation instance of a concrete sigma protocol to compute the actual calculations.
 */
-class SigmaVerifier : public SigmaProtocolVerifier {
-
+class SigmaProtocolVerifier {
 	/*
 	* This class manages the common functionality of all sigma verifiers:
 	* 	Verifier challenge (e):	SAMPLE a random challenge e
@@ -337,28 +281,56 @@ public:
 	/**
 	* Constructor that sets the given channel and random.
 	*/
-	SigmaVerifier(shared_ptr<ChannelServer> channel, shared_ptr<SigmaVerifierComputation> verifierComputation,
+	SigmaProtocolVerifier(shared_ptr<ChannelServer> channel, shared_ptr<SigmaVerifierComputation> verifierComputation,
 		shared_ptr<SigmaProtocolMsg> emptyFirstMessage, shared_ptr<SigmaProtocolMsg> emptySecondMessage) {
 		this->channel = channel;
 		this->verifierComputation = verifierComputation;
 		this->a = emptyFirstMessage;
 		this->z = emptySecondMessage;
 	}
-	bool verify(shared_ptr<SigmaCommonInput> input) override;
-	void sampleChallenge() override {
+
+	/**
+	* Runs the verification of this protocol. <p>
+	* This function executes the verification protocol at once by calling the following.
+	* functions one by one.<p>
+	* This function can be called when a user does not want to save time by doing operations
+	* in parallel.
+	*/
+	bool verify(shared_ptr<SigmaCommonInput> input);
+
+	/**
+	* Samples the challenge for this protocol.
+	*/
+	void sampleChallenge() {
 		// delegates to the underlying verifierComputation object.
 		verifierComputation->sampleChallenge();
 	}
-	void setChallenge(shared_ptr<byte> challenge, int challenge_size) override{
+
+	/**
+	* Waits for the prover's first message and then sends the chosen challenge to the prover.<p>
+	* This is a blocking function!
+	*/
+	void sendChallenge();
+	/**
+	* Waits to the prover's second message and then verifies the proof.	<p>
+	* This is a blocking function!
+	*/
+	bool processVerify(shared_ptr<SigmaCommonInput> input);
+	/**
+	* Sets the given challenge
+	*/
+	void setChallenge(shared_ptr<byte> challenge, int challenge_size) {
 		// delegates to the underlying verifierComputation object.
 		verifierComputation->setChallenge(challenge, challenge_size);
 	}
-	pair<shared_ptr<byte>,int> getChallenge() override {
+
+	/**
+	* Return the challenge byte array
+	*/
+	pair<shared_ptr<byte>, int> getChallenge() {
 		// delegates to the underlying verifierComputation object.
 		return verifierComputation->getChallenge();
 	}
-	void sendChallenge() override;
-	bool processVerify(shared_ptr<SigmaCommonInput> input) override;
 
 private:
 	shared_ptr<ChannelServer> channel;
