@@ -148,7 +148,7 @@ private:
 	*/
 	void processFirstMsg(shared_ptr<SigmaProverInput> input) {
 		// compute the first message by the underlying proverComputation.
-		auto a = sProver->computeFirstMsg(input.get());
+		auto a = sProver->computeFirstMsg(input);
 		// send the first message.
 		sendMsgToVerifier(a);
 	}
@@ -175,7 +175,9 @@ private:
 	*/
 	void processSecondMsg(byte* e, int eSize) {
 		// compute the second message by the underlying proverComputation.
-		auto z = sProver->computeSecondMsg(e, eSize);
+		vector<byte> eVector;
+		copy_byte_array_to_byte_vector(e, eSize, eVector, 0);
+		auto z = sProver->computeSecondMsg(eVector);
 		// send the second message.
 		sendMsgToVerifier(z);
 	}
@@ -254,8 +256,8 @@ private:
 	* Runs COMMIT.commit as the committer with input e.
 	* @param e
 	*/
-	long commit(shared_ptr<byte> e, int eSize) {
-		auto val = committer->generateCommitValue(e, eSize);
+	long commit(vector<byte> e) {
+		auto val = committer->generateCommitValue(e);
 		long id = random();
 		committer->commit(val, id);
 		return id;
@@ -541,7 +543,7 @@ private:
 	*/
 	void processFirstMsg(shared_ptr<SigmaProverInput>  input) {
 		// compute the first message by the underlying proverComputation.
-		auto a = sProver->computeFirstMsg(input.get());
+		auto a = sProver->computeFirstMsg(input);
 		auto msg = a->toString();
 		// send the first message.
 		sendMsgToVerifier(msg);
@@ -587,8 +589,8 @@ private:
 	/**
 	* Runs COMMIT.commit as the committer with input e.
 	*/
-	long commit(shared_ptr<byte> e, int eSize) {
-		auto val = committer->generateCommitValue(e, eSize);
+	long commit(vector<byte> e) {
+		auto val = committer->generateCommitValue(e);
 		long id = random();
 		id = abs(id);
 		committer->commit(val, id);

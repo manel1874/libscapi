@@ -37,7 +37,7 @@ public:
 	* Returns the input array contains inputs for all the underlying sigma protocol's provers.
 	*/
 	vector<shared_ptr<SigmaProverInput>> getInputs() { return sigmaInputs; };
-	shared_ptr<SigmaCommonInput> getCommonParams() override;
+	shared_ptr<SigmaCommonInput> getCommonInput() override;
 private:
 	vector<shared_ptr<SigmaProverInput>> sigmaInputs;
 };
@@ -75,14 +75,14 @@ public:
 	* @param input MUST be an instance of SigmaANDInput.
 	* @return SigmaMultipleMsg contains a1, ..., am.
 	*/
-	shared_ptr<SigmaProtocolMsg> computeFirstMsg(SigmaProverInput* in) override;
+	shared_ptr<SigmaProtocolMsg> computeFirstMsg(shared_ptr<SigmaProverInput> in) override;
 	/**
 	* Computes the second message of the protocol.<p>
 	* "COMPUTE all second prover messages z1,...,zm".
 	* @param challenge
 	* @return SigmaMultipleMsg contains z1, ..., zm.
 	*/
-	shared_ptr<SigmaProtocolMsg> computeSecondMsg(byte* challenge, int challenge_size)override;
+	shared_ptr<SigmaProtocolMsg> computeSecondMsg(vector<byte> challenge) override;
 	/**
 	* Returns the simulator that matches this sigma protocol prover.
 	* @return SigmaANDSimulator
@@ -98,7 +98,7 @@ private:
 	* Sets the inputs for each one of the underlying prover.
 	* @param input MUST be an instance of SigmaANDProverInput.
 	*/
-	shared_ptr<SigmaANDProverInput> checkInput(SigmaProverInput* in);
+	shared_ptr<SigmaANDProverInput> checkInput(shared_ptr<SigmaProverInput> in);
 };
 
 /**
@@ -132,7 +132,7 @@ public:
 	* @return the output of the computation - (a, e, z).
 	*/
 	shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input, 
-		shared_ptr<byte> challenge, int challenge_size) override;
+		vector<byte> challenge) override;
 	/**
 	* Computes the simulator computation with a randomly chosen challenge.
 	* @param input MUST be an instance of SigmaANDCommonInput.
@@ -167,22 +167,19 @@ public:
 	* @param e challenge
 	* @param z second message
 	*/
-	SigmaANDSimulatorOutput(shared_ptr<SigmaMultipleMsg> a, shared_ptr<byte> e,
-		int eSize, shared_ptr<SigmaMultipleMsg> z) {
+	SigmaANDSimulatorOutput(shared_ptr<SigmaMultipleMsg> a, vector<byte> e,
+		shared_ptr<SigmaMultipleMsg> z) {
 		this->a = a;
 		this->e = e;
-		this->eSize = eSize;
 		this->z = z;
 	};
 	shared_ptr<SigmaProtocolMsg> getA() override { return a; };
-	shared_ptr<byte> getE() override { return e; };
-	int getESize() override { return eSize; }
+	vector<byte> getE() override { return e; };
 	shared_ptr<SigmaProtocolMsg> getZ() override { return z; };
 
 private:
 	shared_ptr<SigmaMultipleMsg> a;
-	shared_ptr<byte> e;
-	int eSize;
+	vector<byte> e;
 	shared_ptr<SigmaMultipleMsg> z;
 };
 
@@ -216,11 +213,11 @@ class SigmaANDVerifierComputation : public SigmaVerifierComputation {
 	* 	"SAMPLE a random challenge e<-{0,1}^t".
 	*/
 	void sampleChallenge() override;
-	void setChallenge(shared_ptr<byte> challenge, int challenge_size) override {
+	void setChallenge(vector<byte> challenge) override {
 		for (auto verifier : verifiers)
-			verifier->setChallenge(challenge, challenge_size);
+			verifier->setChallenge(challenge);
 	}
-	pair<shared_ptr<byte>,int> getChallenge() override { return make_pair(e, eSize); };
+	vector<byte> getChallenge() override { return e; };
 	/**
 	* Computes the verification of the protocol.<p>
 	* 	"ACC IFF all verifier checks are ACC".
@@ -234,8 +231,7 @@ class SigmaANDVerifierComputation : public SigmaVerifierComputation {
 private:
 	vector<shared_ptr<SigmaVerifierComputation>> verifiers;	// underlying Sigma protocol's verifier to the AND calculation
 	int len;										// number of underlying verifiers
-	shared_ptr<byte>  e;										// the challenge
-	int eSize;										// the challenge size
+	vector<byte>  e;										// the challenge
 	int t;											// soundness parameter
 	std::mt19937 random;							// prg
 	/**

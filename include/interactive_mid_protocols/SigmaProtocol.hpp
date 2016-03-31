@@ -38,7 +38,7 @@ public:
 	/**
 	* Returns the common parameters of the prover and the verifier.
 	*/
-	virtual shared_ptr<SigmaCommonInput> getCommonParams()=0;
+	virtual shared_ptr<SigmaCommonInput> getCommonInput()=0;
 };
 /**
 * Marker interface. Every Sigma prover or verifier that consists of 
@@ -78,13 +78,7 @@ public:
 	* All SigmaSimulators contains first message, challenge and second message. 
 	* Returns the challenge 
 	*/
-	virtual shared_ptr<byte> getE() = 0 ;
-
-	/**
-	* All SigmaSimulators contains first message, challenge and second message.
-	* Returns the challenge size
-	*/
-	virtual int getESize() = 0;
+	virtual vector<byte> getE() = 0 ;
 
 	/**
 	* All SigmaSimulators contains first message, challenge and second message. 
@@ -107,7 +101,7 @@ public:
 	* Computes the simulator computation.
 	*/
 	virtual shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input,
-		shared_ptr<byte> challenge, int challenge_size)  =0;
+		vector<byte> challenge) = 0;
 
 	/**
 	* Chooses random challenge and computes the simulator computation.
@@ -128,11 +122,11 @@ public:
 	/**
 	* Computes the first message of the sigma protocol.
 	*/
-	virtual shared_ptr<SigmaProtocolMsg> computeFirstMsg(SigmaProverInput* input) =0;
+	virtual shared_ptr<SigmaProtocolMsg> computeFirstMsg(shared_ptr<SigmaProverInput> input) =0;
 	/**
 	* Computes the second message of the sigma protocol.
 	*/
-	virtual shared_ptr<SigmaProtocolMsg> computeSecondMsg(byte* challenge, int challenge_size) =0;
+	virtual shared_ptr<SigmaProtocolMsg> computeSecondMsg(vector<byte> challenge) = 0;
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
 	* @return t soundness parameter
@@ -169,11 +163,11 @@ public:
 	* Sets the given challenge.
 	* @param challenge
 	*/
-	virtual void setChallenge(shared_ptr<byte> challenge, int challenge_size) = 0;
+	virtual void setChallenge(vector<byte> challenge) = 0;
 	/**
 	* @return the challenge.
 	*/
-	virtual pair<shared_ptr<byte>, int> getChallenge() = 0;
+	virtual vector<byte> getChallenge() = 0;
 };
 
 /**
@@ -217,7 +211,7 @@ public:
 	* This function can be called when a user does not want to save time by
 	* doing operations in parallel. <p>
 	*/
-	void prove(SigmaProverInput* input) {
+	void prove(shared_ptr<SigmaProverInput> input) {
 		processFirstMsg(input); // step one of the protocol.
 		processSecondMsg(); // step two of the protocol.
 	}
@@ -229,7 +223,7 @@ public:
 	* 	 SEND the computed message to the verifier".<p>
 	* It computes the first message and sends it to the verifier.
 	*/
-	void processFirstMsg(SigmaProverInput* input);
+	void processFirstMsg(shared_ptr<SigmaProverInput> input);
 
 	/**
 	* Processes the second step of the sigma protocol.<p>
@@ -318,15 +312,15 @@ public:
 	/**
 	* Sets the given challenge
 	*/
-	void setChallenge(shared_ptr<byte> challenge, int challenge_size) {
+	void setChallenge(vector<byte> challenge) {
 		// delegates to the underlying verifierComputation object.
-		verifierComputation->setChallenge(challenge, challenge_size);
+		verifierComputation->setChallenge(challenge);
 	}
 
 	/**
 	* Return the challenge byte array
 	*/
-	pair<shared_ptr<byte>, int> getChallenge() {
+	vector<byte> getChallenge() {
 		// delegates to the underlying verifierComputation object.
 		return verifierComputation->getChallenge();
 	}
@@ -345,8 +339,8 @@ private:
 	/**
 	* Sends the challenge to the prover.
 	*/
-	void sendChallengeToProver(byte* challenge, int challenge_size) {
-		channel->write_fast(challenge, challenge_size);
+	void sendChallengeToProver(vector<byte> challenge) {
+		channel->write_fast(challenge.data(), challenge.size());
 	}
 };
 

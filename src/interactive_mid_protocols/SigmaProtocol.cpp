@@ -4,7 +4,7 @@
 /*   SigmaProtocolProver   */
 /***************************/
 
-void SigmaProtocolProver::processFirstMsg(SigmaProverInput* input) {
+void SigmaProtocolProver::processFirstMsg(shared_ptr<SigmaProverInput> input) {
 	// compute the first message by the underlying proverComputation.
 	auto a = proverComputation->computeFirstMsg(input);
 	// send the first message.
@@ -20,7 +20,7 @@ void SigmaProtocolProver::processSecondMsg() {
 	auto v = channel->read_one();
 
 	// compute the second message by the underlying proverComputation.
-	auto z = proverComputation->computeSecondMsg(&(v->at(0)), v->size());
+	auto z = proverComputation->computeSecondMsg(*v);
 
 	// send the second message.
 	sendMsgToVerifier(z.get());
@@ -49,12 +49,12 @@ void SigmaProtocolVerifier::sendChallenge() {
 	receiveMsgFromProver(a.get());
 
 	// get the challenge from the verifierComputation.
-	auto challengePair = verifierComputation->getChallenge();
-	if (challengePair.second == 0)
+	auto challenge = verifierComputation->getChallenge();
+	if (challenge.size() == 0)
 		throw IllegalStateException("challenge_size=0. Make sure that sampleChallenge function is called before sendChallenge");
 	
 	// send the challenge.
-	sendChallengeToProver(challengePair.first.get(), challengePair.second);
+	sendChallengeToProver(challenge);
 
 	// save the state of the protocol.
 	doneChallenge = true;

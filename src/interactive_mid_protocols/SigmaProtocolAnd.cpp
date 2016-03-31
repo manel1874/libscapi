@@ -4,7 +4,7 @@
 /***************************************/
 /*   SigmaANDProverInput               */
 /***************************************/
-shared_ptr<SigmaCommonInput> SigmaANDProverInput::getCommonParams() {
+shared_ptr<SigmaCommonInput> SigmaANDProverInput::getCommonInput() {
 	/*
 	* There are two options to implement this function:
 	* 1. Create a new instance of SigmaANDCommonInput every time the function is called.
@@ -20,7 +20,7 @@ shared_ptr<SigmaCommonInput> SigmaANDProverInput::getCommonParams() {
 	*/
 	vector<shared_ptr<SigmaCommonInput>> paramsArr;
 	for(auto sigmaInput : sigmaInputs)
-		paramsArr.push_back(sigmaInput->getCommonParams());
+		paramsArr.push_back(sigmaInput->getCommonInput());
 
 	return make_shared<SigmaANDCommonInput>(paramsArr);
 }
@@ -42,7 +42,7 @@ SigmaANDProverComputation::SigmaANDProverComputation(
 	this->random = random;
 }
 
-shared_ptr<SigmaProtocolMsg> SigmaANDProverComputation::computeFirstMsg(SigmaProverInput* in) {
+shared_ptr<SigmaProtocolMsg> SigmaANDProverComputation::computeFirstMsg(shared_ptr<SigmaProverInput> in) {
 	// checks that the input is as expected.
 	auto input = checkInput(in);
 	auto proversInput = input->getInputs();
@@ -52,19 +52,19 @@ shared_ptr<SigmaProtocolMsg> SigmaANDProverComputation::computeFirstMsg(SigmaPro
 
 	// compute all first messages and add them to the array list.
 	for (int i = 0; i < len; i++) 
-		firstMessages.push_back(provers[i]->computeFirstMsg(proversInput[i].get()));
+		firstMessages.push_back(provers[i]->computeFirstMsg(proversInput[i]));
 
 	// create a SigmaMultipleMsg with the messages array.
 	return make_shared<SigmaMultipleMsg>(firstMessages);
 }
 
 shared_ptr<SigmaProtocolMsg> SigmaANDProverComputation::computeSecondMsg(
-	byte* challenge, int challenge_size) {
+	vector<byte> challenge) {
 	// create an array to hold all messages.
 	vector<shared_ptr<SigmaProtocolMsg>> secondMessages;
 	// compute all second messages and add them to the array list.
 	for(auto prover : provers)
-		secondMessages.push_back(prover->computeSecondMsg(challenge, challenge_size));
+		secondMessages.push_back(prover->computeSecondMsg(challenge));
 
 	// Create a SigmaMultipleMsg with the messages array.
 	return make_shared<SigmaMultipleMsg>(secondMessages);
@@ -77,8 +77,8 @@ shared_ptr<SigmaSimulator> SigmaANDProverComputation::getSimulator() {
 	return make_shared<SigmaANDSimulator>(simulators, t, random);
 }
 
-shared_ptr<SigmaANDProverInput> SigmaANDProverComputation::checkInput(SigmaProverInput* in) {
-	SigmaANDProverInput *input = dynamic_cast<SigmaANDProverInput*>(in);
+shared_ptr<SigmaANDProverInput> SigmaANDProverComputation::checkInput(shared_ptr<SigmaProverInput> in) {
+	shared_ptr<SigmaANDProverInput> input = dynamic_pointer_cast<SigmaANDProverInput>(in);
 	if (!input)
 		throw invalid_argument("the given input must be an instance of SigmaANDProverInput");
 
@@ -87,8 +87,7 @@ shared_ptr<SigmaANDProverInput> SigmaANDProverComputation::checkInput(SigmaProve
 	// if number of inputs is not equal to number of provers, throw exception.
 	if (inputLen != len)
 		throw invalid_argument("number of inputs is different from number of underlying provers.");
-	shared_ptr<SigmaANDProverInput> sharedI(input);
-	return sharedI;
+	return input;
 }
 
 /***************************************/
@@ -109,8 +108,8 @@ SigmaANDSimulator::SigmaANDSimulator(vector<shared_ptr<SigmaSimulator>> simulato
 }
 
 shared_ptr<SigmaSimulatorOutput> SigmaANDSimulator::simulate(SigmaCommonInput* input,
-	shared_ptr<byte> challenge, int challenge_size) {
-	if (!checkChallengeLength(challenge_size)) 
+	vector<byte> challenge) {
+	if (!checkChallengeLength(challenge.size())) 
 		throw CheatAttemptException("the length of the given challenge is different from the soundness parameter");
 	
 	SigmaANDCommonInput *andInput = (SigmaANDCommonInput *)input;
@@ -127,7 +126,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaANDSimulator::simulate(SigmaCommonInput* i
 	shared_ptr<SigmaSimulatorOutput> output = NULL;
 	// run each Sigma protocol simulator with the given challenge.
 	for (int i = 0; i < len; i++) {
-		output = simulators[i]->simulate(simulatorsInput[i].get(), challenge, challenge_size);
+		output = simulators[i]->simulate(simulatorsInput[i].get(), challenge);
 		aOutputs.push_back(output->getA());
 		zOutputs.push_back(output->getZ());
 	}
@@ -137,17 +136,16 @@ shared_ptr<SigmaSimulatorOutput> SigmaANDSimulator::simulate(SigmaCommonInput* i
 	auto z = make_shared<SigmaMultipleMsg>(zOutputs);
 
 	// output (a,e,eSize,z).
-	return make_shared<SigmaANDSimulatorOutput>(a, challenge, challenge_size, z);
+	return make_shared<SigmaANDSimulatorOutput>(a, challenge, z);
 }
 
 shared_ptr<SigmaSimulatorOutput> SigmaANDSimulator::simulate(SigmaCommonInput* input) {
-	// create a new byte array of size t/8, to get the required byte size.
-	shared_ptr<byte> e(new byte[t/ 8], default_delete<byte[]>());
-	// fill the byte array with random values.
-	if (!RAND_bytes(e.get(), t / 8 ))
-		throw runtime_error("key generation failed");
+	//Create a new byte array of size t/8, to get the required byte size and fill it with random values.
+	vector<byte> e;
+	gen_random_bytes_vector(e, t / 8, random);
+
 	// call the other simulate function with the given input and the samples e.
-	return simulate(input, e, t / 8);
+	return simulate(input, e);
 }
 
 
@@ -168,15 +166,13 @@ SigmaANDVerifierComputation::SigmaANDVerifierComputation(
 }
 
 void SigmaANDVerifierComputation::sampleChallenge() {
-	// create a new byte array of size t/8, to get the required byte size.
-	std::shared_ptr<byte> e(new byte[t/8], std::default_delete<byte[]>());
-	// fill the byte array with random values.
-	if (!RAND_bytes(e.get(), t / 8))
-		throw runtime_error("key generation failed");
+	//Create a new byte array of size t/8, to get the required byte size and fill it with random values.
+	vector<byte> e;
+	gen_random_bytes_vector(e, t / 8, random);
 
 	// set all the other verifiers with the sampled challenge.
 	for (auto verifier : verifiers)
-		verifier->setChallenge(e, t / 8);
+		verifier->setChallenge(e);
 }
 
 bool SigmaANDVerifierComputation::verify(SigmaCommonInput* input, 
