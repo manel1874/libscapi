@@ -15,6 +15,8 @@
 #include "../include/circuits/BooleanCircuits.hpp"
 #include "../include//interactive_mid_protocols/CommitmentSchemePedersen.hpp"
 #include "../include//interactive_mid_protocols/SigmaProtocol.hpp"
+#include "../include//interactive_mid_protocols/SigmaProtocolDlog.hpp"
+#include "../include//interactive_mid_protocols/SigmaProtocolDH.hpp"
 #include <ctype.h>
 
 biginteger endcode_decode(biginteger bi) {
@@ -714,4 +716,69 @@ TEST_CASE("serialization", "[SerializedData, CmtCCommitmentMsg]")
 		REQUIRE(dlog.isMember(point2.get()));
 		REQUIRE(*point2.get() == *point.get());
 	}
+}
+
+void computeSigmaProtocol(SigmaProverComputation* prover, SigmaVerifierComputation* verifier, 
+	SigmaCommonInput* commonInput, shared_ptr<SigmaProverInput> proverInput) {
+	shared_ptr<SigmaProtocolMsg> firstMsg = prover->computeFirstMsg(proverInput);
+	verifier->sampleChallenge();
+	vector<byte> challenge = verifier->getChallenge();
+	shared_ptr<SigmaProtocolMsg> secondMsg = prover->computeSecondMsg(challenge);
+	bool verified = verifier->verify(commonInput, firstMsg.get(), secondMsg.get());
+	
+	REQUIRE(verified == true);
+}
+
+void simulate(SigmaSimulator* simulator, SigmaVerifierComputation* verifier,
+	SigmaCommonInput* commonInput) {
+	
+	shared_ptr<SigmaSimulatorOutput> output = simulator->simulate(commonInput);
+	verifier->setChallenge(output->getE());
+	bool verified = verifier->verify(commonInput, output->getA().get(), output->getZ().get());
+
+	REQUIRE(verified == true);
+}
+
+TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
+{
+	SECTION("test sigma protocol dlog")
+	{
+		mt19937 random = get_seeded_random();
+		auto dlog = make_shared<OpenSSLDlogECF2m>();
+		//auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
+		
+		SigmaDlogProverComputation prover(dlog, 80, get_seeded_random());
+		SigmaDlogVerifierComputation verifier(dlog, 80, get_seeded_random());
+		SigmaDlogSimulator simulator(dlog, 80, random);
+		biginteger w = getRandomInRange(0, dlog->getOrder() - 1, random);
+		
+		auto h = dlog->exponentiate(dlog->getGenerator().get(), w);
+		SigmaDlogCommonInput commonInput(h);
+		shared_ptr<SigmaDlogProverInput> proverInput = make_shared<SigmaDlogProverInput>(h, w);
+		
+		computeSigmaProtocol(&prover, &verifier, &commonInput, proverInput);
+		simulate(&simulator, &verifier, &commonInput);
 	}
+
+	SECTION("test sigma protocol DH")
+	{
+		mt19937 random = get_seeded_random();
+		auto dlog = make_shared<OpenSSLDlogECFp>();
+		//auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
+		SigmaDHProverComputation prover(dlog, 80, get_seeded_random());
+		SigmaDHVerifierComputation verifier(dlog, 80, get_seeded_random());
+		SigmaDHSimulator simulator(dlog, 80, random);
+		biginteger w = getRandomInRange(0, dlog->getOrder() - 1, random);
+		
+		auto u = dlog->exponentiate(dlog->getGenerator().get(), w);
+		auto h = dlog->createRandomElement();
+		auto v = dlog->exponentiate(h.get(), w);
+		SigmaDHCommonInput commonInput(h, u, v);
+		shared_ptr<SigmaDHProverInput> proverInput = make_shared<SigmaDHProverInput>(h, u, v, w);
+	
+		computeSigmaProtocol(&prover, &verifier, &commonInput, proverInput);
+		simulate(&simulator, &verifier, &commonInput);
+	}
+
+	
+}
