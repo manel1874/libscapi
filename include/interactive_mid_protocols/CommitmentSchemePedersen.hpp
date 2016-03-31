@@ -416,8 +416,8 @@ public:
 		shared_ptr<DlogGroup> dlog, std::mt19937 random) :
 		CmtPedersenCommitterCore(channel, dlog, random) {};
 	
-	shared_ptr<CmtCommitValue> generateCommitValue(shared_ptr<byte> x, int len) override {
-		biginteger bi = decodeBigInteger(x.get(), len);
+	shared_ptr<CmtCommitValue> generateCommitValue(vector<byte> x) override {
+		biginteger bi = decodeBigInteger(x.data(), x.size());
 		return make_shared<CmtBigIntegerCommitValue>(bi);
 	};
 	pair<shared_ptr<byte>,int> generateBytesFromCommitValue(shared_ptr<CmtCommitValue> value) override;

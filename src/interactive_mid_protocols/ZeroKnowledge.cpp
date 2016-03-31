@@ -74,9 +74,9 @@ bool ZKFromSigmaVerifier::verify(shared_ptr<ZKCommonInput> input,
 
 	// sample a random challenge  e <- {0, 1}^t 
 	sVerifier->sampleChallenge();
-	auto ePair = sVerifier->getChallenge();
+	auto e = sVerifier->getChallenge();
 	// run COMMIT.commit as the committer with input e
-	long id = commit(ePair.first, ePair.second);
+	long id = commit(e);
 	// wait for a message a from P
 	receiveMsgFromProver(emptyA);
 	// run COMMIT.decommit as the decommitter
@@ -120,7 +120,9 @@ void ZKPOKFromSigmaCmtPedersenProver::prove(shared_ptr<ZKProverInput> input) {
 void ZKPOKFromSigmaCmtPedersenProver::processSecondMsg(shared_ptr<byte> e, int eSize, 
 	shared_ptr<CmtRCommitPhaseOutput> trap) { 
 	// compute the second message by the underlying proverComputation.
-	auto z = sProver->computeSecondMsg(e.get(), eSize);
+	vector<byte> eVector;
+	copy_byte_array_to_byte_vector(e.get(), eSize, eVector, 0);
+	auto z = sProver->computeSecondMsg(eVector);
 
 	// send the second message.
 	auto raw_z = z->toString();
@@ -145,10 +147,10 @@ bool ZKPOKFromSigmaCmtPedersenVerifier::verify(shared_ptr<ZKCommonInput> input,
 
 	// sample a random challenge  e <- {0, 1}^t 
 	sVerifier->sampleChallenge();
-	auto ePair = sVerifier->getChallenge();
+	auto e = sVerifier->getChallenge();
 
 	// run TRAP_COMMIT.commit as the committer with input e,
-	long id = commit(ePair.first, ePair.second);
+	long id = commit(e);
 	// wait for a message a from P
 	receiveMsgFromProver(emptyA);
 	// run COMMIT.decommit as the decommitter

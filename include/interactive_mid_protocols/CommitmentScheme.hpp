@@ -364,7 +364,7 @@ public:
 	* @param x array to convert into a commitValue.
 	* @return the created CommitValue.
 	*/
-	virtual shared_ptr<CmtCommitValue>  generateCommitValue(shared_ptr<byte> x, int len) =0;
+	virtual shared_ptr<CmtCommitValue>  generateCommitValue(vector<byte> x) =0;
 
 	/**
 	* This function converts the given commit value to a byte array.
