@@ -1152,14 +1152,14 @@ bool OpenSSLPoint::isInfinity() {
 }
 
 OpenSSLECFpPoint::OpenSSLECFpPoint(const biginteger & x, const biginteger & y, OpenSSLDlogECFp* curve, bool bCheckMembership) {
-	if (bCheckMembership) {
-		auto params = dynamic_pointer_cast<ECFpGroupParams>(curve->getGroupParams());
+	//if (bCheckMembership) {
+		//auto params = dynamic_pointer_cast<ECFpGroupParams>(curve->getGroupParams());
 		//checks if the given parameters are valid point on the curve.
-		bool valid = checkCurveMembership(params.get(), x, y);
+	//	bool valid = checkCurveMembership(params.get(), x, y);
 		// checks validity
-		if (valid == false) // if not valid, throws exception
-			throw invalid_argument("x, y values are not a point on this curve");
-	}
+	//	if (valid == false) // if not valid, throws exception
+		//	throw invalid_argument("x, y values are not a point on this curve");
+//	}
 	//Create a point in the field with the given parameters, done by OpenSSL's native code.
 	BIGNUM *xOssl = biginteger_to_opensslbignum(x);
 	BIGNUM *yOssl = biginteger_to_opensslbignum(y);
@@ -1184,6 +1184,16 @@ OpenSSLECFpPoint::OpenSSLECFpPoint(const biginteger & x, const biginteger & y, O
 	//Keep the coordinates for performance reasons. See long comment above next to declaration.
 	this->x = x;
 	this->y = y;
+
+	if (bCheckMembership) {
+		//check if the given parameters are valid point on the curve.
+		boolean valid = curve->isMember(this);
+		// checks validity
+		if (valid == false) {// if not valid, throws exception
+
+			throw new invalid_argument("x, y values are not a point on this curve");
+		}
+	}
 }
 
 /**
