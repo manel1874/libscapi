@@ -134,6 +134,7 @@
     <ClCompile Include="..\..\src\interactive_mid_protocols\OTSemiHonestExtension.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocol.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolAnd.cpp" />
+    <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolDH.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolDlog.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\ZeroKnowledge.cpp" />
     <ClCompile Include="..\..\src\primitives\Dlog.cpp" />
@@ -182,6 +183,7 @@
     <ClInclude Include="..\..\include\interactive_mid_protocols\RandomValue.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocol.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolAnd.hpp" />
+    <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolDH.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolDlog.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolPedersen.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\ZeroKnowledge.hpp" />

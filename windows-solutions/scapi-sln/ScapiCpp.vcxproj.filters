@@ -162,6 +162,9 @@
     <ClCompile Include="..\..\src\circuits\FourToTwoGarbledBoleanCircuitNoAssumptions.cpp">
       <Filter>Source Files\Circuits</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolDH.cpp">
+      <Filter>Source Files\InteractiveMidProtocols</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\circuits\BooleanCircuits.hpp">
@@ -316,6 +319,9 @@
     </ClInclude>
     <ClInclude Include="..\..\include\circuits\FourToTwoGarbledBoleanCircuitNoAssumptions.h">
       <Filter>Header Files\Circuits</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolDH.hpp">
+      <Filter>Header Files\InteractiveMidProtocols</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
