@@ -1,7 +1,7 @@
 #include "../include/primitives/HashOpenSSL.hpp"
 #include <iostream>
 
-int main567()
+int main()
 {
         string input_msg = "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq";
         auto hash = make_shared<OpenSSLSHA1>();
