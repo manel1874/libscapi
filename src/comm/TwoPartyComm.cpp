@@ -262,66 +262,66 @@ void CommPartyTCPSynced::write(const byte* data, int size) {
 	if (ec)
 		throw PartyCommunicationException("Error while writing. " + ec.message());
 }
-
-/*****************************************/
-/* CommPartyTcpSslSynced                 */
-/*****************************************/
-
-void CommPartyTcpSslSynced::join(int sleepBetweenAttempts, int timeout) {
-	int     totalSleep = 0;
-	bool    isAccepted = false;
-	bool    isConnected = false;
-	// establish connections
-	while (!isConnected || !isAccepted) {
-		try {
-			if (!isConnected) {
-				tcp::resolver resolver(ioServiceClient);
-				tcp::resolver::query query(other.getIpAddress().to_string(), to_string(other.getPort()));
-				tcp::resolver::iterator endpointIterator = resolver.resolve(query);
-				boost::asio::connect(clientSocket.lowest_layer(), endpointIterator);
-				clientSocket.handshake(boost::asio::ssl::stream_base::client);
-				isConnected = true;
-			}
-		}
-		catch (const boost::system::system_error& ex)
-		{
-			if (totalSleep > timeout)
-			{
-				cerr << "Failed to connect after timeout, aboting!";
-				throw ex;
-			}
-			cout << "Failed to connect. sleeping for " << sleepBetweenAttempts << " milliseconds, " << ex.what() << endl;
-			this_thread::sleep_for(chrono::milliseconds(sleepBetweenAttempts));
-			totalSleep += sleepBetweenAttempts;
-		}
-		if (!isAccepted) {
-			boost::system::error_code ec;
-			tcp::endpoint peer_endpoint;
-			cout << "accepting" << endl;
-			acceptor_.accept(serverSocket.lowest_layer(), peer_endpoint);
-			cout << "accepting done" << endl;
-			serverSocket.handshake(boost::asio::ssl::stream_base::server, ec);
-			cout << "handshake done" << endl;
-			if(ec)
-				throw PartyCommunicationException("Handshake failed. " + ec.message());
-			isAccepted = true;
-		}
-	}
-	setSocketOptions();
-}
-
-
-void CommPartyTcpSslSynced::setSocketOptions() {
-	//boost::asio::ip::tcp::no_delay option(true);
-	//serverSocket.set(option);
-	//clientSocket.set_option(option);
-}
-
-void CommPartyTcpSslSynced::write(const byte* data, int size) {
-	boost::system::error_code ec;
-	boost::asio::write(clientSocket,
-		boost::asio::buffer(data, size),
-		boost::asio::transfer_all(), ec);
-	if (ec)
-		throw PartyCommunicationException("Error while writing. " + ec.message());
-}
+//
+///*****************************************/
+///* CommPartyTcpSslSynced                 */
+///*****************************************/
+//
+//void CommPartyTcpSslSynced::join(int sleepBetweenAttempts, int timeout) {
+//	int     totalSleep = 0;
+//	bool    isAccepted = false;
+//	bool    isConnected = false;
+//	// establish connections
+//	while (!isConnected || !isAccepted) {
+//		try {
+//			if (!isConnected) {
+//				tcp::resolver resolver(ioServiceClient);
+//				tcp::resolver::query query(other.getIpAddress().to_string(), to_string(other.getPort()));
+//				tcp::resolver::iterator endpointIterator = resolver.resolve(query);
+//				boost::asio::connect(clientSocket.lowest_layer(), endpointIterator);
+//				clientSocket.handshake(boost::asio::ssl::stream_base::client);
+//				isConnected = true;
+//			}
+//		}
+//		catch (const boost::system::system_error& ex)
+//		{
+//			if (totalSleep > timeout)
+//			{
+//				cerr << "Failed to connect after timeout, aboting!";
+//				throw ex;
+//			}
+//			cout << "Failed to connect. sleeping for " << sleepBetweenAttempts << " milliseconds, " << ex.what() << endl;
+//			this_thread::sleep_for(chrono::milliseconds(sleepBetweenAttempts));
+//			totalSleep += sleepBetweenAttempts;
+//		}
+//		if (!isAccepted) {
+//			boost::system::error_code ec;
+//			tcp::endpoint peer_endpoint;
+//			cout << "accepting" << endl;
+//			acceptor_.accept(serverSocket.lowest_layer(), peer_endpoint);
+//			cout << "accepting done" << endl;
+//			serverSocket.handshake(boost::asio::ssl::stream_base::server, ec);
+//			cout << "handshake done" << endl;
+//			if(ec)
+//				throw PartyCommunicationException("Handshake failed. " + ec.message());
+//			isAccepted = true;
+//		}
+//	}
+//	setSocketOptions();
+//}
+//
+//
+//void CommPartyTcpSslSynced::setSocketOptions() {
+//	//boost::asio::ip::tcp::no_delay option(true);
+//	//serverSocket.set(option);
+//	//clientSocket.set_option(option);
+//}
+//
+//void CommPartyTcpSslSynced::write(const byte* data, int size) {
+//	boost::system::error_code ec;
+//	boost::asio::write(clientSocket,
+//		boost::asio::buffer(data, size),
+//		boost::asio::transfer_all(), ec);
+//	if (ec)
+//		throw PartyCommunicationException("Error while writing. " + ec.message());
+//}

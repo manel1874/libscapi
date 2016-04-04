@@ -46,8 +46,8 @@ int main(int argc, char* argv[])
 
 		SocketPartyData me(IpAdress::from_string("127.0.0.1"), atoi(argv[1]));
 		SocketPartyData other(IpAdress::from_string(argv[2]), atoi(argv[3]));
-		//std::unique_ptr<CommPartyTCPSynced> commParty(new CommPartyTCPSynced(io_service, me, other));
-		std::unique_ptr<CommPartyTcpSslSynced> commParty(new CommPartyTcpSslSynced(io_service, me, other));
+		std::unique_ptr<CommPartyTCPSynced> commParty(new CommPartyTCPSynced(io_service, me, other));
+		//std::unique_ptr<CommPartyTcpSslSynced> commParty(new CommPartyTcpSslSynced(io_service, me, other));
 		boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 
 		cout << "tring to connect to: " << argv[2] << " port: " << argv[3] << endl;
