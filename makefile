@@ -54,7 +54,9 @@ tests:: all
 
 compile-ntl:
 	@echo "Compiling the NTL library..."
-	@cp -r lib/NTL/unix $(builddir)/NTL
+	@mkdir -p $(builddir)/NTL
+	@cp -r lib/NTL/unix/. $(builddir)/NTL
+	@chmod 777 $(builddir)/NTL/src/configure
 	@cd $(builddir)/NTL/src/ && ./configure CXX=$(CXX)
 	@$(MAKE) -C $(builddir)/NTL/src/
 	@$(MAKE) -C $(builddir)/NTL/src/ PREFIX=$(prefix) install
