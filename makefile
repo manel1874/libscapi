@@ -34,7 +34,7 @@ directories: $(OUT_DIR)
 $(OUT_DIR):
 	mkdir -p $(OUT_DIR)
 
-$(SLib): compile-ntl compile-miracl compile-scgarbledcircuit compile-otextension $(OBJ_FILES)
+$(SLib): compile-ntl compile-miracl compile-otextension $(OBJ_FILES)
 	ar ru $@ $^ 
 	ranlib $@
 
@@ -93,13 +93,6 @@ compile-otextension: compile-miracl-cpp
 	@$(MAKE) -C $(builddir)/OTExtension CXX=$(CXX) SHARED_LIB_EXT=$(SHARED_LIB_EXT) install
 	@touch compile-otextension
 
-compile-scgarbledcircuit:
-	@echo "Compiling the ScGarbledCircuit library..."
-	@cp -r lib/ScGarbledCircuit $(builddir)/ScGarbledCircuit
-	@$(MAKE) -C $(builddir)/ScGarbledCircuit
-	@$(MAKE) -C $(builddir)/ScGarbledCircuit install
-	@touch compile-scgarbledcircuit
-
 clean-miracl:
 	@echo "Cleaning the miracl build dir..."
 	@rm -rf $(builddir)/Miracl
@@ -115,11 +108,6 @@ clean-otextension:
 	@rm -rf $(builddir)/OTExtension
 	@rm -f compile-otextension
 
-clean-scgarbledcircuit:
-	@echo "Cleaning the ScGarbledCircuit build dir..."
-	@rm -rf $(builddir)/ScGarbledCircuit
-	@rm -f compile-scgarbledcircuit
-	
 clean-ntl:
 	@echo "Cleaning the ntl build dir..."
 	@rm -rf $(builddir)/NTL
@@ -134,4 +122,4 @@ clean-cpp:
 clean-install:
 	@rm -rf install/*
 
-clean: clean-otextension clean-ntl clean-scgarbledcircuit clean-miracl clean-miracl-cpp clean-cpp clean-install
+clean: clean-otextension clean-ntl clean-miracl clean-miracl-cpp clean-cpp clean-install
