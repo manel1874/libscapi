@@ -1,6 +1,7 @@
 #pragma once
 
 #include <boost/asio.hpp>
+#include <boost/asio/ssl.hpp>
 #include <boost/system/error_code.hpp>
 #include <boost/bind.hpp>
 #include <mutex>
@@ -197,6 +198,59 @@ private:
 	boost::asio::io_service& ioServiceClient;
 	tcp::socket serverSocket;
 	tcp::socket clientSocket;
+	SocketPartyData me;
+	SocketPartyData other;
+	void setSocketOptions();
+};
+
+typedef boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ssl_socket;
+
+class CommPartyTcpSslSynced : public CommParty {
+public:
+	static boost::asio::ssl::context getServerContext() {
+		boost::asio::ssl::context ctx(boost::asio::ssl::context::sslv23);
+		//ctx.set_verify_mode(boost::asio::ssl::verify_none);
+		ctx.set_options(
+			boost::asio::ssl::context::default_workarounds
+			| boost::asio::ssl::context::no_sslv2
+			| boost::asio::ssl::context::single_dh_use);
+
+		ctx.set_password_callback([](std::size_t max_length, boost::asio::ssl::context::password_purpose purpose) {return "test"; });
+		ctx.use_certificate_chain_file("server.crt");
+		ctx.use_private_key_file("server.key", boost::asio::ssl::context::pem);
+		ctx.use_tmp_dh_file("dh512.pem");
+		return ctx;
+	}
+
+	static boost::asio::ssl::context getClientContext() {
+		boost::asio::ssl::context ctx(boost::asio::ssl::context::sslv23);
+		ctx.load_verify_file("server.crt");
+		//ctx.set_verify_mode(boost::asio::ssl::verify_none);
+		return ctx;
+	}
+
+	CommPartyTcpSslSynced(boost::asio::io_service& ioService, SocketPartyData me, SocketPartyData other) :
+		ioServiceServer(ioService), ioServiceClient(ioService),
+		acceptor_(ioService, tcp::endpoint(tcp::v4(), me.getPort())),
+		serverSocket(ioService, CommPartyTcpSslSynced::getServerContext()),
+		clientSocket(ioService, CommPartyTcpSslSynced::getClientContext())
+	{
+		this->me = me;
+		this->other = other;
+		
+	};
+	void join(int sleepBetweenAttempts = 500, int timeout = 5000) override;
+	void write(const byte* data, int size) override;
+	size_t read(byte* data, int sizeToRead) override {
+		return boost::asio::read(serverSocket, boost::asio::buffer(data, sizeToRead));
+	}
+private:
+
+	tcp::acceptor acceptor_;
+	boost::asio::io_service& ioServiceServer;
+	boost::asio::io_service& ioServiceClient;
+	ssl_socket serverSocket;
+	ssl_socket clientSocket;
 	SocketPartyData me;
 	SocketPartyData other;
 	void setSocketOptions();

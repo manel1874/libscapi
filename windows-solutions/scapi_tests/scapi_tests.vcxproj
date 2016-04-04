@@ -100,7 +100,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>C:\OpenSSL-Win64\lib\libeay32.lib;..\scapi-sln\x64\Release\ScapiCpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>C:\OpenSSL-Win64\lib\libeay32.lib;C:\OpenSSL-Win64\lib\ssleay32.lib;..\scapi-sln\x64\Release\ScapiCpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

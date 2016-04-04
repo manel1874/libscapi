@@ -84,7 +84,7 @@
       <PreprocessorDefinitions>_WIN32_WINNT=0x06030000;_SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>..\..\lib\MiraclWin64\x64\Debug\big.obj;..\..\lib\MiraclWin64\x64\Debug\MiraclWin64.lib;..\..\lib\OTExtension\Win64-sln\\x64\Debug\OTExtension.lib;C:\OpenSSL-Win64\lib\libeay32.lib;..\scapi-sln\x64\Debug\ScapiCpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\..\lib\MiraclWin64\x64\Debug\big.obj;..\..\lib\MiraclWin64\x64\Debug\MiraclWin64.lib;..\..\lib\OTExtension\Win64-sln\\x64\Debug\OTExtension.lib;C:\OpenSSL-Win64\lib\libeay32.lib;C:\OpenSSL-Win64\lib\ssleay32.lib;..\scapi-sln\x64\Debug\ScapiCpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -94,7 +94,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>..\scapi-sln\x64\Release\ScapiCpp.lib;C:\OpenSSL-Win64\lib\libeay32.lib;..\..\lib\OTExtension\Win64-sln\x64\Release\OTExtension.lib;..\..\lib\MiraclWin64\x64\Release\MiraclWin64.lib;..\..\lib\MiraclWin64\x64\Release\big.obj;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\scapi-sln\x64\Release\ScapiCpp.lib;C:\OpenSSL-Win64\lib\libeay32.lib;C:\OpenSSL-Win64\lib\ssleay32.lib;..\..\lib\OTExtension\Win64-sln\x64\Release\OTExtension.lib;..\..\lib\MiraclWin64\x64\Release\MiraclWin64.lib;..\..\lib\MiraclWin64\x64\Release\big.obj;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
