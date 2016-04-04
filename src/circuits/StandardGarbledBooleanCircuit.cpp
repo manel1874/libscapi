@@ -10,7 +10,7 @@
 #ifdef _WIN32
 //#include "StdAfx.h"
 #else
-#include "Compat.h"
+#include "../../include/circuits/Compat.h"
 #endif
 
 

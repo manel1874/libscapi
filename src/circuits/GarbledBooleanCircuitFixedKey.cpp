@@ -12,7 +12,7 @@
 //#include "StdAfx.h"
 #else
 #include <string.h>
-#include "Compat.h"
+#include "../../include/circuits/Compat.h"
 #endif
 
 using namespace std;
