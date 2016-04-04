@@ -708,7 +708,7 @@ bool OpenSSLDlogECFp::isMember(GroupElement* element) {
 	// Those two checks are done in two steps:
 	// 1.	Checking that the point is on the curve, performed by EC_POINT_is_on_curve.
 	// 2.	Checking that the point is in the Dlog group,performed by checkSubGroupMembership.
-	boolean valid = EC_POINT_is_on_curve(curve.get(), point->getPoint().get(), ctx.get());
+	bool valid = EC_POINT_is_on_curve(curve.get(), point->getPoint().get(), ctx.get());
 
 	//The second check is implemented in ECFpUtility since it is independent of the underlying library (BC, Miracl, or other)
 	//If we ever decide to change the implementation there will only be one place to change it.
@@ -1028,7 +1028,7 @@ bool OpenSSLDlogECF2m::isMember(GroupElement* element) {
 	// Those two checks are done in two steps:
 	// 1.	Checking that the point is on the curve, performed by EC_POINT_is_on_curve.
 	// 2.	Checking that the point is in the Dlog group,performed by checkSubGroupMembership.
-	boolean valid = EC_POINT_is_on_curve(curve.get(), point->getPoint().get(), ctx.get());
+	bool valid = EC_POINT_is_on_curve(curve.get(), point->getPoint().get(), ctx.get());
 
 	//The second check is implemented in ECFpUtility since it is independent of the underlying library (BC, Miracl, or other)
 	//If we ever decide to change the implementation there will only be one place to change it.
@@ -1187,7 +1187,7 @@ OpenSSLECFpPoint::OpenSSLECFpPoint(const biginteger & x, const biginteger & y, O
 
 	if (bCheckMembership) {
 		//check if the given parameters are valid point on the curve.
-		boolean valid = curve->isMember(this);
+		bool valid = curve->isMember(this);
 		// checks validity
 		if (valid == false) {// if not valid, throws exception
 
@@ -1277,7 +1277,7 @@ OpenSSLECF2mPoint::OpenSSLECF2mPoint(const biginteger & x, const biginteger & y,
 
 	if (bCheckMembership) {
 		//check if the given parameters are valid point on the curve.
-		boolean valid = curve->isMember(this);
+		bool valid = curve->isMember(this);
 		// checks validity
 		if (valid == false) {// if not valid, throws exception
 

@@ -207,7 +207,7 @@ typedef boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ssl_socket;
 
 class CommPartyTcpSslSynced : public CommParty {
 public:
-	static boost::asio::ssl::context getServerContext() {
+	static boost::asio::ssl::context& getServerContext() {
 		boost::asio::ssl::context ctx(boost::asio::ssl::context::sslv23);
 		//ctx.set_verify_mode(boost::asio::ssl::verify_none);
 		ctx.set_options(
@@ -222,7 +222,7 @@ public:
 		return ctx;
 	}
 
-	static boost::asio::ssl::context getClientContext() {
+	static boost::asio::ssl::context& getClientContext() {
 		boost::asio::ssl::context ctx(boost::asio::ssl::context::sslv23);
 		ctx.load_verify_file("server.crt");
 		//ctx.set_verify_mode(boost::asio::ssl::verify_none);
