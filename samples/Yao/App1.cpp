@@ -165,7 +165,7 @@ void Usage(char * argv0) {
 	std::cerr << "Usage: " << argv0 << " party_number config_path" << std::endl;
 }
 
-int main9999(int argc, char* argv[]) {
+int main(int argc, char* argv[]) {
 	Logger::configure_logging();
 	if (argc != 3) {
 		Usage(argv[0]);

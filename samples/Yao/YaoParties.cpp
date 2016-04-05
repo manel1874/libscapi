@@ -1,5 +1,8 @@
 #include "YaoExample.hpp"
 #include <tuple>
+#ifndef _WIN32
+#include "../../include/circuits/Compat.h"
+#endif
 
 /*********************************/
 /*          PartyOne             */

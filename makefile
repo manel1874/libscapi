@@ -21,8 +21,10 @@ export libdir=$(prefix)/lib
 
 SLib           = scapi.a
 CPP_FILES     := $(wildcard src/*/*.cpp)
+C_FILES     := $(wildcard src/*/*.c)
 OBJ_FILES     := $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES))
-OUT_DIR        = obj obj/circuits obj/comm obj/infra obj/interactive_mid_protocols obj/primitives
+OBJ_FILES     += $(patsubst src/%.c,obj/%.o,$(C_FILES))
+OUT_DIR        = obj obj/circuits obj/comm obj/infra obj/interactive_mid_protocols obj/primitives obj/circuits_c
 INC            = -I../boost_1_60_0 -Ilib -Iinstall/include 
 CPP_OPTIONS   := -std=c++11 $(INC)  -maes -mpclmul -DBOOST_LOG_DYN_LINK
 $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
@@ -39,7 +41,10 @@ $(SLib): compile-ntl compile-miracl compile-otextension $(OBJ_FILES)
 	ranlib $@
 
 obj/circuits/%.o: src/circuits/%.cpp
+	echo $(OBJ_FILES)
 	g++ -c $(CPP_OPTIONS) -o $@ $< 	 
+obj/circuits_c/%.o: src/circuits_c/%.c
+	gcc -fPIC -mavx -maes -mpclmul -DRDTSC -DTEST=AES128 -O3 -c -o $@ $< 
 obj/comm/%.o: src/comm/%.cpp
 	g++ -c $(CPP_OPTIONS) -o $@ $< 	 
 obj/infra/%.o: src/infra/%.cpp

@@ -1,4 +1,4 @@
-number_of_iterations = 100
+number_of_iterations = 1
 print_output = false
 sender_ip = 127.0.0.1
 receiver_ip = 127.0.0.1
@@ -6,9 +6,9 @@ input_section = AES
 circuit_type = NoFixedKey
 
 [AES]
-circuit_file = C:\code\libscapi\samples\assets\circuits\AES/NigelAes.txt
-input_file_party_1 = C:\code\libscapi\samples\assets\circuits\AES/AESPartyOneInputs.txt
-input_file_party_2 = C:\code\libscapi\samples\assets\circuits\AES/AESPartyTwoInputs.txt
+circuit_file = ../assets/circuits/AES/NigelAes.txt
+input_file_party_1 = ../assets/circuits/AES/AESPartyOneInputs.txt
+input_file_party_2 = ../assets/circuits/AES/AESPartyTwoInputs.txt
 
 [SHA1]
 circuit_file = C:\code\libscapi\samples\assets\circuits\SHA1/NigelSHA1.txt
