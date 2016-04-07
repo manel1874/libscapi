@@ -1,4 +1,4 @@
-#include "../include/primitives/HashOpenSSL.hpp"
+#include "../../include/primitives/HashOpenSSL.hpp"
 #include <iostream>
 
 int mainSha1()

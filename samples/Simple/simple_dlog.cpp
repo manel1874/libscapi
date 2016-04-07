@@ -1,4 +1,4 @@
-#include "../include/primitives/DlogOpenSSL.hpp"
+#include "../../include/primitives/DlogOpenSSL.hpp"
 #include <iostream>
 
 int mainDlog(){

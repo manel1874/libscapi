@@ -1,7 +1,7 @@
 #include <boost/thread/thread.hpp>
-#include "../include/infra/Scanner.hpp"
-#include "../include/infra/ConfigFile.hpp"
-#include "../include/comm/Comm.hpp"
+#include "../../include/infra/Scanner.hpp"
+#include "../../include/infra/ConfigFile.hpp"
+#include "../../include/comm/Comm.hpp"
 
 
 struct CommConfig {
