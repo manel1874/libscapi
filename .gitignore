@@ -51,3 +51,4 @@ test/config_for_test.txt
 *.opendb
 *.ipdb
 windows-solutions/scapi-sln/x64/Release/*
+windows-solutions/scapi-sln/ScapiCpp.vcxproj.filters.orig
