@@ -1,11 +1,5 @@
 #include "../../include/interactive_mid_protocols/SigmaProtocolDH.hpp"
 
-/**
-* Checks if the given challenge length is equal to the soundness parameter.
-* @return true if the challenge length is t; false, otherwise.
-*/
-bool checkChallengeLength(int t, int size) { return ((size == (t / 8)) ? true : false); }
-
 void SigmaDHMsg::initFromString(const string & s) {
 	auto str_vec = explode(s, ':');
 	assert(str_vec.size() == 2);
@@ -91,6 +85,17 @@ shared_ptr<SigmaSimulatorOutput> SigmaDHSimulator::simulate(SigmaCommonInput* in
 	return simulate(input, e);
 }
 
+/**
+* Checks the validity of the given soundness parameter.
+* @return true if the soundness parameter is valid; false, otherwise.
+*/
+bool SigmaDHSimulator::checkSoundnessParam(DlogGroup* dlog, int t) {
+	//If soundness parameter does not satisfy 2^t<q, return false.
+	biginteger soundness = mp::pow(biginteger(2), t);
+	biginteger q = dlog->getOrder();
+	return (soundness < q);
+}
+
 /********************************************/
 /*       Sigma DH Prover Computation        */
 /********************************************/
@@ -173,7 +178,7 @@ shared_ptr<SigmaProtocolMsg> SigmaDHProverComputation::computeSecondMsg(vector<b
 * Checks the validity of the given soundness parameter.
 * @return true if the soundness parameter is valid; false, otherwise.
 */
-bool checkSoundnessParam(DlogGroup* dlog, int t) {
+bool SigmaDHProverComputation::checkSoundnessParam(DlogGroup* dlog, int t) {
 	//If soundness parameter does not satisfy 2^t<q, return false.
 	biginteger soundness = mp::pow(biginteger(2), t);
 	biginteger q = dlog->getOrder();
@@ -208,6 +213,17 @@ SigmaDHVerifierComputation::SigmaDHVerifierComputation(shared_ptr<DlogGroup> dlo
 
 	this->random = random;
 
+}
+
+/**
+* Checks the validity of the given soundness parameter.
+* @return true if the soundness parameter is valid; false, otherwise.
+*/
+bool SigmaDHVerifierComputation::checkSoundnessParam(DlogGroup* dlog, int t) {
+	//If soundness parameter does not satisfy 2^t<q, return false.
+	biginteger soundness = mp::pow(biginteger(2), t);
+	biginteger q = dlog->getOrder();
+	return (soundness < q);
 }
 
 /**

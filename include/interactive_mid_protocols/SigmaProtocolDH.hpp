@@ -3,17 +3,6 @@
 #include "../primitives/Dlog.hpp"
 
 /**
-* Checks the validity of the given soundness parameter.
-* @return true if the soundness parameter is valid; false, otherwise.
-*/
-bool checkSoundnessParam(DlogGroup* dlog, int t);
-/**
-* Checks if the given challenge length is equal to the soundness parameter.
-* @return true if the challenge length is t; false, otherwise.
-*/
-bool checkChallengeLength(int t, int size);
-
-/**
 * Concrete implementation of SigmaProtocol input, used by the SigmaDH verifier and simulator.<p>
 * In SigmaProtocolDH, the common input contains three GroupElements - h, u, v.
 *
@@ -209,6 +198,18 @@ private:
 	mt19937 random;
 	biginteger qMinusOne;
 
+	/**
+	* Checks if the given challenge length is equal to the soundness parameter.
+	* @return true if the challenge length is t; false, otherwise.
+	*/
+	bool checkChallengeLength(int t, int size) { return ((size == (t / 8)) ? true : false); }
+
+	/**
+	* Checks the validity of the given soundness parameter.
+	* @return true if the soundness parameter is valid; false, otherwise.
+	*/
+	bool checkSoundnessParam(DlogGroup* dlog, int t);
+
 };
 
 /**
@@ -282,6 +283,19 @@ private:
 	shared_ptr<SigmaDHProverInput> input;	// Contains h, u, v and w. 
 	biginteger r;							// The value chosen in the protocol.
 	biginteger qMinusOne;
+
+	/**
+	* Checks if the given challenge length is equal to the soundness parameter.
+	* @return true if the challenge length is t; false, otherwise.
+	*/
+	bool checkChallengeLength(int t, int size) { return ((size == (t / 8)) ? true : false); }
+
+	/**
+	* Checks the validity of the given soundness parameter.
+	* @return true if the soundness parameter is valid; false, otherwise.
+	*/
+	bool checkSoundnessParam(DlogGroup* dlog, int t);
+
 };
 
 
@@ -357,4 +371,11 @@ private:
 		int t; 								//Soundness parameter in BITS.
 		vector<byte> e;						// The challenge.
 		mt19937 random;
+
+		/**
+		* Checks the validity of the given soundness parameter.
+		* @return true if the soundness parameter is valid; false, otherwise.
+		*/
+		bool checkSoundnessParam(DlogGroup* dlog, int t);
+
 };
