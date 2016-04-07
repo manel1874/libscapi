@@ -17,6 +17,7 @@
 #include "../include//interactive_mid_protocols/SigmaProtocol.hpp"
 #include "../include//interactive_mid_protocols/SigmaProtocolDlog.hpp"
 #include "../include//interactive_mid_protocols/SigmaProtocolDH.hpp"
+#include "../include//interactive_mid_protocols/SigmaProtocolDHExtended.hpp"
 #include <ctype.h>
 
 biginteger endcode_decode(biginteger bi) {
@@ -780,5 +781,31 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 		simulate(&simulator, &verifier, &commonInput);
 	}
 
+	SECTION("test sigma protocol DH Extended")
+	{
+		mt19937 random = get_seeded_random();
+		auto dlog = make_shared<OpenSSLDlogECFp>();
+		//auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
+		SigmaDHExtendedProverComputation prover(dlog, 80, get_seeded_random());
+		SigmaDHExtendedVerifierComputation verifier(dlog, 80, get_seeded_random());
+		SigmaDHExtendedSimulator simulator(dlog, 80, random);
+		biginteger w = getRandomInRange(0, dlog->getOrder() - 1, random);
+
+		auto g1 = dlog->getGenerator();
+		auto h1 = dlog->exponentiate(g1.get(), w);
+		auto g2 = dlog->createRandomElement();
+		auto h2 = dlog->exponentiate(g2.get(), w);
+		vector<shared_ptr<GroupElement>> g;
+		g.push_back(g1);
+		g.push_back(g2);
+		vector<shared_ptr<GroupElement>> h;
+		h.push_back(h1);
+		h.push_back(h2);
+		SigmaDHExtendedCommonInput commonInput(g, h);
+		shared_ptr<SigmaDHExtendedProverInput> proverInput = make_shared<SigmaDHExtendedProverInput>(g, h, w);
+
+		computeSigmaProtocol(&prover, &verifier, &commonInput, proverInput);
+		simulate(&simulator, &verifier, &commonInput);
+	}
 	
 }
