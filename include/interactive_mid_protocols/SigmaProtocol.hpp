@@ -1,7 +1,7 @@
 #pragma once
 #include "../infra/Common.hpp"
 #include "../primitives/SecurityLevel.hpp"
-#include "../comm/TwoPartyComm.hpp"
+#include "../comm/Comm.hpp"
 #include <openssl/rand.h>
 
 

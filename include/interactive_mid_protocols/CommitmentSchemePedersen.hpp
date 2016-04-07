@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CommitmentScheme.hpp"
-#include "../comm/TwoPartyComm.hpp"
+#include "../comm/Comm.hpp"
 #include "../../include/primitives/DlogOpenSSL.hpp"
 #include <map>
 

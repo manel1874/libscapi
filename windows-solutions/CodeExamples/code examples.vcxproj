@@ -73,9 +73,11 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LibraryPath>C:\local\boost_1_60_0\lib64-msvc-14.0;$(LibraryPath)</LibraryPath>
+    <TargetName>libscapi_examples</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LibraryPath>C:\local\boost_1_60_0\lib64-msvc-14.0;$(LibraryPath)</LibraryPath>
+    <TargetName>libscapi_examples</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -98,16 +100,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\samples\comm_example.cpp" />
+    <ClCompile Include="..\..\samples\Comm\comm_example.cpp" />
+    <ClCompile Include="..\..\samples\examples_main.cpp" />
     <ClCompile Include="..\..\samples\SigmaProtocols\SigmaProtocolExample.cpp" />
-    <ClCompile Include="..\..\samples\simple_dlog.cpp" />
-    <ClCompile Include="..\..\samples\simple_sha1.cpp" />
+    <ClCompile Include="..\..\samples\Simple\simple_dlog.cpp" />
+    <ClCompile Include="..\..\samples\Simple\simple_sha1.cpp" />
     <ClCompile Include="..\..\samples\Yao\App1.cpp" />
     <ClCompile Include="..\..\samples\Yao\YaoParties.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\samples\examples_main.hpp" />
     <ClInclude Include="..\..\samples\SigmaProtocols\SigmaProtocolExample.hpp" />
     <ClInclude Include="..\..\samples\Yao\YaoExample.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\samples\Comm\CommConfig.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

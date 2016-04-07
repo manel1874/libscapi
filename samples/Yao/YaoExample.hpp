@@ -1,7 +1,7 @@
 #pragma once 
 
 #include <boost/thread/thread.hpp>
-#include "../../include/comm/TwoPartyComm.hpp"
+#include "../../include/comm/Comm.hpp"
 #define AES_KEY BC_AES_KEY // AES_KEY is defined both in GarbledBooleanCircuit and in OTSemiHonestExtension
 //#include "../../include/circuits/FastGarbledBooleanCircuit.hpp"
 #include "../../include/circuits/GarbledBooleanCircuit.h"

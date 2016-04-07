@@ -29,14 +29,8 @@ void run_verifier(shared_ptr<ChannelServer> server, SigmaDlogParams sdp, ProverV
 
 }
 
-int main987654(int argc, char* argv[]) {
-	if (argc != 3) {
-		SigmaUsage(argv[0]);
-		return 1;
-	}
-	auto sdp = readSigmaConfig(argv[2]);
-	string side(argv[1]);
-
+int mainSigma(string side, string configPath) {
+	auto sdp = readSigmaConfig(configPath);
 	boost::asio::io_service io_service;
 	SocketPartyData proverParty(sdp.proverIp, sdp.proverPort);
 	SocketPartyData verifierParty(sdp.verifierIp, sdp.verifierPort);
@@ -53,7 +47,7 @@ int main987654(int argc, char* argv[]) {
 			run_verifier(server, sdp, *pve);
 		}
 		else {
-			SigmaUsage(argv[0]);
+			SigmaUsage();
 			return 1;
 		}
 	}

@@ -41,7 +41,6 @@ $(SLib): compile-ntl compile-miracl compile-otextension $(OBJ_FILES)
 	ranlib $@
 
 obj/circuits/%.o: src/circuits/%.cpp
-	echo $(OBJ_FILES)
 	g++ -c $(CPP_OPTIONS) -o $@ $< 	 
 obj/circuits_c/%.o: src/circuits_c/%.c
 	gcc -fPIC -mavx -maes -mpclmul -DRDTSC -DTEST=AES128 -O3 -c -o $@ $< 

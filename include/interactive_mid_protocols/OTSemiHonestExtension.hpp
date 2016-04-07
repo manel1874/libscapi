@@ -2,7 +2,7 @@
 
 #include "../infra/Common.hpp"
 #include "../primitives/SecurityLevel.hpp"
-#include "../comm/TwoPartyComm.hpp"
+#include "../comm/Comm.hpp"
 
 #include <OTExtension/util/typedefs.h>
 #include <OTExtension/util/socket.h>

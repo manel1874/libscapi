@@ -1,7 +1,7 @@
 #pragma once
 
 #include <boost/thread/thread.hpp>
-#include "../../include/comm/TwoPartyComm.hpp"
+#include "../../include/comm/Comm.hpp"
 #include "../../include/interactive_mid_protocols/SigmaProtocolDlog.hpp"
 #include "../../include/interactive_mid_protocols/ZeroKnowledge.hpp"
 #include "../../include/primitives/DlogOpenSSL.hpp"
@@ -54,8 +54,8 @@ SigmaDlogParams readSigmaConfig(string config_file) {
 	return SigmaDlogParams(w, p, q, g, t, proverIp, verifierIp, proverPort, verifierPort, protocolName);
 };
 
-void SigmaUsage(char * argv0) {
-	std::cerr << "Usage: " << argv0 << " <1(=prover)|2(=verifier)> config_file_path" << std::endl;
+void SigmaUsage() {
+	std::cerr << "Usage: ./libscapi_examples <1(=prover)|2(=verifier)> config_file_path" << std::endl;
 }
 
 class ProverVerifierExample {

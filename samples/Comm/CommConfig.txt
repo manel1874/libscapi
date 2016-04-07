@@ -1,7 +1,7 @@
-party_0_ip = 127.0.0.1
 party_1_ip = 127.0.0.1
-party_0_port = 3000
-party_1_port = 3001
+party_2_ip = 127.0.0.1
+party_1_port = 3000
+party_2_port = 3001
 classType = CommPartyTcpSslSynced
 
 [Windows]

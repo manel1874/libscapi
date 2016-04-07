@@ -35,15 +35,8 @@ vector<byte> * readInputAsVector(string input_file) {
 }
 
 GarbledBooleanCircuit * create_circuit(YaoConfig yao_config) {
-	//return new ScNativeGarbledBooleanCircuitNoFixedKey(yao_config.circuit_file, true);
-	return GarbledCircuitFactory::createCircuit(yao_config.circuit_file, GarbledCircuitFactory::CircuitType::FIXED_KEY_FREE_XOR_HALF_GATES, false);
-	//if (yao_config.circuit_type == "FixedKey")
-	//	return new ScNativeGarbledBooleanCircuit(yao_config.circuit_file, 
-	//		ScNativeGarbledBooleanCircuit::CircuitType::FREE_XOR_HALF_GATES, false);
-	//else if (yao_config.circuit_type == "NoFixedKey")
-		//return new ScNativeGarbledBooleanCircuitNoFixedKey(yao_config.circuit_file, true);
-	//else
-	//	throw invalid_argument("circuit_type should either be FixedKey or NoFixedKey");
+	return GarbledCircuitFactory::createCircuit(yao_config.circuit_file, 
+		GarbledCircuitFactory::CircuitType::FIXED_KEY_FREE_XOR_HALF_GATES, false);
 }
 
 void execute_party_one(YaoConfig yao_config) {
@@ -59,7 +52,8 @@ void execute_party_one(YaoConfig yao_config) {
 	start = chrono::system_clock::now();
 	//FastGarbledBooleanCircuit * circuit = create_circuit(yao_config);
 
-	GarbledBooleanCircuit* circuit = GarbledCircuitFactory::createCircuit(yao_config.circuit_file, GarbledCircuitFactory::CircuitType::FIXED_KEY_FREE_XOR_HALF_GATES, false);
+	GarbledBooleanCircuit* circuit = GarbledCircuitFactory::createCircuit(yao_config.circuit_file, 
+		GarbledCircuitFactory::CircuitType::FIXED_KEY_FREE_XOR_HALF_GATES, false);
 
 	print_elapsed_ms(start, "PartyOne: Creating GarbledBooleanCircuit");
 
@@ -161,24 +155,14 @@ YaoConfig read_yao_config(string config_file) {
 		input_file_2, sender_ip_str, receiver_ip_str, circuit_type);
 }
 
-void Usage(char * argv0) {
-	std::cerr << "Usage: " << argv0 << " party_number config_path" << std::endl;
-}
-
-int main(int argc, char* argv[]) {
-	Logger::configure_logging();
-	if (argc != 3) {
-		Usage(argv[0]);
-		return 1;
-	}
-	YaoConfig yao_config = read_yao_config(argv[2]); 	//R"(C:\code\scapi\src\cpp\CodeExamples\Yao\YaoConfig.txt)"
-	string partyNum(argv[1]);
+int mainYao(string partyNum, string configPath) {
+	YaoConfig yao_config = read_yao_config(configPath); 
 	if (partyNum == "1")
 		execute_party_one(yao_config);
 	else if (partyNum == "2") 
 		execute_party_two(yao_config);
 	else {
-		Usage(argv[0]);
+		std::cerr << "Usage: libscapi_examples yao <party_number(1|2)> <config_path>" << std::endl;
 		return 1;
 	}
 
