@@ -12,7 +12,7 @@
 #if defined(__INTEL_COMPILER)
 # include <ia32intrin.h> 
 #elif defined(__GNUC__)
-# include <emmintrin.h>
+	# include <emmintrin.h>
 # include <smmintrin.h>
 #endif
 

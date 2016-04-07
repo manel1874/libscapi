@@ -1,6 +1,56 @@
 #include <boost/thread/thread.hpp>
+#include "../include/infra/Scanner.hpp"
+#include "../include/infra/ConfigFile.hpp"
 #include "../include/comm/TwoPartyComm.hpp"
 
+
+struct CommConfig {
+	string party_0_ip;
+	string party_1_ip;
+	int party_0_port;
+	int party_1_port;
+	string certificateChainFile;
+	string password;
+	string privateKeyFile;
+	string tmpDHFile;
+	string clientVerifyFile;
+	string classType;
+	CommConfig(string party_0_ip, string party_1_ip, int party_0_port, int party_1_port,
+		string certificateChainFile, string password, string privateKeyFile, string tmpDHFile, 
+		string clientVerifyFile, string classType) {
+		this->party_0_ip = party_0_ip;
+		this->party_1_ip = party_1_ip;
+		this->party_0_port = party_0_port;
+		this->party_1_port = party_1_port;
+		this->certificateChainFile = certificateChainFile;
+		this->password = password;
+		this->privateKeyFile = privateKeyFile;
+		this->tmpDHFile = tmpDHFile;
+		this->clientVerifyFile = clientVerifyFile;
+		this->classType = classType;
+	}
+};
+
+CommConfig readCommConfig(string config_file) {
+	ConfigFile cf(config_file);
+#ifdef _WIN32
+	string os = "Windows";
+#else
+	string os = "Linux";
+#endif
+	int party_0_port = stoi(cf.Value("", "party_0_port"));
+	int party_1_port = stoi(cf.Value("", "party_1_port"));
+	string party_0_ip = cf.Value("", "party_0_ip");
+	string party_1_ip = cf.Value("", "party_1_ip");
+	string certificateChainFile = cf.Value(os, "certificateChainFile");
+	string password = cf.Value(os, "password");
+	string privateKeyFile = cf.Value(os, "privateKeyFile");
+	string tmpDHFile = cf.Value(os, "tmpDHFile");
+	string clientVerifyFile = cf.Value(os, "clientVerifyFile");
+	string classType = cf.Value("", "classType");
+	return CommConfig(party_0_ip, party_1_ip, party_0_port, party_1_port,
+		certificateChainFile, password, privateKeyFile, tmpDHFile, clientVerifyFile, classType);
+}
 
 void print_send_message(const string  &s, int i) {
 	cout << "sending message number " << i << " message: " << s << endl;
@@ -30,6 +80,33 @@ void recv_messages(CommParty* commParty, string * messages, int start, int end,
 	}
 }
 
+int commUsage() {
+	std::cerr << "Usage: comm_example party_number(0|1) config_file_path";
+	return 1;
+}
+
+CommParty* getCommParty(CommConfig commConfig, string partyNumber, boost::asio::io_service& io_service) {
+	string myIp = (partyNumber == "0") ? commConfig.party_0_ip : commConfig.party_1_ip;
+	string otherIp = (partyNumber == "0") ? commConfig.party_1_ip : commConfig.party_0_ip;
+	int myPort = (partyNumber == "0") ? commConfig.party_0_port : commConfig.party_1_port;
+	int otherPort = (partyNumber == "0") ? commConfig.party_1_port : commConfig.party_0_port;
+	SocketPartyData me(IpAdress::from_string(myIp), myPort);
+	SocketPartyData other(IpAdress::from_string(otherIp), otherPort);
+	cout << "tring to connect to: " << otherIp << " port: " << otherPort << endl;
+	if (commConfig.classType == "CommPartyTCPSynced")
+	{
+		cout << "Running Communication Example With CommPartyTCPSynced Class" << endl;
+		return new CommPartyTCPSynced(io_service, me, other);
+	}
+	else if (commConfig.classType == "CommPartyTcpSslSynced")
+	{
+		cout << "Running Communication Example With CommPartyTcpSslSynced Class" << endl;
+		return new CommPartyTcpSslSynced(io_service, me, other, commConfig.certificateChainFile,
+			commConfig.password, commConfig.privateKeyFile, commConfig.tmpDHFile, commConfig.clientVerifyFile);
+	}
+	throw invalid_argument("Got unsupported class type in config file");
+}
+
 /*
 * Testing Communication 
 */
@@ -37,33 +114,31 @@ int main(int argc, char* argv[])
 {
 	try
 	{
-		if (argc != 4)
-		{
-			std::cerr << "Usage: chat_server <server port> <client ip> <client port>";
-			return 1;
-		}
+		if (argc != 3)
+			return commUsage();
+		auto partyNumber = string(argv[1]);
+		if (partyNumber != "0" && partyNumber != "1")
+			return commUsage();
+
+		auto commConfig = readCommConfig(argv[2]);
 		boost::asio::io_service io_service;
-
-		SocketPartyData me(IpAdress::from_string("127.0.0.1"), atoi(argv[1]));
-		SocketPartyData other(IpAdress::from_string(argv[2]), atoi(argv[3]));
-		std::unique_ptr<CommPartyTCPSynced> commParty(new CommPartyTCPSynced(io_service, me, other));
-		//std::unique_ptr<CommPartyTcpSslSynced> commParty(new CommPartyTcpSslSynced(io_service, me, other));
+		CommParty * commParty = getCommParty(commConfig, partyNumber, io_service);
 		boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
-
-		cout << "tring to connect to: " << argv[2] << " port: " << argv[3] << endl;
-		commParty->join();
+		
+		commParty->join(500, 5000);
 		string sendMessages[6] = { "s0", "s1", "s2", "s3", "s4", "s5" };
 		string recvMessages[6];
 		byte buffer[100];
 		// send 3 message. get 3. send additional 2 get 2. send 1 get 1
-		send_messages(commParty.get(), sendMessages, 0, 3);
-		recv_messages(commParty.get(), recvMessages, 0, 3, buffer, 6);
-		send_messages(commParty.get(), sendMessages, 3, 5);
-		recv_messages(commParty.get(), recvMessages, 3, 5, buffer, 4);
-		send_messages(commParty.get(), sendMessages, 5, 6);
-		recv_messages(commParty.get(), recvMessages, 5, 6, buffer, 2);
+		send_messages(commParty, sendMessages, 0, 3);
+		recv_messages(commParty, recvMessages, 0, 3, buffer, 6);
+		send_messages(commParty, sendMessages, 3, 5);
+		recv_messages(commParty, recvMessages, 3, 5, buffer, 4);
+		send_messages(commParty, sendMessages, 5, 6);
+		recv_messages(commParty, recvMessages, 5, 6, buffer, 2);
 		io_service.stop();
 		t.join();
+		//delete commParty;
 	}
 	catch (std::exception& e)
 	{

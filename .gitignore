@@ -50,3 +50,4 @@ test/config_for_test.txt
 *.iobj
 *.opendb
 *.ipdb
+windows-solutions/scapi-sln/x64/Release/*

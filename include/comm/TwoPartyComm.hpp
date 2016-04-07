@@ -57,30 +57,6 @@ public:
 	bool operator<(const SocketPartyData &other) const { return (compare(other) < 0); };
 };
 
-/**
-* A simple interface that encapsulate all network operations of one peer in a two peers (or more) 
-* setup.
-*/
-class CommParty {
-public:
-	/**
-	* This method setups a double edge connection with another party.
-	* It connects to the other party, and also accepts connections from it.
-	* The method blocks until boths side are connected to each other.
-	*/
-	virtual void join(int sleep_between_attempts, int timeout)=0;
-	/**
-	* Write data from @param data to the other party.
-	* Will write exactly @param size bytes
-	*/
-	virtual void write(const byte* data, int size) = 0;
-	/**
-	* Read exactly @param sizeToRead bytes int @param buffer
-	* Will block until all bytes are read.
-	*/
-	virtual size_t read(byte* buffer, int sizeToRead) = 0;
-};
-
 class NativeChannel {
 public:
 	NativeChannel(boost::asio::io_service& io_service_server, boost::asio::io_service& io_service_client,
@@ -174,6 +150,29 @@ private:
 	};
 };
 
+/**
+* A simple interface that encapsulate all network operations of one peer in a two peers (or more)
+* setup.
+*/
+class CommParty {
+public:
+	/**
+	* This method setups a double edge connection with another party.
+	* It connects to the other party, and also accepts connections from it.
+	* The method blocks until boths side are connected to each other.
+	*/
+	virtual void join(int sleep_between_attempts, int timeout) = 0;
+	/**
+	* Write data from @param data to the other party.
+	* Will write exactly @param size bytes
+	*/
+	virtual void write(const byte* data, int size) = 0;
+	/**
+	* Read exactly @param sizeToRead bytes int @param buffer
+	* Will block until all bytes are read.
+	*/
+	virtual size_t read(byte* buffer, int sizeToRead) = 0;
+};
 
 class CommPartyTCPSynced : public CommParty {
 public:
@@ -202,56 +201,26 @@ private:
 	SocketPartyData other;
 	void setSocketOptions();
 };
-//
-//typedef boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ssl_socket;
-//
-//class CommPartyTcpSslSynced : public CommParty {
-//public:
-//	static boost::asio::ssl::context& getServerContext() {
-//		boost::asio::ssl::context ctx(boost::asio::ssl::context::sslv23);
-//		//ctx.set_verify_mode(boost::asio::ssl::verify_none);
-//		ctx.set_options(
-//			boost::asio::ssl::context::default_workarounds
-//			| boost::asio::ssl::context::no_sslv2
-//			| boost::asio::ssl::context::single_dh_use);
-//
-//		ctx.set_password_callback([](std::size_t max_length, boost::asio::ssl::context::password_purpose purpose) {return "test"; });
-//		ctx.use_certificate_chain_file("server.crt");
-//		ctx.use_private_key_file("server.key", boost::asio::ssl::context::pem);
-//		ctx.use_tmp_dh_file("dh512.pem");
-//		return ctx;
-//	}
-//
-//	static boost::asio::ssl::context& getClientContext() {
-//		boost::asio::ssl::context ctx(boost::asio::ssl::context::sslv23);
-//		ctx.load_verify_file("server.crt");
-//		//ctx.set_verify_mode(boost::asio::ssl::verify_none);
-//		return ctx;
-//	}
-//
-//	CommPartyTcpSslSynced(boost::asio::io_service& ioService, SocketPartyData me, SocketPartyData other) :
-//		ioServiceServer(ioService), ioServiceClient(ioService),
-//		acceptor_(ioService, tcp::endpoint(tcp::v4(), me.getPort())),
-//		serverSocket(ioService, CommPartyTcpSslSynced::getServerContext()),
-//		clientSocket(ioService, CommPartyTcpSslSynced::getClientContext())
-//	{
-//		this->me = me;
-//		this->other = other;
-//		
-//	};
-//	void join(int sleepBetweenAttempts = 500, int timeout = 5000) override;
-//	void write(const byte* data, int size) override;
-//	size_t read(byte* data, int sizeToRead) override {
-//		return boost::asio::read(serverSocket, boost::asio::buffer(data, sizeToRead));
-//	}
-//private:
-//
-//	tcp::acceptor acceptor_;
-//	boost::asio::io_service& ioServiceServer;
-//	boost::asio::io_service& ioServiceClient;
-//	ssl_socket serverSocket;
-//	ssl_socket clientSocket;
-//	SocketPartyData me;
-//	SocketPartyData other;
-//	void setSocketOptions();
-//};
+
+typedef boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ssl_socket;
+
+class CommPartyTcpSslSynced : public CommParty {
+public:
+	CommPartyTcpSslSynced(boost::asio::io_service& ioService, SocketPartyData me, SocketPartyData other,
+		string certificateChainFile, string password, string privateKeyFile, string tmpDHFile,
+		string clientVerifyFile);
+	void join(int sleepBetweenAttempts = 500, int timeout = 5000) override;
+	void write(const byte* data, int size) override;
+	size_t read(byte* data, int sizeToRead) override {
+		return boost::asio::read(*serverSocket, boost::asio::buffer(data, sizeToRead));
+	}
+
+private:
+	tcp::acceptor acceptor_;
+	boost::asio::io_service& ioServiceServer;
+	boost::asio::io_service& ioServiceClient;
+	ssl_socket* serverSocket;
+	ssl_socket* clientSocket;
+	SocketPartyData me;
+	SocketPartyData other;
+};
