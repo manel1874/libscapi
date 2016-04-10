@@ -18,6 +18,7 @@
 #include "../include//interactive_mid_protocols/SigmaProtocolDlog.hpp"
 #include "../include//interactive_mid_protocols/SigmaProtocolDH.hpp"
 #include "../include//interactive_mid_protocols/SigmaProtocolDHExtended.hpp"
+#include "../include//interactive_mid_protocols/SigmaProtocolPedersenCmtKnowledge.hpp"
 #include <ctype.h>
 
 biginteger endcode_decode(biginteger bi) {
@@ -803,6 +804,30 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 		h.push_back(h2);
 		SigmaDHExtendedCommonInput commonInput(g, h);
 		shared_ptr<SigmaDHExtendedProverInput> proverInput = make_shared<SigmaDHExtendedProverInput>(g, h, w);
+
+		computeSigmaProtocol(&prover, &verifier, &commonInput, proverInput);
+		simulate(&simulator, &verifier, &commonInput);
+	}
+
+	SECTION("test sigma protocol pedersen cmt knowledge")
+	{
+		mt19937 random = get_seeded_random();
+		auto dlog = make_shared<OpenSSLDlogECFp>();
+		//auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
+		SigmaPedersenCmtKnowledgeProverComputation prover(dlog, 80, get_seeded_random());
+		SigmaPedersenCmtKnowledgeVerifierComputation verifier(dlog, 80, get_seeded_random());
+		SigmaPedersenCmtKnowledgeSimulator simulator(dlog, 80, random);
+		biginteger x = getRandomInRange(0, dlog->getOrder() - 1, random);
+		biginteger r = getRandomInRange(0, dlog->getOrder() - 1, random);
+		auto g = dlog->getGenerator();
+		auto h1 = dlog->exponentiate(g.get(), r);
+		auto h = dlog->createRandomElement();
+		auto h2 = dlog->exponentiate(h.get(), x);
+		auto c = dlog->multiplyGroupElements(h1.get(), h2.get());
+
+		
+		SigmaPedersenCmtKnowledgeCommonInput commonInput(h, c);
+		shared_ptr<SigmaPedersenCmtKnowledgeProverInput> proverInput = make_shared<SigmaPedersenCmtKnowledgeProverInput>(h, c, x, r);
 
 		computeSigmaProtocol(&prover, &verifier, &commonInput, proverInput);
 		simulate(&simulator, &verifier, &commonInput);
