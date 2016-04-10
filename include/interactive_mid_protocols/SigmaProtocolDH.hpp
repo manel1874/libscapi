@@ -92,54 +92,6 @@ private:
 };
 
 /**
-* Concrete implementation of SigmaSimulatorOutput, used by SigmaDHSimulator.<p>
-*
-* It contains the a, e, z types used in the above mentioned concrete simulator.
-*
-* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
-*
-*/
-class SigmaDHSimulatorOutput : public SigmaSimulatorOutput {
-
-public:
-	/**
-	* Sets the given messages and challenge.
-	* @param a protocol's first message
-	* @param e protocol's challenge
-	* @param z protocol's second message
-	*/
-	SigmaDHSimulatorOutput(shared_ptr<SigmaDHMsg> a, vector<byte> e, shared_ptr<SigmaBIMsg> z) {
-		this->a = a;
-		this->e = e;
-		this->z = z;
-	}
-
-	/**
-	* Returns the protocol's first message.
-	* @return protocol's first message.
-	*/
-	shared_ptr<SigmaProtocolMsg> getA() override {	return a; }
-
-	/**
-	* Returns the protocol's challenge.
-	* @return protocol's challenge.
-	*/
-	 vector<byte> getE() override { return e; }
-
-	/**
-	* Returns the protocol's second message.
-	* @return protocol's second message.
-	*/
-	 shared_ptr<SigmaProtocolMsg> getZ() override {	return z; }
-
-private:
-	shared_ptr<SigmaDHMsg> a;		//first message
-	vector<byte> e;					//challenge
-	shared_ptr<SigmaBIMsg> z;		//second message
-
-};
-
-/**
 * Concrete implementation of Sigma Simulator.<p>
 * This implementation simulates the case that the prover convince a verifier that the input tuple (g,h,u,v)
 * is a Diffie-Hellman tuple.<p>
@@ -202,13 +154,13 @@ private:
 	* Checks if the given challenge length is equal to the soundness parameter.
 	* @return true if the challenge length is t; false, otherwise.
 	*/
-	bool checkChallengeLength(int t, int size) { return ((size == (t / 8)) ? true : false); }
+	bool checkChallengeLength(int size) { return ((size == (t / 8)) ? true : false); }
 
 	/**
 	* Checks the validity of the given soundness parameter.
 	* @return true if the soundness parameter is valid; false, otherwise.
 	*/
-	bool checkSoundnessParam(DlogGroup* dlog, int t);
+	bool checkSoundnessParam();
 
 };
 
@@ -288,13 +240,13 @@ private:
 	* Checks if the given challenge length is equal to the soundness parameter.
 	* @return true if the challenge length is t; false, otherwise.
 	*/
-	bool checkChallengeLength(int t, int size) { return ((size == (t / 8)) ? true : false); }
+	bool checkChallengeLength(int size) { return ((size == (t / 8)) ? true : false); }
 
 	/**
 	* Checks the validity of the given soundness parameter.
 	* @return true if the soundness parameter is valid; false, otherwise.
 	*/
-	bool checkSoundnessParam(DlogGroup* dlog, int t);
+	bool checkSoundnessParam();
 
 };
 
@@ -376,6 +328,6 @@ private:
 		* Checks the validity of the given soundness parameter.
 		* @return true if the soundness parameter is valid; false, otherwise.
 		*/
-		bool checkSoundnessParam(DlogGroup* dlog, int t);
+		bool checkSoundnessParam();
 
 };

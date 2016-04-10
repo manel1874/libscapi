@@ -39,7 +39,7 @@ SigmaDHExtendedSimulator::SigmaDHExtendedSimulator(shared_ptr<DlogGroup> dlog, i
 	this->t = t;
 
 	//Check the soundness validity.
-	if (!checkSoundnessParam(dlog.get(), t)) {
+	if (!checkSoundnessParam()) {
 		throw invalid_argument("soundness parameter t does not satisfy 2^t<q");
 	}
 
@@ -50,7 +50,7 @@ SigmaDHExtendedSimulator::SigmaDHExtendedSimulator(shared_ptr<DlogGroup> dlog, i
 * Checks the validity of the given soundness parameter.
 * @return true if the soundness parameter is valid; false, otherwise.
 */
-bool SigmaDHExtendedSimulator::checkSoundnessParam(DlogGroup* dlog, int t) {
+bool SigmaDHExtendedSimulator::checkSoundnessParam() {
 	//If soundness parameter does not satisfy 2^t<q, return false.
 	biginteger soundness = mp::pow(biginteger(2), t);
 	biginteger q = dlog->getOrder();
@@ -59,7 +59,7 @@ bool SigmaDHExtendedSimulator::checkSoundnessParam(DlogGroup* dlog, int t) {
 
 shared_ptr<SigmaSimulatorOutput> SigmaDHExtendedSimulator::simulate(SigmaCommonInput* input, vector<byte> challenge) {
 	//check the challenge validity.
-	if (!checkChallengeLength(t, challenge.size())) {
+	if (!checkChallengeLength(challenge.size())) {
 		throw CheatAttemptException("the length of the given challenge is differ from the soundness parameter");
 	}
 
@@ -105,7 +105,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaDHExtendedSimulator::simulate(SigmaCommonI
 	}
 
 	//Output ((a,b),e,z).
-	return make_shared<SigmaDHExtendedSimulatorOutput>(make_shared<SigmaDHExtendedMsg>(aArray), challenge, make_shared<SigmaBIMsg>(z));
+	return make_shared<SigmaSimulatorOutput>(make_shared<SigmaDHExtendedMsg>(aArray), challenge, make_shared<SigmaBIMsg>(z));
 
 }
 
@@ -129,7 +129,7 @@ SigmaDHExtendedProverComputation::SigmaDHExtendedProverComputation(shared_ptr<Dl
 	this->t = t;
 
 	//Check the soundness validity.
-	if (!checkSoundnessParam(dlog.get(), t)) {
+	if (!checkSoundnessParam()) {
 		throw invalid_argument("soundness parameter t does not satisfy 2^t<q");
 	}
 
@@ -141,7 +141,7 @@ SigmaDHExtendedProverComputation::SigmaDHExtendedProverComputation(shared_ptr<Dl
 * Checks the validity of the given soundness parameter.
 * @return true if the soundness parameter is valid; false, otherwise.
 */
-bool SigmaDHExtendedProverComputation::checkSoundnessParam(DlogGroup* dlog, int t) {
+bool SigmaDHExtendedProverComputation::checkSoundnessParam() {
 	//If soundness parameter does not satisfy 2^t<q, return false.
 	biginteger soundness = mp::pow(biginteger(2), t);
 	biginteger q = dlog->getOrder();
@@ -180,7 +180,7 @@ shared_ptr<SigmaProtocolMsg> SigmaDHExtendedProverComputation::computeFirstMsg(s
 shared_ptr<SigmaProtocolMsg> SigmaDHExtendedProverComputation::computeSecondMsg(vector<byte> challenge) {
 
 	//check the challenge validity.
-	if (!checkChallengeLength(t, challenge.size())) {
+	if (!checkChallengeLength(challenge.size())) {
 		throw CheatAttemptException("the length of the given challenge is differ from the soundness parameter");
 	}
 
@@ -219,7 +219,7 @@ SigmaDHExtendedVerifierComputation::SigmaDHExtendedVerifierComputation(shared_pt
 	this->t = t;
 
 	//Check the soundness validity.
-	if (!checkSoundnessParam(dlog.get(), t)) {
+	if (!checkSoundnessParam()) {
 		throw invalid_argument("soundness parameter t does not satisfy 2^t<q");
 	}
 
@@ -230,7 +230,7 @@ SigmaDHExtendedVerifierComputation::SigmaDHExtendedVerifierComputation(shared_pt
 * Checks the validity of the given soundness parameter.
 * @return true if the soundness parameter is valid; false, otherwise.
 */
-bool SigmaDHExtendedVerifierComputation::checkSoundnessParam(DlogGroup* dlog, int t) {
+bool SigmaDHExtendedVerifierComputation::checkSoundnessParam() {
 	//If soundness parameter does not satisfy 2^t<q, return false.
 	biginteger soundness = mp::pow(biginteger(2), t);
 	biginteger q = dlog->getOrder();
