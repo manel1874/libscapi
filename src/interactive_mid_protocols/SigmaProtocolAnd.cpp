@@ -136,7 +136,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaANDSimulator::simulate(SigmaCommonInput* i
 	auto z = make_shared<SigmaMultipleMsg>(zOutputs);
 
 	// output (a,e,eSize,z).
-	return make_shared<SigmaANDSimulatorOutput>(a, challenge, z);
+	return make_shared<SigmaSimulatorOutput>(a, challenge, z);
 }
 
 shared_ptr<SigmaSimulatorOutput> SigmaANDSimulator::simulate(SigmaCommonInput* input) {

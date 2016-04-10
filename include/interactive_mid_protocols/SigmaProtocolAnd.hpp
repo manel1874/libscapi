@@ -156,34 +156,6 @@ private:
 };
 
 /**
-* Concrete implementation of SigmaSimulatorOutput, used by SigmaANDSimulator.<p>
-* It contains the a, e, z types used in the above mentioned concrete simulator.
-*/
-class SigmaANDSimulatorOutput : public SigmaSimulatorOutput {
-public:
-	/**
-	* Sets the output of the simulator.
-	* @param a first message
-	* @param e challenge
-	* @param z second message
-	*/
-	SigmaANDSimulatorOutput(shared_ptr<SigmaMultipleMsg> a, vector<byte> e,
-		shared_ptr<SigmaMultipleMsg> z) {
-		this->a = a;
-		this->e = e;
-		this->z = z;
-	};
-	shared_ptr<SigmaProtocolMsg> getA() override { return a; };
-	vector<byte> getE() override { return e; };
-	shared_ptr<SigmaProtocolMsg> getZ() override { return z; };
-
-private:
-	shared_ptr<SigmaMultipleMsg> a;
-	vector<byte> e;
-	shared_ptr<SigmaMultipleMsg> z;
-};
-
-/**
 * Concrete implementation of Sigma Protocol verifier computation.<p>
 * This protocol is used for a prover to convince a verifier that the AND of any number of statements are true,
 * where each statement can be proven by an associated Sigma protocol.<p>

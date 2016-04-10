@@ -48,7 +48,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaDlogSimulator::simulate(SigmaCommonInput* 
 	// OUTPUT (a,e,eSize,z).
 	auto SigmaGEMsg = make_shared<SigmaGroupElementMsg>(a->generateSendableData());
 	auto SigmaBMsg = make_shared<SigmaBIMsg>(z);
-	return make_shared<SigmaDlogSimulatorOutput>(SigmaGEMsg, challenge, SigmaBMsg);
+	return make_shared<SigmaSimulatorOutput>(SigmaGEMsg, challenge, SigmaBMsg);
 }
 
 shared_ptr<SigmaSimulatorOutput> SigmaDlogSimulator::simulate(SigmaCommonInput* input) {
