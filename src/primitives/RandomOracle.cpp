@@ -26,5 +26,5 @@ HashBasedRO::~HashBasedRO()
 
 HKDFBasedRO::~HKDFBasedRO()
 {
-	delete this->hkdf;
+	//delete this->hkdf;
 }
