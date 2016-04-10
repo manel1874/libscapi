@@ -7,21 +7,7 @@
 */
 bool checkChallengeLength(vector<byte> challenge, int t);
 
-/**
-* Concrete implementation of SigmaProtocol message. <p>
-* This message contains one GroupElement sendable data and used when the prover sends a message to the verifier.
-*/
-class SigmaGroupElementMsg : public SigmaProtocolMsg {
-public:
-	SigmaGroupElementMsg(shared_ptr<GroupElementSendableData> el) {  this->element = el;  };
-	shared_ptr<GroupElementSendableData> getElement() { return element; };
-	// SerializedNetwork implementation:
-	void initFromString(const string & s) override { element->initFromString(s); };
-	string toString() override{ return element->toString();  };
 
-private:
-	shared_ptr<GroupElementSendableData> element=NULL;
-};
 
 /**
 * Concrete implementation of SigmaProtocol input, used by the SigmaDlog verifier and simulator.<p>
@@ -171,42 +157,6 @@ private:
 	* @return true if the soundness parameter is valid; false, otherwise.
 	*/
 	bool checkSoundnessParam();
-};
-
-/**
-* Concrete implementation of SigmaSimulatorOutput, used by SigmaDlogSimulator.<p>
-* It contains the a, e, z types used in the above mentioned concrete simulator.
-*/
-class SigmaDlogSimulatorOutput : public SigmaSimulatorOutput {
-public:
-	/**
-	* Sets the output of the simulator.
-	*/
-	SigmaDlogSimulatorOutput(shared_ptr<SigmaGroupElementMsg> a, vector<byte> e,  
-		shared_ptr<SigmaBIMsg> z) {
-		this->a = a;
-		this->e = e;
-		this->z = z;
-	}
-	/**
-	* Returns first message.
-	*/
-	shared_ptr<SigmaProtocolMsg> getA() override { return a; };
-	/**
-	* Returns the challenge.
-	*/
-	vector<byte> getE() override { return e; };
-	
-	/**
-	* Returns second message.
-	*/
-	shared_ptr<SigmaProtocolMsg> getZ() override { return z; };
-
-
-private:
-	shared_ptr<SigmaGroupElementMsg> a;
-	vector<byte> e;
-	shared_ptr<SigmaBIMsg> z;
 };
 
 /**

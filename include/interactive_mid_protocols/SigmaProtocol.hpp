@@ -3,6 +3,7 @@
 #include "../primitives/SecurityLevel.hpp"
 #include "../comm/Comm.hpp"
 #include <openssl/rand.h>
+#include "../primitives/Dlog.hpp"
 
 
 /**
@@ -66,26 +67,37 @@ class SigmaProtocolMsg : public NetworkSerialized {};
  * for each concrete Sigma protocol.
  */
 class SigmaSimulatorOutput {
+private:
+	shared_ptr<SigmaProtocolMsg> a;
+	vector<byte> e;
+	shared_ptr<SigmaProtocolMsg> z;
+
 public:
+	SigmaSimulatorOutput(shared_ptr<SigmaProtocolMsg> a, vector<byte> e, shared_ptr<SigmaProtocolMsg> z) {
+		this->a = a;
+		this->e = e;
+		this->z = z;
+	}
+
 	/**
 	* All SigmaSimulators contains first message, challenge and second message. 
 	* Returns the first message.
 	* @return a - first message
 	*/
-	virtual shared_ptr<SigmaProtocolMsg> getA()=0;
+	shared_ptr<SigmaProtocolMsg> getA() { return a; }
 
 	/**
 	* All SigmaSimulators contains first message, challenge and second message. 
 	* Returns the challenge 
 	*/
-	virtual vector<byte> getE() = 0 ;
+	vector<byte> getE() { return e; }
 
 	/**
 	* All SigmaSimulators contains first message, challenge and second message. 
 	* Returns the second message.
 	* @return z - second message
 	*/
-	virtual shared_ptr<SigmaProtocolMsg> getZ() = 0;
+	shared_ptr<SigmaProtocolMsg> getZ() { return z;	}
 };
 
 /**
@@ -342,6 +354,22 @@ private:
 	void sendChallengeToProver(vector<byte> challenge) {
 		channel->write_fast(challenge.data(), challenge.size());
 	}
+};
+
+/**
+* Concrete implementation of SigmaProtocol message. <p>
+* This message contains one GroupElement sendable data and used when the prover sends a message to the verifier.
+*/
+class SigmaGroupElementMsg : public SigmaProtocolMsg {
+public:
+	SigmaGroupElementMsg(shared_ptr<GroupElementSendableData> el) { this->element = el; };
+	shared_ptr<GroupElementSendableData> getElement() { return element; };
+	// SerializedNetwork implementation:
+	void initFromString(const string & s) override { element->initFromString(s); };
+	string toString() override { return element->toString(); };
+
+private:
+	shared_ptr<GroupElementSendableData> element = NULL;
 };
 
 /**
