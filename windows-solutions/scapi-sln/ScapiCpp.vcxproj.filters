@@ -165,6 +165,21 @@
     <ClCompile Include="..\..\src\comm\Comm.cpp">
       <Filter>Source Files\comm</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\circuits_c\intrin_sequential_ks1_enc1.c">
+      <Filter>Source Files\Circuits</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\circuits_c\intrin_sequential_ks2_enc2.c">
+      <Filter>Source Files\Circuits</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\circuits_c\intrin_sequential_ks4_enc4.c">
+      <Filter>Source Files\Circuits</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\circuits_c\intrin_sequential_ks4_enc8.c">
+      <Filter>Source Files\Circuits</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolPedersenCmtKnowledge.cpp">
+      <Filter>Source Files\InteractiveMidProtocols</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\circuits\BooleanCircuits.hpp">
@@ -210,9 +225,6 @@
       <Filter>Header Files\InteractiveMidProtocols</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolDlog.hpp">
-      <Filter>Header Files\InteractiveMidProtocols</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolPedersen.hpp">
       <Filter>Header Files\InteractiveMidProtocols</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\interactive_mid_protocols\ZeroKnowledge.hpp">
@@ -319,6 +331,9 @@
     </ClInclude>
     <ClInclude Include="..\..\include\comm\Comm.hpp">
       <Filter>Header Files\Comm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolPedersenCmtKnowledge.hpp">
+      <Filter>Header Files\InteractiveMidProtocols</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

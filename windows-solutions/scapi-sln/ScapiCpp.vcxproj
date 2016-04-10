@@ -121,12 +121,7 @@
     <ClCompile Include="..\..\src\circuits\RowReductionGarbledBooleanCircuit.cpp" />
     <ClCompile Include="..\..\src\circuits\StandardGarbledBooleanCircuit.cpp" />
     <ClCompile Include="..\..\src\circuits\TedKrovetzAesNiWrapperC.cpp" />
-    <ClCompile Include="..\..\src\circuits_c\intrin_sequential_ks1_enc1.c" />
-    <ClCompile Include="..\..\src\circuits_c\intrin_sequential_ks2_enc2.c" />
-    <ClCompile Include="..\..\src\circuits_c\intrin_sequential_ks4_enc4.c" />
-    <ClCompile Include="..\..\src\circuits_c\intrin_sequential_ks4_enc8.c" />
-    <ClCompile Include="..\..\src\comm\Comm.cpp" />
-    <ClCompile Include="..\..\src\infra\Common.cpp" />
+    <ClCompile Include="..\..\src\comm\Comm.cpp" />    <ClCompile Include="..\..\src\infra\Common.cpp" />
     <ClCompile Include="..\..\src\infra\ConfigFile.cpp" />
     <ClCompile Include="..\..\src\infra\MathAlgorithms.cpp" />
     <ClCompile Include="..\..\src\infra\Scanner.cpp" />
@@ -137,6 +132,7 @@
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolDH.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolDHExtended.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolDlog.cpp" />
+    <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolPedersenCmtKnowledge.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\ZeroKnowledge.cpp" />
     <ClCompile Include="..\..\src\primitives\Dlog.cpp" />
     <ClCompile Include="..\..\src\primitives\DlogCryptopp.cpp" />
@@ -186,7 +182,7 @@
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolAnd.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolDH.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolDlog.hpp" />
-    <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolPedersen.hpp" />
+    <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolPedersenCmtKnowledge.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\ZeroKnowledge.hpp" />
     <ClInclude Include="..\..\include\mid_layer\PlainText.hpp" />
     <ClInclude Include="..\..\include\primitives\Dlog.hpp" />
