@@ -15,16 +15,16 @@ SigmaPedersenCommittedValueSimulator::SigmaPedersenCommittedValueSimulator(share
 shared_ptr<SigmaSimulatorOutput> SigmaPedersenCommittedValueSimulator::simulate(SigmaCommonInput* input, vector<byte> challenge) {
 	
 	//Delegate the computation to the underlying Sigma Dlog simulator.
-	return dlogSim.simulate(&convertInput(input), challenge);
+	return dlogSim.simulate(convertInput(input).get(), challenge);
 
 }
 
 shared_ptr<SigmaSimulatorOutput> SigmaPedersenCommittedValueSimulator::simulate(SigmaCommonInput* input) {
 	//Delegate the computation to the underlying Sigma Dlog simulator.
-	return dlogSim.simulate(&convertInput(input));
+	return dlogSim.simulate(convertInput(input).get());
 }
 
-SigmaDlogCommonInput SigmaPedersenCommittedValueSimulator::convertInput(SigmaCommonInput* in) {
+shared_ptr<SigmaDlogCommonInput> SigmaPedersenCommittedValueSimulator::convertInput(SigmaCommonInput* in) {
 	auto params = dynamic_cast<SigmaPedersenCommittedValueCommonInput*>(in);
 
 	//If the given input is not an instance of SigmaPedersenCommittedValueCommonInput throw exception
@@ -39,8 +39,7 @@ SigmaDlogCommonInput SigmaPedersenCommittedValueSimulator::convertInput(SigmaCom
 	auto hTag = dlog->multiplyGroupElements(c.get(), hToX.get());
 
 	//Create and return the input instance with the computes h'.
-	SigmaDlogCommonInput underlyingInput(hTag);
-	return underlyingInput;
+	return make_shared<SigmaDlogCommonInput>(hTag);
 }
 
 /**

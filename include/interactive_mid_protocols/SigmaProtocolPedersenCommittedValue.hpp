@@ -121,7 +121,7 @@ private:
 	* @return the converted input
 	* @throws IllegalArgumentException if the given input is not an instance of SigmaPedersenCommittedValueCommonInput.
 	*/
-	SigmaDlogCommonInput convertInput(SigmaCommonInput* in);
+	shared_ptr<SigmaDlogCommonInput> convertInput(SigmaCommonInput* in);
 
 public:
 	/**
