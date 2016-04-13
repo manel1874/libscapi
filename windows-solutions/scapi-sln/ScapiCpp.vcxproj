@@ -137,6 +137,7 @@
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolDH.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolDHExtended.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolDlog.cpp" />
+    <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolElGamalCmtKnowledge.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolPedersenCmtKnowledge.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolPedersenCommittedValue.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\ZeroKnowledge.cpp" />
@@ -188,9 +189,11 @@
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolAnd.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolDH.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolDlog.hpp" />
+    <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolElGamalCmtKnowledge.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolPedersenCmtKnowledge.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolPedersenCommittedValue.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\ZeroKnowledge.hpp" />
+    <ClInclude Include="..\..\include\mid_layer\key.hpp" />
     <ClInclude Include="..\..\include\mid_layer\PlainText.hpp" />
     <ClInclude Include="..\..\include\primitives\Dlog.hpp" />
     <ClInclude Include="..\..\include\primitives\DlogOpenSSL.hpp" />

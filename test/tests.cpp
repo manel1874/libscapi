@@ -20,6 +20,7 @@
 #include "../include//interactive_mid_protocols/SigmaProtocolDHExtended.hpp"
 #include "../include//interactive_mid_protocols/SigmaProtocolPedersenCmtKnowledge.hpp"
 #include "../include//interactive_mid_protocols/SigmaProtocolPedersenCommittedValue.hpp"
+#include "../include//interactive_mid_protocols/SigmaProtocolElGamalCmtKnowledge.hpp"
 #include <ctype.h>
 
 biginteger endcode_decode(biginteger bi) {
@@ -848,6 +849,25 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 
 		SigmaPedersenCommittedValueCommonInput commonInput(h, c, x);
 		shared_ptr<SigmaPedersenCommittedValueProverInput> proverInput = make_shared<SigmaPedersenCommittedValueProverInput>(h, c, x, r);
+
+		computeSigmaProtocol(&prover, &verifier, &commonInput, proverInput);
+		simulate(prover.getSimulator().get(), &verifier, &commonInput);
+	}
+
+	SECTION("test sigma protocol el gamal cmt knowledge")
+	{
+		mt19937 random = get_seeded_random();
+		auto dlog = make_shared<OpenSSLDlogECFp>();
+		//auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
+		SigmaElGamalCmtKnowledgeProverComputation prover(dlog, 80, get_seeded_random());
+		SigmaElGamalCmtKnowledgeVerifierComputation verifier(dlog, 80, get_seeded_random());
+		biginteger w = getRandomInRange(0, dlog->getOrder() - 1, random);
+		auto g = dlog->getGenerator();
+		auto h = dlog->exponentiate(g.get(), w);
+		ElGamalPublicKey key(h);
+
+		SigmaElGamalCmtKnowledgeCommonInput commonInput(h);
+		auto proverInput = make_shared<SigmaElGamalCmtKnowledgeProverInput>(key, w);
 
 		computeSigmaProtocol(&prover, &verifier, &commonInput, proverInput);
 		simulate(prover.getSimulator().get(), &verifier, &commonInput);
