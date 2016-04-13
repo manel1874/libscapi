@@ -180,6 +180,12 @@
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolPedersenCmtKnowledge.cpp">
       <Filter>Source Files\InteractiveMidProtocols</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolDHExtended.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolPedersenCommittedValue.cpp">
+      <Filter>Source Files\InteractiveMidProtocols</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\circuits\BooleanCircuits.hpp">
@@ -333,6 +339,12 @@
       <Filter>Header Files\Comm</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolPedersenCmtKnowledge.hpp">
+      <Filter>Header Files\InteractiveMidProtocols</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolDHExtended.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolPedersenCommittedValue.hpp">
       <Filter>Header Files\InteractiveMidProtocols</Filter>
     </ClInclude>
   </ItemGroup>
