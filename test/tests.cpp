@@ -21,6 +21,8 @@
 #include "../include//interactive_mid_protocols/SigmaProtocolPedersenCmtKnowledge.hpp"
 #include "../include//interactive_mid_protocols/SigmaProtocolPedersenCommittedValue.hpp"
 #include "../include//interactive_mid_protocols/SigmaProtocolElGamalCmtKnowledge.hpp"
+#include "../include//mid_layer/AsymmetricEnc.hpp"
+#include "../include//mid_layer/ElGamalEnc.hpp"
 #include <ctype.h>
 
 biginteger endcode_decode(biginteger bi) {
@@ -719,6 +721,43 @@ TEST_CASE("serialization", "[SerializedData, CmtCCommitmentMsg]")
 		shared_ptr<GroupElement> point2 = dlog.reconstructElement(false, &point2Data);
 		REQUIRE(dlog.isMember(point2.get()));
 		REQUIRE(*point2.get() == *point.get());
+	}
+}
+
+TEST_CASE("asymmetric encryption")
+{
+	SECTION("El Gamal")
+	{
+		mt19937 random = get_seeded_random();
+		auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
+		ElGamalOnGroupElement elgamal(dlog);
+		auto keys = elgamal.generateKey();
+		elgamal.setKey(keys.first, keys.second);
+		string message = "I want to encrypt this!";
+		int len = message.size();
+		if (elgamal.hasMaxByteArrayLengthForPlaintext()) {
+			REQUIRE(len < elgamal.getMaxLengthOfByteArrayForPlaintext());
+		}
+		vector<byte> plainM(message.begin(), message.end());
+		auto plaintext = elgamal.generatePlaintext(plainM);
+		biginteger r = getRandomInRange(0, dlog->getOrder() - 1, random);
+		auto cipher = elgamal.encrypt(plaintext, r);
+		auto returnedP = elgamal.decrypt(cipher);
+		REQUIRE(*returnedP == *plaintext);
+
+		auto returnedV = elgamal.generateBytesFromPlaintext(plaintext);
+		bool equal = true;
+		for (int i = 0; i < plainM.size(); i++)
+			if (returnedV.data()[i] != plainM.data()[i]) 
+				equal = false;
+		REQUIRE(equal == true);
+
+		
+		auto doubleC = elgamal.multiply(cipher, cipher, r);
+		auto p = dynamic_pointer_cast<GroupElementPlaintext>(plaintext);
+		auto c = dlog->multiplyGroupElements(p->getElement().get(), p->getElement().get());
+		auto multC = elgamal.encrypt(make_shared<GroupElementPlaintext>(c), r*3 % dlog->getOrder());
+		REQUIRE(*doubleC == *multC);
 	}
 }
 
