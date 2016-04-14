@@ -136,13 +136,17 @@ void execute_party_two(YaoConfig yao_config) {
 }
 
 YaoConfig read_yao_config(string config_file) {
-
+#ifdef _WIN32
+	string os = "Windows";
+#else
+	string os = "Linux";
+#endif
 	ConfigFile cf(config_file);
 	int number_of_iterations = stoi(cf.Value("", "number_of_iterations"));
 	string str_print_output = cf.Value("", "print_output");
 	bool print_output;
 	istringstream(str_print_output) >> std::boolalpha >> print_output;
-	string input_section = cf.Value("", "input_section");
+	string input_section = cf.Value("", "input_section") + "-" + os;
 	string circuit_file = cf.Value(input_section, "circuit_file");
 	string input_file_1 = cf.Value(input_section, "input_file_party_1");
 	string input_file_2 = cf.Value(input_section, "input_file_party_2");

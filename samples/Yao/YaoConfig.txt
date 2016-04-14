@@ -2,28 +2,49 @@ number_of_iterations = 1
 print_output = false
 sender_ip = 127.0.0.1
 receiver_ip = 127.0.0.1
-input_section = AES
+input_section = AES 
 circuit_type = NoFixedKey
 
-[AES]
-circuit_file = ../assets/circuits/AES/NigelAes.txt
-input_file_party_1 = ../assets/circuits/AES/AESPartyOneInputs.txt
-input_file_party_2 = ../assets/circuits/AES/AESPartyTwoInputs.txt
+# OS name is added automatically
+[AES-Linux]
+circuit_file = ./assets/circuits/AES/NigelAes.txt
+input_file_party_1 = ./assets/circuits/AES/AESPartyOneInputs.txt
+input_file_party_2 = ./assets/circuits/AES/AESPartyTwoInputs.txt
 
-[SHA1]
-circuit_file = C:\code\libscapi\samples\assets\circuits\SHA1/NigelSHA1.txt
-input_file_party_1 = C:\code\libscapi\samples\assets\circuits\SHA1/SHA1PartyOneInputs.txt
-input_file_party_2 = C:\code\libscapi\samples\assets\circuits\SHA1/SHA1PartyTwoInputs.txt
+[SHA1-Linux]
+circuit_file = ./assets/circuits/SHA1/NigelSHA1.txt
+input_file_party_1 = ./assets/circuits/SHA1/SHA1PartyOneInputs.txt
+input_file_party_2 = ./assets/circuits/SHA1/SHA1PartyTwoInputs.txt
 
-[SHA256]
-circuit_file = C:/code/scapi/src/java/edu/biu/SCProtocols/MaliciousYao/assets/circuits/SHA256/NigelSHA256.txt
-input_file_party_1 = C:/code/scapi/src/java/edu/biu/SCProtocols/MaliciousYao/assets/circuits/SHA256/SHA256PartyOneInputs.txt
-input_file_party_2 = C:/code/scapi/src/java/edu/biu/SCProtocols/MaliciousYao/assets/circuits/SHA256/SHA256PartyTwoInputs.txt
+[SHA256-Linux]
+circuit_file = ./assets/circuits/SHA256/NigelSHA256.txt
+input_file_party_1 = ./assets/circuits/SHA256/SHA256PartyOneInputs.txt
+input_file_party_2 = ./assets/circuits/SHA256/SHA256PartyTwoInputs.txt
 
-[ADD]
-circuit_file = C:/code/scapi/src/java/edu/biu/SCProtocols/MaliciousYao/assets/circuits/ADD/NigelAdd32.txt
-input_file_party_1 = C:/code/scapi/src/java/edu/biu/SCProtocols/MaliciousYao/assets/circuits/ADD/ADDPartyOneInputs.txt
-input_file_party_2 = C:/code/scapi/src/java/edu/biu/SCProtocols/MaliciousYao/assets/circuits/ADD/ADDPartyTwoInputs.txt
+[ADD-Linux]
+circuit_file = ./assets/circuits/ADD/NigelAdd32.txt
+input_file_party_1 = ./assets/circuits/ADD/ADDPartyOneInputs.txt
+input_file_party_2 = ./assets/circuits/ADD/ADDPartyTwoInputs.txt
+
+[AES-Windows]
+circuit_file = ../../../../samples/assets/circuits/AES/NigelAes.txt
+input_file_party_1 = ../../../../samples/assets/circuits/AES/AESPartyOneInputs.txt
+input_file_party_2 = ../../../../samples/assets/circuits/AES/AESPartyTwoInputs.txt
+
+[SHA1-Windows]
+circuit_file = ../../../../samples/assets/circuits/SHA1/NigelSHA1.txt
+input_file_party_1 = ../../../../samples/assets/circuits/SHA1/SHA1PartyOneInputs.txt
+input_file_party_2 = ../../../../samples/assets/circuits/SHA1/SHA1PartyTwoInputs.txt
+
+[SHA256-Windows]
+circuit_file = ../../../../samples/assets/circuits/SHA256/NigelSHA256.txt
+input_file_party_1 = ../../../../samples/assets/circuits/SHA256/SHA256PartyOneInputs.txt
+input_file_party_2 = ../../../../samples/assets/circuits/SHA256/SHA256PartyTwoInputs.txt
+
+[ADD-Windows]
+circuit_file = ../../../../samples/assets/circuits/ADD/NigelAdd32.txt
+input_file_party_1 = ../../../../samples/assets/circuits/ADD/ADDPartyOneInputs.txt
+input_file_party_2 = ../../../../samples/assets/circuits/ADD/ADDPartyTwoInputs.txt
 
 
 
