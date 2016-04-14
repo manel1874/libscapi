@@ -24,7 +24,7 @@
 */
 #pragma once
 #include "RandomValue.hpp"
-#include "../mid_layer/PlainText.hpp"
+#include "../CryptoInfra/PlainText.hpp"
 
 /**
 * General interface of the receiver's output of the commit phase.
@@ -217,7 +217,9 @@ public:
 	* Converts the committed value to a ByteArrayPlaintext.
 	*/
 	shared_ptr<Plaintext> convertToPlaintext() override {
-		auto res = make_shared<ByteArrayPlaintext>(x, len);
+		vector<byte> target;
+		copy_byte_array_to_byte_vector(x.get(), len, target, 0);
+		auto res = make_shared<ByteArrayPlaintext>(target);
 		return res;
 	};
 };
