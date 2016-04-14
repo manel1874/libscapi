@@ -46,6 +46,12 @@
     <Filter Include="Header Files\MidLayer">
       <UniqueIdentifier>{8599081e-49bd-4ae0-acf1-4c86b5c6e861}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\mid_layer">
+      <UniqueIdentifier>{4206e073-299c-4932-a26f-3f7725e48887}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\CryptoInfra">
+      <UniqueIdentifier>{0161b3ac-9ee5-4fb3-837f-a7c1416c171f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\circuits\BooleanCircuits.cpp">
@@ -180,14 +186,17 @@
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolPedersenCmtKnowledge.cpp">
       <Filter>Source Files\InteractiveMidProtocols</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolDHExtended.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolPedersenCommittedValue.cpp">
       <Filter>Source Files\InteractiveMidProtocols</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolElGamalCmtKnowledge.cpp">
       <Filter>Source Files\InteractiveMidProtocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolDHExtended.cpp">
+      <Filter>Source Files\InteractiveMidProtocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\mid_layer\ElGamalEnc.cpp">
+      <Filter>Source Files\mid_layer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -239,9 +248,6 @@
     <ClInclude Include="..\..\include\interactive_mid_protocols\ZeroKnowledge.hpp">
       <Filter>Header Files\InteractiveMidProtocols</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\mid_layer\PlainText.hpp">
-      <Filter>Header Files\MidLayer</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\primitives\Dlog.hpp">
       <Filter>Header Files\Primitives</Filter>
     </ClInclude>
@@ -257,9 +263,6 @@
     <ClInclude Include="..\..\include\primitives\Kdf.hpp">
       <Filter>Header Files\Primitives</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\primitives\Key.hpp">
-      <Filter>Header Files\Primitives</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\primitives\mac.hpp">
       <Filter>Header Files\Primitives</Filter>
     </ClInclude>
@@ -273,9 +276,6 @@
       <Filter>Header Files\Primitives</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\primitives\RandomOracle.hpp">
-      <Filter>Header Files\Primitives</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\primitives\SecurityLevel.hpp">
       <Filter>Header Files\Primitives</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\primitives\TrapdoorPermutationOpenSSL.hpp">
@@ -350,11 +350,23 @@
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolElGamalCmtKnowledge.hpp">
       <Filter>Header Files\InteractiveMidProtocols</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\mid_layer\key.hpp">
-      <Filter>Header Files\MidLayer</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolDHExtended.hpp">
       <Filter>Header Files\InteractiveMidProtocols</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\mid_layer\AsymmetricEnc.hpp">
+      <Filter>Header Files\MidLayer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\mid_layer\ElGamalEnc.hpp">
+      <Filter>Header Files\MidLayer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\primitives\SecurityLevel.hpp">
+      <Filter>Header Files\CryptoInfra</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\primitives\Key.hpp">
+      <Filter>Header Files\CryptoInfra</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\mid_layer\PlainText.hpp">
+      <Filter>Header Files\CryptoInfra</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -141,6 +141,7 @@
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolPedersenCmtKnowledge.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolPedersenCommittedValue.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\ZeroKnowledge.cpp" />
+    <ClCompile Include="..\..\src\mid_layer\ElGamalEnc.cpp" />
     <ClCompile Include="..\..\src\primitives\Dlog.cpp" />
     <ClCompile Include="..\..\src\primitives\DlogCryptopp.cpp" />
     <ClCompile Include="..\..\src\primitives\DlogOpenSSL.cpp" />
@@ -193,7 +194,8 @@
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolPedersenCmtKnowledge.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolPedersenCommittedValue.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\ZeroKnowledge.hpp" />
-    <ClInclude Include="..\..\include\mid_layer\key.hpp" />
+    <ClInclude Include="..\..\include\mid_layer\AsymmetricEnc.hpp" />
+    <ClInclude Include="..\..\include\mid_layer\ElGamalEnc.hpp" />
     <ClInclude Include="..\..\include\mid_layer\PlainText.hpp" />
     <ClInclude Include="..\..\include\primitives\Dlog.hpp" />
     <ClInclude Include="..\..\include\primitives\DlogOpenSSL.hpp" />
