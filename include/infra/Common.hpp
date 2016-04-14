@@ -40,6 +40,30 @@ public:
 	InvalidKeyException(const string & msg) : logic_error(msg) {};
 };
 
+class KeyException : public logic_error
+{
+public:
+	KeyException(const string & msg) : logic_error(msg) {};
+};
+
+class UnsupportedOperationException : public logic_error
+{
+public:
+	UnsupportedOperationException(const string & msg) : logic_error(msg) {};
+};
+
+class SecurityLevelException : public logic_error
+{
+public:
+	SecurityLevelException(const string & msg) : logic_error(msg) {};
+};
+
+class CheatAttemptException : public logic_error
+{
+public:
+	CheatAttemptException(const string & msg) : logic_error(msg) {};
+};
+
 // using boost::multiprecision:cpp_int - Arbitrary precision integer type.
 namespace mp = boost::multiprecision;     // reduce the typing a bit later...
 
