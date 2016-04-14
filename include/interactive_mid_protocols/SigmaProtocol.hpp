@@ -1,6 +1,6 @@
 #pragma once
 #include "../infra/Common.hpp"
-#include "../primitives/SecurityLevel.hpp"
+#include "../CryptoInfra/SecurityLevel.hpp"
 #include "../comm/Comm.hpp"
 #include <openssl/rand.h>
 #include "../primitives/Dlog.hpp"

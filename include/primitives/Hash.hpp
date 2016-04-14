@@ -2,7 +2,7 @@
 #define SCAPI_HASH_H
 
 #include "../infra/Common.hpp"
-#include "SecurityLevel.hpp"
+#include "../CryptoInfra/SecurityLevel.hpp"
 
 /**
 * A hash function is target collision resistant if it is infeasible for an adversary to succeed in the following game:

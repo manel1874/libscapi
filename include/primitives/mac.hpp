@@ -1,7 +1,7 @@
 #ifndef SCAPI_MAC_H
 #define SCAPI_MAC_H
 #include "../infra/Common.hpp"
-#include "Key.hpp"
+#include "../CryptoInfra/Key.hpp"
 
 /**
 * General interface for Mac. Every class in this family must implement this interface. <p>

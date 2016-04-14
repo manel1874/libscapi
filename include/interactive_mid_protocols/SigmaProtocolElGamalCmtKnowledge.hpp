@@ -1,7 +1,7 @@
 #pragma once
 #include "SigmaProtocol.hpp"
 #include "SigmaProtocolDlog.hpp"
-#include "../mid_layer/key.hpp"
+#include "../mid_layer/ElGamalEnc.hpp"
 
 /**
 * Concrete implementation of SigmaProtocol input, used by the SigmaElGamalCTKnowldge verifier and simulator.<p>

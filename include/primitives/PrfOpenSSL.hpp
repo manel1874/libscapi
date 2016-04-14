@@ -3,7 +3,7 @@
 
 #include "Prf.hpp"
 #include "HashOpenSSL.hpp"
-#include "Key.hpp"
+#include "../CryptoInfra/Key.hpp"
 #include <openssl/rand.h>
 #include <openssl/hmac.h>
 #include <openssl/err.h>

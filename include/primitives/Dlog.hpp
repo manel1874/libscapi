@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../infra/Common.hpp"
-#include "SecurityLevel.hpp"
+#include "../CryptoInfra/SecurityLevel.hpp"
 #include "../infra/MathAlgorithms.hpp"
 #include "../../include/infra/ConfigFile.hpp"
 
