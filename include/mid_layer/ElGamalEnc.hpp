@@ -144,7 +144,7 @@ public:
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
 *
 */
-class ElGamalOnGroupElement : public AsymMultiplicativeHomomorphicEnc {
+class ElGamalOnGroupElementEnc : public AsymMultiplicativeHomomorphicEnc {
 private:
 
 	shared_ptr<DlogGroup> dlog;						//The underlying DlogGroup
@@ -160,7 +160,7 @@ public:
 	/**
 	* Default constructor. Uses the default implementations of DlogGroup, CryptographicHash and SecureRandom.
 	*/
-	ElGamalOnGroupElement();
+	ElGamalOnGroupElementEnc();
 
 	/**
 	* Constructor that gets a DlogGroup and sets it to the underlying group.
@@ -168,7 +168,7 @@ public:
 	* @param dlogGroup underlying DlogGroup to use, it has to have DDH security level
 	* @throws SecurityLevelException if the Dlog Group is not DDH secure
 	*/
-	ElGamalOnGroupElement(shared_ptr<DlogGroup> dlogGroup, mt19937 random = get_seeded_random()) {
+	ElGamalOnGroupElementEnc(shared_ptr<DlogGroup> dlogGroup, mt19937 random = get_seeded_random()) {
 		setMembers(dlogGroup, random);
 	}
 
