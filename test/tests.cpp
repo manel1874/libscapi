@@ -21,6 +21,7 @@
 #include "../include//interactive_mid_protocols/SigmaProtocolPedersenCmtKnowledge.hpp"
 #include "../include//interactive_mid_protocols/SigmaProtocolPedersenCommittedValue.hpp"
 #include "../include//interactive_mid_protocols/SigmaProtocolElGamalCmtKnowledge.hpp"
+#include "../include//interactive_mid_protocols/SigmaProtocolElGamalCommittedValue.hpp"
 #include "../include//mid_layer/AsymmetricEnc.hpp"
 #include "../include//mid_layer/ElGamalEnc.hpp"
 #include <ctype.h>
@@ -730,7 +731,7 @@ TEST_CASE("asymmetric encryption")
 	{
 		mt19937 random = get_seeded_random();
 		auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
-		ElGamalOnGroupElement elgamal(dlog);
+		ElGamalOnGroupElementEnc elgamal(dlog);
 		auto keys = elgamal.generateKey();
 		elgamal.setKey(keys.first, keys.second);
 		string message = "I want to encrypt this!";
@@ -907,6 +908,29 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 
 		SigmaElGamalCmtKnowledgeCommonInput commonInput(h);
 		auto proverInput = make_shared<SigmaElGamalCmtKnowledgeProverInput>(key, w);
+
+		computeSigmaProtocol(&prover, &verifier, &commonInput, proverInput);
+		simulate(prover.getSimulator().get(), &verifier, &commonInput);
+	}
+
+	SECTION("test sigma protocol el gamal committed value")
+	{
+		mt19937 random = get_seeded_random();
+		auto dlog = make_shared<OpenSSLDlogECFp>();
+		//auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
+		SigmaElGamalCommittedValueProverComputation prover(dlog, 80, get_seeded_random());
+		SigmaElGamalCommittedValueVerifierComputation verifier(dlog, 80, get_seeded_random());
+		biginteger w = getRandomInRange(0, dlog->getOrder() - 1, random);
+		auto x = dlog->createRandomElement();
+		ElGamalOnGroupElementEnc elgamal(dlog, random);
+		auto pair = elgamal.generateKey();
+		elgamal.setKey(pair.first, pair.second);
+		auto cipher = elgamal.encrypt(make_shared<GroupElementPlaintext>(x), w);
+		
+		auto key = *(dynamic_cast<ElGamalPublicKey*>(pair.first.get()));
+		auto commitment = *(dynamic_cast<ElGamalOnGrElSendableData*>(cipher->generateSendableData().get()));
+		SigmaElGamalCommittedValueCommonInput commonInput(key, commitment, x);
+		auto proverInput = make_shared<SigmaElGamalCommittedValueProverInput>(key, commitment, x, w);
 
 		computeSigmaProtocol(&prover, &verifier, &commonInput, proverInput);
 		simulate(prover.getSimulator().get(), &verifier, &commonInput);

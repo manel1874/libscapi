@@ -198,6 +198,9 @@
     <ClCompile Include="..\..\src\mid_layer\ElGamalEnc.cpp">
       <Filter>Source Files\mid_layer</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolElGamalCommittedValue.cpp">
+      <Filter>Source Files\InteractiveMidProtocols</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\circuits\BooleanCircuits.hpp">
@@ -367,6 +370,9 @@
     </ClInclude>
     <ClInclude Include="..\..\include\mid_layer\PlainText.hpp">
       <Filter>Header Files\CryptoInfra</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolElGamalCommittedValue.hpp">
+      <Filter>Header Files\InteractiveMidProtocols</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
