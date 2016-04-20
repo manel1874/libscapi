@@ -3,7 +3,7 @@
 int exampleUsage()
 {
 	auto usage = R"(
-To run the example:
+To run an example:
 ./libscapi_examples <example_name> [args...]
 
 example_name can one of the followin: 
