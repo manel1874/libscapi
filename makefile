@@ -24,7 +24,7 @@ CPP_FILES     := $(wildcard src/*/*.cpp)
 C_FILES     := $(wildcard src/*/*.c)
 OBJ_FILES     := $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES))
 OBJ_FILES     += $(patsubst src/%.c,obj/%.o,$(C_FILES))
-OUT_DIR        = obj obj/circuits obj/comm obj/infra obj/interactive_mid_protocols obj/primitives obj/circuits_c
+OUT_DIR        = obj obj/mid_layer obj/circuits obj/comm obj/infra obj/interactive_mid_protocols obj/primitives obj/circuits_c
 INC            = -I../boost_1_60_0 -Ilib -Iinstall/include 
 CPP_OPTIONS   := -std=c++11 $(INC)  -maes -mpclmul -DBOOST_LOG_DYN_LINK
 $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
@@ -51,6 +51,8 @@ obj/infra/%.o: src/infra/%.cpp
 obj/interactive_mid_protocols/%.o: src/interactive_mid_protocols/%.cpp
 	g++ -c $(CPP_OPTIONS) -o $@ $< 	 
 obj/primitives/%.o: src/primitives/%.cpp
+	g++ -c $(CPP_OPTIONS) -o $@ $< 	 
+obj/mid_layer/%.o: src/mid_layer/%.cpp
 	g++ -c $(CPP_OPTIONS) -o $@ $< 	 
 
 tests:: all

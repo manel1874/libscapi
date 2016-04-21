@@ -1,7 +1,7 @@
 #pragma once
 #include "../CryptoInfra/SecurityLevel.hpp"
 #include "../CryptoInfra/Key.hpp"
-#include "../CryptoInfra/Plaintext.hpp"
+#include "../CryptoInfra/PlainText.hpp"
 
 /**
 * General interface for asymmetric encryption. Each class of this family must implement this interface. <p>
