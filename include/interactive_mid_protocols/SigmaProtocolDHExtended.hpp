@@ -240,8 +240,7 @@ public:
 	*/
 
 	shared_ptr<SigmaSimulator> getSimulator() override {
-		auto res = make_shared<SigmaDHExtendedSimulator>(dlog, t, random);
-		return res;
+		return make_shared<SigmaDHExtendedSimulator>(dlog, t, random);
 	}
 };
 
