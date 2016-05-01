@@ -22,6 +22,7 @@
 #include "../include//interactive_mid_protocols/SigmaProtocolPedersenCommittedValue.hpp"
 #include "../include//interactive_mid_protocols/SigmaProtocolElGamalCmtKnowledge.hpp"
 #include "../include//interactive_mid_protocols/SigmaProtocolElGamalCommittedValue.hpp"
+#include "../include//interactive_mid_protocols/SigmaProtocolElGamalPrivateKey.hpp"
 #include "../include//mid_layer/AsymmetricEnc.hpp"
 #include "../include//mid_layer/ElGamalEnc.hpp"
 #include <ctype.h>
@@ -931,6 +932,25 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 		auto commitment = *(dynamic_cast<ElGamalOnGrElSendableData*>(cipher->generateSendableData().get()));
 		SigmaElGamalCommittedValueCommonInput commonInput(key, commitment, x);
 		auto proverInput = make_shared<SigmaElGamalCommittedValueProverInput>(key, commitment, x, w);
+
+		computeSigmaProtocol(&prover, &verifier, &commonInput, proverInput);
+		simulate(prover.getSimulator().get(), &verifier, &commonInput);
+	}
+
+	SECTION("test sigma protocol el gamal private key")
+	{
+		mt19937 random = get_seeded_random();
+		auto dlog = make_shared<OpenSSLDlogECFp>();
+		//auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
+		SigmaElGamalPrivateKeyProverComputation prover(dlog, 80, get_seeded_random());
+		SigmaElGamalPrivateKeyVerifierComputation verifier(dlog, 80, get_seeded_random());
+		ElGamalOnGroupElementEnc elgamal(dlog, random);
+		auto pair = elgamal.generateKey();
+		
+		auto publicKey = *(dynamic_cast<ElGamalPublicKey*>(pair.first.get()));
+		auto privateKey = *(dynamic_cast<ElGamalPrivateKey*>(pair.second.get()));
+		SigmaElGamalPrivateKeyCommonInput commonInput(publicKey);
+		auto proverInput = make_shared<SigmaElGamalPrivateKeyProverInput>(publicKey, privateKey);
 
 		computeSigmaProtocol(&prover, &verifier, &commonInput, proverInput);
 		simulate(prover.getSimulator().get(), &verifier, &commonInput);
