@@ -204,6 +204,9 @@
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolElGamalPrivateKey.cpp">
       <Filter>Source Files\InteractiveMidProtocols</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolElGamalEncryptedValue.cpp">
+      <Filter>Source Files\InteractiveMidProtocols</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\circuits\BooleanCircuits.hpp">
@@ -378,6 +381,9 @@
       <Filter>Header Files\InteractiveMidProtocols</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolElGamalPrivateKey.hpp">
+      <Filter>Header Files\InteractiveMidProtocols</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolElGamalEncryptedValue.hpp">
       <Filter>Header Files\InteractiveMidProtocols</Filter>
     </ClInclude>
   </ItemGroup>

@@ -23,6 +23,7 @@
 #include "../include//interactive_mid_protocols/SigmaProtocolElGamalCmtKnowledge.hpp"
 #include "../include//interactive_mid_protocols/SigmaProtocolElGamalCommittedValue.hpp"
 #include "../include//interactive_mid_protocols/SigmaProtocolElGamalPrivateKey.hpp"
+#include "../include//interactive_mid_protocols/SigmaProtocolElGamalEncryptedValue.hpp"
 #include "../include//mid_layer/AsymmetricEnc.hpp"
 #include "../include//mid_layer/ElGamalEnc.hpp"
 #include <ctype.h>
@@ -954,6 +955,36 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 
 		computeSigmaProtocol(&prover, &verifier, &commonInput, proverInput);
 		simulate(prover.getSimulator().get(), &verifier, &commonInput);
+	}
+
+	SECTION("test sigma protocol el gamal encrypted value")
+	{
+		mt19937 random = get_seeded_random();
+		auto dlog = make_shared<OpenSSLDlogECFp>();
+		//auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
+		SigmaElGamalEncryptedValueProverComputation prover(dlog, 80, get_seeded_random());
+		SigmaElGamalEncryptedValueVerifierComputation verifier(dlog, 80, get_seeded_random());
+		biginteger w = getRandomInRange(0, dlog->getOrder() - 1, random);
+		auto x = dlog->createRandomElement();
+		ElGamalOnGroupElementEnc elgamal(dlog, random);
+		auto pair = elgamal.generateKey();
+		elgamal.setKey(pair.first, pair.second);
+		auto cipher = elgamal.encrypt(make_shared<GroupElementPlaintext>(x), w);
+
+		auto key = *(dynamic_cast<ElGamalPublicKey*>(pair.first.get()));
+		auto ciphertext = *(dynamic_cast<ElGamalOnGroupElementCiphertext*>(cipher.get()));
+		SigmaElGamalEncryptedValueCommonInput randomInput(true, ciphertext, key, x);
+		auto proverRandomInput = make_shared<SigmaElGamalEncryptedValueRandomnessProverInput>(ciphertext, key, x, w);
+
+		computeSigmaProtocol(&prover, &verifier, &randomInput, proverRandomInput);
+		simulate(prover.getSimulator().get(), &verifier, &randomInput);
+
+		auto privateKey = *(dynamic_cast<ElGamalPrivateKey*>(pair.second.get()));
+		SigmaElGamalEncryptedValueCommonInput keyInput(false, ciphertext, key, x);
+		auto proverKeyInput = make_shared<SigmaElGamalEncryptedValuePrivKeyProverInput>(ciphertext, key, x, privateKey);
+
+		computeSigmaProtocol(&prover, &verifier, &keyInput, proverKeyInput);
+		simulate(prover.getSimulator().get(), &verifier, &keyInput);
 	}
 	
 }

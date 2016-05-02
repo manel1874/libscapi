@@ -139,6 +139,7 @@
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolDlog.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolElGamalCmtKnowledge.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolElGamalCommittedValue.cpp" />
+    <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolElGamalEncryptedValue.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolElGamalPrivateKey.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolPedersenCmtKnowledge.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolPedersenCommittedValue.cpp" />
@@ -194,6 +195,7 @@
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolDlog.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolElGamalCmtKnowledge.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolElGamalCommittedValue.hpp" />
+    <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolElGamalEncryptedValue.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolElGamalPrivateKey.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolPedersenCmtKnowledge.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolPedersenCommittedValue.hpp" />
