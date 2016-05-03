@@ -33,11 +33,14 @@ void PartyOne::run(byte* ungarbledInput) {
 	//	throw runtime_error("key generation failed");
 
 	values = circuit->garble();
+	
 
 
 	//write one byte
-	byte test;
-	channel->write(&test, 1);
+	//byte test;
+	//channel->write(&test, 1);
+
+
 
 	// send garbled tables and the translation table to p2.
 	auto garbledTables = circuit->getGarbledTables();
@@ -46,8 +49,11 @@ void PartyOne::run(byte* ungarbledInput) {
 	// send p1 input keys to p2.
 	sendP1Inputs(ungarbledInput);
 
+	//cout << "PartyOne: after sending p1 inputs and circuit: " << endl;
 	// run OT protocol in order to send p2 the necessary keys without revealing any information.
 	runOTProtocol();
+
+	//cout << "PartyOne: after ot: " << endl;
 }
 
 void PartyOne::runOTProtocol() {
@@ -112,9 +118,12 @@ void PartyTwo::run(byte * ungarbledInput, int inputSize, bool print_output) {
 	receiveCircuit();
 	receiveP1Inputs();
 
+	//cout << "PartyTwo: after recieving p1 inputs and circuit: " << endl;
 	// run OT protocol in order to get the necessary keys without revealing any information.
 	OTBatchROutput * output = runOTProtocol(ungarbledInput, inputSize);
 
+
+	//cout << "PartyTwo: after run ot: " << endl;
 	// Compute the circuit.
 	byte* circuitOutput = computeCircuit(output);
 
@@ -132,8 +141,8 @@ void PartyTwo::run(byte * ungarbledInput, int inputSize, bool print_output) {
 void PartyTwo::receiveCircuit() {
 
 	//read one byte
-	byte test;
-	channel->read(&test, 1);
+	//byte test;
+	//channel->read(&test, 1);
 
 	// receive garbled tables.
 	channel->read((byte*)circuit->getGarbledTables(), circuit->getGarbledTableSize());
