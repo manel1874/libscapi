@@ -69,6 +69,8 @@ void execute_party_one(YaoConfig yao_config) {
 
 	PartyOne * p1;
 	auto all = scapi_now();
+
+	cout << "after reading input";
 	// create Party one with the previous created objects.
 	p1 = new PartyOne(channel, otSender, circuit);
 	for (int i = 0; i < yao_config.number_of_iterations ; i++) {
@@ -93,7 +95,7 @@ void execute_party_two(YaoConfig yao_config) {
 	boost::asio::io_service io_service;
 	SocketPartyData me(yao_config.receiver_ip, 1212);
 	SocketPartyData other(yao_config.sender_ip, 1213);
-	SocketPartyData receiverParty(yao_config.receiver_ip, 7766);
+	//SocketPartyData receiverParty(yao_config.receiver_ip, 7766);
 	CommParty * channel = new CommPartyTCPSynced(io_service, me, other);
 	boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 	print_elapsed_ms(start, "PartyTwo: Init");
@@ -107,7 +109,9 @@ void execute_party_two(YaoConfig yao_config) {
 
 	// create the OT receiver.
 	start = scapi_now();
-	OTBatchReceiver * otReceiver = new OTSemiHonestExtensionReceiver(receiverParty, 163, 1);
+	SocketPartyData senderParty(yao_config.sender_ip, 7766);
+	//OTBatchReceiver * otReceiver = new OTSemiHonestExtensionReceiver(receiverParty, 163, 1);
+	OTBatchReceiver * otReceiver = new OTSemiHonestExtensionReceiver(senderParty, 163, 1);
 	print_elapsed_ms(start, "PartyTwo: creating OTSemiHonestExtensionReceiver");
 
 	// connect to party one
@@ -116,6 +120,8 @@ void execute_party_two(YaoConfig yao_config) {
 
 	// create Party two with the previous created objec ts			
 	vector<byte> * ungarbledInput = readInputAsVector(yao_config.input_file_2);
+
+	cout << "after reading input";
 
 	PartyTwo * p2;
 	auto all = scapi_now();
