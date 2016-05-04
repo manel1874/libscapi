@@ -207,6 +207,12 @@
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolElGamalEncryptedValue.cpp">
       <Filter>Source Files\InteractiveMidProtocols</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\mid_layer\CramerShoupEnc.cpp">
+      <Filter>Source Files\mid_layer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolCramerShoupEncryptedValue.cpp">
+      <Filter>Source Files\InteractiveMidProtocols</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\circuits\BooleanCircuits.hpp">
@@ -368,15 +374,6 @@
     <ClInclude Include="..\..\include\mid_layer\ElGamalEnc.hpp">
       <Filter>Header Files\MidLayer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\primitives\SecurityLevel.hpp">
-      <Filter>Header Files\CryptoInfra</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\primitives\Key.hpp">
-      <Filter>Header Files\CryptoInfra</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\mid_layer\PlainText.hpp">
-      <Filter>Header Files\CryptoInfra</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolElGamalCommittedValue.hpp">
       <Filter>Header Files\InteractiveMidProtocols</Filter>
     </ClInclude>
@@ -385,6 +382,21 @@
     </ClInclude>
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolElGamalEncryptedValue.hpp">
       <Filter>Header Files\InteractiveMidProtocols</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolCramerShoupEncryptedValue.hpp">
+      <Filter>Header Files\InteractiveMidProtocols</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\mid_layer\CramerShoupEnc.hpp">
+      <Filter>Header Files\MidLayer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\CryptoInfra\Key.hpp">
+      <Filter>Header Files\CryptoInfra</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\CryptoInfra\PlainText.hpp">
+      <Filter>Header Files\CryptoInfra</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\CryptoInfra\SecurityLevel.hpp">
+      <Filter>Header Files\CryptoInfra</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
