@@ -63,6 +63,8 @@ void OpenSSLHash::hashFinal(vector<byte> &out, int outOffset) {
 	int length = EVP_MD_CTX_size(hash);
 	byte* tempOut = new byte[length];
 	EVP_DigestFinal_ex(hash, tempOut, NULL);
+	//Initialize the hash structure again to enable repeated calls.
+	EVP_DigestInit(hash, EVP_MD_CTX_md(hash));
 	copy_byte_array_to_byte_vector(tempOut, length, out, outOffset);
 	delete tempOut;
 }
