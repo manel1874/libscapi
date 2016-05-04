@@ -87,11 +87,37 @@ class Eav : public EncSecLevel {};
 class Cpa : public Eav {};
 
 /**
+* An encryption scheme that is secure in the presence of preprocessing chosen-ciphertext attacks
+* (meaning that the decryption oracle is available only before the challenge ciphertext is provided) should implement this interface.
+* It is also necessary to specify if such a scheme is Indistinguishable or NonMalleable.
+* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
+*
+*/
+class Cca1 : public Cpa {};
+
+/**
 * This interface should be used when the security level of the encryption scheme is according to the regular indistinguishability game that defines privacy.
 *
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
 */
 class Indistinguishable : public EncSecLevel {};
+
+/**
+* This interface should be used for encryption schemes that achieve non-malleability, meaning that it is infeasible for an adversary to generate a related ciphertext.
+* Non-malleability always implies indistinguishability.
+*
+* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
+*/
+class NonMalleable : public Indistinguishable {};
+
+/**
+* An encryption scheme that is secure in the presence of (full) chosen-ciphertext attacks should implement this interface.
+* Note that any Cca2 scheme is both Indistinguishable and NonMalleable. Thus, Cca2 extends both Cca1 and NonMalleable,
+* and it suffices to have a CCA2-secure scheme implement only the Cca2 interface.
+*
+* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
+*/
+class Cca2 : public Cca1, NonMalleable {};
 
 /**
 * This interface is the root interface of the security level hierarchy for (secure computation) protocols.<p>
