@@ -11,7 +11,7 @@ void ElGamalOnGroupElementEnc::setMembers(shared_ptr<DlogGroup> dlogGroup, mt199
 	auto ddh = dynamic_pointer_cast<DDH>(dlogGroup);
 	//The underlying dlog group must be DDH secure.
 	if (ddh == NULL) {
-		throw new SecurityLevelException("DlogGroup should have DDH security level");
+		throw SecurityLevelException("DlogGroup should have DDH security level");
 	}
 	dlog = dlogGroup;
 	qMinusOne = dlog->getOrder() - 1;

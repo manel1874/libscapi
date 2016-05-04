@@ -125,7 +125,7 @@ public:
 		return make_shared<ElGamalOnGrElSendableData>(cipher1->generateSendableData(), cipher2->generateSendableData());
 	}
 
-	bool operator==(const AsymmetricCiphertext &other) const {
+	bool operator==(const AsymmetricCiphertext &other) const override {
 		auto temp = dynamic_cast<const ElGamalOnGroupElementCiphertext*>(&other);
 		if (*cipher1 != *(temp->cipher1)) 
 			return false;
