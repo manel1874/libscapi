@@ -225,7 +225,7 @@ void GarbledBooleanCircuit::setGarbledTables(block* garbledTables) {
 }
 
 
-vector<int> GarbledBooleanCircuit::getNumOfInputsForEachParty(){
+int* GarbledBooleanCircuit::getNumOfInputsForEachParty(){
 	return numOfInputsForEachParty;
 }
 
@@ -304,14 +304,14 @@ void GarbledBooleanCircuit::readCircuitFromFile(const char* fileName)
 		myfile >> numberOfGates;//get the gates
 		myfile >> numberOfParties;
 
-		numOfInputsForEachParty.reserve(numberOfParties);
+		numOfInputsForEachParty = new int[numberOfParties];
 		partiesInputs = new int*[numberOfParties];
 
 		for(int j=0 ; j<numberOfParties; j++){
 			myfile >> currentPartyNumber;
 
 			myfile >> numOfinputsForParty;
-			numOfInputsForEachParty.push_back(numOfinputsForParty);
+			numOfInputsForEachParty[currentPartyNumber - 1] = numOfinputsForParty;
 
 			partiesInputs[currentPartyNumber-1] = new int[numOfInputsForEachParty[currentPartyNumber-1]];
 
