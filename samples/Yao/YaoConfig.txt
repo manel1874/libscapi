@@ -1,8 +1,8 @@
-number_of_iterations = 1
+number_of_iterations = 1000
 print_output = false
 sender_ip = 127.0.0.1
 receiver_ip = 127.0.0.1
-input_section = AES-Windows 
+input_section = AES 
 circuit_type = NoFixedKey
 
 # OS name is added automatically
