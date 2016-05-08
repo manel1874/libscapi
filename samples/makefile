@@ -1,4 +1,4 @@
-INC               =  -I../../boost_1_60_0
+INC               =  -I../../boost_1_60_0 -I../lib -I../install/include
 LIBS              =  -L../install/lib -L../../boost_1_60_0/stage/lib
 LINKER_OPTIONS    =  ../scapi.a $(LIBS) -lcrypto -ldl -lboost_log -lboost_system -lboost_thread -lpthread -lssl -lgmp -lOTExtension
 CPP_OPTIONS       = -std=c++11 $(INC)
