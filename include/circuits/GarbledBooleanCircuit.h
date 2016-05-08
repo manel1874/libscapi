@@ -128,7 +128,7 @@ protected:
 	bool NOTgateOptimization;
 
 	int numberOfParties;//The number parties participating in the protocol that uses the circuit.
-	std::vector<int> numOfInputsForEachParty;//An array that holds for each party the number of inputs it has in the circuit.
+	int* numOfInputsForEachParty;//An array that holds for each party the number of inputs it has in the circuit.
 
 	std::vector<int> inputIndices;//The indices of the input wires.
 	std::vector<int> outputIndices;//The indices of the output wires.
@@ -253,7 +253,7 @@ public:
 	/**
 	* Get function for class members that may be needed by users of the class, rather than a derived class.
 	*/
-	std::vector<int> getNumOfInputsForEachParty();
+	int *getNumOfInputsForEachParty();
 	std::vector<int> getOutputIndices() { return outputIndices;};
 	int getNumberOfOutputs() {return numberOfOutputs;};
 	int getNumberOfInputs() { return numberOfInputs;};
