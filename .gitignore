@@ -52,3 +52,4 @@ test/config_for_test.txt
 *.ipdb
 windows-solutions/scapi-sln/x64/Release/*
 windows-solutions/scapi-sln/ScapiCpp.vcxproj.filters.orig
+windows-solutions/scapi-sln/ScapiCpp.VC.db
