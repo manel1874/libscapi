@@ -179,7 +179,7 @@ void StandardGarbledBooleanCircuit::garble(block *emptyBothInputKeys, block *emp
 		}
 
 	}
-
+	translationTable.clear();
 	//copy the output keys to get back to the caller of the function as well as filling the translation table.
 	//The input keys were already filled in the initialization of the function.
 	for (int i = 0; i < numberOfOutputs; i++) {

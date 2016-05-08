@@ -256,7 +256,7 @@ void RowReductionGarbledBooleanCircuit::garble(block *emptyBothInputKeys, block 
 			emptyBothOutputKeys[2 * i + 1] = _mm_xor_si128(emptyBothOutputKeys[2 * i], deltaFreeXor);
 		}
 	}
-
+	translationTable.clear();
 	//update the translation table
 	for (int i = 0; i < numberOfOutputs; i++) {
 		translationTable.push_back(getSignalBitOf(emptyBothOutputKeys[2 * i]));
