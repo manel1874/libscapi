@@ -191,6 +191,8 @@ public:
 	* Will block until all bytes are read.
 	*/
 	virtual size_t read(byte* buffer, int sizeToRead) = 0;
+
+	virtual ~CommParty() {};
 };
 
 class CommPartyTCPSynced : public CommParty {
@@ -209,6 +211,8 @@ public:
 	size_t read(byte* data, int sizeToRead) override {
 		return boost::asio::read(serverSocket, boost::asio::buffer(data, sizeToRead));
 	}
+
+	virtual ~CommPartyTCPSynced(); 
 
 private:
 	tcp::acceptor acceptor_;
@@ -233,6 +237,7 @@ public:
 	size_t read(byte* data, int sizeToRead) override {
 		return boost::asio::read(*serverSocket, boost::asio::buffer(data, sizeToRead));
 	}
+	virtual ~CommPartyTcpSslSynced();
 
 private:
 	tcp::acceptor acceptor_;

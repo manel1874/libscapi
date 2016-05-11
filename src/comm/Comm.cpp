@@ -262,6 +262,12 @@ void CommPartyTCPSynced::write(const byte* data, int size) {
 		throw PartyCommunicationException("Error while writing. " + ec.message());
 }
 
+CommPartyTCPSynced::~CommPartyTCPSynced() {
+	acceptor_.close();
+	serverSocket.close();
+	clientSocket.close();
+}
+
 /*****************************************/
 /* CommPartyTcpSslSynced                 */
 /*****************************************/
@@ -344,3 +350,11 @@ void CommPartyTcpSslSynced::write(const byte* data, int size) {
 	if (ec)
 		throw PartyCommunicationException("Error while writing. " + ec.message());
 }
+
+CommPartyTcpSslSynced::~CommPartyTcpSslSynced() {
+	acceptor_.close();
+	serverSocket->lowest_layer().close();
+	clientSocket->lowest_layer().close();
+}
+
+

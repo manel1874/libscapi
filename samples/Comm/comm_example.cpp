@@ -137,7 +137,7 @@ int mainComm(string partyNumber, string filePath)
 		recv_messages(commParty, recvMessages, 5, 6, buffer, 2);
 		io_service.stop();
 		t.join();
-		//delete commParty;
+		delete commParty;
 	}
 	catch (std::exception& e)
 	{
