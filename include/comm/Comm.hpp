@@ -191,7 +191,11 @@ public:
 	* Will block until all bytes are read.
 	*/
 	virtual size_t read(byte* buffer, int sizeToRead) = 0;
-
+	virtual void write(string s) { write((const byte *)s.c_str(), s.size()); };
+	virtual void writeWithSize(const byte* data, int size);
+	virtual int readSize();
+	virtual size_t readWithSizeIntoVector(vector<byte> & targetVector);
+	virtual void writeWithSize(string s) { writeWithSize((const byte*)s.c_str(), s.size()); };
 	virtual ~CommParty() {};
 };
 
@@ -211,7 +215,6 @@ public:
 	size_t read(byte* data, int sizeToRead) override {
 		return boost::asio::read(serverSocket, boost::asio::buffer(data, sizeToRead));
 	}
-
 	virtual ~CommPartyTCPSynced(); 
 
 private:

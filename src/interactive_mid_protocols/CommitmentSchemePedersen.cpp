@@ -3,13 +3,13 @@
 /*********************************/
 /*   CmtPedersenReceiverCore     */
 /*********************************/
-CmtPedersenReceiverCore::CmtPedersenReceiverCore(shared_ptr<ChannelServer> channel) {
+CmtPedersenReceiverCore::CmtPedersenReceiverCore(shared_ptr<CommParty> channel) {
 	auto r = get_seeded_random();
 	auto dg = make_shared<OpenSSLDlogZpSafePrime>(256, r);
 	doConstruct(channel, dg, r);
 };
 
-void CmtPedersenReceiverCore::doConstruct(shared_ptr<ChannelServer> channel, 
+void CmtPedersenReceiverCore::doConstruct(shared_ptr<CommParty> channel,
 	shared_ptr<DlogGroup> dlog, std::mt19937 random) {
 	// the underlying dlog group must be DDH secure.
 	auto ddh = std::dynamic_pointer_cast<DDH>(dlog);
@@ -33,25 +33,27 @@ void CmtPedersenReceiverCore::preProcess() {
 	h = dlog->exponentiate(dlog->getGenerator().get(), trapdoor);
 	auto sendableData = h->generateSendableData();	
 	auto raw_msg = sendableData->toString();
-	channel->write_fast(raw_msg);}
+	channel->writeWithSize(raw_msg);
+}
 
 shared_ptr<CmtRCommitPhaseOutput> CmtPedersenReceiverCore::receiveCommitment() {
 	// create an empty CmtPedersenCommitmentMessage 
 	auto msg = make_shared<CmtPedersenCommitmentMessage>(dlog->getGenerator()->generateSendableData());
 	// read encoded CmtPedersenCommitmentMessage from channel
-	auto v = channel->read_one();
+	vector<byte> raw_msg; // by the end of the scope - no need to hold it anymore - already decoded and copied
+	channel->readWithSizeIntoVector(raw_msg);
 	// init the empy CmtPedersenCommitmentMessage using the encdoed data
-	msg->initFromByteVector(*v);
+	msg->initFromByteVector(raw_msg);
 	auto cm = msg->getCommitment();
 	commitmentMap[msg->getId()] = msg;
-	delete v; // no need to hold it anymore - already decoded and copied
 	return make_shared<CmtRBasicCommitPhaseOutput>(msg->getId());
 }
 
 shared_ptr<CmtCommitValue> CmtPedersenReceiverCore::receiveDecommitment(long id) {
-	auto v = channel->read_one();
+	vector<byte> raw_msg;
+	channel->readWithSizeIntoVector(raw_msg);
 	shared_ptr<CmtPedersenDecommitmentMessage> msg = make_shared<CmtPedersenDecommitmentMessage>();
-	msg->initFromByteVector(*v);
+	msg->initFromByteVector(raw_msg);
 	auto receivedCommitment = commitmentMap[id];
 	auto cmtCommitMsg = std::static_pointer_cast<CmtCCommitmentMsg>(receivedCommitment);
 	return verifyDecommitment(cmtCommitMsg, msg);
@@ -99,7 +101,7 @@ shared_ptr<void> CmtPedersenReceiverCore::getCommitmentPhaseValues(long id) {
 /*********************************/
 /*   CmtPedersenCommitterCore    */
 /*********************************/
-void CmtPedersenCommitterCore::doConstruct(shared_ptr<ChannelServer> channel,
+void CmtPedersenCommitterCore::doConstruct(shared_ptr<CommParty> channel,
 	shared_ptr<DlogGroup> dlog, std::mt19937 randomm) {
 	
 	// the underlying dlog group must be DDH secure.
@@ -126,10 +128,11 @@ void CmtPedersenCommitterCore::preProcess() {
 }
 
 shared_ptr<CmtPedersenPreprocessMessage> CmtPedersenCommitterCore::waitForMessageFromReceiver() {
-	auto v = channel->read_one();
+	vector<byte> rawMsg;
+	channel->readWithSizeIntoVector(rawMsg);
 	auto dummySendableData = dlog->getGenerator()->generateSendableData();
 	auto msg = make_shared<CmtPedersenPreprocessMessage>(dummySendableData);
-	msg->initFromByteVector(*v);
+	msg->initFromByteVector(rawMsg);
 	return msg;
 }
 
@@ -165,7 +168,7 @@ shared_ptr<CmtCCommitmentMsg> CmtPedersenCommitterCore::generateCommitmentMsg(
 void CmtPedersenCommitterCore::commit(shared_ptr<CmtCommitValue> in, long id) {
 	auto msg = generateCommitmentMsg(in, id);
 	auto msgStr = msg->toString();
-	channel->write_fast(msgStr);
+	channel->writeWithSize(msgStr);
 }
 
 shared_ptr<CmtCDecommitmentMessage> CmtPedersenCommitterCore::generateDecommitmentMsg(long id) {
@@ -182,7 +185,7 @@ void CmtPedersenCommitterCore::decommit(long id) {
 	// fetch the commitment according to the requested ID
 	auto msg = generateDecommitmentMsg(id);
 	auto bMsg = msg->toString();
-	channel->write_fast(bMsg);
+	channel->writeWithSize(bMsg);
 }
 
 void** CmtPedersenCommitterCore::getPreProcessValues() {

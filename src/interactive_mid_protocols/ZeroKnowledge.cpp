@@ -5,7 +5,7 @@
 /*   ZKFromSigmaProver                          */
 /************************************************/
 
-ZKFromSigmaProver::ZKFromSigmaProver(shared_ptr<ChannelServer> channel,
+ZKFromSigmaProver::ZKFromSigmaProver(shared_ptr<CommParty> channel,
 	shared_ptr<SigmaProverComputation> sProver, shared_ptr<CmtReceiver> receiver) {
 	// receiver must be an instance of PerfectlyHidingCT
 	auto perfectHidingReceiver = std::dynamic_pointer_cast<PerfectlyHidingCmt>(receiver);
@@ -45,7 +45,7 @@ void ZKFromSigmaProver::prove(shared_ptr<ZKProverInput> input) {
 /*   ZKFromSigmaVerifier                        */
 /************************************************/
 
-ZKFromSigmaVerifier::ZKFromSigmaVerifier(shared_ptr<ChannelServer> channel,
+ZKFromSigmaVerifier::ZKFromSigmaVerifier(shared_ptr<CommParty> channel,
 	shared_ptr<SigmaVerifierComputation> sVerifier, shared_ptr<CmtCommitter> committer,
 	std::mt19937_64 random) {
 	// committer must be an instance of PerfectlyHidingCT
@@ -88,8 +88,9 @@ bool ZKFromSigmaVerifier::verify(shared_ptr<ZKCommonInput> input,
 }
 
 void ZKFromSigmaVerifier::receiveMsgFromProver(shared_ptr<SigmaProtocolMsg> concreteMsg) {
-	auto raw_msg = channel->read_one();
-	concreteMsg->initFromByteVector(*raw_msg);
+	vector<byte> rawMsg;
+	channel->readWithSizeIntoVector(rawMsg);
+	concreteMsg->initFromByteVector(rawMsg);
 }
 
 /************************************************/

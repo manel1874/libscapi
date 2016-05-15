@@ -60,11 +60,11 @@ void SigmaUsage() {
 
 class ProverVerifierExample {
 public:
-	virtual void prove(shared_ptr<ChannelServer> server, 
+	virtual void prove(shared_ptr<CommParty> server, 
 		shared_ptr<SigmaDlogProverComputation> proverComputation, 
 		shared_ptr<DlogGroup> dg,
 		shared_ptr<SigmaDlogProverInput> proverinput) = 0;
-	virtual bool verify(shared_ptr<ChannelServer> server, 
+	virtual bool verify(shared_ptr<CommParty> server,
 		shared_ptr<SigmaDlogVerifierComputation> verifierComputation,
 		shared_ptr<SigmaGroupElementMsg> msgA,
 		shared_ptr<SigmaBIMsg> msgZ,
@@ -74,7 +74,7 @@ public:
 
 class SimpleDlogSigma : public ProverVerifierExample {
 public:
-	virtual void prove(shared_ptr<ChannelServer> server,
+	virtual void prove(shared_ptr<CommParty> server,
 		shared_ptr<SigmaDlogProverComputation> proverComputation,
 		shared_ptr<DlogGroup> dg,
 		shared_ptr<SigmaDlogProverInput> proverinput) override {
@@ -82,7 +82,7 @@ public:
 		cout << "--> running simple sigma dlog prover" << endl;
 		sp->prove(proverinput);
 	}
-	virtual bool verify(shared_ptr<ChannelServer> server,
+	virtual bool verify(shared_ptr<CommParty> server,
 		shared_ptr<SigmaDlogVerifierComputation> verifierComputation,
 		shared_ptr<SigmaGroupElementMsg> msgA,
 		shared_ptr<SigmaBIMsg> msgZ,
@@ -98,7 +98,7 @@ public:
 
 class PedersenZKSigma : public ProverVerifierExample {
 public:
-	virtual void prove(shared_ptr<ChannelServer> server,
+	virtual void prove(shared_ptr<CommParty> server,
 		shared_ptr<SigmaDlogProverComputation> proverComputation,
 		shared_ptr<DlogGroup> dg,
 		shared_ptr<SigmaDlogProverInput> proverinput) {
@@ -106,7 +106,7 @@ public:
 		cout << "--> running pedersen prover" << endl;
 		sp->prove(proverinput);
 	}
-	virtual bool verify(shared_ptr<ChannelServer> server,
+	virtual bool verify(shared_ptr<CommParty> server,
 		shared_ptr<SigmaDlogVerifierComputation> verifierComputation,
 		shared_ptr<SigmaGroupElementMsg> msgA,
 		shared_ptr<SigmaBIMsg> msgZ,

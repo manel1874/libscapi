@@ -445,9 +445,9 @@ public:
 	* ...
 	*
 	*		//Send the messages by the channel.
-	*		channel->write_fast(msg1);
-	*		channel->write_fast(msg2);
-	*		channel->write_fast(msg3);
+	*		channel->writeWithSize(msg1);
+	*		channel->writeWithSize(msg2);
+	*		channel->writeWithSize(msg3);
 	*
 	*
 	* @param commitmentMsg the commitment object.

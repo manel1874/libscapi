@@ -135,6 +135,17 @@ int mainComm(string partyNumber, string filePath)
 		recv_messages(commParty, recvMessages, 3, 5, buffer, 4);
 		send_messages(commParty, sendMessages, 5, 6);
 		recv_messages(commParty, recvMessages, 5, 6, buffer, 2);
+
+		string longMessage = "Hi, this is a long message to test the writeWithSize approach";
+		commParty->writeWithSize(longMessage);
+
+		vector<byte> resMsg;
+		commParty->readWithSizeIntoVector(resMsg);
+		const byte * uc = &(resMsg[0]);
+		string resMsgStr(reinterpret_cast<char const*>(uc), resMsg.size());
+		string eq = (resMsgStr == longMessage)? "yes" : "no";
+		cout << "Got long message: " << resMsgStr << ".\nequal? " << eq << "!" << endl;
+
 		io_service.stop();
 		t.join();
 		delete commParty;

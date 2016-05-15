@@ -94,7 +94,7 @@ public:
 	* @param sProver underlying sigma prover to use.
 	* @param receiver Must be an instance of PerfectlyHidingCT
 	*/
-	ZKFromSigmaProver(shared_ptr<ChannelServer> channel, shared_ptr<SigmaProverComputation> sProver,
+	ZKFromSigmaProver(shared_ptr<CommParty> channel, shared_ptr<SigmaProverComputation> sProver,
 		shared_ptr<CmtReceiver> receiver);
 
 	/**
@@ -103,7 +103,7 @@ public:
 	* @param channel used to communicate between prover and verifier.
 	* @param sProver underlying sigma prover to use.
 	*/
-	ZKFromSigmaProver(shared_ptr<ChannelServer> channel, shared_ptr<SigmaProverComputation> sProver) {
+	ZKFromSigmaProver(shared_ptr<CommParty> channel, shared_ptr<SigmaProverComputation> sProver) {
 		this->sProver = sProver;
 		this->receiver = make_shared<CmtPedersenReceiver>(channel);
 		this->channel = channel;
@@ -130,7 +130,7 @@ public:
 	void prove(shared_ptr<ZKProverInput> input) override;
 
 private:
-	shared_ptr<ChannelServer> channel;
+	shared_ptr<CommParty> channel;
 	// underlying prover that computes the proof of the sigma protocol:
 	shared_ptr<SigmaProverComputation> sProver;
 	shared_ptr<CmtReceiver> receiver; //Underlying Commitment receiver to use.
@@ -188,7 +188,7 @@ private:
 	*/
 	void sendMsgToVerifier(shared_ptr<SigmaProtocolMsg> message) {
 		auto raw_message = message->toString();
-		channel->write_fast(raw_message);
+		channel->writeWithSize(raw_message);
 	};
 };
 
@@ -209,7 +209,7 @@ public:
 	* @param sVerifier underlying sigma verifier to use.
 	* @param committer Must be an instance of PerfectlyHidingCT
 	*/
-	ZKFromSigmaVerifier(shared_ptr<ChannelServer> channel, shared_ptr<SigmaVerifierComputation> sVerifier,
+	ZKFromSigmaVerifier(shared_ptr<CommParty> channel, shared_ptr<SigmaVerifierComputation> sVerifier,
 		shared_ptr<CmtCommitter> committer, std::mt19937_64 random);
 
 	/**
@@ -218,7 +218,7 @@ public:
 	* @param channel used to communicate between prover and verifier.
 	* @param sVerifier underlying sigma verifier to use.
 	*/
-	ZKFromSigmaVerifier(shared_ptr<ChannelServer> channel,
+	ZKFromSigmaVerifier(shared_ptr<CommParty> channel,
 		shared_ptr<SigmaVerifierComputation> sVerifier, std::mt19937_64 random) {
 		this->sVerifier = sVerifier;
 		this->committer = make_shared<CmtPedersenCommitter>(channel);
@@ -246,7 +246,7 @@ public:
 		shared_ptr<SigmaProtocolMsg> emptyZ) override;
 
 private:
-	shared_ptr<ChannelServer> channel;
+	shared_ptr<CommParty> channel;
 	// underlying verifier that computes the proof of the sigma protocol.
 	shared_ptr<SigmaVerifierComputation> sVerifier;
 	shared_ptr<CmtCommitter> committer;	// underlying Commitment committer to use.
@@ -320,7 +320,7 @@ public:
 	* Default constructor that gets the channel and creates the ZK provers with default Dlog group.
 	* @param channel
 	*/
-	CmtPedersenWithProofsCommitter(shared_ptr<ChannelServer> channel, int statisticalParamater) :
+	CmtPedersenWithProofsCommitter(shared_ptr<CommParty> channel, int statisticalParamater) :
 		CmtPedersenCommitter(channel) {
 		doConstruct(statisticalParamater);
 	};
@@ -333,7 +333,7 @@ public:
 	* @param t statistical parameter
 	* @param random
 	*/
-	CmtPedersenWithProofsCommitter(shared_ptr<ChannelServer> channel,
+	CmtPedersenWithProofsCommitter(shared_ptr<CommParty> channel,
 		shared_ptr<DlogGroup> dlog, int t, std::mt19937 random) :
 		CmtPedersenCommitter(channel, dlog, random) {
 		doConstruct(t);
@@ -365,7 +365,7 @@ public:
 	* Default constructor that gets the channel and creates the ZK verifiers with default Dlog group.
 	* @param channel
 	*/
-	CmtPedersenWithProofsReceiver(shared_ptr<ChannelServer> channel, int t) : CmtPedersenReceiver(channel) {
+	CmtPedersenWithProofsReceiver(shared_ptr<CommParty> channel, int t) : CmtPedersenReceiver(channel) {
 		doConstruct(t);
 	};
 
@@ -376,7 +376,7 @@ public:
 	* @param t statistical parameter
 	* @param random
 	*/
-	CmtPedersenWithProofsReceiver(shared_ptr<ChannelServer> channel,
+	CmtPedersenWithProofsReceiver(shared_ptr<CommParty> channel,
 		shared_ptr<DlogGroup> dlog, int t, std::mt19937 random) :
 		CmtPedersenReceiver(channel, dlog, random) {
 		doConstruct(t);
@@ -409,7 +409,7 @@ public:
 	* The receiver needs to be instantiated with the default constructor too.
 	* @param channel
 	*/
-	CmtPedersenTrapdoorCommitter(shared_ptr<ChannelServer> channel) : CmtPedersenCommitter(channel) {};
+	CmtPedersenTrapdoorCommitter(shared_ptr<CommParty> channel) : CmtPedersenCommitter(channel) {};
 
 	/**
 	* Constructor that receives a connected channel (to the receiver), the DlogGroup agreed upon between them and a SecureRandom object.
@@ -418,7 +418,7 @@ public:
 	* @param dlog
 	* @param random
 	*/
-	CmtPedersenTrapdoorCommitter(shared_ptr<ChannelServer> channel,
+	CmtPedersenTrapdoorCommitter(shared_ptr<CommParty> channel,
 		shared_ptr<DlogGroup> dlog, std::mt19937 random) :
 		CmtPedersenCommitter(channel, dlog, random) {};
 
@@ -454,7 +454,7 @@ public:
 	* @param dlog
 	* @param random
 	*/
-	CmtPedersenTrapdoorReceiver(shared_ptr<ChannelServer> channel,
+	CmtPedersenTrapdoorReceiver(shared_ptr<CommParty> channel,
 		shared_ptr<DlogGroup> dlog, std::mt19937 random) :
 		CmtPedersenReceiver(channel, dlog, random) {};
 
@@ -486,7 +486,7 @@ public:
 	* @param channel used for communication
 	* @param sProver underlying sigma prover to use.
 	*/
-	ZKPOKFromSigmaCmtPedersenProver(shared_ptr<ChannelServer> channel,
+	ZKPOKFromSigmaCmtPedersenProver(shared_ptr<CommParty> channel,
 		shared_ptr<SigmaProverComputation> sProver, shared_ptr<DlogGroup> dg) {
 		this->sProver = sProver;
 		this->receiver = make_shared<CmtPedersenTrapdoorReceiver>(channel, dg, get_seeded_random());
@@ -523,7 +523,7 @@ public:
 	void processSecondMsg(shared_ptr<byte> e, int eSize, shared_ptr<CmtRCommitPhaseOutput> trap);
 
 private:
-	shared_ptr<ChannelServer> channel;
+	shared_ptr<CommParty> channel;
 	// underlying prover that computes the proof of the sigma protocol.
 	shared_ptr<SigmaProverComputation> sProver;
 	shared_ptr<CmtPedersenTrapdoorReceiver> receiver; // underlying Commitment receiver to use.
@@ -566,7 +566,7 @@ private:
 	* Sends the given message to the verifier.
 	* @param message to send to the verifier.
 	*/
-	void sendMsgToVerifier(string msg) { channel->write_fast(msg); };
+	void sendMsgToVerifier(string msg) { channel->writeWithSize(msg); };
 };
 
 
@@ -580,7 +580,7 @@ private:
 */
 class ZKPOKFromSigmaCmtPedersenVerifier : public ZKPOKVerifier {
 private:
-	shared_ptr<ChannelServer> channel;
+	shared_ptr<CommParty> channel;
 	// underlying verifier that computes the proof of the sigma protocol.
 	shared_ptr<SigmaVerifierComputation> sVerifier;
 	shared_ptr<CmtPedersenTrapdoorCommitter> committer; // underlying Commitment committer to use.
@@ -601,16 +601,18 @@ private:
 	* @return the received message
 	*/
 	void receiveMsgFromProver(shared_ptr<SigmaProtocolMsg> emptyMsg) {
-		auto v = channel->read_one();
-		emptyMsg->initFromByteVector(*v);
+		vector<byte> rawMsg;
+		channel->readWithSizeIntoVector(rawMsg);
+		emptyMsg->initFromByteVector(rawMsg);
 	};
 
 	/**
 	* Waits for a trapdoor a from the prover.
 	*/
 	void receiveTrapFromProver(shared_ptr<CmtRCommitPhaseOutput> emptyOutput) {
-		auto v = channel->read_one();
-		emptyOutput->initFromByteVector(*v);
+		vector<byte> rawMsg;
+		channel->readWithSizeIntoVector(rawMsg);
+		emptyOutput->initFromByteVector(rawMsg);
 	}
 	/**
 	* Verifies the proof.
@@ -631,7 +633,7 @@ public:
 	* @param sVerifier underlying sigma verifier to use.
 	* @param random
 	*/
-	ZKPOKFromSigmaCmtPedersenVerifier(shared_ptr<ChannelServer> channel,
+	ZKPOKFromSigmaCmtPedersenVerifier(shared_ptr<CommParty> channel,
 		shared_ptr<SigmaVerifierComputation> sVerifier, std::mt19937_64 random,
 		shared_ptr<CmtRCommitPhaseOutput> emptyTrap, shared_ptr<DlogGroup> dg) {
 		this->channel = channel;
