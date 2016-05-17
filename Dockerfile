@@ -24,13 +24,13 @@ RUN cd ~/libscapi && git checkout dev && make
 RUN sudo ldconfig ~/boost_1_60_0/stage/lib/ ~/libscapi/install/lib/
 
 # build the samples and run one of them
-RUN make -C samples/
-RUN samples/libscapi_example.exe dlog
-RUN samples/libscapi_example.exe sha1
+RUN make -C ~libscapi/samples/
+RUN ~/libscapi/samples/libscapi_example.exe dlog
+RUN ~/libscapi/samples/libscapi_example.exe sha1
 
 # build the tests and run them
-RUN make -C test/
-RUN test/tests.exe
+RUN make -C ~/libscapi/test/
+RUN ~/libscapi/test/tests.exe
 
 # done
 RUN echo DONE!
