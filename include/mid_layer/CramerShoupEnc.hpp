@@ -246,7 +246,7 @@ public:
 	* @param random source of randomness.
 	* @throws SecurityLevelException if the Dlog Group or the Hash function do not meet the required Security Level
 	*/
-	CramerShoupOnGroupElementEnc(shared_ptr<DlogGroup> dlogGroup = make_shared<OpenSSLDlogZpSafePrime>("1024"), shared_ptr<CryptographicHash> hash = make_shared<OpenSSLSHA256>(), mt19937 random = get_seeded_random());
+	CramerShoupOnGroupElementEnc(shared_ptr<DlogGroup> dlogGroup = make_shared<OpenSSLDlogZpSafePrime>("1024"), shared_ptr<CryptographicHash> hash = make_shared<OpenSSLSHA256>());
 
 	/**
 	* This function sets the Public\Private key.
@@ -273,7 +273,7 @@ public:
 	* @return the CramerShoupPublicKey
 	* @throws IllegalStateException if no public key was set.
 	*/
-	shared_ptr<PublicKey> getPublicKey() {
+	shared_ptr<PublicKey> getPublicKey() override {
 		if (!isKeySet()) {
 			throw new IllegalStateException("no PublicKey was set");
 		}
@@ -296,7 +296,7 @@ public:
 	* This function is not supported for this encryption scheme, since there is no need for parameters to generate a CramerShoup key pair.
 	* @throws UnsupportedOperationException
 	*/
-	pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> generateKey(shared_ptr<KeySpec> keyParams) override {
+	pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> generateKey(shared_ptr<AlgorithmParameterSpec> keyParams) override {
 		//No need for parameters to generate an Cramer-Shoup key pair. Therefore this operation is not supported.
 		throw new UnsupportedOperationException("To generate Cramer-Shoup keys use the generateKey() function");
 	}
@@ -336,13 +336,13 @@ public:
 	* Cramer-Shoup on GroupElement encryption scheme has a limit of the byte array length to generate a plaintext from.
 	* @return true.
 	*/
-	bool hasMaxByteArrayLengthForPlaintext() {return true; }
+	bool hasMaxByteArrayLengthForPlaintext() override { return true; }
 
 	/**
 	* Returns the maximum size of the byte array that can be passed to generatePlaintext function.
 	* This is the maximum size of a byte array that can be converted to a Plaintext object suitable to this encryption scheme.
 	*/
-	int getMaxLengthOfByteArrayForPlaintext() {	return dlogGroup->getMaxLengthOfByteArrayForEncoding(); }
+	int getMaxLengthOfByteArrayForPlaintext() override { return dlogGroup->getMaxLengthOfByteArrayForEncoding(); }
 
 	/**
 	* Generates a Plaintext suitable to CramerShoup encryption scheme from the given message.
