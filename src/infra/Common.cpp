@@ -21,7 +21,7 @@ int NumberOfBits(const biginteger bi) {
 	return find_log2_floor(bis)+ 1;
 }
 
-void gen_random_bytes_vector(vector<byte> &v, const int len, mt19937 random) {
+void gen_random_bytes_vector(vector<byte> &v, const int len, mt19937 & random) {
 	static const char alphanum[] =
 		"0123456789"
 		"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -182,11 +182,21 @@ std::chrono::time_point<std::chrono::system_clock> scapi_now() {
 	return chrono::system_clock::now();
 }
 
-biginteger getRandomInRange(biginteger min, biginteger max, std::mt19937 random)
+biginteger getRandomInRange(biginteger min, biginteger max, std::mt19937 & random)
 {
 	boost::random::uniform_int_distribution<biginteger> ui(min, max);
 	biginteger res = ui(random);
 	return res;
+}
+
+biginteger getRandomPrime(int numBytes, int certainty, mt19937 & random) {
+	biginteger p;
+	biginteger max = mp::pow(biginteger(2),numBytes);
+	
+	do {
+		p = getRandomInRange(0, max, random);
+	} while (!isPrime(p, certainty));
+	return p;
 }
 
 void print_byte_array(byte * arr, int len, string message)
@@ -197,7 +207,7 @@ void print_byte_array(byte * arr, int len, string message)
 	cout << endl;
 }
 
-bool isPrime(biginteger bi) {
+bool isPrime(biginteger bi, int certainty) {
 	auto prg = get_seeded_random();
-	return (miller_rabin_test(bi, 40, prg));
+	return (miller_rabin_test(bi, certainty, prg));
 }
