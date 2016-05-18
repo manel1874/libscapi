@@ -213,6 +213,12 @@
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolCramerShoupEncryptedValue.cpp">
       <Filter>Source Files\InteractiveMidProtocols</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\mid_layer\DamgardJurikEnc.cpp">
+      <Filter>Source Files\mid_layer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolDamgardJurikEncryptedZero.cpp">
+      <Filter>Source Files\InteractiveMidProtocols</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\circuits\BooleanCircuits.hpp">
@@ -397,6 +403,12 @@
     </ClInclude>
     <ClInclude Include="..\..\include\CryptoInfra\SecurityLevel.hpp">
       <Filter>Header Files\CryptoInfra</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\mid_layer\DamgardJurikEnc.hpp">
+      <Filter>Header Files\MidLayer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolDamgardJurikEncryptedZero.hpp">
+      <Filter>Header Files\InteractiveMidProtocols</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

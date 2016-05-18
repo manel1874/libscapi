@@ -135,6 +135,7 @@
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocol.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolAnd.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolCramerShoupEncryptedValue.cpp" />
+    <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolDamgardJurikEncryptedZero.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolDH.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolDHExtended.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolDlog.cpp" />
@@ -146,6 +147,7 @@
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolPedersenCommittedValue.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\ZeroKnowledge.cpp" />
     <ClCompile Include="..\..\src\mid_layer\CramerShoupEnc.cpp" />
+    <ClCompile Include="..\..\src\mid_layer\DamgardJurikEnc.cpp" />
     <ClCompile Include="..\..\src\mid_layer\ElGamalEnc.cpp" />
     <ClCompile Include="..\..\src\primitives\Dlog.cpp" />
     <ClCompile Include="..\..\src\primitives\DlogCryptopp.cpp" />
@@ -192,6 +194,7 @@
     <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentScheme.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentSchemePedersen.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolCramerShoupEncryptedValue.hpp" />
+    <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolDamgardJurikEncryptedZero.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolDHExtended.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\OTSemiHonestExtension.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\RandomValue.hpp" />
@@ -208,6 +211,7 @@
     <ClInclude Include="..\..\include\interactive_mid_protocols\ZeroKnowledge.hpp" />
     <ClInclude Include="..\..\include\mid_layer\AsymmetricEnc.hpp" />
     <ClInclude Include="..\..\include\mid_layer\CramerShoupEnc.hpp" />
+    <ClInclude Include="..\..\include\mid_layer\DamgardJurikEnc.hpp" />
     <ClInclude Include="..\..\include\mid_layer\ElGamalEnc.hpp" />
     <ClInclude Include="..\..\include\primitives\Dlog.hpp" />
     <ClInclude Include="..\..\include\primitives\DlogOpenSSL.hpp" />
