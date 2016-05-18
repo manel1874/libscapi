@@ -14,7 +14,7 @@ void SigmaPedersenCmtKnowledgeMsg::initFromString(const string & s) {
 * @param random
 * @throws IllegalArgumentException if soundness parameter is invalid.
 */
-SigmaPedersenCmtKnowledgeSimulator::SigmaPedersenCmtKnowledgeSimulator(shared_ptr<DlogGroup> dlog, int t, mt19937 random) {
+SigmaPedersenCmtKnowledgeSimulator::SigmaPedersenCmtKnowledgeSimulator(shared_ptr<DlogGroup> dlog, int t) {
 
 	//Sets the parameters.
 	this->dlog = dlog;
@@ -25,7 +25,7 @@ SigmaPedersenCmtKnowledgeSimulator::SigmaPedersenCmtKnowledgeSimulator(shared_pt
 		throw invalid_argument("soundness parameter t does not satisfy 2^t<q");
 	}
 
-	this->random = random;
+	this->random = get_seeded_random();
 }
 
 bool SigmaPedersenCmtKnowledgeSimulator::checkSoundnessParam() {
@@ -89,7 +89,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaPedersenCmtKnowledgeSimulator::simulate(Si
 * @param random
 * @throws IllegalArgumentException if soundness parameter is invalid.
 */
-SigmaPedersenCmtKnowledgeProverComputation::SigmaPedersenCmtKnowledgeProverComputation(shared_ptr<DlogGroup> dlog, int t, mt19937 random) {
+SigmaPedersenCmtKnowledgeProverComputation::SigmaPedersenCmtKnowledgeProverComputation(shared_ptr<DlogGroup> dlog, int t) {
 
 	//Sets the parameters.
 	this->dlog = dlog;
@@ -100,7 +100,7 @@ SigmaPedersenCmtKnowledgeProverComputation::SigmaPedersenCmtKnowledgeProverCompu
 		throw invalid_argument("soundness parameter t does not satisfy 2^t<q");
 	}
 
-	this->random = random;
+	this->random = get_seeded_random();
 }
 
 /**
@@ -184,7 +184,7 @@ shared_ptr<SigmaProtocolMsg> SigmaPedersenCmtKnowledgeProverComputation::compute
 * @throws InvalidDlogGroupException if the given DlogGroup is not valid.
 * @throws IllegalArgumentException if soundness parameter is invalid.
 */
-SigmaPedersenCmtKnowledgeVerifierComputation::SigmaPedersenCmtKnowledgeVerifierComputation(shared_ptr<DlogGroup> dlog, int t, mt19937 random) {
+SigmaPedersenCmtKnowledgeVerifierComputation::SigmaPedersenCmtKnowledgeVerifierComputation(shared_ptr<DlogGroup> dlog, int t) {
 
 	if (!dlog->validateGroup())
 		throw InvalidDlogGroupException("invalid dlog");
@@ -198,7 +198,7 @@ SigmaPedersenCmtKnowledgeVerifierComputation::SigmaPedersenCmtKnowledgeVerifierC
 		throw invalid_argument("soundness parameter t does not satisfy 2^t<q");
 	}
 
-	this->random = random;
+	this->random = get_seeded_random();
 }
 
 /**

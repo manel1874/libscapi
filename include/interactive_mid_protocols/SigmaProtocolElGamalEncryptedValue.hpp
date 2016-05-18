@@ -170,7 +170,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaElGamalEncryptedValueSimulator(shared_ptr<DlogGroup> dlog, int t, mt19937 random);
+	SigmaElGamalEncryptedValueSimulator(shared_ptr<DlogGroup> dlog, int t);
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -248,7 +248,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaElGamalEncryptedValueProverComputation(shared_ptr<DlogGroup> dlog, int t, mt19937 random);
+	SigmaElGamalEncryptedValueProverComputation(shared_ptr<DlogGroup> dlog, int t);
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -275,7 +275,7 @@ public:
 	* @return SigmaDlogSimulator
 	*/
 	shared_ptr<SigmaSimulator> getSimulator() override {
-		return make_shared<SigmaElGamalEncryptedValueSimulator>(dlog, t, random);
+		return make_shared<SigmaElGamalEncryptedValueSimulator>(dlog, t);
 	}
 
 };
@@ -326,7 +326,7 @@ public:
 	* @param random
 	* @throws InvalidDlogGroupException if the given dlog is invalid.
 	*/
-	SigmaElGamalEncryptedValueVerifierComputation(shared_ptr<DlogGroup> dlog, int t, mt19937 random);
+	SigmaElGamalEncryptedValueVerifierComputation(shared_ptr<DlogGroup> dlog, int t);
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.

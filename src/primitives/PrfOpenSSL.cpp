@@ -139,7 +139,7 @@ OpenSSLPRP::~OpenSSLPRP() {
 /**** OpenSSLAES ***/
 /*************************************************/
 
-OpenSSLAES::OpenSSLAES(mt19937 prg) : OpenSSLPRP(prg) {
+OpenSSLAES::OpenSSLAES() {
 	computeP = EVP_CIPHER_CTX_new();
 	invertP = EVP_CIPHER_CTX_new();
 }
@@ -181,7 +181,7 @@ void OpenSSLAES::setKey(SecretKey secretKey) {
 /*************************************************/
 /**** OpenSSLHMAC ***/
 /*************************************************/
-void OpenSSLHMAC::construct(string hashName, mt19937 random) {
+void OpenSSLHMAC::construct(string hashName) {
 	/*
 	* The way we call the hash is not the same as OpenSSL. For example: we call "SHA-1" while OpenSSL calls it "SHA1".
 	* So the hyphen should be deleted.
@@ -201,7 +201,7 @@ void OpenSSLHMAC::construct(string hashName, mt19937 random) {
 	if (0 == res)
 		throw runtime_error("failed to create hmac");
 
-	this->random = random;
+	this->random = get_seeded_random();
 }
 
 void OpenSSLHMAC::setKey(SecretKey secretKey) {
@@ -353,7 +353,7 @@ OpenSSLHMAC::~OpenSSLHMAC()
 /**** OpenSSLTripleDES ***/
 /*************************************************/
 
-OpenSSLTripleDES::OpenSSLTripleDES(mt19937 prg) : OpenSSLPRP(prg){
+OpenSSLTripleDES::OpenSSLTripleDES() {
 	// create the native objects.
 	computeP = EVP_CIPHER_CTX_new();
 	invertP = EVP_CIPHER_CTX_new();

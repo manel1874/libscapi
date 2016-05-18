@@ -117,7 +117,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaElGamalCommittedValueSimulator(shared_ptr<DlogGroup> dlog, int t, mt19937 random) : dhSim(dlog, t, random) {
+	SigmaElGamalCommittedValueSimulator(shared_ptr<DlogGroup> dlog, int t) : dhSim(dlog, t) {
 		this->dlog = dlog;
 	}
 
@@ -184,7 +184,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaElGamalCommittedValueProverComputation(shared_ptr<DlogGroup> dlog, int t, mt19937 random) : sigmaDH(dlog, t, random){
+	SigmaElGamalCommittedValueProverComputation(shared_ptr<DlogGroup> dlog, int t) : sigmaDH(dlog, t){
 
 		this->dlog = dlog;
 		this->t = t;
@@ -218,7 +218,7 @@ public:
 	* @return SigmaElGamalCommittedValueSimulator
 	*/
 	shared_ptr<SigmaSimulator> getSimulator() override {
-		return make_shared<SigmaElGamalCommittedValueSimulator>(dlog, t, random);
+		return make_shared<SigmaElGamalCommittedValueSimulator>(dlog, t);
 	}
 
 };
@@ -260,7 +260,7 @@ public:
 	* @param random
 	* @throws InvalidDlogGroupException if the given dlog is invalid.
 	*/
-	SigmaElGamalCommittedValueVerifierComputation(shared_ptr<DlogGroup> dlog, int t, mt19937 random) :sigmaDH(dlog, t, random) {
+	SigmaElGamalCommittedValueVerifierComputation(shared_ptr<DlogGroup> dlog, int t) :sigmaDH(dlog, t) {
 
 		this->dlog = dlog;
 	}

@@ -126,7 +126,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaCramerShoupEncryptedValueSimulator(shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, int t, mt19937 random);
+	SigmaCramerShoupEncryptedValueSimulator(shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, int t);
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -200,7 +200,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaCramerShoupEncryptedValueProverComputation(shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, int t, mt19937 random);
+	SigmaCramerShoupEncryptedValueProverComputation(shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, int t);
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -230,7 +230,7 @@ public:
 	* @return SigmaCramerShoupEncryptedValueSimulator.
 	*/
 	shared_ptr<SigmaSimulator> getSimulator() override {
-		return make_shared<SigmaCramerShoupEncryptedValueSimulator>(dlog, hash, t, random);
+		return make_shared<SigmaCramerShoupEncryptedValueSimulator>(dlog, hash, t);
 	}
 };
 
@@ -278,7 +278,7 @@ public:
 	* @param random
 	* @throws InvalidDlogGroupException if the given dlog is invalid.
 	*/
-	SigmaCramerShoupEncryptedValueVerifierComputation(shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, int t, mt19937 random);
+	SigmaCramerShoupEncryptedValueVerifierComputation(shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, int t);
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.

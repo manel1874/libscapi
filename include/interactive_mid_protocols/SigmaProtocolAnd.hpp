@@ -64,7 +64,7 @@ public:
 	* 		  and the prover wants to prove to the verify that the AND of all statements are true.
 	* @param t soundness parameter. t MUST be equal to all t values of the underlying provers object.
 	*/
-	SigmaANDProverComputation(vector<shared_ptr<SigmaProverComputation>> provers, int t, std::mt19937 random);
+	SigmaANDProverComputation(vector<shared_ptr<SigmaProverComputation>> provers, int t);
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
 	*/
@@ -123,7 +123,7 @@ public:
 	* @param t soundness parameter. t MUST be equal to all t values of the underlying simulators object.
 	* @param random source of randomness
 	*/
-	SigmaANDSimulator(vector<shared_ptr<SigmaSimulator>> simulators, int t, std::mt19937 random);
+	SigmaANDSimulator(vector<shared_ptr<SigmaSimulator>> simulators, int t);
 	int getSoundnessParam() override { return t; };
 	/**
 	* Computes the simulator computation with the given challenge.
@@ -175,7 +175,7 @@ class SigmaANDVerifierComputation : public SigmaVerifierComputation {
 	* @param t soundness parameter. t MUST be equal to all t values of the underlying verifiers object.
 	* @param random source of randomness
 	*/
-	SigmaANDVerifierComputation(vector<shared_ptr<SigmaVerifierComputation>> & verifiers, int t, std::mt19937 random);
+	SigmaANDVerifierComputation(vector<shared_ptr<SigmaVerifierComputation>> & verifiers, int t);
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
 	*/

@@ -24,7 +24,7 @@ private:
 
 	OpenSSLZpSafePrimeElement(const biginteger & x, const biginteger & p, bool bCheckMembership) :
 		ZpSafePrimeElement(x, p, bCheckMembership) { createOpenSSLElement(); };
-	OpenSSLZpSafePrimeElement(const biginteger & p, mt19937 prg) : ZpSafePrimeElement(p, prg) { createOpenSSLElement(); };
+	OpenSSLZpSafePrimeElement(const biginteger & p, mt19937 & prg) : ZpSafePrimeElement(p, prg) { createOpenSSLElement(); };
 	OpenSSLZpSafePrimeElement(const biginteger & elementValue) : ZpSafePrimeElement(elementValue) { createOpenSSLElement(); };
 public:
 	virtual string toString() {
@@ -52,14 +52,13 @@ public:
 	/**
 	* Initializes the OpenSSL implementation of Dlog over Zp* with the given groupParams.
 	*/
-	OpenSSLDlogZpSafePrime(std::shared_ptr<ZpGroupParams> groupParams,
-		mt19937 prg =get_seeded_random());
+	OpenSSLDlogZpSafePrime(std::shared_ptr<ZpGroupParams> groupParams);
 	OpenSSLDlogZpSafePrime(string q, string g, string p) : OpenSSLDlogZpSafePrime(
 		make_shared<ZpGroupParams>(biginteger(q), biginteger(g), biginteger(p))) {};
 	/**
 	* Default constructor. Initializes this object with 1024 bit size.
 	*/
-	OpenSSLDlogZpSafePrime(int numBits = 1024, mt19937 prg = mt19937(clock()));
+	OpenSSLDlogZpSafePrime(int numBits = 1024);
 	OpenSSLDlogZpSafePrime(string numBits) : OpenSSLDlogZpSafePrime(stoi(numBits)) {};
 	OpenSSLDlogZpSafePrime(int numBits, string randNumGenAlg) { /* TODO: implement */ };
 
@@ -94,9 +93,9 @@ protected:
 	shared_ptr<BN_CTX> getCTX() { return ctx; }
 
 public:
-	OpenSSLDlogEC(string fileName, string curveName, mt19937 random) : DlogEllipticCurve(fileName, curveName, random) { }
+	OpenSSLDlogEC(string fileName, string curveName) : DlogEllipticCurve(fileName, curveName) { }
 
-	OpenSSLDlogEC(string curveName, mt19937 random) : DlogEllipticCurve(curveName, random) { }
+	OpenSSLDlogEC(string curveName) : DlogEllipticCurve(curveName) { }
 
 	bool validateGroup() override;
 
@@ -132,14 +131,14 @@ private:
 
 protected:
 	shared_ptr<ECElement> createPoint(shared_ptr<EC_POINT>) override;
-	void init(string fileName, string curveName, mt19937 random) override;
+	void init(string fileName, string curveName) override;
 
 public:
 	OpenSSLDlogECFp() : OpenSSLDlogECFp("P-192") { }
 
-	OpenSSLDlogECFp(string fileName, string curveName, mt19937 random) : OpenSSLDlogEC(fileName, curveName, random) { init(fileName, curveName, random); }
+	OpenSSLDlogECFp(string fileName, string curveName) : OpenSSLDlogEC(fileName, curveName) { init(fileName, curveName); }
 
-	OpenSSLDlogECFp(string curveName, mt19937 random = get_seeded_random()) : OpenSSLDlogEC(curveName, random)  { init(NISTEC_PROPERTIES_FILE, curveName, random); }
+	OpenSSLDlogECFp(string curveName) : OpenSSLDlogEC(curveName)  { init(NISTEC_PROPERTIES_FILE, curveName); }
 
 	string getGroupType() override;
 
@@ -164,16 +163,16 @@ private:
 	void createCurve();
 	bool checkSubGroupMembership(OpenSSLECF2mPoint*  point);
 protected:
-	void init(string fileName, string curveName, mt19937 random) override;
+	void init(string fileName, string curveName) override;
 	shared_ptr<ECElement> createPoint(shared_ptr<EC_POINT>) override;
 
 public:
 
 	OpenSSLDlogECF2m() : OpenSSLDlogECF2m("K-163") {}
 
-	OpenSSLDlogECF2m(string fileName, string curveName, mt19937 random): OpenSSLDlogEC(fileName, curveName, random) { init(fileName, curveName, random); }
+	OpenSSLDlogECF2m(string fileName, string curveName): OpenSSLDlogEC(fileName, curveName) { init(fileName, curveName); }
 
-	OpenSSLDlogECF2m(string curveName, mt19937 random = get_seeded_random()) : OpenSSLDlogEC(curveName, random) { init(NISTEC_PROPERTIES_FILE, curveName, random); }
+	OpenSSLDlogECF2m(string curveName) : OpenSSLDlogEC(curveName) { init(NISTEC_PROPERTIES_FILE, curveName); }
 
 	string getGroupType() override;
 

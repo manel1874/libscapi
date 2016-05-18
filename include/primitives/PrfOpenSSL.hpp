@@ -18,7 +18,7 @@ protected:
 	bool _isKeySet;
 
 public:
-	OpenSSLPRP(mt19937 prg = mt19937(clock())) { random = prg; };
+	OpenSSLPRP() { random = get_seeded_random(); };
 	bool isKeySet() override { return _isKeySet; };
 	SecretKey generateKey(AlgorithmParameterSpec keyParams) override {
 		throw NotImplementedException("To generate a key for this prf object use the generateKey(int keySize) function");
@@ -63,7 +63,7 @@ public:
 	/**
 	* Default constructor that creates the AES objects. Uses default implementation of SecureRandom.
 	*/
-	OpenSSLAES(mt19937 prg = mt19937(clock()));
+	OpenSSLAES();
 
 	/**
 	* Initializes this AES objects with the given secret key.
@@ -81,26 +81,20 @@ private:
 	HMAC_CTX * hmac; //Pointer to the native hmac.
 	bool _isKeySet; //until setKey is called set to false.
 	mt19937 random; //source of randomness used in key generation
-	void construct(string hashName, mt19937 random);
+	void construct(string hashName);
 
 public: 
 	/**
 	* Default constructor that uses SHA1.
 	*/
-	OpenSSLHMAC() { construct("SHA-1", mt19937(clock())); };
+	OpenSSLHMAC() { construct("SHA-1"); };
 	/**
 	* This constructor receives a hashName and builds the underlying hmac according to it. It can be called from the factory.
 	* @param hashName - the hash function to translate into OpenSSL's hash.
 	* @throws FactoriesException if there is no hash function with given name.
 	*/
-	OpenSSLHMAC(string hashName) { construct(hashName, mt19937(clock())); };
-	/**
-	* This constructor receives an hashName and build the underlying hmac according to it. It can be called from the factory.
-	* @param hashName - the hash function to translate into OpenSSL's hash.
-	* @param random - the random object to use.
-	* @throws FactoriesException if there is no hash function with given name.
-	*/
-	OpenSSLHMAC(string hashName, mt19937 random) { construct(hashName, random); };
+	OpenSSLHMAC(string hashName) { construct(hashName); };
+
 	/**
 	* This constructor gets a random and a SCAPI CryptographicHash to be the underlying hash and retrieves the name of the hash in
 	* order to create the related OpenSSL's hash.
@@ -108,7 +102,7 @@ public:
 	* @param random the random object to use.
 	* @throws FactoriesException if there is no hash function with given name.
 	*/
-	OpenSSLHMAC(CryptographicHash *hash, mt19937 random = mt19937(clock())) { construct(hash->getAlgorithmName(), random); };
+	OpenSSLHMAC(CryptographicHash *hash) { construct(hash->getAlgorithmName()); };
 	/**
 	* Initializes this hmac with a secret key.
 	* @param secretKey the secret key
@@ -141,7 +135,7 @@ public:
 	/**
 	* Default constructor that creates the TripleDES objects. Uses default implementation of SecureRandom.
 	*/
-	OpenSSLTripleDES(mt19937 prg = mt19937(clock()));
+	OpenSSLTripleDES();
 	void setKey(SecretKey secretKey) override;
 	string getAlgorithmName() override{ return "TripleDES"; };
 	int getBlockSize() override { return 8; }; // TripleDES works on 64 bit block.

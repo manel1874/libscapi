@@ -30,7 +30,7 @@ SigmaCramerShoupEncryptedValueProverInput::SigmaCramerShoupEncryptedValueProverI
 * @param t Soundness parameter in BITS.
 * @param random
 */
-SigmaCramerShoupEncryptedValueSimulator::SigmaCramerShoupEncryptedValueSimulator(shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, int t, mt19937 random) : dhSim(dlog, t, random) {
+SigmaCramerShoupEncryptedValueSimulator::SigmaCramerShoupEncryptedValueSimulator(shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, int t) : dhSim(dlog, t) {
 
 	this->dlog = dlog;
 	this->hash = hash;
@@ -142,13 +142,13 @@ biginteger SigmaCramerShoupEncryptedValueSimulator::calcW(shared_ptr<GroupElemen
 * @param t Soundness parameter in BITS.
 * @param random
 */
-SigmaCramerShoupEncryptedValueProverComputation::SigmaCramerShoupEncryptedValueProverComputation(shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, int t, mt19937 random) 
-	: sigmaDH(dlog, t, random) {
+SigmaCramerShoupEncryptedValueProverComputation::SigmaCramerShoupEncryptedValueProverComputation(shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, int t) 
+	: sigmaDH(dlog, t) {
 
 	this->dlog = dlog;
 	this->hash = hash;
 	this->t = t;
-	this->random = random;
+	this->random = get_seeded_random();
 }
 
 biginteger SigmaCramerShoupEncryptedValueProverComputation::calcW(shared_ptr<GroupElement> u1, shared_ptr<GroupElement> u2, shared_ptr<GroupElement> e) {
@@ -243,8 +243,8 @@ shared_ptr<SigmaProtocolMsg> SigmaCramerShoupEncryptedValueProverComputation::co
 * @param random
 * @throws InvalidDlogGroupException if the given dlog is invalid.
 */
-SigmaCramerShoupEncryptedValueVerifierComputation::SigmaCramerShoupEncryptedValueVerifierComputation(shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, int t, mt19937 random)
-	: sigmaDH(dlog, t, random) {
+SigmaCramerShoupEncryptedValueVerifierComputation::SigmaCramerShoupEncryptedValueVerifierComputation(shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, int t)
+	: sigmaDH(dlog, t) {
 
 	this->dlog = dlog;
 	this->hash = hash;

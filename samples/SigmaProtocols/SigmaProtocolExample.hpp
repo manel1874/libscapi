@@ -113,8 +113,7 @@ public:
 		shared_ptr<SigmaDlogCommonInput> commonInput,
 		shared_ptr<DlogGroup> dg) override {
 		auto emptyTrap = make_shared<CmtRTrapdoorCommitPhaseOutput>();
-		auto v = new ZKPOKFromSigmaCmtPedersenVerifier(server, verifierComputation,
-			get_seeded_random64(), emptyTrap, dg);
+		auto v = new ZKPOKFromSigmaCmtPedersenVerifier(server, verifierComputation, emptyTrap, dg);
 		cout << "--> running pedersen verify" << endl;
 		bool verificationPassed = v->verify(commonInput, msgA, msgZ);
 		delete v;

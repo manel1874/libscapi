@@ -122,8 +122,8 @@ private:
 	bool _isKeySet=false;
 
 public:
-	OpenSSLRC4(mt19937 random = get_seeded_random()) {
-		this->random = random;
+	OpenSSLRC4() {
+		this->random = get_seeded_random();
 		rc4 = new RC4_KEY();
 	}
 	void setKey(SecretKey secretKey) override;	

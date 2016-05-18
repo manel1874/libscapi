@@ -44,7 +44,7 @@ SigmaElGamalEncryptedValueRandomnessProverInput::SigmaElGamalEncryptedValueRando
 * @param t Soundness parameter in BITS.
 * @param random
 */
-SigmaElGamalEncryptedValueSimulator::SigmaElGamalEncryptedValueSimulator(shared_ptr<DlogGroup> dlog, int t, mt19937 random) : dhSim(dlog, t, random) {
+SigmaElGamalEncryptedValueSimulator::SigmaElGamalEncryptedValueSimulator(shared_ptr<DlogGroup> dlog, int t) : dhSim(dlog, t) {
 	//Creates the underlying SigmaDHSimulator object with the given parameters.
 	this->dlog = dlog;
 }
@@ -129,10 +129,10 @@ shared_ptr<SigmaDHCommonInput> SigmaElGamalEncryptedValueSimulator::checkAndCrea
 * @param t Soundness parameter in BITS.
 * @param random
 */
-SigmaElGamalEncryptedValueProverComputation::SigmaElGamalEncryptedValueProverComputation(shared_ptr<DlogGroup> dlog, int t, mt19937 random) : sigmaDH(dlog, t, random) {
+SigmaElGamalEncryptedValueProverComputation::SigmaElGamalEncryptedValueProverComputation(shared_ptr<DlogGroup> dlog, int t) : sigmaDH(dlog, t) {
 	this->dlog = dlog;
 	this->t = t;
-	this->random = random;
+	this->random = get_seeded_random();
 }
 
 shared_ptr<SigmaDHProverInput> SigmaElGamalEncryptedValueProverComputation::convertInput(SigmaProverInput* in) {
@@ -209,7 +209,7 @@ shared_ptr<SigmaProtocolMsg> SigmaElGamalEncryptedValueProverComputation::comput
 * @param random
 * @throws InvalidDlogGroupException if the given dlog is invalid.
 */
-SigmaElGamalEncryptedValueVerifierComputation::SigmaElGamalEncryptedValueVerifierComputation(shared_ptr<DlogGroup> dlog, int t, mt19937 random) : sigmaDH(dlog, t, random) {
+SigmaElGamalEncryptedValueVerifierComputation::SigmaElGamalEncryptedValueVerifierComputation(shared_ptr<DlogGroup> dlog, int t) : sigmaDH(dlog, t) {
 	this->dlog = dlog;
 }
 

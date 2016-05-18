@@ -130,7 +130,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaPedersenCommittedValueSimulator(shared_ptr<DlogGroup> dlog, int t, mt19937 random);
+	SigmaPedersenCommittedValueSimulator(shared_ptr<DlogGroup> dlog, int t);
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -200,7 +200,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaPedersenCommittedValueProverComputation(shared_ptr<DlogGroup> dlog, int t, mt19937 random);
+	SigmaPedersenCommittedValueProverComputation(shared_ptr<DlogGroup> dlog, int t);
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -229,7 +229,7 @@ public:
 	* @return SigmaDlogSimulator
 	*/
 	shared_ptr<SigmaSimulator> getSimulator() override {
-		return make_shared<SigmaPedersenCommittedValueSimulator>(dlog, t, random);
+		return make_shared<SigmaPedersenCommittedValueSimulator>(dlog, t);
 	}
 };
 
@@ -271,7 +271,7 @@ public:
 	* @param random
 	* @throws InvalidDlogGroupException if the given dlog is invalid.
 	*/
-	SigmaPedersenCommittedValueVerifierComputation(shared_ptr<DlogGroup> dlog, int t, mt19937 random) : sigmaDlog(dlog, t, random) {
+	SigmaPedersenCommittedValueVerifierComputation(shared_ptr<DlogGroup> dlog, int t) : sigmaDlog(dlog, t) {
 		this->dlog = dlog;
 	}
 

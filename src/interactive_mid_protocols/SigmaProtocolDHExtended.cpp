@@ -33,7 +33,7 @@ void SigmaDHExtendedMsg::initFromString(const string & s) {
 * @param random
 * @throws IllegalArgumentException if soundness parameter is invalid.
 */
-SigmaDHExtendedSimulator::SigmaDHExtendedSimulator(shared_ptr<DlogGroup> dlog, int t, mt19937 random) {
+SigmaDHExtendedSimulator::SigmaDHExtendedSimulator(shared_ptr<DlogGroup> dlog, int t) {
 	//Sets the parameters.
 	this->dlog = dlog;
 	this->t = t;
@@ -43,7 +43,7 @@ SigmaDHExtendedSimulator::SigmaDHExtendedSimulator(shared_ptr<DlogGroup> dlog, i
 		throw invalid_argument("soundness parameter t does not satisfy 2^t<q");
 	}
 
-	this->random = random;
+	this->random = get_seeded_random();
 }
 
 /**
@@ -122,7 +122,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaDHExtendedSimulator::simulate(SigmaCommonI
 /******** Sigma DH Extended prover ****************/
 /**************************************************/
 
-SigmaDHExtendedProverComputation::SigmaDHExtendedProverComputation(shared_ptr<DlogGroup> dlog, int t, mt19937 random) {
+SigmaDHExtendedProverComputation::SigmaDHExtendedProverComputation(shared_ptr<DlogGroup> dlog, int t) {
 
 	//Sets the parameters.
 	this->dlog = dlog;
@@ -133,7 +133,7 @@ SigmaDHExtendedProverComputation::SigmaDHExtendedProverComputation(shared_ptr<Dl
 		throw invalid_argument("soundness parameter t does not satisfy 2^t<q");
 	}
 
-	this->random = random;
+	this->random = get_seeded_random();
 
 }
 
@@ -209,7 +209,7 @@ shared_ptr<SigmaProtocolMsg> SigmaDHExtendedProverComputation::computeSecondMsg(
 * @throws InvalidDlogGroupException if the given dlog is invalid.
 * @throws IllegalArgumentException if soundness parameter is invalid.
 */
-SigmaDHExtendedVerifierComputation::SigmaDHExtendedVerifierComputation(shared_ptr<DlogGroup> dlog, int t, mt19937 random) {
+SigmaDHExtendedVerifierComputation::SigmaDHExtendedVerifierComputation(shared_ptr<DlogGroup> dlog, int t) {
 
 	if (!dlog->validateGroup())
 		throw InvalidDlogGroupException("invalid dlog");
@@ -223,7 +223,7 @@ SigmaDHExtendedVerifierComputation::SigmaDHExtendedVerifierComputation(shared_pt
 		throw invalid_argument("soundness parameter t does not satisfy 2^t<q");
 	}
 
-	this->random = random;
+	this->random = get_seeded_random();
 }
 
 /**

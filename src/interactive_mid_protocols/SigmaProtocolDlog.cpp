@@ -17,13 +17,13 @@ bool checkChallengeLength(vector<byte> challenge, int t) {
 /*   SigmaDlogSimulator                */
 /***************************************/
 
-SigmaDlogSimulator::SigmaDlogSimulator(shared_ptr<DlogGroup> dlog, int t, std::mt19937 random) {
+SigmaDlogSimulator::SigmaDlogSimulator(shared_ptr<DlogGroup> dlog, int t) {
 	this->dlog = dlog;
 	this->t = t;
 	if (!checkSoundnessParam()) // check the soundness validity.
 		throw invalid_argument("soundness parameter t does not satisfy 2^t<q. q=" +
 			(string)dlog->getOrder() + " t=" + to_string(t) + "\n");
-	this->random = random;
+	this->random = get_seeded_random();
 	qMinusOne = dlog->getOrder() - 1;
 }
 
@@ -68,13 +68,12 @@ bool SigmaDlogSimulator::checkSoundnessParam() {
 /*   SigmaDlogProverComputation        */
 /***************************************/
 
-SigmaDlogProverComputation::SigmaDlogProverComputation(shared_ptr<DlogGroup> dlog,
-	int t, std::mt19937 random) {
+SigmaDlogProverComputation::SigmaDlogProverComputation(shared_ptr<DlogGroup> dlog, int t) {
 	this->dlog = dlog;
 	this->t = t;
 	if (!checkSoundnessParam()) // check the soundness validity.
 		throw invalid_argument("soundness parameter t does not satisfy 2^t<q");
-	this->random = random;
+	this->random = get_seeded_random();
 	qMinusOne = dlog->getOrder() - 1;
 }
 
@@ -115,8 +114,7 @@ bool SigmaDlogProverComputation::checkSoundnessParam() {
 /*   SigmaDlogVerifierComputation      */
 /***************************************/
 
-SigmaDlogVerifierComputation::SigmaDlogVerifierComputation(shared_ptr<DlogGroup> dlog,
-	int t, std::mt19937 random) {
+SigmaDlogVerifierComputation::SigmaDlogVerifierComputation(shared_ptr<DlogGroup> dlog, int t) {
 	if (!dlog->validateGroup())
 		throw InvalidDlogGroupException("invalid dlog");
 
@@ -124,7 +122,7 @@ SigmaDlogVerifierComputation::SigmaDlogVerifierComputation(shared_ptr<DlogGroup>
 	this->t = t;
 	if (!checkSoundnessParam()) // check the soundness validity.
 		throw invalid_argument("soundness parameter t does not satisfy 2^t<q");
-	this->random = random;
+	this->random = get_seeded_random();
 }
 
 void SigmaDlogVerifierComputation::sampleChallenge() {

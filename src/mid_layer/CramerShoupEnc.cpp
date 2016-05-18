@@ -84,7 +84,7 @@ void CrShOnGroupElSendableData::initFromString(const string & row) {
 * @param random source of randomness.
 * @throws SecurityLevelException if the Dlog Group or the Hash function do not meet the required Security Level
 */
-CramerShoupOnGroupElementEnc::CramerShoupOnGroupElementEnc(shared_ptr<DlogGroup> dlogGroup, shared_ptr<CryptographicHash> hash, mt19937 random) {
+CramerShoupOnGroupElementEnc::CramerShoupOnGroupElementEnc(shared_ptr<DlogGroup> dlogGroup, shared_ptr<CryptographicHash> hash) {
 	//The Cramer-Shoup encryption scheme must work with a Dlog Group that has DDH security level
 	//and a Hash function that has CollisionResistant security level. If any of this conditions is not 
 	//met then cannot construct an object of type Cramer-Shoup encryption scheme; therefore throw exception.
@@ -100,7 +100,7 @@ CramerShoupOnGroupElementEnc::CramerShoupOnGroupElementEnc(shared_ptr<DlogGroup>
 	this->hash = hash;
 	// Everything is correct, then sets the member variables and creates object.
 	qMinusOne = dlogGroup->getOrder() - 1;
-	this->random = random;
+	this->random = get_seeded_random();
 }
 
 /**

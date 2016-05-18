@@ -7,7 +7,7 @@ void ElGamalOnGrElSendableData::initFromString(const string & row) {
 	cipher2->initFromString(str_vec[1]);
 }
 
-void ElGamalOnGroupElementEnc::setMembers(shared_ptr<DlogGroup> dlogGroup, mt19937 random) {
+void ElGamalOnGroupElementEnc::setMembers(shared_ptr<DlogGroup> dlogGroup) {
 	auto ddh = dynamic_pointer_cast<DDH>(dlogGroup);
 	//The underlying dlog group must be DDH secure.
 	if (ddh == NULL) {
@@ -15,7 +15,7 @@ void ElGamalOnGroupElementEnc::setMembers(shared_ptr<DlogGroup> dlogGroup, mt199
 	}
 	dlog = dlogGroup;
 	qMinusOne = dlog->getOrder() - 1;
-	this->random = random;
+	this->random = get_seeded_random();
 }
 
 /**
@@ -24,10 +24,10 @@ void ElGamalOnGroupElementEnc::setMembers(shared_ptr<DlogGroup> dlogGroup, mt199
 ElGamalOnGroupElementEnc::ElGamalOnGroupElementEnc() {
 
 	try {
-		setMembers(make_shared<OpenSSLDlogECF2m>("K-233"), get_seeded_random());
+		setMembers(make_shared<OpenSSLDlogECF2m>("K-233"));
 	}
 	catch (...) {
-		setMembers(make_shared<OpenSSLDlogZpSafePrime>(), get_seeded_random());
+		setMembers(make_shared<OpenSSLDlogZpSafePrime>());
 	}
 }
 

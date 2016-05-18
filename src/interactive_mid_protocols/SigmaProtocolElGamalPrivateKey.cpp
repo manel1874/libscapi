@@ -47,10 +47,10 @@ shared_ptr<SigmaSimulatorOutput> SigmaElGamalPrivateKeySimulator::simulate(Sigma
 * @param t Soundness parameter in BITS.
 * @param random
 */
-SigmaElGamalPrivateKeyProverComputation::SigmaElGamalPrivateKeyProverComputation(shared_ptr<DlogGroup> dlog, int t, mt19937 random) : sigmaDlog(dlog, t, random) {
+SigmaElGamalPrivateKeyProverComputation::SigmaElGamalPrivateKeyProverComputation(shared_ptr<DlogGroup> dlog, int t) : sigmaDlog(dlog, t) {
 	this->dlog = dlog;
 	this->t = t;
-	this->random = random;
+	this->random = get_seeded_random();
 }
 
 /**

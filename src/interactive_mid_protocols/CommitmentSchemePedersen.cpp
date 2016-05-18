@@ -3,14 +3,13 @@
 /*********************************/
 /*   CmtPedersenReceiverCore     */
 /*********************************/
-CmtPedersenReceiverCore::CmtPedersenReceiverCore(shared_ptr<CommParty> channel) {
-	auto r = get_seeded_random();
-	auto dg = make_shared<OpenSSLDlogZpSafePrime>(256, r);
-	doConstruct(channel, dg, r);
+CmtPedersenReceiverCore::CmtPedersenReceiverCore(shared_ptr<ChannelServer> channel) {
+	auto dg = make_shared<OpenSSLDlogZpSafePrime>(256);
+	doConstruct(channel, dg);
 };
 
-void CmtPedersenReceiverCore::doConstruct(shared_ptr<CommParty> channel,
-	shared_ptr<DlogGroup> dlog, std::mt19937 random) {
+void CmtPedersenReceiverCore::doConstruct(shared_ptr<ChannelServer> channel, 
+	shared_ptr<DlogGroup> dlog) {
 	// the underlying dlog group must be DDH secure.
 	auto ddh = std::dynamic_pointer_cast<DDH>(dlog);
 	if (!ddh)
@@ -22,7 +21,7 @@ void CmtPedersenReceiverCore::doConstruct(shared_ptr<CommParty> channel,
 
 	this->channel = channel;
 	this->dlog = dlog;
-	this->random = random;
+	this->random = get_seeded_random();
 	qMinusOne = dlog->getOrder()-1;
 	// the pre-process phase is actually performed at construction
 	preProcess();
@@ -101,8 +100,8 @@ shared_ptr<void> CmtPedersenReceiverCore::getCommitmentPhaseValues(long id) {
 /*********************************/
 /*   CmtPedersenCommitterCore    */
 /*********************************/
-void CmtPedersenCommitterCore::doConstruct(shared_ptr<CommParty> channel,
-	shared_ptr<DlogGroup> dlog, std::mt19937 randomm) {
+void CmtPedersenCommitterCore::doConstruct(shared_ptr<ChannelServer> channel,
+	shared_ptr<DlogGroup> dlog) {
 	
 	// the underlying dlog group must be DDH secure.
 	auto ddh = std::dynamic_pointer_cast<DDH>(dlog);
@@ -114,7 +113,7 @@ void CmtPedersenCommitterCore::doConstruct(shared_ptr<CommParty> channel,
 
 	this->channel = channel;
 	this->dlog = dlog;
-	this->random = random;
+	this->random = get_seeded_random();
 	qMinusOne = dlog->getOrder()-1;
 	// the pre-process phase is actually performed at construction
 	preProcess();

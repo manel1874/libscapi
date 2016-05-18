@@ -20,7 +20,7 @@ private:
 	biginteger computeRSA(biginteger elementP);
 
 public:
-	OpenSSLRSAPermutation(mt19937 random = get_seeded_random()) { this->random = random; };
+	OpenSSLRSAPermutation() { this->random = get_seeded_random(); };
 	void setKey(PublicKey* publicKey, PrivateKey* privateKey=NULL) override; 
 	string getAlgorithmName() override { return "OpenSSLRSA"; };
 	KeyPair generateKey(int keySize) override;

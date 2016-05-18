@@ -209,8 +209,8 @@ public:
 	* @param sVerifier underlying sigma verifier to use.
 	* @param committer Must be an instance of PerfectlyHidingCT
 	*/
-	ZKFromSigmaVerifier(shared_ptr<CommParty> channel, shared_ptr<SigmaVerifierComputation> sVerifier,
-		shared_ptr<CmtCommitter> committer, std::mt19937_64 random);
+	ZKFromSigmaVerifier(shared_ptr<ChannelServer> channel, shared_ptr<SigmaVerifierComputation> sVerifier,
+		shared_ptr<CmtCommitter> committer);
 
 	/**
 	* Constructor that accepts the underlying channel, sigma protocol's verifier and
@@ -218,12 +218,12 @@ public:
 	* @param channel used to communicate between prover and verifier.
 	* @param sVerifier underlying sigma verifier to use.
 	*/
-	ZKFromSigmaVerifier(shared_ptr<CommParty> channel,
-		shared_ptr<SigmaVerifierComputation> sVerifier, std::mt19937_64 random) {
+	ZKFromSigmaVerifier(shared_ptr<ChannelServer> channel,
+		shared_ptr<SigmaVerifierComputation> sVerifier) {
 		this->sVerifier = sVerifier;
 		this->committer = make_shared<CmtPedersenCommitter>(channel);
 		this->channel = channel;
-		this->random = random;
+		this->random = get_seeded_random64();
 	}
 
 	/**
@@ -333,9 +333,8 @@ public:
 	* @param t statistical parameter
 	* @param random
 	*/
-	CmtPedersenWithProofsCommitter(shared_ptr<CommParty> channel,
-		shared_ptr<DlogGroup> dlog, int t, std::mt19937 random) :
-		CmtPedersenCommitter(channel, dlog, random) {
+	CmtPedersenWithProofsCommitter(shared_ptr<ChannelServer> channel, shared_ptr<DlogGroup> dlog, int t) :
+		CmtPedersenCommitter(channel, dlog) {
 		doConstruct(t);
 	};
 	void proveKnowledge(long id) override;
@@ -376,9 +375,8 @@ public:
 	* @param t statistical parameter
 	* @param random
 	*/
-	CmtPedersenWithProofsReceiver(shared_ptr<CommParty> channel,
-		shared_ptr<DlogGroup> dlog, int t, std::mt19937 random) :
-		CmtPedersenReceiver(channel, dlog, random) {
+	CmtPedersenWithProofsReceiver(shared_ptr<ChannelServer> channel, shared_ptr<DlogGroup> dlog, int t) :
+		CmtPedersenReceiver(channel, dlog) {
 		doConstruct(t);
 	};
 
@@ -418,9 +416,8 @@ public:
 	* @param dlog
 	* @param random
 	*/
-	CmtPedersenTrapdoorCommitter(shared_ptr<CommParty> channel,
-		shared_ptr<DlogGroup> dlog, std::mt19937 random) :
-		CmtPedersenCommitter(channel, dlog, random) {};
+	CmtPedersenTrapdoorCommitter(shared_ptr<ChannelServer> channel,	shared_ptr<DlogGroup> dlog) :
+		CmtPedersenCommitter(channel, dlog) {};
 
 	/**
 	* Validate the h value received from the receiver in the pre process phase.
@@ -454,9 +451,8 @@ public:
 	* @param dlog
 	* @param random
 	*/
-	CmtPedersenTrapdoorReceiver(shared_ptr<CommParty> channel,
-		shared_ptr<DlogGroup> dlog, std::mt19937 random) :
-		CmtPedersenReceiver(channel, dlog, random) {};
+	CmtPedersenTrapdoorReceiver(shared_ptr<ChannelServer> channel,	shared_ptr<DlogGroup> dlog) :
+		CmtPedersenReceiver(channel, dlog) {};
 
 	/**
 	* Returns the receiver's trapdoor from the preprocess phase.
@@ -489,7 +485,7 @@ public:
 	ZKPOKFromSigmaCmtPedersenProver(shared_ptr<CommParty> channel,
 		shared_ptr<SigmaProverComputation> sProver, shared_ptr<DlogGroup> dg) {
 		this->sProver = sProver;
-		this->receiver = make_shared<CmtPedersenTrapdoorReceiver>(channel, dg, get_seeded_random());
+		this->receiver = make_shared<CmtPedersenTrapdoorReceiver>(channel, dg);
 		this->channel = channel;
 	}
 
@@ -633,13 +629,13 @@ public:
 	* @param sVerifier underlying sigma verifier to use.
 	* @param random
 	*/
-	ZKPOKFromSigmaCmtPedersenVerifier(shared_ptr<CommParty> channel,
-		shared_ptr<SigmaVerifierComputation> sVerifier, std::mt19937_64 random,
+	ZKPOKFromSigmaCmtPedersenVerifier(shared_ptr<ChannelServer> channel,
+		shared_ptr<SigmaVerifierComputation> sVerifier,
 		shared_ptr<CmtRCommitPhaseOutput> emptyTrap, shared_ptr<DlogGroup> dg) {
 		this->channel = channel;
 		this->sVerifier = sVerifier; 
-		this->committer = make_shared<CmtPedersenTrapdoorCommitter>(channel, dg, get_seeded_random());
-		this->random = random;
+		this->committer = make_shared<CmtPedersenTrapdoorCommitter>(channel, dg);
+		this->random = get_seeded_random64();
 		this->trap = emptyTrap;
 	};
 
