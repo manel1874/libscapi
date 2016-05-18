@@ -3,12 +3,12 @@
 /*********************************/
 /*   CmtPedersenReceiverCore     */
 /*********************************/
-CmtPedersenReceiverCore::CmtPedersenReceiverCore(shared_ptr<ChannelServer> channel) {
+CmtPedersenReceiverCore::CmtPedersenReceiverCore(shared_ptr<CommParty> channel) {
 	auto dg = make_shared<OpenSSLDlogZpSafePrime>(256);
 	doConstruct(channel, dg);
 };
 
-void CmtPedersenReceiverCore::doConstruct(shared_ptr<ChannelServer> channel, 
+void CmtPedersenReceiverCore::doConstruct(shared_ptr<CommParty> channel,
 	shared_ptr<DlogGroup> dlog) {
 	// the underlying dlog group must be DDH secure.
 	auto ddh = std::dynamic_pointer_cast<DDH>(dlog);
@@ -100,7 +100,7 @@ shared_ptr<void> CmtPedersenReceiverCore::getCommitmentPhaseValues(long id) {
 /*********************************/
 /*   CmtPedersenCommitterCore    */
 /*********************************/
-void CmtPedersenCommitterCore::doConstruct(shared_ptr<ChannelServer> channel,
+void CmtPedersenCommitterCore::doConstruct(shared_ptr<CommParty> channel,
 	shared_ptr<DlogGroup> dlog) {
 	
 	// the underlying dlog group must be DDH secure.

@@ -209,7 +209,7 @@ protected:
 	* Constructor that receives a connected channel (to the committer),the DlogGroup agreed upon between them and a SecureRandom object.
 	* The Committer needs to be instantiated with the same DlogGroup, otherwise nothing will work properly.
 	*/
-	CmtPedersenReceiverCore(std::shared_ptr<ChannelServer> channel, 
+	CmtPedersenReceiverCore(std::shared_ptr<CommParty> channel, 
 		std::shared_ptr<DlogGroup> dlog) {
 		doConstruct(channel, dlog);
 	}
@@ -223,7 +223,7 @@ private:
 	* @param dlog
 	* @param random
 	*/
-	void doConstruct(shared_ptr<ChannelServer> channel, shared_ptr<DlogGroup> dlog);
+	void doConstruct(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog);
 
 	/**
 	* Runs the preprocess stage of the protocol:
@@ -314,7 +314,7 @@ protected:
 	* default dlog and random.
 	* The receiver needs to be instantiated with the default constructor too.
 	*/
-	CmtPedersenCommitterCore(shared_ptr<ChannelServer> channel) {
+	CmtPedersenCommitterCore(shared_ptr<CommParty> channel) {
 		auto dg = make_shared<OpenSSLDlogZpSafePrime>(256);
 		doConstruct(channel, dg);
 	}
@@ -325,7 +325,7 @@ protected:
 	* The Receiver needs to be instantiated with the same DlogGroup, 
 	* otherwise nothing will work properly.
 	*/
-	CmtPedersenCommitterCore(shared_ptr<ChannelServer> channel, 
+	CmtPedersenCommitterCore(shared_ptr<CommParty> channel,
 		shared_ptr<DlogGroup> dlog) {
 		doConstruct(channel, dlog);
 	};
@@ -337,7 +337,7 @@ private:
 	* @param dlog
 	* @param random
 	*/
-	void doConstruct(shared_ptr<ChannelServer> channel, shared_ptr<DlogGroup> dlog);
+	void doConstruct(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog);
 
 	/**
 	* Runs the preprocess phase of the commitment scheme:
@@ -410,7 +410,7 @@ public:
 	* @param dlog
 	* @param random
 	*/
-	CmtPedersenCommitter(shared_ptr<ChannelServer> channel, 
+	CmtPedersenCommitter(shared_ptr<CommParty> channel,
 		shared_ptr<DlogGroup> dlog) :
 		CmtPedersenCommitterCore(channel, dlog) {};
 	
@@ -453,7 +453,7 @@ public:
 	* @throws InvalidDlogGroupException if the given dlog is not valid.
 	* @throws IOException if there was a problem in the communication
 	*/
-	CmtPedersenReceiver(shared_ptr<ChannelServer> channel, shared_ptr<DlogGroup> dlog) :
+	CmtPedersenReceiver(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog) :
 		CmtPedersenReceiverCore(channel, dlog) {};
 
 	/**

@@ -209,7 +209,7 @@ public:
 	* @param sVerifier underlying sigma verifier to use.
 	* @param committer Must be an instance of PerfectlyHidingCT
 	*/
-	ZKFromSigmaVerifier(shared_ptr<ChannelServer> channel, shared_ptr<SigmaVerifierComputation> sVerifier,
+	ZKFromSigmaVerifier(shared_ptr<CommParty> channel, shared_ptr<SigmaVerifierComputation> sVerifier,
 		shared_ptr<CmtCommitter> committer);
 
 	/**
@@ -218,7 +218,7 @@ public:
 	* @param channel used to communicate between prover and verifier.
 	* @param sVerifier underlying sigma verifier to use.
 	*/
-	ZKFromSigmaVerifier(shared_ptr<ChannelServer> channel,
+	ZKFromSigmaVerifier(shared_ptr<CommParty> channel,
 		shared_ptr<SigmaVerifierComputation> sVerifier) {
 		this->sVerifier = sVerifier;
 		this->committer = make_shared<CmtPedersenCommitter>(channel);
@@ -333,7 +333,7 @@ public:
 	* @param t statistical parameter
 	* @param random
 	*/
-	CmtPedersenWithProofsCommitter(shared_ptr<ChannelServer> channel, shared_ptr<DlogGroup> dlog, int t) :
+	CmtPedersenWithProofsCommitter(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, int t) :
 		CmtPedersenCommitter(channel, dlog) {
 		doConstruct(t);
 	};
@@ -375,7 +375,7 @@ public:
 	* @param t statistical parameter
 	* @param random
 	*/
-	CmtPedersenWithProofsReceiver(shared_ptr<ChannelServer> channel, shared_ptr<DlogGroup> dlog, int t) :
+	CmtPedersenWithProofsReceiver(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, int t) :
 		CmtPedersenReceiver(channel, dlog) {
 		doConstruct(t);
 	};
@@ -416,7 +416,7 @@ public:
 	* @param dlog
 	* @param random
 	*/
-	CmtPedersenTrapdoorCommitter(shared_ptr<ChannelServer> channel,	shared_ptr<DlogGroup> dlog) :
+	CmtPedersenTrapdoorCommitter(shared_ptr<CommParty> channel,	shared_ptr<DlogGroup> dlog) :
 		CmtPedersenCommitter(channel, dlog) {};
 
 	/**
@@ -451,7 +451,7 @@ public:
 	* @param dlog
 	* @param random
 	*/
-	CmtPedersenTrapdoorReceiver(shared_ptr<ChannelServer> channel,	shared_ptr<DlogGroup> dlog) :
+	CmtPedersenTrapdoorReceiver(shared_ptr<CommParty> channel,	shared_ptr<DlogGroup> dlog) :
 		CmtPedersenReceiver(channel, dlog) {};
 
 	/**
@@ -629,7 +629,7 @@ public:
 	* @param sVerifier underlying sigma verifier to use.
 	* @param random
 	*/
-	ZKPOKFromSigmaCmtPedersenVerifier(shared_ptr<ChannelServer> channel,
+	ZKPOKFromSigmaCmtPedersenVerifier(shared_ptr<CommParty> channel,
 		shared_ptr<SigmaVerifierComputation> sVerifier,
 		shared_ptr<CmtRCommitPhaseOutput> emptyTrap, shared_ptr<DlogGroup> dg) {
 		this->channel = channel;

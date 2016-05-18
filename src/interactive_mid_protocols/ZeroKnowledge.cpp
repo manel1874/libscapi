@@ -45,7 +45,7 @@ void ZKFromSigmaProver::prove(shared_ptr<ZKProverInput> input) {
 /*   ZKFromSigmaVerifier                        */
 /************************************************/
 
-ZKFromSigmaVerifier::ZKFromSigmaVerifier(shared_ptr<ChannelServer> channel,
+ZKFromSigmaVerifier::ZKFromSigmaVerifier(shared_ptr<CommParty> channel,
 	shared_ptr<SigmaVerifierComputation> sVerifier, shared_ptr<CmtCommitter> committer) {
 	// committer must be an instance of PerfectlyHidingCT
 	auto perfectHidingCommiter = std::dynamic_pointer_cast<PerfectlyHidingCmt>(committer);
