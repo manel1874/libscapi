@@ -170,3 +170,44 @@ public:
 	virtual bool operator==(const AsymmetricCiphertext &other) const = 0;
 };
 
+/**
+* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
+*
+*/
+class BigIntegerCiphertext : public AsymmetricCiphertext, public AsymmetricCiphertextSendableData{
+
+private:
+	biginteger cipher;
+
+public:
+	BigIntegerCiphertext(biginteger cipher) {
+		this->cipher = cipher;
+	}
+
+	biginteger getCipher() { return cipher;	}
+
+	/**
+	* This function is used when an asymmetric ciphertext needs to be sent via a edu.biu.scapi.comm.Channel or any other means of sending data (including serialization).
+	* It retrieves all the data needed to reconstruct this ciphertext at a later time and/or in a different VM. It puts all the data in an instance of the relevant class
+	* that implements the AsymmetricCiphertextSendableData interface.<p>
+	* In order to deserialize this into a BigIntegerCiphertext all you need to do is cast the serialized object with (BigIntegerCiphertext)
+	*
+	*/
+	shared_ptr<AsymmetricCiphertextSendableData> generateSendableData() {
+		//Since BigIntegerCiphertext is both an AsymmetricCiphertext and a AsymmetricCiphertextSendableData, on the one hand it has to implement
+		//the generateSendableData() function, but on the other hand it is in itself an AsymmetricCiphertextSendableData, so we do not really
+		//generate sendable data, but just return this object.
+		return shared_ptr<AsymmetricCiphertextSendableData>(this);
+	}
+
+	bool operator==(const AsymmetricCiphertext &other) const {
+		auto temp = dynamic_cast<const BigIntegerCiphertext*>(&other);
+		return cipher == temp->cipher;
+	}
+
+	string toString() override { return string(cipher);	};
+
+	void initFromString(const string & row) override { cipher = biginteger(row); }
+};
+
+
