@@ -53,6 +53,44 @@ public:
 		this->q = q;
 		this->n = n;
 	};
+
+	/**
+	* This function generates an RSA modulus N with "length" bits of length, such that N = p*q, and p and q
+	* @param length the length in bits of the RSA modulus
+	* @param certainty the certainty required regarding the primeness of p and q
+	* @param random a source of randomness
+	* @return an RSAModulus structure that holds N, p and q.
+	*/
+	RSAModulus(int length, int certainty, mt19937 & random) {
+
+		int pbitlength = (length + 1) / 2;
+		int qbitlength = length - pbitlength;
+		int mindiffbits = length / 3;
+
+
+		// generate p prime
+		p = getRandomPrime(pbitlength, certainty, random);
+		for (;;) {
+			do {
+				q = getRandomPrime(qbitlength, certainty, random);
+				
+			} while ((bytesCount(mp::abs(q - p)) * 8) < mindiffbits);
+			
+			// calculate the modulus
+			n = p * q;
+
+			if ((bytesCount(n) * 8) == length)
+			{
+				break;
+			}
+
+			//
+			// if we get here our primes aren't big enough, make the largest
+			// of the two p and try again
+			//
+			p = (p > q) ? p : q;
+		}
+	}
 };
 
 /**
