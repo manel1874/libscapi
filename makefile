@@ -37,7 +37,7 @@ directories: $(OUT_DIR)
 $(OUT_DIR):
 	mkdir -p $(OUT_DIR)
 
-$(SLib): libs $(OBJ_FILES)
+$(SLib): $(OBJ_FILES)
 	ar ru $@ $^ 
 	ranlib $@
 

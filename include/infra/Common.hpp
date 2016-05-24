@@ -125,7 +125,7 @@ void print_elapsed_micros(std::chrono::time_point<std::chrono::system_clock> sta
 std::chrono::time_point<std::chrono::system_clock> scapi_now();
 string hexStr(vector<byte> const & data);
 void print_byte_array(byte * arr, int len, string message);
-void gen_random_bytes_vector(vector<byte> &v, const int len, mt19937 & random = get_seeded_random());
+void gen_random_bytes_vector(vector<byte> &v, const int len, mt19937 & random);
 
 /**
 * Abstract marker interface that allow serialization and deserialization from byte array and size

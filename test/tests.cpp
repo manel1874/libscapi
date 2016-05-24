@@ -66,8 +66,9 @@ TEST_CASE("Common methods", "[boost, common, math, log, bitLength, helper]") {
 	SECTION("gen_random_bytes_vector")
 	{
 		vector<byte> v, v2;
-		gen_random_bytes_vector(v, 10);
-		gen_random_bytes_vector(v2, 10);
+		auto prg = get_seeded_random();
+		gen_random_bytes_vector(v, 10, prg);
+		gen_random_bytes_vector(v2, 10, prg);
 		REQUIRE(v.size() == 10);
 		for (byte b : v)
 			REQUIRE(isalnum(b));
@@ -79,7 +80,8 @@ TEST_CASE("Common methods", "[boost, common, math, log, bitLength, helper]") {
 	SECTION("copy byte vector to byte array")
 	{
 		vector<byte> v;
-		gen_random_bytes_vector(v, 20);
+		auto prg = get_seeded_random();
+		gen_random_bytes_vector(v, 20, prg);
 		byte * vb = new byte[40];
 		int index;
 		copy_byte_vector_to_byte_array(v, vb, 0);
@@ -324,9 +326,10 @@ void test_encode_decode(shared_ptr<DlogGroup> dg)
 	int k = dg->getMaxLengthOfByteArrayForEncoding();
 	REQUIRE(k > 0);
 
+	auto prg = get_seeded_random();
 	vector<byte> v;
 	v.reserve(k);
-	gen_random_bytes_vector(v, k);
+	gen_random_bytes_vector(v, k, prg);
 
 	auto ge = dg->encodeByteArrayToGroupElement(v);
 	vector<byte> res = dg->decodeGroupElementToByteArray(ge.get());

@@ -798,7 +798,12 @@ protected:
 	string curveName;
 	string fileName;
 	shared_ptr<ConfigFile> ecConfig; // properties object to hold the given config file's parameters
+#ifdef _WIN32
 	const string NISTEC_PROPERTIES_FILE = "../../../../include/configFiles/NISTEC.txt";
+#else
+	const string NISTEC_PROPERTIES_FILE = "../include/configFiles/NISTEC.txt";
+#endif
+	
 	virtual void init(string fileName, string curveName);
 
 public:

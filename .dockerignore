@@ -19,6 +19,7 @@ dokcerfiles
 install
 obj
 windows-solutions
+dokcerfiles/*Dockerfile*
 */Win64-sln/*
 lib/MiraclWin64
 lib/NTL/windows
