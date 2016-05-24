@@ -29,14 +29,15 @@ INC            = -I../boost_1_60_0 -Ilib -Iinstall/include
 CPP_OPTIONS   := -std=c++11 $(INC)  -maes -mpclmul -DBOOST_LOG_DYN_LINK
 $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
 
-all:: directories $(SLib)
-
+all:: libs libscapi
+libs:: compile-ntl compile-miracl compile-otextension 
+libscapi:: directories $(SLib)
 directories: $(OUT_DIR)
 
 $(OUT_DIR):
 	mkdir -p $(OUT_DIR)
 
-$(SLib): compile-ntl compile-miracl compile-otextension $(OBJ_FILES)
+$(SLib): libs $(OBJ_FILES)
 	ar ru $@ $^ 
 	ranlib $@
 

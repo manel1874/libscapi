@@ -6,14 +6,19 @@
 # Set the base image to Ubuntu
 FROM ubuntu:14.04
 
-# Update the repository sources list
-RUN sudo apt-get update
-
-# Install all required packages
-RUN sudo apt-get install -y wget git build-essential libssl-ocaml-dev libssl-dev libgmp3-dev vim
+# Update the repository sources list and Install all required packages
+RUN sudo apt-get update && sudo apt-get install -y \
+	wget \
+	git \
+	build-essential \
+	libssl-ocaml-dev \
+	libssl-dev \
+	libgmp3-dev \ 
+	vim \
+	&& rm -rf /var/lib/apt/lists/*
 
 # Download and install boost
-WORKDIR ~
+WORKDIR /root
 RUN wget -O boost_1_60_0.tar.bz2 http://sourceforge.net/projects/boost/files/boost/1.60.0/boost_1_60_0.tar.bz2/download 
 RUN tar --bzip2 -xf boost_1_60_0.tar.bz2
 WORKDIR boost_1_60_0

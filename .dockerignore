@@ -1,18 +1,3 @@
-# C extensions
-*.so
-*.exe
-*.lib
-*.a
-*.o
-
-# Distribution / packaging
-build/
-dokcerfiles/
-install/
-obj/
-windows-solutions/
-*/*/Win64-sln
-
 # Git
 .git
 .gitignore
