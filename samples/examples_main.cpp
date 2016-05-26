@@ -12,6 +12,7 @@ example_name can one of the followin:
 	* comm  <party_number (1|2)> <config_file_path>
 	* yao   <party_number (1|2)> <config_file_path>
 	* sigma <party_number (1|2)> <config_file_path>
+	* maliciousOT <party_number (1|2)>
 				)";
 	cerr << usage << endl;
 	return 1;
@@ -25,7 +26,8 @@ int main(int argc, char* argv[]) {
 		return mainDlog();
 	if (exampleName == "sha1")
 		return mainSha1();
-
+	if (exampleName == "maliciousOT")
+		return mainOT(argv[2]);
 	if (argc != 4)
 		return exampleUsage();
 
@@ -35,6 +37,9 @@ int main(int argc, char* argv[]) {
 		return mainYao(argv[2], argv[3]);
 	if (exampleName == "sigma")
 		return mainSigma(argv[2], argv[3]);
-
+	
 	return exampleUsage();
 }
+
+
+
