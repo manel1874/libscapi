@@ -37,7 +37,7 @@ bool OTSemiHonestExtensionSender::Listen()
 	for (int i = 0; i<m_nNumOTThreads; i++) //twice the actual number, due to double sockets for OT
 	{
 		cout << "Waiting for receiver to connect on port: " << m_nPort << endl;
-		CSocket sock;
+		semihonestot::CSocket sock;
 		//cerr << "New round! " << endl;
 		if (!m_vSockets[0].Accept(sock))
 		{
@@ -82,7 +82,7 @@ bool OTSemiHonestExtensionSender::PrecomputeNaorPinkasSender()
 	return true;
 }
 
-OTExtensionSender* OTSemiHonestExtensionSender::InitOTSender(const char* address, int port, int numOfThreads, bool b_print)
+semihonestot::OTExtensionSender* OTSemiHonestExtensionSender::InitOTSender(const char* address, int port, int numOfThreads, bool b_print)
 {
 	int nSndVals = 2;
 	m_nPort = (USHORT)port;
@@ -94,22 +94,23 @@ OTExtensionSender* OTSemiHonestExtensionSender::InitOTSender(const char* address
 	Listen();
 	auto start = scapi_now();
 	PrecomputeNaorPinkasSender();
-	auto otes = new OTExtensionSender(nSndVals, m_vSockets.data(), U, vKeySeeds);
+	auto otes = new semihonestot::OTExtensionSender(nSndVals, m_vSockets.data(), U, vKeySeeds);
 	if (b_print)
 		print_elapsed_ms(start, "PrecomputeNaorPinkasSender and OTExtensionSender init");
 	return otes;
 }
 
-OTBatchSOutput* OTSemiHonestExtensionSender::transfer(OTBatchSInput * input) {
+shared_ptr<OTBatchSOutput> OTSemiHonestExtensionSender::transfer(OTBatchSInput * input) {
 	int numOfOts;
 	
 	if (input->getType() == OTBatchSInputTypes::OTExtensionGeneralSInput ){ // in case the given input is general input.
 		// retrieve the values from the input object.
-		byte* x0 = ((OTExtensionGeneralSInput *)input)->getX0Arr();
-		byte* x1 = ((OTExtensionGeneralSInput *)input)->getX1Arr();
+		auto x0 = ((OTExtensionGeneralSInput *)input)->getX0Arr();
+		auto x1 = ((OTExtensionGeneralSInput *)input)->getX1Arr();
 		numOfOts = ((OTExtensionGeneralSInput *)input)->getNumOfOts();
-		int x0Size = ((OTExtensionGeneralSInput *)input)->getX0ArrSize();
-		runOtAsSender(x0, x1, NULL, numOfOts, x0Size / numOfOts * 8, "general");
+		auto x0Size = ((OTExtensionGeneralSInput *)input)->getX0ArrSize();
+		vector<byte> empty;
+		runOtAsSender(x0, x1, empty, numOfOts, x0Size / numOfOts * 8, "general");
 		// This version has no output. Return null.
 		return NULL;
 	}
@@ -150,32 +151,31 @@ OTBatchSOutput* OTSemiHonestExtensionSender::transfer(OTBatchSInput * input) {
 	else //If input is not instance of the above inputs, throw Exception.
 		throw invalid_argument("input should be an instance of OTExtensionGeneralSInput or OTExtensionCorrelatedSInput or OTExtensionRandomSInput.");
 }
-void OTSemiHonestExtensionSender::runOtAsSender(byte *x1, byte * x2, byte * deltaArr, int numOfOts, int bitLength, string version) {
+void OTSemiHonestExtensionSender::runOtAsSender(vector<byte> x1, vector<byte> x2, vector<byte> deltaArr, int numOfOts, int bitLength, string version) {
 	//The masking function with which the values that are sent in the last communication step are processed
 	//Choose OT extension version: G_OT, C_OT or R_OT
 	BYTE ver;
 	// supports all of the SHA hashes. Get the name of the required hash and instanciate that hash.
 	if (version=="general")
-		ver = G_OT;
+		ver = semihonestot::G_OT;
 	else if (version=="correlated")
-		ver = C_OT;
+		ver = semihonestot::C_OT;
 	else if(version=="random")
-		ver = R_OT;
-
-	CBitVector delta, X1, X2;
+		ver = semihonestot::R_OT;
+	semihonestot::CBitVector delta, X1, X2;
 	// create X1 and X2 as two arrays with "numOTs" entries of "bitlength" bit-values
 	X1.Create(numOfOts, bitLength);
 	X2.Create(numOfOts, bitLength);
-	if (ver == G_OT) {
+	if (ver == semihonestot::G_OT) {
 		//copy the values given from java
 		for (int i = 0; i < numOfOts*bitLength / 8; i++)
 		{
-			X1.SetByte(i, x1[i]);
-			X2.SetByte(i, x2[i]);
+			X1.SetByte(i, x1.at(i));
+			X2.SetByte(i, x2.at(i));
 		}
 	}
-	else if (ver == C_OT) {
-		m_fMaskFct = new XORMasking(bitLength);
+	else if (ver == semihonestot::C_OT) {
+		m_fMaskFct = new semihonestot::XORMasking(bitLength);
 		delta.Create(numOfOts, bitLength);
 		//set the delta values given from java
 		for (int i = 0; i < numOfOts*bitLength / 8; i++)
@@ -188,8 +188,8 @@ void OTSemiHonestExtensionSender::runOtAsSender(byte *x1, byte * x2, byte * delt
 	//else if(ver==R_OT){} no need to set any values. There is no input for x0 and x1 and no input for delta
 	//run the ot extension as the sender
 	ObliviouslySend(senderPtr, X1, X2, numOfOts, bitLength, ver, delta);
-
-	if (ver != G_OT) {//we need to copy x0 and x1 
+	
+	if (ver != semihonestot::G_OT) {//we need to copy x0 and x1 
 		//get the values from the ot and copy them to x1Arr, x2Arr wich later on will be copied to the java values x1 and x2
 		for (int i = 0; i < numOfOts*bitLength / 8; i++)
 		{
@@ -197,7 +197,7 @@ void OTSemiHonestExtensionSender::runOtAsSender(byte *x1, byte * x2, byte * delt
 			x1[i] = X1.GetByte(i);
 			x2[i] = X2.GetByte(i);
 		}
-		if (ver == C_OT) {
+		if (ver == semihonestot::C_OT) {
 			delete m_fMaskFct;
 		}
 	}
@@ -208,7 +208,7 @@ void OTSemiHonestExtensionSender::runOtAsSender(byte *x1, byte * x2, byte * delt
 	delta.delCBitVector();
 }
 
-bool OTSemiHonestExtensionSender::ObliviouslySend(OTExtensionSender* sender, CBitVector& X1, CBitVector& X2, int numOTs, int bitlength, byte version, CBitVector& delta)
+bool OTSemiHonestExtensionSender::ObliviouslySend(semihonestot::OTExtensionSender* sender, semihonestot::CBitVector& X1, semihonestot::CBitVector& X2, int numOTs, int bitlength, byte version, semihonestot::CBitVector& delta)
 {
 	bool success = FALSE;
 	int nSndVals = 2; //Perform 1-out-of-2 OT
@@ -233,14 +233,14 @@ bool OTSemiHonestExtensionBase::Init(int numOfThreads)
 	//Number of threads that will be used in OT extension
 	m_nNumOTThreads = numOfThreads;
 	m_vSockets.resize(m_nNumOTThreads);
-	bot = new NaorPinkas(m_nSecParam, m_aSeed, m_bUseECC);
+	bot = new semihonestot::NaorPinkas(m_nSecParam, m_aSeed, m_bUseECC);
 	return true;
 }
 
 bool OTSemiHonestExtensionReceiver::Connect(){
 	bool bFail = false;
 	LONG lTO = CONNECT_TIMEO_MILISEC;
-	cout << "connecting to addr: " << m_nAddr << " port: " << m_nPort << endl;
+	//cout << "connecting to addr: " << m_nAddr << " port: " << m_nPort << endl;
 	for (int k = m_nNumOTThreads - 1; k >= 0; k--)
 	{
 		for (int i = 0; i<RETRY_CONNECT; i++)
@@ -319,10 +319,10 @@ OTSemiHonestExtensionReceiver::OTSemiHonestExtensionReceiver(SocketPartyData par
 	// client connect
 	Connect();
 	PrecomputeNaorPinkasReceiver();
-	receiverPtr = new OTExtensionReceiver(nSndVals, m_vSockets.data(), vKeySeedMtx, m_aSeed);
+	receiverPtr = new semihonestot::OTExtensionReceiver(nSndVals, m_vSockets.data(), vKeySeedMtx, m_aSeed);
 }
 
-OTBatchROutput* OTSemiHonestExtensionReceiver::transfer(OTBatchRInput* input) {
+shared_ptr<OTBatchROutput> OTSemiHonestExtensionReceiver::transfer(OTBatchRInput* input) {
 	// we set the version to be the general case, if a different call was made we will change it later to the relevant version.
 	string version = "general";
 	
@@ -339,31 +339,31 @@ OTBatchROutput* OTSemiHonestExtensionReceiver::transfer(OTBatchRInput* input) {
 	//	version = "random";
 	//}
 
-	byte* sigmaArr = ((OTExtensionRInput *)input)->getSigmaArr();
+	auto sigmaArr = ((OTExtensionRInput *)input)->getSigmaArr();
 	int numOfOts = ((OTExtensionRInput *)input)->getSigmaArrSize();
 	int elementSize = ((OTExtensionRInput *)input)->getElementSize();
 
 	int outbytesLength = numOfOts*elementSize / 8;
-	byte* outputBytes = new byte[outbytesLength];
 	
 	// run the protocol using the native code in the dll.
-	runOtAsReceiver(sigmaArr, numOfOts, elementSize, outputBytes, version);
-	return new OTOnByteArrayROutput(outputBytes, outbytesLength);
+	vector<byte> output = runOtAsReceiver(sigmaArr, numOfOts, elementSize, version);
+	return make_shared<OTOnByteArrayROutput>(output);
+	
 }
 
-void OTSemiHonestExtensionReceiver::runOtAsReceiver(byte* sigma, int numOfOts, int bitLength, byte* output, std::string version) {
+vector<byte> OTSemiHonestExtensionReceiver::runOtAsReceiver(vector<byte> sigma, int numOfOts, int bitLength, std::string version) {
 	BYTE ver;
 	//supports all of the SHA hashes. Get the name of the required hash and instanciate that hash.
 	if (version=="general")
-		ver = G_OT;
+		ver = semihonestot::G_OT;
 	if (version=="correlated") {
-		ver = C_OT;
-		m_fMaskFct = new XORMasking(bitLength);
+		ver = semihonestot::C_OT;
+		m_fMaskFct = new semihonestot::XORMasking(bitLength);
 	}
 	if (version=="random") 
-		ver = R_OT;
+		ver = semihonestot::R_OT;
 
-	CBitVector choices, response;
+	semihonestot::CBitVector choices, response;
 	choices.Create(numOfOts);
 
 	// pre-generate the respose vector for the results
@@ -371,26 +371,29 @@ void OTSemiHonestExtensionReceiver::runOtAsReceiver(byte* sigma, int numOfOts, i
 
 	// copy the sigma values received from java
 	for (int i = 0; i<numOfOts; i++) {
-		choices.SetBit((i / 8) * 8 + 7 - (i % 8), sigma[i]);
+		choices.SetBit((i / 8) * 8 + 7 - (i % 8), sigma.at(i));
 		//choices.SetBit(i, sigmaArr[i]);
 	}
 
 	//run the ot extension as the receiver
 	ObliviouslyReceive(choices, response, numOfOts, bitLength, ver);
 
+	vector<byte> output;
 	//prepare the out array
 	for (int i = 0; i < numOfOts*bitLength / 8; i++)
 		//copy each byte result to out
-		output[i] = response.GetByte(i);
+		output.push_back(response.GetByte(i));
 
 	// free the pointer of choises and reponse
 	choices.delCBitVector();
 	response.delCBitVector();
-	if (ver == C_OT) 
+	if (ver == semihonestot::C_OT)
 		delete m_fMaskFct;
+
+	return output;
 }
 
-bool OTSemiHonestExtensionReceiver::ObliviouslyReceive(CBitVector& choices, CBitVector& ret, int numOTs, int bitlength, BYTE version) {
+bool OTSemiHonestExtensionReceiver::ObliviouslyReceive(semihonestot::CBitVector& choices, semihonestot::CBitVector& ret, int numOTs, int bitlength, BYTE version) {
 	bool success = false;
 	// Execute OT receiver routine 	
 
