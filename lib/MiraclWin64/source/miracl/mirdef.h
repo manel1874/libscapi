@@ -11,13 +11,11 @@
 #define mr_unsign64 unsigned __int64
 
 #define MR_IBITS 32
-#define MR_LBITS 32
+#define MR_LBITS 64
 #define MR_FLASH 52
 
 
-#define MAXBASE 2//((mr_small)1<<(MIRACL-1))
+#define MAXBASE ((mr_small)1<<(MIRACL-1))
 #define MR_BITSINCHAR 8
-
-
 
 
