@@ -25,6 +25,9 @@
     <Filter Include="Source Files\Simple">
       <UniqueIdentifier>{a87533b8-12bc-4605-aeda-5383624a0c6c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\maliciousOT">
+      <UniqueIdentifier>{09bc7e6c-17ed-4ae2-a9ad-7aa317190b8f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\samples\Yao\App1.cpp">
@@ -47,6 +50,9 @@
     </ClCompile>
     <ClCompile Include="..\..\samples\examples_main.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\samples\MaliciousOT\MaliciousOTExample.cpp">
+      <Filter>Source Files\maliciousOT</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
