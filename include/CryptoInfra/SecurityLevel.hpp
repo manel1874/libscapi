@@ -135,3 +135,23 @@ class StatisticallyHidingCmt : public SecureCommit {};
 * Any commitment scheme that is perfectly hiding should implement this interface.
 */
 class PerfectlyHidingCmt : public StatisticallyHidingCmt {};
+
+/**
+* Any protocol that is secure in the presence of semi-honest adversaries should implement this interface.
+*/
+class SemiHonest : ProtocolSecLevel {};
+
+/**
+* Any protocol that is secure in the presence of covert adversaries should implement this interface.
+* We stress that the deterrent parameter is not guaranteed by the interface.
+*/
+class Covert : public SemiHonest {};
+
+class OneSidedSimulation : public ProtocolSecLevel {};
+
+/**
+* Any protocol that is secure in the presence of malicious adversaries should implement this interface.
+*
+*/
+class Malicious :public Covert, OneSidedSimulation {};
+
