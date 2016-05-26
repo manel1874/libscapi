@@ -27,13 +27,13 @@ void PartyOne::sendP1Inputs(byte* ungarbledInput) {
 }
 
 void PartyOne::run(byte* ungarbledInput) {
-	
+
 	//byte * seed = new byte[16];
 	//if (!RAND_bytes(seed, 16))
 	//	throw runtime_error("key generation failed");
 
 	values = circuit->garble();
-	
+
 
 
 	//write one byte
@@ -63,25 +63,25 @@ void PartyOne::runOTProtocol() {
 	byte* allInputWireValues = (byte*)std::get<0>(values);
 	p1InputSize = circuit->getNumberOfInputs(1);
 	p2InputSize = circuit->getNumberOfInputs(2);
-	auto x0Arr = new vector<byte>();
-	x0Arr->reserve(p2InputSize * SIZE_OF_BLOCK);
+	vector<byte> x0Arr;
+	x0Arr.reserve(p2InputSize * SIZE_OF_BLOCK);
 	//int arrSize = p2InputSize * SIZE_OF_BLOCK;
 	//byte * x0Arr = new byte[arrSize];
-	auto x1Arr = new vector<byte>();
-	x1Arr->reserve(p2InputSize * SIZE_OF_BLOCK);
+	vector<byte> x1Arr;
+	x1Arr.reserve(p2InputSize * SIZE_OF_BLOCK);
 	int beginIndex0, beginIndex1;
 	for (int i = 0; i<p2InputSize; i++) {
 		beginIndex0 = p1InputSize * 2 * SIZE_OF_BLOCK + 2 * i*SIZE_OF_BLOCK;
 		beginIndex1 = p1InputSize * 2 * SIZE_OF_BLOCK + (2 * i + 1)*SIZE_OF_BLOCK;
-		x0Arr->insert(x0Arr->end(), &allInputWireValues[beginIndex0], &allInputWireValues[beginIndex0 + SIZE_OF_BLOCK]);
+		x0Arr.insert(x0Arr.end(), &allInputWireValues[beginIndex0], &allInputWireValues[beginIndex0 + SIZE_OF_BLOCK]);
 		//memcpy(x0Arr, &allInputWireValues[beginIndex0], SIZE_OF_BLOCK);
-		x1Arr->insert(x1Arr->end(), &allInputWireValues[beginIndex1], &allInputWireValues[beginIndex1 + SIZE_OF_BLOCK]);
+		x1Arr.insert(x1Arr.end(), &allInputWireValues[beginIndex1], &allInputWireValues[beginIndex1 + SIZE_OF_BLOCK]);
 	}
 	// create an OT input object with the keys arrays.
-	OTBatchSInput * input = new OTExtensionGeneralSInput(&(x0Arr->at(0)), x0Arr->size(), &(x1Arr->at(0)), x1Arr->size(), p2InputSize);
+	OTBatchSInput * input = new OTExtensionGeneralSInput(x0Arr, x1Arr, p2InputSize);
 	// run the OT's transfer phase.
 	otSender->transfer(input);
-	delete x0Arr, x1Arr;
+	//delete x0Arr, x1Arr;
 }
 
 /*********************************/
@@ -90,14 +90,14 @@ void PartyOne::runOTProtocol() {
 
 byte* PartyTwo::computeCircuit(OTBatchROutput * otOutput) {
 	// Get the output of the protocol.
-	byte* p2Inputs = ((OTOnByteArrayROutput *)otOutput)->getXSigma();
+	vector<byte> p2Inputs = ((OTOnByteArrayROutput *)otOutput)->getXSigma();
 	int p2InputsSize = ((OTOnByteArrayROutput *)otOutput)->getLength();
 	// Get party two input wires' indices.
 	//int* labels = NULL;
 	//labels = circuit->getInputWireIndices(2);
 	vector<byte> allInputs(p1InputsSize + p2InputsSize);
 	memcpy(&allInputs[0], p1Inputs, p1InputsSize);
-	memcpy(&allInputs[p1InputsSize], p2Inputs, p2InputsSize);
+	memcpy(&allInputs[p1InputsSize], p2Inputs.data(), p2InputsSize);
 	
 	// set the input to the circuit.
 	//circuit->setInputs(allInputs);
@@ -120,12 +120,12 @@ void PartyTwo::run(byte * ungarbledInput, int inputSize, bool print_output) {
 
 	//cout << "PartyTwo: after recieving p1 inputs and circuit: " << endl;
 	// run OT protocol in order to get the necessary keys without revealing any information.
-	OTBatchROutput * output = runOTProtocol(ungarbledInput, inputSize);
+	auto output = runOTProtocol(ungarbledInput, inputSize);
 
 
 	//cout << "PartyTwo: after run ot: " << endl;
 	// Compute the circuit.
-	byte* circuitOutput = computeCircuit(output);
+	byte* circuitOutput = computeCircuit(output.get());
 
 	// we're done print the output
 	if (print_output)

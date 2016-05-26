@@ -60,7 +60,7 @@ void execute_party_one(YaoConfig yao_config) {
 	// create the semi honest OT extension sender
 	SocketPartyData senderParty(yao_config.sender_ip, 7766);
 	OTBatchSender * otSender = new OTSemiHonestExtensionSender(senderParty, 163, 1);
-
+	
 	// connect to party two
 	channel->join(500, 5000);
 	
@@ -75,7 +75,7 @@ void execute_party_one(YaoConfig yao_config) {
 	p1 = new PartyOne(channel, otSender, circuit);
 	for (int i = 0; i < yao_config.number_of_iterations ; i++) {
 		// run Party one
-		p1->run(&(ungarbledInput->at(0)));
+		p1->run(ungarbledInput->data());
 	}
 	auto end = std::chrono::system_clock::now();
 	int elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - all).count();
@@ -110,7 +110,7 @@ void execute_party_two(YaoConfig yao_config) {
 	// create the OT receiver.
 	start = scapi_now();
 	SocketPartyData senderParty(yao_config.sender_ip, 7766);
-	//OTBatchReceiver * otReceiver = new OTSemiHonestExtensionReceiver(receiverParty, 163, 1);
+	
 	OTBatchReceiver * otReceiver = new OTSemiHonestExtensionReceiver(senderParty, 163, 1);
 	print_elapsed_ms(start, "PartyTwo: creating OTSemiHonestExtensionReceiver");
 

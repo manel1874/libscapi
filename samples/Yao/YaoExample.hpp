@@ -108,10 +108,12 @@ public:
 	* @param sigmaArr Contains a byte indicates for each input wire which key to get.
 	* @return The output from the OT protocol, party tw oinputs.
 	*/
-	OTBatchROutput * runOTProtocol(byte* sigmaArr, int arrSize) {
+	shared_ptr<OTBatchROutput> runOTProtocol(byte* sigmaArr, int arrSize) {
 		//Create an OT input object with the given sigmaArr.
+		vector<byte> sigma;
+		copy_byte_array_to_byte_vector(sigmaArr, arrSize, sigma, 0);
 		int elementSize = 128;
-		OTBatchRInput * input = new OTExtensionGeneralRInput(sigmaArr, arrSize, elementSize);
+		OTBatchRInput * input = new OTExtensionGeneralRInput(sigma, elementSize);
 		//Run the Ot protocol.
 		return otReceiver->transfer(input);
 	};
