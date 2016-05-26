@@ -1,3 +1,4 @@
+#pragma once
 #ifndef __TYPEDEFS_H__BY_SGCHOI
 #define __TYPEDEFS_H__BY_SGCHOI
 
@@ -8,50 +9,57 @@
 //#define OTEXT_USE_GMP
 #define OTEXT_USE_ECC
 //#define VERIFY_OT
+#ifndef NUMOTBLOCKS
 #define NUMOTBLOCKS 128
+#endif
+#include <openssl/evp.h>
+#include <openssl/sha.h>
+#include <openssl/aes.h>
+namespace semihonestot {
+
+	static int CEIL_LOG2(int bits)
+	{
+		int targetlevel = 0, bitstemp = bits;
+		while (bitstemp >>= 1) ++targetlevel;
+		return targetlevel + ((1 << targetlevel) > bits);
+	}
+
+	static int FLOOR_LOG2(int bits)
+	{
+		int targetlevel = 0;
+		while (bits >>= 1) ++targetlevel;
+		return targetlevel;
+	}
+
+	//static double getMillies(timeval timestart, timeval timeend)
+	//{
+	//	long time1 = (timestart.tv_sec * 1000000) + (timestart.tv_usec );
+	//	long time2 = (timeend.tv_sec * 1000000) + (timeend.tv_usec );
+	//
+	//	return (double)(time2-time1)/1000000;
+	//}
 
 
-static int CEIL_LOG2(int bits)
-{
-	int targetlevel = 0, bitstemp = bits;
-	while (bitstemp >>= 1) ++targetlevel;
-	return targetlevel + ((1<<targetlevel) > bits);
-}
 
-static int FLOOR_LOG2(int bits)
-{
-	int targetlevel = 0;
-	while (bits >>= 1) ++targetlevel;
-	return targetlevel;
-}
+	typedef int			BOOL;
+	typedef long			LONG;
 
-//static double getMillies(timeval timestart, timeval timeend)
-//{
-//	long time1 = (timestart.tv_sec * 1000000) + (timestart.tv_usec );
-//	long time2 = (timeend.tv_sec * 1000000) + (timeend.tv_usec );
-//
-//	return (double)(time2-time1)/1000000;
-//}
+	typedef unsigned char	BYTE;
+	typedef unsigned short	USHORT;
+	typedef unsigned int	UINT;
+	typedef unsigned long 	ULONG;
+	typedef unsigned long long UINT_64T;
 
+	typedef ULONG	DWORD;
+	typedef UINT_64T REGISTER_SIZE;
 
-
-typedef int			BOOL;
-typedef long			LONG;
-
-typedef unsigned char	BYTE;
-typedef unsigned short	USHORT;
-typedef unsigned int	UINT;
-typedef unsigned long 	ULONG;
-typedef unsigned long long UINT_64T;
-
-typedef ULONG	DWORD;
-typedef UINT_64T REGISTER_SIZE;
-
-typedef REGISTER_SIZE REGSIZE;
+	typedef REGISTER_SIZE REGSIZE;
 #define LOG2_REGISTER_SIZE		CEIL_LOG2(sizeof(REGISTER_SIZE) << 3)
 
 #define SHA1_BYTES				20
+#ifndef SHA1_BITS
 #define SHA1_BITS				160
+#endif
 
 #define AES_KEY_BITS			128
 #define AES_KEY_BYTES			16
@@ -83,17 +91,15 @@ typedef REGISTER_SIZE REGSIZE;
 #define VECTOR_INTERNAL_SIZE 8
 
 
-#include <openssl/evp.h>
-#include <openssl/sha.h>
-#include <openssl/aes.h>
+
 
 #define AES_KEY_CTX EVP_CIPHER_CTX
 #define OTEXT_HASH_INIT(sha) SHA_Init(sha)
 #define OTEXT_HASH_UPDATE(sha, buf, bufsize) SHA_Update(sha, buf, bufsize)
 #define OTEXT_HASH_FINAL(sha, sha_buf) SHA_Final(sha_buf, sha)
 
-const BYTE ZERO_IV[AES_BYTES]={0};
-static int otextaesencdummy;
+	const BYTE ZERO_IV[AES_BYTES] = { 0 };
+	static int otextaesencdummy;
 
 #define OTEXT_AES_KEY_INIT(ctx, buf) { \
 	EVP_CIPHER_CTX_init(ctx); \
@@ -117,14 +123,22 @@ static int otextaesencdummy;
 #define MACHINE_SIZE_16
 #endif
 
-template<class T>
-T rem(T a, T b) { return ((a)>0) ? (a)%(b) : (a)%(b)+abs(b); }
+	template<class T>
+	T rem(T a, T b) { return ((a) > 0) ? (a) % (b) : (a) % (b)+abs(b); }
 
 #define FALSE			0
 #define TRUE			1
 #define ZERO_BYTE		0
 #define MAX_BYTE		0xFF
 #define MAX_UINT		0xFFFFFFFF
+
+
+#define CEIL_DIVIDE(x, y)			(( ((x) + (y)-1)/(y)))
+
+#define PadToRegisterSize(x) 		(PadToMultiple(x, OTEXT_BLOCK_SIZE_BITS))
+#define PadToMultiple(x, y) 		(( ((x) + (y)-1)/(y)) * (y))
+
+}
 
 #ifdef WIN32
 #include <WinSock2.h>
@@ -156,12 +170,6 @@ typedef int SOCKET;
  
 #define SleepMiliSec(x)			usleep((x)<<10)
 #endif// WIN32
-
-#define CEIL_DIVIDE(x, y)			(( ((x) + (y)-1)/(y)))
-
-#define PadToRegisterSize(x) 		(PadToMultiple(x, OTEXT_BLOCK_SIZE_BITS))
-#define PadToMultiple(x, y) 		(( ((x) + (y)-1)/(y)) * (y))
-
 #include <cstring>
 #include <string>  
 #include <vector> 

@@ -131,9 +131,27 @@
   <ItemGroup>
     <ClCompile Include="..\ot\asharov-lindell.cpp" />
     <ClCompile Include="..\ot\baseOT.cpp" />
+    <ClCompile Include="..\ot\brick.cpp" />
+    <ClCompile Include="..\ot\double-exp.cpp" />
     <ClCompile Include="..\ot\naor-pinkas.cpp" />
+    <ClCompile Include="..\ot\naor-pinkas_noro.cpp" />
     <ClCompile Include="..\ot\ot-extension.cpp" />
     <ClCompile Include="..\util\cbitvector.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\ot\asharov-lindell.h" />
+    <ClInclude Include="..\ot\baseOT.h" />
+    <ClInclude Include="..\ot\brick.h" />
+    <ClInclude Include="..\ot\double-exp.h" />
+    <ClInclude Include="..\ot\maskingfunction.h" />
+    <ClInclude Include="..\ot\naor-pinkas.h" />
+    <ClInclude Include="..\ot\naor-pinkas_noro.h" />
+    <ClInclude Include="..\ot\ot-extension.h" />
+    <ClInclude Include="..\ot\xormasking.h" />
+    <ClInclude Include="..\util\cbitvector.h" />
+    <ClInclude Include="..\util\socket.h" />
+    <ClInclude Include="..\util\thread.h" />
+    <ClInclude Include="..\util\typedefs.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

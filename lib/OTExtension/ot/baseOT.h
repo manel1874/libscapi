@@ -16,6 +16,7 @@
 #include <miracl/ecn.h>
 #include <miracl/big.h>
 #include <miracl/ec2.h>
+#pragma once
 #include <iostream>
 #include <cstring>
 #include <fstream>
@@ -41,41 +42,43 @@ typedef struct security_parameters NPState;
 
 #endif
 
-class BaseOT
-{
+namespace semihonestot {
+
+	class BaseOT
+	{
 	public:
-		BaseOT(){};
-		virtual ~BaseOT(){};
+		BaseOT() {};
+		virtual ~BaseOT() {};
 
 		BOOL Receiver(int nSndVals, int nOTs, CBitVector& choices, CSocket& sock, BYTE* ret)
 		{
 #ifdef OTEXT_USE_GMP
-			if(m_bUseECC)
+			if (m_bUseECC)
 #endif
 				return ReceiverECC(nSndVals, nOTs, choices, sock, ret);
 #ifdef OTEXT_USE_GMP
 			else
-				return ReceiverIFC(nSndVals, nOTs, choices, sock, ret);		
+				return ReceiverIFC(nSndVals, nOTs, choices, sock, ret);
 #endif
 		};
-		
+
 		BOOL Sender(int nSndVals, int nOTs, CSocket& sock, BYTE* ret)
 		{
 #ifdef OTEXT_USE_GMP
-			if(m_bUseECC)
+			if (m_bUseECC)
 #endif
-				return SenderECC(nSndVals, nOTs, sock, ret);		
+				return SenderECC(nSndVals, nOTs, sock, ret);
 #ifdef OTEXT_USE_GMP
 			else
 				return SenderIFC(nSndVals, nOTs, sock, ret);
 #endif
 		};
-		
+
 		BOOL Init(int secparam, BYTE* seed, bool useecc)
 		{
 #ifdef OTEXT_USE_GMP
 			m_bUseECC = useecc;
-			if(m_bUseECC)
+			if (m_bUseECC)
 #endif
 				return Miracl_Init(secparam, seed);
 #ifdef OTEXT_USE_GMP
@@ -83,11 +86,11 @@ class BaseOT
 				return GMP_Init(secparam, seed);
 #endif
 		}
-		
+
 		BOOL Cleanup()
 		{
 #ifdef OTEXT_USE_GMP
-			if(m_bUseECC)
+			if (m_bUseECC)
 #endif
 				return Miracl_Cleanup();
 #ifdef OTEXT_USE_GMP
@@ -96,7 +99,7 @@ class BaseOT
 #endif
 		}
 
-protected: 
+	protected:
 #ifdef OTEXT_USE_GMP
 		virtual BOOL 			SenderIFC(int nSndVals, int nOTs, CSocket& sock, BYTE* ret) = 0;
 		virtual BOOL 			ReceiverIFC(int nSndVals, int nOTs, CBitVector& choices, CSocket& sock, BYTE* ret) = 0;
@@ -121,8 +124,8 @@ protected:
 		void mpz_export_padded(BYTE* pBufIdx, int field_size, mpz_t to_export);
 #endif
 		void hashReturn(BYTE* ret, BYTE* val, int val_len, int ctr);
-		
-		
+
+
 
 		BOOL Miracl_Init(int secparam, BYTE* seed);
 		BOOL Miracl_Cleanup();
@@ -142,8 +145,8 @@ protected:
 		void ByteArrayToPoint(EC2 *point, int field_size, BYTE* pBufIdx);
 		void SampleRandomPoint(EC2 *point, int field_size);
 		void SampleRandomPoint(ECn *point, int field_size);
-		
-		void printepoint(epoint *point);
-};
 
+		void printepoint(epoint *point);
+	};
+}
 #endif /* BASEOT_H_ */
