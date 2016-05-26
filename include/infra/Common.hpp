@@ -107,11 +107,14 @@ biginteger convert_hex_to_biginteger(const string & hex);
 /*
 * Returns a random biginteger uniformly distributed in [min, max]
 */
-biginteger getRandomInRange(biginteger min, biginteger max, std::mt19937 random);
-
+biginteger getRandomInRange(biginteger min, biginteger max, std::mt19937 & random);
+/*
+* Returns a random prime number with the given number of bytes.
+*/
+biginteger getRandomPrime(int numBytes, int certainty, mt19937 & random);
 const vector<string> explode(const string& s, const char& c);
 
-bool isPrime(biginteger bi);
+bool isPrime(biginteger bi, int certainty = 40);
 
 /********************/
 /* Debugging Methods*/
@@ -122,7 +125,7 @@ void print_elapsed_micros(std::chrono::time_point<std::chrono::system_clock> sta
 std::chrono::time_point<std::chrono::system_clock> scapi_now();
 string hexStr(vector<byte> const & data);
 void print_byte_array(byte * arr, int len, string message);
-void gen_random_bytes_vector(vector<byte> &v, const int len, mt19937 random = get_seeded_random());
+void gen_random_bytes_vector(vector<byte> &v, const int len, mt19937 & random);
 
 /**
 * Abstract marker interface that allow serialization and deserialization from byte array and size

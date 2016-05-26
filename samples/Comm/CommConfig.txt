@@ -2,7 +2,7 @@ party_1_ip = 127.0.0.1
 party_2_ip = 127.0.0.1
 party_1_port = 3000
 party_2_port = 3001
-classType = CommPartyTcpSslSynced
+classType = CommPartyTCPSynced
 
 [Windows]
 certificateChainFile = ..\..\..\..\samples\assets\ssl_keys\server.crt

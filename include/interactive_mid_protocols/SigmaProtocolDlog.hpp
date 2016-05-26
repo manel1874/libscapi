@@ -39,7 +39,7 @@ public:
 	/**
 	* Constructor that gets the underlying DlogGroup, soundness parameter and SecureRandom.
 	*/
-	SigmaDlogSimulator(shared_ptr<DlogGroup> dlog, int t, std::mt19937 random);
+	SigmaDlogSimulator(shared_ptr<DlogGroup> dlog, int t);
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
 	*/
@@ -120,7 +120,7 @@ public:
 	/**
 	* Constructor that gets the underlying DlogGroup, soundness parameter and SecureRandom.
 	*/
-	SigmaDlogProverComputation(shared_ptr<DlogGroup> dlog, int t, mt19937 random);
+	SigmaDlogProverComputation(shared_ptr<DlogGroup> dlog, int t);
 	int getSoundnessParam() override { return t; };
 	/**
 	* Computes the first message from the protocol.<p>
@@ -141,7 +141,7 @@ public:
 	* Returns the simulator that matches this sigma protocol prover.
 	*/
 	shared_ptr<SigmaSimulator> getSimulator() override { 
-		auto res = make_shared<SigmaDlogSimulator>(dlog, t, random);
+		auto res = make_shared<SigmaDlogSimulator>(dlog, t);
 		return res; };
 
 private:
@@ -178,7 +178,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaDlogVerifierComputation(shared_ptr<DlogGroup> dlog, int t, mt19937 random);
+	SigmaDlogVerifierComputation(shared_ptr<DlogGroup> dlog, int t);
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
 	*/

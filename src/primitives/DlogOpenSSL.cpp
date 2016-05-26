@@ -80,7 +80,7 @@ void OpenSSLDlogZpSafePrime::createRandomOpenSSLDlogZp(int numBits) {
 	}
 }
 
-OpenSSLDlogZpSafePrime::OpenSSLDlogZpSafePrime(shared_ptr<ZpGroupParams> groupParams, mt19937 prg)
+OpenSSLDlogZpSafePrime::OpenSSLDlogZpSafePrime(shared_ptr<ZpGroupParams> groupParams)
 {
 	// TODO - unify with cryptoPP
 	biginteger p = groupParams->getP();
@@ -96,7 +96,7 @@ OpenSSLDlogZpSafePrime::OpenSSLDlogZpSafePrime(shared_ptr<ZpGroupParams> groupPa
 
 	// set the inner parameters
 	this->groupParams = groupParams;
-	this->random_element_gen = prg;
+	this->random_element_gen = get_seeded_random();
 
 	//Create a native Dlog object with dh and ctx.
 	createOpenSSLDlogZp(p, q, g);
@@ -113,9 +113,9 @@ OpenSSLDlogZpSafePrime::OpenSSLDlogZpSafePrime(shared_ptr<ZpGroupParams> groupPa
 	k = calcK(p);
 }
 
-OpenSSLDlogZpSafePrime::OpenSSLDlogZpSafePrime(int numBits, mt19937 prg) {
+OpenSSLDlogZpSafePrime::OpenSSLDlogZpSafePrime(int numBits) {
 
-	this->random_element_gen = prg;
+	this->random_element_gen = get_seeded_random();
 
 	// Create random Zp dlog group.
 	createRandomOpenSSLDlogZp(numBits);
@@ -607,7 +607,7 @@ shared_ptr<ECElement> OpenSSLDlogEC::getInfinity() {
 }
 
 /************************concrete classes***********************/
-void OpenSSLDlogECFp::init(string fileName, string curveName, mt19937 random) {
+void OpenSSLDlogECFp::init(string fileName, string curveName) {
 	// check that the given curve is in the field that matches the group.
 	size_t index = curveName.find("P-");
 	if (index != 0) {
@@ -875,7 +875,7 @@ shared_ptr<GroupElement> OpenSSLDlogECFp::reconstructElement(bool bCheckMembersh
 }
 
 
-void OpenSSLDlogECF2m::init(string fileName, string curveName, mt19937 random) {
+void OpenSSLDlogECF2m::init(string fileName, string curveName) {
 	//Get the parameters of the group from the config file and create the groupParams member.
 	createGroupParams();
 

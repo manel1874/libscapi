@@ -478,7 +478,7 @@ protected:
 	* choose a random element between 1 to p-1
 	* calculate element^2 mod p
 	*/
-	ZpSafePrimeElement(const biginteger & p, mt19937 prg);
+	ZpSafePrimeElement(const biginteger & p, mt19937 & prg);
 	/*
 	* Constructor that simply create element using the given value
 	*/
@@ -798,13 +798,18 @@ protected:
 	string curveName;
 	string fileName;
 	shared_ptr<ConfigFile> ecConfig; // properties object to hold the given config file's parameters
+#ifdef _WIN32
 	const string NISTEC_PROPERTIES_FILE = "../../../../include/configFiles/NISTEC.txt";
-	virtual void init(string fileName, string curveName, mt19937 random);
+#else
+	const string NISTEC_PROPERTIES_FILE = "../include/configFiles/NISTEC.txt";
+#endif
+	
+	virtual void init(string fileName, string curveName);
 
 public:
-	DlogEllipticCurve(string fileName, string curveName, mt19937 random) { init(fileName, curveName, random); }
+	DlogEllipticCurve(string fileName, string curveName) { init(fileName, curveName); }
 
-	DlogEllipticCurve(string curveName, mt19937 random) { init(NISTEC_PROPERTIES_FILE, curveName, random); }
+	DlogEllipticCurve(string curveName) { init(NISTEC_PROPERTIES_FILE, curveName); }
 	
 	virtual shared_ptr<ECElement> getInfinity() = 0;
 

@@ -21,7 +21,7 @@ ZpSafePrimeElement::ZpSafePrimeElement(const biginteger & x, const biginteger & 
 		
 }
 
-ZpSafePrimeElement::ZpSafePrimeElement(const biginteger & p, mt19937 prg)
+ZpSafePrimeElement::ZpSafePrimeElement(const biginteger & p, mt19937 & prg)
 {
 	// find a number in the range [1, ..., p-1]
 	biginteger rand_in_range = getRandomInRange(1, p - 1, prg);
@@ -396,7 +396,7 @@ void ECElementSendableData::initFromString(const string & raw) {
 * @param curveName - name of curve to initialized
 * @throws IOException
 */
-void DlogEllipticCurve::init(string fileName, string curveName, mt19937 random) {
+void DlogEllipticCurve::init(string fileName, string curveName) {
 	
 	ecConfig = make_shared<ConfigFile>(fileName); //get ConfigFile object containing the curves data
 																//EC_FILE_PATH = fileName;
@@ -406,5 +406,5 @@ void DlogEllipticCurve::init(string fileName, string curveName, mt19937 random) 
 	this->curveName = curveName;
 	this->fileName = fileName;
 
-	random_element_gen = random;
+	random_element_gen = get_seeded_random();
 }

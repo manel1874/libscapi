@@ -50,10 +50,3 @@ test/config_for_test.txt
 *.iobj
 *.opendb
 *.ipdb
-samples/assets/circuits/DNA/start_small.txt
-samples/assets/circuits/DNA/start_small_counter.txt
-samples/assets/circuits/DNA/start_small_counter_party1_input.txt
-samples/assets/circuits/DNA/start_small_counter_party2_input.txt
-samples/assets/circuits/DNA/start_small_party1_input.txt
-samples/assets/circuits/DNA/start_small_party2_input.txt
-windows-solutions/scapi-sln/ScapiCpp.VC.db

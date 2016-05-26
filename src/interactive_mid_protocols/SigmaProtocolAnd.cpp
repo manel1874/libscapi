@@ -29,8 +29,7 @@ shared_ptr<SigmaCommonInput> SigmaANDProverInput::getCommonInput() {
 /*   SigmaANDProverComputation         */
 /***************************************/
 
-SigmaANDProverComputation::SigmaANDProverComputation(
-	vector<shared_ptr<SigmaProverComputation>> provers, int t, mt19937 random) {
+SigmaANDProverComputation::SigmaANDProverComputation(vector<shared_ptr<SigmaProverComputation>> provers, int t) {
 	// if the given t is different from one of the underlying object's t values, throw exception.
 	for (auto prover : provers)
 		if(t != prover->getSoundnessParam())
@@ -39,7 +38,7 @@ SigmaANDProverComputation::SigmaANDProverComputation(
 	this->provers = provers;
 	len = provers.size();
 	this->t = t;
-	this->random = random;
+	this->random = get_seeded_random();
 }
 
 shared_ptr<SigmaProtocolMsg> SigmaANDProverComputation::computeFirstMsg(shared_ptr<SigmaProverInput> in) {
@@ -74,7 +73,7 @@ shared_ptr<SigmaSimulator> SigmaANDProverComputation::getSimulator() {
 	vector<shared_ptr<SigmaSimulator>> simulators;
 	for(auto prover:provers)
 		simulators.push_back(prover->getSimulator());
-	return make_shared<SigmaANDSimulator>(simulators, t, random);
+	return make_shared<SigmaANDSimulator>(simulators, t);
 }
 
 shared_ptr<SigmaANDProverInput> SigmaANDProverComputation::checkInput(shared_ptr<SigmaProverInput> in) {
@@ -94,8 +93,7 @@ shared_ptr<SigmaANDProverInput> SigmaANDProverComputation::checkInput(shared_ptr
 /*   SigmaANDSimulator                 */
 /***************************************/
 
-SigmaANDSimulator::SigmaANDSimulator(vector<shared_ptr<SigmaSimulator>> simulators, 
-	int t, mt19937 random) {
+SigmaANDSimulator::SigmaANDSimulator(vector<shared_ptr<SigmaSimulator>> simulators, int t) {
 	// if the given t is different from one of the underlying object's t values, throw exception.
 	for(auto sigmaSimulator : simulators)
 		if(t!=sigmaSimulator->getSoundnessParam())
@@ -104,7 +102,7 @@ SigmaANDSimulator::SigmaANDSimulator(vector<shared_ptr<SigmaSimulator>> simulato
 	this->simulators = simulators;
 	len = simulators.size();
 	this->t = t;
-	this->random = random;
+	this->random = get_seeded_random();
 }
 
 shared_ptr<SigmaSimulatorOutput> SigmaANDSimulator::simulate(SigmaCommonInput* input,
@@ -152,8 +150,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaANDSimulator::simulate(SigmaCommonInput* i
 /***************************************/
 /*   SigmaANDVerifierComputation       */
 /***************************************/
-SigmaANDVerifierComputation::SigmaANDVerifierComputation(
-	vector<shared_ptr<SigmaVerifierComputation>> & verifiers, int t, std::mt19937 random) {
+SigmaANDVerifierComputation::SigmaANDVerifierComputation(vector<shared_ptr<SigmaVerifierComputation>> & verifiers, int t) {
 	// if the given t is different from one of the underlying object's t values, throw exception.
 	for(auto verifier : verifiers)
 		if(t != verifier->getSoundnessParam())
@@ -162,7 +159,7 @@ SigmaANDVerifierComputation::SigmaANDVerifierComputation(
 	this->verifiers = verifiers;
 	len = verifiers.size();
 	this->t = t;
-	this->random = random;
+	this->random = get_seeded_random();
 }
 
 void SigmaANDVerifierComputation::sampleChallenge() {

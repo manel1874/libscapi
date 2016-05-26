@@ -164,7 +164,7 @@ public:
 	* @param random
 	* @throws IllegalArgumentException if soundness parameter is invalid.
 	*/
-	SigmaPedersenCmtKnowledgeSimulator(shared_ptr<DlogGroup> dlog, int t, mt19937 random);
+	SigmaPedersenCmtKnowledgeSimulator(shared_ptr<DlogGroup> dlog, int t);
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -241,7 +241,7 @@ public:
 	* @param random
 	* @throws IllegalArgumentException if soundness parameter is invalid.
 	*/
-	SigmaPedersenCmtKnowledgeProverComputation(shared_ptr<DlogGroup> dlog, int t, mt19937 random);
+	SigmaPedersenCmtKnowledgeProverComputation(shared_ptr<DlogGroup> dlog, int t);
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -270,7 +270,7 @@ public:
 	* @return SigmaDlogSimulator
 	*/
 	shared_ptr<SigmaSimulator> getSimulator() override{
-		return make_shared<SigmaPedersenCmtKnowledgeSimulator>(dlog, t, random);
+		return make_shared<SigmaPedersenCmtKnowledgeSimulator>(dlog, t);
 	}
 };
 
@@ -313,7 +313,7 @@ public:
 	* @throws InvalidDlogGroupException if the given DlogGroup is not valid.
 	* @throws IllegalArgumentException if soundness parameter is invalid.
 	*/
-	SigmaPedersenCmtKnowledgeVerifierComputation(shared_ptr<DlogGroup> dlog, int t, mt19937 random);
+	SigmaPedersenCmtKnowledgeVerifierComputation(shared_ptr<DlogGroup> dlog, int t);
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.

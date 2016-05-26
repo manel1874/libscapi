@@ -86,7 +86,10 @@ public:
 	virtual biginteger getCrtCoefficient() = 0;
 };
 
-class AlgorithmParameterSpec {};
+class AlgorithmParameterSpec {
+public: 
+	virtual ~AlgorithmParameterSpec(){}
+};
 
 class RSAKeyGenParameterSpec : public AlgorithmParameterSpec {};
 #endif

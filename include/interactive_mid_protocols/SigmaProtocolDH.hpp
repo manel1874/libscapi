@@ -117,7 +117,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaDHSimulator(shared_ptr<DlogGroup> dlog, int t, mt19937 random);
+	SigmaDHSimulator(shared_ptr<DlogGroup> dlog, int t);
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -192,7 +192,7 @@ public:
 	* @param random
 	* @throws IllegalArgumentException if soundness parameter is invalid.
 	*/
-	SigmaDHProverComputation(shared_ptr<DlogGroup> dlog, int t, mt19937 random);
+	SigmaDHProverComputation(shared_ptr<DlogGroup> dlog, int t);
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -224,7 +224,7 @@ public:
 	* @return SigmaDHSimulator
 	*/
 	shared_ptr<SigmaSimulator> getSimulator() override {
-		auto res = make_shared<SigmaDHSimulator>(dlog, t, random);
+		auto res = make_shared<SigmaDHSimulator>(dlog, t);
 		return res;
 	}
 
@@ -277,7 +277,7 @@ public:
 	* @throws InvalidDlogGroupException if the given dlog is invalid.
 	* @throws IllegalArgumentException if soundness parameter is invalid.
 	*/
-	SigmaDHVerifierComputation(shared_ptr<DlogGroup> dlog, int t, mt19937 random);
+	SigmaDHVerifierComputation(shared_ptr<DlogGroup> dlog, int t);
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.

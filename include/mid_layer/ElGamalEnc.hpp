@@ -125,7 +125,7 @@ public:
 		return make_shared<ElGamalOnGrElSendableData>(cipher1->generateSendableData(), cipher2->generateSendableData());
 	}
 
-	bool operator==(const AsymmetricCiphertext &other) const {
+	bool operator==(const AsymmetricCiphertext &other) const override {
 		auto temp = dynamic_cast<const ElGamalOnGroupElementCiphertext*>(&other);
 		if (*cipher1 != *(temp->cipher1)) 
 			return false;
@@ -154,7 +154,7 @@ private:
 	bool keySet;
 	biginteger qMinusOne;							//We keep this value to save unnecessary calculations.
 
-	void setMembers(shared_ptr<DlogGroup> dlogGroup, mt19937 random);
+	void setMembers(shared_ptr<DlogGroup> dlogGroup);
 
 public:
 	/**
@@ -168,8 +168,8 @@ public:
 	* @param dlogGroup underlying DlogGroup to use, it has to have DDH security level
 	* @throws SecurityLevelException if the Dlog Group is not DDH secure
 	*/
-	ElGamalOnGroupElementEnc(shared_ptr<DlogGroup> dlogGroup, mt19937 random = get_seeded_random()) {
-		setMembers(dlogGroup, random);
+	ElGamalOnGroupElementEnc(shared_ptr<DlogGroup> dlogGroup) {
+		setMembers(dlogGroup);
 	}
 
 	/**
@@ -198,7 +198,7 @@ public:
 	* @return the ElGamalPublicKey
 	* @throws IllegalStateException if no public key was set.
 	*/
-	shared_ptr<PublicKey> getPublicKey() {
+	shared_ptr<PublicKey> getPublicKey() override {
 		if (!isKeySet()) {
 			throw new IllegalStateException("no PublicKey was set");
 		}
@@ -209,7 +209,7 @@ public:
 	/**
 	* @return the name of this AsymmetricEnc - ElGamal and the underlying dlog group type
 	*/
-	string getAlgorithmName() {	return "ElGamal/" + dlog->getGroupType(); }
+	string getAlgorithmName() override {	return "ElGamal/" + dlog->getGroupType(); }
 
 	/**
 	* Generates a KeyPair containing a set of ElGamalPublicKEy and ElGamalPrivateKey using the source of randomness and the dlog specified upon construction.
@@ -221,7 +221,7 @@ public:
 	* This function is not supported for this encryption scheme, since there is no need for parameters to generate an ElGamal key pair.
 	* @throws UnsupportedOperationException
 	*/
-	pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> generateKey(shared_ptr<KeySpec> keyParams) override{
+	pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> generateKey(shared_ptr<AlgorithmParameterSpec> keyParams) override{
 		//No need for parameters to generate an El Gamal key pair. 
 		throw new UnsupportedOperationException("To Generate ElGamal keys use the generateKey() function");
 	}

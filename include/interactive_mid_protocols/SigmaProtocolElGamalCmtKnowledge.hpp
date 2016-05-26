@@ -96,7 +96,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaElGamalCmtKnowledgeSimulator(shared_ptr<DlogGroup> dlog, int t, mt19937 random) : dlogSim(dlog, t, random) {}
+	SigmaElGamalCmtKnowledgeSimulator(shared_ptr<DlogGroup> dlog, int t) : dlogSim(dlog, t) {}
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -163,7 +163,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaElGamalCmtKnowledgeProverComputation(shared_ptr<DlogGroup> dlog, int t, mt19937 random);
+	SigmaElGamalCmtKnowledgeProverComputation(shared_ptr<DlogGroup> dlog, int t);
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -192,7 +192,7 @@ public:
 	* @return SigmaDlogSimulator
 	*/
 	shared_ptr<SigmaSimulator> getSimulator() override {
-		return make_shared<SigmaElGamalCmtKnowledgeSimulator>(dlog, t, random);
+		return make_shared<SigmaElGamalCmtKnowledgeSimulator>(dlog, t);
 	}
 
 };
@@ -233,7 +233,7 @@ public:
 	* @param random
 	* @throws InvalidDlogGroupException if the given dlog is invalid.
 	*/
-	SigmaElGamalCmtKnowledgeVerifierComputation(shared_ptr<DlogGroup> dlog, int t, mt19937 random) : sigmaDlog(dlog, t, random) {}
+	SigmaElGamalCmtKnowledgeVerifierComputation(shared_ptr<DlogGroup> dlog, int t) : sigmaDlog(dlog, t) {}
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.

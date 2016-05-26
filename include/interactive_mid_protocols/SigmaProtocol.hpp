@@ -212,7 +212,7 @@ public:
 	/**
 	* Constructor that sets the given channel and sigmaProverComputation.
 	*/
-	SigmaProtocolProver(shared_ptr<ChannelServer> channel,
+	SigmaProtocolProver(shared_ptr<CommParty> channel,
 		shared_ptr<SigmaProverComputation> proverComputation) {
 		this->channel = channel;
 		this->proverComputation = proverComputation;
@@ -247,7 +247,7 @@ public:
 	void processSecondMsg();
 
 private:
-	shared_ptr<ChannelServer> channel;
+	shared_ptr<CommParty> channel;
 	shared_ptr<SigmaProverComputation> proverComputation;	// underlying sigma computation.
 	bool doneFirstMsg;
 
@@ -256,7 +256,7 @@ private:
 	*/
 	void sendMsgToVerifier(SigmaProtocolMsg* message) {
 		auto raw_message = message->toString();
-		channel->write_fast(raw_message);
+		channel->writeWithSize(raw_message);
 	}
 };
 
@@ -286,7 +286,7 @@ public:
 	/**
 	* Constructor that sets the given channel and random.
 	*/
-	SigmaProtocolVerifier(shared_ptr<ChannelServer> channel, shared_ptr<SigmaVerifierComputation> verifierComputation,
+	SigmaProtocolVerifier(shared_ptr<CommParty> channel, shared_ptr<SigmaVerifierComputation> verifierComputation,
 		shared_ptr<SigmaProtocolMsg> emptyFirstMessage, shared_ptr<SigmaProtocolMsg> emptySecondMessage) {
 		this->channel = channel;
 		this->verifierComputation = verifierComputation;
@@ -338,7 +338,7 @@ public:
 	}
 
 private:
-	shared_ptr<ChannelServer> channel;
+	shared_ptr<CommParty> channel;
 	shared_ptr<SigmaVerifierComputation> verifierComputation;
 	shared_ptr<SigmaProtocolMsg> a;	// first message from the prover.
 	shared_ptr<SigmaProtocolMsg> z;	// second message from the prover.
@@ -352,7 +352,8 @@ private:
 	* Sends the challenge to the prover.
 	*/
 	void sendChallengeToProver(vector<byte> challenge) {
-		channel->write_fast(challenge.data(), challenge.size());
+		channel->writeWithSize(challenge.data(), challenge.size());
+		//channel->write(challenge.data(), challenge.size());
 	}
 };
 

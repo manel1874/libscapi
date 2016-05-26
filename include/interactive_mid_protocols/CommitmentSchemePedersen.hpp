@@ -181,7 +181,7 @@ class CmtPedersenReceiverCore : public CmtReceiver {
 	*/
 
 protected:
-	shared_ptr<ChannelServer> channel;
+	shared_ptr<CommParty> channel;
 	std::shared_ptr<DlogGroup> dlog;
 	std::mt19937 random;
 	biginteger trapdoor; // sampled random value in Zq that will be the trpadoor.
@@ -203,15 +203,15 @@ protected:
 	* If this constructor is used for the recevier then also the default constructor 
 	* needs to be used by the committer.
 	*/
-	CmtPedersenReceiverCore(std::shared_ptr<ChannelServer> channel);
+	CmtPedersenReceiverCore(std::shared_ptr<CommParty> channel);
 
 	/**
 	* Constructor that receives a connected channel (to the committer),the DlogGroup agreed upon between them and a SecureRandom object.
 	* The Committer needs to be instantiated with the same DlogGroup, otherwise nothing will work properly.
 	*/
-	CmtPedersenReceiverCore(std::shared_ptr<ChannelServer> channel, 
-		std::shared_ptr<DlogGroup> dlog, std::mt19937 random) {
-		doConstruct(channel, dlog, random);
+	CmtPedersenReceiverCore(std::shared_ptr<CommParty> channel, 
+		std::shared_ptr<DlogGroup> dlog) {
+		doConstruct(channel, dlog);
 	}
 
 private:
@@ -223,8 +223,7 @@ private:
 	* @param dlog
 	* @param random
 	*/
-	void doConstruct(shared_ptr<ChannelServer> channel, 
-		shared_ptr<DlogGroup> dlog, std::mt19937 random);
+	void doConstruct(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog);
 
 	/**
 	* Runs the preprocess stage of the protocol:
@@ -297,7 +296,7 @@ class CmtPedersenCommitterCore : public CmtCommitter {
 	*
 	*/
 protected:
-	shared_ptr<ChannelServer> channel;
+	shared_ptr<CommParty> channel;
 	shared_ptr<DlogGroup> dlog;
 	std::mt19937 random;
 	// the key to the map is an ID and the value is a structure that has the Committer's
@@ -315,10 +314,9 @@ protected:
 	* default dlog and random.
 	* The receiver needs to be instantiated with the default constructor too.
 	*/
-	CmtPedersenCommitterCore(shared_ptr<ChannelServer> channel) {
-		auto r = get_seeded_random();
+	CmtPedersenCommitterCore(shared_ptr<CommParty> channel) {
 		auto dg = make_shared<OpenSSLDlogZpSafePrime>(256);
-		doConstruct(channel, dg, r);
+		doConstruct(channel, dg);
 	}
 
 	/**
@@ -327,9 +325,9 @@ protected:
 	* The Receiver needs to be instantiated with the same DlogGroup, 
 	* otherwise nothing will work properly.
 	*/
-	CmtPedersenCommitterCore(shared_ptr<ChannelServer> channel, 
-		shared_ptr<DlogGroup> dlog, std::mt19937 random) {
-		doConstruct(channel, dlog, random);
+	CmtPedersenCommitterCore(shared_ptr<CommParty> channel,
+		shared_ptr<DlogGroup> dlog) {
+		doConstruct(channel, dlog);
 	};
 private:
 	biginteger qMinusOne;
@@ -339,8 +337,8 @@ private:
 	* @param dlog
 	* @param random
 	*/
-	void doConstruct(shared_ptr<ChannelServer> channel, 
-		shared_ptr<DlogGroup> dlog, std::mt19937 randomm);
+	void doConstruct(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog);
+
 	/**
 	* Runs the preprocess phase of the commitment scheme:
 	* "WAIT for h from R
@@ -401,7 +399,7 @@ public:
 	* The receiver needs to be instantiated with the default constructor too.
 	* @param channel
 	*/
-	CmtPedersenCommitter(shared_ptr<ChannelServer> channel) : CmtPedersenCommitterCore(channel) {};
+	CmtPedersenCommitter(shared_ptr<CommParty> channel) : CmtPedersenCommitterCore(channel) {};
 
 	/**
 	* Constructor that receives a connected channel (to the receiver), 
@@ -412,9 +410,9 @@ public:
 	* @param dlog
 	* @param random
 	*/
-	CmtPedersenCommitter(shared_ptr<ChannelServer> channel, 
-		shared_ptr<DlogGroup> dlog, std::mt19937 random) :
-		CmtPedersenCommitterCore(channel, dlog, random) {};
+	CmtPedersenCommitter(shared_ptr<CommParty> channel,
+		shared_ptr<DlogGroup> dlog) :
+		CmtPedersenCommitterCore(channel, dlog) {};
 	
 	shared_ptr<CmtCommitValue> generateCommitValue(vector<byte> x) override {
 		biginteger bi = decodeBigInteger(x.data(), x.size());
@@ -443,7 +441,7 @@ public:
 	* The committer needs to be instantiated with the default constructor too.
 	* @param channel
 	*/
-	CmtPedersenReceiver(shared_ptr<ChannelServer> channel) : CmtPedersenReceiverCore(channel) {};
+	CmtPedersenReceiver(shared_ptr<CommParty> channel) : CmtPedersenReceiverCore(channel) {};
 
 	/**
 	* Constructor that receives a connected channel (to the receiver), the DlogGroup agreed upon between them and a SecureRandom object.
@@ -455,9 +453,8 @@ public:
 	* @throws InvalidDlogGroupException if the given dlog is not valid.
 	* @throws IOException if there was a problem in the communication
 	*/
-	CmtPedersenReceiver(shared_ptr<ChannelServer> channel, 
-		shared_ptr<DlogGroup> dlog, std::mt19937 random) :
-		CmtPedersenReceiverCore(channel, dlog, random) {};
+	CmtPedersenReceiver(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog) :
+		CmtPedersenReceiverCore(channel, dlog) {};
 
 	/**
 	* This function converts the given commit value to a byte array.

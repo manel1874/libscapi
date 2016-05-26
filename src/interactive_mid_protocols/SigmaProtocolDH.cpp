@@ -17,7 +17,7 @@ void SigmaDHMsg::initFromString(const string & s) {
 * @param t Soundness parameter in BITS.
 * @param random
 */
-SigmaDHSimulator::SigmaDHSimulator(shared_ptr<DlogGroup> dlog, int t, mt19937 random) {
+SigmaDHSimulator::SigmaDHSimulator(shared_ptr<DlogGroup> dlog, int t) {
 	//Sets the parameters.
 	this->dlog = dlog;
 	this->t = t;
@@ -27,7 +27,7 @@ SigmaDHSimulator::SigmaDHSimulator(shared_ptr<DlogGroup> dlog, int t, mt19937 ra
 		throw invalid_argument("soundness parameter t does not satisfy 2^t<q");
 	}
 
-	this->random = random;
+	this->random = get_seeded_random();
 	qMinusOne = dlog->getOrder() - 1;
 }
 
@@ -107,7 +107,7 @@ bool SigmaDHSimulator::checkSoundnessParam() {
 * @param random
 * @throws IllegalArgumentException if soundness parameter is invalid.
 */
-SigmaDHProverComputation::SigmaDHProverComputation(shared_ptr<DlogGroup> dlog, int t, mt19937 random) {
+SigmaDHProverComputation::SigmaDHProverComputation(shared_ptr<DlogGroup> dlog, int t) {
 
 	//Sets the parameters.
 	this->dlog = dlog;
@@ -118,7 +118,7 @@ SigmaDHProverComputation::SigmaDHProverComputation(shared_ptr<DlogGroup> dlog, i
 		throw invalid_argument("soundness parameter t does not satisfy 2^t<q");
 	}
 
-	this->random = random;
+	this->random = get_seeded_random();
 	qMinusOne = dlog->getOrder() - 1;
 }
 
@@ -197,7 +197,7 @@ bool SigmaDHProverComputation::checkSoundnessParam() {
 * @throws InvalidDlogGroupException if the given dlog is invalid.
 * @throws IllegalArgumentException if soundness parameter is invalid.
 */
-SigmaDHVerifierComputation::SigmaDHVerifierComputation(shared_ptr<DlogGroup> dlog, int t, mt19937 random) {
+SigmaDHVerifierComputation::SigmaDHVerifierComputation(shared_ptr<DlogGroup> dlog, int t) {
 
 	if (!dlog->validateGroup())
 		throw InvalidDlogGroupException("invalid dlog");
@@ -211,7 +211,7 @@ SigmaDHVerifierComputation::SigmaDHVerifierComputation(shared_ptr<DlogGroup> dlo
 		throw invalid_argument("soundness parameter t does not satisfy 2^t<q");
 	}
 
-	this->random = random;
+	this->random = get_seeded_random();
 
 }
 

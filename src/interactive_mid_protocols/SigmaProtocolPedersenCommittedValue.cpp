@@ -6,7 +6,7 @@
 * @param t Soundness parameter in BITS.
 * @param random
 */
-SigmaPedersenCommittedValueSimulator::SigmaPedersenCommittedValueSimulator(shared_ptr<DlogGroup> dlog, int t, mt19937 random) : dlogSim(dlog, t, random) {
+SigmaPedersenCommittedValueSimulator::SigmaPedersenCommittedValueSimulator(shared_ptr<DlogGroup> dlog, int t) : dlogSim(dlog, t) {
 
 	//Creates the underlying SigmaDlogSimulator object with the given parameters.
 	this->dlog = dlog.get();
@@ -48,11 +48,11 @@ shared_ptr<SigmaDlogCommonInput> SigmaPedersenCommittedValueSimulator::convertIn
 * @param t Soundness parameter in BITS.
 * @param random
 */
-SigmaPedersenCommittedValueProverComputation::SigmaPedersenCommittedValueProverComputation(shared_ptr<DlogGroup> dlog, int t, mt19937 random) : sigmaDlog(dlog, t, random) {
+SigmaPedersenCommittedValueProverComputation::SigmaPedersenCommittedValueProverComputation(shared_ptr<DlogGroup> dlog, int t) : sigmaDlog(dlog, t) {
 
 	this->dlog = dlog;
 	this->t = t;
-	this->random = random;
+	this->random = get_seeded_random();
 }
 
 /**

@@ -76,99 +76,6 @@ public:
 	bool operator<(const SocketPartyData &other) const { return (compare(other) < 0); };
 };
 
-class NativeChannel {
-public:
-	NativeChannel(boost::asio::io_service& io_service_server, boost::asio::io_service& io_service_client,
-		SocketPartyData me, SocketPartyData other) :
-		io_service_client_(io_service_client), serverSocket(io_service_server), clientSocket(io_service_client)	{
-		this->me = me;
-		this->other = other;
-	};
-	tcp::socket& getServerSocket() { return serverSocket; };
-	void connect(bool bSynced);
-	void start_listening();
-	void write(const Message& msg);
-	void close();
-	bool is_connected() { return m_IsConnected; };
-	vector<byte> * read_one();
-	void write_fast(const Message& msg);
-	//vector<Message> read_all();
-
-private:
-	std::mutex m;
-	std::condition_variable cv;
-	tcp::socket serverSocket;
-	tcp::socket clientSocket;
-	SocketPartyData me;
-	SocketPartyData other;
-	deque<Message> write_msgs_;
-	Message read_msg_;
-	deque<vector<byte> *> read_msgs_;
-	boost::asio::io_service& io_service_client_;
-	bool m_IsConnected = false;
-	void handle_connect(const boost::system::error_code& error);
-	void do_write(const Message & msg);
-	void do_write_fast(byte* data, int len);
-	void handle_write(const boost::system::error_code& error);
-	void do_close() { clientSocket.close(); };
-	void handle_msg(const Message& msg);
-	void handle_read_body(const boost::system::error_code& error);
-	void handle_read_header(const boost::system::error_code& error);
-};
-
-class ChannelServer {
-private:
-	tcp::acceptor acceptor_;
-	boost::asio::io_service& io_service_server;
-	boost::asio::io_service& io_service_client;
-	std::shared_ptr<NativeChannel> channel;
-	Message msg;
-public:
-	ChannelServer(boost::asio::io_service& io_service, SocketPartyData me, SocketPartyData other) :
-		io_service_server(io_service), io_service_client(io_service),
-		acceptor_(io_service, tcp::endpoint(tcp::v4(), me.getPort())) 
-	{
-		Logger::log("Craeting ChannelServer Between me (" + me.to_log_string() + ") and other (" + other.to_log_string() + ")");
-		channel = make_shared<NativeChannel>(io_service_server, io_service_client, me, other);
-		acceptor_.async_accept(channel->getServerSocket(), boost::bind(&ChannelServer::handle_accept, 
-			this, channel, boost::asio::placeholders::error));
-	};
-	void connect(bool bSynced=false) { channel->connect(bSynced); };
-	void try_connecting(int sleep_between_attempts=500, int timeout=5000) {
-		int total_sleep = 0;
-		while (!channel->is_connected())
-		{
-			try {
-				channel->connect(true);
-			}
-			catch (const boost::system::system_error& ex)
-			{
-				cout << "Failed to connect. sleeping for " << sleep_between_attempts << " milliseconds" << endl;
-				this_thread::sleep_for(chrono::milliseconds(sleep_between_attempts));
-				total_sleep += sleep_between_attempts;
-				if (total_sleep > timeout)
-				{
-					cerr << "Failed to connect after timeout, aboting!";
-					throw ex;
-				}
-			}
-		}
-	}
-	bool is_connected() { return channel->is_connected(); };
-	void write(shared_ptr<byte> data, int size);
-	vector<byte> * read_one() { return channel->read_one(); };
-	//vector<Message> read_all() { return channel->read_all(); };
-	void write_fast(byte* data, int size);
-	void write_fast(const string & data);
-
-private:
-	void handle_accept(shared_ptr<NativeChannel> new_channel, const boost::system::error_code& error) {
-		if (error) 
-			throw PartyCommunicationException("Failed to accept " + error.message());
-		new_channel->start_listening();
-	};
-};
-
 /**
 * A simple interface that encapsulate all network operations of one peer in a two peers (or more)
 * setup.
@@ -191,6 +98,12 @@ public:
 	* Will block until all bytes are read.
 	*/
 	virtual size_t read(byte* buffer, int sizeToRead) = 0;
+	virtual void write(string s) { write((const byte *)s.c_str(), s.size()); };
+	virtual void writeWithSize(const byte* data, int size);
+	virtual int readSize();
+	virtual size_t readWithSizeIntoVector(vector<byte> & targetVector);
+	virtual void writeWithSize(string s) { writeWithSize((const byte*)s.c_str(), s.size()); };
+	virtual ~CommParty() {};
 };
 
 class CommPartyTCPSynced : public CommParty {
@@ -209,6 +122,7 @@ public:
 	size_t read(byte* data, int sizeToRead) override {
 		return boost::asio::read(serverSocket, boost::asio::buffer(data, sizeToRead));
 	}
+	virtual ~CommPartyTCPSynced(); 
 
 private:
 	tcp::acceptor acceptor_;
@@ -233,6 +147,7 @@ public:
 	size_t read(byte* data, int sizeToRead) override {
 		return boost::asio::read(*serverSocket, boost::asio::buffer(data, sizeToRead));
 	}
+	virtual ~CommPartyTcpSslSynced();
 
 private:
 	tcp::acceptor acceptor_;

@@ -1,27 +1,25 @@
 #include "SigmaProtocolExample.hpp"
 
-void run_prover(std::shared_ptr<ChannelServer> server, SigmaDlogParams sdp, ProverVerifierExample& pe) {
+void run_prover(std::shared_ptr<CommParty> server, SigmaDlogParams sdp, ProverVerifierExample& pe) {
 	auto zp_params = make_shared<ZpGroupParams>(sdp.q, sdp.g, sdp.p);
 	auto dg = make_shared<OpenSSLDlogZpSafePrime>(zp_params);
-	server->try_connecting(500, 5000); // sleep time=500, timeout = 5000 (ms);
+	server->join(500, 5000); // sleep time=500, timeout = 5000 (ms);
 	auto g = dg->getGenerator();
 	auto h = dg->exponentiate(g.get(), sdp.w);
-	auto proverComputation = make_shared<SigmaDlogProverComputation>(dg, sdp.t,
-		get_seeded_random());
+	auto proverComputation = make_shared<SigmaDlogProverComputation>(dg, sdp.t);
 	auto proverInput = make_shared<SigmaDlogProverInput>(h, sdp.w);
 	pe.prove(server, proverComputation, dg, proverInput);
 }
 
-void run_verifier(shared_ptr<ChannelServer> server, SigmaDlogParams sdp, ProverVerifierExample& pe) {
+void run_verifier(shared_ptr<CommParty> server, SigmaDlogParams sdp, ProverVerifierExample& pe) {
 	auto zp_params = make_shared<ZpGroupParams>(sdp.q, sdp.g, sdp.p);
-	auto openSSLdg = make_shared<OpenSSLDlogZpSafePrime>(zp_params, get_seeded_random());
+	auto openSSLdg = make_shared<OpenSSLDlogZpSafePrime>(zp_params);
 	auto dg = std::static_pointer_cast<DlogGroup>(openSSLdg);
-	server->try_connecting(500, 5000); // sleep time=500, timeout = 5000 (ms);
+	server->join(500, 5000); // sleep time=500, timeout = 5000 (ms);
 	auto g = dg->getGenerator();
 	auto h = dg->exponentiate(g.get(), sdp.w);
 	auto commonInput = make_shared<SigmaDlogCommonInput>(h);
-	auto verifierComputation = make_shared<SigmaDlogVerifierComputation>(
-		dg, sdp.t, get_seeded_random());
+	auto verifierComputation = make_shared<SigmaDlogVerifierComputation>(dg, sdp.t);
 	auto msg1 = make_shared<SigmaGroupElementMsg>(dg->getIdentity()->generateSendableData());
 	auto msg2 = make_shared<SigmaBIMsg>();
 	bool verificationPassed = pe.verify(server, verifierComputation, msg1, msg2, commonInput, openSSLdg);
@@ -34,9 +32,9 @@ int mainSigma(string side, string configPath) {
 	boost::asio::io_service io_service;
 	SocketPartyData proverParty(sdp.proverIp, sdp.proverPort);
 	SocketPartyData verifierParty(sdp.verifierIp, sdp.verifierPort);
-	shared_ptr<ChannelServer> server = (side == "1")?
-		make_shared<ChannelServer>(io_service, proverParty, verifierParty) : 
-		make_shared<ChannelServer>(io_service, verifierParty, proverParty);
+	shared_ptr<CommParty> server = (side == "1")?
+		make_shared<CommPartyTCPSynced>(io_service, proverParty, verifierParty) :
+		make_shared<CommPartyTCPSynced>(io_service, verifierParty, proverParty);
 	boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 	auto pve = getProverVerifier(sdp);
 	try {
