@@ -8,7 +8,7 @@
 #include "../util/typedefs.h"
 #include "../util/socket.h"
 #include "../util/thread.h"
-#include "../util/CBitVector.h"
+#include "../util/cbitvector.h"
 #include "../util/crypto.h"
 #include "maskingfunction.h"
 

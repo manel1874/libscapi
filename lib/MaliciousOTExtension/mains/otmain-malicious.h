@@ -5,7 +5,7 @@
 #include "../util/typedefs.h"
 #include "../util/socket.h"
 #include "../ot/ot-extension-malicious.h"
-#include "../util/CBitVector.h"
+#include "../util/cbitvector.h"
 #include "../ot/xormasking.h"
 #include "../ot/pvwddh.h"
 

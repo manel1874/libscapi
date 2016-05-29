@@ -5,7 +5,7 @@
 *      Author: mzohner
 */
 
-#include "CBitVector.h"
+#include "cbitvector.h"
 
 namespace maliciousot {
 

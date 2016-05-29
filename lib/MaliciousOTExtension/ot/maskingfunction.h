@@ -8,7 +8,7 @@
 #ifndef MASKINGFUNCTION_H_
 #define MASKINGFUNCTION_H_
 
-#include "../util/CBitVector.h"
+#include "../util/cbitvector.h"
 #include "../util/typedefs.h"
 
 namespace maliciousot {

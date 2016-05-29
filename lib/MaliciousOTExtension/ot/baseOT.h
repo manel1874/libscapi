@@ -10,7 +10,7 @@
 #define BASEOT_H_
 
 #include "../util/typedefs.h"
-#include "../util/CBitVector.h"
+#include "../util/cbitvector.h"
 #include "../util/socket.h"
 #include <ctime>
 

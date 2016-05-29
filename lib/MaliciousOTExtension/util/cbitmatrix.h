@@ -8,7 +8,7 @@
 #ifndef CBITMATRIX_H_
 #define CBITMATRIX_H_
 
-#include "CBitVector.h"
+#include "cbitvector.h"
 #include "../util/typedefs.h"
 
 
