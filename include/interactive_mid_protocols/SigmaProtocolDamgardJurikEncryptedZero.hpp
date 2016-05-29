@@ -1,7 +1,6 @@
 #pragma once
 #include "SigmaProtocol.hpp"
 #include "../mid_layer/DamgardJurikEnc.hpp"
-#include <boost/random/detail/const_mod.hpp>
 
 /**
 * Concrete implementation of SigmaProtocol input, used by the SigmaDamgardJurikEncryptedZero verifier and simulator.
