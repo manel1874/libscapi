@@ -4,12 +4,12 @@
 #define __THREAD_H__BY_SGCHOI 
 
 #include "typedefs.h"
-
+namespace semihonestot {
 #ifdef WIN32 
  
 #include <process.h>
 
-namespace semihonestot {
+
 
 	class CEvent
 	{
