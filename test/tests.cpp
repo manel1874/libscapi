@@ -26,6 +26,7 @@
 #include "../include//interactive_mid_protocols/SigmaProtocolElGamalEncryptedValue.hpp"
 #include "../include//interactive_mid_protocols/SigmaProtocolCramerShoupEncryptedValue.hpp"
 #include "../include//interactive_mid_protocols/SigmaProtocolDamgardJurikEncryptedZero.hpp"
+#include "../include//interactive_mid_protocols/SigmaProtocolDamgardJurikEncryptedValue.hpp"
 #include "../include//mid_layer/AsymmetricEnc.hpp"
 #include "../include//mid_layer/ElGamalEnc.hpp"
 #include "../include//mid_layer/CramerShoupEnc.hpp"
@@ -1133,6 +1134,33 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 		simulate(prover.getSimulator().get(), &verifier, &input);
 
 		proverInput = make_shared<SigmaDJEncryptedZeroProverInput>(publicKey, ciphertext, privateKey);
+		computeSigmaProtocol(&prover, &verifier, &input, proverInput);
+		simulate(prover.getSimulator().get(), &verifier, &input);
+	}
+
+	SECTION("test sigma protocol Damgard Jurik encrypted value")
+	{
+		mt19937 random = get_seeded_random();
+		SigmaDJEncryptedValueProverComputation prover;
+		SigmaDJEncryptedValueVerifierComputation verifier;
+		DamgardJurikEnc dj;
+		auto pair = dj.generateKey(make_shared<DJKeyGenParameterSpec>(DJKeyGenParameterSpec()));
+		dj.setKey(pair.first, pair.second);
+		biginteger r = getRandomInRange(0, dynamic_pointer_cast<DamgardJurikPublicKey>(pair.first)->getModulus(), random);
+		auto plaintext = make_shared<BigIntegerPlainText>(0);
+		auto cipher = dj.encrypt(plaintext, r);
+
+		auto publicKey = *(dynamic_cast<DamgardJurikPublicKey*>(pair.first.get()));
+		auto privateKey = *(dynamic_cast<DamgardJurikPrivateKey*>(pair.second.get()));
+		auto ciphertext = *(dynamic_cast<BigIntegerCiphertext*>(cipher.get()));
+
+		SigmaDJEncryptedValueCommonInput input(publicKey, ciphertext, *(plaintext.get()));
+		auto proverInput = make_shared<SigmaDJEncryptedValueProverInput>(publicKey, ciphertext, *(plaintext.get()), r);
+
+		computeSigmaProtocol(&prover, &verifier, &input, proverInput);
+		simulate(prover.getSimulator().get(), &verifier, &input);
+
+		proverInput = make_shared<SigmaDJEncryptedValueProverInput>(publicKey, ciphertext, *(plaintext.get()), privateKey);
 		computeSigmaProtocol(&prover, &verifier, &input, proverInput);
 		simulate(prover.getSimulator().get(), &verifier, &input);
 	}
