@@ -30,7 +30,7 @@ CPP_OPTIONS   := -std=c++11 $(INC)  -maes -mpclmul -DBOOST_LOG_DYN_LINK
 $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
 
 all:: libs libscapi
-libs:: compile-ntl compile-miracl compile-otextension 
+libs:: compile-ntl compile-miracl compile-otextension compile-otextension-malicious
 libscapi:: directories $(SLib)
 directories: $(OUT_DIR)
 
@@ -99,6 +99,13 @@ compile-otextension: compile-miracl-cpp
 	@$(MAKE) -C $(builddir)/OTExtension CXX=$(CXX)
 	@$(MAKE) -C $(builddir)/OTExtension CXX=$(CXX) SHARED_LIB_EXT=$(SHARED_LIB_EXT) install
 	@touch compile-otextension
+	
+compile-otextension-malicious: compile-miracl-cpp
+	@echo "Compiling the OtExtension malicious library..."
+	@cp -r lib/MaliciousOTExtension $(builddir)/MaliciousOTExtension
+	@$(MAKE) -C $(builddir)/MaliciousOTExtension CXX=$(CXX)
+	@$(MAKE) -C $(builddir)/MaliciousOTExtension CXX=$(CXX) SHARED_LIB_EXT=$(SHARED_LIB_EXT) install
+	@touch compile-otextension-malicious
 
 clean-miracl:
 	@echo "Cleaning the miracl build dir..."
@@ -114,6 +121,11 @@ clean-otextension:
 	@echo "Cleaning the otextension build dir..."
 	@rm -rf $(builddir)/OTExtension
 	@rm -f compile-otextension
+	
+clean-otextension-malicious:
+	@echo "Cleaning the otextension malicious build dir..."
+	@rm -rf $(builddir)/MaliciousOTExtension
+	@rm -f compile-otextension-malicious
 
 clean-ntl:
 	@echo "Cleaning the ntl build dir..."
@@ -129,4 +141,4 @@ clean-cpp:
 clean-install:
 	@rm -rf install/*
 
-clean: clean-otextension clean-ntl clean-miracl clean-miracl-cpp clean-cpp clean-install
+clean: clean-otextension-malicious clean-otextension clean-ntl clean-miracl clean-miracl-cpp clean-cpp clean-install
