@@ -138,6 +138,7 @@
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolCramerShoupEncryptedValue.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolDamgardJurikEncryptedValue.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolDamgardJurikEncryptedZero.cpp" />
+    <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolDamgardJurikProduct.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolDH.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolDHExtended.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolDlog.cpp" />
@@ -200,6 +201,7 @@
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolCramerShoupEncryptedValue.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolDamgardJurikEncryptedValue.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolDamgardJurikEncryptedZero.hpp" />
+    <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolDamgardJurikProduct.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolDHExtended.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\OTSemiHonestExtension.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\RandomValue.hpp" />
