@@ -45,7 +45,7 @@ bool OTSemiHonestExtensionSender::Listen()
 			goto listen_failure;
 		}
 		cout << "Receiver connected" << endl;
-		UINT threadID;
+		semihonestot::UINT threadID;
 		sock.Receive(&threadID, sizeof(int));
 		if (threadID >= m_nNumOTThreads)
 		{
@@ -67,12 +67,12 @@ listen_failure:
 bool OTSemiHonestExtensionSender::PrecomputeNaorPinkasSender()
 {
 	int nSndVals = 2;
-	BYTE* pBuf = new BYTE[NUM_EXECS_NAOR_PINKAS * SHA1_BYTES];
+	semihonestot::BYTE* pBuf = new semihonestot::BYTE[NUM_EXECS_NAOR_PINKAS * SHA1_BYTES];
 	int log_nVals = (int)ceil(log((double)nSndVals) / log(2.0)), cnt = 0;
 	U.Create(NUM_EXECS_NAOR_PINKAS*log_nVals, m_aSeed, cnt);
 	bot->Receiver(nSndVals, NUM_EXECS_NAOR_PINKAS, U, m_vSockets[0], pBuf);
 	//Key expansion
-	BYTE* pBufIdx = pBuf;
+	semihonestot::BYTE* pBufIdx = pBuf;
 	for (int i = 0; i<NUM_EXECS_NAOR_PINKAS; i++) //80 HF calls for the Naor Pinkas protocol
 	{
 		memcpy(vKeySeeds + i * AES_KEY_BYTES, pBufIdx, AES_KEY_BYTES);
@@ -85,9 +85,9 @@ bool OTSemiHonestExtensionSender::PrecomputeNaorPinkasSender()
 semihonestot::OTExtensionSender* OTSemiHonestExtensionSender::InitOTSender(const char* address, int port, int numOfThreads, bool b_print)
 {
 	int nSndVals = 2;
-	m_nPort = (USHORT)port;
+	m_nPort = (semihonestot::USHORT)port;
 	m_nAddr = address;
-	vKeySeeds = (BYTE*)malloc(AES_KEY_BYTES*NUM_EXECS_NAOR_PINKAS);
+	vKeySeeds = (semihonestot::BYTE*)malloc(AES_KEY_BYTES*NUM_EXECS_NAOR_PINKAS);
 	// initialize values
 	Init(numOfThreads);
 	// server listen
@@ -154,7 +154,7 @@ shared_ptr<OTBatchSOutput> OTSemiHonestExtensionSender::transfer(OTBatchSInput *
 void OTSemiHonestExtensionSender::runOtAsSender(vector<byte> x1, vector<byte> x2, vector<byte> deltaArr, int numOfOts, int bitLength, string version) {
 	//The masking function with which the values that are sent in the last communication step are processed
 	//Choose OT extension version: G_OT, C_OT or R_OT
-	BYTE ver;
+	semihonestot::BYTE ver;
 	// supports all of the SHA hashes. Get the name of the required hash and instanciate that hash.
 	if (version=="general")
 		ver = semihonestot::G_OT;
@@ -226,8 +226,8 @@ bool OTSemiHonestExtensionBase::Init(int numOfThreads)
 	// Random numbers
 	SHA_CTX sha;
 	OTEXT_HASH_INIT(&sha);
-	OTEXT_HASH_UPDATE(&sha, (BYTE*)&m_nPID, sizeof(m_nPID));
-	OTEXT_HASH_UPDATE(&sha, (BYTE*)OTSemiHonestExtensionBase::m_nSeed, sizeof(m_nSeed));
+	OTEXT_HASH_UPDATE(&sha, (semihonestot::BYTE*)&m_nPID, sizeof(m_nPID));
+	OTEXT_HASH_UPDATE(&sha, (semihonestot::BYTE*)OTSemiHonestExtensionBase::m_nSeed, sizeof(m_nSeed));
 	OTEXT_HASH_FINAL(&sha, m_aSeed);
 	m_nCounter = 0;
 	//Number of threads that will be used in OT extension
@@ -239,7 +239,7 @@ bool OTSemiHonestExtensionBase::Init(int numOfThreads)
 
 bool OTSemiHonestExtensionReceiver::Connect(){
 	bool bFail = false;
-	LONG lTO = CONNECT_TIMEO_MILISEC;
+	semihonestot::LONG lTO = CONNECT_TIMEO_MILISEC;
 	//cout << "connecting to addr: " << m_nAddr << " port: " << m_nPort << endl;
 	for (int k = m_nNumOTThreads - 1; k >= 0; k--)
 	{
@@ -279,12 +279,12 @@ bool OTSemiHonestExtensionReceiver::PrecomputeNaorPinkasReceiver()
 {
 	int nSndVals = 2;
 	// Execute NP receiver routine and obtain the key 
-	BYTE* pBuf = new BYTE[SHA1_BYTES * NUM_EXECS_NAOR_PINKAS * nSndVals];
+	semihonestot::BYTE* pBuf = new semihonestot::BYTE[SHA1_BYTES * NUM_EXECS_NAOR_PINKAS * nSndVals];
 	//=================================================	
 	// N-P sender: send: C0 (=g^r), C1, C2, C3 
 	bot->Sender(nSndVals, NUM_EXECS_NAOR_PINKAS, m_vSockets[0], pBuf);
 	//Key expansion
-	BYTE* pBufIdx = pBuf;
+	semihonestot::BYTE* pBufIdx = pBuf;
 	for (int i = 0; i<NUM_EXECS_NAOR_PINKAS * nSndVals; i++)
 	{
 		memcpy(vKeySeedMtx + i * AES_KEY_BYTES, pBufIdx, AES_KEY_BYTES);
@@ -308,7 +308,7 @@ OTSemiHonestExtensionReceiver::OTSemiHonestExtensionReceiver(SocketPartyData par
 		m_nSecParam = koblitzOrZpSize;
 	}
 	int nSndVals = 2;
-	m_nPort = (USHORT)party.getPort();
+	m_nPort = (semihonestot::USHORT)party.getPort();
 	const std::string& tmp = party.getIpAddress().to_string();
 	m_nAddr = tmp.c_str();
 	vKeySeedMtx = (byte*)malloc(AES_KEY_BYTES*NUM_EXECS_NAOR_PINKAS * nSndVals);
@@ -352,7 +352,7 @@ shared_ptr<OTBatchROutput> OTSemiHonestExtensionReceiver::transfer(OTBatchRInput
 }
 
 vector<byte> OTSemiHonestExtensionReceiver::runOtAsReceiver(vector<byte> sigma, int numOfOts, int bitLength, std::string version) {
-	BYTE ver;
+	semihonestot::BYTE ver;
 	//supports all of the SHA hashes. Get the name of the required hash and instanciate that hash.
 	if (version=="general")
 		ver = semihonestot::G_OT;
@@ -393,7 +393,7 @@ vector<byte> OTSemiHonestExtensionReceiver::runOtAsReceiver(vector<byte> sigma, 
 	return output;
 }
 
-bool OTSemiHonestExtensionReceiver::ObliviouslyReceive(semihonestot::CBitVector& choices, semihonestot::CBitVector& ret, int numOTs, int bitlength, BYTE version) {
+bool OTSemiHonestExtensionReceiver::ObliviouslyReceive(semihonestot::CBitVector& choices, semihonestot::CBitVector& ret, int numOTs, int bitlength, semihonestot::BYTE version) {
 	bool success = false;
 	// Execute OT receiver routine 	
 

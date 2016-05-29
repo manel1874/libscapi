@@ -22,19 +22,19 @@ OTExtensionMaliciousBase::~OTExtensionMaliciousBase() {
 }
 
 void OTExtensionMaliciousBase::init_seeds(int role) {
-	BYTE seedtmp[SHA1_BYTES];
+	maliciousot::BYTE seedtmp[SHA1_BYTES];
 	maliciousot::HASH_CTX sha;
 
 	// m_receiver_seed = hash(role || m_initial_seed)
 	MPC_HASH_INIT(&sha);
-	MPC_HASH_UPDATE(&sha, (BYTE*)&role, sizeof(role));
-	MPC_HASH_UPDATE(&sha, (BYTE*)m_initial_seed, sizeof(m_initial_seed));
+	MPC_HASH_UPDATE(&sha, (maliciousot::BYTE*)&role, sizeof(role));
+	MPC_HASH_UPDATE(&sha, (maliciousot::BYTE*)m_initial_seed, sizeof(m_initial_seed));
 	MPC_HASH_FINAL(&sha, m_receiver_seed);
 
 	// m_sender_seed = hash(role || m_receiver_seed)
 	MPC_HASH_INIT(&sha);
-	MPC_HASH_UPDATE(&sha, (BYTE*)&role, sizeof(role));
-	MPC_HASH_UPDATE(&sha, (BYTE*)m_receiver_seed, SHA1_BYTES);
+	MPC_HASH_UPDATE(&sha, (maliciousot::BYTE*)&role, sizeof(role));
+	MPC_HASH_UPDATE(&sha, (maliciousot::BYTE*)m_receiver_seed, SHA1_BYTES);
 	MPC_HASH_FINAL(&sha, seedtmp);
 	memcpy(m_sender_seed, seedtmp, AES_BYTES);
 }
@@ -48,9 +48,9 @@ OTExtensionMaliciousSender::OTExtensionMaliciousSender(SocketPartyData bindAddre
 	int s2ots = nblocks * m_num_base_ots;
 
 	// key seed matrix used for the 1-step base OTs
-	m_receiver_key_seeds_matrix = (BYTE*)malloc(AES_KEY_BYTES * m_num_base_ots * nSndVals);
+	m_receiver_key_seeds_matrix = (maliciousot::BYTE*)malloc(AES_KEY_BYTES * m_num_base_ots * nSndVals);
 	// key seeds for the 2-nd step base OTs
-	m_sender_key_seeds = (BYTE*)malloc(AES_KEY_BYTES * s2ots);//m_security_level.symbits);
+	m_sender_key_seeds = (maliciousot::BYTE*)malloc(AES_KEY_BYTES * s2ots);//m_security_level.symbits);
 
 															  // Server listen
 	
@@ -94,12 +94,12 @@ OTExtensionMaliciousSender::OTExtensionMaliciousSender(SocketPartyData bindAddre
 BOOL OTExtensionMaliciousSender::precompute_base_ots_sender() {
 	int nSndVals = 2;
 	// Execute NP receiver routine and obtain the key 
-	BYTE* pBuf = new BYTE[SHA1_BYTES * m_num_base_ots * nSndVals];
+	maliciousot::BYTE* pBuf = new maliciousot::BYTE[SHA1_BYTES * m_num_base_ots * nSndVals];
 
 	//=================================================	
 	m_baseot_handler->Sender(nSndVals, m_num_base_ots, m_connection_manager->get_socket(0), pBuf);
 
-	BYTE* pBufIdx = pBuf;
+	maliciousot::BYTE* pBufIdx = pBuf;
 	for (int i = 0; i<m_num_base_ots * nSndVals; i++) {
 		memcpy(m_receiver_key_seeds_matrix + i * AES_KEY_BYTES, pBufIdx, AES_KEY_BYTES);
 		pBufIdx += SHA1_BYTES;
@@ -190,7 +190,7 @@ shared_ptr<OTBatchSOutput> OTExtensionMaliciousSender::transfer(OTBatchSInput * 
 * @param bitLength The length (in bits) of each item in the OT. can be derived from |x0|, |x1|, numOfOts
 * @param version the OT extension version the user wants to use.
 */
-void OTExtensionMaliciousSender::runOtAsSender(vector<byte> x0, vector<byte> x1, vector<byte> delta, int numOfOts, int bitLength, BYTE version) {
+void OTExtensionMaliciousSender::runOtAsSender(vector<byte> x0, vector<byte> x1, vector<byte> delta, int numOfOts, int bitLength, maliciousot::BYTE version) {
 	
 	maliciousot::CBitVector /*delta,*/ X1, X2;
 	maliciousot::MaskingFunction * masking_function = new maliciousot::XORMasking(bitLength);
@@ -271,8 +271,8 @@ OTExtensionMaliciousReceiver::OTExtensionMaliciousReceiver(SocketPartyData serve
 	int nblocks = CEIL_DIVIDE(m_num_ots, NUMOTBLOCKS * wdsize);
 	int s2ots = nblocks * m_num_base_ots;
 
-	m_sender_key_seeds = new BYTE[AES_KEY_BYTES * m_num_base_ots];//m_security_level.symbits);
-	m_receiver_key_seeds_matrix = new BYTE[AES_KEY_BYTES * 2 * s2ots];
+	m_sender_key_seeds = new maliciousot::BYTE[AES_KEY_BYTES * m_num_base_ots];//m_security_level.symbits);
+	m_receiver_key_seeds_matrix = new maliciousot::BYTE[AES_KEY_BYTES * 2 * s2ots];
 
 	// client connect
 	// Create the receiver by passing the local host address.
@@ -316,7 +316,7 @@ OTExtensionMaliciousReceiver::OTExtensionMaliciousReceiver(SocketPartyData serve
 BOOL OTExtensionMaliciousReceiver::precompute_base_ots_receiver() {
 
 	int nSndVals = 2;
-	BYTE* pBuf = new BYTE[m_num_base_ots * SHA1_BYTES];
+	maliciousot::BYTE* pBuf = new maliciousot::BYTE[m_num_base_ots * SHA1_BYTES];
 	int log_nVals = (int)ceil(log((double)nSndVals) / log((double)2));
 	int cnt = 0;
 
@@ -324,7 +324,7 @@ BOOL OTExtensionMaliciousReceiver::precompute_base_ots_receiver() {
 
 	m_baseot_handler->Receiver(nSndVals, m_num_base_ots, U, m_connection_manager->get_socket(0), pBuf);
 	//Key expansion
-	BYTE* pBufIdx = pBuf;
+	maliciousot::BYTE* pBufIdx = pBuf;
 	for (int i = 0; i<m_num_base_ots; i++) { //80 HF calls for the Naor Pinkas protocol
 		memcpy(m_sender_key_seeds + i * AES_KEY_BYTES, pBufIdx, AES_KEY_BYTES);
 		pBufIdx += SHA1_BYTES;
@@ -343,7 +343,7 @@ BOOL OTExtensionMaliciousReceiver::precompute_base_ots_receiver() {
 */
 shared_ptr<OTBatchROutput> OTExtensionMaliciousReceiver::transfer(OTBatchRInput * input) {
 
-	BYTE version = maliciousot::G_OT;
+	maliciousot::BYTE version = maliciousot::G_OT;
 	//Check if the input is valid. If input is not instance of OTRExtensionInput, throw Exception.
 	if (input->getType() != OTBatchRInputTypes::OTExtensionGeneralRInput)
 		throw invalid_argument("input should be instance of OTExtensionGeneralRInput");
@@ -368,7 +368,7 @@ shared_ptr<OTBatchROutput> OTExtensionMaliciousReceiver::transfer(OTBatchRInput 
 	return make_shared<OTOnByteArrayROutput>(output);
 }
 
-vector<byte> OTExtensionMaliciousReceiver::runOtAsReceiver(vector<byte> sigma, int numOfOts, int bitLength, BYTE version) {
+vector<byte> OTExtensionMaliciousReceiver::runOtAsReceiver(vector<byte> sigma, int numOfOts, int bitLength, maliciousot::BYTE version) {
 	// The masking function with which the values that are sent 
 	// in the last communication step are processed
 	
@@ -426,7 +426,7 @@ const char *ConnectionManager::DEFAULT_ADDRESS = "localhost";
 ConnectionManager::ConnectionManager(int role, int num_of_threads, SocketPartyData party) :
 	m_sockets(num_of_threads + 1) { //Number of threads that will be used in OT extension
 	m_num_of_threads = num_of_threads;
-	m_port = (USHORT)party.getPort();
+	m_port = (maliciousot::USHORT)party.getPort();
 	m_address = party.getIpAddress().to_string();
 	
 	m_pid = role;
@@ -484,7 +484,7 @@ BOOL ConnectionManagerServer::setup_connection() {
 		// cerr << "Server: accept succeded i = " << i << endl;
 
 		// receive the other side thread id (the first thing that is sent on the socket)
-		UINT threadID;
+		maliciousot::UINT threadID;
 		sock.Receive(&threadID, sizeof(int));
 
 		// cerr << "Server: received threadID = " << threadID << endl;
@@ -527,7 +527,7 @@ ConnectionManagerClient::ConnectionManagerClient(int role, int num_of_threads, S
 */
 BOOL ConnectionManagerClient::setup_connection() {
 	BOOL bFail = FALSE;
-	LONG lTO = CONNECT_TIMEO_MILISEC;
+	maliciousot::LONG lTO = CONNECT_TIMEO_MILISEC;
 	int num_connections = m_num_of_threads + 1;
 
 	//cerr << "ConnectionManagerClient->setup_connection() started." << endl;

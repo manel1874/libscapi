@@ -34,13 +34,13 @@ protected:
 	maliciousot::SECLVL m_security_level;
 
 	// seeds (SHA PRG)
-	BYTE m_receiver_seed[SHA1_BYTES];
-	BYTE m_sender_seed[AES_BYTES];
+	maliciousot::BYTE m_receiver_seed[SHA1_BYTES];
+	maliciousot::BYTE m_sender_seed[AES_BYTES];
 
 	// implementation details
 	maliciousot::CBitVector U;
-	BYTE *m_sender_key_seeds;
-	BYTE *m_receiver_key_seeds_matrix;
+	maliciousot::BYTE *m_sender_key_seeds;
+	maliciousot::BYTE *m_receiver_key_seeds_matrix;
 
 	// logger stuff
 	double logger_random_gentime;
@@ -83,7 +83,7 @@ private:
 	* @param bitLength The length (in bits) of each item in the OT. can be derived from |x0|, |x1|, numOfOts
 	* @param version the OT extension version the user wants to use.
 	*/
-	void runOtAsSender(vector<byte> x0, vector<byte> x1, vector<byte> delta, int numOfOts, int bitLength, BYTE version);
+	void runOtAsSender(vector<byte> x0, vector<byte> x1, vector<byte> delta, int numOfOts, int bitLength, maliciousot::BYTE version);
 	
 public:
 	/**
@@ -140,7 +140,7 @@ private:
 	* 				 array is given empty and the native code fills it with the result of the multiple OT results.
 	* @param version The particular OT type to run.
 	*/
-	vector<byte> runOtAsReceiver(vector<byte> sigma, int numOfOts, int bitLength, BYTE version);
+	vector<byte> runOtAsReceiver(vector<byte> sigma, int numOfOts, int bitLength, maliciousot::BYTE version);
 	
 public:
 
@@ -175,7 +175,7 @@ class ConnectionManager {
 
 public:
 	static const char * DEFAULT_ADDRESS;
-	static const USHORT DEFAULT_PORT = 7766;
+	static const maliciousot::USHORT DEFAULT_PORT = 7766;
 
 	// ctors
 	ConnectionManager(int role, int num_of_threads, SocketPartyData address);
@@ -192,7 +192,7 @@ public:
 protected:
 	int m_num_of_threads;
 	string m_address;
-	USHORT m_port;
+	maliciousot::USHORT m_port;
 	int m_pid; // thread id - indicates the role: (0 for server, 1 for client)
 	std::vector<maliciousot::CSocket> m_sockets;
 };

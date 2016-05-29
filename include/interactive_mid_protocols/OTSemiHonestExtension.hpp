@@ -22,7 +22,7 @@
 class OTSemiHonestExtensionBase : public SemiHonest {
 protected:
 	static const char* m_nSeed;
-	USHORT m_nPort = 7766;
+	semihonestot::USHORT m_nPort = 7766;
 	const char* m_nAddr;// = "localhost";
 	// Naor-Pinkas OT
 	semihonestot::BaseOT* bot;
@@ -36,7 +36,7 @@ protected:
 	bool m_bUseECC;
 	semihonestot::MaskingFunction* m_fMaskFct;
 	// SHA PRG
-	BYTE m_aSeed[SHA1_BYTES];
+	semihonestot::BYTE m_aSeed[SHA1_BYTES];
 	bool Init(int numOfThreads);
 };
 
@@ -76,7 +76,7 @@ private:
 	int m_nBitLength;
 	int m_nMod;
 	semihonestot::CBitVector U;
-	BYTE *vKeySeeds;
+	semihonestot::BYTE *vKeySeeds;
 	double rndgentime;
 
 	semihonestot::OTExtensionSender* InitOTSender(const char* address, int port, int numOfThreads, bool b_print = false);
@@ -158,7 +158,7 @@ private:
 	semihonestot::OTExtensionReceiver * receiverPtr;
 	bool Connect();
 	bool PrecomputeNaorPinkasReceiver();
-	bool ObliviouslyReceive(semihonestot::CBitVector& choices, semihonestot::CBitVector& ret, int numOTs, int bitlength, BYTE version);
+	bool ObliviouslyReceive(semihonestot::CBitVector& choices, semihonestot::CBitVector& ret, int numOTs, int bitlength, semihonestot::BYTE version);
 	/*
 	* The native code that runs the OT extension as the receiver.
 	* @param sigma An array holding the input of the receiver, that is, the 0 and 1 choices for each OT.
