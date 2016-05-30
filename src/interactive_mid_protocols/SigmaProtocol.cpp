@@ -80,3 +80,19 @@ void SigmaProtocolVerifier::receiveMsgFromProver(SigmaProtocolMsg* msg) {
 	channel->readWithSizeIntoVector(rawMsg);
 	msg->initFromByteVector(rawMsg);
 }
+
+void SigmaMultipleMsg::initFromString(const string & s) {
+	auto str_vec = explode(s, ':');
+	int len = str_vec.size();
+	for (int i = 0; i < len; i++) {
+		messages[i]->initFromString(str_vec[i]);
+	}
+}
+
+string SigmaMultipleMsg::toString() {
+	string output;
+	for (auto message : messages) {
+		output += message->toString();
+	}
+	return output;
+}
