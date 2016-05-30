@@ -109,13 +109,9 @@ shared_ptr<SigmaSimulatorOutput> SigmaOrTwoSimulator::simulate(SigmaCommonInput*
 	for (int i = 0; i < len; i++) {
 		e1.push_back(challenge[i] ^ e0[i]);
 	}
-	cout << "after xor" << endl;
-
+	
 	auto output0 = simulators[0]->simulate(in->getInputs()[0].get(), e0);
-	cout << "after first simulator" << endl;
 	auto output1 = simulators[1]->simulate(in->getInputs()[1].get(), e1);
-	cout << "after second simulator" << endl;
-
 
 	//Create a SigmaORTwo messages from the simulates function's outputs.
 	vector<shared_ptr<SigmaProtocolMsg>> firstMessages;

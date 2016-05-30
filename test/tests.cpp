@@ -884,7 +884,6 @@ void simulate(SigmaSimulator* simulator, SigmaVerifierComputation* verifier,
 	SigmaCommonInput* commonInput) {
 	
 	shared_ptr<SigmaSimulatorOutput> output = simulator->simulate(commonInput);
-	cout << "after simulate" << endl;
 	verifier->setChallenge(output->getE());
 	bool verified = verifier->verify(commonInput, output->getA().get(), output->getZ().get());
 
@@ -1293,9 +1292,7 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 		SigmaMultipleCommonInput commonInput(commonInputArr);
 		auto proverInput = make_shared<SigmaOrTwoProverInput>(proverDlogInput, commonDHInput, 0);
 
-		cout << "before compute sigma protocol" << endl;
 		computeSigmaProtocol(&prover, &verifier, &commonInput, proverInput);
-		cout << "after compute sigma protocol" << endl;
 		simulate(prover.getSimulator().get(), &verifier, &commonInput);
 
 	}
