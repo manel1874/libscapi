@@ -2,30 +2,6 @@
 
 
 /***************************************/
-/*   SigmaANDProverInput               */
-/***************************************/
-shared_ptr<SigmaCommonInput> SigmaANDProverInput::getCommonInput() {
-	/*
-	* There are two options to implement this function:
-	* 1. Create a new instance of SigmaANDCommonInput every time the function is called.
-	* 2. Create the object in the construction time and return it every time this function is called.
-	* This class holds an array of SigmaProverInput, where each instance in the array holds
-	* an instance of SigmaCommonParams inside it.
-	* In the second option above, this class will have in addition an array of SigmaCommonInput.
-	* This way, the SigmaCommonInput instances will appear twice -
-	* once in the array and once in the corresponding SigmaProverInput.
-	* This is an undesired duplication and redundancy, So we decided to implement using the
-	* first way, although this is less efficient.
-	* In case the efficiency is important, a user can derive this class and override this implementation.
-	*/
-	vector<shared_ptr<SigmaCommonInput>> paramsArr;
-	for(auto sigmaInput : sigmaInputs)
-		paramsArr.push_back(sigmaInput->getCommonInput());
-
-	return make_shared<SigmaANDCommonInput>(paramsArr);
-}
-
-/***************************************/
 /*   SigmaANDProverComputation         */
 /***************************************/
 
@@ -76,10 +52,10 @@ shared_ptr<SigmaSimulator> SigmaANDProverComputation::getSimulator() {
 	return make_shared<SigmaANDSimulator>(simulators, t);
 }
 
-SigmaANDProverInput* SigmaANDProverComputation::checkInput(SigmaProverInput* in) {
-	auto input = dynamic_cast<SigmaANDProverInput*>(in);
+SigmaMultipleProverInput* SigmaANDProverComputation::checkInput(SigmaProverInput* in) {
+	auto input = dynamic_cast<SigmaMultipleProverInput*>(in);
 	if (!input)
-		throw invalid_argument("the given input must be an instance of SigmaANDProverInput");
+		throw invalid_argument("the given input must be an instance of SigmaMultipleProverInput");
 
 	int inputLen = input->getInputs().size();
 
@@ -110,7 +86,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaANDSimulator::simulate(SigmaCommonInput* i
 	if (!checkChallengeLength(challenge.size())) 
 		throw CheatAttemptException("the length of the given challenge is different from the soundness parameter");
 	
-	auto andInput = dynamic_cast<SigmaANDCommonInput*>(input);
+	auto andInput = dynamic_cast<SigmaMultipleCommonInput*>(input);
 	if (andInput == NULL) {
 		throw invalid_argument("the given input must be an instance of SigmaANDCommonInput");
 	}
@@ -183,7 +159,7 @@ void SigmaANDVerifierComputation::setChallenge(vector<byte> challenge) {
 bool SigmaANDVerifierComputation::verify(SigmaCommonInput* input, 
 	SigmaProtocolMsg* a, SigmaProtocolMsg* z) {
 	// checks that the input is as expected.
-	auto in = dynamic_cast<SigmaANDCommonInput*>(input);
+	auto in = dynamic_cast<SigmaMultipleCommonInput*>(input);
 	int inputLen = in->getInputs().size();
 
 	// if number of inputs is not equal to number of verifiers, throw exception.

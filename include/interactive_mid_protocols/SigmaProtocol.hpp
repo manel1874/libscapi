@@ -405,3 +405,44 @@ public:
 	void initFromString(const string & s) override { z = biginteger(s); };
 	string toString() override { return z.str(); };
 };
+
+/**
+* Concrete implementation of SigmaProtocol input, used by the SigmaProtocolAND verifier and simulator.<p>
+* In SigmaProtocolAND, the common input contains an array of inputs to all of its underlying objects.
+*/
+class SigmaMultipleCommonInput : public SigmaCommonInput {
+public:
+	/**
+	* Sets the input array.
+	* We pass input by value to avoid unlegal reference and since it is just pointer inside the vector
+	* @param input contains inputs for all the underlying sigma protocol.
+	*/
+	SigmaMultipleCommonInput(vector<shared_ptr<SigmaCommonInput>> input) { sigmaInputs = input; };
+	/**
+	* Returns the input array contains inputs for all the underlying sigma protocol.
+	*/
+	vector<shared_ptr<SigmaCommonInput>> getInputs() { return sigmaInputs; };
+
+private:
+	vector<shared_ptr<SigmaCommonInput>> sigmaInputs;
+};
+
+/**
+* Concrete implementation of SigmaProtocol input, used by the SigmaProtocolANDProver.<p>
+* In SigmaProtocolANDProver, the prover gets an array of inputs to all of its underlying objects.
+*/
+class SigmaMultipleProverInput : public SigmaProverInput {
+public:
+	/**
+	* Sets the input array.
+	* @param input contains inputs for all the underlying sigma protocol's provers.
+	*/
+	SigmaMultipleProverInput(vector<shared_ptr<SigmaProverInput>> input) { sigmaInputs = input; };
+	/**
+	* Returns the input array contains inputs for all the underlying sigma protocol's provers.
+	*/
+	vector<shared_ptr<SigmaProverInput>> getInputs() { return sigmaInputs; };
+	shared_ptr<SigmaCommonInput> getCommonInput() override;
+private:
+	vector<shared_ptr<SigmaProverInput>> sigmaInputs;
+};

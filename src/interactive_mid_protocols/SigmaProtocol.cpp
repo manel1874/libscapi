@@ -93,6 +93,31 @@ string SigmaMultipleMsg::toString() {
 	string output;
 	for (auto message : messages) {
 		output += message->toString();
+		output += ":";
 	}
 	return output;
+}
+
+/***************************************/
+/*   SigmaANDProverInput               */
+/***************************************/
+shared_ptr<SigmaCommonInput> SigmaMultipleProverInput::getCommonInput() {
+	/*
+	* There are two options to implement this function:
+	* 1. Create a new instance of SigmaANDCommonInput every time the function is called.
+	* 2. Create the object in the construction time and return it every time this function is called.
+	* This class holds an array of SigmaProverInput, where each instance in the array holds
+	* an instance of SigmaCommonParams inside it.
+	* In the second option above, this class will have in addition an array of SigmaCommonInput.
+	* This way, the SigmaCommonInput instances will appear twice -
+	* once in the array and once in the corresponding SigmaProverInput.
+	* This is an undesired duplication and redundancy, So we decided to implement using the
+	* first way, although this is less efficient.
+	* In case the efficiency is important, a user can derive this class and override this implementation.
+	*/
+	vector<shared_ptr<SigmaCommonInput>> paramsArr;
+	for (auto sigmaInput : sigmaInputs)
+		paramsArr.push_back(sigmaInput->getCommonInput());
+
+	return make_shared<SigmaMultipleCommonInput>(paramsArr);
 }
