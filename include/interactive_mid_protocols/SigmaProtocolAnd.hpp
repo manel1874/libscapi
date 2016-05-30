@@ -93,12 +93,11 @@ private:
 	vector<shared_ptr<SigmaProverComputation>> provers;	// underlying Sigma protocol's provers to the AND calculation.
 	int len;								// number of underlying provers.
 	int t;									// soundness parameter.
-	mt19937 random;
 	/**
 	* Sets the inputs for each one of the underlying prover.
 	* @param input MUST be an instance of SigmaANDProverInput.
 	*/
-	shared_ptr<SigmaANDProverInput> checkInput(shared_ptr<SigmaProverInput> in);
+	SigmaANDProverInput* checkInput(SigmaProverInput* in);
 };
 
 /**
@@ -162,6 +161,7 @@ private:
 * The pseudo code of this protocol can be found in Protocol 1.14 of pseudo codes document at {@link http://cryptobiu.github.io/scapi/SDK_Pseudocode.pdf}.<p>
 */
 class SigmaANDVerifierComputation : public SigmaVerifierComputation {
+public:
 	/*
 	This class computes the following calculations:
 	SAMPLE a random challenge  e <- {0, 1}^t
@@ -175,7 +175,7 @@ class SigmaANDVerifierComputation : public SigmaVerifierComputation {
 	* @param t soundness parameter. t MUST be equal to all t values of the underlying verifiers object.
 	* @param random source of randomness
 	*/
-	SigmaANDVerifierComputation(vector<shared_ptr<SigmaVerifierComputation>> & verifiers, int t);
+	SigmaANDVerifierComputation(vector<shared_ptr<SigmaVerifierComputation>> verifiers, int t);
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
 	*/
@@ -185,10 +185,9 @@ class SigmaANDVerifierComputation : public SigmaVerifierComputation {
 	* 	"SAMPLE a random challenge e<-{0,1}^t".
 	*/
 	void sampleChallenge() override;
-	void setChallenge(vector<byte> challenge) override {
-		for (auto verifier : verifiers)
-			verifier->setChallenge(challenge);
-	}
+
+	void setChallenge(vector<byte> challenge) override;
+
 	vector<byte> getChallenge() override { return e; };
 	/**
 	* Computes the verification of the protocol.<p>
@@ -203,14 +202,9 @@ class SigmaANDVerifierComputation : public SigmaVerifierComputation {
 private:
 	vector<shared_ptr<SigmaVerifierComputation>> verifiers;	// underlying Sigma protocol's verifier to the AND calculation
 	int len;										// number of underlying verifiers
-	vector<byte>  e;										// the challenge
+	vector<byte>  e;								// the challenge
 	int t;											// soundness parameter
 	std::mt19937 random;							// prg
-	/**
-	* Sets the inputs for each one of the underlying verifier.
-	* @param input MUST be an instance of SigmaANDCommonInput.
-	*/
-	void checkInput(SigmaCommonInput* in);
 };
 
 
