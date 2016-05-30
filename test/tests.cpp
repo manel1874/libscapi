@@ -29,6 +29,7 @@
 #include "../include//interactive_mid_protocols/SigmaProtocolDamgardJurikEncryptedValue.hpp"
 #include "../include//interactive_mid_protocols/SigmaProtocolDamgardJurikProduct.hpp"
 #include "../include//interactive_mid_protocols/SigmaProtocolAND.hpp"
+#include "../include//interactive_mid_protocols/SigmaProtocolOrTwo.hpp"
 #include "../include//mid_layer/AsymmetricEnc.hpp"
 #include "../include//mid_layer/ElGamalEnc.hpp"
 #include "../include//mid_layer/CramerShoupEnc.hpp"
@@ -883,6 +884,7 @@ void simulate(SigmaSimulator* simulator, SigmaVerifierComputation* verifier,
 	SigmaCommonInput* commonInput) {
 	
 	shared_ptr<SigmaSimulatorOutput> output = simulator->simulate(commonInput);
+	cout << "after simulate" << endl;
 	verifier->setChallenge(output->getE());
 	bool verified = verifier->verify(commonInput, output->getA().get(), output->getZ().get());
 
@@ -1242,12 +1244,60 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 
 		SigmaANDProverComputation prover(provers, 80);
 		SigmaANDVerifierComputation verifier(verifiers, 80);
-		SigmaANDCommonInput commonInput(commonInputArr);
-		auto proverInput = make_shared<SigmaANDProverInput>(proverInputArr);
+		SigmaMultipleCommonInput commonInput(commonInputArr);
+		auto proverInput = make_shared<SigmaMultipleProverInput>(proverInputArr);
 		
 		computeSigmaProtocol(&prover, &verifier, &commonInput, proverInput);
 		simulate(prover.getSimulator().get(), &verifier, &commonInput);
 		
+	}
+
+	SECTION("test sigma protocol OR")
+	{
+		mt19937 random = get_seeded_random();
+		auto dlog = make_shared<OpenSSLDlogECFp>();
+
+		auto dlogProver = make_shared<SigmaDlogProverComputation>(dlog, 80);
+		auto dlogVerifier = make_shared<SigmaDlogVerifierComputation>(dlog, 80);
+		biginteger w = getRandomInRange(0, dlog->getOrder() - 1, random);
+
+		auto h1 = dlog->exponentiate(dlog->getGenerator().get(), w);
+		auto commonDlogInput = make_shared<SigmaDlogCommonInput>(h1);
+		auto proverDlogInput = make_shared<SigmaDlogProverInput>(h1, w);
+
+		//auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
+		auto dhProver = make_shared<SigmaDHProverComputation>(dlog, 80);
+		auto dhVerifier = make_shared<SigmaDHVerifierComputation>(dlog, 80);
+
+		auto u = dlog->exponentiate(dlog->getGenerator().get(), w);
+		auto h = dlog->createRandomElement();
+		auto v = dlog->exponentiate(h.get(), w);
+		auto commonDHInput = make_shared<SigmaDHCommonInput>(h, u, v);
+		
+		vector<shared_ptr<SigmaProverComputation>> provers;
+		vector<shared_ptr<SigmaVerifierComputation>> verifiers;
+		vector<shared_ptr<SigmaSimulator>> simulators;
+		vector<shared_ptr<SigmaCommonInput>> commonInputArr;
+
+		provers.push_back(dlogProver);
+		provers.push_back(dhProver);
+		verifiers.push_back(dlogVerifier);
+		verifiers.push_back(dhVerifier);
+		simulators.push_back(dlogProver->getSimulator());
+		simulators.push_back(dhProver->getSimulator());
+		commonInputArr.push_back(commonDlogInput);
+		commonInputArr.push_back(commonDHInput);
+		
+		SigmaOrTwoProverComputation prover(dlogProver, dhProver->getSimulator(), 80);
+		SigmaOrTwoVerifierComputation verifier(verifiers, 80);
+		SigmaMultipleCommonInput commonInput(commonInputArr);
+		auto proverInput = make_shared<SigmaOrTwoProverInput>(proverDlogInput, commonDHInput, 0);
+
+		cout << "before compute sigma protocol" << endl;
+		computeSigmaProtocol(&prover, &verifier, &commonInput, proverInput);
+		cout << "after compute sigma protocol" << endl;
+		simulate(prover.getSimulator().get(), &verifier, &commonInput);
+
 	}
 	
 }

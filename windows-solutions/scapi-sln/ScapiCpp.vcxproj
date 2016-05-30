@@ -109,6 +109,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\include\interactive_mid_protocols\SigmaProtocolOrTwo.cpp" />
     <ClCompile Include="..\..\src\circuits\BooleanCircuits.cpp" />
     <ClCompile Include="..\..\src\circuits\FourToTwoGarbledBoleanCircuitNoAssumptions.cpp" />
     <ClCompile Include="..\..\src\circuits\HalfGatesGarbledBoleanCircuitNoFixedKey.cpp" />
@@ -146,6 +147,7 @@
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolElGamalCommittedValue.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolElGamalEncryptedValue.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolElGamalPrivateKey.cpp" />
+    <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolOr.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolPedersenCmtKnowledge.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolPedersenCommittedValue.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\ZeroKnowledge.cpp" />
@@ -213,6 +215,8 @@
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolElGamalCommittedValue.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolElGamalEncryptedValue.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolElGamalPrivateKey.hpp" />
+    <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolOr.hpp" />
+    <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolOrTwo.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolPedersenCmtKnowledge.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolPedersenCommittedValue.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\ZeroKnowledge.hpp" />
