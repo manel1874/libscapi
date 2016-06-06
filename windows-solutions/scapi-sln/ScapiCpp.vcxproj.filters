@@ -228,10 +228,10 @@
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolDamgardJurikProduct.cpp">
       <Filter>Source Files\InteractiveMidProtocols</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolOr.cpp">
+    <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolOrMultiple.cpp">
       <Filter>Source Files\InteractiveMidProtocols</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\include\interactive_mid_protocols\SigmaProtocolOrTwo.cpp">
+    <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolOrTwo.cpp">
       <Filter>Source Files\InteractiveMidProtocols</Filter>
     </ClCompile>
   </ItemGroup>
@@ -437,10 +437,10 @@
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolDamgardJurikProduct.hpp">
       <Filter>Header Files\InteractiveMidProtocols</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolOr.hpp">
+    <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolOrTwo.hpp">
       <Filter>Header Files\InteractiveMidProtocols</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolOrTwo.hpp">
+    <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolOrMultiple.hpp">
       <Filter>Header Files\InteractiveMidProtocols</Filter>
     </ClInclude>
   </ItemGroup>

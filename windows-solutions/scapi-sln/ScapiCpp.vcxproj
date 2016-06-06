@@ -90,7 +90,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\lib\MiraclWin64\source;C:\OpenSSL-Win64\include;C:\code\libscapi\lib\NTL\windows\include;..\..\lib;C:\local\boost_1_60_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\lib\MiraclWin64\source;C:\OpenSSL-Win64\include;..\..\lib\NTL\windows\include;..\..\lib;C:\local\boost_1_60_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PreprocessorDefinitions>_SCL_SECURE_NO_WARNINGS;_WIN32_WINNT=0x06030000;__WINSOCK_DEPRECATED_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
@@ -101,7 +101,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\lib;C:\OpenSSL-Win64\include;C:\local\boost_1_60_0;..\..\lib\MiraclWin64\source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\lib;C:\OpenSSL-Win64\include;C:\local\boost_1_60_0;..\..\lib\MiraclWin64\source;..\..\lib\NTL\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_SCL_SECURE_NO_WARNINGS;_WIN32_WINNT=0x06030000;__WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -109,7 +109,6 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\include\interactive_mid_protocols\SigmaProtocolOrTwo.cpp" />
     <ClCompile Include="..\..\src\circuits\BooleanCircuits.cpp" />
     <ClCompile Include="..\..\src\circuits\FourToTwoGarbledBoleanCircuitNoAssumptions.cpp" />
     <ClCompile Include="..\..\src\circuits\HalfGatesGarbledBoleanCircuitNoFixedKey.cpp" />
@@ -147,7 +146,8 @@
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolElGamalCommittedValue.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolElGamalEncryptedValue.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolElGamalPrivateKey.cpp" />
-    <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolOr.cpp" />
+    <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolOrMultiple.cpp" />
+    <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolOrTwo.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolPedersenCmtKnowledge.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolPedersenCommittedValue.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\ZeroKnowledge.cpp" />
@@ -215,7 +215,7 @@
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolElGamalCommittedValue.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolElGamalEncryptedValue.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolElGamalPrivateKey.hpp" />
-    <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolOr.hpp" />
+    <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolOrMultiple.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolOrTwo.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolPedersenCmtKnowledge.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolPedersenCommittedValue.hpp" />
