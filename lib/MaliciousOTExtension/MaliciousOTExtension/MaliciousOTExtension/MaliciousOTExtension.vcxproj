@@ -142,7 +142,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\mains\otmain-malicious.h" />
     <ClInclude Include="..\..\ot\baseOT.h" />
     <ClInclude Include="..\..\ot\maskingfunction.h" />
     <ClInclude Include="..\..\ot\naor-pinkas.h" />
@@ -160,7 +159,6 @@
     <ClInclude Include="..\..\util\typedefs.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\mains\otmain-malicious.cpp" />
     <ClCompile Include="..\..\ot\baseOT.cpp" />
     <ClCompile Include="..\..\ot\naor-pinkas.cpp" />
     <ClCompile Include="..\..\ot\ot-extension-malicious.cpp" />

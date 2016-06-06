@@ -31,15 +31,12 @@ LIBRARIES += $(INCLUDE_ARCHIVES_END) #-lgmp -lgmpxx
 LIBRARIES_DIR=-L$(prefix)/ssl/lib -L$(prefix)/lib
 
 # target names
-OT_MAIN=otmain
 OT_LIBRARY=otlib
 MOT=mal-ot
 
 # sources
 SOURCES_UTIL=util/*.cpp
 OBJECTS_UTIL=util/*.o
-SOURCES_OTMAINMALICIOUS=mains/otmain-malicious.cpp
-OBJECTS_OTMAINMALICIOUS=mains/otmain-malicious.o
 SOURCES_OT=ot/*.cpp
 OBJECTS_OT=ot/*.o
 #OBJECTS_MIRACL=util/Miracl/*.o
@@ -54,18 +51,11 @@ INCLUDE=-I.. $(OPENSSL_INCLUDES) $(MIRACL_INCLUDES)
 
 ## targets ##
 
-all: mal-ot otlib
+all: otlib
 
 otlib: ${OBJECTS_UTIL} ${OBJECTS_OT}
 	${CXX} ${SHARED_LIB_OPT} -o libMaliciousOTExtension${SHARED_LIB_EXT} ${DEBUG_OPTIONS} \
 	${OBJECTS_UTIL} ${OBJECTS_OT} ${LIBRARIES_DIR} ${LIBRARIES}
-
-mal-ot: ${OBJECTS_UTIL} ${OBJECTS_OT} ${OBJECTS_OTMAINMALICIOUS}
-	${CXX} ${COMPILER_OPTIONS} -o mal_ot.exe ${CFLAGS} ${DEBUG_OPTIONS} ${OBJECTS_OTMAINMALICIOUS} ${OBJECTS_UTIL} ${OBJECTS_OT} ${LIBRARIES_DIR} ${LIBRARIES}
-
-${OBJECTS_OTMAINMALICIOUS}: ${SOURCES_OTMAINMALICIOUS}
-	@echo "compling ot-main..."
-	cd mains; ${CXX} -c ${INCLUDE} ${CFLAGS} ${BATCH} ${DEBUG_OPTIONS} *.cpp
 
 ${OBJECTS_UTIL}: ${SOURCES_UTIL}
 	@echo "compling ot-util..."
@@ -84,7 +74,7 @@ install:
 	install -m 0644 util/*.h $(includedir)/MaliciousOTExtension/util
 
 clean:
-	rm -rf *.exe ${OBJECTS_UTIL} ${OBJECTS_OTMAINMALICIOUS} ${OBJECTS_OT}
+	rm -rf *.exe ${OBJECTS_UTIL} ${OBJECTS_OT}
 	rm -f *.so
 	rm -f *.dylib
 	rm -f *.jnilib
