@@ -240,7 +240,7 @@ public:
 	* Returns the soundness parameter for this Sigma protocol.
 	* @return t soundness parameter
 	*/
-	int getSoundnessParam() { return t;	}
+	int getSoundnessParam() override { return t; }
 
 	/**
 	* Computes the simulator computation with the given challenge.
