@@ -104,12 +104,16 @@ public:
 	* The committed values can vary, therefore returns a void pointer
 	* @return the committed value.
 	*/
-	virtual std::shared_ptr<void> getX() = 0;
+	virtual shared_ptr<void> getX() = 0;
 	/**
 	* Converts the committed value into a plaintext in order to encrypt it.
 	* @return the plaintext contains this commit value.
 	*/
 	virtual shared_ptr<Plaintext> convertToPlaintext() = 0;
+
+	virtual bool operator==(const CmtCommitValue & other) = 0;
+
+	virtual string toString() = 0;
 };
 
 /**
@@ -134,6 +138,16 @@ public:
 		auto res = make_shared<GroupElementPlaintext>(x);
 		return res; 
 	};
+
+	bool operator==(const CmtCommitValue & other) override {
+		auto temp = dynamic_cast<const CmtGroupElementCommitValue*>(&other);
+		if (temp == NULL) {
+			throw invalid_argument("the given argument should be an instance of CmtGroupElementCommitValue");
+		}
+		return *x == *(temp->x);
+	}
+
+	string toString() override { return x->generateSendableData()->toString(); }
 };
 
 /**
@@ -142,15 +156,29 @@ public:
 * the computed commitment and the random values used for the computation.
 */
 class CmtCommitmentPhaseValues {
+private:
+	// The random value used in the computation of the commitment for the specific commitval.
+	shared_ptr<RandomValue> r;
+	// The value that the committer commits about. This value is not sent to the receiver in the 
+	// commitment phase, it is sent in the decommitment phase.
+	shared_ptr<CmtCommitValue> x;
 public:
+
+	CmtCommitmentPhaseValues(shared_ptr<RandomValue> r, shared_ptr<CmtCommitValue> x) {
+		this->r = r;
+		this->x = x;
+	}
+
 	/**
 	* Returns the random value used for commit the value.
 	*/
-	virtual shared_ptr<RandomValue> getR()=0;
+	shared_ptr<RandomValue> getR() { return r; }
+
 	/**
 	* Returns the committed value.
 	*/
-	virtual shared_ptr<CmtCommitValue> getX()=0;
+	shared_ptr<CmtCommitValue> getX() { return x; }
+
 	/**
 	* The commitment objects can be vary in the different commitment scheme.
 	* Therefore, Returns a void pointer.
@@ -164,24 +192,18 @@ public:
 class CmtBigIntegerCommitValue : public CmtCommitValue {
 private:
 	biginteger x; // the committed value
-	int byteCount;
 
 public:
 	/**
 	* Constructor that sets the commit value.
 	* @param x BigInteger to commit on.
 	*/
-	CmtBigIntegerCommitValue(biginteger x) { this->x = x; this->byteCount = bytesCount(x); };
+	CmtBigIntegerCommitValue(biginteger x) { this->x = x; };
 
 	/**
 	* Returns the committed BigInteger. Client should cast to biginteger.
 	*/
 	shared_ptr<void> getX() override { return make_shared<biginteger>(x); };
-
-	/**
-	* Converts the committed value to a string.
-	*/
-	std::string toString() { return (string)x; };
 
 	/**
 	* Converts the committed value to a BigIntegerPlaintaxt.
@@ -190,6 +212,16 @@ public:
 		auto res = make_shared<BigIntegerPlainText>(x);
 		return res;
 	};
+
+	bool operator==(const CmtCommitValue & other) override {
+		auto temp = dynamic_cast<const CmtBigIntegerCommitValue*>(&other);
+		if (temp == NULL) {
+			throw invalid_argument("the given argument should be an instance of CmtBigIntegerCommitValue");
+		}
+		return x == temp->x;
+	}
+
+	string toString() override { return (string) x; }
 };
 
 /**
@@ -197,31 +229,38 @@ public:
 */
 class CmtByteArrayCommitValue : public CmtCommitValue {
 private:
-	std::shared_ptr<byte> x; // the committed value
-	int len; 
+	vector<byte> x; // the committed value
 public:
 	/**
 	* Constructor that sets the commit value.
 	*/
-	CmtByteArrayCommitValue(std::shared_ptr<byte> x, int len) { this->x = x; this->len = len; };
+	CmtByteArrayCommitValue(vector<byte> x) { this->x = x; }
 	/**
 	* Returns the committed byte*. client need to cast to byte*
 	*/
-	shared_ptr<void> getX() override{ return x; }
-	int getXSize() { return len; };
-	/**
-	* Converts the committed value to a string.
-	*/
-	string toString() { return std::string(reinterpret_cast<char const*>(x.get()), len); };
+	shared_ptr<void> getX() override{ return make_shared<vector<byte>>(x); }
+	
 	/**
 	* Converts the committed value to a ByteArrayPlaintext.
 	*/
 	shared_ptr<Plaintext> convertToPlaintext() override {
-		vector<byte> target;
-		copy_byte_array_to_byte_vector(x.get(), len, target, 0);
-		auto res = make_shared<ByteArrayPlaintext>(target);
+		auto res = make_shared<ByteArrayPlaintext>(x);
 		return res;
 	};
+
+	bool operator==(const CmtCommitValue & other) override {
+		auto temp = dynamic_cast<const CmtByteArrayCommitValue*>(&other);
+		if (temp == NULL) {
+			throw invalid_argument("the given argument should be an instance of CmtByteArrayCommitValue");
+		}
+		return x == temp->x;
+	}
+
+	string toString() override {
+		const byte * uc = &(x[0]);
+		return string(reinterpret_cast<char const*>(uc), x.size());
+	}
+
 };
 
 /**
@@ -300,7 +339,7 @@ public:
 	* that many commitments are performed one after the other without decommiting them yet.
 	* @return the generated commitment object.
 	*/
-	virtual shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(shared_ptr<CmtCommitValue> input, long id)=0;
+	virtual shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(CmtCommitValue* input, long id)=0;
 
 	/**
 	* This function is the heart of the commitment phase from the Committer's point of view.
@@ -308,7 +347,7 @@ public:
 	* @param id Unique value attached to the input to keep track of the commitments in
 	* the case that many commitments are performed one after the other without decommiting them yet.
 	*/
-	virtual void commit(shared_ptr<CmtCommitValue> input, long id) = 0;
+	virtual void commit(CmtCommitValue* input, long id) = 0;
 
 	/**
 	* Generate a decommitment message using the given id.<p>
@@ -373,8 +412,7 @@ public:
 	* @param value to get its bytes.
 	* @return the generated bytes.
 	*/
-	virtual pair<shared_ptr<byte>,int> generateBytesFromCommitValue(
-		shared_ptr<CmtCommitValue> value)=0;
+	virtual vector<byte> generateBytesFromCommitValue(CmtCommitValue* value)=0;
 
 	/**
 	* This function returns the values calculated during the preprocess phase.<p>
@@ -383,9 +421,8 @@ public:
 	* We recommended not to call this function from somewhere else.
 	* @return values calculated during the preprocess phase
 	*/
-	virtual void** getPreProcessValues() = 0;
-	virtual int getPreProcessValuesSize() = 0;
-
+	virtual vector<shared_ptr<void>> getPreProcessValues() = 0;
+	
 	/**
 	* This function returns the values calculated during the commit phase for a specific commitment.<p>
 	* This function is used for protocols that need values of the commitment,
@@ -454,16 +491,15 @@ public:
 	* @param decommitmentMsg the decommitment object
 	* @return the committed value if the decommit succeeded; null, otherwise.
 	*/
-	virtual shared_ptr<CmtCommitValue> verifyDecommitment(shared_ptr<CmtCCommitmentMsg> commitmentMsg,
-		shared_ptr<CmtCDecommitmentMessage> decommitmentMsg) = 0;
+	virtual shared_ptr<CmtCommitValue> verifyDecommitment(CmtCCommitmentMsg* commitmentMsg,
+		CmtCDecommitmentMessage* decommitmentMsg) = 0;
 
 	/**
 	* Return the values used during the pre-process phase (usually upon construction). 
 	* Since these values vary between the different implementations this function
 	* returns a general array of void pointers.
 	*/
-	virtual void** getPreProcessedValues() = 0;
-	virtual int getPreProcessedValuesSize() = 0;
+	virtual vector<shared_ptr<void>> getPreProcessedValues() = 0;
 
 	/**
 	* Return the intermediate values used during the commitment phase.
@@ -477,7 +513,7 @@ public:
 	* @param value to get its bytes.
 	* @return a shared pointer to the generated bytes + the array size
 	*/
-	virtual pair<shared_ptr<byte>, int> generateBytesFromCommitValue(shared_ptr<CmtCommitValue> value)=0;
+	virtual vector<byte> generateBytesFromCommitValue(CmtCommitValue* value)=0;
 };
 
 /**
