@@ -101,6 +101,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\samples\Commitment\CommitmentExample.cpp" />
     <ClCompile Include="..\..\samples\Comm\comm_example.cpp" />
     <ClCompile Include="..\..\samples\examples_main.cpp" />
     <ClCompile Include="..\..\samples\MaliciousOT\MaliciousOTExample.cpp" />
@@ -111,6 +112,7 @@
     <ClCompile Include="..\..\samples\Yao\YaoParties.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\samples\Commitment\CommitmentExample.hpp" />
     <ClInclude Include="..\..\samples\examples_main.hpp" />
     <ClInclude Include="..\..\samples\SigmaProtocols\SigmaProtocolExample.hpp" />
     <ClInclude Include="..\..\samples\Yao\YaoExample.hpp" />

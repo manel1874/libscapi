@@ -6,3 +6,4 @@ int mainDlog();
 int mainSha1();
 int mainSigma(string, string);
 int mainOT(string  party);
+int mainCommitment(string, string);

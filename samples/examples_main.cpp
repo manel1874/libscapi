@@ -9,10 +9,11 @@ To run an example:
 example_name can one of the followin: 
 	* dlog
 	* sha1
-	* comm  <party_number (1|2)> <config_file_path>
-	* yao   <party_number (1|2)> <config_file_path>
-	* sigma <party_number (1|2)> <config_file_path>
 	* maliciousOT <party_number (1|2)>
+	* comm		  <party_number (1|2)> <config_file_path>
+	* yao		  <party_number (1|2)> <config_file_path>
+	* sigma		  <party_number (1|2)> <config_file_path>
+	* commitment  <party_number (1|2)> <config_file_path>
 				)";
 	cerr << usage << endl;
 	return 1;
@@ -26,6 +27,8 @@ int main(int argc, char* argv[]) {
 		return mainDlog();
 	if (exampleName == "sha1")
 		return mainSha1();
+	if (argc == 2)
+		return exampleUsage();
 	if (exampleName == "maliciousOT")
 		return mainOT(argv[2]);
 	if (argc != 4)
@@ -37,6 +40,8 @@ int main(int argc, char* argv[]) {
 		return mainYao(argv[2], argv[3]);
 	if (exampleName == "sigma")
 		return mainSigma(argv[2], argv[3]);
+	if (exampleName == "commitment")
+		return mainCommitment(argv[2], argv[3]);
 	
 	return exampleUsage();
 }

@@ -28,6 +28,9 @@
     <Filter Include="Source Files\maliciousOT">
       <UniqueIdentifier>{09bc7e6c-17ed-4ae2-a9ad-7aa317190b8f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Commitment">
+      <UniqueIdentifier>{1c247d50-12c0-4304-bbc5-c7db98850716}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\samples\Yao\App1.cpp">
@@ -54,6 +57,9 @@
     <ClCompile Include="..\..\samples\MaliciousOT\MaliciousOTExample.cpp">
       <Filter>Source Files\maliciousOT</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\samples\Commitment\CommitmentExample.cpp">
+      <Filter>Source Files\Commitment</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\samples\Yao\YaoExample.hpp">
@@ -64,6 +70,9 @@
     </ClInclude>
     <ClInclude Include="..\..\samples\examples_main.hpp">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\samples\Commitment\CommitmentExample.hpp">
+      <Filter>Source Files\Commitment</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
