@@ -35,10 +35,10 @@ void ZKFromSigmaProver::prove(shared_ptr<ZKProverInput> input) {
 	processFirstMsg(sigmaProverInput);
 	// run the receiver in COMMIT.decommit 
 	// if decommit returns INVALID output ERROR (CHEAT_ATTEMPT_BY_V)
-	auto ePair = receiveDecommit(output->getCommitmentId());
+	auto e = receiveDecommit(output->getCommitmentId());
 	// IF decommit returns some e, compute the response z to (a,e) according to sigma, 
 	// Send z to V and output nothing
-	processSecondMsg(ePair.first.get(), ePair.second);
+	processSecondMsg(e.data(), e.size());
 }
 
 /************************************************/
@@ -110,10 +110,10 @@ void ZKPOKFromSigmaCmtPedersenProver::prove(shared_ptr<ZKProverInput> input) {
 	processFirstMsg(sigmaProverInput);
 	// run the receiver in TRAP_COMMIT.decommit 
 	// if decommit returns INVALID output ERROR (CHEAT_ATTEMPT_BY_V)
-	auto ePair = receiveDecommit(trap->getCommitmentId());
+	auto e = receiveDecommit(trap->getCommitmentId());
 	// if decommit returns some e, compute the response z to (a,e) according to sigma, 
 	// send z to V and output nothing
-	processSecondMsg(ePair.first, ePair.second, trap);
+	processSecondMsg(make_shared<byte>(e[0]), e.size(), trap);
 
 }
 
@@ -173,24 +173,3 @@ bool ZKPOKFromSigmaCmtPedersenVerifier::verify(shared_ptr<ZKCommonInput> input,
 	return valid;
 }
 
-/********************************************/
-/*   CmtPedersenWithProofsCommitter         */
-/********************************************/
-void CmtPedersenWithProofsCommitter::doConstruct(int t) {
-	//SigmaProverComputation pedersenCommittedValProver = new SigmaPedersenCommittedValueProverComputation(dlog, t, random);
-	//SigmaProverComputation pedersenCTKnowledgeProver = new SigmaPedersenCmtKnowledgeProverComputation(dlog, t, random);
-	//knowledgeProver = make_shared<ZKPOKFromSigmaCmtPedersenProver>(channel, pedersenCTKnowledgeProver);
-	//committedValProver = make_shared<ZKPOKFromSigmaCmtPedersenProver>(channel, pedersenCommittedValProver);
-}
-
-/********************************************/
-/*   CmtPedersenTrapdoorCommitter           */
-/********************************************/
-bool CmtPedersenTrapdoorCommitter::validate(shared_ptr<CmtRCommitPhaseOutput> trap) {
-	auto trapdoor = dynamic_pointer_cast<CmtRTrapdoorCommitPhaseOutput>(trap);
-	if (!trapdoor)
-		throw invalid_argument("the given trapdor should be an instance of CmtRTrapdoorCommitPhaseOutput");
-	// check that g^trapdoor equals to h.
-	auto gToTrap = dlog->exponentiate(dlog->getGenerator().get(), trapdoor->getTrap());
-	return (*gToTrap == *h); 
-}
