@@ -1,4 +1,7 @@
 #include "../../include/interactive_mid_protocols/CommitmentSchemePedersen.hpp"
+#include "../../include/interactive_mid_protocols/ZeroKnowledge.hpp"
+#include "../../include/interactive_mid_protocols/SigmaProtocolPedersenCommittedValue.hpp"
+#include "../../include/interactive_mid_protocols/SigmaProtocolPedersenCmtKnowledge.hpp"
 
 /*********************************/
 /*   CmtPedersenReceiverCore     */
@@ -11,7 +14,7 @@ CmtPedersenReceiverCore::CmtPedersenReceiverCore(shared_ptr<CommParty> channel) 
 void CmtPedersenReceiverCore::doConstruct(shared_ptr<CommParty> channel,
 	shared_ptr<DlogGroup> dlog) {
 	// the underlying dlog group must be DDH secure.
-	auto ddh = std::dynamic_pointer_cast<DDH>(dlog);
+	auto ddh = dynamic_pointer_cast<DDH>(dlog);
 	if (!ddh)
 		throw SecurityLevelException("DlogGroup should have DDH security level");
 
@@ -28,6 +31,9 @@ void CmtPedersenReceiverCore::doConstruct(shared_ptr<CommParty> channel,
 }
 
 void CmtPedersenReceiverCore::preProcess() {
+	if (channel == NULL) {
+		throw runtime_error("In order to pre-compute the channel must be given");
+	}
 	trapdoor = getRandomInRange(0, qMinusOne, random);
 	h = dlog->exponentiate(dlog->getGenerator().get(), trapdoor);
 	auto sendableData = h->generateSendableData();	
@@ -38,12 +44,13 @@ void CmtPedersenReceiverCore::preProcess() {
 shared_ptr<CmtRCommitPhaseOutput> CmtPedersenReceiverCore::receiveCommitment() {
 	// create an empty CmtPedersenCommitmentMessage 
 	auto msg = make_shared<CmtPedersenCommitmentMessage>(dlog->getGenerator()->generateSendableData());
+	
 	// read encoded CmtPedersenCommitmentMessage from channel
 	vector<byte> raw_msg; // by the end of the scope - no need to hold it anymore - already decoded and copied
 	channel->readWithSizeIntoVector(raw_msg);
 	// init the empy CmtPedersenCommitmentMessage using the encdoed data
 	msg->initFromByteVector(raw_msg);
-	auto cm = msg->getCommitment();
+	
 	commitmentMap[msg->getId()] = msg;
 	return make_shared<CmtRBasicCommitPhaseOutput>(msg->getId());
 }
@@ -54,15 +61,20 @@ shared_ptr<CmtCommitValue> CmtPedersenReceiverCore::receiveDecommitment(long id)
 	shared_ptr<CmtPedersenDecommitmentMessage> msg = make_shared<CmtPedersenDecommitmentMessage>();
 	msg->initFromByteVector(raw_msg);
 	auto receivedCommitment = commitmentMap[id];
-	auto cmtCommitMsg = std::static_pointer_cast<CmtCCommitmentMsg>(receivedCommitment);
-	return verifyDecommitment(cmtCommitMsg, msg);
+	auto cmtCommitMsg = static_pointer_cast<CmtCCommitmentMsg>(receivedCommitment);
+	return verifyDecommitment(cmtCommitMsg.get(), msg.get());
 }
 
-shared_ptr<CmtCommitValue> CmtPedersenReceiverCore::verifyDecommitment(
-	shared_ptr<CmtCCommitmentMsg> commitmentMsg,
-	shared_ptr<CmtCDecommitmentMessage> decommitmentMsg) {
-	auto decommitmentMsgPedersen = dynamic_pointer_cast<CmtPedersenDecommitmentMessage>(decommitmentMsg);
-	auto commitmentMsgPedersen = dynamic_pointer_cast<CmtPedersenCommitmentMessage>(commitmentMsg);
+shared_ptr<CmtCommitValue> CmtPedersenReceiverCore::verifyDecommitment(CmtCCommitmentMsg* commitmentMsg,
+	CmtCDecommitmentMessage* decommitmentMsg) {
+	auto decommitmentMsgPedersen = dynamic_cast<CmtPedersenDecommitmentMessage*>(decommitmentMsg);
+	if (decommitmentMsgPedersen == NULL) {
+		throw invalid_argument("The received message should be an instance of CmtPedersenDecommitmentMessage");
+	}
+	auto commitmentMsgPedersen = dynamic_cast<CmtPedersenCommitmentMessage*>(commitmentMsg);
+	if (commitmentMsgPedersen == NULL) {
+		throw invalid_argument("The received message should be an instance of CmtPedersenCommitmentMessage");
+	}
 	biginteger x = decommitmentMsgPedersen->getX();
 	biginteger r = decommitmentMsgPedersen->getRValue();
 
@@ -84,11 +96,10 @@ shared_ptr<CmtCommitValue> CmtPedersenReceiverCore::verifyDecommitment(
 	return NULL;
 }
 
-void** CmtPedersenReceiverCore::getPreProcessedValues() {
-	return NULL;
-}
-int CmtPedersenReceiverCore::getPreProcessedValuesSize() {
-	return -1;
+vector<shared_ptr<void>> CmtPedersenReceiverCore::getPreProcessedValues() {
+	vector<shared_ptr<void>> values;
+	values.push_back(h);
+	return values;
 }
 
 shared_ptr<void> CmtPedersenReceiverCore::getCommitmentPhaseValues(long id) {
@@ -102,7 +113,6 @@ shared_ptr<void> CmtPedersenReceiverCore::getCommitmentPhaseValues(long id) {
 /*********************************/
 void CmtPedersenCommitterCore::doConstruct(shared_ptr<CommParty> channel,
 	shared_ptr<DlogGroup> dlog) {
-	
 	// the underlying dlog group must be DDH secure.
 	auto ddh = std::dynamic_pointer_cast<DDH>(dlog);
 	if (!ddh)
@@ -121,23 +131,24 @@ void CmtPedersenCommitterCore::doConstruct(shared_ptr<CommParty> channel,
 
 void CmtPedersenCommitterCore::preProcess() {
 	auto msg = waitForMessageFromReceiver();
-	h = dlog->reconstructElement(true, msg->getH().get());
+	h = dlog->reconstructElement(true, msg.get());
 	if (!dlog->isMember(h.get()))
 		throw CheatAttemptException("h element is not a member of the current DlogGroup");
 }
 
-shared_ptr<CmtPedersenPreprocessMessage> CmtPedersenCommitterCore::waitForMessageFromReceiver() {
+shared_ptr<GroupElementSendableData> CmtPedersenCommitterCore::waitForMessageFromReceiver() {
+	if (channel == NULL) {
+		throw runtime_error("In order to pre-compute the channel must be given");
+	}
 	vector<byte> rawMsg;
 	channel->readWithSizeIntoVector(rawMsg);
 	auto dummySendableData = dlog->getGenerator()->generateSendableData();
-	auto msg = make_shared<CmtPedersenPreprocessMessage>(dummySendableData);
-	msg->initFromByteVector(rawMsg);
-	return msg;
+	dummySendableData->initFromByteVector(rawMsg);
+	return dummySendableData;
 }
 
-shared_ptr<CmtCCommitmentMsg> CmtPedersenCommitterCore::generateCommitmentMsg(
-	shared_ptr<CmtCommitValue> input, long id) {
-	auto biCmt = std::dynamic_pointer_cast<CmtBigIntegerCommitValue>(input);
+shared_ptr<CmtCCommitmentMsg> CmtPedersenCommitterCore::generateCommitmentMsg(CmtCommitValue* input, long id) {
+	auto biCmt = dynamic_cast<CmtBigIntegerCommitValue*>(input);
 	if (!biCmt)
 		throw invalid_argument("The input must be of type CmtBigIntegerCommitValue");
 
@@ -160,23 +171,26 @@ shared_ptr<CmtCCommitmentMsg> CmtPedersenCommitterCore::generateCommitmentMsg(
 	commitmentMap[id] = make_shared<CmtPedersenCommitmentPhaseValues>(sharedR, cmtBIValue, c);
 
 	// send c
-	auto res = make_shared<CmtPedersenCommitmentMessage>(c->generateSendableData(), id);
-	return res;
+	return make_shared<CmtPedersenCommitmentMessage>(c->generateSendableData(), id);
 }
 
-void CmtPedersenCommitterCore::commit(shared_ptr<CmtCommitValue> in, long id) {
+void CmtPedersenCommitterCore::commit(CmtCommitValue* in, long id) {
 	auto msg = generateCommitmentMsg(in, id);
-	auto msgStr = msg->toString();
-	channel->writeWithSize(msgStr);
+	try {
+		auto msgStr = msg->toString();
+		channel->writeWithSize(msgStr);
+	} catch (...) {
+		commitmentMap.erase(id);
+	}
 }
 
 shared_ptr<CmtCDecommitmentMessage> CmtPedersenCommitterCore::generateDecommitmentMsg(long id) {
 	auto values = commitmentMap[id];
 	auto cmtValue = values->getX();
-	auto biCmt = std::dynamic_pointer_cast<CmtBigIntegerCommitValue>(cmtValue);
+	auto biCmt = dynamic_pointer_cast<CmtBigIntegerCommitValue>(cmtValue);
 	biginteger x = *((biginteger *)biCmt->getX().get());
 	auto randomValuePtr = values->getR();
-	auto biRVPtr = std::dynamic_pointer_cast<BigIntegerRandomValue>(randomValuePtr);
+	auto biRVPtr = dynamic_pointer_cast<BigIntegerRandomValue>(randomValuePtr);
 	return make_shared<CmtPedersenDecommitmentMessage>(x, biRVPtr);
 }
 
@@ -187,41 +201,66 @@ void CmtPedersenCommitterCore::decommit(long id) {
 	channel->writeWithSize(bMsg);
 }
 
-void** CmtPedersenCommitterCore::getPreProcessValues() {
-	return NULL;
-	//GroupElement** values = new GroupElement*[1];
-	//values[0] = h;
-	//return values;
-}
-
-int CmtPedersenCommitterCore::getPreProcessValuesSize() {
-	return NULL;
+vector<shared_ptr<void>> CmtPedersenCommitterCore::getPreProcessValues() {
+	vector<shared_ptr<void>> values;
+	values.push_back(h);
+	return values;
 }
 
 /**********/
 /* Helper */
 /**********/
-pair<shared_ptr<byte>, int> fromCmtToByteArray(shared_ptr<CmtCommitValue> value) {
+vector<byte> fromCmtToByteArray(CmtCommitValue* value) {
 	biginteger x = *((biginteger *)value->getX().get());
 	int size = bytesCount(x);
-	auto byteRes = std::shared_ptr<byte>(new byte[size], std::default_delete<byte[]>());
-	encodeBigInteger(x, byteRes.get(), size);
-	return make_pair(byteRes, size);
+	vector<byte> byteRes(size);
+	encodeBigInteger(x, byteRes.data(), size);
+	return byteRes;
 }
 
 /*********************************/
 /*   CmtPedersenCommitter        */
 /*********************************/
-pair<shared_ptr<byte>, int> CmtPedersenCommitter::generateBytesFromCommitValue(
-	shared_ptr<CmtCommitValue> value) {
+vector<byte> CmtPedersenCommitter::generateBytesFromCommitValue(CmtCommitValue* value) {
 	return fromCmtToByteArray(value);
 }
 
 /*********************************/
 /*   CmtPedersenReceiver         */
 /*********************************/
-pair<shared_ptr<byte>, int> CmtPedersenReceiver::generateBytesFromCommitValue(
-	shared_ptr<CmtCommitValue> value) {
+vector<byte> CmtPedersenReceiver::generateBytesFromCommitValue(CmtCommitValue* value) {
 	return fromCmtToByteArray(value);
+}
+
+/********************************************/
+/*   CmtPedersenWithProofsCommitter         */
+/********************************************/
+void CmtPedersenWithProofsCommitter::doConstruct(int t) {
+	//SigmaPedersenCommittedValueProverComputation pedersenCommittedValProver(dlog, t);
+	//SigmaPedersenCmtKnowledgeProverComputation pedersenCTKnowledgeProver(dlog, t);
+	//knowledgeProver = make_shared<ZKPOKFromSigmaCmtPedersenProver>(channel, pedersenCTKnowledgeProver);
+	//committedValProver = make_shared<ZKPOKFromSigmaCmtPedersenProver>(channel, pedersenCommittedValProver);
+}
+
+/********************************************/
+/*   CmtPedersenWithProofsReceiver         */
+/********************************************/
+void CmtPedersenWithProofsReceiver::doConstruct(int t) {
+	//SigmaPedersenCommittedValueVerifierComputation pedersenCommittedValVerifier(dlog, t);
+	//SigmaPedersenCmtKnowledgeVerifierComputation pedersenCTKnowledgeVerifier(dlog, t);
+	//knowledgeVerifier = make_shared<ZKPOKFromSigmaCmtPedersenVerifier>(channel, pedersenCTKnowledgeVerifier);
+	//committedValVerifier = make_shared<ZKPOKFromSigmaCmtPedersenVerifier>(channel, pedersenCommittedValVerifier);
+}
+
+/********************************************/
+/*   CmtPedersenTrapdoorCommitter           */
+/********************************************/
+bool CmtPedersenTrapdoorCommitter::validate(shared_ptr<CmtRCommitPhaseOutput> trap) {
+	auto trapdoor = dynamic_pointer_cast<CmtRTrapdoorCommitPhaseOutput>(trap);
+	if (!trapdoor)
+		throw invalid_argument("the given trapdor should be an instance of CmtRTrapdoorCommitPhaseOutput");
+	// check that g^trapdoor equals to h.
+	auto gToTrap = dlog->exponentiate(dlog->getGenerator().get(), trapdoor->getTrap());
+	return (*gToTrap == *h);
 }
 
