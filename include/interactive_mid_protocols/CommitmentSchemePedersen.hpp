@@ -140,14 +140,6 @@ protected:
 	// h is a value calculated during the creation of this receiver and is sent to
 	// the committer once in the beginning.
 	shared_ptr<GroupElement> h;
-	// The committer may commit many values one after the other without decommitting.
-	// And only at a later time decommit some or all those values. In order to keep track
-	// of the commitments and be able to relate them afterwards to the decommitments we keep 
-	// them in the commitmentMap. The key is some unique id known to the application
-	// running the committer. The exact same id has to be use later on to decommit the 
-	// corresponding values, otherwise the receiver will reject the decommitment.
-	map<long, shared_ptr<CmtPedersenCommitmentMessage>> commitmentMap;
-
 
 	/**
 	* This constructor only needs to get a connected channel (to the committer). 
@@ -246,16 +238,10 @@ class CmtPedersenCommitterCore : public CmtCommitter {
 	*
 	*/
 protected:
-	shared_ptr<CommParty> channel;
+	
 	shared_ptr<DlogGroup> dlog;
 	mt19937 random;
-	// the key to the map is an ID and the value is a structure that has the Committer's
-	// private input x in Zq,the random value used to commit x and the actual commitment.
-	// Each committed value is sent together with an ID so that the receiver can keep it in
-	// some data structure. This is necessary in the cases that the same instances of committer
-	// and receiver can be used for performing various commitments utilizing the values calculated
-	// during the pre-process stage for the sake of efficiency.
-	map<long, shared_ptr<CmtPedersenCommitmentPhaseValues>> commitmentMap;
+	
 	// the content of the message obtained from the receiver during the pre-process phase which occurs upon construction.
 	shared_ptr<GroupElement> h;
 
@@ -308,29 +294,11 @@ public:
 	* "SAMPLE a random value r <- Zq<P>
 	* 	COMPUTE  c = g^r * h^x". <p>
 	*/
-	shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(CmtCommitValue* input, long id) override;
+	shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(shared_ptr<CmtCommitValue> input, long id) override;
 	
-	/**
-	* Runs the commit phase of the commitment scheme. <P>
-	* "SAMPLE a random value r <- Zq<P>
-	* 	COMPUTE  c = g^r * h^x<P>
-	* 	SEND c".
-	*/
-	void commit(CmtCommitValue* in, long id) override;
-
 	shared_ptr<CmtCDecommitmentMessage> generateDecommitmentMsg(long id) override;
-	/**
-	* Runs the decommit phase of the commitment scheme.<P>
-	* "SEND (r, x) to R<P>
-	*	OUTPUT nothing."
-	*/
-	void decommit(long id) override;
 	
 	vector<shared_ptr<void>> getPreProcessValues() override;
-	
-	shared_ptr<CmtCommitmentPhaseValues> getCommitmentPhaseValues(long id) override{
-		return commitmentMap[id]; 
-	};
 };
 
 /**
@@ -366,13 +334,13 @@ public:
 	
 	shared_ptr<CmtCommitValue> generateCommitValue(vector<byte> x) override {
 		biginteger bi = decodeBigInteger(x.data(), x.size());
-		return make_shared<CmtBigIntegerCommitValue>(bi);
+		return make_shared<CmtBigIntegerCommitValue>(make_shared<biginteger>(bi));
 	};
 	vector<byte> generateBytesFromCommitValue(CmtCommitValue* value) override;
 
 	shared_ptr<CmtCommitValue> sampleRandomCommitValue() override {
 		auto val = getRandomInRange(0, dlog->getOrder() - 1, random);
-		return make_shared<CmtBigIntegerCommitValue>(val);
+		return make_shared<CmtBigIntegerCommitValue>(make_shared<biginteger>(val));
 	}
 };
 

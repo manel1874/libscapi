@@ -89,7 +89,7 @@ shared_ptr<CmtCommitValue> CmtPedersenReceiverCore::verifyDecommitment(CmtCCommi
 	auto ge = static_pointer_cast<GroupElementSendableData>(cmt);
 	auto commitmentElement = dlog->reconstructElement(true, ge.get());
 	if (*commitmentElement == *(dlog->multiplyGroupElements(gTor.get(), hTox.get())))
-		return make_shared<CmtBigIntegerCommitValue>(x);
+		return make_shared<CmtBigIntegerCommitValue>(make_shared<biginteger>(x));
 	// in the pseudocode it says to return X and ACCEPT if valid commitment else, REJECT.
 	// for now we return null as a mode of reject. If the returned value of this function is not
 	// null then it means ACCEPT
@@ -147,14 +147,14 @@ shared_ptr<GroupElementSendableData> CmtPedersenCommitterCore::waitForMessageFro
 	return dummySendableData;
 }
 
-shared_ptr<CmtCCommitmentMsg> CmtPedersenCommitterCore::generateCommitmentMsg(CmtCommitValue* input, long id) {
-	auto biCmt = dynamic_cast<CmtBigIntegerCommitValue*>(input);
+shared_ptr<CmtCCommitmentMsg> CmtPedersenCommitterCore::generateCommitmentMsg(shared_ptr<CmtCommitValue> input, long id) {
+	auto biCmt = dynamic_pointer_cast<CmtBigIntegerCommitValue>(input);
 	if (!biCmt)
 		throw invalid_argument("The input must be of type CmtBigIntegerCommitValue");
 
-	biginteger x = *((biginteger *)biCmt->getX().get());
+	shared_ptr<biginteger> x = static_pointer_cast<biginteger>(biCmt->getX());
 	// check that the input is in Zq.
-	if(x < 0 || x > dlog->getOrder())
+	if(*x < 0 || *x > dlog->getOrder())
 		throw invalid_argument("The input must be in Zq");
 
 	// sample a random value r <- Zq
@@ -162,26 +162,15 @@ shared_ptr<CmtCCommitmentMsg> CmtPedersenCommitterCore::generateCommitmentMsg(Cm
 
 	// compute  c = g^r * h^x
 	auto gToR = dlog->exponentiate(dlog->getGenerator().get(), r);
-	auto hToX = dlog->exponentiate(h.get(), x);
+	auto hToX = dlog->exponentiate(h.get(), *x);
 	auto c = dlog->multiplyGroupElements(gToR.get(), hToX.get());
 
 	// keep the committed value in the map together with its ID.
 	auto sharedR = make_shared<BigIntegerRandomValue>(r);
-	auto cmtBIValue = make_shared<CmtBigIntegerCommitValue>(x);
-	commitmentMap[id] = make_shared<CmtPedersenCommitmentPhaseValues>(sharedR, cmtBIValue, c);
+	commitmentMap[id] = make_shared<CmtPedersenCommitmentPhaseValues>(sharedR, input, c);
 
 	// send c
 	return make_shared<CmtPedersenCommitmentMessage>(c->generateSendableData(), id);
-}
-
-void CmtPedersenCommitterCore::commit(CmtCommitValue* in, long id) {
-	auto msg = generateCommitmentMsg(in, id);
-	try {
-		auto msgStr = msg->toString();
-		channel->writeWithSize(msgStr);
-	} catch (...) {
-		commitmentMap.erase(id);
-	}
 }
 
 shared_ptr<CmtCDecommitmentMessage> CmtPedersenCommitterCore::generateDecommitmentMsg(long id) {
@@ -192,13 +181,6 @@ shared_ptr<CmtCDecommitmentMessage> CmtPedersenCommitterCore::generateDecommitme
 	auto randomValuePtr = values->getR();
 	auto biRVPtr = dynamic_pointer_cast<BigIntegerRandomValue>(randomValuePtr);
 	return make_shared<CmtPedersenDecommitmentMessage>(x, biRVPtr);
-}
-
-void CmtPedersenCommitterCore::decommit(long id) {
-	// fetch the commitment according to the requested ID
-	auto msg = generateDecommitmentMsg(id);
-	auto bMsg = msg->toString();
-	channel->writeWithSize(bMsg);
 }
 
 vector<shared_ptr<void>> CmtPedersenCommitterCore::getPreProcessValues() {

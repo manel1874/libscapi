@@ -25,6 +25,7 @@
 #pragma once
 #include "RandomValue.hpp"
 #include "../CryptoInfra/PlainText.hpp"
+#include "../comm/Comm.hpp"
 
 /**
 * General interface of the receiver's output of the commit phase.
@@ -191,25 +192,25 @@ public:
 */
 class CmtBigIntegerCommitValue : public CmtCommitValue {
 private:
-	biginteger x; // the committed value
+	shared_ptr<biginteger> x; // the committed value
 
 public:
 	/**
 	* Constructor that sets the commit value.
 	* @param x BigInteger to commit on.
 	*/
-	CmtBigIntegerCommitValue(biginteger x) { this->x = x; };
+	CmtBigIntegerCommitValue(shared_ptr<biginteger> x) { this->x = x; };
 
 	/**
 	* Returns the committed BigInteger. Client should cast to biginteger.
 	*/
-	shared_ptr<void> getX() override { return make_shared<biginteger>(x); };
+	shared_ptr<void> getX() override { return x; };
 
 	/**
 	* Converts the committed value to a BigIntegerPlaintaxt.
 	*/
 	shared_ptr<Plaintext> convertToPlaintext() override {
-		auto res = make_shared<BigIntegerPlainText>(x);
+		auto res = make_shared<BigIntegerPlainText>(*x);
 		return res;
 	};
 
@@ -218,10 +219,10 @@ public:
 		if (temp == NULL) {
 			throw invalid_argument("the given argument should be an instance of CmtBigIntegerCommitValue");
 		}
-		return x == temp->x;
+		return *x == *temp->x;
 	}
 
-	string toString() override { return (string) x; }
+	string toString() override { return (string) *x; }
 };
 
 /**
@@ -229,22 +230,22 @@ public:
 */
 class CmtByteArrayCommitValue : public CmtCommitValue {
 private:
-	vector<byte> x; // the committed value
+	shared_ptr<vector<byte>> x; // the committed value. 
 public:
 	/**
 	* Constructor that sets the commit value.
 	*/
-	CmtByteArrayCommitValue(vector<byte> x) { this->x = x; }
+	CmtByteArrayCommitValue(shared_ptr<vector<byte>> x) { this->x = x; }
 	/**
 	* Returns the committed byte*. client need to cast to byte*
 	*/
-	shared_ptr<void> getX() override{ return make_shared<vector<byte>>(x); }
+	shared_ptr<void> getX() override{ return x; }
 	
 	/**
 	* Converts the committed value to a ByteArrayPlaintext.
 	*/
 	shared_ptr<Plaintext> convertToPlaintext() override {
-		auto res = make_shared<ByteArrayPlaintext>(x);
+		auto res = make_shared<ByteArrayPlaintext>(*x);
 		return res;
 	};
 
@@ -253,12 +254,12 @@ public:
 		if (temp == NULL) {
 			throw invalid_argument("the given argument should be an instance of CmtByteArrayCommitValue");
 		}
-		return x == temp->x;
+		return *x == *(temp->x);
 	}
 
 	string toString() override {
-		const byte * uc = &(x[0]);
-		return string(reinterpret_cast<char const*>(uc), x.size());
+		const byte * uc = &((*x)[0]);
+		return string(reinterpret_cast<char const*>(uc), x->size());
 	}
 
 };
@@ -301,6 +302,16 @@ public:
 * Receiver; and a decommitment phase in which the the Committer sends the decommitment to the Receiver.
 */
 class CmtCommitter {
+protected:
+	shared_ptr<CommParty> channel;
+	// the key to the map is an ID and the value is a structure that has the Committer's
+	// private input x in Zq,the random value used to commit x and the actual commitment.
+	// Each committed value is sent together with an ID so that the receiver can keep it in
+	// some data structure. This is necessary in the cases that the same instances of committer
+	// and receiver can be used for performing various commitments utilizing the values calculated
+	// during the pre-process stage for the sake of efficiency.
+	map<long, shared_ptr<CmtCommitmentPhaseValues>> commitmentMap;
+
 public:
 	/**
 	* Generate a commitment message using the given input and ID.<p>
@@ -335,11 +346,11 @@ public:
 	*	}
 	*
 	* @param input The value that the committer commits about.
-	* @param id Unique value attached to the input to keep track of the commitments in the case 
+	* @param id Unique value attached to the input to keep track of the commitments in the case
 	* that many commitments are performed one after the other without decommiting them yet.
 	* @return the generated commitment object.
 	*/
-	virtual shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(CmtCommitValue* input, long id)=0;
+	virtual shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(shared_ptr<CmtCommitValue> input, long id) = 0;
 
 	/**
 	* This function is the heart of the commitment phase from the Committer's point of view.
@@ -347,7 +358,16 @@ public:
 	* @param id Unique value attached to the input to keep track of the commitments in
 	* the case that many commitments are performed one after the other without decommiting them yet.
 	*/
-	virtual void commit(CmtCommitValue* input, long id) = 0;
+	void commit(shared_ptr<CmtCommitValue> input, long id) {
+		auto msg = generateCommitmentMsg(input, id);
+		try {
+			auto msgStr = msg->toString();
+			channel->writeWithSize(msgStr);
+		}
+		catch (...) {
+			commitmentMap.erase(id);
+		}
+	}
 
 	/**
 	* Generate a decommitment message using the given id.<p>
@@ -391,7 +411,12 @@ public:
 	* This function is the heart of the decommitment phase from the Committer's point of view.
 	* @param id Unique value used to identify which previously committed value needs to be decommitted now.
 	*/
-	virtual void decommit(long id) = 0;
+	void decommit(long id) {
+		// fetch the commitment according to the requested ID
+		auto msg = generateDecommitmentMsg(id);
+		auto bMsg = msg->toString();
+		channel->writeWithSize(bMsg);
+	}
 
 	/**
 	* This function samples random commit value to commit on.
@@ -431,7 +456,9 @@ public:
 	* @param id of the specific commitment
 	* @return values calculated during the commit phase
 	*/
-	virtual shared_ptr<CmtCommitmentPhaseValues> getCommitmentPhaseValues(long id) = 0;
+	shared_ptr<CmtCommitmentPhaseValues> getCommitmentPhaseValues(long id) {
+		return commitmentMap[id];
+	}
 };
 
 /**
@@ -441,6 +468,14 @@ public:
 * sent by the Committer and checks whether to accept or reject the decommitment.
 */
 class CmtReceiver {
+protected:
+	// The committer may commit many values one after the other without decommitting.
+	// And only at a later time decommit some or all those values. In order to keep track
+	// of the commitments and be able to relate them afterwards to the decommitments we keep 
+	// them in the commitmentMap. The key is some unique id known to the application
+	// running the committer. The exact same id has to be use later on to decommit the 
+	// corresponding values, otherwise the receiver will reject the decommitment.
+	map<long, shared_ptr<CmtCCommitmentMsg>> commitmentMap;
 public:
 	/**
 	* This function is the heart of the commitment phase from the Receiver's point of view.
@@ -506,7 +541,9 @@ public:
 	* @param id get the commitment values according to this id.
 	* @return a general void pointer.
 	*/
-	virtual shared_ptr<void> getCommitmentPhaseValues(long id) = 0;
+	virtual shared_ptr<void> getCommitmentPhaseValues(long id) {
+		return commitmentMap[id];
+	}
 
 	/**
 	* This function converts the given commit value to a byte array.

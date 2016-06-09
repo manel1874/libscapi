@@ -259,7 +259,7 @@ private:
 	long commit(vector<byte> e) {
 		auto val = committer->generateCommitValue(e);
 		long id = random();
-		committer->commit(val.get(), id);
+		committer->commit(val, id);
 		return id;
 	}
 
@@ -418,7 +418,7 @@ private:
 		auto val = committer->generateCommitValue(e);
 		long id = random();
 		id = abs(id);
-		committer->commit(val.get(), id);
+		committer->commit(val, id);
 		return id;
 	};
 	/**
