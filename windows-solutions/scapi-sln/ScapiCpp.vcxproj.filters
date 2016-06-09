@@ -234,6 +234,9 @@
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolOrTwo.cpp">
       <Filter>Source Files\InteractiveMidProtocols</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\interactive_mid_protocols\CommitmentSchemeSimpleHash.cpp">
+      <Filter>Source Files\InteractiveMidProtocols</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\circuits\BooleanCircuits.hpp">
@@ -441,6 +444,9 @@
       <Filter>Header Files\InteractiveMidProtocols</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolOrMultiple.hpp">
+      <Filter>Header Files\InteractiveMidProtocols</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentSchemeSimpleHash.hpp">
       <Filter>Header Files\InteractiveMidProtocols</Filter>
     </ClInclude>
   </ItemGroup>
