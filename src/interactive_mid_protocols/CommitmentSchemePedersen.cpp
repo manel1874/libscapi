@@ -234,15 +234,3 @@ void CmtPedersenWithProofsReceiver::doConstruct(int t) {
 	//committedValVerifier = make_shared<ZKPOKFromSigmaCmtPedersenVerifier>(channel, pedersenCommittedValVerifier);
 }
 
-/********************************************/
-/*   CmtPedersenTrapdoorCommitter           */
-/********************************************/
-bool CmtPedersenTrapdoorCommitter::validate(shared_ptr<CmtRCommitPhaseOutput> trap) {
-	auto trapdoor = dynamic_pointer_cast<CmtRTrapdoorCommitPhaseOutput>(trap);
-	if (!trapdoor)
-		throw invalid_argument("the given trapdor should be an instance of CmtRTrapdoorCommitPhaseOutput");
-	// check that g^trapdoor equals to h.
-	auto gToTrap = dlog->exponentiate(dlog->getGenerator().get(), trapdoor->getTrap());
-	return (*gToTrap == *h);
-}
-

@@ -201,6 +201,7 @@
     <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentScheme.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentSchemePedersen.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentSchemePedersenHash.hpp" />
+    <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentSchemePedersenTrapdoor.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentSchemeSimpleHash.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\OTBatch.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\OTExtensionMalicious.hpp" />

@@ -24,7 +24,7 @@
 */
 #pragma once
 #include "SigmaProtocol.hpp"
-#include "CommitmentSchemePedersen.hpp"
+#include "CommitmentSchemePedersenTrapdoor.hpp"
 
 /**
 * A zero-knowledge proof or zero-knowledge protocol is a method by which one party (the prover) 

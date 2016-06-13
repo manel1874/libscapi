@@ -455,5 +455,8 @@
     <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentSchemePedersenHash.hpp">
       <Filter>Header Files\InteractiveMidProtocols</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentSchemePedersenTrapdoor.hpp">
+      <Filter>Header Files\InteractiveMidProtocols</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

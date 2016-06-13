@@ -2,6 +2,7 @@
 #include "../include/interactive_mid_protocols/CommitmentScheme.hpp"
 #include "../include//interactive_mid_protocols/CommitmentSchemePedersen.hpp"
 #include "../include//interactive_mid_protocols/CommitmentSchemePedersenHash.hpp"
+#include "../include//interactive_mid_protocols/CommitmentSchemePedersenTrapdoor.hpp"
 #include "../include//interactive_mid_protocols/CommitmentSchemeSimpleHash.hpp"
 
 #include <boost/thread/thread.hpp>
