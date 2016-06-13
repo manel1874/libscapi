@@ -101,7 +101,7 @@
       <PreprocessorDefinitions>_SCL_SECURE_NO_WARNINGS;_WIN32_WINNT=0x06030000;__WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>C:\OpenSSL-Win64\lib\libeay32.lib;C:\OpenSSL-Win64\lib\ssleay32.lib;..\scapi-sln\x64\Release\ScapiCpp.lib;C:\Github\libScapiDev\lib\NTL\windows\NTL-WIN64\x64\Release\NTL-WIN64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>C:\OpenSSL-Win64\lib\libeay32.lib;C:\OpenSSL-Win64\lib\ssleay32.lib;..\scapi-sln\x64\Release\ScapiCpp.lib;..\..\lib\NTL\windows\NTL-WIN64\x64\Release\NTL-WIN64.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
