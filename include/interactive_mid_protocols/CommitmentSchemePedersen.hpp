@@ -98,7 +98,7 @@ public:
 	* @param commitVal the committed value
 	* @param computedCommitment the commitment
 	*/
-	CmtPedersenCommitmentPhaseValues(shared_ptr<BigIntegerRandomValue> r, 
+	CmtPedersenCommitmentPhaseValues(shared_ptr<RandomValue> r, 
 		shared_ptr<CmtCommitValue> commitVal, shared_ptr<GroupElement> computedCommitment) : CmtCommitmentPhaseValues(r, commitVal) {
 		this->computedCommitment = computedCommitment;
 	};
