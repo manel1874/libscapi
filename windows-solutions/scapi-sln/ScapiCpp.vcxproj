@@ -131,6 +131,7 @@
     <ClCompile Include="..\..\src\infra\MathAlgorithms.cpp" />
     <ClCompile Include="..\..\src\infra\Scanner.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\CommitmentSchemePedersen.cpp" />
+    <ClCompile Include="..\..\src\interactive_mid_protocols\CommitmentSchemePedersenHash.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\CommitmentSchemeSimpleHash.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\OTExtensionMalicious.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\OTSemiHonestExtension.cpp" />
@@ -199,6 +200,7 @@
     <ClInclude Include="..\..\include\infra\Scanner.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentScheme.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentSchemePedersen.hpp" />
+    <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentSchemePedersenHash.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentSchemeSimpleHash.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\OTBatch.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\OTExtensionMalicious.hpp" />

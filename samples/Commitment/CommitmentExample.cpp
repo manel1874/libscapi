@@ -24,6 +24,10 @@ shared_ptr<CmtCommitter> getCommitter(shared_ptr<CommParty> channel, CommitmentP
 	} else if (sdp.protocolName == "PedersenTrapdoor") {
 		auto dlog = make_shared<OpenSSLDlogECF2m>();
 		sds = make_shared<CmtPedersenTrapdoorCommitter>(channel, dlog);
+	} else if (sdp.protocolName == "PedersenHash") {
+		auto dlog = make_shared<OpenSSLDlogECF2m>("K-283");
+		auto hash = make_shared<OpenSSLSHA256>();
+		sds = make_shared<CmtPedersenHashCommitter>(channel, dlog, hash);
 	} else if (sdp.protocolName == "SimpleHash") {
 		sds = make_shared<CmtSimpleHashCommitter>(channel);
 	}
@@ -36,10 +40,13 @@ shared_ptr<CmtReceiver> getReceiver(shared_ptr<CommParty> channel, CommitmentPar
 	if (sdp.protocolName == "Pedersen") {
 		auto dlog = make_shared<OpenSSLDlogECF2m>();
 		sds = make_shared<CmtPedersenReceiver>(channel, dlog);
-	}
-	else if (sdp.protocolName == "PedersenTrapdoor") {
+	} else if (sdp.protocolName == "PedersenTrapdoor") {
 		auto dlog = make_shared<OpenSSLDlogECF2m>();
 		sds = make_shared<CmtPedersenTrapdoorReceiver>(channel, dlog);
+	} else if (sdp.protocolName == "PedersenHash") {
+		auto dlog = make_shared<OpenSSLDlogECF2m>("K-283");
+		auto hash = make_shared<OpenSSLSHA256>();
+		sds = make_shared<CmtPedersenHashReceiver>(channel, dlog, hash);
 	} else if (sdp.protocolName == "SimpleHash") {
 		sds = make_shared<CmtSimpleHashReceiver>(channel);
 	}
