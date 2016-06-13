@@ -118,7 +118,7 @@ public:
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
 *
 */
-class CmtSimpleHashCommitter : public CmtCommitter, SecureCommit {
+class CmtSimpleHashCommitter : public CmtCommitter, public SecureCommit, public CmtOnByteArray {
 
 	/*
 	* runs the following protocol:
@@ -218,7 +218,7 @@ public:
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
 *
 */
-class CmtSimpleHashReceiver : public CmtReceiver, SecureCommit {
+class CmtSimpleHashReceiver : public CmtReceiver, public SecureCommit, public CmtOnByteArray {
 
 	/*
 	* runs the following protocol:

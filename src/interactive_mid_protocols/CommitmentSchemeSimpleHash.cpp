@@ -71,7 +71,7 @@ shared_ptr<CmtCCommitmentMsg> CmtSimpleHashCommitter::generateCommitmentMsg(shar
 	auto in = dynamic_pointer_cast<CmtByteArrayCommitValue>(input);
 	if (in == NULL)
 		throw invalid_argument("The input has to be of type CmtByteArrayCommitValue");
-	auto x = (static_pointer_cast<vector<byte>>(in->getX()));
+	auto x = in->getXVector();
 	//Sample random byte array r
 	vector<byte> r;
 	gen_random_bytes_vector(r, n, random);
@@ -112,7 +112,7 @@ vector<byte> CmtSimpleHashCommitter::generateBytesFromCommitValue(CmtCommitValue
 	auto val = dynamic_cast<CmtByteArrayCommitValue*>(value);
 	if (val == NULL)
 		throw invalid_argument("The given value must be of type CmtByteArrayCommitValue");
-	return *(static_pointer_cast<vector<byte>>(val->getX()));
+	return *val->getXVector();
 }
 
 /**
@@ -221,6 +221,5 @@ vector<byte> CmtSimpleHashReceiver::generateBytesFromCommitValue(CmtCommitValue*
 	auto val = dynamic_cast<CmtByteArrayCommitValue*>(value);
 	if (val == NULL)
 		throw invalid_argument("The given value must be of type CmtByteArrayCommitValue");
-	auto x = static_pointer_cast<vector<byte>>(val->getX());
-	return *x;
+	return *val->getXVector();
 }

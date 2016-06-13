@@ -240,7 +240,7 @@ public:
 	* Returns the committed byte*. client need to cast to byte*
 	*/
 	shared_ptr<void> getX() override{ return x; }
-	
+	shared_ptr<vector<byte>> getXVector() { return x; }
 	/**
 	* Converts the committed value to a ByteArrayPlaintext.
 	*/
