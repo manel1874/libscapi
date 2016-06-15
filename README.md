@@ -21,17 +21,29 @@ For detailed instructions, see [INSTALL.MD](INSTALL.MD)
 ### Math and General Purpose Libraries
 
 ##### OpenSSL
-[](https://www.openssl.org/)
+[https://www.openssl.org/](https://www.openssl.org/)
+ OpenSSL is an open source project that provides a robust, commercial-grade, and full-featured toolkit for the Transport Layer Security (TLS) and Secure Sockets Layer (SSL) protocols. It is also a general-purpose cryptography library. For more information about the team and community around the project, or to start making your own contributions, start with the community page. To get the latest news, download the source, and so on, please see the sidebar or the buttons at the top of every page.
+
 ##### The GNU Multiple Precision Arithmetic Library (GMP)
-[](https://gmplib.org/)
+[https://gmplib.org/](https://gmplib.org/)
+GMP is a free library for arbitrary precision arithmetic, operating on signed integers, rational numbers, and floating-point numbers. There is no practical limit to the precision except the ones implied by the available memory in the machine GMP runs on. GMP has a rich set of functions, and the functions have a regular interface.
+The main target applications for GMP are cryptography applications and research, Internet security applications, algebra systems, computational algebra research, etc.
+
 ##### NTL: A Library for doing Number Theory- Victor Shoup
 [](http://www.shoup.net/ntl/)
+ NTL is a high-performance, portable C++ library providing data structures and algorithms for manipulating signed, arbitrary length integers, and for vectors, matrices, and polynomials over the integers and over finite fields.On modern platforms supporting C++11, NTL can be compiled in thread safe and exception safe modes. 
+
 ##### MIRACL Cryptographic SDK
 [](https://github.com/miracl/MIRACL)
+MIRACL Cryptographic SDK: Multiprecision Integer and Rational Arithmetic Cryptographic Library C software library
+
 ##### Boost 1.60
-[](http://www.boost.org/)
+[http://www.boost.org/](http://www.boost.org/)
+Boost provides free peer-reviewed portable C++ source libraries. We emphasize libraries that work well with the C++ Standard Library. Boost libraries are intended to be widely useful, and usable across a broad spectrum of applications
+
 ##### Cereal C++ Serialization Library
-[](http://uscilab.github.io/cereal/)
+[https://github.com/USCiLab/cereal](http://uscilab.github.io/cereal/)
+cereal is a header-only C++11 serialization library. cereal takes arbitrary data types and reversibly turns them into different representations, such as compact binary encodings, XML, or JSON. cereal was designed to be fast, light-weight, and easy to extend - it has no external dependencies and can be easily bundled with other code or used standalone.
 
 ### Implementations by other Academic Institutes
 
