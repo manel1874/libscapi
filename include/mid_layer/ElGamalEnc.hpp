@@ -221,14 +221,14 @@ public:
 	* This function is not supported for this encryption scheme, since there is no need for parameters to generate an ElGamal key pair.
 	* @throws UnsupportedOperationException
 	*/
-	pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> generateKey(shared_ptr<AlgorithmParameterSpec> keyParams) override{
+	pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> generateKey(AlgorithmParameterSpec* keyParams) override{
 		//No need for parameters to generate an El Gamal key pair. 
 		throw new UnsupportedOperationException("To Generate ElGamal keys use the generateKey() function");
 	}
 
-	shared_ptr<PublicKey> reconstructPublicKey(shared_ptr<KeySendableData> data) override;
+	shared_ptr<PublicKey> reconstructPublicKey(KeySendableData* data) override;
 
-	shared_ptr<PrivateKey> reconstructPrivateKey(shared_ptr<KeySendableData> data) override;
+	shared_ptr<PrivateKey> reconstructPrivateKey(KeySendableData* data) override;
 
 	/**
 	* Encrypts the given message using ElGamal encryption scheme.
@@ -282,7 +282,7 @@ public:
 	* @throws KeyException if no private key was set.
 	* @throws IllegalArgumentException if the given cipher is not instance of ElGamalOnGroupElementCiphertext.
 	*/
-	shared_ptr<Plaintext> decrypt(shared_ptr<AsymmetricCiphertext> cipher) override;
+	shared_ptr<Plaintext> decrypt(AsymmetricCiphertext* cipher) override;
 
 	/**
 	* Generates a byte array from the given plaintext.
@@ -292,7 +292,7 @@ public:
 	* @return the byte array generated from the given plaintext.
 	* @throws IllegalArgumentException if the given plaintext is not an instance of GroupElementPlaintext.
 	*/
-	vector<byte> generateBytesFromPlaintext(shared_ptr<Plaintext> plaintext) override;
+	vector<byte> generateBytesFromPlaintext(Plaintext* plaintext) override;
 
 	/**
 	* Calculates the ciphertext resulting of multiplying two given ciphertexts.
@@ -302,7 +302,7 @@ public:
 	* 		1. If one or more of the given ciphertexts is not instance of ElGamalOnGroupElementCiphertext.
 	* 		2. If one or more of the GroupElements in the given ciphertexts is not a member of the underlying DlogGroup of this ElGamal encryption scheme.
 	*/
-	shared_ptr<AsymmetricCiphertext> multiply(shared_ptr<AsymmetricCiphertext> cipher1, shared_ptr<AsymmetricCiphertext> cipher2) override;
+	shared_ptr<AsymmetricCiphertext> multiply(AsymmetricCiphertext* cipher1, AsymmetricCiphertext* cipher2) override;
 
 	/**
 	* Calculates the ciphertext resulting of multiplying two given ciphertexts.<P>
@@ -318,11 +318,11 @@ public:
 	* 		1. If one or more of the given ciphertexts is not instance of ElGamalOnGroupElementCiphertext.
 	* 		2. If one or more of the GroupElements in the given ciphertexts is not a member of the underlying DlogGroup of this ElGamal encryption scheme.
 	*/
-	shared_ptr<AsymmetricCiphertext> multiply(shared_ptr<AsymmetricCiphertext> cipher1, shared_ptr<AsymmetricCiphertext> cipher2, biginteger r) override; 
+	shared_ptr<AsymmetricCiphertext> multiply(AsymmetricCiphertext* cipher1, AsymmetricCiphertext* cipher2, biginteger r) override;
 
 	
 	/**
 	* @see edu.biu.scapi.midLayer.asymmetricCrypto.encryption.AsymmetricEnc#reconstructCiphertext(edu.biu.scapi.midLayer.ciphertext.AsymmetricCiphertextSendableData)
 	*/
-	shared_ptr<AsymmetricCiphertext> reconstructCiphertext(shared_ptr<AsymmetricCiphertextSendableData> data) override;
+	shared_ptr<AsymmetricCiphertext> reconstructCiphertext(AsymmetricCiphertextSendableData* data) override;
 };

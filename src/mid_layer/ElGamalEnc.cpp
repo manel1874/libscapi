@@ -2,9 +2,14 @@
 
 void ElGamalOnGrElSendableData::initFromString(const string & row) {
 	auto str_vec = explode(row, ':');
-	assert(str_vec.size() == 2);
-	cipher1->initFromString(str_vec[0]);
-	cipher2->initFromString(str_vec[1]);
+	if (str_vec.size() == 2) {
+
+		cipher1->initFromString(str_vec[0]);
+		cipher2->initFromString(str_vec[1]);
+	} else if (str_vec.size() == 4) {
+		cipher1->initFromString(str_vec[0] + ":" + str_vec[1]);
+		cipher2->initFromString(str_vec[2] + ":" + str_vec[3]);
+	}
 }
 
 void ElGamalOnGroupElementEnc::setMembers(shared_ptr<DlogGroup> dlogGroup) {
@@ -88,8 +93,8 @@ pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> ElGamalOnGroupElementEnc::ge
 	return pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>>(publicKey, privateKey);
 }
 
-shared_ptr<PublicKey> ElGamalOnGroupElementEnc::reconstructPublicKey(shared_ptr<KeySendableData> data) {
-	auto data1 = dynamic_pointer_cast<ElGamalPublicKeySendableData>(data);
+shared_ptr<PublicKey> ElGamalOnGroupElementEnc::reconstructPublicKey(KeySendableData* data) {
+	auto data1 = dynamic_cast<ElGamalPublicKeySendableData*>(data);
 	if (data1 == NULL)
 		throw invalid_argument("To generate the key from sendable data, the data has to be of type ScElGamalPublicKeySendableData");
 	
@@ -97,11 +102,11 @@ shared_ptr<PublicKey> ElGamalOnGroupElementEnc::reconstructPublicKey(shared_ptr<
 	return make_shared<ElGamalPublicKey>(h);
 }
 
-shared_ptr<PrivateKey> ElGamalOnGroupElementEnc::reconstructPrivateKey(shared_ptr<KeySendableData> data) {
-	auto data1 = dynamic_pointer_cast<ElGamalPrivateKey>(data);
+shared_ptr<PrivateKey> ElGamalOnGroupElementEnc::reconstructPrivateKey(KeySendableData* data) {
+	auto data1 = dynamic_cast<ElGamalPrivateKey*>(data);
 	if (data1 == NULL)
 		throw invalid_argument("To generate the key from sendable data, the data has to be of type ElGamalPrivateKey");
-	return data1;
+	return make_shared<ElGamalPrivateKey>(data1->getX());
 }
 
 /**
@@ -203,7 +208,7 @@ shared_ptr<Plaintext> ElGamalOnGroupElementEnc::generatePlaintext(vector<byte> t
 * @throws KeyException if no private key was set.
 * @throws IllegalArgumentException if the given cipher is not instance of ElGamalOnGroupElementCiphertext.
 */
-shared_ptr<Plaintext> ElGamalOnGroupElementEnc::decrypt(shared_ptr<AsymmetricCiphertext> cipher) {
+shared_ptr<Plaintext> ElGamalOnGroupElementEnc::decrypt(AsymmetricCiphertext* cipher) {
 	/*
 	* Pseudo-code:
 	* 		Calculate s = ciphertext.getC1() ^ x^(-1) //x^(-1) is kept in the private key because of the optimization computed in the function initPrivateKey.
@@ -216,7 +221,7 @@ shared_ptr<Plaintext> ElGamalOnGroupElementEnc::decrypt(shared_ptr<AsymmetricCip
 	}
 
 	//Ciphertext should be ElGamal ciphertext.
-	auto ciphertext = dynamic_pointer_cast<ElGamalOnGroupElementCiphertext>(cipher);
+	auto ciphertext = dynamic_cast<ElGamalOnGroupElementCiphertext*>(cipher);
 	if (ciphertext == NULL) {
 		throw invalid_argument("ciphertext should be instance of ElGamalOnGroupElementCiphertext");
 	}
@@ -238,9 +243,9 @@ shared_ptr<Plaintext> ElGamalOnGroupElementEnc::decrypt(shared_ptr<AsymmetricCip
 * @return the byte array generated from the given plaintext.
 * @throws IllegalArgumentException if the given plaintext is not an instance of GroupElementPlaintext.
 */
-vector<byte> ElGamalOnGroupElementEnc::generateBytesFromPlaintext(shared_ptr<Plaintext> plaintext) {
+vector<byte> ElGamalOnGroupElementEnc::generateBytesFromPlaintext(Plaintext* plaintext) {
 	
-	auto plain = dynamic_pointer_cast<GroupElementPlaintext>(plaintext);
+	auto plain = dynamic_cast<GroupElementPlaintext*>(plaintext);
 	if (plain == NULL) {
 		throw invalid_argument("plaintext should be an instance of GroupElementPlaintext");
 	}
@@ -256,7 +261,7 @@ vector<byte> ElGamalOnGroupElementEnc::generateBytesFromPlaintext(shared_ptr<Pla
 * 		1. If one or more of the given ciphertexts is not instance of ElGamalOnGroupElementCiphertext.
 * 		2. If one or more of the GroupElements in the given ciphertexts is not a member of the underlying DlogGroup of this ElGamal encryption scheme.
 */
-shared_ptr<AsymmetricCiphertext> ElGamalOnGroupElementEnc::multiply(shared_ptr<AsymmetricCiphertext> cipher1, shared_ptr<AsymmetricCiphertext> cipher2) {
+shared_ptr<AsymmetricCiphertext> ElGamalOnGroupElementEnc::multiply(AsymmetricCiphertext* cipher1, AsymmetricCiphertext* cipher2) {
 
 	//Choose a random value in Zq.
 	biginteger w = getRandomInRange(0, qMinusOne, random);
@@ -279,7 +284,7 @@ shared_ptr<AsymmetricCiphertext> ElGamalOnGroupElementEnc::multiply(shared_ptr<A
 * 		1. If one or more of the given ciphertexts is not instance of ElGamalOnGroupElementCiphertext.
 * 		2. If one or more of the GroupElements in the given ciphertexts is not a member of the underlying DlogGroup of this ElGamal encryption scheme.
 */
-shared_ptr<AsymmetricCiphertext> ElGamalOnGroupElementEnc::multiply(shared_ptr<AsymmetricCiphertext> cipher1, shared_ptr<AsymmetricCiphertext> cipher2, biginteger r) {
+shared_ptr<AsymmetricCiphertext> ElGamalOnGroupElementEnc::multiply(AsymmetricCiphertext* cipher1, AsymmetricCiphertext* cipher2, biginteger r) {
 	/*
 	* Pseudo-Code:
 	* 	c1 = (u1, v1); c2 = (u2, v2)
@@ -293,8 +298,8 @@ shared_ptr<AsymmetricCiphertext> ElGamalOnGroupElementEnc::multiply(shared_ptr<A
 		throw new IllegalStateException("in order to encrypt a message this object must be initialized with public key");
 	}
 
-	auto c1 = dynamic_pointer_cast<ElGamalOnGroupElementCiphertext>(cipher1);
-	auto c2 = dynamic_pointer_cast<ElGamalOnGroupElementCiphertext>(cipher2);
+	auto c1 = dynamic_cast<ElGamalOnGroupElementCiphertext*>(cipher1);
+	auto c2 = dynamic_cast<ElGamalOnGroupElementCiphertext*>(cipher2);
 
 	// Cipher1 and cipher2 should be ElGamal ciphertexts.
 	if (c1 == NULL || c2 == NULL) {
@@ -329,8 +334,8 @@ shared_ptr<AsymmetricCiphertext> ElGamalOnGroupElementEnc::multiply(shared_ptr<A
 	return make_shared<ElGamalOnGroupElementCiphertext>(u, v);
 }
 
-shared_ptr<AsymmetricCiphertext> ElGamalOnGroupElementEnc::reconstructCiphertext(shared_ptr<AsymmetricCiphertextSendableData> data) {
-	auto data1 = dynamic_pointer_cast<ElGamalOnGrElSendableData>(data);
+shared_ptr<AsymmetricCiphertext> ElGamalOnGroupElementEnc::reconstructCiphertext(AsymmetricCiphertextSendableData* data) {
+	auto data1 = dynamic_cast<ElGamalOnGrElSendableData*>(data);
 	if (data1 == NULL)
 		throw invalid_argument("The input data has to be of type ElGamalOnGrElSendableData");
 	
