@@ -16,6 +16,30 @@ Libscapi has is tested on Ubuntu 14.04 and should run on all major versions of L
 Mac OSX has not been tested so far. 
 For detailed instructions, see [INSTALL.MD](INSTALL.MD)
 
+## Libraries used by libscapi
+
+### Math and General Purpose Libraries
+
+##### OpenSSL
+[](https://www.openssl.org/)
+##### The GNU Multiple Precision Arithmetic Library (GMP)
+[](https://gmplib.org/)
+##### NTL: A Library for doing Number Theory- Victor Shoup
+[](http://www.shoup.net/ntl/)
+##### MIRACL Cryptographic SDK
+[](https://github.com/miracl/MIRACL)
+##### Boost 1.60
+[](http://www.boost.org/)
+##### Cereal C++ Serialization Library
+[](http://uscilab.github.io/cereal/)
+
+### Implementations by other Academic Institutes
+
+##### Engineering Cryptographic Protocols Group at TU Darmstadt OT Extension
+[](https://github.com/encryptogroup/OTExtension)
+
+Implementation of the passive secure OT extension protocol of [1] and the active secure OT extension protocols of [2] and [3]. Implements the general OT (G_OT), correlated OT (C_OT), global correlated OT (GC_OT), sender random OT (SR_OT), and receiver random OT (RR_OT) (Definitions of the functionalities will follow). Implements the base-OTs by Naor-Pinkas [4], Peikert-Vaikuntanathan-Waters [5], and Chou-Orlandi [6]. The code is based on the OT extension implementation of [7] and uses the MIRACL libary [8] for elliptic curve arithmetic. Update: Implemented 1-out-of-2 OT from the 1-out-of-N OT extension of [10].
+
 
 
 
