@@ -6,7 +6,9 @@ The goal of libscapi is to promote research by in Secure Multiparty Computation,
 
 However, some of the libraries we use have different licenses. Fo further information pleare refer to [LICENSE.MD](LICENSE.MD)
 
-##Installing libscapi on Ubuntu 14.04
+##Installing libscapi
+
+### Ubuntu 14.04LTS
 
 #### Prerequisites
 - sudo apt-get update
@@ -32,4 +34,9 @@ However, some of the libraries we use have different licenses. Fo further inform
 - cd ~/libscapi/test
 - make
 - ./tests.exe
+
+### Docker Image
+
+### Windows 7/8/10
+
 
