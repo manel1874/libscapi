@@ -40,7 +40,7 @@ GMP is a free library for arbitrary precision arithmetic, operating on signed in
 The main target applications for GMP are cryptography applications and research, Internet security applications, algebra systems, computational algebra research, etc.
 
 ##### NTL: A Library for doing Number Theory- Victor Shoup
-[](http://www.shoup.net/ntl/)
+[ttp://www.shoup.net/ntl/](http://www.shoup.net/ntl/)
 
  NTL is a high-performance, portable C++ library providing data structures and algorithms for manipulating signed, arbitrary length integers, and for vectors, matrices, and polynomials over the integers and over finite fields.On modern platforms supporting C++11, NTL can be compiled in thread safe and exception safe modes. 
 
