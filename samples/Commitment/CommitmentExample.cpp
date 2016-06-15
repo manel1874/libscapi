@@ -30,6 +30,9 @@ shared_ptr<CmtCommitter> getCommitter(shared_ptr<CommParty> channel, CommitmentP
 		sds = make_shared<CmtPedersenHashCommitter>(channel, dlog, hash);
 	} else if (sdp.protocolName == "SimpleHash") {
 		sds = make_shared<CmtSimpleHashCommitter>(channel);
+	} else if (sdp.protocolName == "ElGamalOnGroupElement") {
+		auto dlog = make_shared<OpenSSLDlogECF2m>();
+		sds = make_shared<CmtElGamalOnGroupElementCommitter>(channel, dlog);
 	}
 
 	return sds;
@@ -49,6 +52,9 @@ shared_ptr<CmtReceiver> getReceiver(shared_ptr<CommParty> channel, CommitmentPar
 		sds = make_shared<CmtPedersenHashReceiver>(channel, dlog, hash);
 	} else if (sdp.protocolName == "SimpleHash") {
 		sds = make_shared<CmtSimpleHashReceiver>(channel);
+	} else if (sdp.protocolName == "ElGamalOnGroupElement") {
+		auto dlog = make_shared<OpenSSLDlogECF2m>();
+		sds = make_shared<CmtElGamalOnGroupElementReceiver>(channel, dlog);
 	}
 
 	return sds;
@@ -69,7 +75,7 @@ int mainCommitment(string side, string configPath) {
 			server->join(500, 5000); // sleep time=500, timeout = 5000 (ms);
 			auto committer = getCommitter(server, sdp);
 			auto val = committer->sampleRandomCommitValue();
-			cout << "the committed value is:" << val->toString();
+			cout << "the committed value is:" << val->toString() << endl;
 			committer->commit(val, 0);
 			committer->decommit(0);
 		}
