@@ -47,7 +47,7 @@ class CmtElGamalCommitmentMessage : public CmtCCommitmentMsg {
 	// In ElGamal schemes the commitment object is a ElGamalCiphertext
 	//In order to this class be a serializable, we get it as ElGamalCiphertextSendableData. 
 private:
-	shared_ptr<ElGamalOnGrElSendableData> cipherData;
+	shared_ptr<AsymmetricCiphertextSendableData> cipherData;
 	long id; //The id of the commitment
 
 public:
@@ -56,7 +56,7 @@ public:
 	* @param cipherData the actual commitment object. In ElGamal schemes the commitment object is a ElGamalCiphertextSendableData.
 	* @param id the commitment id.
 	*/
-	CmtElGamalCommitmentMessage(shared_ptr<ElGamalOnGrElSendableData> cipherData = NULL, long id = 0) {
+	CmtElGamalCommitmentMessage(shared_ptr<AsymmetricCiphertextSendableData> cipherData = NULL, long id = 0) {
 		this->cipherData = cipherData;
 		this->id = id;
 	}
@@ -169,7 +169,7 @@ private:
 	* @throws InvalidDlogGroupException if the given dlog is not valid.
 	* @throws IOException if there was a problem in the communication
 	*/
-	void doConstruct(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, shared_ptr<ElGamalOnGroupElementEnc> elGamal);
+	void doConstruct(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, shared_ptr<ElGamalEnc> elGamal);
 
 	/**
 	* The pre-process is performed once within the construction of this object.
@@ -186,7 +186,7 @@ protected:
 	shared_ptr<DlogGroup> dlog;
 	mt19937 random;
 	biginteger qMinusOne;
-	shared_ptr<ElGamalOnGroupElementEnc> elGamal;
+	shared_ptr<ElGamalEnc> elGamal;
 	shared_ptr<ElGamalPublicKey> publicKey;
 	shared_ptr<ElGamalPrivateKey> privateKey;
 
@@ -196,7 +196,7 @@ protected:
 	* The Receiver needs to be instantiated with the same DlogGroup,
 	* otherwise nothing will work properly.
 	*/
-	CmtElGamalCommitterCore(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, shared_ptr<ElGamalOnGroupElementEnc> elGamal) {
+	CmtElGamalCommitterCore(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, shared_ptr<ElGamalEnc> elGamal) {
 		doConstruct(channel, dlog, elGamal);
 	}
 
@@ -302,7 +302,7 @@ private:
 	* @param dlog
 	* @param elGamal
 	*/
-	void doConstruct(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, shared_ptr<ElGamalOnGroupElementEnc> elGamal);
+	void doConstruct(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, shared_ptr<ElGamalEnc> elGamal);
 
 	/**
 	* The pre-process is performed once within the construction of this object.
@@ -314,8 +314,10 @@ private:
 protected:
 	shared_ptr<DlogGroup> dlog;
 	shared_ptr<CommParty> channel;
-	shared_ptr<ElGamalOnGroupElementEnc> elGamal;
+	shared_ptr<ElGamalEnc> elGamal;
 	shared_ptr<ElGamalPublicKey> publicKey;
+
+	virtual shared_ptr<CmtElGamalCommitmentMessage> getCommitmentMsg() = 0; 
 
 public:
 	/**
@@ -324,7 +326,7 @@ public:
 	* The committer needs to be instantiated with the same DlogGroup,
 	* otherwise nothing will work properly.
 	*/
-	CmtElGamalReceiverCore(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, shared_ptr<ElGamalOnGroupElementEnc> elGamal) {
+	CmtElGamalReceiverCore(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, shared_ptr<ElGamalEnc> elGamal) {
 		doConstruct(channel, dlog, elGamal);
 	}
 
@@ -368,6 +370,8 @@ public:
 *
 */
 class CmtElGamalOnGroupElementReceiver : public CmtElGamalReceiverCore, public PerfectlyBindingCmt, public CmtOnGroupElement {
+protected:
+	shared_ptr<CmtElGamalCommitmentMessage> getCommitmentMsg() override;
 
 public:
 	/**
@@ -403,5 +407,116 @@ public:
 	*/
 	vector<byte> generateBytesFromCommitValue(CmtCommitValue* value) override;
 
+};
+
+/**
+* This class implements the committer side of the ElGamal commitment. <p>
+*
+* It uses El Gamal encryption for byte arrays, that is, the encryption class used is
+* ScElGamalOnbyteArray. This default cannot be changed.<p>
+*
+* The pseudo code of this protocol can be found in Protocol 3.4 of pseudo codes document at {@link http://cryptobiu.github.io/scapi/SDK_Pseudocode.pdf}.<p>
+*
+* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
+*
+*/
+class CmtElGamalOnByteArrayCommitter : public CmtElGamalCommitterCore, public PerfectlyBindingCmt, public CmtOnByteArray {
+
+	/**
+	* This constructor lets the caller pass the channel, the dlog group and the
+	* KeyDerivation function to work with.
+	* The El Gamal option (ScElGamalOnByteArray)is set by default by the constructor
+	* and cannot be changed.
+	* @param channel used for the communication
+	* @param dlog	Dlog group
+	* @param kdf key derivation function
+	* @param random
+	* 
+	*/
+public:
+	CmtElGamalOnByteArrayCommitter(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog = make_shared<OpenSSLDlogECF2m>("K-233"), 
+		shared_ptr<KeyDerivationFunction> kdf = make_shared<HKDF>(new OpenSSLHMAC())) 
+		: CmtElGamalCommitterCore(channel, dlog, make_shared<ElGamalOnByteArrayEnc>(dlog, kdf)) {}
+	
+	shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(shared_ptr<CmtCommitValue> input, long id) override;
+
+	/**
+	* This function samples random commit value and returns it.
+	* @return the sampled commit value
+	*/
+	shared_ptr<CmtCommitValue> sampleRandomCommitValue() override;
+
+	shared_ptr<CmtCommitValue> generateCommitValue(vector<byte> x) override {
+		return make_shared<CmtByteArrayCommitValue>(make_shared<vector<byte>>(x));
+	}
+
+	/**
+	* This function converts the given commit value to a byte array.
+	* @param value
+	* @return the generated bytes.
+	*/
+	vector<byte> generateBytesFromCommitValue(CmtCommitValue* value) override;
+
+};
+
+/**
+* This class implements the receiver side of the ElGamal commitment. <p>
+* It uses El Gamal encryption for byte arrays, that is, the encryption class used is
+* ScElGamalOnByteArray. This default cannot be changed.<p>
+*
+* The pseudo code of this protocol can be found in Protocol 3.4 of pseudo codes document at {@link http://cryptobiu.github.io/scapi/SDK_Pseudocode.pdf}.<p>
+*
+* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
+*
+*/
+class CmtElGamalOnByteArrayReceiver : public CmtElGamalReceiverCore , public PerfectlyBindingCmt, public CmtOnByteArray {
+private:
+	shared_ptr<KeyDerivationFunction> kdf;
+
+protected:
+	shared_ptr<CmtElGamalCommitmentMessage> getCommitmentMsg() override;
+
+public:
+	/**
+	* This constructor lets the caller pass the channel, the dlog group and the
+	* KeyDerivation function to work with.
+	* The El Gamal option (ScElGamalOnByteArray)is set by default by the constructor
+	* and cannot be changed.
+	* @param channel used for the communication
+	* @param dlog	Dlog group
+	* @param kdf key derivation function
+	* @throws CheatAttemptException if the receiver suspects the committer trying to cheat.
+	* @throws ClassNotFoundException if there was a problem during serialization.
+	* @throws SecurityLevelException if the given dlog is not DDH - secure
+	* @throws InvalidDlogGroupException if the given dlog is not valid
+	* @throws IOException if there was a problem during communication
+	*/
+	CmtElGamalOnByteArrayReceiver(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog = make_shared<OpenSSLDlogECF2m>("K-233"),
+		shared_ptr<KeyDerivationFunction> kdf = make_shared<HKDF>(new OpenSSLHMAC())) : CmtElGamalReceiverCore(channel, dlog, make_shared<ElGamalOnByteArrayEnc>(dlog, kdf)) {
+		this->kdf = kdf;
+	}
+
+	/**
+	* Proccesses the decommitment phase.<p>
+	* "IF NOT<p>
+	*		u=g^r <p>
+	*		v = h^r * x<p>
+	*		x in G<p>
+	*		OUTPUT REJ<p>
+	*	ELSE<p>
+	*	    OUTPUT ACC and value x"<p>
+	* @param id the id of the commitment.
+	* @param msg the receiver message from the committer
+	* @return the committed value if the decommit succeeded; null, otherwise.
+	*/
+	shared_ptr<CmtCommitValue> verifyDecommitment(CmtCCommitmentMsg* commitmentMsg,
+		CmtCDecommitmentMessage* decommitmentMsg) override; 
+
+	/**
+	* This function converts the given commit value to a byte array.
+	* @param value
+	* @return the generated bytes.
+	*/
+	vector<byte> generateBytesFromCommitValue(CmtCommitValue* value) override;
 };
 

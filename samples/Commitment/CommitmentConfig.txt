@@ -6,4 +6,5 @@ verifierPort  = 1223
 #protocolName = PedersenHash
 #protocolName = PedersenTrapdoor
 #protocolName = SimpleHash
-protocolName = ElGamalOnGroupElement
+#protocolName = ElGamalOnGroupElement
+protocolName = ElGamalOnByteArray

@@ -33,6 +33,8 @@ shared_ptr<CmtCommitter> getCommitter(shared_ptr<CommParty> channel, CommitmentP
 	} else if (sdp.protocolName == "ElGamalOnGroupElement") {
 		auto dlog = make_shared<OpenSSLDlogECF2m>();
 		sds = make_shared<CmtElGamalOnGroupElementCommitter>(channel, dlog);
+	} else if (sdp.protocolName == "ElGamalOnByteArray") {
+		sds = make_shared<CmtElGamalOnByteArrayCommitter>(channel);
 	}
 
 	return sds;
@@ -55,7 +57,10 @@ shared_ptr<CmtReceiver> getReceiver(shared_ptr<CommParty> channel, CommitmentPar
 	} else if (sdp.protocolName == "ElGamalOnGroupElement") {
 		auto dlog = make_shared<OpenSSLDlogECF2m>();
 		sds = make_shared<CmtElGamalOnGroupElementReceiver>(channel, dlog);
+	} else if (sdp.protocolName == "ElGamalOnByteArray") {
+		sds = make_shared<CmtElGamalOnByteArrayReceiver>(channel);
 	}
+
 
 	return sds;
 }
