@@ -7,8 +7,25 @@ The goal of libscapi is to promote research by Academy and Industry practitioner
 - High Performance implementation on standard Linux & Intelx64 Architecture. We use modern techniques like Intel Intrinsics Instructions, Pipelining and TCP optimizations. However, we avoid using techinques that are too advanced or not available on common platforms (such as Intel AVX-512 and DPDK, GPGPU exc).   
 - Provide a common platfrom for benchmarking different alogirthms and implementations
 
-## License information
-Libscapi is released under the MIT open source license. However, some of the libraries we use have different licenses. Fo further information pleare refer to [LICENSE.MD](LICENSE.MD)
+## libscapi Modules
+##### Primitives
+- Dlog, Cryptographic Hash Function, HMAC and KDF, Pseudorandom Functions and Permutations, Pseudo Random Generator, Trapdoor Permutation, Random Oracle (to be elaborated)
+
+##### Mid-layer protocols
+- Currently includes Public Key Encryption Schemes: Cramer-Shoup, Damgard-Jurik, El-Gamal
+
+##### Interactive Mid-layer protocols
+- Sigma Protocols, Zero Knowledge Proofs, Commitment Schemes (to be elaborated)
+- OT Extension - Semi-Honest and Malicious 
+
+##### Circuits
+- To be elaborated
+
+##### Communication Channel
+- To be elaborated
+
+- ## License information
+Libscapi is released under the MIT open source license. However, some of the libraries we use have different licenses. For further information pleare refer to [LICENSE.MD](LICENSE.MD)
 
 ##Installing libscapi
 
