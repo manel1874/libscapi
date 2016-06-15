@@ -137,6 +137,10 @@ class StatisticallyHidingCmt : public SecureCommit {};
 class PerfectlyHidingCmt : public StatisticallyHidingCmt {};
 
 /**
+* Any commitment scheme that is perfectly binding should implement this interface.
+*/
+class PerfectlyBindingCmt : public SecureCommit {}; 
+/**
 * Any protocol that is secure in the presence of semi-honest adversaries should implement this interface.
 */
 class SemiHonest : ProtocolSecLevel {};
