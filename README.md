@@ -1,10 +1,10 @@
 # Libscapi
 libscapi is the C++ high performance version of scapi (secure multi party computation - API). We are in beta,  release of first version is expected at 1 August 2016
 
-# License information
+## License information
 The goal of libscapi is to promote research by in Secure Multiparty Computation, and it is therefore released under the MIT open source license. 
 
-However, some of the libraries we use have different licenses. Fo further information pleare refer to [1](LICENSE.MD)
+However, some of the libraries we use have different licenses. Fo further information pleare refer to [LICENSE.MD](LICENSE.MD)
 
 ##Installing libscapi on Ubuntu 14.04
 
@@ -32,7 +32,4 @@ However, some of the libraries we use have different licenses. Fo further inform
 - cd ~/libscapi/test
 - make
 - ./tests.exe
- 
-# License
 
-#
