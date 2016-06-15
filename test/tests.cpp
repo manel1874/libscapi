@@ -732,7 +732,7 @@ TEST_CASE("serialization", "[SerializedData, CmtCCommitmentMsg]")
 
 TEST_CASE("asymmetric encryption")
 {
-	SECTION("El Gamal")
+	SECTION("El Gamal on group element")
 	{
 		mt19937 random = get_seeded_random();
 		auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
@@ -764,6 +764,34 @@ TEST_CASE("asymmetric encryption")
 		auto c = dlog->multiplyGroupElements(p->getElement().get(), p->getElement().get());
 		auto multC = elgamal.encrypt(make_shared<GroupElementPlaintext>(c), r*3 % dlog->getOrder());
 		REQUIRE(*doubleC == *multC);
+	}
+
+	SECTION("El Gamal on byte array")
+	{
+		mt19937 random = get_seeded_random();
+		auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
+		auto kdf = make_shared<HKDF>(new OpenSSLHMAC());
+		ElGamalOnByteArrayEnc elgamal(dlog, kdf);
+		auto keys = elgamal.generateKey();
+		elgamal.setKey(keys.first, keys.second);
+		string message = "I want to encrypt this!";
+		int len = message.size();
+		if (elgamal.hasMaxByteArrayLengthForPlaintext()) {
+			REQUIRE(len < elgamal.getMaxLengthOfByteArrayForPlaintext());
+		}
+		vector<byte> plainM(message.begin(), message.end());
+		auto plaintext = elgamal.generatePlaintext(plainM);
+		biginteger r = getRandomInRange(0, dlog->getOrder() - 1, random);
+		auto cipher = elgamal.encrypt(plaintext, r);
+		auto returnedP = elgamal.decrypt(cipher.get());
+		REQUIRE(*returnedP == *plaintext);
+
+		auto returnedV = elgamal.generateBytesFromPlaintext(plaintext.get());
+		bool equal = true;
+		for (int i = 0; i < plainM.size(); i++)
+			if (returnedV.data()[i] != plainM.data()[i])
+				equal = false;
+		REQUIRE(equal == true);
 	}
 
 	SECTION("CramerShoup")
