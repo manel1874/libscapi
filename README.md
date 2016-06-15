@@ -52,6 +52,10 @@ cereal is a header-only C++11 serialization library. cereal takes arbitrary data
 
 Implementation of the passive secure OT extension protocol of [1] and the active secure OT extension protocols of [2] and [3]. Implements the general OT (G_OT), correlated OT (C_OT), global correlated OT (GC_OT), sender random OT (SR_OT), and receiver random OT (RR_OT) (Definitions of the functionalities will follow). Implements the base-OTs by Naor-Pinkas [4], Peikert-Vaikuntanathan-Waters [5], and Chou-Orlandi [6]. The code is based on the OT extension implementation of [7] and uses the MIRACL libary [8] for elliptic curve arithmetic. Update: Implemented 1-out-of-2 OT from the 1-out-of-N OT extension of [10].
 
+##### University of Bristol: Advanced Protocols for Real-world Implementation of Computational Oblivious Transfers
+[https://github.com/bristolcrypto/apricot](https://github.com/bristolcrypto/apricot)
 
+##### Tung Chou and Claudio Orlandi: The Simplest Oblivious Transfer Protocol
+[http://users-cs.au.dk/orlandi/simpleOT/](http://users-cs.au.dk/orlandi/simpleOT/)
 
 
