@@ -10,8 +10,8 @@ The goal of libscapi is to promote research by Academy and Industry practitioner
 ## libscapi Modules
 - __Primitives__: Dlog, Cryptographic Hash Function, HMAC and KDF, Pseudorandom Functions and Permutations, Pseudo Random Generator, Trapdoor Permutation, Random Oracle (to be elaborated)
 - __Mid-layer protocols__: Currently includes Public Key Encryption Schemes: Cramer-Shoup, Damgard-Jurik, El-Gamal
-- __Interactive Mid-layer protocols__: Sigma Protocols, Zero Knowledge Proofs, Commitment Schemes (to be elaborated),
-__OT Extension__ - Semi-Honest and Malicious 
+- __Interactive Mid-layer protocols__: Sigma Protocols, Zero Knowledge Proofs, Commitment Schemes (to be elaborated)
+- __OT Extension__ - Semi-Honest and Malicious 
 - __Circuits__: To be elaborated
 - __Communication Channel__: To be elaborated
 
