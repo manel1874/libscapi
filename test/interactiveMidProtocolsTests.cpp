@@ -269,7 +269,8 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 		SigmaDJEncryptedZeroProverComputation prover;
 		SigmaDJEncryptedZeroVerifierComputation verifier;
 		DamgardJurikEnc dj;
-		auto pair = dj.generateKey(&DJKeyGenParameterSpec());
+		DJKeyGenParameterSpec spec;
+		auto pair = dj.generateKey(&spec);
 		dj.setKey(pair.first, pair.second);
 		biginteger r = getRandomInRange(0, dynamic_pointer_cast<DamgardJurikPublicKey>(pair.first)->getModulus(), random);
 		auto cipher = dj.encrypt(make_shared<BigIntegerPlainText>(0), r);
@@ -294,7 +295,8 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 		SigmaDJEncryptedValueProverComputation prover;
 		SigmaDJEncryptedValueVerifierComputation verifier;
 		DamgardJurikEnc dj;
-		auto pair = dj.generateKey(&DJKeyGenParameterSpec());
+		DJKeyGenParameterSpec spec;
+		auto pair = dj.generateKey(&spec);
 		dj.setKey(pair.first, pair.second);
 		biginteger r = getRandomInRange(0, dynamic_pointer_cast<DamgardJurikPublicKey>(pair.first)->getModulus(), random);
 		auto plaintext = make_shared<BigIntegerPlainText>(0);
@@ -321,7 +323,8 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 		SigmaDJProductProverComputation prover;
 		SigmaDJProductVerifierComputation verifier;
 		DamgardJurikEnc dj;
-		auto pair = dj.generateKey(&DJKeyGenParameterSpec());
+		DJKeyGenParameterSpec spec;
+		auto pair = dj.generateKey(&spec);
 		dj.setKey(pair.first, pair.second);
 		biginteger r1 = getRandomInRange(0, dynamic_pointer_cast<DamgardJurikPublicKey>(pair.first)->getModulus(), random);
 		auto p1 = make_shared<BigIntegerPlainText>(2);
@@ -466,7 +469,8 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 		auto djProver = make_shared<SigmaDJEncryptedZeroProverComputation>(80);
 		auto djVerifier = make_shared<SigmaDJEncryptedZeroVerifierComputation>(80);
 		DamgardJurikEnc dj;
-		auto pair = dj.generateKey(&DJKeyGenParameterSpec());
+		DJKeyGenParameterSpec spec;
+		auto pair = dj.generateKey(&spec);
 		dj.setKey(pair.first, pair.second);
 		biginteger r = getRandomInRange(0, dynamic_pointer_cast<DamgardJurikPublicKey>(pair.first)->getModulus(), random);
 		auto cipher = dj.encrypt(make_shared<BigIntegerPlainText>(0), r);
