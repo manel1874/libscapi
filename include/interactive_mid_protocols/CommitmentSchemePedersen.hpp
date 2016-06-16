@@ -424,6 +424,7 @@ public:
 		CmtPedersenCommitter(channel, dlog) {
 		doConstruct(t);
 	};
+
 	void proveKnowledge(long id) override;
 	void proveCommittedValue(long id) override;
 };
@@ -469,7 +470,6 @@ public:
 	};
 
 	bool verifyKnowledge(long id) override;
-
 	shared_ptr<CmtCommitValue> verifyCommittedValue(long id) override;
 };
 

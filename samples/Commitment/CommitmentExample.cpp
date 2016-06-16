@@ -21,6 +21,9 @@ shared_ptr<CmtCommitter> getCommitter(shared_ptr<CommParty> channel, CommitmentP
 	if (sdp.protocolName == "Pedersen") {
 		auto dlog = make_shared<OpenSSLDlogECF2m>();
 		sds = make_shared<CmtPedersenCommitter>(channel, dlog);
+	} if (sdp.protocolName == "PedersenWithProofs") {
+		auto dlog = make_shared<OpenSSLDlogECF2m>();
+		sds = make_shared<CmtPedersenWithProofsCommitter>(channel, dlog, 80);
 	} else if (sdp.protocolName == "PedersenTrapdoor") {
 		auto dlog = make_shared<OpenSSLDlogECF2m>();
 		sds = make_shared<CmtPedersenTrapdoorCommitter>(channel, dlog);
@@ -47,6 +50,9 @@ shared_ptr<CmtReceiver> getReceiver(shared_ptr<CommParty> channel, CommitmentPar
 	if (sdp.protocolName == "Pedersen") {
 		auto dlog = make_shared<OpenSSLDlogECF2m>();
 		sds = make_shared<CmtPedersenReceiver>(channel, dlog);
+	} if (sdp.protocolName == "PedersenWithProofs") {
+		auto dlog = make_shared<OpenSSLDlogECF2m>();
+		sds = make_shared<CmtPedersenWithProofsReceiver>(channel, dlog, 80);
 	} else if (sdp.protocolName == "PedersenTrapdoor") {
 		auto dlog = make_shared<OpenSSLDlogECF2m>();
 		sds = make_shared<CmtPedersenTrapdoorReceiver>(channel, dlog);
@@ -87,6 +93,12 @@ int mainCommitment(string side, string configPath) {
 			cout << "the committed value is:" << val->toString() << endl;
 			committer->commit(val, 0);
 			committer->decommit(0);
+
+			if (sdp.protocolName.find("WithProofs") != string::npos) {
+				auto prover = dynamic_pointer_cast<CmtWithProofsCommitter>(committer);
+				prover->proveKnowledge(0);
+				prover->proveCommittedValue(0);
+			}
 		}
 		else if (side == "2") {
 			server->join(500, 5000); // sleep time=500, timeout = 5000 (ms);
@@ -95,8 +107,16 @@ int mainCommitment(string side, string configPath) {
 			auto result = receiver->receiveDecommitment(0);
 			if (result == NULL) {
 				cout << "commitment failed" << endl;
-			} else 
-				cout << "the committed value is:" << result->toString();
+			} else
+				cout << "the committed value is:" << result->toString() << endl;;
+
+
+			if (sdp.protocolName.find("WithProofs") != string::npos) {
+				auto verifier = dynamic_pointer_cast<CmtWithProofsReceiver>(receiver);
+				bool verified = verifier->verifyKnowledge(0);
+				cout << "knowledge verifer output: " << (verified ? "Success" : "Failure") << endl;
+				cout << "verified committed value: " << verifier->verifyCommittedValue(0)->toString() << endl;
+			}
 		}
 		else {
 			CommitmentUsage();
