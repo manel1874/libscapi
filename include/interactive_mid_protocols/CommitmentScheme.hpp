@@ -560,7 +560,7 @@ public:
 *
 * All commitment scheme that have proofs should implement this interface.
 */
-class CmtWithProofsCommitter : public CmtCommitter {
+class CmtWithProofsCommitter {
 public:
 	/**
 	* Proves that the committer knows the committed value.
@@ -581,7 +581,7 @@ public:
 * 2. The committed value was x.<p>
 * All commitment scheme that have proofs should implement this interface.
 */
-class CmtWithProofsReceiver : CmtReceiver {
+class CmtWithProofsReceiver {
 public:
 	/**
 	* Verifies that the committer knows the committed value.
