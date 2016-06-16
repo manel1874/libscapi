@@ -109,6 +109,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\include\interactive_mid_protocols\CommitmentSchemeElGamalHash.cpp" />
     <ClCompile Include="..\..\src\circuits\BooleanCircuits.cpp" />
     <ClCompile Include="..\..\src\circuits\FourToTwoGarbledBoleanCircuitNoAssumptions.cpp" />
     <ClCompile Include="..\..\src\circuits\HalfGatesGarbledBoleanCircuitNoFixedKey.cpp" />
@@ -201,6 +202,7 @@
     <ClInclude Include="..\..\include\infra\Scanner.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentScheme.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentSchemeElGamal.hpp" />
+    <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentSchemeElGamalHash.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentSchemePedersen.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentSchemePedersenHash.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentSchemePedersenTrapdoor.hpp" />
