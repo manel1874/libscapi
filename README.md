@@ -1,6 +1,5 @@
 # Libscapi
-libscapi is the C++ high performance version of scapi (Secure Multiparty Computation API). We are in beta,  release of first version is expected by 1 August 2016. 
-The goal of libscapi is to promote research by Academy and Industry practitioners in this field by providing:
+libscapi is the C++ high performance version of scapi (Secure Multiparty Computation API).We are in beta,  release of first version is expected by 1 August 2016.  Libscapi is developed  by [Bar Ilan University Cryptography Research Group](http://crypto.biu.ac.il/). The goal of libscapi is to promote research by Academy and Industry practitioners in this field by providing:
 
 - A consistent API over Primitives, Mid-Layer Protocols, Interactive Mid-Layer Protocols and Communictaion Channels, simplifying the development and evaluation fo new protocols. We focus on keeping libscapi easy to build and use.
 - Integrating best performance open-source implementations by other Academy Research Institutets.  
