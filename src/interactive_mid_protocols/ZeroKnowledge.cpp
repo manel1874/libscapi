@@ -8,12 +8,12 @@
 ZKFromSigmaProver::ZKFromSigmaProver(shared_ptr<CommParty> channel,
 	shared_ptr<SigmaProverComputation> sProver, shared_ptr<CmtReceiver> receiver) {
 	// receiver must be an instance of PerfectlyHidingCT
-	auto perfectHidingReceiver = std::dynamic_pointer_cast<PerfectlyHidingCmt>(receiver);
+	auto perfectHidingReceiver = dynamic_pointer_cast<PerfectlyHidingCmt>(receiver);
 	if (!perfectHidingReceiver) 
 		throw SecurityLevelException("the given CTReceiver must be an instance of PerfectlyHidingCmt");
 	// receiver must be a commitment scheme on ByteArray or on BigInteger
-	auto onBigIntegerReceiver = std::dynamic_pointer_cast<CmtOnBigInteger>(receiver);
-	auto onByteArrayReceiver = std::dynamic_pointer_cast<CmtOnByteArray>(receiver);
+	auto onBigIntegerReceiver = dynamic_pointer_cast<CmtOnBigInteger>(receiver);
+	auto onByteArrayReceiver = dynamic_pointer_cast<CmtOnByteArray>(receiver);
 	if (!onBigIntegerReceiver && !onByteArrayReceiver) 
 		throw invalid_argument("the given receiver must be a commitment scheme on ByteArray or on BigInteger");
 
@@ -64,10 +64,9 @@ ZKFromSigmaVerifier::ZKFromSigmaVerifier(shared_ptr<CommParty> channel,
 	this->random = get_seeded_random64();
 }
 
-bool ZKFromSigmaVerifier::verify(shared_ptr<ZKCommonInput> input, 
-	shared_ptr<SigmaProtocolMsg> emptyA, shared_ptr<SigmaProtocolMsg> emptyZ) {
+bool ZKFromSigmaVerifier::verify(ZKCommonInput* input, SigmaProtocolMsg* emptyA, SigmaProtocolMsg* emptyZ) {
 	// the given input must be an instance of SigmaProtocolInput.
-	auto sigmaCommonInput = std::dynamic_pointer_cast<SigmaCommonInput>(input);
+	auto sigmaCommonInput = dynamic_cast<SigmaCommonInput*>(input);
 	if (!sigmaCommonInput)
 		throw invalid_argument("the given input must be an instance of SigmaCommonInput");
 
@@ -86,7 +85,7 @@ bool ZKFromSigmaVerifier::verify(shared_ptr<ZKCommonInput> input,
 	return proccessVerify(sigmaCommonInput, emptyA, emptyZ);
 }
 
-void ZKFromSigmaVerifier::receiveMsgFromProver(shared_ptr<SigmaProtocolMsg> concreteMsg) {
+void ZKFromSigmaVerifier::receiveMsgFromProver(SigmaProtocolMsg* concreteMsg) {
 	vector<byte> rawMsg;
 	channel->readWithSizeIntoVector(rawMsg);
 	concreteMsg->initFromByteVector(rawMsg);
@@ -113,16 +112,13 @@ void ZKPOKFromSigmaCmtPedersenProver::prove(shared_ptr<ZKProverInput> input) {
 	auto e = receiveDecommit(trap->getCommitmentId());
 	// if decommit returns some e, compute the response z to (a,e) according to sigma, 
 	// send z to V and output nothing
-	processSecondMsg(make_shared<byte>(e[0]), e.size(), trap);
+	processSecondMsg(e, trap);
 
 }
 
-void ZKPOKFromSigmaCmtPedersenProver::processSecondMsg(shared_ptr<byte> e, int eSize, 
-	shared_ptr<CmtRCommitPhaseOutput> trap) { 
+void ZKPOKFromSigmaCmtPedersenProver::processSecondMsg(vector<byte> e, shared_ptr<CmtRCommitPhaseOutput> trap) { 
 	// compute the second message by the underlying proverComputation.
-	vector<byte> eVector;
-	copy_byte_array_to_byte_vector(e.get(), eSize, eVector, 0);
-	auto z = sProver->computeSecondMsg(eVector);
+	auto z = sProver->computeSecondMsg(e);
 
 	// send the second message.
 	auto raw_z = z->toString();
@@ -138,10 +134,10 @@ void ZKPOKFromSigmaCmtPedersenProver::processSecondMsg(shared_ptr<byte> e, int e
 /************************************************/
 /*   ZKPOKFromSigmaCmtPedersenVerifier          */
 /************************************************/
-bool ZKPOKFromSigmaCmtPedersenVerifier::verify(shared_ptr<ZKCommonInput> input, 
-	shared_ptr<SigmaProtocolMsg> emptyA, shared_ptr<SigmaProtocolMsg> emptyZ) {
+bool ZKPOKFromSigmaCmtPedersenVerifier::verify(ZKCommonInput* input, 
+	SigmaProtocolMsg* emptyA, SigmaProtocolMsg* emptyZ) {
 	// the given input must be an instance of SigmaProtocolInput.
-	auto sigmaCommonInput = dynamic_pointer_cast<SigmaCommonInput>(input);
+	auto sigmaCommonInput = dynamic_cast<SigmaCommonInput*>(input);
 	if (!sigmaCommonInput) 
 		throw invalid_argument("the given input must be an instance of SigmaCommonInput");
 
@@ -161,15 +157,45 @@ bool ZKPOKFromSigmaCmtPedersenVerifier::verify(shared_ptr<ZKCommonInput> input,
 	// wait for a message z from P
 	receiveMsgFromProver(emptyZ);
 	// wait for trap from P
-	receiveTrapFromProver(trap);
+	receiveTrapFromProver(trap.get());
 
 	// run TRAP_COMMIT.valid(T,trap), where T is the transcript from the commit phase
 	valid = valid && committer->validate(trap);
 
 	// run transcript (a, e, z) is accepting in sigma on input x
-	valid = valid && proccessVerify(sigmaCommonInput, emptyA, emptyZ);
+	valid = valid && sVerifier->verify(sigmaCommonInput, emptyA, emptyZ);
+	
 
 	// if decommit and sigma verify returned true, return ACCEPT. Else, return REJECT.
 	return valid;
+}
+
+/**
+* Runs COMMIT.commit as the committer with input e.
+*/
+long ZKPOKFromSigmaCmtPedersenVerifier::commit(vector<byte> e) {
+	auto val = committer->generateCommitValue(e);
+	long id = random();
+	id = abs(id);
+	committer->commit(val, id);
+	return id;
+};
+/**
+* Waits for a message a from the prover.
+* @return the received message
+*/
+void ZKPOKFromSigmaCmtPedersenVerifier::receiveMsgFromProver(SigmaProtocolMsg* emptyMsg) {
+	vector<byte> rawMsg;
+	channel->readWithSizeIntoVector(rawMsg);
+	emptyMsg->initFromByteVector(rawMsg);
+};
+
+/**
+* Waits for a trapdoor a from the prover.
+*/
+void ZKPOKFromSigmaCmtPedersenVerifier::receiveTrapFromProver(CmtRCommitPhaseOutput* emptyOutput) {
+	vector<byte> rawMsg;
+	channel->readWithSizeIntoVector(rawMsg);
+	emptyOutput->initFromByteVector(rawMsg);
 }
 

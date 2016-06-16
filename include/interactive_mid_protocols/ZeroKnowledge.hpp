@@ -66,8 +66,7 @@ public:
 	* @param input holds necessary values to the varification calculations.
 	* @return true if the proof was verified; false, otherwise.
 	*/
-	virtual bool verify(shared_ptr<ZKCommonInput> input, shared_ptr<SigmaProtocolMsg> emptyA,
-		shared_ptr<SigmaProtocolMsg> emptyZ) = 0;
+	virtual bool verify(ZKCommonInput* input, SigmaProtocolMsg* emptyA, SigmaProtocolMsg* emptyZ) = 0;
 };
 
 /**
@@ -85,7 +84,7 @@ class ZKPOKVerifier : public ZKVerifier {};
 * The pseudo code of this protocol can be found in Protocol 2.1 of pseudo codes document
 * at {@link http://cryptobiu.github.io/scapi/SDK_Pseudocode.pdf}.<p>
 */
-class ZKFromSigmaProver : ZKProver {
+class ZKFromSigmaProver : public ZKProver {
 public:
 	/**
 	* Constructor that accepts the underlying channel, sigma protocol's prover and 
@@ -150,7 +149,7 @@ private:
 		// compute the first message by the underlying proverComputation.
 		auto a = sProver->computeFirstMsg(input);
 		// send the first message.
-		sendMsgToVerifier(a);
+		sendMsgToVerifier(a.get());
 	}
 
 	/**
@@ -179,14 +178,14 @@ private:
 		copy_byte_array_to_byte_vector(e, eSize, eVector, 0);
 		auto z = sProver->computeSecondMsg(eVector);
 		// send the second message.
-		sendMsgToVerifier(z);
+		sendMsgToVerifier(z.get());
 	}
 
 	/**
 	* Sends the given message to the verifier.
 	* @param message to send to the verifier.
 	*/
-	void sendMsgToVerifier(shared_ptr<SigmaProtocolMsg> message) {
+	void sendMsgToVerifier(SigmaProtocolMsg* message) {
 		auto raw_message = message->toString();
 		channel->writeWithSize(raw_message);
 	};
@@ -242,15 +241,14 @@ public:
 	*	 	    OUTPUT REJ<p>
 	* @param input must be an instance of SigmaCommonInput.
 	*/
-	bool verify(shared_ptr<ZKCommonInput> input, shared_ptr<SigmaProtocolMsg> emptyA, 
-		shared_ptr<SigmaProtocolMsg> emptyZ) override;
+	bool verify(ZKCommonInput* input, SigmaProtocolMsg* emptyA, SigmaProtocolMsg* emptyZ) override;
 
 private:
 	shared_ptr<CommParty> channel;
 	// underlying verifier that computes the proof of the sigma protocol.
 	shared_ptr<SigmaVerifierComputation> sVerifier;
 	shared_ptr<CmtCommitter> committer;	// underlying Commitment committer to use.
-	std::mt19937_64 random;
+	mt19937_64 random;
 
 	/**
 	* Runs COMMIT.commit as the committer with input e.
@@ -259,6 +257,7 @@ private:
 	long commit(vector<byte> e) {
 		auto val = committer->generateCommitValue(e);
 		long id = random();
+		id = abs(id);
 		committer->commit(val, id);
 		return id;
 	}
@@ -267,7 +266,7 @@ private:
 	* Waits for a message a from the prover.
 	* @return the received message
 	*/
-	void receiveMsgFromProver(shared_ptr<SigmaProtocolMsg> concreteMsg);
+	void receiveMsgFromProver(SigmaProtocolMsg* concreteMsg);
 
 	/**
 	* Runs COMMIT.decommit as the decommitter.
@@ -280,14 +279,12 @@ private:
 	* @param input
 	* @param a first message from prover.
 	*/
-	bool proccessVerify(
-		shared_ptr<SigmaCommonInput> input, shared_ptr<SigmaProtocolMsg> a,
-		shared_ptr<SigmaProtocolMsg> z) {
+	bool proccessVerify(SigmaCommonInput* input, SigmaProtocolMsg* a, SigmaProtocolMsg* z) {
 		// wait for a message z from P, 
 		// if transcript (a, e, z) is accepting in sigma on input x, output ACC
 		// else outupt REJ
 		receiveMsgFromProver(z);
-		return sVerifier->verify(input.get(), a.get(), z.get());
+		return sVerifier->verify(input, a, z);
 	};
 };
 
@@ -338,15 +335,6 @@ public:
 	*/
 	void prove(shared_ptr<ZKProverInput> input);
 
-	/**
-	* Processes the second message of the Zero Knowledge protocol.<p>
-	* 	"COMPUTE the response z to (a,e) according to sigma<p>
-	*   SEND z to V<p>
-	*   OUTPUT nothing".<p>
-	* This is a blocking function!
-	*/
-	void processSecondMsg(shared_ptr<byte> e, int eSize, shared_ptr<CmtRCommitPhaseOutput> trap);
-
 private:
 	shared_ptr<CommParty> channel;
 	// underlying prover that computes the proof of the sigma protocol.
@@ -392,6 +380,16 @@ private:
 	* @param message to send to the verifier.
 	*/
 	void sendMsgToVerifier(string msg) { channel->writeWithSize(msg); };
+
+	/**
+	* Processes the second message of the Zero Knowledge protocol.<p>
+	* 	"COMPUTE the response z to (a,e) according to sigma<p>
+	*   SEND z to V<p>
+	*   OUTPUT nothing".<p>
+	* This is a blocking function!
+	*/
+	void processSecondMsg(vector<byte> e, shared_ptr<CmtRCommitPhaseOutput> trap);
+
 };
 
 
@@ -411,45 +409,22 @@ private:
 	shared_ptr<CmtPedersenTrapdoorCommitter> committer; // underlying Commitment committer to use.
 	std::mt19937_64 random;
 	shared_ptr<CmtRCommitPhaseOutput> trap;
+	
 	/**
 	* Runs COMMIT.commit as the committer with input e.
 	*/
-	long commit(vector<byte> e) {
-		auto val = committer->generateCommitValue(e);
-		long id = random();
-		id = abs(id);
-		committer->commit(val, id);
-		return id;
-	};
+	long commit(vector<byte> e);
+
 	/**
 	* Waits for a message a from the prover.
 	* @return the received message
 	*/
-	void receiveMsgFromProver(shared_ptr<SigmaProtocolMsg> emptyMsg) {
-		vector<byte> rawMsg;
-		channel->readWithSizeIntoVector(rawMsg);
-		emptyMsg->initFromByteVector(rawMsg);
-	};
+	void receiveMsgFromProver(SigmaProtocolMsg* emptyMsg);
 
 	/**
 	* Waits for a trapdoor a from the prover.
 	*/
-	void receiveTrapFromProver(shared_ptr<CmtRCommitPhaseOutput> emptyOutput) {
-		vector<byte> rawMsg;
-		channel->readWithSizeIntoVector(rawMsg);
-		emptyOutput->initFromByteVector(rawMsg);
-	}
-	/**
-	* Verifies the proof.
-	* @param input
-	* @param a first message from prover.
-	* @param z second message from prover.
-	*/
-	bool proccessVerify(shared_ptr<SigmaCommonInput> input,
-		shared_ptr<SigmaProtocolMsg> a, shared_ptr<SigmaProtocolMsg> z) {
-		// run transcript (a, e, z) is accepting in sigma on input x
-		return sVerifier->verify(input.get(), a.get(), z.get());
-	};
+	void receiveTrapFromProver(CmtRCommitPhaseOutput* emptyOutput);
 
 public:
 	/**
@@ -487,7 +462,6 @@ public:
 
 	* @param input must be an instance of SigmaCommonInput.
 	*/
-	bool verify(shared_ptr<ZKCommonInput> input, shared_ptr<SigmaProtocolMsg> emptyA, 
-		shared_ptr<SigmaProtocolMsg> emptyZ) override;
+	bool verify(ZKCommonInput* input, SigmaProtocolMsg* emptyA, SigmaProtocolMsg* emptyZ) override;
 
 };
