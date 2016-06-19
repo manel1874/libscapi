@@ -109,7 +109,6 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\include\interactive_mid_protocols\CommitmentSchemeElGamalHash.cpp" />
     <ClCompile Include="..\..\src\circuits\BooleanCircuits.cpp" />
     <ClCompile Include="..\..\src\circuits\FourToTwoGarbledBoleanCircuitNoAssumptions.cpp" />
     <ClCompile Include="..\..\src\circuits\HalfGatesGarbledBoleanCircuitNoFixedKey.cpp" />
@@ -132,6 +131,7 @@
     <ClCompile Include="..\..\src\infra\MathAlgorithms.cpp" />
     <ClCompile Include="..\..\src\infra\Scanner.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\CommitmentSchemeElGamal.cpp" />
+    <ClCompile Include="..\..\src\interactive_mid_protocols\CommitmentSchemeElGamalHash.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\CommitmentSchemePedersen.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\CommitmentSchemePedersenHash.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\CommitmentSchemeSimpleHash.cpp" />
@@ -203,6 +203,7 @@
     <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentScheme.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentSchemeElGamal.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentSchemeElGamalHash.hpp" />
+    <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentSchemeEquivocal.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentSchemePedersen.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentSchemePedersenHash.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentSchemePedersenTrapdoor.hpp" />
