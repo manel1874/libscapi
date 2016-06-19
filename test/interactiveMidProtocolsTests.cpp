@@ -181,8 +181,8 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 		elgamal.setKey(pair.first, pair.second);
 		auto cipher = elgamal.encrypt(make_shared<GroupElementPlaintext>(x), w);
 
-		auto key = *(dynamic_cast<ElGamalPublicKey*>(pair.first.get()));
-		auto commitment = *(dynamic_cast<ElGamalOnGrElSendableData*>(cipher->generateSendableData().get()));
+		auto key = dynamic_pointer_cast<ElGamalPublicKey>(pair.first);
+		auto commitment = dynamic_pointer_cast<ElGamalOnGrElSendableData>(cipher->generateSendableData());
 		SigmaElGamalCommittedValueCommonInput commonInput(key, commitment, x);
 		auto proverInput = make_shared<SigmaElGamalCommittedValueProverInput>(key, commitment, x, w);
 

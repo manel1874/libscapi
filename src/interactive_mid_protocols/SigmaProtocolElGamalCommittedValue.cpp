@@ -16,11 +16,11 @@ shared_ptr<SigmaDHCommonInput> SigmaElGamalCommittedValueSimulator::convertInput
 
 	//Convert input to the underlying DH prover:
 	//(g,h,u,v) = (g,h,c1,c2/x).
-	auto h = input->getPublicKey().getH();
+	auto h = input->getPublicKey()->getH();
 	//u = c1
-	auto u = dlog->reconstructElement(true, commitment.getCipher1().get());
+	auto u = dlog->reconstructElement(true, commitment->getCipher1().get());
 	//Calculate v = c2/x = c2*x^(-1)
-	auto c2 = dlog->reconstructElement(true, commitment.getCipher2().get());
+	auto c2 = dlog->reconstructElement(true, commitment->getCipher2().get());
 	auto xInv = dlog->getInverse(input->getX().get());
 	auto v = dlog->multiplyGroupElements(c2.get(), xInv.get());
 	
@@ -73,11 +73,11 @@ shared_ptr<SigmaDHProverInput> SigmaElGamalCommittedValueProverComputation::conv
 
 	//Convert input to the underlying DH prover:
 	//(g,h,u,v) = (g,h,c1,c2/x).
-	auto h = commonInput->getPublicKey().getH();
+	auto h = commonInput->getPublicKey()->getH();
 	//u = c1
-	auto u = dlog->reconstructElement(true, commitment.getCipher1().get());
+	auto u = dlog->reconstructElement(true, commitment->getCipher1().get());
 	//Calculate v = c2/x = c2*x^(-1)
-	auto c2 = dlog->reconstructElement(true, commitment.getCipher2().get());
+	auto c2 = dlog->reconstructElement(true, commitment->getCipher2().get());
 	auto xInv = dlog->getInverse(commonInput->getX().get());
 	auto v = dlog->multiplyGroupElements(c2.get(), xInv.get());
 
@@ -118,18 +118,16 @@ shared_ptr<SigmaDHCommonInput> SigmaElGamalCommittedValueVerifierComputation::co
 	if (input == NULL) {
 		throw invalid_argument("the given input must be an instance of SigmaElGamalCommittedValueCommonInput");
 	}
-
 	auto commitment = input->getCommitment();
-
+	
 	//Convert input to the underlying DH prover:
 	//(g,h,u,v) = (g,h,c1,c2/x).
-	auto h = input->getPublicKey().getH();
+	auto h = input->getPublicKey()->getH();
 	//u = c1
-	auto u = dlog->reconstructElement(true, commitment.getCipher1().get());
+	auto u = dlog->reconstructElement(true, commitment->getCipher1().get()); 
 	//Calculate v = c2/x = c2*x^(-1)
-	auto c2 = dlog->reconstructElement(true, commitment.getCipher2().get());
+	auto c2 = dlog->reconstructElement(true, commitment->getCipher2().get());
 	auto xInv = dlog->getInverse(input->getX().get());
 	auto v = dlog->multiplyGroupElements(c2.get(), xInv.get());
-
 	return make_shared<SigmaDHCommonInput>(h, u, v);
 }
