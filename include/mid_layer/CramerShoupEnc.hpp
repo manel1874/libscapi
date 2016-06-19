@@ -296,17 +296,17 @@ public:
 	* This function is not supported for this encryption scheme, since there is no need for parameters to generate a CramerShoup key pair.
 	* @throws UnsupportedOperationException
 	*/
-	pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> generateKey(shared_ptr<AlgorithmParameterSpec> keyParams) override {
+	pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> generateKey(AlgorithmParameterSpec* keyParams) override {
 		//No need for parameters to generate an Cramer-Shoup key pair. Therefore this operation is not supported.
 		throw new UnsupportedOperationException("To generate Cramer-Shoup keys use the generateKey() function");
 	}
 
-	shared_ptr<PrivateKey> reconstructPrivateKey(shared_ptr<KeySendableData> data) override;
+	shared_ptr<PrivateKey> reconstructPrivateKey(KeySendableData* data) override;
 
 	/**
 	* @data The KeySendableData object has to be of type ScCramerShoupPublicKeySendableData
 	*/
-	shared_ptr<PublicKey> reconstructPublicKey(shared_ptr<KeySendableData> data) override;
+	shared_ptr<PublicKey> reconstructPublicKey(KeySendableData* data) override;
 
 	/**
 	* Encrypts the given plaintext using this Cramer Shoup encryption scheme.
@@ -358,7 +358,7 @@ public:
 	* @throws KeyException if no private key was set.
 	* @throws IllegalArgumentException if the given Ciphertext is not instance of CramerShoupCiphertext.
 	*/
-	shared_ptr<Plaintext> decrypt(shared_ptr<AsymmetricCiphertext> cipher) override; 
+	shared_ptr<Plaintext> decrypt(AsymmetricCiphertext* cipher) override; 
 
 	/**
 	* Generates a byte array from the given plaintext.
@@ -368,10 +368,10 @@ public:
 	* @return the byte array generated from the given plaintext.
 	* @throws IllegalArgumentException if the given plaintext is not an instance of GroupElementPlaintext.
 	*/
-	vector<byte> generateBytesFromPlaintext(shared_ptr<Plaintext> plaintext) override;
+	vector<byte> generateBytesFromPlaintext(Plaintext* plaintext) override;
 
 	/**
 	* @see edu.biu.scapi.midLayer.asymmetricCrypto.encryption.AsymmetricEnc#reconstructCiphertext(edu.biu.scapi.midLayer.ciphertext.AsymmetricCiphertextSendableData)
 	*/
-	shared_ptr<AsymmetricCiphertext> reconstructCiphertext(shared_ptr<AsymmetricCiphertextSendableData> data) override; 
+	shared_ptr<AsymmetricCiphertext> reconstructCiphertext(AsymmetricCiphertextSendableData* data) override; 
 };

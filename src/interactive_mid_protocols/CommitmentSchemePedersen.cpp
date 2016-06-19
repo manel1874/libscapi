@@ -218,19 +218,79 @@ vector<byte> CmtPedersenReceiver::generateBytesFromCommitValue(CmtCommitValue* v
 /*   CmtPedersenWithProofsCommitter         */
 /********************************************/
 void CmtPedersenWithProofsCommitter::doConstruct(int t) {
-	//SigmaPedersenCommittedValueProverComputation pedersenCommittedValProver(dlog, t);
-	//SigmaPedersenCmtKnowledgeProverComputation pedersenCTKnowledgeProver(dlog, t);
-	//knowledgeProver = make_shared<ZKPOKFromSigmaCmtPedersenProver>(channel, pedersenCTKnowledgeProver);
-	//committedValProver = make_shared<ZKPOKFromSigmaCmtPedersenProver>(channel, pedersenCommittedValProver);
+	auto pedersenCommittedValProver = make_shared<SigmaPedersenCommittedValueProverComputation>(dlog, t);
+	auto pedersenCTKnowledgeProver = make_shared<SigmaPedersenCmtKnowledgeProverComputation>(dlog, t);
+	knowledgeProver = make_shared<ZKPOKFromSigmaCmtPedersenProver>(channel, pedersenCTKnowledgeProver, dlog);
+	committedValProver = make_shared<ZKPOKFromSigmaCmtPedersenProver>(channel, pedersenCommittedValProver, dlog);
+}
+
+void CmtPedersenWithProofsCommitter::proveKnowledge(long id)  {
+	auto val = getCommitmentPhaseValues(id);
+	auto h = static_pointer_cast<GroupElement>(getPreProcessValues()[0]);
+	auto commitment = static_pointer_cast<GroupElement>(val->getComputedCommitment());
+	biginteger x = *static_pointer_cast<biginteger>(val->getX()->getX());
+	biginteger r = static_pointer_cast<BigIntegerRandomValue>(val->getR())->getR();
+	SigmaPedersenCmtKnowledgeProverInput input(h, commitment, x, r);
+	knowledgeProver->prove(make_shared<SigmaPedersenCmtKnowledgeProverInput>(input));
+}
+
+void CmtPedersenWithProofsCommitter::proveCommittedValue(long id) {
+	auto val = getCommitmentPhaseValues(id);
+	//Send s1 to P2
+	channel->writeWithSize(val->getX()->toString());
+
+	auto h = static_pointer_cast<GroupElement>(getPreProcessValues()[0]);
+	auto commitment = static_pointer_cast<GroupElement>(val->getComputedCommitment());
+	biginteger x = *static_pointer_cast<biginteger>(val->getX()->getX());
+	biginteger r = static_pointer_cast<BigIntegerRandomValue>(val->getR())->getR();
+	SigmaPedersenCommittedValueProverInput input(h, commitment, x, r);
+	committedValProver->prove(make_shared<SigmaPedersenCommittedValueProverInput>(input));
 }
 
 /********************************************/
 /*   CmtPedersenWithProofsReceiver         */
 /********************************************/
 void CmtPedersenWithProofsReceiver::doConstruct(int t) {
-	//SigmaPedersenCommittedValueVerifierComputation pedersenCommittedValVerifier(dlog, t);
-	//SigmaPedersenCmtKnowledgeVerifierComputation pedersenCTKnowledgeVerifier(dlog, t);
-	//knowledgeVerifier = make_shared<ZKPOKFromSigmaCmtPedersenVerifier>(channel, pedersenCTKnowledgeVerifier);
-	//committedValVerifier = make_shared<ZKPOKFromSigmaCmtPedersenVerifier>(channel, pedersenCommittedValVerifier);
+	auto pedersenCommittedValVerifier = make_shared<SigmaPedersenCommittedValueVerifierComputation>(dlog, t);
+	auto pedersenCTKnowledgeVerifier = make_shared<SigmaPedersenCmtKnowledgeVerifierComputation>(dlog, t);
+	auto output = make_shared<CmtRTrapdoorCommitPhaseOutput>();
+	knowledgeVerifier = make_shared<ZKPOKFromSigmaCmtPedersenVerifier>(channel, pedersenCTKnowledgeVerifier, output, dlog);
+	committedValVerifier = make_shared<ZKPOKFromSigmaCmtPedersenVerifier>(channel, pedersenCommittedValVerifier, output, dlog);
+}
+
+bool CmtPedersenWithProofsReceiver::verifyKnowledge(long id) {
+	auto commitmentVal = getCommitmentPhaseValues(id);
+
+	auto h = static_pointer_cast<GroupElement>(getPreProcessedValues()[0]);
+	auto commitment = static_pointer_cast<GroupElement>(commitmentVal);
+	SigmaPedersenCmtKnowledgeCommonInput input(h, commitment);
+
+	SigmaGroupElementMsg emptyA(dlog->getGenerator()->generateSendableData());
+	SigmaPedersenCmtKnowledgeMsg emptyZ(0,0);
+	return knowledgeVerifier->verify(&input, &emptyA, &emptyZ);
+}
+
+shared_ptr<CmtCommitValue> CmtPedersenWithProofsReceiver::verifyCommittedValue(long id) {
+	// read biginteger from channel
+	vector<byte> raw_msg; // by the end of the scope - no need to hold it anymore - already decoded and copied
+	channel->readWithSizeIntoVector(raw_msg);
+
+	// init the empy CmtPedersenCommitmentMessage using the encdoed data
+	const byte * uc = &(raw_msg[0]);
+	string s(reinterpret_cast<char const*>(uc), raw_msg.size());
+	biginteger x = biginteger(s);
+
+	auto commitmentVal = getCommitmentPhaseValues(id);
+	auto h = static_pointer_cast<GroupElement>(getPreProcessedValues()[0]);
+	auto commitment = static_pointer_cast<GroupElement>(commitmentVal);
+	SigmaPedersenCommittedValueCommonInput input(h, commitment, x);
+	
+	SigmaGroupElementMsg emptyA(dlog->getGenerator()->generateSendableData());
+	SigmaBIMsg emptyZ;
+	bool verified = committedValVerifier->verify(&input, &emptyA, &emptyZ);
+	if (verified)
+		return make_shared<CmtBigIntegerCommitValue>(make_shared<biginteger>(x));
+	return NULL;
+	
 }
 

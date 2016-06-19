@@ -4,6 +4,8 @@
 #include "../include//interactive_mid_protocols/CommitmentSchemePedersenHash.hpp"
 #include "../include//interactive_mid_protocols/CommitmentSchemePedersenTrapdoor.hpp"
 #include "../include//interactive_mid_protocols/CommitmentSchemeSimpleHash.hpp"
+#include "../include//interactive_mid_protocols/CommitmentSchemeElGamal.hpp"
+#include "../include//interactive_mid_protocols/CommitmentSchemeElGamalHash.hpp"
 
 #include <boost/thread/thread.hpp>
 #include "../../include/comm/Comm.hpp"

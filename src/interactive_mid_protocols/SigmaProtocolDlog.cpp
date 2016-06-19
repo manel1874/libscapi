@@ -9,7 +9,7 @@ bool check_soundness(int t, shared_ptr<DlogGroup> dlog) {
 
 bool checkChallengeLength(vector<byte> challenge, int t) {
 	// if the challenge's length is equal to t, return true. else, return false.
-	biginteger e = decodeBigInteger(challenge.data(), challenge.size());
+	biginteger e = abs(decodeBigInteger(challenge.data(), challenge.size()));
 	return (e >= 0) && (e < mp::pow(biginteger(2), t));
 }
 

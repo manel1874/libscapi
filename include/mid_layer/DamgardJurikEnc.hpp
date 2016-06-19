@@ -70,6 +70,7 @@ private:
 
 public:
 	DamgardJurikPrivateKey(RSAModulus rsaMod);
+	DamgardJurikPrivateKey(biginteger p, biginteger q, biginteger t, biginteger dForS1);
 
 	string getAlgorithm() override { return "DamgardJurik"; }
 
@@ -211,7 +212,7 @@ public:
 	* @return KeyPair contains keys for this DamgardJurik encryption object.
 	* @throws InvalidParameterSpecException if keyParams is not instance of DJKeyGenParameterSpec.
 	*/
-	pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> generateKey(shared_ptr<AlgorithmParameterSpec> keyParams) override;
+	pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> generateKey(AlgorithmParameterSpec* keyParams) override;
 
 	/**
 	* This function is not supported for this encryption scheme, since there is a need for parameters to generate a DamgardJurik key pair.
@@ -261,7 +262,7 @@ public:
 	* @throws KeyException if the Private Key has not been set for this object.
 	* @throws IllegalArgumentException if cipher is not an instance of BigIntegerCiphertext.
 	*/
-	shared_ptr<Plaintext> decrypt(shared_ptr<AsymmetricCiphertext> cipher) override;
+	shared_ptr<Plaintext> decrypt(AsymmetricCiphertext* cipher) override;
 
 	/**
 	* Generates a byte array from the given plaintext.
@@ -271,7 +272,7 @@ public:
 	* @return the byte array generated from the given plaintext.
 	* @throws IllegalArgumentException if the given plaintext is not an instance of BigIntegerPlainText.
 	*/
-	vector<byte> generateBytesFromPlaintext(shared_ptr<Plaintext> plaintext) override;
+	vector<byte> generateBytesFromPlaintext(Plaintext* plaintext) override;
 
 	/**
 	* This function takes an encryption of some plaintext (let's call it originalPlaintext) and returns a cipher that "looks" different but
@@ -282,7 +283,7 @@ public:
 	* 		1. If cipher is not an instance of BigIntegerCiphertext.
 	* 		2. If the BigInteger number in the given cipher is not in ZN'.
 	*/
-	shared_ptr<AsymmetricCiphertext> reRandomize(shared_ptr<AsymmetricCiphertext> cipher);
+	shared_ptr<AsymmetricCiphertext> reRandomize(AsymmetricCiphertext* cipher);
 
 	/**
 	* This function takes an encryption of some plaintext (let's call it originalPlaintext) and returns a cipher that "looks" different but
@@ -293,7 +294,7 @@ public:
 	* 		1. If cipher is not an instance of BigIntegerCiphertext.
 	* 		2. If the BigInteger number in the given cipher is not in ZN'.
 	*/
-	shared_ptr<AsymmetricCiphertext> reRandomize(shared_ptr<AsymmetricCiphertext> cipher, biginteger r);
+	shared_ptr<AsymmetricCiphertext> reRandomize(AsymmetricCiphertext* cipher, biginteger r);
 
 	/**
 	* Given two ciphers c1 = Enc(p1)  and c2 = Enc(p2) this function return c1 + c2 = Enc(p1 +p2).
@@ -304,7 +305,7 @@ public:
 	* 		2. If the sizes of ciphertexts do not match.
 	* 		3. If one or more of the BigInteger numbers in the given ciphertexts is not in ZN'.
 	*/
-	shared_ptr<AsymmetricCiphertext> add(shared_ptr<AsymmetricCiphertext> cipher1, shared_ptr<AsymmetricCiphertext> cipher2) override;
+	shared_ptr<AsymmetricCiphertext> add(AsymmetricCiphertext* cipher1, AsymmetricCiphertext* cipher2) override;
 
 	/**
 	* Given two ciphers c1 = Enc(p1)  and c2 = Enc(p2) this function return c1 + c2 = Enc(p1 +p2).<p>
@@ -321,7 +322,7 @@ public:
 	* 		2. If the sizes of ciphertexts do not match.
 	* 		3. If one or more of the BigInteger numbers in the given ciphertexts is not in ZN'.
 	*/
-	shared_ptr<AsymmetricCiphertext> add(shared_ptr<AsymmetricCiphertext> cipher1, shared_ptr<AsymmetricCiphertext> cipher2, biginteger r) override;
+	shared_ptr<AsymmetricCiphertext> add(AsymmetricCiphertext* cipher1, AsymmetricCiphertext* cipher2, biginteger r) override;
 
 	/**
 	* This function calculates the homomorphic multiplication by a constant of a ciphertext<p>
@@ -334,7 +335,7 @@ public:
 	* 		2. If the BigInteger numbers in the given ciphertext is not in ZN'.
 	* 		3. If the constant number is not in ZN.
 	*/
-	shared_ptr<AsymmetricCiphertext> multByConst(shared_ptr<AsymmetricCiphertext> cipher, biginteger constNumber) override;
+	shared_ptr<AsymmetricCiphertext> multByConst(AsymmetricCiphertext* cipher, biginteger constNumber) override;
 	
 	/**
 	* This function calculates the homomorphic multiplication by a constant of a ciphertext
@@ -355,13 +356,13 @@ public:
 	* 		2. If the BigInteger numbers in the given ciphertext is not in ZN'.
 	* 		3. If the constant number is not in ZN.
 	*/
-	shared_ptr<AsymmetricCiphertext> multByConst(shared_ptr<AsymmetricCiphertext> cipher, biginteger constNumber, biginteger r) override;
+	shared_ptr<AsymmetricCiphertext> multByConst(AsymmetricCiphertext* cipher, biginteger constNumber, biginteger r) override;
 
-	shared_ptr<AsymmetricCiphertext> reconstructCiphertext(shared_ptr<AsymmetricCiphertextSendableData> data) override;
+	shared_ptr<AsymmetricCiphertext> reconstructCiphertext(AsymmetricCiphertextSendableData* data) override;
 
-	shared_ptr<PublicKey> reconstructPublicKey(shared_ptr<KeySendableData> data) override;
+	shared_ptr<PublicKey> reconstructPublicKey(KeySendableData* data) override;
 
-	shared_ptr<PrivateKey> reconstructPrivateKey(shared_ptr<KeySendableData> data) override;
+	shared_ptr<PrivateKey> reconstructPrivateKey(KeySendableData* data) override;
 
 };
 

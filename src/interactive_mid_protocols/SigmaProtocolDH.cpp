@@ -2,9 +2,16 @@
 
 void SigmaDHMsg::initFromString(const string & s) {
 	auto str_vec = explode(s, ':');
-	assert(str_vec.size() == 2);
-	a->initFromString(str_vec[0]);
-	b->initFromString(str_vec[1]);
+	assert(str_vec.size() == 2 || str_vec.size() == 4);
+	if (str_vec.size() == 2) {
+		a->initFromString(str_vec[0]);
+		b->initFromString(str_vec[1]);
+	}
+	else if (str_vec.size() == 4) {
+
+		a->initFromString(str_vec[0] + ":" + str_vec[1]);
+		b->initFromString(str_vec[2] + ":" + str_vec[3]);
+	}
 }
 
 /********************************************/

@@ -173,18 +173,19 @@ pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> CramerShoupOnGroupElementEnc
 	return pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>>(publicKey, privateKey);
 }
 
-shared_ptr<PrivateKey> CramerShoupOnGroupElementEnc::reconstructPrivateKey(shared_ptr<KeySendableData> data) {
-	auto data1 = dynamic_pointer_cast<CramerShoupPrivateKey>(data);
+shared_ptr<PrivateKey> CramerShoupOnGroupElementEnc::reconstructPrivateKey(KeySendableData* data) {
+	auto data1 = dynamic_cast<CramerShoupPrivateKey*>(data);
 	if (data1 == NULL)
 		throw invalid_argument("To generate the key from sendable data, the data has to be of type CramerShoupPrivateKey");
-	return data1;
+	return make_shared<CramerShoupPrivateKey>(data1->getPrivateExp1(), data1->getPrivateExp2(), 
+		data1->getPrivateExp3(), data1->getPrivateExp4(), data1->getPrivateExp5());
 }
 
 /**
 * @data The KeySendableData object has to be of type ScCramerShoupPublicKeySendableData
 */
-shared_ptr<PublicKey> CramerShoupOnGroupElementEnc::reconstructPublicKey(shared_ptr<KeySendableData> data) {
-	auto data1 = dynamic_pointer_cast<CramerShoupPublicKeySendableData>(data);
+shared_ptr<PublicKey> CramerShoupOnGroupElementEnc::reconstructPublicKey(KeySendableData* data) {
+	auto data1 = dynamic_cast<CramerShoupPublicKeySendableData*>(data);
 	if (data1 == NULL)
 		throw invalid_argument("To generate the key from sendable data, the data has to be of type ScCramerShoupPublicKeySendableData");
 	
@@ -340,7 +341,7 @@ shared_ptr<Plaintext> CramerShoupOnGroupElementEnc::generatePlaintext(vector<byt
 * @throws KeyException if no private key was set.
 * @throws IllegalArgumentException if the given Ciphertext is not instance of CramerShoupCiphertext.
 */
-shared_ptr<Plaintext> CramerShoupOnGroupElementEnc::decrypt(shared_ptr<AsymmetricCiphertext> cipher) {
+shared_ptr<Plaintext> CramerShoupOnGroupElementEnc::decrypt(AsymmetricCiphertext* cipher) {
 	/*
 	If cipher is not instance of CramerShoupCiphertext, throw IllegalArgumentException.
 	If private key is null, then cannot decrypt. Throw exception.
@@ -356,7 +357,7 @@ shared_ptr<Plaintext> CramerShoupOnGroupElementEnc::decrypt(shared_ptr<Asymmetri
 		throw KeyException("in order to decrypt a message, this object must be initialized with private key");
 	}
 	//Ciphertext should be Cramer Shoup ciphertext.
-	auto ciphertext = dynamic_pointer_cast<CramerShoupOnGroupElementCiphertext>(cipher);
+	auto ciphertext = dynamic_cast<CramerShoupOnGroupElementCiphertext*>(cipher);
 	if (ciphertext == NULL) {
 		throw invalid_argument("ciphertext should be instance of CramerShoupCiphertext");
 	}
@@ -369,7 +370,7 @@ shared_ptr<Plaintext> CramerShoupOnGroupElementEnc::decrypt(shared_ptr<Asymmetri
 	//Calculates the hash(u1 + u2 + e).
 	auto alpha = calcAlpha(u1, u2, e);
 	
-	checkValidity(ciphertext.get(), alpha);
+	checkValidity(ciphertext, alpha);
 
 	//Calculates m = e*((u1^z)^ -1). 
 	//Instead of calculating (u1^z)^-1, we use the optimization that was calculated in initPrivateKey function and calculate u1^zInv.
@@ -412,8 +413,8 @@ void CramerShoupOnGroupElementEnc::checkValidity(CramerShoupOnGroupElementCipher
 * @return the byte array generated from the given plaintext.
 * @throws IllegalArgumentException if the given plaintext is not an instance of GroupElementPlaintext.
 */
-vector<byte> CramerShoupOnGroupElementEnc::generateBytesFromPlaintext(shared_ptr<Plaintext> plaintext) {
-	auto plain = dynamic_pointer_cast<GroupElementPlaintext>(plaintext);
+vector<byte> CramerShoupOnGroupElementEnc::generateBytesFromPlaintext(Plaintext* plaintext) {
+	auto plain = dynamic_cast<GroupElementPlaintext*>(plaintext);
 	if (plain == NULL) {
 		throw invalid_argument("plaintext should be an instance of GroupElementPlaintext");
 	}
@@ -421,9 +422,9 @@ vector<byte> CramerShoupOnGroupElementEnc::generateBytesFromPlaintext(shared_ptr
 	return dlogGroup->decodeGroupElementToByteArray(el.get());
 }
 
-shared_ptr<AsymmetricCiphertext> CramerShoupOnGroupElementEnc::reconstructCiphertext(shared_ptr<AsymmetricCiphertextSendableData> data){
+shared_ptr<AsymmetricCiphertext> CramerShoupOnGroupElementEnc::reconstructCiphertext(AsymmetricCiphertextSendableData* data){
 	
-	auto data1 = dynamic_pointer_cast<CrShOnGroupElSendableData>(data);
+	auto data1 = dynamic_cast<CrShOnGroupElSendableData*>(data);
 	if (data1 == NULL)
 		throw invalid_argument("The input data has to be of type CrShOnGroupElSendableData");
 	

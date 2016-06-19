@@ -96,6 +96,35 @@ public:
 	}
 };
 
+class ZKFromSigma : public ProverVerifierExample {
+public:
+	virtual void prove(shared_ptr<CommParty> server,
+		shared_ptr<SigmaDlogProverComputation> proverComputation,
+		shared_ptr<DlogGroup> dg,
+		shared_ptr<SigmaDlogProverInput> proverinput) {
+		cout << "before creating ZK prover" << endl;
+		auto receiver = make_shared<CmtPedersenReceiver>(server, dg);
+		auto sp = new ZKFromSigmaProver(server, proverComputation, receiver);
+		cout << "--> running ZK prover" << endl;
+		sp->prove(proverinput);
+	}
+	virtual bool verify(shared_ptr<CommParty> server,
+		shared_ptr<SigmaDlogVerifierComputation> verifierComputation,
+		shared_ptr<SigmaGroupElementMsg> msgA,
+		shared_ptr<SigmaBIMsg> msgZ,
+		shared_ptr<SigmaDlogCommonInput> commonInput,
+		shared_ptr<DlogGroup> dg) override {
+		cout << "before creating ZK verifier" << endl;
+		auto emptyTrap = make_shared<CmtRTrapdoorCommitPhaseOutput>();
+		auto committer = make_shared<CmtPedersenCommitter>(server, dg);
+		auto v = new ZKFromSigmaVerifier(server, verifierComputation, committer);
+		cout << "--> running ZK verify" << endl;
+		bool verificationPassed = v->verify(commonInput.get(), msgA.get(), msgZ.get());
+		delete v;
+		return verificationPassed;
+	}
+};
+
 class PedersenZKSigma : public ProverVerifierExample {
 public:
 	virtual void prove(shared_ptr<CommParty> server,
@@ -115,7 +144,7 @@ public:
 		auto emptyTrap = make_shared<CmtRTrapdoorCommitPhaseOutput>();
 		auto v = new ZKPOKFromSigmaCmtPedersenVerifier(server, verifierComputation, emptyTrap, dg);
 		cout << "--> running pedersen verify" << endl;
-		bool verificationPassed = v->verify(commonInput, msgA, msgZ);
+		bool verificationPassed = v->verify(commonInput.get(), msgA.get(), msgZ.get());
 		delete v;
 		return verificationPassed;
 	}
@@ -127,6 +156,8 @@ shared_ptr<ProverVerifierExample> getProverVerifier(SigmaDlogParams sdp)
 	shared_ptr<ProverVerifierExample> sds;
 	if(sdp.protocolName=="Simple")
 		sds = make_shared<SimpleDlogSigma>();
+	else if (sdp.protocolName == "SimpleZK")
+		sds = make_shared<ZKFromSigma>();
 	else if(sdp.protocolName=="ZKPedersen")
 		sds = make_shared<PedersenZKSigma>();
 

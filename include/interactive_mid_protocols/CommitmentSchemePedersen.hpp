@@ -3,8 +3,6 @@
 #include "CommitmentScheme.hpp"
 #include "../comm/Comm.hpp"
 #include "../../include/primitives/DlogOpenSSL.hpp"
-//#include "SigmaProtocolPedersenCmtKnowledge.hpp"
-//#include "SigmaProtocolPedersenCommittedValue.hpp"
 #include <map>
 
 
@@ -420,10 +418,11 @@ public:
 	* @param t statistical parameter
 	* @param random
 	*/
-	CmtPedersenWithProofsCommitter(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, int t) :
+	CmtPedersenWithProofsCommitter(shared_ptr<CommParty> channel, int t, shared_ptr<DlogGroup> dlog) :
 		CmtPedersenCommitter(channel, dlog) {
 		doConstruct(t);
 	};
+
 	void proveKnowledge(long id) override;
 	void proveCommittedValue(long id) override;
 };
@@ -463,13 +462,12 @@ public:
 	* @param t statistical parameter
 	* @param random
 	*/
-	CmtPedersenWithProofsReceiver(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, int t) :
+	CmtPedersenWithProofsReceiver(shared_ptr<CommParty> channel, int t, shared_ptr<DlogGroup> dlog) :
 		CmtPedersenReceiver(channel, dlog) {
 		doConstruct(t);
 	};
 
 	bool verifyKnowledge(long id) override;
-
 	shared_ptr<CmtCommitValue> verifyCommittedValue(long id) override;
 };
 

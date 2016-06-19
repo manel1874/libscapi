@@ -4,6 +4,7 @@ verifierIp    = 127.0.0.1
 proverPort    = 1222
 verifierPort  = 1223
 #protocolName = Simple
+#protocolName = SimpleZK
 protocolName = ZKPedersen
 
 [SMALL]

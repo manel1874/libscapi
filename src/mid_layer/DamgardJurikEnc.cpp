@@ -23,6 +23,13 @@ DamgardJurikPrivateKey::DamgardJurikPrivateKey(RSAModulus rsaMod) {
 	dForS1 = generateD(rsaMod.n, t);
 }
 
+DamgardJurikPrivateKey::DamgardJurikPrivateKey(biginteger p, biginteger q, biginteger t, biginteger dForS1) {
+	this->p = p;
+	this->q = q;
+	this->t = t;
+	this->dForS1 = dForS1;
+}
+
 string DamgardJurikPrivateKey::toString() {
 	biginteger t;
 	biginteger dForS1; //Pre-calculated d in the case the s == 1
@@ -97,9 +104,9 @@ shared_ptr<PublicKey> DamgardJurikEnc::getPublicKey() {
 * @return KeyPair contains keys for this DamgardJurik encryption object.
 * @throws InvalidParameterSpecException if keyParams is not instance of DJKeyGenParameterSpec.
 */
-pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> DamgardJurikEnc::generateKey(shared_ptr<AlgorithmParameterSpec> keyParams) {
+pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> DamgardJurikEnc::generateKey(AlgorithmParameterSpec* keyParams) {
 
-	auto params = dynamic_pointer_cast<DJKeyGenParameterSpec>(keyParams);
+	auto params = dynamic_cast<DJKeyGenParameterSpec*>(keyParams);
 	if (params == NULL) {
 		throw invalid_argument("keyParams has to be an instance of DJKeyGenParameterSpec");
 	}
@@ -219,7 +226,7 @@ shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::encrypt(shared_ptr<Plaintext> 
 * @throws KeyException if the Private Key has not been set for this object.
 * @throws IllegalArgumentException if cipher is not an instance of BigIntegerCiphertext.
 */
-shared_ptr<Plaintext> DamgardJurikEnc::decrypt(shared_ptr<AsymmetricCiphertext> cipher) {
+shared_ptr<Plaintext> DamgardJurikEnc::decrypt(AsymmetricCiphertext* cipher) {
 	/*
 	* We use the notation N=n^s, and N' = n^(s+1).
 	* Pseudo-Code:
@@ -250,7 +257,7 @@ shared_ptr<Plaintext> DamgardJurikEnc::decrypt(shared_ptr<AsymmetricCiphertext> 
 		throw KeyException("in order to decrypt a message, this object must be initialized with private key");
 	}
 	//Ciphertext should be Damgard-Jurik ciphertext.
-	auto djCipher = dynamic_pointer_cast<BigIntegerCiphertext>(cipher);
+	auto djCipher = dynamic_cast<BigIntegerCiphertext*>(cipher);
 	if (djCipher == NULL) {
 		throw invalid_argument ("cipher should be instance of BigIntegerCiphertext");
 	}
@@ -308,8 +315,8 @@ shared_ptr<Plaintext> DamgardJurikEnc::decrypt(shared_ptr<AsymmetricCiphertext> 
 * @return the byte array generated from the given plaintext.
 * @throws IllegalArgumentException if the given plaintext is not an instance of BigIntegerPlainText.
 */
-vector<byte> DamgardJurikEnc::generateBytesFromPlaintext(shared_ptr<Plaintext> plaintext) {
-	auto plain = dynamic_pointer_cast<BigIntegerPlainText>(plaintext);
+vector<byte> DamgardJurikEnc::generateBytesFromPlaintext(Plaintext* plaintext) {
+	auto plain = dynamic_cast<BigIntegerPlainText*>(plaintext);
 	if (plain == NULL) {
 		throw invalid_argument("the given plaintext should be an instance of BigIntegerPlainText");
 	}
@@ -330,14 +337,14 @@ vector<byte> DamgardJurikEnc::generateBytesFromPlaintext(shared_ptr<Plaintext> p
 * 		1. If cipher is not an instance of BigIntegerCiphertext.
 * 		2. If the BigInteger number in the given cipher is not in ZN'.
 */
-shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::reRandomize(shared_ptr<AsymmetricCiphertext> cipher) {
+shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::reRandomize(AsymmetricCiphertext* cipher) {
 	// If there is no public key can not operate the function, throws exception.
 	if (!isKeySet()) {
 		throw IllegalStateException("in order to reRandomize a ciphertext this object must be initialized with public key");
 	}
 
 	//Ciphertext should be Damgard-Jurik ciphertext.
-	auto djCipher = dynamic_pointer_cast<BigIntegerCiphertext>(cipher);
+	auto djCipher = dynamic_cast<BigIntegerCiphertext*>(cipher);
 	if (djCipher == NULL) {
 		throw invalid_argument("cipher should be instance of BigIntegerCiphertext");
 	}
@@ -366,14 +373,14 @@ shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::reRandomize(shared_ptr<Asymmet
 * 		1. If cipher is not an instance of BigIntegerCiphertext.
 * 		2. If the BigInteger number in the given cipher is not in ZN'.
 */
-shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::reRandomize(shared_ptr<AsymmetricCiphertext> cipher, biginteger r) {
+shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::reRandomize(AsymmetricCiphertext* cipher, biginteger r) {
 	// If there is no public key can not operate the function, throws exception.
 	if (!isKeySet()) {
 		throw IllegalStateException("in order to reRandomize a ciphertext this object must be initialized with public key");
 	}
 
 	//Ciphertext should be Damgard-Jurik ciphertext.
-	auto djCipher = dynamic_pointer_cast<BigIntegerCiphertext>(cipher);
+	auto djCipher = dynamic_cast<BigIntegerCiphertext*>(cipher);
 	if (djCipher == NULL) {
 		throw invalid_argument("cipher should be instance of BigIntegerCiphertext");
 	}
@@ -412,14 +419,14 @@ shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::reRandomize(shared_ptr<Asymmet
 * 		2. If the sizes of ciphertexts do not match.
 * 		3. If one or more of the BigInteger numbers in the given ciphertexts is not in ZN'.
 */
-shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::add(shared_ptr<AsymmetricCiphertext> cipher1, shared_ptr<AsymmetricCiphertext> cipher2) {
+shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::add(AsymmetricCiphertext* cipher1, AsymmetricCiphertext* cipher2) {
 	// If there is no public key can not encrypt, throws exception.
 	if (!isKeySet()) {
 		throw IllegalStateException("in order to add ciphertexts this object must be initialized with public key");
 	}
 
 	//Ciphertexts should be Damgard-Jurik ciphertexts.
-	auto djCipher1 = dynamic_pointer_cast<BigIntegerCiphertext>(cipher1);
+	auto djCipher1 = dynamic_cast<BigIntegerCiphertext*>(cipher1);
 	if (djCipher1 == NULL) {
 		throw invalid_argument("cipher should be instance of BigIntegerCiphertext");
 	}
@@ -456,7 +463,7 @@ shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::add(shared_ptr<AsymmetricCiphe
 * 		2. If the sizes of ciphertexts do not match.
 * 		3. If one or more of the BigInteger numbers in the given ciphertexts is not in ZN'.
 */
-shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::add(shared_ptr<AsymmetricCiphertext> cipher1, shared_ptr<AsymmetricCiphertext> cipher2, biginteger r) {
+shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::add(AsymmetricCiphertext* cipher1, AsymmetricCiphertext* cipher2, biginteger r) {
 
 	// If there is no public key can not operate the function, throws exception.
 	if (!isKeySet()) {
@@ -464,8 +471,8 @@ shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::add(shared_ptr<AsymmetricCiphe
 	}
 
 	//Ciphertexts should be Damgard-Jurik ciphertexts.
-	auto djCipher1 = dynamic_pointer_cast<BigIntegerCiphertext>(cipher1);
-	auto djCipher2 = dynamic_pointer_cast<BigIntegerCiphertext>(cipher2);
+	auto djCipher1 = dynamic_cast<BigIntegerCiphertext*>(cipher1);
+	auto djCipher2 = dynamic_cast<BigIntegerCiphertext*>(cipher2);
 	if (djCipher1 == NULL || djCipher2 == NULL) {
 		throw invalid_argument("cipher should be instance of BigIntegerCiphertext");
 	}
@@ -517,15 +524,14 @@ shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::add(shared_ptr<AsymmetricCiphe
 * 		2. If the BigInteger numbers in the given ciphertext is not in ZN'.
 * 		3. If the constant number is not in ZN.
 */
-shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::
-multByConst(shared_ptr<AsymmetricCiphertext> cipher, biginteger constNumber) {
+shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::multByConst(AsymmetricCiphertext* cipher, biginteger constNumber) {
 	// If there is no public key can not operate the function, throws exception.
 	if (!isKeySet()) {
 		throw invalid_argument("in order to multiply a ciphertext this object must be initialized with public key");
 	}
 
 	//Ciphertext should be Damgard-Jurik ciphertext.
-	auto djCipher = dynamic_pointer_cast<BigIntegerCiphertext>(cipher);
+	auto djCipher = dynamic_cast<BigIntegerCiphertext*>(cipher);
 	if (djCipher == NULL) {
 		throw  invalid_argument("cipher should be instance of BigIntegerCiphertext");
 	}
@@ -565,14 +571,14 @@ multByConst(shared_ptr<AsymmetricCiphertext> cipher, biginteger constNumber) {
 * 		2. If the BigInteger numbers in the given ciphertext is not in ZN'.
 * 		3. If the constant number is not in ZN.
 */
-shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::multByConst(shared_ptr<AsymmetricCiphertext> cipher, biginteger constNumber, biginteger r) {
+shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::multByConst(AsymmetricCiphertext* cipher, biginteger constNumber, biginteger r) {
 	// If there is no public key can not operate the function, throws exception.
 	if (!isKeySet()) {
 		throw invalid_argument("in order to multiply a ciphertext this object must be initialized with public key");
 	}
 
 	//Ciphertext should be Damgard-Jurik ciphertext.
-	auto djCipher = dynamic_pointer_cast<BigIntegerCiphertext>(cipher);
+	auto djCipher = dynamic_cast<BigIntegerCiphertext*>(cipher);
 	if (djCipher == NULL) {
 		throw  invalid_argument("cipher should be instance of BigIntegerCiphertext");
 	}
@@ -618,24 +624,24 @@ biginteger DamgardJurikEnc::generateD(biginteger N, biginteger t) {
 	return d;
 }
 
-shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::reconstructCiphertext(shared_ptr<AsymmetricCiphertextSendableData> data) {
-	auto temp = dynamic_pointer_cast<BigIntegerCiphertext>(data);
+shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::reconstructCiphertext(AsymmetricCiphertextSendableData* data) {
+	auto temp = dynamic_cast<BigIntegerCiphertext*>(data);
 	if (temp == NULL)
 		throw invalid_argument("The input data has to be of type BigIntegerCiphertext");
 
-	return temp;
+	return make_shared<BigIntegerCiphertext>(temp->getCipher());
 }
 
-shared_ptr<PublicKey> DamgardJurikEnc::reconstructPublicKey(shared_ptr<KeySendableData> data) {
-	auto temp = dynamic_pointer_cast<DamgardJurikPublicKey>(data);
+shared_ptr<PublicKey> DamgardJurikEnc::reconstructPublicKey(KeySendableData* data) {
+	auto temp = dynamic_cast<DamgardJurikPublicKey*>(data);
 	if (temp == NULL)
 		throw invalid_argument("To generate the key from sendable data, the data has to be of type DamgardJurikPublicKey");
-	return temp;
+	return make_shared<DamgardJurikPublicKey>(temp->getModulus());
 }
 
-shared_ptr<PrivateKey> DamgardJurikEnc::reconstructPrivateKey(shared_ptr<KeySendableData> data)  {
-	auto temp = dynamic_pointer_cast<DamgardJurikPrivateKey>(data);
+shared_ptr<PrivateKey> DamgardJurikEnc::reconstructPrivateKey(KeySendableData* data)  {
+	auto temp = dynamic_cast<DamgardJurikPrivateKey*>(data);
 	if (temp == NULL)
 		throw invalid_argument("To generate the key from sendable data, the data has to be of type DamgardJurikPrivateKey");
-	return temp;
+	return make_shared<DamgardJurikPrivateKey>(temp->getP(), temp->getQ(), temp->getT(), temp->getDForS1());
 }

@@ -14,8 +14,8 @@
 class SigmaElGamalCommittedValueCommonInput : public SigmaCommonInput {
 
 private: 
-	ElGamalPublicKey publicKey;
-	ElGamalOnGrElSendableData commitment;
+	shared_ptr<ElGamalPublicKey> publicKey;
+	shared_ptr<ElGamalOnGrElSendableData> commitment;
 	shared_ptr<GroupElement> x;
 
 public:
@@ -25,14 +25,16 @@ public:
 	* @param commitment the actual commitment value.
 	* @param x committed value.
 	*/
-	SigmaElGamalCommittedValueCommonInput(ElGamalPublicKey publicKey, ElGamalOnGrElSendableData commitment, shared_ptr<GroupElement> x) : publicKey(publicKey), commitment(commitment) {
+	SigmaElGamalCommittedValueCommonInput(shared_ptr<ElGamalPublicKey> publicKey, shared_ptr<ElGamalOnGrElSendableData> commitment, shared_ptr<GroupElement> x)  {
+		this->publicKey = publicKey;
+		this->commitment = commitment;
 		this->x = x;
 	}
 
 	/**
 	* Returns the actual commitment value.
 	*/
-	ElGamalOnGrElSendableData getCommitment() {	return commitment; }
+	shared_ptr<ElGamalOnGrElSendableData> getCommitment() {	return commitment; }
 
 	/**
 	* Returns the committed value.
@@ -42,7 +44,7 @@ public:
 	/**
 	* Returns the public key used to commit.
 	*/
-	ElGamalPublicKey getPublicKey() { return publicKey;	}
+	shared_ptr<ElGamalPublicKey> getPublicKey() { return publicKey;	}
 };
 
 /**
@@ -67,7 +69,7 @@ public:
 	* @param x committed value
 	* @param r random value used to commit.
 	*/
-	SigmaElGamalCommittedValueProverInput(ElGamalPublicKey publicKey, ElGamalOnGrElSendableData commitment, shared_ptr<GroupElement> x, biginteger r) {
+	SigmaElGamalCommittedValueProverInput(shared_ptr<ElGamalPublicKey> publicKey, shared_ptr<ElGamalOnGrElSendableData> commitment, shared_ptr<GroupElement> x, biginteger r) {
 		input = make_shared<SigmaElGamalCommittedValueCommonInput>(publicKey, commitment, x);
 		this->r = r;
 	}

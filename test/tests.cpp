@@ -732,7 +732,7 @@ TEST_CASE("serialization", "[SerializedData, CmtCCommitmentMsg]")
 
 TEST_CASE("asymmetric encryption")
 {
-	SECTION("El Gamal")
+	SECTION("El Gamal on group element")
 	{
 		mt19937 random = get_seeded_random();
 		auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
@@ -748,10 +748,10 @@ TEST_CASE("asymmetric encryption")
 		auto plaintext = elgamal.generatePlaintext(plainM);
 		biginteger r = getRandomInRange(0, dlog->getOrder() - 1, random);
 		auto cipher = elgamal.encrypt(plaintext, r);
-		auto returnedP = elgamal.decrypt(cipher);
+		auto returnedP = elgamal.decrypt(cipher.get());
 		REQUIRE(*returnedP == *plaintext);
 
-		auto returnedV = elgamal.generateBytesFromPlaintext(plaintext);
+		auto returnedV = elgamal.generateBytesFromPlaintext(plaintext.get());
 		bool equal = true;
 		for (int i = 0; i < plainM.size(); i++)
 			if (returnedV.data()[i] != plainM.data()[i]) 
@@ -759,11 +759,39 @@ TEST_CASE("asymmetric encryption")
 		REQUIRE(equal == true);
 
 		
-		auto doubleC = elgamal.multiply(cipher, cipher, r);
+		auto doubleC = elgamal.multiply(cipher.get(), cipher.get(), r);
 		auto p = dynamic_pointer_cast<GroupElementPlaintext>(plaintext);
 		auto c = dlog->multiplyGroupElements(p->getElement().get(), p->getElement().get());
 		auto multC = elgamal.encrypt(make_shared<GroupElementPlaintext>(c), r*3 % dlog->getOrder());
 		REQUIRE(*doubleC == *multC);
+	}
+
+	SECTION("El Gamal on byte array")
+	{
+		mt19937 random = get_seeded_random();
+		auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
+		auto kdf = make_shared<HKDF>(new OpenSSLHMAC());
+		ElGamalOnByteArrayEnc elgamal(dlog, kdf);
+		auto keys = elgamal.generateKey();
+		elgamal.setKey(keys.first, keys.second);
+		string message = "I want to encrypt this!";
+		int len = message.size();
+		if (elgamal.hasMaxByteArrayLengthForPlaintext()) {
+			REQUIRE(len < elgamal.getMaxLengthOfByteArrayForPlaintext());
+		}
+		vector<byte> plainM(message.begin(), message.end());
+		auto plaintext = elgamal.generatePlaintext(plainM);
+		biginteger r = getRandomInRange(0, dlog->getOrder() - 1, random);
+		auto cipher = elgamal.encrypt(plaintext, r);
+		auto returnedP = elgamal.decrypt(cipher.get());
+		REQUIRE(*returnedP == *plaintext);
+
+		auto returnedV = elgamal.generateBytesFromPlaintext(plaintext.get());
+		bool equal = true;
+		for (int i = 0; i < plainM.size(); i++)
+			if (returnedV.data()[i] != plainM.data()[i])
+				equal = false;
+		REQUIRE(equal == true);
 	}
 
 	SECTION("CramerShoup")
@@ -782,10 +810,10 @@ TEST_CASE("asymmetric encryption")
 		auto plaintext = cr.generatePlaintext(plainM);
 		biginteger r = getRandomInRange(0, dlog->getOrder() - 1, random);
 		auto cipher = cr.encrypt(plaintext, r);
-		auto returnedP = cr.decrypt(cipher);
+		auto returnedP = cr.decrypt(cipher.get());
 		REQUIRE(*returnedP == *plaintext);
 
-		auto returnedV = cr.generateBytesFromPlaintext(plaintext);
+		auto returnedV = cr.generateBytesFromPlaintext(plaintext.get());
 		bool equal = true;
 		for (int i = 0; i < plainM.size(); i++)
 			if (returnedV.data()[i] != plainM.data()[i])

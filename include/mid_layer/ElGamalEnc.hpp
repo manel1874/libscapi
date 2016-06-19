@@ -3,6 +3,8 @@
 #include "../infra/Common.hpp"
 #include "../primitives/Dlog.hpp"
 #include "../primitives/DlogOpenSSL.hpp"
+#include "../primitives/Kdf.hpp"
+#include "../primitives/PrfOpenSSL.hpp"
 
 class ElGamalPublicKeySendableData : public KeySendableData {
 private:
@@ -134,33 +136,111 @@ public:
 	}
 };
 
+//Nested class that holds the sendable data of the outer class
+class ElGamalOnByteArraySendableData : public AsymmetricCiphertextSendableData {
+
+private:
+	//First part of the ciphertext.
+	shared_ptr<GroupElementSendableData> cipher1;
+	//Second part of the ciphertext.
+	vector<byte> cipher2;
+
+public:
+	ElGamalOnByteArraySendableData(shared_ptr<GroupElementSendableData> cipher1, vector<byte> cipher2) {
+		this->cipher1 = cipher1;
+		this->cipher2 = cipher2;
+	}
+
+	shared_ptr<GroupElementSendableData> getCipher1() {	return cipher1;	}
+
+	vector<byte> getCipher2() { return cipher2; }
+
+	string toString() override;
+	void initFromString(const string & row) override;
+};
+
 /**
-* This class performs the El Gamal encryption scheme that perform the encryption on a GroupElement. <P>
-* In some cases there are protocols that do multiple calculations and might want to keep working on a close group.
-* For those cases we provide encryption on a group element. <P>
+* This class is a container that encapsulates the cipher data resulting from applying the ElGamalOnByteArray encryption.
+* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
 *
-* By definition, this encryption scheme is CPA-secure and Indistinguishable.
+*/
+class ElGamalOnByteArrayCiphertext : public AsymmetricCiphertext {
+
+private:
+	//First part of the ciphertext.
+	shared_ptr<GroupElement> cipher1;
+	//Second part of the ciphertext.
+	vector<byte> cipher2;
+
+public:
+	/**
+	* Create an instance of this container class.
+	* This constructor is used by the Encryption Scheme as a result of a call to function encrypt.
+	* @param c1 the first part of the cihertext
+	* @param c2 the second part of the ciphertext
+	*/
+	ElGamalOnByteArrayCiphertext(shared_ptr<GroupElement> c1, vector<byte> c2) {
+		cipher1 = c1;
+		cipher2 = c2;
+	}
+
+	/**
+	*
+	* @return the first part of the ciphertext
+	*/
+	shared_ptr<GroupElement> getC1() { return cipher1; }
+
+	/**
+	*
+	* @return the second part of the ciphertext
+	*/
+	vector<byte> getC2() { return cipher2; }
+
+	shared_ptr<AsymmetricCiphertextSendableData> generateSendableData() override {
+		return make_shared<ElGamalOnByteArraySendableData>(cipher1->generateSendableData(), cipher2);
+	}
+
+	bool operator==(const AsymmetricCiphertext &other) const override {
+		auto obj = dynamic_cast<const ElGamalOnByteArrayCiphertext*>(&other);
+		if (this == obj)
+			return true;
+		if (obj == NULL)
+			return false;
+		if (*cipher1 != *obj->cipher1) {
+				return false;
+		}
+		return cipher2 == obj->cipher2;
+	}
+};
+
+
+/**
+* Abstract class that implements some common functionality to all ElGamal types.
 *
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
 *
 */
-class ElGamalOnGroupElementEnc : public AsymMultiplicativeHomomorphicEnc {
+class ElGamalEnc : public AsymmetricEnc {
 private:
-
+	bool keySet;
+protected:
 	shared_ptr<DlogGroup> dlog;						//The underlying DlogGroup
 	shared_ptr<ElGamalPrivateKey> privateKey;		//ElGamal private key (contains x)
 	shared_ptr<ElGamalPublicKey> publicKey;			//ElGamal public key (contains h)
 	mt19937 random;									//Source of randomness
-	bool keySet;
 	biginteger qMinusOne;							//We keep this value to save unnecessary calculations.
 
 	void setMembers(shared_ptr<DlogGroup> dlogGroup);
 
+	virtual void initPrivateKey(shared_ptr<ElGamalPrivateKey> privateKey) = 0;
+	
+	virtual shared_ptr<AsymmetricCiphertext> completeEncryption(shared_ptr<GroupElement> c1, GroupElement* hy, Plaintext* plaintext) = 0;
+	
 public:
 	/**
 	* Default constructor. Uses the default implementations of DlogGroup, CryptographicHash and SecureRandom.
 	*/
-	ElGamalOnGroupElementEnc();
+	ElGamalEnc();
 
 	/**
 	* Constructor that gets a DlogGroup and sets it to the underlying group.
@@ -168,7 +248,7 @@ public:
 	* @param dlogGroup underlying DlogGroup to use, it has to have DDH security level
 	* @throws SecurityLevelException if the Dlog Group is not DDH secure
 	*/
-	ElGamalOnGroupElementEnc(shared_ptr<DlogGroup> dlogGroup) {
+	ElGamalEnc(shared_ptr<DlogGroup> dlogGroup) {
 		setMembers(dlogGroup);
 	}
 
@@ -187,7 +267,7 @@ public:
 	* @param publicKey should be ElGamalPublicKey
 	* @throws InvalidKeyException if the given key is not instances of ElGamalPuclicKey.
 	*/
-	void setKey(shared_ptr<PublicKey> publicKey) override {	setKey(publicKey, NULL); }
+	void setKey(shared_ptr<PublicKey> publicKey) override { setKey(publicKey, NULL); }
 
 	bool isKeySet() override { return keySet; }
 
@@ -209,7 +289,7 @@ public:
 	/**
 	* @return the name of this AsymmetricEnc - ElGamal and the underlying dlog group type
 	*/
-	string getAlgorithmName() override {	return "ElGamal/" + dlog->getGroupType(); }
+	string getAlgorithmName() override { return "ElGamal/" + dlog->getGroupType(); }
 
 	/**
 	* Generates a KeyPair containing a set of ElGamalPublicKEy and ElGamalPrivateKey using the source of randomness and the dlog specified upon construction.
@@ -221,14 +301,14 @@ public:
 	* This function is not supported for this encryption scheme, since there is no need for parameters to generate an ElGamal key pair.
 	* @throws UnsupportedOperationException
 	*/
-	pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> generateKey(shared_ptr<AlgorithmParameterSpec> keyParams) override{
+	pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> generateKey(AlgorithmParameterSpec* keyParams) override {
 		//No need for parameters to generate an El Gamal key pair. 
 		throw new UnsupportedOperationException("To Generate ElGamal keys use the generateKey() function");
 	}
 
-	shared_ptr<PublicKey> reconstructPublicKey(shared_ptr<KeySendableData> data) override;
+	shared_ptr<PublicKey> reconstructPublicKey(KeySendableData* data) override;
 
-	shared_ptr<PrivateKey> reconstructPrivateKey(shared_ptr<KeySendableData> data) override;
+	shared_ptr<PrivateKey> reconstructPrivateKey(KeySendableData* data) override;
 
 	/**
 	* Encrypts the given message using ElGamal encryption scheme.
@@ -254,18 +334,57 @@ public:
 	* @throws IllegalArgumentException if the given Plaintext does not match this ElGamal type.
 	*/
 	shared_ptr<AsymmetricCiphertext> encrypt(shared_ptr<Plaintext> plaintext, biginteger r) override;
+};
 
+
+/**
+* This class performs the El Gamal encryption scheme that perform the encryption on a GroupElement. <P>
+* In some cases there are protocols that do multiple calculations and might want to keep working on a close group.
+* For those cases we provide encryption on a group element. <P>
+*
+* By definition, this encryption scheme is CPA-secure and Indistinguishable.
+*
+* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
+*
+*/
+class ElGamalOnGroupElementEnc : public ElGamalEnc, public AsymMultiplicativeHomomorphicEnc {
+protected:
+	/**
+	* ElGamal decrypt function can be optimized if, instead of using the x value in the private key as is,
+	* we change it to be q-x, while q is the dlog group order.
+	* This function computes this changing and saves the new private value as the private key member.
+	* @param privateKey to change.
+	*/
+	void initPrivateKey(shared_ptr<ElGamalPrivateKey> privateKey) override;
+
+	shared_ptr<AsymmetricCiphertext> completeEncryption(shared_ptr<GroupElement> c1, GroupElement* hy, Plaintext* plaintext) override;
+
+public:
+	/**
+	* Default constructor. Uses the default implementations of DlogGroup, CryptographicHash and SecureRandom.
+	*/
+	ElGamalOnGroupElementEnc() {}
+
+	/**
+	* Constructor that gets a DlogGroup and sets it to the underlying group.
+	* It lets SCAPI choose and source of randomness.
+	* @param dlogGroup underlying DlogGroup to use, it has to have DDH security level
+	* @throws SecurityLevelException if the Dlog Group is not DDH secure
+	*/
+	ElGamalOnGroupElementEnc(shared_ptr<DlogGroup> dlogGroup) : ElGamalEnc(dlogGroup) {}
+
+	
 	/**
 	* El-Gamal encryption scheme has a limit of the byte array length to generate a plaintext from.
 	* @return true.
 	*/
-	bool hasMaxByteArrayLengthForPlaintext() override { return true;	}
+	bool hasMaxByteArrayLengthForPlaintext() override { return true; }
 
 	/**
 	* Returns the maximum size of the byte array that can be passed to generatePlaintext function.
 	* This is the maximum size of a byte array that can be converted to a Plaintext object suitable to this encryption scheme.
 	*/
-	int getMaxLengthOfByteArrayForPlaintext() override {	return dlog->getMaxLengthOfByteArrayForEncoding(); }
+	int getMaxLengthOfByteArrayForPlaintext() override { return dlog->getMaxLengthOfByteArrayForEncoding(); }
 
 	/**
 	* Generates a Plaintext suitable to ElGamal encryption scheme from the given message.
@@ -282,7 +401,7 @@ public:
 	* @throws KeyException if no private key was set.
 	* @throws IllegalArgumentException if the given cipher is not instance of ElGamalOnGroupElementCiphertext.
 	*/
-	shared_ptr<Plaintext> decrypt(shared_ptr<AsymmetricCiphertext> cipher) override;
+	shared_ptr<Plaintext> decrypt(AsymmetricCiphertext* cipher) override;
 
 	/**
 	* Generates a byte array from the given plaintext.
@@ -292,7 +411,7 @@ public:
 	* @return the byte array generated from the given plaintext.
 	* @throws IllegalArgumentException if the given plaintext is not an instance of GroupElementPlaintext.
 	*/
-	vector<byte> generateBytesFromPlaintext(shared_ptr<Plaintext> plaintext) override;
+	vector<byte> generateBytesFromPlaintext(Plaintext* plaintext) override;
 
 	/**
 	* Calculates the ciphertext resulting of multiplying two given ciphertexts.
@@ -302,7 +421,7 @@ public:
 	* 		1. If one or more of the given ciphertexts is not instance of ElGamalOnGroupElementCiphertext.
 	* 		2. If one or more of the GroupElements in the given ciphertexts is not a member of the underlying DlogGroup of this ElGamal encryption scheme.
 	*/
-	shared_ptr<AsymmetricCiphertext> multiply(shared_ptr<AsymmetricCiphertext> cipher1, shared_ptr<AsymmetricCiphertext> cipher2) override;
+	shared_ptr<AsymmetricCiphertext> multiply(AsymmetricCiphertext* cipher1, AsymmetricCiphertext* cipher2) override;
 
 	/**
 	* Calculates the ciphertext resulting of multiplying two given ciphertexts.<P>
@@ -318,11 +437,110 @@ public:
 	* 		1. If one or more of the given ciphertexts is not instance of ElGamalOnGroupElementCiphertext.
 	* 		2. If one or more of the GroupElements in the given ciphertexts is not a member of the underlying DlogGroup of this ElGamal encryption scheme.
 	*/
-	shared_ptr<AsymmetricCiphertext> multiply(shared_ptr<AsymmetricCiphertext> cipher1, shared_ptr<AsymmetricCiphertext> cipher2, biginteger r) override; 
+	shared_ptr<AsymmetricCiphertext> multiply(AsymmetricCiphertext* cipher1, AsymmetricCiphertext* cipher2, biginteger r) override;
 
 	
 	/**
 	* @see edu.biu.scapi.midLayer.asymmetricCrypto.encryption.AsymmetricEnc#reconstructCiphertext(edu.biu.scapi.midLayer.ciphertext.AsymmetricCiphertextSendableData)
 	*/
-	shared_ptr<AsymmetricCiphertext> reconstructCiphertext(shared_ptr<AsymmetricCiphertextSendableData> data) override;
+	shared_ptr<AsymmetricCiphertext> reconstructCiphertext(AsymmetricCiphertextSendableData* data) override;
+};
+
+/**
+* This class performs the El Gamal encryption scheme that perform the encryption on a ByteArray.
+* The general encryption of a message usually uses this type of encryption. <p>
+*
+* By definition, this encryption scheme is CPA-secure and Indistinguishable.
+*
+* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
+*
+*/
+class ElGamalOnByteArrayEnc : public ElGamalEnc {
+
+private:
+	shared_ptr<KeyDerivationFunction> kdf; 	// The underlying KDF to use in the encryption.
+
+protected:
+	/**
+	* Sets the private key.
+	* @param privateKey.
+	*/
+	void initPrivateKey(shared_ptr<ElGamalPrivateKey> privateKey) override	{
+		//Sets the given PrivateKey.
+		this->privateKey = privateKey;
+	}
+
+	/**
+	* Completes the encryption operation.
+	* @param plaintext contains message to encrypt. MUST be of type ByteArrayPlaintext.
+	* @return Ciphertext of type ElGamalOnByteArrayCiphertext containing the encrypted message.
+	* @throws IllegalArgumentException if the given Plaintext is not an instance of ByteArrayPlaintext.
+	*/
+	shared_ptr<AsymmetricCiphertext> completeEncryption(shared_ptr<GroupElement> c1, GroupElement* hy, Plaintext* plaintext) override;
+									
+public:
+	/**
+	* Default constructor. Uses the default implementations of DlogGroup and SecureRandom.
+	*/
+	ElGamalOnByteArrayEnc() : ElGamalEnc() {
+		//Creates a default implementation of KDF.
+		this->kdf = make_shared<HKDF>(new OpenSSLHMAC());
+	}
+
+	/**
+	* Constructor that gets a DlogGroup and sets it to the underlying group.
+	* It lets SCAPI choose and source of randomness.
+	* @param dlogGroup must be DDH secure.
+	* @throws SecurityLevelException if the given dlog group does not have DDH security level.
+	*/
+	ElGamalOnByteArrayEnc(shared_ptr<DlogGroup> dlogGroup, shared_ptr<KeyDerivationFunction> kdf) : ElGamalEnc(dlogGroup) {
+		this->kdf = kdf;
+	}
+	
+	/**
+	* ElGamalOnByteArray encryption scheme has no limit of the byte array length to generate a plaintext from.
+	* @return false.
+	*/
+	bool hasMaxByteArrayLengthForPlaintext() override { return false; }
+
+	/**
+	* ElGamalOnByteArray encryption can get any plaintext length.
+	* @throws NoMaxException.
+	*/
+	int getMaxLengthOfByteArrayForPlaintext() override {
+		throw runtime_error("ElGamalOnByteArray encryption can get any plaintext length");
+	}
+
+	/**
+	* Generates a Plaintext suitable to ElGamal encryption scheme from the given message.
+	* @param text byte array to convert to a Plaintext object.
+	*/
+	shared_ptr<Plaintext> generatePlaintext(vector<byte> text) override {
+		return make_shared<ByteArrayPlaintext>(text);
+	}
+
+	/**
+	* Decrypts the given ciphertext using ElGamal encryption scheme.
+	*
+	* @param cipher MUST be of type ElGamalOnByteArrayCiphertext contains the cipher to decrypt.
+	* @return Plaintext of type ByteArrayPlaintext which containing the decrypted message.
+	* @throws KeyException if no private key was set.
+	* @throws IllegalArgumentException if the given cipher is not instance of ElGamalOnByteArrayCiphertext.
+	*/
+	shared_ptr<Plaintext> decrypt(AsymmetricCiphertext* cipher) override; 
+
+	/**
+	* Generates a byte array from the given plaintext.
+	* This function should be used when the user does not know the specific type of the Asymmetric encryption he has,
+	* and therefore he is working on byte array.
+	* @param plaintext to generates byte array from. MUST be an instance of ByteArrayPlaintext.
+	* @return the byte array generated from the given plaintext.
+	* @throws IllegalArgumentException if the given plaintext is not an instance of ByteArrayPlaintext.
+	*/
+	vector<byte> generateBytesFromPlaintext(Plaintext* plaintext) override; 
+
+	/**
+	* @see edu.biu.scapi.midLayer.asymmetricCrypto.encryption.AsymmetricEnc#reconstructCiphertext(edu.biu.scapi.midLayer.ciphertext.AsymmetricCiphertextSendableData)
+	*/
+	shared_ptr<AsymmetricCiphertext> reconstructCiphertext(AsymmetricCiphertextSendableData* data) override; 
 };
