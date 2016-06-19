@@ -23,7 +23,7 @@ shared_ptr<CmtCommitter> getCommitter(shared_ptr<CommParty> channel, CommitmentP
 		sds = make_shared<CmtPedersenCommitter>(channel, dlog);
 	} if (sdp.protocolName == "PedersenWithProofs") {
 		auto dlog = make_shared<OpenSSLDlogECF2m>();
-		sds = make_shared<CmtPedersenWithProofsCommitter>(channel, dlog, 80);
+		sds = make_shared<CmtPedersenWithProofsCommitter>(channel, 80, dlog);
 	} else if (sdp.protocolName == "PedersenTrapdoor") {
 		auto dlog = make_shared<OpenSSLDlogECF2m>();
 		sds = make_shared<CmtPedersenTrapdoorCommitter>(channel, dlog);
@@ -36,6 +36,9 @@ shared_ptr<CmtCommitter> getCommitter(shared_ptr<CommParty> channel, CommitmentP
 	} else if (sdp.protocolName == "ElGamalOnGroupElement") {
 		auto dlog = make_shared<OpenSSLDlogECF2m>();
 		sds = make_shared<CmtElGamalOnGroupElementCommitter>(channel, dlog);
+	} else if (sdp.protocolName == "ElGamalWithProofs") {
+		auto dlog = make_shared<OpenSSLDlogECF2m>();
+		sds = make_shared<CmtElGamalWithProofsCommitter>(channel, 80, dlog);
 	} else if (sdp.protocolName == "ElGamalOnByteArray") {
 		sds = make_shared<CmtElGamalOnByteArrayCommitter>(channel);
 	} else if (sdp.protocolName == "ElGamalHash") {
@@ -52,7 +55,7 @@ shared_ptr<CmtReceiver> getReceiver(shared_ptr<CommParty> channel, CommitmentPar
 		sds = make_shared<CmtPedersenReceiver>(channel, dlog);
 	} if (sdp.protocolName == "PedersenWithProofs") {
 		auto dlog = make_shared<OpenSSLDlogECF2m>();
-		sds = make_shared<CmtPedersenWithProofsReceiver>(channel, dlog, 80);
+		sds = make_shared<CmtPedersenWithProofsReceiver>(channel, 80, dlog);
 	} else if (sdp.protocolName == "PedersenTrapdoor") {
 		auto dlog = make_shared<OpenSSLDlogECF2m>();
 		sds = make_shared<CmtPedersenTrapdoorReceiver>(channel, dlog);
@@ -65,6 +68,9 @@ shared_ptr<CmtReceiver> getReceiver(shared_ptr<CommParty> channel, CommitmentPar
 	} else if (sdp.protocolName == "ElGamalOnGroupElement") {
 		auto dlog = make_shared<OpenSSLDlogECF2m>();
 		sds = make_shared<CmtElGamalOnGroupElementReceiver>(channel, dlog);
+	} else if (sdp.protocolName == "ElGamalWithProofs") {
+		auto dlog = make_shared<OpenSSLDlogECF2m>();
+		sds = make_shared<CmtElGamalWithProofsReceiver>(channel, 80, dlog);
 	} else if (sdp.protocolName == "ElGamalOnByteArray") {
 		sds = make_shared<CmtElGamalOnByteArrayReceiver>(channel);
 	} else if (sdp.protocolName == "ElGamalHash") {

@@ -1,4 +1,6 @@
 #include "../../include/interactive_mid_protocols/CommitmentSchemeElGamal.hpp"
+#include "../../include/interactive_mid_protocols/SigmaProtocolElGamalCommittedValue.hpp"
+#include "../../include/interactive_mid_protocols/SigmaProtocolElGamalCmtKnowledge.hpp"
 
 /**
 * Sets the given parameters and execute the preprocess phase of the scheme.
@@ -157,6 +159,7 @@ shared_ptr<CmtRCommitPhaseOutput> CmtElGamalReceiverCore::receiveCommitment()  {
 	channel->readWithSizeIntoVector(raw_msg);
 	// init the empy CmtPedersenCommitmentMessage using the encdoed data
 	msg->initFromByteVector(raw_msg);
+	
 	commitmentMap[msg->getId()] = msg;
 	return make_shared<CmtRBasicCommitPhaseOutput>(msg->getId());
 }
@@ -367,4 +370,91 @@ vector<byte> CmtElGamalOnByteArrayReceiver::generateBytesFromCommitValue(CmtComm
 	if (val == NULL)
 		throw invalid_argument ("The given value must be of type CmtByteArrayCommitValue");
 	return *static_pointer_cast<vector<byte>>(value->getX());
+}
+
+/**
+* Creates the ZK provers using sigma protocols that prove Pedersen's proofs.
+* @param t statistical parameter
+* @throws IOException if there was a problem in the communication
+*/
+void CmtElGamalWithProofsCommitter::doConstruct(int t) {
+	auto elGamalCommittedValProver = make_shared<SigmaElGamalCommittedValueProverComputation>(dlog, t);
+	auto elGamalCTKnowledgeProver = make_shared<SigmaElGamalCmtKnowledgeProverComputation>(dlog, t);
+	knowledgeProver = make_shared<ZKPOKFromSigmaCmtPedersenProver>(channel, elGamalCTKnowledgeProver, dlog);
+	auto receiver = make_shared<CmtPedersenReceiver>(channel, dlog);
+	committedValProver = make_shared<ZKFromSigmaProver>(channel, elGamalCommittedValProver, receiver);
+
+}
+
+void CmtElGamalWithProofsCommitter::proveKnowledge(long id)  {
+	auto keys = getPreProcessValues();
+	auto publicKey = static_pointer_cast<ElGamalPublicKey>(keys[0]);
+	auto privateKey = static_pointer_cast<ElGamalPrivateKey>(keys[1]);
+	SigmaElGamalCmtKnowledgeProverInput input(*publicKey, privateKey->getX());
+	knowledgeProver->prove(make_shared<SigmaElGamalCmtKnowledgeProverInput>(input));
+}
+
+void CmtElGamalWithProofsCommitter::proveCommittedValue(long id)  {
+	//Send s1 to P2
+	auto val = getCommitmentPhaseValues(id);
+	//Send s1 to P2
+	channel->writeWithSize(val->getX()->toString());
+
+	auto keys = getPreProcessValues();
+	auto publicKey = static_pointer_cast<ElGamalPublicKey>(keys[0]);
+	auto commitment = static_pointer_cast<AsymmetricCiphertext>(val->getComputedCommitment())->generateSendableData();
+	auto x = static_pointer_cast<GroupElement>(val->getX()->getX());
+	auto r = static_pointer_cast<BigIntegerRandomValue>(val->getR())->getR();
+	SigmaElGamalCommittedValueProverInput input(publicKey, static_pointer_cast<ElGamalOnGrElSendableData>(commitment), x, r);
+	committedValProver->prove(make_shared<SigmaElGamalCommittedValueProverInput>(input));
+}
+
+/**
+* Creates the ZK verifiers using sigma protocols that verifies ElGamal's proofs.
+* @param t
+* @throws IOException Creates the ZK provers using sigma protocols that prove Pedersen's proofs.
+* @throws InvalidDlogGroupException if the given dlog is not valid.
+* @throws CheatAttemptException if the receiver h is not in the DlogGroup.
+* @throws ClassNotFoundException if there was a problem in the serialization
+*/
+void CmtElGamalWithProofsReceiver::doConstruct(int t) {
+	auto elGamalCommittedValVerifier = make_shared<SigmaElGamalCommittedValueVerifierComputation>(dlog, t);
+	auto elGamalCTKnowledgeVerifier = make_shared<SigmaElGamalCmtKnowledgeVerifierComputation>(dlog, t);
+	auto output = make_shared<CmtRTrapdoorCommitPhaseOutput>();
+	knowledgeVerifier = make_shared<ZKPOKFromSigmaCmtPedersenVerifier>(channel, elGamalCTKnowledgeVerifier, output, dlog);
+	auto committer = make_shared<CmtPedersenCommitter>(channel, dlog);
+	committedValVerifier = make_shared<ZKFromSigmaVerifier>(channel, elGamalCommittedValVerifier, committer);
+
+}
+
+bool CmtElGamalWithProofsReceiver::verifyKnowledge(long id) {
+	auto key = static_pointer_cast<ElGamalPublicKey>(getPreProcessedValues()[0]);
+	SigmaElGamalCmtKnowledgeCommonInput input(*key);
+	SigmaGroupElementMsg emptyA(dlog->getGenerator()->generateSendableData());
+	SigmaBIMsg emptyZ;
+	return knowledgeVerifier->verify(&input, &emptyA, &emptyZ);
+}
+
+shared_ptr<CmtCommitValue> CmtElGamalWithProofsReceiver::verifyCommittedValue(long id) {
+	//Receive the committed value from the committer.
+	// read biginteger from channel
+	vector<byte> raw_msg; // by the end of the scope - no need to hold it anymore - already decoded and copied
+	channel->readWithSizeIntoVector(raw_msg);
+	auto sendable = dlog->getGenerator()->generateSendableData();
+	sendable->initFromByteVector(raw_msg);
+	auto committedVal = dlog->reconstructElement(true, sendable.get());
+	
+	//Creates input for the ZK verifier
+	auto key = static_pointer_cast<ElGamalPublicKey>(getPreProcessedValues()[0]);
+	auto commitmentVal = static_pointer_cast<CmtCCommitmentMsg>(getCommitmentPhaseValues(id));
+	auto commitment = static_pointer_cast<ElGamalOnGrElSendableData>(commitmentVal->getCommitment());
+	SigmaElGamalCommittedValueCommonInput input(key, commitment, committedVal);
+	//Computes the verification.
+
+	SigmaDHMsg emptyA(dlog->getGenerator()->generateSendableData(), dlog->getGenerator()->generateSendableData());
+	SigmaBIMsg emptyZ;
+	bool verified = committedValVerifier->verify(&input, &emptyA, &emptyZ);
+	if (verified) 
+		return make_shared<CmtGroupElementCommitValue>(committedVal);
+	return NULL;
 }

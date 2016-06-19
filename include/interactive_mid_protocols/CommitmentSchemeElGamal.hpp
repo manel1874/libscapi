@@ -1,5 +1,6 @@
 #pragma once
 #include "CommitmentScheme.hpp"
+#include "ZeroKnowledge.hpp"
 #include "../mid_layer/ElGamalEnc.hpp"
 
 /**
@@ -519,4 +520,85 @@ public:
 	*/
 	vector<byte> generateBytesFromCommitValue(CmtCommitValue* value) override;
 };
+
+/**
+* Concrete implementation of committer with proofs.
+* This implementation uses ZK based on SigmaElGamalKnowledge and SIgmaElGamalCommittedValue.
+*
+* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
+*
+*/
+class CmtElGamalWithProofsCommitter : public CmtElGamalOnGroupElementCommitter, public CmtWithProofsCommitter {
+private:
+
+	//Proves that the committer knows the committed value.
+	shared_ptr<ZKPOKFromSigmaCmtPedersenProver> knowledgeProver;
+	//Proves that the committed value is x.
+	shared_ptr<ZKFromSigmaProver> committedValProver;
+
+	/**
+	* Creates the ZK provers using sigma protocols that prove Pedersen's proofs.
+	* @param t statistical parameter
+	* @throws IOException if there was a problem in the communication
+	*/
+	void doConstruct(int t);
+
+public:
+	/**
+	* Default constructor that gets the channel and creates the ZK provers with default Dlog group.
+	* @param channel
+	* @throws IOException
+	*/
+	CmtElGamalWithProofsCommitter(shared_ptr<CommParty> channel, int t, shared_ptr<DlogGroup> dlog = make_shared<OpenSSLDlogECF2m>("K-233"))
+		: CmtElGamalOnGroupElementCommitter(channel, dlog) {
+		doConstruct(t);
+	}
+
+	void proveKnowledge(long id) override; 
+	void proveCommittedValue(long id) override;
+};
+
+/**
+* Concrete implementation of receiver with proofs.
+*
+* This implementation uses ZK based on SigmaElGamalKnowledge and SIgmaElGamalCommittedValue.
+*
+* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
+*
+*/
+class CmtElGamalWithProofsReceiver : public CmtElGamalOnGroupElementReceiver, public CmtWithProofsReceiver {
+private:
+
+	//Verifies that the committer knows the committed value.
+	shared_ptr<ZKPOKFromSigmaCmtPedersenVerifier> knowledgeVerifier;
+	//Proves that the committed value is x.
+	shared_ptr<ZKFromSigmaVerifier> committedValVerifier;
+
+	/**
+	* Creates the ZK verifiers using sigma protocols that verifies ElGamal's proofs.
+	* @param t
+	*/
+	void doConstruct(int t);
+
+public:
+	
+	/**
+	* Constructor that gets the channel, dlog, statistical parameter and random and uses
+	* them to create the ZK verifiers.
+	* @param channel
+	* @param dlog
+	* @param t statistical parameter
+	* @param random
+	*/
+	CmtElGamalWithProofsReceiver(shared_ptr<CommParty> channel, int t, shared_ptr<DlogGroup> dlog = make_shared<OpenSSLDlogECF2m>("K-233"))
+		: CmtElGamalOnGroupElementReceiver(channel, dlog) {
+		doConstruct(t);
+	}
+
+	bool verifyKnowledge(long id) override; 
+
+	shared_ptr<CmtCommitValue> verifyCommittedValue(long id) override; 
+};
+
+
 
