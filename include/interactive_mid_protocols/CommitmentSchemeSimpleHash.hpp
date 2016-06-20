@@ -80,7 +80,7 @@ public:
 class CmtSimpleHashDecommitmentMessage : public CmtCDecommitmentMessage {
 private:
 	shared_ptr<ByteArrayRandomValue> r; //Random value sampled during the commitment stage;
-	vector<byte> x; //Committer's private input x 
+	shared_ptr<vector<byte>> x; //Committer's private input x 
 	
 public:
 	CmtSimpleHashDecommitmentMessage() {}
@@ -90,12 +90,13 @@ public:
 	* @param x the committed value
 	* @param r the random value used for commit.
 	*/
-	CmtSimpleHashDecommitmentMessage(shared_ptr<ByteArrayRandomValue> r, vector<byte> x) {
+	CmtSimpleHashDecommitmentMessage(shared_ptr<ByteArrayRandomValue> r, shared_ptr<vector<byte>> x) {
 		this->r = r;
 		this->x = x;
 	}
 
-	vector<byte> getX() { return x;	}
+	shared_ptr<void> getX() override { return x; }
+	vector<byte> getXValue() { return *x; }
 
 	shared_ptr<RandomValue> getR() override { return r;	}
 

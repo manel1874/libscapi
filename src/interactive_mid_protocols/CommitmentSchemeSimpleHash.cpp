@@ -28,16 +28,17 @@ void CmtSimpleHashDecommitmentMessage::initFromString(const string & s) {
 	assert(vec.size() == 2);
 	vector<byte> random(vec[0].begin(), vec[0].end());
 	r = make_shared<ByteArrayRandomValue>(random);
-	x.assign(vec[1].begin(), vec[1].end());
+	vector<byte> tmp(vec[1].begin(), vec[1].end());
+	x = make_shared<vector<byte>>(tmp);
 }
 
 string CmtSimpleHashDecommitmentMessage::toString() {
 	auto random = r->getR();
 	const byte * uc = &(random[0]);
 	string output(reinterpret_cast<char const*>(uc), random.size());
-	const byte * xBytes = &(x[0]);
+	const byte * xBytes = &((*x)[0]);
 	output += ":";
-	output += string(reinterpret_cast<char const*>(xBytes), x.size());
+	output += string(reinterpret_cast<char const*>(xBytes), x->size());
 	return output;
 };
 
@@ -90,7 +91,7 @@ shared_ptr<CmtCDecommitmentMessage> CmtSimpleHashCommitter::generateDecommitment
 	auto vals = commitmentMap[id];
 	auto x = static_pointer_cast<vector<byte>>(vals->getX()->getX());
 	auto r = static_pointer_cast<ByteArrayRandomValue>(commitmentMap[id]->getR());
-	return make_shared<CmtSimpleHashDecommitmentMessage>(r, *x);
+	return make_shared<CmtSimpleHashDecommitmentMessage>(r, x);
 }
 
 /**
@@ -193,7 +194,7 @@ shared_ptr<CmtCommitValue> CmtSimpleHashReceiver::verifyDecommitment(CmtCCommitm
 	}
 	
 	//Compute c = H(r,x)
-	auto x = decomMsg->getX();
+	auto x = decomMsg->getXValue();
 	auto r = dynamic_pointer_cast<ByteArrayRandomValue>(decomMsg->getR())->getR();
 	
 	//create an array that will hold the concatenation of r with x

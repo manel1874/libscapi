@@ -49,7 +49,7 @@ public:
 */
 class CmtPedersenDecommitmentMessage : public CmtCDecommitmentMessage {
 private:
-	biginteger x; // committer's private input x in Zq
+	shared_ptr<biginteger> x; // committer's private input x in Zq
 	shared_ptr<BigIntegerRandomValue> r; // random value sampled during the sampleRandomValues stage;
 public:
 	/**
@@ -57,23 +57,24 @@ public:
 	* @param x the committed value
 	* @param r the random value used for commit.
 	*/
-	CmtPedersenDecommitmentMessage(biginteger x = 0, shared_ptr<BigIntegerRandomValue> r = NULL) {
+	CmtPedersenDecommitmentMessage(shared_ptr<biginteger> x = make_shared<biginteger>(0), shared_ptr<BigIntegerRandomValue> r = NULL) {
 		this->x = x;
 		this->r = r;
 	};
 
 	shared_ptr<RandomValue> getR() override { return r; };
 	biginteger getRValue() { return r->getR(); }
-	biginteger getX() { return x; };
+	shared_ptr<void> getX() override { return x; };
+	biginteger getXValue() { return *x; }
 
 	// network serialization implementation:
 	void initFromString(const string & s) override {
 		auto vec = explode(s, ':');
-		x = biginteger(vec[0]);
+		*x = biginteger(vec[0]);
 		biginteger rVal(vec[1]);
 		r = make_shared<BigIntegerRandomValue>(rVal);
 	}
-	string toString() override { return x.str() + ':' + getRValue().str(); };
+	string toString() override { return x->str() + ':' + getRValue().str(); };
 };
 
 /**

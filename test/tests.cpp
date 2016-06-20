@@ -652,24 +652,24 @@ TEST_CASE("serialization", "[SerializedData, CmtCCommitmentMsg]")
 		biginteger rvalue(rsa100);
 		biginteger xvalue(95612134554333);
 		auto r = make_shared<BigIntegerRandomValue>(rvalue);
-		CmtPedersenDecommitmentMessage cpdm(xvalue, r);
+		CmtPedersenDecommitmentMessage cpdm(make_shared<biginteger>(xvalue), r);
 		auto serialized = cpdm.toString();
 		auto biR = dynamic_pointer_cast<BigIntegerRandomValue>(cpdm.getR());
 		REQUIRE(biR->getR() == rvalue);
-		REQUIRE(cpdm.getX() == xvalue);
-
+		REQUIRE(cpdm.getXValue() == xvalue);
+		
 		// verify new one is created with empty values
 		auto r2 = make_shared<BigIntegerRandomValue>(0);
 		CmtPedersenDecommitmentMessage cpdm2;
 		auto biR2 = dynamic_pointer_cast<BigIntegerRandomValue>(cpdm2.getR());
 		REQUIRE(!biR2);
-		REQUIRE(cpdm2.getX() == 0);
-
+		REQUIRE(cpdm2.getXValue() == 0);
+		
 		// deserialize and verify original values in the new object
 		cpdm2.initFromString(serialized);
 		auto biR3 = dynamic_pointer_cast<BigIntegerRandomValue>(cpdm2.getR());
 		REQUIRE(biR3->getR() == rvalue);
-		REQUIRE(cpdm2.getX() == xvalue);
+		REQUIRE(cpdm2.getXValue() == xvalue);
 	}
 	SECTION("CmtRTrapdoorCommitPhaseOutput") {
 		biginteger trap(rsa100);

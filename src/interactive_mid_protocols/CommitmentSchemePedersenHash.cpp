@@ -4,14 +4,15 @@ void CmtPedersenHashDecommitmentMessage::initFromString(const string & s) {
 	auto vec = explode(s, ':');
 	assert(vec.size() == 2);
 	r = make_shared<BigIntegerRandomValue>(biginteger(vec[0]));
-	x.assign(vec[1].begin(), vec[1].end());
+	vector<byte> tmp(vec[1].begin(), vec[1].end());
+	x = make_shared<vector<byte>>(tmp);
 }
 
 string CmtPedersenHashDecommitmentMessage::toString() {
 	string output = (string) r->getR();
-	const byte * xBytes = &(x[0]);
+	const byte * xBytes = &((*x)[0]);
 	output += ":";
-	output += string(reinterpret_cast<char const*>(xBytes), x.size());
+	output += string(reinterpret_cast<char const*>(xBytes), x->size());
 	return output;
 };
 
@@ -71,7 +72,7 @@ shared_ptr<CmtCDecommitmentMessage> CmtPedersenHashCommitter::generateDecommitme
 
 	//Fetch the commitment according to the requested ID
 	auto tmp = dynamic_pointer_cast<CmtByteArrayCommitValue>(commitmentMap[id]->getX());
-	auto x = *tmp->getXVector();
+	auto x = tmp->getXVector();
 	
 	//Get the relevant random value used in the commitment phase
 	auto r = dynamic_pointer_cast<BigIntegerRandomValue>(commitmentMap[id]->getR());
@@ -143,7 +144,7 @@ shared_ptr<CmtCommitValue> CmtPedersenHashReceiver::verifyDecommitment(CmtCCommi
 		throw invalid_argument("The given decommiment message should be an instance of CmtPedersenDecommitmentMessage");
 	}
 	//Hash the input x with the hash function
-	vector<byte> x = decom->getX();
+	vector<byte> x = decom->getXValue();
 	
 	//calculate H(x) = Hash(x)
 	vector<byte> hashValArray;
@@ -152,7 +153,7 @@ shared_ptr<CmtCommitValue> CmtPedersenHashReceiver::verifyDecommitment(CmtCCommi
 	
 	biginteger xBi = abs(decodeBigInteger(hashValArray.data(), hashValArray.size()));
 	auto r = static_pointer_cast<BigIntegerRandomValue>(decom->getR());
-	auto innerDecom = make_shared<CmtPedersenDecommitmentMessage>(xBi, r);
+	auto innerDecom = make_shared<CmtPedersenDecommitmentMessage>(make_shared<biginteger>(xBi), r);
 	auto val = CmtPedersenReceiverCore::verifyDecommitment(commitmentMsg, innerDecom.get());
 	//If the inner Pedersen core algorithm returned null it means that it rejected the decommitment, so Pedersen Hash also rejects the answer and returns null
 	if (val == NULL)

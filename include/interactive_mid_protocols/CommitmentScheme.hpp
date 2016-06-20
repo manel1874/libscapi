@@ -293,6 +293,7 @@ public:
 	* Returns the random value used to commit.
 	*/
 	virtual shared_ptr<RandomValue> getR() = 0;
+	virtual shared_ptr<void> getX() = 0;
 
 };
 

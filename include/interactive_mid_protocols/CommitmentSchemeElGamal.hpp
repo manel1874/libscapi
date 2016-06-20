@@ -97,7 +97,7 @@ class CmtElGamalDecommitmentMessage : public CmtCDecommitmentMessage {
 private:
 	//This message is common to ElGamal on GroupElement and on byte[].
 	//In order to enable this, x value can hold every serializable object.
-	string x;
+	shared_ptr<string> x;
 	shared_ptr<BigIntegerRandomValue> r; //Random value sampled during the sampleRandomValues stage;
 
 public:
@@ -106,7 +106,7 @@ public:
 	* @param x the committed value
 	* @param r the random value used for commit.
 	*/
-	CmtElGamalDecommitmentMessage(string x = "", shared_ptr<BigIntegerRandomValue> r = NULL) {
+	CmtElGamalDecommitmentMessage(shared_ptr<string> x = NULL, shared_ptr<BigIntegerRandomValue> r = NULL) {
 		this->x = x;
 		this->r = r;
 	}
@@ -114,7 +114,8 @@ public:
 	/**
 	* Returns the committed value.
 	*/
-	string getX() { return x;	}
+	shared_ptr<void> getX() override { return x; }
+	string getXValue() { return *x; }
 
 	/**
 	* Returns the random value used for commit.
@@ -125,15 +126,15 @@ public:
 	void initFromString(const string & s) override {
 		auto vec = explode(s, ':');
 		if (vec.size() == 2) {
-			x = vec[0];
+			x = make_shared<string>(vec[0]);
 			r = make_shared<BigIntegerRandomValue>(biginteger(vec[1]));
 		} else if (vec.size() == 3) {
-			x = vec[0] + ":" + vec[1];
+			x = make_shared<string>(vec[0] + ":" + vec[1]);
 			r = make_shared<BigIntegerRandomValue>(biginteger(vec[2]));
 		} 
 	}
 
-	string toString() override { return x + ":" + (string) r->getR(); };
+	string toString() override { return *x + ":" + (string) r->getR(); };
 };
 
 /**

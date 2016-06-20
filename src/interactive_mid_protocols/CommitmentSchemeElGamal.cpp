@@ -75,7 +75,7 @@ shared_ptr<CmtCDecommitmentMessage> CmtElGamalCommitterCore::generateDecommitmen
 
 	//fetch the commitment according to the requested ID
 	auto values = commitmentMap[id];
-	return make_shared<CmtElGamalDecommitmentMessage>(values->getX()->toString(), dynamic_pointer_cast<BigIntegerRandomValue>(values->getR()));
+	return make_shared<CmtElGamalDecommitmentMessage>(make_shared<string>(values->getX()->toString()), dynamic_pointer_cast<BigIntegerRandomValue>(values->getR()));
 }
 
 vector<shared_ptr<void>> CmtElGamalCommitterCore::getPreProcessValues() {
@@ -225,7 +225,7 @@ shared_ptr<CmtCommitValue> CmtElGamalOnGroupElementReceiver::verifyDecommitment(
 		throw invalid_argument("commitmentMsg should be an instance of CmtElGamalCommitmentMessage");
 	}
 	auto sendable = dlog->getGenerator()->generateSendableData();
-	sendable->initFromString(decom->getX());
+	sendable->initFromString(decom->getXValue());
 	auto xEl = dlog->reconstructElement(true, sendable.get());
 	
 	//First check if x is a group element in the current Dlog Group, if not return null meaning rejection:
@@ -326,7 +326,7 @@ shared_ptr<CmtCommitValue> CmtElGamalOnByteArrayReceiver::verifyDecommitment(Cmt
 		throw invalid_argument("commitment value is not an instance of ElGamalOnByteArraySendableData");
 	
 	vector<byte> x;
-	const string tmp = decommitment->getX();
+	const string tmp = decommitment->getXValue();
 	x.assign(tmp.begin(), tmp.end());
 	
 	int len = x.size();

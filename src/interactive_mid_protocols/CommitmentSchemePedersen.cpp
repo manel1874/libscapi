@@ -75,7 +75,7 @@ shared_ptr<CmtCommitValue> CmtPedersenReceiverCore::verifyDecommitment(CmtCCommi
 	if (commitmentMsgPedersen == NULL) {
 		throw invalid_argument("The received message should be an instance of CmtPedersenCommitmentMessage");
 	}
-	biginteger x = decommitmentMsgPedersen->getX();
+	biginteger x = decommitmentMsgPedersen->getXValue();
 	biginteger r = decommitmentMsgPedersen->getRValue();
 
 	// if x is not in Zq return null
@@ -177,7 +177,7 @@ shared_ptr<CmtCDecommitmentMessage> CmtPedersenCommitterCore::generateDecommitme
 	auto values = commitmentMap[id];
 	auto cmtValue = values->getX();
 	auto biCmt = dynamic_pointer_cast<CmtBigIntegerCommitValue>(cmtValue);
-	biginteger x = *((biginteger *)biCmt->getX().get());
+	auto x = static_pointer_cast<biginteger>(biCmt->getX());
 	auto randomValuePtr = values->getR();
 	auto biRVPtr = dynamic_pointer_cast<BigIntegerRandomValue>(randomValuePtr);
 	return make_shared<CmtPedersenDecommitmentMessage>(x, biRVPtr);

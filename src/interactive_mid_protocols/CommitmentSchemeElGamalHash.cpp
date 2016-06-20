@@ -56,7 +56,7 @@ shared_ptr<CmtCDecommitmentMessage> CmtElGamalHashCommitter::generateDecommitmen
 	//Get the relevant random value used in the commitment phase
 	auto r = commitmentMap[id]->getR();
 
-	return make_shared<CmtElGamalDecommitmentMessage>(x->toString(), dynamic_pointer_cast<BigIntegerRandomValue>(r));
+	return make_shared<CmtElGamalDecommitmentMessage>(make_shared<string>(x->toString()), dynamic_pointer_cast<BigIntegerRandomValue>(r));
 }
 
 /**
@@ -117,7 +117,7 @@ shared_ptr<CmtCommitValue> CmtElGamalHashReceiver::verifyDecommitment(CmtCCommit
 
 	//Hash the input x with the hash function
 	vector<byte> x;
-	const string tmp = decommitment->getX();
+	const string tmp = decommitment->getXValue();
 	x.assign(tmp.begin(), tmp.end());
 
 	//calculate H(x) = Hash(x)
