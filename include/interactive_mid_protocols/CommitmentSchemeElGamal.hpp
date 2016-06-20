@@ -143,7 +143,7 @@ public:
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
 *
 */
-class CmtElGamalCommitterCore : public CmtCommitter {
+class CmtElGamalCommitterCore : public virtual CmtCommitter {
 	/*
 	* runs the following protocol:
 	* "Commit phase
@@ -275,7 +275,7 @@ public:
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
 *
 */
-class CmtElGamalReceiverCore : public CmtReceiver {
+class CmtElGamalReceiverCore : public virtual CmtReceiver {
 
 	/*
 	* runs the following protocol:
