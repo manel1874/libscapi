@@ -358,7 +358,7 @@ public:
 	* @param id Unique value attached to the input to keep track of the commitments in
 	* the case that many commitments are performed one after the other without decommiting them yet.
 	*/
-	void commit(shared_ptr<CmtCommitValue> input, long id) {
+	virtual void commit(shared_ptr<CmtCommitValue> input, long id) {
 		auto msg = generateCommitmentMsg(input, id);
 		try {
 			auto msgStr = msg->toString();
@@ -411,7 +411,7 @@ public:
 	* This function is the heart of the decommitment phase from the Committer's point of view.
 	* @param id Unique value used to identify which previously committed value needs to be decommitted now.
 	*/
-	void decommit(long id) {
+	virtual void decommit(long id) {
 		// fetch the commitment according to the requested ID
 		auto msg = generateDecommitmentMsg(id);
 		auto bMsg = msg->toString();
@@ -560,7 +560,7 @@ public:
 *
 * All commitment scheme that have proofs should implement this interface.
 */
-class CmtWithProofsCommitter {
+class CmtWithProofsCommitter : public virtual CmtCommitter{
 public:
 	/**
 	* Proves that the committer knows the committed value.
@@ -581,7 +581,7 @@ public:
 * 2. The committed value was x.<p>
 * All commitment scheme that have proofs should implement this interface.
 */
-class CmtWithProofsReceiver {
+class CmtWithProofsReceiver : public virtual CmtReceiver {
 public:
 	/**
 	* Verifies that the committer knows the committed value.
