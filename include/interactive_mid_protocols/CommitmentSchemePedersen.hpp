@@ -112,7 +112,7 @@ public:
 * This abstract class performs all the core functionality of the receiver side of Pedersen commitment.
 * Specific implementations can extend this class and add or override functions as necessary.
 */
-class CmtPedersenReceiverCore : public CmtReceiver {
+class CmtPedersenReceiverCore : public virtual CmtReceiver {
 	/*
 	* runs the following protocol:
 	* "Commit phase
@@ -218,7 +218,7 @@ public:
 * Pedersen commitment. <p>
 * Specific implementations can extend this class and add or override functions as necessary.
 */
-class CmtPedersenCommitterCore : public CmtCommitter {
+class CmtPedersenCommitterCore : public virtual CmtCommitter {
 	/*
 	* runs the following protocol:
 	* "Commit phase
@@ -249,7 +249,7 @@ protected:
 	* The receiver needs to be instantiated with the default constructor too.
 	*/
 	CmtPedersenCommitterCore(shared_ptr<CommParty> channel) {
-		auto dg = make_shared<OpenSSLDlogZpSafePrime>(256);
+		auto dg = make_shared<OpenSSLDlogECF2m>("K-233");
 		doConstruct(channel, dg);
 	}
 

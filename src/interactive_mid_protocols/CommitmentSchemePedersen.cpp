@@ -7,7 +7,7 @@
 /*   CmtPedersenReceiverCore     */
 /*********************************/
 CmtPedersenReceiverCore::CmtPedersenReceiverCore(shared_ptr<CommParty> channel) {
-	auto dg = make_shared<OpenSSLDlogZpSafePrime>(256);
+	auto dg = make_shared<OpenSSLDlogECF2m>("K-233");
 	doConstruct(channel, dg);
 };
 
