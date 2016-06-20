@@ -6,6 +6,7 @@
 #include "../include//interactive_mid_protocols/CommitmentSchemeSimpleHash.hpp"
 #include "../include//interactive_mid_protocols/CommitmentSchemeElGamal.hpp"
 #include "../include//interactive_mid_protocols/CommitmentSchemeElGamalHash.hpp"
+#include "../include/interactive_mid_protocols/CommitmentSchemeEquivocal.hpp"
 
 #include <boost/thread/thread.hpp>
 #include "../../include/comm/Comm.hpp"

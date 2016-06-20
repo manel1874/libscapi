@@ -131,6 +131,7 @@ class ProtocolSecLevel : public SecurityLevel {};
 class CommitSecLevel : public SecurityLevel {};
 class SecureCommit : public CommitSecLevel {};
 class StatisticallyHidingCmt : public SecureCommit {};
+class EquivocalCmt : public SecureCommit {};
 /**
 * Any commitment scheme that is perfectly hiding should implement this interface.
 */

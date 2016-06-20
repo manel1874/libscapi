@@ -43,6 +43,8 @@ shared_ptr<CmtCommitter> getCommitter(shared_ptr<CommParty> channel, CommitmentP
 		sds = make_shared<CmtElGamalOnByteArrayCommitter>(channel);
 	} else if (sdp.protocolName == "ElGamalHash") {
 		sds = make_shared<CmtElGamalHashCommitter>(channel);
+	} else if (sdp.protocolName == "Equivocal") {
+		sds = make_shared<CmtEquivocalCommitter>(channel, 80);
 	}
 
 	return sds;
@@ -75,6 +77,8 @@ shared_ptr<CmtReceiver> getReceiver(shared_ptr<CommParty> channel, CommitmentPar
 		sds = make_shared<CmtElGamalOnByteArrayReceiver>(channel);
 	} else if (sdp.protocolName == "ElGamalHash") {
 		sds = make_shared<CmtElGamalHashReceiver>(channel);
+	} else if (sdp.protocolName == "Equivocal") {
+		sds = make_shared<CmtEquivocalReceiver>(channel, 80);
 	}
 
 
@@ -99,7 +103,6 @@ int mainCommitment(string side, string configPath) {
 			cout << "the committed value is:" << val->toString() << endl;
 			committer->commit(val, 0);
 			committer->decommit(0);
-
 			if (sdp.protocolName.find("WithProofs") != string::npos) {
 				auto prover = dynamic_pointer_cast<CmtWithProofsCommitter>(committer);
 				prover->proveKnowledge(0);
