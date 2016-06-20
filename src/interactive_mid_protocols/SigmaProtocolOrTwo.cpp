@@ -101,8 +101,9 @@ shared_ptr<SigmaSimulatorOutput> SigmaOrTwoSimulator::simulate(SigmaCommonInput*
 	}
 	
 	//Sample a random e0.
-	vector<byte> e0;
-	gen_random_bytes_vector(e0, len, random);
+	vector<byte> e0(len);
+	RAND_bytes(e0.data(), len);
+
 	
 	//Set e1 = challenge XOR e0.
 	vector<byte> e1;
@@ -133,8 +134,8 @@ shared_ptr<SigmaSimulatorOutput> SigmaOrTwoSimulator::simulate(SigmaCommonInput*
 */
 shared_ptr<SigmaSimulatorOutput> SigmaOrTwoSimulator::simulate(SigmaCommonInput* input) {
 	//Create a new byte array of size t/8, to get the required byte size.
-	vector<byte> e;
-	gen_random_bytes_vector(e, t / 8, random);
+	vector<byte> e(t / 8);
+	RAND_bytes(e.data(), t / 8);
 	
 	return simulate(input, e);
 }
@@ -189,7 +190,8 @@ shared_ptr<SigmaProtocolMsg> SigmaOrTwoProverComputation::computeFirstMsg(shared
 	b = in->getB();
 
 	//Create the challenge for the Simulator.
-	gen_random_bytes_vector(eOneMinusB, t / 8, random);
+	eOneMinusB.resize(t / 8);
+	RAND_bytes(eOneMinusB.data(), t / 8);
 
 	//Call the sigma WITH THE WITNESS to compute first message ab.
 	//The second prover will not be in use so it does not need to compute messages.

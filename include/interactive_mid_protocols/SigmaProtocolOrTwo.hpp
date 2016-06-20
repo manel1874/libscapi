@@ -288,8 +288,9 @@ public:
 	* 	"SAMPLE a random challenge e<-{0,1}^t".
 	*/
 	void sampleChallenge() override {
-		//Create a new byte array of size t/8 and fill it with random values.
-		gen_random_bytes_vector(e, t / 8, random);
+		//make space for t/8 bytes and fill it with random values.
+		e.resize(t / 8);
+		RAND_bytes(e.data(), t / 8);
 	}
 
 	/**

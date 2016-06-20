@@ -266,8 +266,10 @@ vector<vector<byte>> sampleRandomFieldElements(int numElements, int t, vector<sh
 
 	//Samples random elements, puts their bytes in the output array and put their addresses in the pointers array.
 	for (int i = 0; i<numElements; i++) {
-		vector<byte> e;
-		gen_random_bytes_vector(e, t / 8, random);
+		vector<byte> e(t / 8);
+		RAND_bytes(e.data(), t / 8);
+		//modify the challenge to be positive.
+		e.data()[e.size() - 1] = e.data()[e.size() - 1] & 127;
 		//sample random field element.
 		auto element = new NTL::GF2E;
 		*element = convertBytesToGF2E(e);
@@ -307,9 +309,10 @@ NTL::GF2E convertBytesToGF2E(vector<byte> elementByts) {
 */
 shared_ptr<SigmaSimulatorOutput> SigmaOrMultipleSimulator::simulate(SigmaCommonInput* input)  {
 	//Create a new byte array of size t/8, to get the required byte size and fill the byte array with random values.
-	vector<byte> e;
-	gen_random_bytes_vector(e, t / 8, random);
-	//Fill the byte array with random values.
+	vector<byte> e(t / 8);
+	RAND_bytes(e.data(), t / 8);
+	//modify the challenge to be positive.
+	e.data()[e.size() - 1] = e.data()[e.size() - 1] & 127;
 
 	//Call the other simulate function with the given input and the sampled e.
 	return simulate(input, e);
@@ -512,7 +515,11 @@ SigmaOrMultipleVerifierComputation::SigmaOrMultipleVerifierComputation(vector<sh
 * 	"SAMPLE a single random challenge  e <- GF[2^t]".
 */
 void SigmaOrMultipleVerifierComputation::sampleChallenge() {
-	gen_random_bytes_vector(challengeBytes, t / 8, random);
+	//make space for t/8 bytes and fill it with random values.
+	challengeBytes.resize(t / 8);
+	RAND_bytes(challengeBytes.data(), t / 8);
+	//modify the challenge to be positive.
+	challengeBytes.data()[challengeBytes.size() - 1] = challengeBytes.data()[challengeBytes.size() - 1] & 127;
 	challengeElement = convertBytesToGF2E(challengeBytes);
 }
 

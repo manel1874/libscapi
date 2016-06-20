@@ -272,8 +272,9 @@ shared_ptr<CmtCCommitmentMsg> CmtElGamalOnByteArrayCommitter::generateCommitment
 * @return the sampled commit value
 */
 shared_ptr<CmtCommitValue> CmtElGamalOnByteArrayCommitter::sampleRandomCommitValue() {
-	vector<byte> val;
-	gen_random_bytes_vector(val, 32, random);
+	vector<byte> val(32);
+	RAND_bytes(val.data(), 32);
+	
 	return make_shared<CmtByteArrayCommitValue>(make_shared<vector<byte>>(val));
 }
 

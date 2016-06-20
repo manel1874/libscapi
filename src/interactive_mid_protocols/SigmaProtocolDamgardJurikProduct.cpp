@@ -164,9 +164,10 @@ shared_ptr<SigmaSimulatorOutput> SigmaDJProductSimulator::simulate(SigmaCommonIn
 */
 shared_ptr<SigmaSimulatorOutput> SigmaDJProductSimulator::simulate(SigmaCommonInput* input) { 
 	//Create a new byte array of size t/8, to get the required byte size.
-	vector<byte> e;
-	gen_random_bytes_vector(e, t / 8, random);
-	
+	vector<byte> e(t / 8);
+	RAND_bytes(e.data(), t / 8);
+	//modify the challenge to be positive.
+	e.data()[e.size() - 1] = e.data()[e.size() - 1] & 127;
 	//Call the other simulate function with the given input and the sampled e.
 	return simulate(input, e);
 }
@@ -337,8 +338,11 @@ SigmaDJProductVerifierComputation::SigmaDJProductVerifierComputation(int t, int 
 * 	"SAMPLE a random challenge e<-{0,1}^t".
 */
 void SigmaDJProductVerifierComputation::sampleChallenge() {
-	//Create a new byte array of size t/8, to get the required byte size.
-	gen_random_bytes_vector(e, t / 8, random);
+	//make space for t/8 bytes and fill it with random values.
+	e.resize(t / 8);
+	RAND_bytes(e.data(), t / 8);
+	//modify the challenge to be positive.
+	e.data()[e.size() - 1] = e.data()[e.size() - 1] & 127;
 }
 
 /**

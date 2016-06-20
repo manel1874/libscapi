@@ -53,8 +53,8 @@ shared_ptr<SigmaSimulatorOutput> SigmaDlogSimulator::simulate(SigmaCommonInput* 
 
 shared_ptr<SigmaSimulatorOutput> SigmaDlogSimulator::simulate(SigmaCommonInput* input) {
 	//Create a new byte array of size t/8, to get the required byte size and fill it with random values.
-	vector<byte> e;
-	gen_random_bytes_vector(e, t / 8, random);
+	vector<byte> e(t / 8);
+	RAND_bytes(e.data(), t / 8);
 
 	// call the other simulate function with the given input and the sampled e.
 	return simulate(input, e);

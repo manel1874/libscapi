@@ -74,8 +74,9 @@ shared_ptr<CmtCCommitmentMsg> CmtSimpleHashCommitter::generateCommitmentMsg(shar
 		throw invalid_argument("The input has to be of type CmtByteArrayCommitValue");
 	auto x = in->getXVector();
 	//Sample random byte array r
-	vector<byte> r;
-	gen_random_bytes_vector(r, n, random);
+	vector<byte> r(n);
+	RAND_bytes(r.data(), n);
+
 	
 	//Compute the hash function
 	auto hashValArray = computeCommitment(*x, r);
@@ -99,8 +100,9 @@ shared_ptr<CmtCDecommitmentMessage> CmtSimpleHashCommitter::generateDecommitment
 * @return the sampled commit value
 */
 shared_ptr<CmtCommitValue> CmtSimpleHashCommitter::sampleRandomCommitValue() {
-	vector<byte> val;
-	gen_random_bytes_vector(val, 32, random);
+	vector<byte> val(32);
+	RAND_bytes(val.data(), 32);
+
 	return make_shared<CmtByteArrayCommitValue>(make_shared<vector<byte>>(val));
 }
 
