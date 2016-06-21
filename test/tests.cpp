@@ -13,12 +13,13 @@
 #include "../include/primitives/RandomOracle.hpp"
 #include "../include/comm/Comm.hpp"
 #include "../include/circuits/BooleanCircuits.hpp"
-#include "../include//interactive_mid_protocols/CommitmentSchemePedersen.hpp"
-#include "../include//mid_layer/AsymmetricEnc.hpp"
-#include "../include//mid_layer/ElGamalEnc.hpp"
-#include "../include//mid_layer/CramerShoupEnc.hpp"
-#include "../include//mid_layer/DamgardJurikEnc.hpp"
-#include "../include//interactive_mid_protocols/SigmaProtocol.hpp"
+#include "../include/interactive_mid_protocols/CommitmentSchemePedersen.hpp"
+#include "../include/mid_layer/OpenSSLSymmetricEnc.hpp"
+#include "../include/mid_layer/AsymmetricEnc.hpp"
+#include "../include/mid_layer/ElGamalEnc.hpp"
+#include "../include/mid_layer/CramerShoupEnc.hpp"
+#include "../include/mid_layer/DamgardJurikEnc.hpp"
+#include "../include/interactive_mid_protocols/SigmaProtocol.hpp"
 #include <ctype.h>
 
 biginteger endcode_decode(biginteger bi) {
@@ -729,6 +730,28 @@ TEST_CASE("serialization", "[SerializedData, CmtCCommitmentMsg]")
 		REQUIRE(*point2.get() == *point.get());
 	}
 }
+
+TEST_CASE("symmetric encryption")
+{
+	SECTION("Openssl CTR encryption")
+	{
+
+		OpenSSLCTREncRandomIV enc("AES");
+		auto key = enc.generateKey(128);
+		REQUIRE(enc.isKeySet() == false);
+		enc.setKey(key);
+		REQUIRE(enc.isKeySet() == true);
+		REQUIRE(enc.getAlgorithmName() == "CTR Encryption with AES"); 
+		
+		string message = "I want to encrypt this!";
+		vector<byte> plainM(message.begin(), message.end());
+		ByteArrayPlaintext plaintext(plainM);
+		auto cipher = enc.encrypt(&plaintext);
+		auto original = enc.decrypt(cipher.get());
+		REQUIRE(*original == plaintext);
+	}
+}
+
 
 TEST_CASE("asymmetric encryption")
 {

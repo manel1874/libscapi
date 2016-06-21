@@ -158,6 +158,7 @@
     <ClCompile Include="..\..\src\mid_layer\CramerShoupEnc.cpp" />
     <ClCompile Include="..\..\src\mid_layer\DamgardJurikEnc.cpp" />
     <ClCompile Include="..\..\src\mid_layer\ElGamalEnc.cpp" />
+    <ClCompile Include="..\..\src\mid_layer\OpenSSLSymmetricEnc.cpp" />
     <ClCompile Include="..\..\src\primitives\Dlog.cpp" />
     <ClCompile Include="..\..\src\primitives\DlogCryptopp.cpp" />
     <ClCompile Include="..\..\src\primitives\DlogOpenSSL.cpp" />
@@ -234,6 +235,8 @@
     <ClInclude Include="..\..\include\mid_layer\CramerShoupEnc.hpp" />
     <ClInclude Include="..\..\include\mid_layer\DamgardJurikEnc.hpp" />
     <ClInclude Include="..\..\include\mid_layer\ElGamalEnc.hpp" />
+    <ClInclude Include="..\..\include\mid_layer\OpenSSLSymmetricEnc.hpp" />
+    <ClInclude Include="..\..\include\mid_layer\SymmetricEnc.hpp" />
     <ClInclude Include="..\..\include\primitives\Dlog.hpp" />
     <ClInclude Include="..\..\include\primitives\DlogOpenSSL.hpp" />
     <ClInclude Include="..\..\include\primitives\Hash.hpp" />

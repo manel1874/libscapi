@@ -246,6 +246,9 @@
     <ClCompile Include="..\..\src\interactive_mid_protocols\CommitmentSchemeElGamalHash.cpp">
       <Filter>Source Files\InteractiveMidProtocols</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\mid_layer\OpenSSLSymmetricEnc.cpp">
+      <Filter>Source Files\mid_layer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\circuits\BooleanCircuits.hpp">
@@ -472,6 +475,12 @@
     </ClInclude>
     <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentSchemeEquivocal.hpp">
       <Filter>Header Files\InteractiveMidProtocols</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\mid_layer\SymmetricEnc.hpp">
+      <Filter>Header Files\MidLayer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\mid_layer\OpenSSLSymmetricEnc.hpp">
+      <Filter>Header Files\MidLayer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -210,4 +210,132 @@ public:
 	void initFromString(const string & row) override { cipher = biginteger(row); }
 };
 
+/**
+* General interface for any symmetric ciphertext.
+* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
+*
+*/
+class SymmetricCiphertext : public NetworkSerialized {
+public:
+	/**
+	* @return the byte array representation of the ciphertext.
+	*/
+	virtual vector<byte> getBytes() = 0;
+
+	/**
+	* @return the length of the byte array representation of the ciphertext.
+	*/
+	virtual int getLength() = 0;
+};
+
+/**
+* The decorator pattern has been used to implement different types of symmetric ciphertext.<p>
+* This abstract class is the decorator part of the pattern. It allows wrapping the base symmetric ciphertext with extra functionality.
+*
+* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
+*
+*/
+class SymCiphertextDecorator : public SymmetricCiphertext{
+
+protected:
+	//The symmetric ciphertext we want to decorate.
+	shared_ptr<SymmetricCiphertext> cipher;
+
+public:
+	/**
+	* This constructor gets the symmetric ciphertext that we need to decorate.
+	* @param cipher
+	*/
+	SymCiphertextDecorator(shared_ptr<SymmetricCiphertext> cipher) { this->cipher = cipher; }
+
+	/**
+	*
+	* @return the undecorated cipher.
+	*/
+	shared_ptr<SymmetricCiphertext> getCipher() { return cipher; }
+
+	/*
+	* Delegate to underlying (decorated) ciphertext. This behavior can be overridden by inheriting classes.
+	*/
+	vector<byte> getBytes() override { return cipher->getBytes(); }
+
+	/*
+	* Delegate to underlying (decorated) ciphertext. This behavior can be overridden by inheriting classes.
+	*/
+	int getLength() override { return cipher->getLength();	}
+};
+
+/**
+* This class represents the most basic symmetric ciphertext.
+* It is a data holder for the ciphertext calculated by some symmetric encryption algorithm. <p>
+* It only holds the actual "ciphered" bytes and not any additional information like for example in El Gamal encryption.
+*
+* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
+*/
+class ByteArraySymCiphertext : public SymmetricCiphertext {
+
+private:
+	vector<byte> data;
+
+public:
+	/**
+	* The encrypted bytes need to be passed to construct this holder.
+	* @param data
+	*/
+	ByteArraySymCiphertext(vector<byte> data) { this->data = data; }
+
+	vector<byte> getBytes() override { return data; }
+
+	int getLength() override { return data.size(); }
+
+	string toString() override {
+		const byte * uc = &(data[0]);
+		return string(reinterpret_cast<char const*>(uc), data.size());
+	};
+
+	void initFromString(const string & s) override {
+		data.assign(s.begin(), s.end());
+	}
+};
+
+/**
+* This class is a container for cipher-texts that include actual cipher data and the IV used.
+* This is a concrete decorator in the Decorator Pattern used for Symmetric Ciphertext.
+* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
+*
+*/
+class IVCiphertext : public SymCiphertextDecorator {
+
+private:
+	vector<byte> iv;
+
+public:
+	/**
+	* Constructs a container for Ciphertexts that need an IV.
+	* @param cipher symmetric ciphertext to which we need to add an IV.
+	* @param iv the IV we need to add to the ciphertext.
+	*/
+	IVCiphertext(shared_ptr<SymmetricCiphertext> cipher, vector<byte> iv) : SymCiphertextDecorator(cipher) {
+		this->iv = iv;
+	}
+
+	/**
+	* @return the IV of this ciphertext-with-IV.
+	*/
+	vector<byte> getIv() { return iv; }
+
+	string toString() override {
+		const byte * uc = &(iv[0]);
+		return cipher->toString() + string(reinterpret_cast<char const*>(uc), iv.size());
+	};
+
+	void initFromString(const string & s) override {
+		auto vec = explode(s, ':');
+		assert(vec.size() == 2);
+		cipher->initFromString(vec[0]);
+		iv.assign(vec[1].begin(), vec[1].end());
+	}
+};
+
+
 
