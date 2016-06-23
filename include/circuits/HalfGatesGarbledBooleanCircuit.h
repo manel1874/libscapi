@@ -1,27 +1,30 @@
 /**
 * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-*
-* Copyright (c) 2012 - SCAPI (http://crypto.biu.ac.il/scapi)
+* 
+* Copyright (c) 2016 LIBSCAPI (http://crypto.biu.ac.il/SCAPI)
 * This file is part of the SCAPI project.
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
-*
+* 
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"),
-* to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
+* to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
 * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-*
+* 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*
+* 
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*
+* 
 * We request that any publication and/or code referring to and/or based on SCAPI contain an appropriate citation to SCAPI, including a reference to
 * http://crypto.biu.ac.il/SCAPI.
+* 
+* Libscapi uses several open source libraries. Please see these projects for any further licensing issues.
+* For more information , See https://github.com/cryptobiu/libscapi/blob/master/LICENSE.MD
 *
-* SCAPI uses Crypto++, Miracl, NTL and Bouncy Castle. Please see these projects for any further licensing issues.
-* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-*
+* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+* 
 */
+
 #pragma once
 #include "GarbledBooleanCircuitFixedKey.h"
 #include <vector>
@@ -30,7 +33,10 @@
 /**
 * The HalfGatesGarbledBooleanCircuit uses the Free XOR technique that is explained in depth in "Free XOR Gates and
 * Applications" by Validimir Kolesnikov and Thomas Schneider combined with the techniqe of "Efficient Garbling from a Fixed-Key Blockcipher".
-* This class is based on the paper "Two Halves Make a Whole Reducing Data Transfer in Garbled Circuits using Half Gates" where each AND gate* uses only 2 rows in the garbled table. It is better than the Row reduction technique where each non Xor gate uses 3 rows.* This class only accept AND, XOR, XORNOT and NOT gates and does not deal with other general gates.* Unlike the previous techniques, this class also assumes circuilarity in addition to fixed key and free xor.
+* This class is based on the paper "Two Halves Make a Whole Reducing Data Transfer in Garbled Circuits using Half Gates" where each AND gate
+* uses only 2 rows in the garbled table. It is better than the Row reduction technique where each non Xor gate uses 3 rows.
+* This class only accept AND, XOR, XORNOT and NOT gates and does not deal with other general gates.
+* Unlike the previous techniques, this class also assumes circuilarity in addition to fixed key and free xor.
 * It uses the optimization of XOR and NON_XOR gates that can be computed without an encryption due to the way the
 * wire's keys were chosen. See the above papers also for a proof of security of this method. 
 * This class implements the virtual functions garble and internalVerify since the diffrences with other circuits are fundemental and thus 
