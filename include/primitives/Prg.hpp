@@ -17,7 +17,8 @@ private:
 
 public:	
 	/**
-	* Constructor that gets a random bit sequence which is the entropy source, and prf key size in bits and sets them.
+	* Constructor that gets a random bit sequence which is the entropy source, and prf key size in 
+	* bits and sets them.
 	*/
 	PrgFromPrfParameterSpec(vector<byte> entropySource, int prfKeySize) {
 		this->entropySource = entropySource;
@@ -77,8 +78,10 @@ public:
 class RC4 : public PseudorandomGenerator {};
 
 /**
-* This is a simple way of generating a pseudorandom stream from a pseudorandom function. The seed for the pseudorandom generator is the key to the pseudorandom function.
-* Then, the algorithm initializes a counter to 1 and applies the pseudorandom function to the counter, increments it, and repeats.
+* This is a simple way of generating a pseudorandom stream from a pseudorandom function.
+* The seed for the pseudorandom generator is the key to the pseudorandom function.
+* Then, the algorithm initializes a counter to 1 and applies the pseudorandom function to the counter, 
+* increments it, and repeats.
 */
 class ScPrgFromPrf : public PseudorandomGenerator {
 private:
@@ -113,7 +116,8 @@ public:
 /**
 * This class wraps the OpenSSL implementation of RC4.
 * RC4 is a well known stream cipher, that is essentially a pseudorandom generator.<p>
-* In our implementation, we throw out the first 1024 bits since the first few bytes have been shown to have some bias.
+* In our implementation, we throw out the first 1024 bits since the first few bytes have been shown
+* to have some bias.
 **/
 class OpenSSLRC4 : public RC4 {
 private:

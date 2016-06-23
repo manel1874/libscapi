@@ -86,10 +86,10 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>
-      <AdditionalDependencies>C:\OpenSSL-Win64\lib\libeay32.lib;C:\OpenSSL-Win64\lib\ssleay32.lib;..\scapi-sln\x64\Debug\ScapiCpp.lib;C:\Github\libScapiDev\lib\NTL\windows\NTL-WIN64\x64\Debug\NTL-WIN64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>C:\OpenSSL-Win64\lib\libeay32.lib;C:\OpenSSL-Win64\lib\ssleay32.lib;..\scapi-sln\x64\Debug\ScapiCpp.lib;..\..\lib\NTL\windows\NTL-WIN64\x64\Debug\NTL-WIN64.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Github\libScapiDev\lib;C:\OpenSSL-Win64\include;C:\local\boost_1_60_0;C:\Github\libScapiDev\lib\NTL\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\OpenSSL-Win64\include;C:\local\boost_1_60_0;..\..\lib\NTL\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PreprocessorDefinitions>_SCL_SECURE_NO_WARNINGS;_WIN32_WINNT=0x06030000;__WINSOCK_DEPRECATED_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
@@ -101,7 +101,7 @@
       <PreprocessorDefinitions>_SCL_SECURE_NO_WARNINGS;_WIN32_WINNT=0x06030000;__WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>C:\OpenSSL-Win64\lib\libeay32.lib;C:\OpenSSL-Win64\lib\ssleay32.lib;..\scapi-sln\x64\Release\ScapiCpp.lib;C:\Github\libScapiDev\lib\NTL\windows\NTL-WIN64\x64\Release\NTL-WIN64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>C:\OpenSSL-Win64\lib\libeay32.lib;C:\OpenSSL-Win64\lib\ssleay32.lib;..\scapi-sln\x64\Release\ScapiCpp.lib;..\..\lib\NTL\windows\NTL-WIN64\x64\Release\NTL-WIN64.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

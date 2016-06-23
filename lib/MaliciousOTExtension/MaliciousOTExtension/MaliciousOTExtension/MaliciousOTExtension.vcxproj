@@ -81,7 +81,7 @@
     <IncludePath>C:\OpenSSL-Win64\include;C:\Github\libScapiDev\lib\MiraclWin64\source;..\..\MiraclWin64\source;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\OpenSSL-Win64\include;C:\Github\libScapiDev\lib\MiraclWin64\source;$(IncludePath)</IncludePath>
+    <IncludePath>C:\OpenSSL-Win64\include;..\..\..\..\lib\MiraclWin64\source;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>C:\OpenSSL-Win64\include;..\..\..\..\lib\MiraclWin64\source;$(IncludePath)</IncludePath>

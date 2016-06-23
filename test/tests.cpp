@@ -758,7 +758,7 @@ TEST_CASE("asymmetric encryption")
 	SECTION("El Gamal on group element")
 	{
 		mt19937 random = get_seeded_random();
-		auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
+		auto dlog = make_shared<OpenSSLDlogZpSafePrime>(256);
 		ElGamalOnGroupElementEnc elgamal(dlog);
 		auto keys = elgamal.generateKey();
 		elgamal.setKey(keys.first, keys.second);
@@ -792,7 +792,7 @@ TEST_CASE("asymmetric encryption")
 	SECTION("El Gamal on byte array")
 	{
 		mt19937 random = get_seeded_random();
-		auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
+		auto dlog = make_shared<OpenSSLDlogZpSafePrime>(64);
 		auto kdf = make_shared<HKDF>(new OpenSSLHMAC());
 		ElGamalOnByteArrayEnc elgamal(dlog, kdf);
 		auto keys = elgamal.generateKey();
@@ -820,7 +820,7 @@ TEST_CASE("asymmetric encryption")
 	SECTION("CramerShoup")
 	{
 		mt19937 random = get_seeded_random();
-		auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
+		auto dlog = make_shared<OpenSSLDlogZpSafePrime>(256);
 		CramerShoupOnGroupElementEnc cr(dlog);
 		auto keys = cr.generateKey();
 		cr.setKey(keys.first, keys.second);
