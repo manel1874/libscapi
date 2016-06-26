@@ -39,6 +39,7 @@
 #include "../include/primitives/Prg.hpp"
 #include "../include/primitives/Kdf.hpp"
 #include "../include/primitives/RandomOracle.hpp"
+#include "../include/primitives/AES_PRG.hpp"
 #include "../include/comm/Comm.hpp"
 #include "../include/circuits/BooleanCircuits.hpp"
 #include "../include/interactive_mid_protocols/CommitmentSchemePedersen.hpp"
@@ -759,6 +760,7 @@ TEST_CASE("serialization", "[SerializedData, CmtCCommitmentMsg]")
 	}
 }
 
+
 TEST_CASE("symmetric encryption")
 {
 	SECTION("Openssl CTR encryption")
@@ -777,6 +779,19 @@ TEST_CASE("symmetric encryption")
 		auto cipher = enc.encrypt(&plaintext);
 		auto original = enc.decrypt(cipher.get());
 		REQUIRE(*original == plaintext);
+	}
+}
+
+
+
+TEST_CASE("AES_PRG")
+{
+	SECTION("sanity")
+	{
+	AES_PRG prgKeyEncrypt = AES_PRG::instance();
+        uint32_t test = prgKeyEncrypt.getRandom();
+        uint32_t test2 = prgKeyEncrypt.getRandom();
+	REQUIRE(test!=test2);
 	}
 }
 
