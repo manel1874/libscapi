@@ -212,8 +212,8 @@ TEST_CASE("boosts multiprecision", "[boost, multiprecision]") {
 
 	SECTION("generating random from range")
 	{
-		biginteger randNum1 = getRandomInRange(0, 100, gen);
-		biginteger randNum2 = getRandomInRange(0, 100, gen);
+		biginteger randNum1 = getRandomInRange(0, 10000, gen);
+		biginteger randNum2 = getRandomInRange(0, 10000, gen);
 		REQUIRE(randNum1 != randNum2);
 	}
 	
