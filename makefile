@@ -25,12 +25,12 @@ C_FILES     := $(wildcard src/*/*.c)
 OBJ_FILES     := $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES))
 OBJ_FILES     += $(patsubst src/%.c,obj/%.o,$(C_FILES))
 OUT_DIR        = obj obj/mid_layer obj/circuits obj/comm obj/infra obj/interactive_mid_protocols obj/primitives obj/circuits_c
-INC            = -I../boost_1_60_0 -Ilib -Iinstall/include 
+INC            = -I../boost_1_60_0 -Ilib -Iinstall/include -Ilib/OTExtensionBristol 
 CPP_OPTIONS   := -std=c++11 $(INC)  -maes -mpclmul -DBOOST_LOG_DYN_LINK
 $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
 
 all:: libs libscapi
-libs:: compile-ntl compile-miracl compile-otextension compile-otextension-malicious
+libs:: compile-ntl compile-miracl compile-otextension compile-otextension-malicious compile-otextension-bristol
 libscapi:: directories $(SLib)
 directories: $(OUT_DIR)
 
@@ -107,6 +107,13 @@ compile-otextension-malicious: compile-miracl-cpp
 	@$(MAKE) -C $(builddir)/MaliciousOTExtension CXX=$(CXX) SHARED_LIB_EXT=$(SHARED_LIB_EXT) install
 	@touch compile-otextension-malicious
 
+compile-otextension-bristol: 
+	@echo "Compiling the OtExtension malicious Bristol library..."
+	@cp -r lib/OTExtensionBristol $(builddir)/OTExtensionBristol
+	@$(MAKE) -C $(builddir)/OTExtensionBristol CXX=$(CXX)
+	@$(MAKE) -C $(builddir)/OTExtensionBristol CXX=$(CXX) install
+	@touch compile-otextension-bristol
+
 clean-miracl:
 	@echo "Cleaning the miracl build dir..."
 	@rm -rf $(builddir)/Miracl
@@ -127,6 +134,11 @@ clean-otextension-malicious:
 	@rm -rf $(builddir)/MaliciousOTExtension
 	@rm -f compile-otextension-malicious
 
+clean-otextension-bristol:
+	@echo "Cleaning the otextension malicious bristol build dir..."
+	@rm -rf $(builddir)/OTExtensionBristol
+	@rm -f compile-otextension-bristol
+
 clean-ntl:
 	@echo "Cleaning the ntl build dir..."
 	@rm -rf $(builddir)/NTL
@@ -141,4 +153,4 @@ clean-cpp:
 clean-install:
 	@rm -rf install/*
 
-clean: clean-otextension-malicious clean-otextension clean-ntl clean-miracl clean-miracl-cpp clean-cpp clean-install
+clean: clean-otextension-bristol clean-otextension-malicious clean-otextension clean-ntl  clean-miracl clean-miracl-cpp clean-cpp clean-install

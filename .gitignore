@@ -51,4 +51,5 @@ test/config_for_test.txt
 *.opendb
 *.ipdb
 config_for_test.txt
+*~
 

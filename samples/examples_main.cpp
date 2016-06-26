@@ -42,6 +42,7 @@ example_name can one of the followin:
 	* yao		  <party_number (1|2)> <config_file_path>
 	* sigma		  <party_number (1|2)> <config_file_path>
 	* commitment  <party_number (1|2)> <config_file_path>
+	* OTExtensionBristol <party_number (0|1)>
 				)";
 	cerr << usage << endl;
 	return 1;
@@ -59,6 +60,9 @@ int main(int argc, char* argv[]) {
 		return exampleUsage();
 	if (exampleName == "maliciousOT")
 		return mainOT(argv[2]);
+
+	if (exampleName == "OTExtensionBristol")
+		return mainBristol(argv[2]);
 	if (argc != 4)
 		return exampleUsage();
 
@@ -70,6 +74,8 @@ int main(int argc, char* argv[]) {
 		return mainSigma(argv[2], argv[3]);
 	if (exampleName == "commitment")
 		return mainCommitment(argv[2], argv[3]);
+
+	
 	
 	return exampleUsage();
 }
