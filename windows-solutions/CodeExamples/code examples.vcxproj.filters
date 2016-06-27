@@ -31,6 +31,9 @@
     <Filter Include="Source Files\Commitment">
       <UniqueIdentifier>{1c247d50-12c0-4304-bbc5-c7db98850716}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Paillier">
+      <UniqueIdentifier>{37b17ca1-5d06-4091-9900-6a702d0b49ce}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\samples\Yao\App1.cpp">
@@ -59,6 +62,9 @@
     </ClCompile>
     <ClCompile Include="..\..\samples\Commitment\CommitmentExample.cpp">
       <Filter>Source Files\Commitment</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\samples\Paillier\FdrPaillierParty.cpp">
+      <Filter>Source Files\Paillier</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
