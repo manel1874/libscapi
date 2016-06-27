@@ -20,8 +20,12 @@ compile-miracl
 compile-otextension
 compile-miracl-cpp
 compile-scgarbledcircuit
+compile-otextension-bristol
+compile-otextension-malicious
 compile-ntl
 test/config_for_test.txt
+.cproject
+.project
 
 # Fortran module files
 *.mod
