@@ -105,6 +105,7 @@
     <ClCompile Include="..\..\samples\Comm\comm_example.cpp" />
     <ClCompile Include="..\..\samples\examples_main.cpp" />
     <ClCompile Include="..\..\samples\MaliciousOT\MaliciousOTExample.cpp" />
+    <ClCompile Include="..\..\samples\OTExtensionBristol\OTExtensionBristolExample.cpp" />
     <ClCompile Include="..\..\samples\Paillier\FdrPaillierParty.cpp" />
     <ClCompile Include="..\..\samples\SigmaProtocols\SigmaProtocolExample.cpp" />
     <ClCompile Include="..\..\samples\Simple\simple_dlog.cpp" />

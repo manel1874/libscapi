@@ -1,3 +1,4 @@
+#ifndef _WIN32
 #include <iostream>
 #include "../../include/interactive_mid_protocols/OTExtensionBristol.hpp"
 
@@ -39,3 +40,4 @@ int mainBristol(string partyNum) {
 
     return 0;
 }
+#endif

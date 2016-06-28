@@ -34,7 +34,7 @@ int exampleUsage()
 To run an example:
 ./libscapi_examples <example_name> [args...]
 
-example_name can one of the followin: 
+example_name can one of the following: 
 	* dlog
 	* sha1
 	* maliciousOT <party_number (1|2)>
@@ -42,7 +42,7 @@ example_name can one of the followin:
 	* yao		  <party_number (1|2)> <config_file_path>
 	* sigma		  <party_number (1|2)> <config_file_path>
 	* commitment  <party_number (1|2)> <config_file_path>
-	* OTExtensionBristol <party_number (0|1)>
+	* OTExtensionBristol <party_number (0|1)> (linux only) 
 				)";
 	cerr << usage << endl;
 	return 1;
@@ -60,9 +60,10 @@ int main(int argc, char* argv[]) {
 		return exampleUsage();
 	if (exampleName == "maliciousOT")
 		return mainOT(argv[2]);
-
+#ifndef _WIN32
 	if (exampleName == "OTExtensionBristol")
 		return mainBristol(argv[2]);
+#endif
 	if (argc != 4)
 		return exampleUsage();
 

@@ -1,3 +1,4 @@
+#ifndef _WIN32
 #include "../../include/interactive_mid_protocols/OTExtensionBristol.hpp"
 
 
@@ -95,3 +96,4 @@ OTSemiHonestExtensionReciever::OTSemiHonestExtensionReciever(const char* address
 	init(address, port, 1);
 
 }
+#endif

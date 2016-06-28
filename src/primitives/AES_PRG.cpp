@@ -1,3 +1,4 @@
+#ifndef _WIN32
 #include <openssl/evp.h>
 #include "../../include/primitives/AES_PRG.hpp"
 
@@ -191,3 +192,4 @@ void PRG_CTR128::doInc(int size)
     }
 
 }
+#endif

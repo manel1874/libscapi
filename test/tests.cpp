@@ -39,7 +39,9 @@
 #include "../include/primitives/Prg.hpp"
 #include "../include/primitives/Kdf.hpp"
 #include "../include/primitives/RandomOracle.hpp"
+#ifndef _WIN32
 #include "../include/primitives/AES_PRG.hpp"
+#endif
 #include "../include/comm/Comm.hpp"
 #include "../include/circuits/BooleanCircuits.hpp"
 #include "../include/interactive_mid_protocols/CommitmentSchemePedersen.hpp"
@@ -783,7 +785,7 @@ TEST_CASE("symmetric encryption")
 }
 
 
-
+#ifndef _WIN32
 TEST_CASE("AES_PRG")
 {
 	SECTION("sanity")
@@ -794,7 +796,7 @@ TEST_CASE("AES_PRG")
 	REQUIRE(test!=test2);
 	}
 }
-
+#endif
 
 TEST_CASE("asymmetric encryption")
 {

@@ -135,6 +135,7 @@
     <ClCompile Include="..\..\src\interactive_mid_protocols\CommitmentSchemePedersen.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\CommitmentSchemePedersenHash.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\CommitmentSchemeSimpleHash.cpp" />
+    <ClCompile Include="..\..\src\interactive_mid_protocols\OTExtensionBristol.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\OTExtensionMalicious.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\OTSemiHonestExtension.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocol.cpp" />
@@ -160,6 +161,7 @@
     <ClCompile Include="..\..\src\mid_layer\ElGamalEnc.cpp" />
     <ClCompile Include="..\..\src\mid_layer\OpenSSLSymmetricEnc.cpp" />
     <ClCompile Include="..\..\src\mid_layer\Paillier.cpp" />
+    <ClCompile Include="..\..\src\primitives\AES_PRG.cpp" />
     <ClCompile Include="..\..\src\primitives\Dlog.cpp" />
     <ClCompile Include="..\..\src\primitives\DlogCryptopp.cpp" />
     <ClCompile Include="..\..\src\primitives\DlogOpenSSL.cpp" />
@@ -212,6 +214,7 @@
     <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentSchemePedersenTrapdoor.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentSchemeSimpleHash.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\OTBatch.hpp" />
+    <ClInclude Include="..\..\include\interactive_mid_protocols\OTExtensionBristol.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\OTExtensionMalicious.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolCramerShoupEncryptedValue.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolDamgardJurikEncryptedValue.hpp" />
@@ -240,6 +243,7 @@
     <ClInclude Include="..\..\include\mid_layer\OpenSSLSymmetricEnc.hpp" />
     <ClInclude Include="..\..\include\mid_layer\Paillier.hpp" />
     <ClInclude Include="..\..\include\mid_layer\SymmetricEnc.hpp" />
+    <ClInclude Include="..\..\include\primitives\AES_PRG.hpp" />
     <ClInclude Include="..\..\include\primitives\Dlog.hpp" />
     <ClInclude Include="..\..\include\primitives\DlogOpenSSL.hpp" />
     <ClInclude Include="..\..\include\primitives\Hash.hpp" />

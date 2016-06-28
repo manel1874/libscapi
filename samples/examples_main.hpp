@@ -34,5 +34,7 @@ int mainDlog();
 int mainSha1();
 int mainSigma(string, string);
 int mainOT(string  party);
+#ifndef _WIN32
 int mainBristol(string party);
+#endif
 int mainCommitment(string, string);

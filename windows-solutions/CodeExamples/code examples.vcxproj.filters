@@ -34,6 +34,9 @@
     <Filter Include="Source Files\Paillier">
       <UniqueIdentifier>{37b17ca1-5d06-4091-9900-6a702d0b49ce}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\OTExtensionBristol">
+      <UniqueIdentifier>{85b4572b-ec74-4456-9210-51e8876b92ea}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\samples\Yao\App1.cpp">
@@ -65,6 +68,9 @@
     </ClCompile>
     <ClCompile Include="..\..\samples\Paillier\FdrPaillierParty.cpp">
       <Filter>Source Files\Paillier</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\samples\OTExtensionBristol\OTExtensionBristolExample.cpp">
+      <Filter>Source Files\OTExtensionBristol</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
