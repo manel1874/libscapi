@@ -788,7 +788,7 @@ TEST_CASE("AES_PRG")
 {
 	SECTION("sanity")
 	{
-	AES_PRG prgKeyEncrypt = AES_PRG::instance();
+	AES_PRG prgKeyEncrypt;
         uint32_t test = prgKeyEncrypt.getRandom();
         uint32_t test2 = prgKeyEncrypt.getRandom();
 	REQUIRE(test!=test2);
