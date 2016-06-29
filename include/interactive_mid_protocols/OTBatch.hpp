@@ -199,7 +199,7 @@ public:
 	OTBatchRInputTypes getType() { return OTBatchRInputTypes::OTExtensionGeneralRInput; };
 };
 
-
+#ifndef _WIN32
 /**
 * A concrete class for OT extension for bristol implementation. <p>
 * All the classes are the same and differ only in the name.
@@ -233,6 +233,7 @@ public:
 
 	BitMatrix receiverOutputMatrix;
 };
+#endif
 
 /**
 * General interface for Batch OT Receiver. <p>
