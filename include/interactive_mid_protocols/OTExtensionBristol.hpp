@@ -22,13 +22,13 @@ public:
 protected:
 
 
-	void init(const char* address, int port, int my_num, bool isSemiHonest);
+	void init(const string& senderAddress, int port, int my_num, bool isSemiHonest);
 };
 
 class OTExtensionBristolReciever: public OTExtensionBristolBase,  public OTBatchReceiver{
 
 public:
-	OTExtensionBristolReciever(const char* address, int port, bool isSemiHonest);
+	OTExtensionBristolReciever(const string& address, int port, bool isSemiHonest);
 	/*void transfer(int nOTs, const BitVector& receiverInput){ cout << "in transfer reciever" <<endl;
 															OTExtensionBristolBase::transfer(nOTs,receiverInput);}
 */
@@ -37,15 +37,15 @@ public:
 };
 
 
-class OTExtensionBristolSender: public OTExtensionBristolBase/*, public OTBatchSender*/{
+class OTExtensionBristolSender: public OTExtensionBristolBase, public OTBatchSender{
 
 public:
-	OTExtensionBristolSender(const char* address, int port, bool isSemiHonest);
-	void transfer(int nOTs){cout << "in transfer sender" <<endl;
+	OTExtensionBristolSender(int port, bool isSemiHonest);
+	/*void transfer(int nOTs){cout << "in transfer sender" <<endl;
                             BitVector receiverInput(nOTs);
                             OTExtensionBristolBase::transfer(nOTs,receiverInput);   };
+*/
 
-
-
+	virtual shared_ptr<OTBatchSOutput> transfer(OTBatchSInput * input);
 
 };

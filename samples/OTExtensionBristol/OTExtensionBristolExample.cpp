@@ -20,24 +20,37 @@ int mainBristol(string partyNum) {
 
     if (my_num == 0) {
         cout<<"nOTS: "<< nOTs<<endl;
-        OTExtensionBristolSender sender("localhost", 7000,false);
-        sender.transfer(nOTs);
+        OTExtensionBristolSender sender(12000,false);
+
+        auto input = new OTExtensionRandomizedSInput(nOTs);
+        auto output = sender.transfer(input);
+
+        ((OTExtensionBristolRandomizedSOutput*)output.get())->senderOutputMatrices[0].print_side_by_side(((OTExtensionBristolRandomizedSOutput*)output.get())->senderOutputMatrices[1]);
 
 
     }
     else {
         cout<<"nOTS: "<< nOTs<<endl;
-        OTExtensionBristolReciever reciever("localhost", 7000,false);
+        OTExtensionBristolReciever reciever("localhost", 12000,false);
 
         OTBatchRInput * input = new OTExtensionBristolRInput(nOTs, receiverInput);
 
 
-        reciever.transfer(input);
+        auto output = reciever.transfer(input);
+
+        for (int i = 0; i < 32; i++){
+			for (int j = 0; j < 128; j++)
+				cout << ((OTExtensionBristolROutput*)output.get())->receiverOutputMatrix.squares[0].get_bit(i,j);
+
+			cout << " "<<endl;
+		}
+
+
 
     }
 
 
-    cout<<"Done running with receiver in scapi"<<endl;
+    cout<<"Done running"<<endl;
 
 
     return 0;

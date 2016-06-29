@@ -8,7 +8,7 @@
 /***********************************/
 
 
-void OTExtensionBristolBase::init(const char* address, int port, int my_num, bool isSemiHonest)
+void OTExtensionBristolBase::init(const string& senderAddress, int port, int my_num, bool isSemiHonest)
 {
 
 	int nOTs = 128;
@@ -25,10 +25,11 @@ void OTExtensionBristolBase::init(const char* address, int port, int my_num, boo
 
 
 	vector<string> names(2);
-	names[my_num] = "localhost";
-	names[1-my_num] = "localhost";
 
-	pParty.reset(new TwoPartyPlayer(Names(my_num, portnum_base, names), 1 - my_num, 7000));
+	names[my_num] = "localhost";
+	names[1-my_num] = senderAddress;
+
+	pParty.reset(new TwoPartyPlayer(Names(my_num, portnum_base, names), 1 - my_num, 0));
 
 	timeval baseOTstart, baseOTend;
 	gettimeofday(&baseOTstart, NULL);
@@ -79,15 +80,40 @@ void OTExtensionBristolBase::transfer(int nOTs, const BitVector& receiverInput) 
 
 }
 
-OTExtensionBristolSender::OTExtensionBristolSender(const char* address, int port,bool isSemiHonest) {
+OTExtensionBristolSender::OTExtensionBristolSender(int port,bool isSemiHonest) {
 
-	init(address, port, 0, isSemiHonest);
+	init("localhost", port, 0, isSemiHonest);
 }
 
 
-OTExtensionBristolReciever::OTExtensionBristolReciever(const char* address, int port,bool isSemiHonest) {
+shared_ptr<OTBatchSOutput> OTExtensionBristolSender::transfer(OTBatchSInput * input){
 
-	init(address, port, 1, isSemiHonest);
+	if(input->getType()!= OTBatchSInputTypes::OTExtensionRandomizedSInput){
+		throw invalid_argument("input should be instance of OTExtensionRandomizedSInput");
+	}
+	else{
+
+		//we create a bitvector since the transfer of the bristol library demands that. There is no use of it and thus
+		//we do not require that the user inputs that.
+		BitVector receiverInput(((OTExtensionRandomizedSInput*)input)->getNumOfOts());
+		receiverInput.assign_zero();
+
+		//call the base class transfer that eventually calls the ot extenstion of the bristol library
+		OTExtensionBristolBase::transfer(((OTExtensionRandomizedSInput*)input)->getNumOfOts(),receiverInput);
+
+		//return a shared pointer of the output as it taken from the ot object of the library
+		//return make_shared<OTExtensionBristolRandomizedSOutput>(pOtExt->senderOutputMatrices);
+
+		auto shared = std::shared_ptr<OTExtensionBristolRandomizedSOutput>(new OTExtensionBristolRandomizedSOutput(pOtExt->senderOutputMatrices));
+
+		return shared;
+	}
+}
+
+
+OTExtensionBristolReciever::OTExtensionBristolReciever(const string& senderAddress, int port,bool isSemiHonest) {
+
+	init(senderAddress, port, 1, isSemiHonest);
 
 }
 

@@ -39,7 +39,36 @@
 */
 class OTBatchSOutput {};
 
-enum class OTBatchSInputTypes { OTExtensionGeneralSInput };
+
+class OTExtensionBristolRandomizedSOutput: public OTBatchSOutput{
+
+public:
+
+	OTExtensionBristolRandomizedSOutput(const vector<BitMatrix>& senderOutputMatrices){
+
+		//copy the bitmatrix
+		this->senderOutputMatrices.reserve(senderOutputMatrices.size());
+
+		/*//copy the vector of bitmatrices
+		for (BitMatrix element : senderOutputMatrices) {
+			BitMatrix copyElement;
+			copyElement.squares = element.squares;
+			this->senderOutputMatrices.push_back(copyElement);
+		}*/
+
+		for (auto it = begin (senderOutputMatrices); it != end (senderOutputMatrices); ++it) {
+			BitMatrix copyElement;
+			copyElement.squares = it->squares;
+			this->senderOutputMatrices.push_back(copyElement);
+		}
+
+
+	};
+
+	vector<BitMatrix> senderOutputMatrices;
+};
+
+enum class OTBatchSInputTypes { OTExtensionGeneralSInput, OTExtensionRandomizedSInput };
 
 /**
 * Every Batch OT sender needs inputs during the protocol execution, but every concrete protocol needs
@@ -93,6 +122,31 @@ public:
 	int getX0ArrSize() { return x0Arr.size(); };
 	int getX1ArrSize() { return x1Arr.size(); };
 };
+
+
+
+/**
+* A concrete class for randomized OT extension input for the sender. <p>
+* In the radomized OT extension scenario the sender gets has no x0 and x1 as input, rather this is an output from the protocol.
+*/
+class OTExtensionRandomizedSInput : public OTBatchSInput {
+private:
+	int numOfOts;	// Number of OTs in the OT extension.
+
+public:
+	OTBatchSInputTypes getType() override { return OTBatchSInputTypes::OTExtensionRandomizedSInput; };
+	/**
+	* Constructor that sets the number of OTs.
+	* @param x1Arr holds all the x0 for all the senders serially.
+	* @param x0Arr holds all the x1 for all the senders serially.
+	* @param numOfOts Number of OTs in the OT extension.
+	*/
+	OTExtensionRandomizedSInput(int numOfOts) : numOfOts(numOfOts) {} ;
+	int getNumOfOts() { return numOfOts; };
+
+};
+
+
 
 /**
 * General interface for Batch OT Sender.
