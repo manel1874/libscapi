@@ -8,14 +8,10 @@
 /***********************************/
 
 
-
-
-
-void OTExtensionScapi::init(const char* address, int port, int my_num)
+void OTExtensionBristolBase::init(const char* address, int port, int my_num, bool isSemiHonest)
 {
 
 	int nOTs = 128;
-
 
 	string hostname, ot_mode, usage;
 	int portnum_base = 5000,  nbase = 128;
@@ -59,7 +55,7 @@ void OTExtensionScapi::init(const char* address, int port, int my_num)
 									   baseOT.sender_inputs,
 									   baseOT.receiver_outputs,
 									   ot_role,
-									   true));
+									   isSemiHonest));
 
 
 }
@@ -67,17 +63,15 @@ void OTExtensionScapi::init(const char* address, int port, int my_num)
 
 
 
-void OTExtensionScapi::transfer(int nOTs, const BitVector& receiverInput2) {
+void OTExtensionBristolBase::transfer(int nOTs, const BitVector& receiverInput) {
 
 	cout<<"nOTs in transfer: "<< nOTs<<endl;
 
 
 	timeval transStart,transEnd;
 	gettimeofday(&transStart, NULL);
-	if(pOtExt== nullptr){
-		cout<<"I am null"<<endl;
-	}
-	pOtExt->transfer(nOTs, receiverInput2);
+
+	pOtExt->transfer(nOTs, receiverInput);
 	gettimeofday(&transEnd, NULL);
 	double transTime = timeval_diff(&transStart, &transEnd);
 	cout << "\t\tTransfer (" << "): " << transTime/1000000 << endl << flush;
@@ -85,15 +79,31 @@ void OTExtensionScapi::transfer(int nOTs, const BitVector& receiverInput2) {
 
 }
 
-OTSemiHonestExtensionSender::OTSemiHonestExtensionSender(const char* address, int port) {
+OTExtensionBristolSender::OTExtensionBristolSender(const char* address, int port,bool isSemiHonest) {
 
-	init(address, port, 0);
+	init(address, port, 0, isSemiHonest);
 }
 
 
-OTSemiHonestExtensionReciever::OTSemiHonestExtensionReciever(const char* address, int port) {
+OTExtensionBristolReciever::OTExtensionBristolReciever(const char* address, int port,bool isSemiHonest) {
 
-	init(address, port, 1);
+	init(address, port, 1, isSemiHonest);
+
+}
+
+
+shared_ptr<OTBatchROutput> OTExtensionBristolReciever::transfer(OTBatchRInput * input){
+
+	if (input->getType() != OTBatchRInputTypes::OTExtensionBristolRInput){
+		throw invalid_argument("input should be instance of OTExtensionBristolRInput");
+	}
+	else{
+		((OTExtensionBristolRInput *)input)->receiverInput;
+
+		OTExtensionBristolBase::transfer(((OTExtensionBristolRInput *)input)->nOTs,((OTExtensionBristolRInput *)input)->receiverInput);
+
+		return make_shared<OTExtensionBristolROutput>(pOtExt->receiverOutputMatrix);
+	}
 
 }
 #endif

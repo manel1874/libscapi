@@ -28,7 +28,8 @@
 
 #pragma once
 #include "../infra/Common.hpp"
-
+#include <OTExtensionBristol/OT/BitMatrix.h>
+#include <OTExtensionBristol/OT/BitVector.h>
 /**
 * This interface is a marker interface for OT sender output, where there is an implementing class for each OT protocol that has an output.<p>
 * Most OT senders output nothing. However in the batch scenario there may be cases where the protocol wishes to output x0 and x1 instead of inputting it.
@@ -138,7 +139,7 @@ private:
 	vector<byte> xSigma;
 };
 
-enum class OTBatchRInputTypes { OTExtensionGeneralRInput };
+enum class OTBatchRInputTypes { OTExtensionGeneralRInput, OTExtensionBristolRInput };
 
 /**
 * Every Batch OT receiver needs inputs during the protocol execution, but every concrete protocol needs
@@ -172,7 +173,7 @@ public:
 	vector<byte> getSigmaArr() { return sigmaArr; };
 	int getSigmaArrSize() { return sigmaArr.size(); };
 	int getElementSize() { return elementSize; };
-	OTBatchRInputTypes getType() { return OTBatchRInputTypes::OTExtensionGeneralRInput; };
+
 
 private:
 	vector<byte> sigmaArr; 		// Each byte holds a sigma bit for each OT in the OT extension protocol.
@@ -193,6 +194,42 @@ public:
 	* @param elementSize The size of each element in the OT extension, in bits.
 	*/
 	OTExtensionGeneralRInput(vector<byte> sigmaArr, int elementSize) : OTExtensionRInput(sigmaArr, elementSize) {};
+	OTBatchRInputTypes getType() { return OTBatchRInputTypes::OTExtensionGeneralRInput; };
+};
+
+
+/**
+* A concrete class for OT extension for bristol implementation. <p>
+* All the classes are the same and differ only in the name.
+* The reason a class is created for each version is due to the fact that a respective class is created for the sender and we wish to be consistent.
+* The name of the class determines the version of the OT extension we wish to run and in this case the general case.
+*/
+class OTExtensionBristolRInput : public OTBatchRInput {
+public:
+	/**
+	* Constructor that sets the number of ot's and the bitvector that contains the receiver input.
+	* @param nOTs number of OT's.
+	* @param receiverInput The receiver input in Bitvector instance that is defined in the ot extension of bristol library.
+	*/
+	OTExtensionBristolRInput(int nOTs, const BitVector& receiverInput) : nOTs(nOTs), receiverInput(receiverInput) {};
+	OTBatchRInputTypes getType() { return OTBatchRInputTypes::OTExtensionBristolRInput; };
+
+
+	const BitVector& receiverInput; 		// Each byte holds a sigma bit for each OT in the OT extension protocol.
+	int nOTs;	// The size of each element in the ot extension. All elements must be of the same size.
+};
+
+/**
+* Concrete implementation of OT receiver of bristol output.<p>
+* In the bristol scenario, the receiver outputs xSigma as a bitvector.
+* This output class also can be viewed as the output of batch OT when xSigma is a concatenation of all xSigma byte array of all OTs.
+*/
+class OTExtensionBristolROutput : public OTROutput, public OTBatchROutput {
+
+public:
+	OTExtensionBristolROutput(const BitMatrix& receiverOutputMatrix) {this->receiverOutputMatrix.squares = receiverOutputMatrix.squares;};
+
+	BitMatrix receiverOutputMatrix;
 };
 
 /**

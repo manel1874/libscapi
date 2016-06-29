@@ -20,22 +20,24 @@ int mainBristol(string partyNum) {
 
     if (my_num == 0) {
         cout<<"nOTS: "<< nOTs<<endl;
-        OTSemiHonestExtensionSender sender("localhost", 7000);
+        OTExtensionBristolSender sender("localhost", 7000,false);
         sender.transfer(nOTs);
 
 
     }
     else {
         cout<<"nOTS: "<< nOTs<<endl;
-        OTSemiHonestExtensionReciever reciever("localhost", 7000);
+        OTExtensionBristolReciever reciever("localhost", 7000,false);
+
+        OTBatchRInput * input = new OTExtensionBristolRInput(nOTs, receiverInput);
 
 
-        reciever.transfer(nOTs, receiverInput);
+        reciever.transfer(input);
 
     }
 
 
-    cout<<"Done running"<<endl;
+    cout<<"Done running with receiver in scapi"<<endl;
 
 
     return 0;

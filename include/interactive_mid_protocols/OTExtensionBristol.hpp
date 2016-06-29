@@ -1,12 +1,14 @@
 #pragma once
 
+#include "../CryptoInfra/SecurityLevel.hpp"
 #include <OTExtensionBristol/OT/OTExtensionWithMatrix.h>
+#include "OTBatch.hpp"
 #include <memory>
 
 using namespace std;
 
 
-class OTExtensionScapi{
+class OTExtensionBristolBase : public Malicious{
 
 protected:
 
@@ -20,27 +22,30 @@ public:
 protected:
 
 
-	void init(const char* address, int port, int my_num);
+	void init(const char* address, int port, int my_num, bool isSemiHonest);
 };
 
-class OTSemiHonestExtensionReciever: public OTExtensionScapi{
+class OTExtensionBristolReciever: public OTExtensionBristolBase,  public OTBatchReceiver{
 
 public:
-	OTSemiHonestExtensionReciever(const char* address, int port);
-	void transfer(int nOTs, const BitVector& receiverInput){ cout << "in transfer reciever" <<endl;
-                                                    OTExtensionScapi::transfer(nOTs,receiverInput);}
-
+	OTExtensionBristolReciever(const char* address, int port, bool isSemiHonest);
+	/*void transfer(int nOTs, const BitVector& receiverInput){ cout << "in transfer reciever" <<endl;
+															OTExtensionBristolBase::transfer(nOTs,receiverInput);}
+*/
+	shared_ptr<OTBatchROutput> transfer(OTBatchRInput * input);
 
 };
 
 
-class OTSemiHonestExtensionSender: public OTExtensionScapi{
+class OTExtensionBristolSender: public OTExtensionBristolBase/*, public OTBatchSender*/{
 
 public:
-	OTSemiHonestExtensionSender(const char* address, int port);
+	OTExtensionBristolSender(const char* address, int port, bool isSemiHonest);
 	void transfer(int nOTs){cout << "in transfer sender" <<endl;
                             BitVector receiverInput(nOTs);
-                            OTExtensionScapi::transfer(nOTs,receiverInput);   };
+                            OTExtensionBristolBase::transfer(nOTs,receiverInput);   };
+
+
 
 
 };
