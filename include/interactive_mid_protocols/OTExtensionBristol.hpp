@@ -1,3 +1,30 @@
+/**
+* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+*
+* Copyright (c) 2016 LIBSCAPI (http://crypto.biu.ac.il/SCAPI)
+* This file is part of the SCAPI project.
+* DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"),
+* to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
+* and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+* FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+* WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*
+* We request that any publication and/or code referring to and/or based on SCAPI contain an appropriate citation to SCAPI, including a reference to
+* http://crypto.biu.ac.il/SCAPI.
+*
+* Libscapi uses several open source libraries. Please see these projects for any further licensing issues.
+* For more information , See https://github.com/cryptobiu/libscapi/blob/master/LICENSE.MD
+*
+* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+*
+*/
+
 #pragma once
 
 #include "../CryptoInfra/SecurityLevel.hpp"
@@ -8,30 +35,61 @@
 using namespace std;
 
 
+/**
+*
+* The base OT class holds pointers to the ot extension of the bristol library implementation based on the paper :
+* Actively Secure OT Extension with Optimal Overhead.
+*
+* There are three versions of OT extension: General, Correlated and Random. The bristol library currently support the randomized version only
+*
+* The inputs are different for each version for the sender side. The receiver inputs the same for all versions and are called .
+* In general OT extension both x0 and x1 are given by the sender.<p>
+* In Correlated OT extension the user gives a delta array and x0, x1 arrays are chosen such that x0 = delta^x1.<p>
+* In random OT extension both x0 and x1 are chosen randomly.<p>
+* To allow the user decide which OT extension's version he wants, each option has a corresponding input class. <p>
+* The particular OT extension version is executed according to the given input instance;
+* For example, if the user gave as input an instance of OTExtensionRandomSInput than the random OT Extension will be execute.<p>
+*
+* NOTE: Unlike a regular implementation the connection is done via the native code and thus the channel provided in the transfer function is ignored.
+*
+* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Meital Levy)
+*
+*/
 class OTExtensionBristolBase : public Malicious{
 
 protected:
 
-	unique_ptr<OTExtensionWithMatrix> pOtExt;
-	unique_ptr<TwoPartyPlayer> pParty;
-
-public:
+	unique_ptr<OTExtensionWithMatrix> pOtExt;//Hold a pointer to the ot extension of the library.
+	unique_ptr<TwoPartyPlayer> pParty;//We hold a pointer to this object since it has to be alive when running the ot.
 
 
+	/**
+	* The actual transfer that calls the ot extension Bristol library transfer. This is called by derived classes.
+	* @param nOTs the number of ot's to transfer
+	* @param receiverInput the receiver input. This passed by both sender and receiver since the underlying bristol library demands that even though
+	* 		 the sender should not have this information. The derived sender class sends a dummy bitvector as input.
+	*/
 	void transfer(int nOTs, const BitVector& receiverInput);
-protected:
 
-
+	/**
+	 * Inits the underlying OTExtensionWithMatrix object, the communication and runs the base ot.
+	 */
 	void init(const string& senderAddress, int port, int my_num, bool isSemiHonest);
 };
+
+
+
+
+
+
+
+
 
 class OTExtensionBristolReciever: public OTExtensionBristolBase,  public OTBatchReceiver{
 
 public:
 	OTExtensionBristolReciever(const string& address, int port, bool isSemiHonest);
-	/*void transfer(int nOTs, const BitVector& receiverInput){ cout << "in transfer reciever" <<endl;
-															OTExtensionBristolBase::transfer(nOTs,receiverInput);}
-*/
+
 	shared_ptr<OTBatchROutput> transfer(OTBatchRInput * input);
 
 };
@@ -41,10 +99,7 @@ class OTExtensionBristolSender: public OTExtensionBristolBase, public OTBatchSen
 
 public:
 	OTExtensionBristolSender(int port, bool isSemiHonest);
-	/*void transfer(int nOTs){cout << "in transfer sender" <<endl;
-                            BitVector receiverInput(nOTs);
-                            OTExtensionBristolBase::transfer(nOTs,receiverInput);   };
-*/
+
 
 	virtual shared_ptr<OTBatchSOutput> transfer(OTBatchSInput * input);
 

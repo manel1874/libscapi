@@ -2,19 +2,12 @@
 #include "../../include/interactive_mid_protocols/OTExtensionBristol.hpp"
 
 
-
-/***********************************/
-/*   OTSemiHonestExtensionSender   */
-/***********************************/
-
-
 void OTExtensionBristolBase::init(const string& senderAddress, int port, int my_num, bool isSemiHonest)
 {
 
 	int nOTs = 128;
 
-	string hostname, ot_mode, usage;
-	int portnum_base = 5000,  nbase = 128;
+	int nbase = 128;
 
 	OT_ROLE ot_role;
 
@@ -29,7 +22,7 @@ void OTExtensionBristolBase::init(const string& senderAddress, int port, int my_
 	names[my_num] = "localhost";
 	names[1-my_num] = senderAddress;
 
-	pParty.reset(new TwoPartyPlayer(Names(my_num, portnum_base, names), 1 - my_num, 0));
+	pParty.reset(new TwoPartyPlayer(Names(my_num, 0, names), 1 - my_num, port));
 
 	timeval baseOTstart, baseOTend;
 	gettimeofday(&baseOTstart, NULL);
@@ -102,11 +95,8 @@ shared_ptr<OTBatchSOutput> OTExtensionBristolSender::transfer(OTBatchSInput * in
 		OTExtensionBristolBase::transfer(((OTExtensionRandomizedSInput*)input)->getNumOfOts(),receiverInput);
 
 		//return a shared pointer of the output as it taken from the ot object of the library
-		//return make_shared<OTExtensionBristolRandomizedSOutput>(pOtExt->senderOutputMatrices);
+		return make_shared<OTExtensionBristolRandomizedSOutput>(pOtExt->senderOutputMatrices);
 
-		auto shared = std::shared_ptr<OTExtensionBristolRandomizedSOutput>(new OTExtensionBristolRandomizedSOutput(pOtExt->senderOutputMatrices));
-
-		return shared;
 	}
 }
 
