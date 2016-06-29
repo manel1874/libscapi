@@ -28,8 +28,10 @@
 
 #pragma once
 #include "../infra/Common.hpp"
+#ifndef _WIN32
 #include <OTExtensionBristol/OT/BitMatrix.h>
 #include <OTExtensionBristol/OT/BitVector.h>
+#endif
 /**
 * This interface is a marker interface for OT sender output, where there is an implementing class for each OT protocol that has an output.<p>
 * Most OT senders output nothing. However in the batch scenario there may be cases where the protocol wishes to output x0 and x1 instead of inputting it.
