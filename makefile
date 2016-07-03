@@ -26,7 +26,7 @@ OBJ_FILES     := $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES))
 OBJ_FILES     += $(patsubst src/%.c,obj/%.o,$(C_FILES))
 OUT_DIR        = obj obj/mid_layer obj/circuits obj/comm obj/infra obj/interactive_mid_protocols obj/primitives obj/circuits_c
 INC            = -I../boost_1_60_0 -Ilib -Iinstall/include -Ilib/OTExtensionBristol 
-CPP_OPTIONS   := -std=c++11 $(INC)  -maes -mpclmul -DBOOST_LOG_DYN_LINK
+CPP_OPTIONS   := -std=c++11 $(INC)  -maes -mpclmul -Wall -fPIC
 $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
 
 all:: libs libscapi
@@ -69,7 +69,7 @@ compile-ntl:
 	@$(MAKE) -C $(builddir)/NTL/src/ PREFIX=$(prefix) install
 	@touch compile-ntl
 
-prepare-miracl::
+prepare-miracl:
 	@echo "Copying the miracl source files into the miracl build dir..."
 	@mkdir -p $(builddir)/$(MIRACL_DIR)
 	@find lib/Miracl/ -type f -exec cp '{}' $(builddir)/$(MIRACL_DIR)/ \;
@@ -77,7 +77,7 @@ prepare-miracl::
 	@rm -f $(builddir)/$(MIRACL_DIR)/mrmuldv.c
 	@cp -r lib/MiraclCompilation/* $(builddir)/$(MIRACL_DIR)/
 
-compile-miracl::
+compile-miracl:
 	@$(MAKE) prepare-miracl MIRACL_DIR=Miracl
 	@echo "Compiling the Miracl library (C)..."
 	@$(MAKE) -C $(builddir)/Miracl MIRACL_TARGET_LANG=c
@@ -85,7 +85,7 @@ compile-miracl::
 	@$(MAKE) -C $(builddir)/Miracl MIRACL_TARGET_LANG=c install
 	@touch compile-miracl
 
-compile-miracl-cpp::
+compile-miracl-cpp:
 	@$(MAKE) prepare-miracl MIRACL_DIR=MiraclCPP CXX=$(CXX)
 	@echo "Compiling the Miracl library (C++)..."
 	@$(MAKE) -C $(builddir)/MiraclCPP MIRACL_TARGET_LANG=cpp CXX=$(CXX)
