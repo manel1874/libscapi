@@ -40,6 +40,8 @@
 class OTBatchSOutput {
 };
 
+
+#ifndef _WIN32
 class OTExtensionBristolRandomizedSOutput: public OTBatchSOutput {
 
 public:
@@ -68,6 +70,8 @@ public:
 
 	vector<BitMatrix> senderOutputMatrices;
 };
+
+#endif
 
 enum class OTBatchSInputTypes {
 	OTExtensionGeneralSInput, OTExtensionRandomizedSInput, OTExtensionGeneralBristolSInput
