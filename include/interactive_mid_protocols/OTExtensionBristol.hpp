@@ -30,6 +30,7 @@
 #include "../CryptoInfra/SecurityLevel.hpp"
 #include <OTExtensionBristol/OT/OTExtensionWithMatrix.h>
 #include "OTBatch.hpp"
+#include "../comm/Comm.hpp"
 #include <memory>
 
 using namespace std;
@@ -50,17 +51,19 @@ using namespace std;
 * The particular OT extension version is executed according to the given input instance;
 * For example, if the user gave as input an instance of OTExtensionRandomSInput than the random OT Extension will be execute.<p>
 *
-* NOTE: Unlike a regular implementation the connection is done via the native code and thus the channel provided in the transfer function is ignored.
+* NOTE: The size of element is fixed 128 bit.
 *
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Meital Levy)
 *
 */
-class OTExtensionBristolBase : public Malicious{
+class OTExtensionBristolBase {
 
 protected:
 
 	unique_ptr<OTExtensionWithMatrix> pOtExt;//Hold a pointer to the ot extension of the library.
 	unique_ptr<TwoPartyPlayer> pParty;//We hold a pointer to this object since it has to be alive when running the ot.
+	shared_ptr<CommParty> channel;//this is a shared pointer for the general case where there is one communication between the
+								  //sender and the receiver after the bristol ot extension is done in providing random x0 and x1 for the sender.
 
 
 	/**
@@ -74,31 +77,37 @@ protected:
 	/**
 	 * Inits the underlying OTExtensionWithMatrix object, the communication and runs the base ot.
 	 */
-	void init(const string& senderAddress, int port, int my_num, bool isSemiHonest);
+	void init(const string& senderAddress, int port, int my_num, bool isSemiHonest, shared_ptr<CommParty> channel);
 };
 
 
-
-
-
-
-
-
-
+/**
+ * A receiver side of the bristol ot extension for both the semi honest and malicious adversaries.
+ * The receiver should provide the sender's address since that is the hostname it should connect to.
+ *
+ */
 class OTExtensionBristolReciever: public OTExtensionBristolBase,  public OTBatchReceiver{
 
 public:
-	OTExtensionBristolReciever(const string& address, int port, bool isSemiHonest);
+	//OTExtensionBristolReciever(const string& senderAddress, int port, bool isSemiHonest);
+	OTExtensionBristolReciever(const string& senderAddress, int port, bool isSemiHonest, shared_ptr<CommParty> channel = nullptr);
 
 	shared_ptr<OTBatchROutput> transfer(OTBatchRInput * input);
 
+
+
 };
 
-
+/**
+ * A sender side of the bristol ot extension for both the semi honest and malicious adversaries.
+ * The sender does not need to provide an IP, since is listens on local host, It only needs to provide the
+ * port on which it listens to.
+ *
+ */
 class OTExtensionBristolSender: public OTExtensionBristolBase, public OTBatchSender{
 
 public:
-	OTExtensionBristolSender(int port, bool isSemiHonest);
+	OTExtensionBristolSender(int port, bool isSemiHonest, shared_ptr<CommParty> channel = nullptr);
 
 
 	virtual shared_ptr<OTBatchSOutput> transfer(OTBatchSInput * input);
