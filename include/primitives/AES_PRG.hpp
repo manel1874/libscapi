@@ -17,6 +17,7 @@
 using namespace std;
 
 typedef unsigned char byte;
+typedef __m128i block;
 
 #define DEFAULT_CACHE_SIZE 60000
 
@@ -37,7 +38,8 @@ private:
     byte *m_buf;
     int m_max_size;
     byte m_ctr[16] __attribute__((aligned(16))) = {0};
-    __m128i m_CONST_ONE;
+    block m_CONST_ONE;
+
 };
 
 
@@ -60,6 +62,9 @@ public:
     SecretKey generateKey(AlgorithmParameterSpec keyParams) override;
     SecretKey generateKey(int keySize) override;
     void getPRGBytes(vector<byte> & outBytes, int outOffset, int outLen) override;
+    vector<byte> getPRGBitsBytes(int size);
+    vector<byte> getRandomBytes(int size);
+    block* getRandomBytesBlock(int size);
 
 
 private:

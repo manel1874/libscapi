@@ -1,12 +1,11 @@
-#ifndef _WIN32
-#include <openssl/evp.h>
+#include <bitset>
 #include "../../include/primitives/AES_PRG.hpp"
 
 unsigned char AES_PRG::m_defualtkey[16] = {0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6,
                                        0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c};
 
-unsigned char AES_PRG::m_defaultiv[16] = {0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7,
-                                      0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff};
+unsigned char AES_PRG::m_defaultiv[16] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01};
 
 AES_PRG::AES_PRG(int cahchedSize) : AES_PRG((byte*)m_defualtkey,(byte*)m_defaultiv,cahchedSize) { }
 
@@ -95,6 +94,38 @@ byte * AES_PRG::getRandomBytes()
 
 }
 
+
+vector<byte> AES_PRG::getPRGBitsBytes(int size)
+{
+    vector<byte> prg;
+    prg.resize(size*8);
+    byte* data = m_cachedRandoms + m_cachedRandomsIdx*size;
+    m_cachedRandomsIdx += size;
+
+    for(int i=0;i<size;i+=8)
+    {
+        bitset <8> bits(data[i]);
+
+        for(int j=0;j<8;j++)
+        {
+            if(bits[j]==0)
+                prg[i+j] = 0;
+            else
+                prg[i+j] = 1;
+        }
+    }
+
+    return prg;
+}
+
+vector<byte> AES_PRG::getRandomBytes(int size)
+{
+    vector<byte> data (m_cachedRandoms,m_cachedRandoms+size);
+    m_cahchedSize += size;
+    return data;
+}
+
+
 void AES_PRG::prepare(int isPlanned)
 {
     int actual;
@@ -102,6 +133,23 @@ void AES_PRG::prepare(int isPlanned)
     EVP_EncryptUpdate(&m_enc, m_cachedRandoms, &actual , ctr, 16*m_cachedRandomsIdx );
     m_cachedRandomsIdx = 0;
     m_idx = 0;
+}
+
+block* AES_PRG::getRandomBytesBlock(int size)
+{
+    block *data = new block[size];
+    for(int i=0;i<size;i++)
+    {
+        uint32_t t1 = getRandom();
+        uint32_t t2 = getRandom();
+        uint32_t t3 = getRandom();
+        uint32_t t4 = getRandom();
+
+        data[i] = _mm_set_epi32(t4,t3,t2,t1);
+    }
+
+    return data;
+
 }
 
 uint32_t AES_PRG::getRandom()
@@ -170,18 +218,18 @@ byte *PRG_CTR128::inc(int size)
 
 void PRG_CTR128::spillCounter()
 {
-    __m128i tempCopy;
-    tempCopy = _mm_loadu_si128((__m128i*)(m_ctr));
-    _mm_stream_si128((__m128i*)m_buf,tempCopy);
+    block tempCopy;
+    tempCopy = _mm_loadu_si128((block*)(m_ctr));
+    _mm_stream_si128((block*)m_buf,tempCopy);
 
     //memcpy(m_buf, m_ctr, 16);
 }
 
 void PRG_CTR128::recordCounter(int size)
 {
-    __m128i tempCopy;
-    tempCopy = _mm_loadu_si128((__m128i*)(m_buf + (size-1)*16));
-    __m128i *ctrCopy = (__m128i*)&m_ctr;
+    block tempCopy;
+    tempCopy = _mm_loadu_si128((block*)(m_buf + (size-1)*16));
+    block *ctrCopy = (block*)&m_ctr;
     _mm_stream_si128(ctrCopy,tempCopy);
 }
 
@@ -192,4 +240,3 @@ void PRG_CTR128::doInc(int size)
     }
 
 }
-#endif
