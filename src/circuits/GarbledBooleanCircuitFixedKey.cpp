@@ -61,10 +61,7 @@ GarbledBooleanCircuitFixedKey::~GarbledBooleanCircuitFixedKey(void)
 }
 
 void GarbledBooleanCircuitFixedKey::createCircuit(const char* fileName, bool isFreeXor, bool isNonXorOutputsRequired){
-	//clock_t start, stop;
-
-	cout << " in create...";
-
+	
 	//Set the fixed key.
 	fixedKey = _mm_set_epi8(36, -100,50, -22, 92, -26, 49, 9,-82 , -86, -51, -96, 98, -20, 29,  -13);
 
