@@ -37,7 +37,10 @@ private:
 
     byte *m_buf;
     int m_max_size;
-    byte m_ctr[16] __attribute__((aligned(16))) = {0};
+    byte m_ctr[16] = {0,0,0,0,
+                      0,0,0,0,
+                      0,0,0,0,
+                      0,0,0,0};
     block m_CONST_ONE;
 
 };
