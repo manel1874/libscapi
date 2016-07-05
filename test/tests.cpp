@@ -641,6 +641,14 @@ TEST_CASE("Gates and Wires", "") {
 		auto bc_res_map = bc.compute();
 		REQUIRE(bc_res_map[7].getValue() == 1);
 	}
+
+	SECTION("Boolean Circuit From file") {
+		BooleanCircuit bc(new scannerpp::File("../../../../test/testCircuit.txt"));
+		
+		REQUIRE(bc.getNumberOfInputs(1) == 4);
+		REQUIRE(bc.getNumberOfInputs(2) == 1);
+		REQUIRE(bc.getOutputWireIndices().size() == 1);
+	}
 }
 
 TEST_CASE("serialization", "[SerializedData, CmtCCommitmentMsg]")

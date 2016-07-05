@@ -98,74 +98,76 @@ int Gate::calculateIndexOfTruthTable(map<int, Wire> computedWires) const {
 /*                BooleanCircuit                    */
 /****************************************************/
 
-//BooleanCircuit(Scanner s) throws CircuitFileFormatException {
-//	//Read the number of gates.
-//	int numberOfGates = Integer.parseInt(read(s));
-//	gates = new Gate[numberOfGates];
-//	//Read the number of parties.
-//	numberOfParties = Integer.parseInt(read(s));
-//	isInputSet = new boolean[numberOfParties];
-//	//For each party, read the party's number, number of input wires and their indices.
-//	for (int i = 0; i < numberOfParties; i++) {
-//		if (Integer.parseInt(read(s)) != i + 1) {//add 1 since parties are indexed from 1, not 0
-//			throw new CircuitFileFormatException();
-//		}
-//		//Read the number of input wires.
-//		int numberOfInputsForCurrentParty = Integer.parseInt(read(s));
-//		if (numberOfInputsForCurrentParty < 0) {
-//			throw new CircuitFileFormatException();
-//		}
-//		boolean isThisPartyInputSet = numberOfInputsForCurrentParty == 0 ? true : false;
-//		isInputSet[i] = isThisPartyInputSet;
-//
-//		ArrayList<Integer> currentPartyInput = new ArrayList<Integer>();
-//		eachPartysInputWires.add(currentPartyInput);
-//		//Read the input wires indices.
-//		for (int j = 0; j < numberOfInputsForCurrentParty; j++) {
-//			currentPartyInput.add(Integer.parseInt(read(s)));
-//		}
-//	}
-//
-//	/*
-//	* The ouputWireIndices are the outputs from this circuit. However, this circuit may actually be a single layer of a
-//	* larger layered circuit. So this output can be part of the input to another layer of the circuit.
-//	*/
-//	int numberOfCircuitOutputs = Integer.parseInt(read(s));
-//	outputWireIndices = new int[numberOfCircuitOutputs];
-//	//Read the output wires indices.
-//	for (int i = 0; i < numberOfCircuitOutputs; i++) {
-//		outputWireIndices[i] = Integer.parseInt(read(s));
-//	}
-//
-//	int numberOfGateInputs, numberOfGateOutputs;
-//	//For each gate, read the number of input and output wires, their indices and the truth table.
-//	for (int i = 0; i < numberOfGates; i++) {
-//		numberOfGateInputs = Integer.parseInt(read(s));
-//		numberOfGateOutputs = Integer.parseInt(read(s));
-//		int[] inputWireIndices = new int[numberOfGateInputs];
-//		int[] outputWireIndices = new int[numberOfGateOutputs];
-//		for (int j = 0; j < numberOfGateInputs; j++) {
-//			inputWireIndices[j] = Integer.parseInt(read(s));
-//		}
-//		for (int j = 0; j < numberOfGateOutputs; j++) {
-//			outputWireIndices[j] = Integer.parseInt(read(s));
-//		}
-//
-//		/*
-//		* We create a BitSet representation of the truth table from the 01 String
-//		* that we read from the file.
-//		*/
-//		BitSet truthTable = new BitSet();
-//		String tTable = read(s);
-//		for (int j = 0; j < tTable.length(); j++) {
-//			if (tTable.charAt(j) == '1') {
-//				truthTable.set(j);
-//			}
-//		}
-//		//Construct the gate.
-//		gates[i] = new Gate(i, truthTable, inputWireIndices, outputWireIndices);
-//	}
-//}
+BooleanCircuit::BooleanCircuit(scannerpp::Scanner s) {
+	//Read the number of gates.
+	int numberOfGates = atoi(read(s).c_str());
+	gates.resize(numberOfGates);
+	//Read the number of parties.
+	numberOfParties = atoi(read(s).c_str());
+	isInputSet.resize(numberOfParties);
+	
+	//For each party, read the party's number, number of input wires and their indices.
+	for (int i = 0; i < numberOfParties; i++) {
+		if (atoi(read(s).c_str()) != i + 1) {//add 1 since parties are indexed from 1, not 0
+			throw runtime_error("Circuit file format is wrong");
+		}
+		//Read the number of input wires.
+		int numberOfInputsForCurrentParty = atoi(read(s).c_str());
+		if (numberOfInputsForCurrentParty < 0) {
+			throw runtime_error("Circuit file format is wrong");
+		}
+		bool isThisPartyInputSet = numberOfInputsForCurrentParty == 0 ? true : false;
+		isInputSet[i] = isThisPartyInputSet;
+
+		vector<int> currentPartyInput(numberOfInputsForCurrentParty);
+		eachPartysInputWires.push_back(currentPartyInput);
+		//Read the input wires indices.
+		for (int j = 0; j < numberOfInputsForCurrentParty; j++) {
+			currentPartyInput.push_back(atoi(read(s).c_str()));
+		}
+	}
+	
+	/*
+	* The ouputWireIndices are the outputs from this circuit. However, this circuit may actually be a single layer of a
+	* larger layered circuit. So this output can be part of the input to another layer of the circuit.
+	*/
+	int numberOfCircuitOutputs = atoi(read(s).c_str());
+	outputWireIndices.resize(numberOfCircuitOutputs);
+	//Read the output wires indices.
+	for (int i = 0; i < numberOfCircuitOutputs; i++) {
+		outputWireIndices[i] = atoi(read(s).c_str());
+	}
+	
+	int numberOfGateInputs, numberOfGateOutputs;
+	//For each gate, read the number of input and output wires, their indices and the truth table.
+	for (int i = 0; i < numberOfGates; i++) {
+		numberOfGateInputs = atoi(read(s).c_str());
+		numberOfGateOutputs = atoi(read(s).c_str());
+		vector<int> inputWireIndices(numberOfGateInputs);
+		vector<int> outputWireIndices(numberOfGateOutputs);
+		for (int j = 0; j < numberOfGateInputs; j++) {
+			inputWireIndices[j] = atoi(read(s).c_str());
+		}
+		for (int j = 0; j < numberOfGateOutputs; j++) {
+			outputWireIndices[j] = atoi(read(s).c_str());
+		}
+
+		/*
+		* We create a BitSet representation of the truth table from the 01 String
+		* that we read from the file.
+		*/
+		vector<bool> truthTable;
+		string tTable = read(s);
+		for (int j = 0; j < tTable.length(); j++) {
+			if (tTable.at(j) == '1') 
+				truthTable.push_back(true);
+			else 
+				truthTable.push_back(false);
+		}
+		//Construct the gate.
+		gates[i] = Gate(i, truthTable, inputWireIndices, outputWireIndices);
+	}
+}
 
 void BooleanCircuit::setInputs(const map<int, Wire> & presetInputWires, int partyNumber) {
 	if (partyNumber < 1 || partyNumber > numberOfParties)

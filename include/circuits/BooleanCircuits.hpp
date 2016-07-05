@@ -93,6 +93,8 @@ private:
 */
 class Gate {
 public:
+	Gate() {};
+
 	/**
 	* Sets the given values.
 	* @param gateNumber The gate's number (in a circuit all gates will be numbered).
