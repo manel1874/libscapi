@@ -82,13 +82,13 @@ OTExtensionBristolSender::OTExtensionBristolSender(int port,bool isSemiHonest, s
 
 shared_ptr<OTBatchSOutput> OTExtensionBristolSender::transfer(OTBatchSInput * input){
 
-	if(input->getType()!= OTBatchSInputTypes::OTExtensionRandomizedSInput || input->getType()!= OTBatchSInputTypes::OTExtensionGeneralSInput){
-		throw invalid_argument("input should be instance of OTExtensionRandomizedSInput");
+	if(input->getType()!= OTBatchSInputTypes::OTExtensionRandomizedSInput && input->getType()!= OTBatchSInputTypes::OTExtensionGeneralBristolSInput){
+		throw invalid_argument("input should be instance of OTExtensionRandomizedSInput or OTExtensionGeneralBristolSInput.");
 	}
 	else{
 		int nOTs;
 
-		if(input->getType()!= OTBatchSInputTypes::OTExtensionGeneralBristolSInput){
+		if(input->getType()== OTBatchSInputTypes::OTExtensionGeneralBristolSInput){
 
 			nOTs = (((OTExtensionGeneralSInput*)input)->getNumOfOts());
 		}
@@ -105,11 +105,25 @@ shared_ptr<OTBatchSOutput> OTExtensionBristolSender::transfer(OTBatchSInput * in
 		//call the base class transfer that eventually calls the ot extenstion of the bristol library
 		OTExtensionBristolBase::transfer(nOTs,receiverInput);
 
-		if(input->getType()!= OTBatchSInputTypes::OTExtensionGeneralBristolSInput){//need another round of communication using the channel member
+		if(input->getType()== OTBatchSInputTypes::OTExtensionGeneralBristolSInput){//need another round of communication using the channel member
+
+			if (channel == NULL) {
+					throw runtime_error("In order to execute a general ot extension the channel must be given");
+				}
+
 
 			//xor every input with the randomized output
 			((OTExtensionGeneralBristolSInput *)input)->x0Arr ^=   pOtExt->senderOutputMatrices[0];
 			((OTExtensionGeneralBristolSInput *)input)->x1Arr ^=   pOtExt->senderOutputMatrices[1];
+
+			auto *arrayx0 = &((OTExtensionGeneralBristolSInput *)input)->x0Arr.squares.at(0);
+			auto *arrayx1 = &((OTExtensionGeneralBristolSInput *)input)->x1Arr.squares.at(0);
+
+			//send the bitmatrix over the channel. The underlying array of the vector of squares can be viewed as one long array of bytes.
+			channel->write((byte *)arrayx0, ((OTExtensionGeneralBristolSInput *)input)->x0Arr.squares.size()*128*16);
+			channel->write((byte *)arrayx1, ((OTExtensionGeneralBristolSInput *)input)->x1Arr.squares.size()*128*16);
+
+			return nullptr;
 
 		}
 
@@ -131,15 +145,62 @@ OTExtensionBristolReciever::OTExtensionBristolReciever(const string& senderAddre
 
 shared_ptr<OTBatchROutput> OTExtensionBristolReciever::transfer(OTBatchRInput * input){
 
-	if (input->getType() != OTBatchRInputTypes::OTExtensionBristolRInput){
-		throw invalid_argument("input should be instance of OTExtensionBristolRInput");
+	if (input->getType() != OTBatchRInputTypes::OTExtensionBristolGeneralRInput && input->getType() != OTBatchRInputTypes::OTExtensionBristolRandomizedRInput){
+		throw invalid_argument("input should be instance of OTExtensionBristolGeneralRInput or OTExtensionBristolRandomizedRInput.");
 	}
 	else{
-		((OTExtensionBristolRInput *)input)->receiverInput;
+		auto inputBits = ((OTExtensionBristolRInput *)input)->receiverInput;
 
-		OTExtensionBristolBase::transfer(((OTExtensionBristolRInput *)input)->nOTs,((OTExtensionBristolRInput *)input)->receiverInput);
+		auto nOTs = ((OTExtensionBristolRInput *)input)->nOTs;
 
-		return make_shared<OTExtensionBristolROutput>(pOtExt->receiverOutputMatrix);
+		OTExtensionBristolBase::transfer(nOTs,inputBits);
+
+		//we need to get the xor of the randomized and real data from the sender.
+		if(input->getType() == OTBatchRInputTypes::OTExtensionBristolGeneralRInput){
+
+			if (channel == NULL) {
+				throw runtime_error("In order to execute a general ot extension the channel must be given");
+			}
+
+			cout<<"in transfer general"<<endl;
+			auto sizeInBytes = nOTs*16;
+			__m128i* x0Arr = (__m128i *) _mm_malloc(sizeof(__m128i) * nOTs, 16);
+			__m128i* x1Arr = (__m128i *) _mm_malloc(sizeof(__m128i) * nOTs, 16);
+			//byte* bufferx0 = new byte[sizeInBytes];
+			//byte* bufferx1 = new byte[sizeInBytes];
+			auto sizeRead = channel->read((byte *)x0Arr, sizeInBytes);
+			sizeRead = channel->read((byte *)x1Arr, sizeInBytes);
+
+			BitMatrix outputMatrix(nOTs);
+
+			//create alligned arrays
+
+
+			//memcpy ( x0Arr, bufferx0, sizeInBytes );
+			//memcpy ( x1Arr, bufferx1, sizeInBytes );
+
+			cout<<"x0Arr[0] = "<<(((int*)x0Arr)[0])<<endl;
+			cout<<"x1Arr[0] = "<<(((int*)x1Arr)[0])<<endl;
+
+
+			//xor each randomized output with the relevant xored sent from the sender
+			for(int i=0; i<nOTs; i++){
+				if(inputBits.get_bit(i)==0)
+					outputMatrix.squares[i/128].rows[i % 128] =  x0Arr[i]^ pOtExt->receiverOutputMatrix.squares[i/128].rows[i % 128];
+				else
+					outputMatrix.squares[i/128].rows[i % 128] =  x1Arr[i]^ pOtExt->receiverOutputMatrix.squares[i/128].rows[i % 128];
+			}
+
+
+
+			return make_shared<OTExtensionBristolROutput>(outputMatrix);
+
+		}
+		else{
+			return make_shared<OTExtensionBristolROutput>(pOtExt->receiverOutputMatrix);
+		}
+
+
 	}
 
 }

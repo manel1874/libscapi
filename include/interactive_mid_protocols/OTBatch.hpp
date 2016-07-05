@@ -192,7 +192,7 @@ private:
 	int numOfOts; // Number of OTs in the OT extension.
 
 public:
-	OTBatchSInputTypes getType()override {return OTBatchSInputTypes::OTExtensionRandomizedSInput;};
+	OTBatchSInputTypes getType() override {return OTBatchSInputTypes::OTExtensionRandomizedSInput;};
 	/**
 	 * Constructor that sets the number of OTs.
 	 * @param x1Arr holds all the x0 for all the senders serially.
@@ -269,7 +269,7 @@ private:
 };
 
 enum class OTBatchRInputTypes {
-	OTExtensionGeneralRInput, OTExtensionBristolRInput, OTExtensionGeneralBlocksRInput
+	OTExtensionGeneralRInput, OTExtensionBristolGeneralRInput, OTExtensionBristolRandomizedRInput
 };
 
 /**
@@ -362,15 +362,24 @@ public:
 	OTExtensionBristolRInput(int nOTs, const BitVector& receiverInput) :
 		nOTs(nOTs), receiverInput(receiverInput) {
 	}
-	;
-	OTBatchRInputTypes getType() {
-		return OTBatchRInputTypes::OTExtensionBristolRInput;
-	}
-	;
+
 
 	const BitVector& receiverInput; // Each byte holds a sigma bit for each OT in the OT extension protocol.
 	int nOTs; // The size of each element in the ot extension. All elements must be of the same size.
 };
+
+class OTExtensionBristolGeneralRInput: public OTExtensionBristolRInput{
+public:
+	OTExtensionBristolGeneralRInput(int nOTs, const BitVector& receiverInput) : OTExtensionBristolRInput(nOTs,receiverInput) {}
+
+	OTBatchRInputTypes getType() override {return OTBatchRInputTypes::OTExtensionBristolGeneralRInput;}
+};
+class OTExtensionBristolRandomizedRInput: public OTExtensionBristolRInput{
+public:
+	OTExtensionBristolRandomizedRInput(int nOTs, const BitVector& receiverInput) : OTExtensionBristolRInput(nOTs,receiverInput) {}
+	OTBatchRInputTypes getType() override {return OTBatchRInputTypes::OTExtensionBristolRandomizedRInput;}
+};
+
 
 /**
  * Concrete implementation of OT receiver of bristol output.<p>
@@ -383,7 +392,6 @@ public:
 	OTExtensionBristolROutput(const BitMatrix& receiverOutputMatrix) {
 		this->receiverOutputMatrix.squares = receiverOutputMatrix.squares;
 	}
-	;
 
 	BitMatrix receiverOutputMatrix;
 };
