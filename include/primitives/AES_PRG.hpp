@@ -41,10 +41,7 @@ private:
 
     byte *m_buf;
     int m_max_size;
-    byte m_ctr[16] = {0,0,0,0,
-                      0,0,0,0,
-                      0,0,0,0,
-                      0,0,0,0};
+    byte m_ctr[16];
     block m_CONST_ONE;
 
 };

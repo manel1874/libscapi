@@ -1,11 +1,12 @@
+#include <openssl/evp.h>
 #include <bitset>
 #include "../../include/primitives/AES_PRG.hpp"
 
 unsigned char AES_PRG::m_defualtkey[16] = {0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6,
                                        0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c};
 
-unsigned char AES_PRG::m_defaultiv[16] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01};
+unsigned char AES_PRG::m_defaultiv[16] = {0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7,
+                                      0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff};
 
 AES_PRG::AES_PRG(int cahchedSize) : AES_PRG((byte*)m_defualtkey,(byte*)m_defaultiv,cahchedSize) { }
 
@@ -199,11 +200,15 @@ PRG_CTR128::PRG_CTR128(int max_size)
     m_max_size = max_size;
     m_buf = new byte[16*max_size](); //initialize to zero
     m_buf = (byte*)memalign(16*max_size,16*max_size);
+    m_ctr = (byte*)memalign(16,16);
+    for(int i=0;i<16;i++)
+        m_ctr[i] = 16;
     m_CONST_ONE = _mm_set_epi64x(1,1);
 }
 
 PRG_CTR128:: ~PRG_CTR128()
 {
+
 }
 
 byte *PRG_CTR128::inc(int size)

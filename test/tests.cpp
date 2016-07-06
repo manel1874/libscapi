@@ -797,7 +797,7 @@ TEST_CASE("symmetric encryption")
 }
 
 
-#ifndef _WIN32
+
 TEST_CASE("AES_PRG")
 {
 	SECTION("sanity")
@@ -808,7 +808,6 @@ TEST_CASE("AES_PRG")
 	REQUIRE(test!=test2);
 	}
 }
-#endif
 
 TEST_CASE("asymmetric encryption")
 {
