@@ -15,7 +15,7 @@
 %MakeVal = (
 
 'CXX'	      => 'g++',
-'CXXFLAGS'    => '-g -O2',
+'CXXFLAGS'    => '-g -O2 -fPIC',
 'CXXAUTOFLAGS'=> '',
 'AR'	      => 'ar',
 'ARFLAGS'     => 'ruv',

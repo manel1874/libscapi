@@ -56,6 +56,8 @@ all: otlib
 otlib: ${OBJECTS_UTIL} ${OBJECTS_OT}
 	${CXX} ${SHARED_LIB_OPT} -o libMaliciousOTExtension${SHARED_LIB_EXT} ${DEBUG_OPTIONS} \
 	${OBJECTS_UTIL} ${OBJECTS_OT} ${LIBRARIES_DIR} ${LIBRARIES}
+	ar ru libMaliciousOTExtension.a ${OBJECTS_UTIL} ${OBJECTS_OT} 
+	ranlib libMaliciousOTExtension.a
 
 ${OBJECTS_UTIL}: ${SOURCES_UTIL}
 	@echo "compling ot-util..."
@@ -70,6 +72,7 @@ install:
 	install -d $(includedir)/MaliciousOTExtension/ot
 	install -d $(includedir)/MaliciousOTExtension/util
 	install -m 0644 libMaliciousOTExtension${SHARED_LIB_EXT} $(libdir)
+	install -m 0644 libMaliciousOTExtension.a $(libdir)
 	install -m 0644 ot/*.h $(includedir)/MaliciousOTExtension/ot
 	install -m 0644 util/*.h $(includedir)/MaliciousOTExtension/util
 

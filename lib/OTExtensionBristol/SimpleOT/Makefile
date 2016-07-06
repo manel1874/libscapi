@@ -1,5 +1,5 @@
 CC = /usr/bin/gcc
-CFLAGS = -O3 -Wall -Wextra
+CFLAGS = -fPIC -O3 -Wall -Wextra
 
 ######################################################
 
@@ -69,10 +69,11 @@ OBJS+= consts4x.o
 
 ######################################################
 
-all: ot_sender_test ot_receiver_test libsimpleot
+all: ot_sender_test ot_receiver_test libsimpleot.a
 
-libsimpleot: $(OBJS)
-	$(AR) -crs libsimpleot.a $(OBJS)
+libsimpleot.a: $(OBJS)
+	ar ru $@ $^ 
+	ranlib $@
 
 ot_sender_test: ot_sender_test.o $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^ 

@@ -1,7 +1,7 @@
 LDLIBS = -lpthread -lrt
 
 CC = g++
-CFLAGS = -g -Wextra -Wall -Wno-non-template-friend $(LIBOPT) -O3 -pthread -maes -mpclmul -msse4.1 -msse2 -I.
+CFLAGS = -g -Wextra -Wall -Wno-non-template-friend $(LIBOPT) -O3 -fPIC -pthread -maes -mpclmul -msse4.1 -msse2 -I.
 CPPFLAGS = $(CFLAGS)
 
 TOOLS = $(patsubst %.cpp,%.o,$(wildcard Tools/*.cpp))

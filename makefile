@@ -5,7 +5,7 @@ uname_S := $(shell sh -c 'uname -s 2>/dev/null || echo not')
 ARCH := $(shell getconf LONG_BIT)
 SHARED_LIB_EXT:=.so
 INCLUDE_ARCHIVES_START = -Wl,-whole-archive # linking options, we prefer our generated shared object will be self-contained.
-INCLUDE_ARCHIVES_END = -Wl,-no-whole-archive -Wl,--no-undefined
+INCLUDE_ARCHIVES_END = -Wl,-no-whole-archive 
 SHARED_LIB_OPT:=-shared
 
 export uname_S
@@ -28,6 +28,9 @@ OUT_DIR        = obj obj/mid_layer obj/circuits obj/comm obj/infra obj/interacti
 INC            = -I../boost_1_60_0 -Ilib -Iinstall/include -Ilib/OTExtensionBristol 
 CPP_OPTIONS   := -std=c++11 $(INC)  -maes -mpclmul -Wall -fPIC
 $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
+LINKER_OPTIONS = $(INCLUDE_ARCHIVES_START) install/lib/libOTExtensionBristol.a install/lib/libsimpleot.a install/lib/libntl.a install/lib/libmiracl.a -lpthread -lgmp -lcrypto -lssl -lboost_system -lboost_thread -lOTExtension -lMaliciousOTExtension -ldl $(INCLUDE_ARCHIVES_END)
+LIBRARIES_DIR  = -L../boost_1_60_0/stage/lib -Linstall/lib
+LD_FLAGS = 
 
 all:: libs libscapi
 libs:: compile-ntl compile-miracl compile-otextension compile-otextension-malicious compile-otextension-bristol

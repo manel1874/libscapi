@@ -11,7 +11,7 @@ CXX=g++
 # A C++ compiler, e.g., g++, CC, xlC
 
 
-CXXFLAGS=-g -O2
+CXXFLAGS=-g -O2 -fPIC
 # Flags for the C++ compiler
 
 CXXAUTOFLAGS=

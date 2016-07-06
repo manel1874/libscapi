@@ -30,8 +30,8 @@
 #include "../infra/Common.hpp"
 #include "../infra/NTLWrapper.hpp"
 #include "../infra/MathAlgorithms.hpp"
-//#include "gmp.h"
-//#include "gmpxx.h"
+#include "gmp.h"
+#include "gmpxx.h"
 //#include <stdlib.h>
 //#include <stdio.h>
 //#include <string.h>
@@ -48,35 +48,28 @@
 struct paillier_pubkey_t
 {
 	int bits;  /* e.g., 1024 */
-	//mpz_t n;   /* public modulus n = p q */
-	//mpz_t n_squared; /* cached to avoid recomputing */
-	//mpz_t n_plusone; /* cached to avoid recomputing */
-	biginteger n;   /* public modulus n = p q */
-	biginteger n_squared; /* cached to avoid recomputing */
-	biginteger n_plusone; /* cached to avoid recomputing */
+	mpz_t n;   /* public modulus n = p q */
+	mpz_t n_squared; /* cached to avoid recomputing */
+	mpz_t n_plusone; /* cached to avoid recomputing */
 	NTL::ZZ *g; /* cached to avoid recomputing */
 };
 
 
 struct paillier_prvkey_t
 {
-	//mpz_t lambda;    /* lambda(n), i.e., lcm(p-1,q-1) */
-	//mpz_t x;   /* cached to avoid recomputing */
-	biginteger lambda;
-	biginteger x;
+	mpz_t lambda;    /* lambda(n), i.e., lcm(p-1,q-1) */
+	mpz_t x;   /* cached to avoid recomputing */
 };
 
 struct paillier_plaintext_t
 {
-	//mpz_t m;
-	biginteger m;
+	mpz_t m;
 };
 
 
 struct paillier_ciphertext_t
 {
-	//mpz_t c;
-	biginteger c;
+	mpz_t c;
 };
 
 typedef void (*paillier_get_rand_t) ( void* buf, int len );
@@ -88,7 +81,7 @@ class PaillierAPI
 
 public:
 
-	//void init_rand(gmp_randstate_t rand, paillier_get_rand_t get_ran, int bytes);
+	void init_rand(gmp_randstate_t rand, paillier_get_rand_t get_ran, int bytes);
 	void complete_pubkey( paillier_pubkey_t* pub );
 	void complete_prvkey( paillier_prvkey_t* prv, paillier_pubkey_t* pub );
 	void paillier_keygen( int modulusbits, paillier_pubkey_t **pub, 

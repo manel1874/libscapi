@@ -42,6 +42,8 @@ all: ${OT_LIBRARY}
 otlib: ${OBJECTS_UTIL} ${OBJECTS_OT}
 	${CXX} ${SHARED_LIB_OPT} -o libOTExtension${SHARED_LIB_EXT} \
 	${OBJECTS_UTIL} ${OBJECTS_OT} ${MIRACL_PATH} ${LIBRARIES} ${LIBRARIES_DIR}
+	ar ru libOTExtension.a ${OBJECTS_UTIL} ${OBJECTS_OT} 
+	ranlib libOTExtension.a
 
 otmain: ${OBJECTS_UTIL}  ${OBJECTS_OT} ${OBJECTS_OTMAIN}
 	${CXX} -o ot.exe $(INCLUDE) ${CFLAGS} ${OBJECTS_OTMAIN} ${OBJECTS_UTIL} ${OBJECTS_OT} ${LIBRARIES} ${COMPILER_OPTIONS}
@@ -60,6 +62,7 @@ install:
 	install -d $(prefix)/include/OTExtension/ot
 	install -d $(prefix)/include/OTExtension/util
 	install -m 0644 libOTExtension${SHARED_LIB_EXT} $(libdir)
+	install -m 0644 libOTExtension.a $(libdir)
 	install -m 0644 ot/*.h $(prefix)/include/OTExtension/ot
 	install -m 0644 util/*.h $(prefix)/include/OTExtension/util
 
