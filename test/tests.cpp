@@ -643,7 +643,11 @@ TEST_CASE("Gates and Wires", "") {
 	}
 
 	SECTION("Boolean Circuit From file") {
+#ifdef _WIN32
 		BooleanCircuit bc(new scannerpp::File("../../../../test/testCircuit.txt"));
+#else
+		BooleanCircuit bc(new scannerpp::File("../test/testCircuit.txt"));
+#endif
 		
 		REQUIRE(bc.getNumberOfInputs(1) == 4);
 		REQUIRE(bc.getNumberOfInputs(2) == 1);
