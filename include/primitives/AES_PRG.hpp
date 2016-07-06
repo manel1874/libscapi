@@ -11,7 +11,7 @@
 #include <openssl/evp.h>
 #include <emmintrin.h>
 #include <malloc.h>
-#include "../../libscapi/include/primitives/Prg.hpp"
+#include "Prg.hpp"
 
 
 using namespace std;
