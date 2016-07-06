@@ -7,7 +7,6 @@
 
 
 #include <iostream>
-#include <openssl/aes.h>
 #include <openssl/evp.h>
 #include <emmintrin.h>
 #include <malloc.h>
