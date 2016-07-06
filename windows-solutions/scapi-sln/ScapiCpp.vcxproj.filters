@@ -249,9 +249,6 @@
     <ClCompile Include="..\..\src\mid_layer\OpenSSLSymmetricEnc.cpp">
       <Filter>Source Files\mid_layer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\mid_layer\Paillier.cpp">
-      <Filter>Source Files\mid_layer</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\primitives\AES_PRG.cpp">
       <Filter>Source Files\primitives</Filter>
     </ClCompile>

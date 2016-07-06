@@ -160,7 +160,6 @@
     <ClCompile Include="..\..\src\mid_layer\DamgardJurikEnc.cpp" />
     <ClCompile Include="..\..\src\mid_layer\ElGamalEnc.cpp" />
     <ClCompile Include="..\..\src\mid_layer\OpenSSLSymmetricEnc.cpp" />
-    <ClCompile Include="..\..\src\mid_layer\Paillier.cpp" />
     <ClCompile Include="..\..\src\primitives\AES_PRG.cpp" />
     <ClCompile Include="..\..\src\primitives\Dlog.cpp" />
     <ClCompile Include="..\..\src\primitives\DlogCryptopp.cpp" />
