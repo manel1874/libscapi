@@ -9,7 +9,7 @@ int mainBristol(string partyNum) {
     int my_num = stoi(partyNum);
 
 
-    int nOTs = 1280000;
+    int nOTs = 12800000;
 
 
     BitVector receiverInput(nOTs);
@@ -20,7 +20,7 @@ int mainBristol(string partyNum) {
 
 
 
-    if (my_num == 0) {
+   /* if (my_num == 0) {
         cout<<"nOTS: "<< nOTs<<endl;
         OTExtensionBristolSender sender(12000,false);
 
@@ -54,7 +54,7 @@ int mainBristol(string partyNum) {
 
 
     cout<<"Done running randomized"<<endl;
-
+*/
 
     if (my_num == 0) {
     	boost::asio::io_service io_service;
@@ -78,9 +78,9 @@ int mainBristol(string partyNum) {
 
 
 		OTBatchSInput * input = new OTExtensionGeneralBristolSInput(x0, x1, nOTs);
+		auto start = scapi_now();
 		auto output = sender.transfer(input);
-
-		((OTExtensionBristolRandomizedSOutput*)output.get())->senderOutputMatrices[0].print_side_by_side(((OTExtensionBristolRandomizedSOutput*)output.get())->senderOutputMatrices[1]);
+		 print_elapsed_ms(start, "Transfer for general");
 
 
         }

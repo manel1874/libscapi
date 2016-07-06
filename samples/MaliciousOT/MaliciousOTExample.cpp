@@ -31,7 +31,7 @@
 void mainR() {
 	// init phase
 	int baseOts = 190;
-	int numOts = 700;
+	int numOts = 12800000;
 	int bitLength = 128;
 	srand(time(NULL));
 	SocketPartyData senderParty(IpAdress::from_string("127.0.0.1"), 7766);
@@ -57,7 +57,9 @@ void mainR() {
 	//run the ot extension as the receiver
 	OTBatchRInput * input = new OTExtensionGeneralRInput(choices, 128);
 	cerr << "started receiver_interface->obliviously_receive()" << endl;
+	auto start = scapi_now();
 	auto output = receiver_interface->transfer(input);
+	print_elapsed_ms(start, "Transfer for general");
 	cerr << "ended receiver_interface->obliviously_receive()" << endl;
 
 	//prepare the out array
@@ -79,7 +81,7 @@ void mainR() {
 void mainS() {
 	// init phase
 	int baseOts = 190;
-	int numOts = 700;
+	int numOts = 12800000;
 	int bitLength = 128;
 	srand(time(NULL));
 	SocketPartyData senderParty(IpAdress::from_string("127.0.0.1"), 7766);
@@ -102,7 +104,9 @@ void mainS() {
 
 	OTBatchSInput * input = new OTExtensionGeneralSInput(X1, X2, numOts);
 	cerr << "started receiver_interface->obliviously_send()" << endl;
+	auto start = scapi_now();
 	sender_interface->transfer(input); //, delta);
+	print_elapsed_ms(start, "Transfer for general");
 	cerr << "ended receiver_interface->obliviously_send()" << endl;
 	//X1.delCBitVector();
 	//X2.delCBitVector();
