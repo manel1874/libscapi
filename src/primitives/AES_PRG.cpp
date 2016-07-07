@@ -216,8 +216,8 @@ PRG_CTR128::PRG_CTR128(int max_size)
 
 PRG_CTR128:: ~PRG_CTR128()
 {
-	_aligned_free(m_buf);
-	_aligned_free(m_ctr);
+	//_aligned_free(m_buf);
+	//_aligned_free(m_ctr);
 }
 
 byte *PRG_CTR128::inc(int size)
