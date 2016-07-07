@@ -35,7 +35,7 @@ AES_PRG::AES_PRG(byte *key, byte *iv,int cahchedSize) : m_ctr128(cahchedSize)
 
 AES_PRG::~AES_PRG()
 {
-    //delete[] m_cachedRandoms;
+    delete[] m_cachedRandoms;
     EVP_CIPHER_CTX_cleanup(&m_enc);
 }
 
@@ -202,7 +202,6 @@ uint32_t AES_PRG::getRandom()
 PRG_CTR128::PRG_CTR128(int max_size)
 {
     m_max_size = max_size;
-    m_buf = new byte[16*max_size](); //initialize to zero
     #ifndef _WIN32
         m_buf = (byte*)memalign(16*max_size, 16);
         m_ctr = (byte*)memalign(16, 16);
@@ -217,8 +216,8 @@ PRG_CTR128::PRG_CTR128(int max_size)
 
 PRG_CTR128:: ~PRG_CTR128()
 {
-	//_aligned_free(m_buf);
-	//_aligned_free(m_ctr);
+	_aligned_free(m_buf);
+	_aligned_free(m_ctr);
 }
 
 byte *PRG_CTR128::inc(int size)

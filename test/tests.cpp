@@ -796,17 +796,6 @@ TEST_CASE("symmetric encryption")
 
 
 
-TEST_CASE("AES_PRG")
-{
-	SECTION("sanity")
-	{
-		AES_PRG prgKeyEncrypt;
-        uint32_t test = prgKeyEncrypt.getRandom();
-        uint32_t test2 = prgKeyEncrypt.getRandom();
-     	REQUIRE(test!=test2);
-	}
-}
-
 TEST_CASE("asymmetric encryption")
 {
 	SECTION("El Gamal on group element")
