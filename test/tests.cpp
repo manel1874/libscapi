@@ -653,6 +653,29 @@ TEST_CASE("Gates and Wires", "") {
 	}
 }
 
+TEST_CASE("AES PRG")
+{
+	SECTION("Check seeds values with key init")
+	{
+		byte key[3] = {0x00,0x12,0x00};
+	    AES_PRG prg1(key,1000);
+	    AES_PRG prg2(key,1000);
+	    uint32_t prgVal1 = prg1.getRandom();
+	    uint32_t prgVal2 = prg2.getRandom();
+	    REQUIRE(prgVal1 == prgVal2);
+	}
+	SECTION("Check seeds values with default key")
+	{
+	    AES_PRG prg1;
+	    AES_PRG prg2;
+	    byte *prgVal1 = prg1.getRandomBytes();
+	    byte *prgVal2 = prg2.getRandomBytes();
+	    REQUIRE(prgVal1[0] == prgVal2[0]);
+	    REQUIRE(prgVal1[1500] == prgVal2[1500]);
+	    REQUIRE(prgVal1[28000] == prgVal2[28000]);  	
+	}
+}
+
 TEST_CASE("serialization", "[SerializedData, CmtCCommitmentMsg]")
 {
 	SECTION("CmtPedersenCommitmentMessage") {
