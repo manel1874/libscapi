@@ -24,9 +24,9 @@ AES_PRG::AES_PRG(byte *key, byte *iv,int cahchedSize) : m_ctr128(cahchedSize)
     EVP_CIPHER_CTX_init(&m_enc);
     EVP_EncryptInit(&m_enc, EVP_aes_128_ecb(),m_key, m_iv);
     #ifndef _WIN32
-        m_cachedRandoms = (byte*)memalign(m_cahchedSize*16,m_cahchedSize*16);
+        m_cachedRandoms = (byte*)memalign(m_cahchedSize*16, 16);
     #else
-    m_cachedRandoms = (byte*)_aligned_malloc(m_cahchedSize*16,m_cahchedSize*16);
+    m_cachedRandoms = (byte*)_aligned_malloc(m_cahchedSize*16, 16);
     #endif
     m_isKeySet = true;
     prepare(1);
@@ -35,7 +35,7 @@ AES_PRG::AES_PRG(byte *key, byte *iv,int cahchedSize) : m_ctr128(cahchedSize)
 
 AES_PRG::~AES_PRG()
 {
-    delete [] m_cachedRandoms;
+    delete[] m_cachedRandoms;
     EVP_CIPHER_CTX_cleanup(&m_enc);
 }
 
@@ -202,31 +202,22 @@ uint32_t AES_PRG::getRandom()
 PRG_CTR128::PRG_CTR128(int max_size)
 {
     m_max_size = max_size;
-#ifndef _WIN32
-    m_buf = (byte*)memalign(16*max_size, 16*max_size);
-    m_ctr = (byte*)memalign(16, 16);
-#else
-    m_buf = (byte*)_aligned_malloc(16*max_size, 16);
+    #ifndef _WIN32
+        m_buf = (byte*)memalign(16*max_size, 16);
+        m_ctr = (byte*)memalign(16, 16);
+    #else
+        m_buf = (byte*)_aligned_malloc(16*max_size, 16);
         m_ctr = (byte*)_aligned_malloc(16, 16);
-#endif
-    for(int i=0;i<16;i++)
+    #endif
+    for(int i=0; i<16; i++)
         m_ctr[i] = 0x00;
-    m_CONST_ONE = _mm_set_epi64x(1,1);
+    m_CONST_ONE = _mm_set_epi64x(1, 1);
 }
 
 PRG_CTR128:: ~PRG_CTR128()
 {
-    #ifndef _WIN32
-        if(!m_buf)
-            delete [] m_buf;
-        if(!m_ctr)
-            delete [] m_ctr;
-    #else
-        if(!m_buf)
-            _aligned_free(m_buf);
-        if(!m_ctr)
-        _aligned_free(m_ctr);
-    #endif
+	//_aligned_free(m_buf);
+	//_aligned_free(m_ctr);
 }
 
 byte *PRG_CTR128::inc(int size)
