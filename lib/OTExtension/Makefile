@@ -40,7 +40,7 @@ INCLUDE=-I.. $(MIRACL_PATH)
 all: ${OT_LIBRARY}
 
 otlib: ${OBJECTS_UTIL} ${OBJECTS_OT}
-	${CXX} ${SHARED_LIB_OPT} -o libOTExtension${SHARED_LIB_EXT} \
+	${CXX} ${SHARED_LIB_OPT} -o libOTExtension${SHARED_LIB_EXT} ${COMPILER_OPTIONS}\
 	${OBJECTS_UTIL} ${OBJECTS_OT} ${MIRACL_PATH} ${LIBRARIES} ${LIBRARIES_DIR}
 	ar ru libOTExtension.a ${OBJECTS_UTIL} ${OBJECTS_OT} 
 	ranlib libOTExtension.a

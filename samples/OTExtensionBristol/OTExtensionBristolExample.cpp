@@ -21,7 +21,7 @@ int mainBristol(string partyNum) {
 
 
 
-   if (my_num == 0) {
+  if (my_num == 0) {
         cout<<"nOTS: "<< nOTs<<endl;
         OTExtensionBristolSender sender(12000,true);
 
@@ -53,7 +53,7 @@ int mainBristol(string partyNum) {
 
 
     cout<<"Done running randomized"<<endl;
-
+ /*
 
     if (my_num == 0) {
     	boost::asio::io_service io_service;
@@ -113,8 +113,8 @@ int mainBristol(string partyNum) {
 
 
 	}
-
-    int size = 128;
+*/
+    int size = 1280000;
     SocketPartyData senderParty(IpAdress::from_string("127.0.0.1"), 7766);
     if (my_num == 0) {
 

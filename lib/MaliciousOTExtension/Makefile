@@ -54,7 +54,7 @@ INCLUDE=-I.. $(OPENSSL_INCLUDES) $(MIRACL_INCLUDES)
 all: otlib
 
 otlib: ${OBJECTS_UTIL} ${OBJECTS_OT}
-	${CXX} ${SHARED_LIB_OPT} -o libMaliciousOTExtension${SHARED_LIB_EXT} ${DEBUG_OPTIONS} \
+	${CXX} ${SHARED_LIB_OPT} -o libMaliciousOTExtension${SHARED_LIB_EXT} ${DEBUG_OPTIONS} ${COMPILER_OPTIONS} \
 	${OBJECTS_UTIL} ${OBJECTS_OT} ${LIBRARIES_DIR} ${LIBRARIES}
 	ar ru libMaliciousOTExtension.a ${OBJECTS_UTIL} ${OBJECTS_OT} 
 	ranlib libMaliciousOTExtension.a
