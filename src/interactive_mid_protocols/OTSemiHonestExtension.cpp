@@ -215,7 +215,9 @@ void OTSemiHonestExtensionSender::runOtAsSender(vector<byte> x1, vector<byte> x2
 	}
 	//else if(ver==R_OT){} no need to set any values. There is no input for x0 and x1 and no input for delta
 	//run the ot extension as the sender
+	auto start = scapi_now();
 	ObliviouslySend(senderPtr, X1, X2, numOfOts, bitLength, ver, delta);
+	print_elapsed_ms(start, "just transfer semi-honest general : the function ObliviouslySend ");
 	
 	if (ver != semihonestot::G_OT) {//we need to copy x0 and x1 
 		//get the values from the ot and copy them to x1Arr, x2Arr wich later on will be copied to the java values x1 and x2
@@ -404,7 +406,9 @@ vector<byte> OTSemiHonestExtensionReceiver::runOtAsReceiver(vector<byte> sigma, 
 	}
 
 	//run the ot extension as the receiver
+	auto start = scapi_now();
 	ObliviouslyReceive(choices, response, numOfOts, bitLength, ver);
+	print_elapsed_ms(start, "Transfer for general semi-honest : ObliviouslyReceive");
 
 	vector<byte> output;
 	//prepare the out array

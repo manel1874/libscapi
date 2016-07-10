@@ -26,7 +26,7 @@ OBJ_FILES     := $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES))
 OBJ_FILES     += $(patsubst src/%.c,obj/%.o,$(C_FILES))
 OUT_DIR        = obj obj/mid_layer obj/circuits obj/comm obj/infra obj/interactive_mid_protocols obj/primitives obj/circuits_c
 INC            = -I../boost_1_60_0 -Ilib -Iinstall/include -Ilib/OTExtensionBristol 
-CPP_OPTIONS   := -std=c++11 $(INC)  -maes -mpclmul -Wall -fPIC
+CPP_OPTIONS   := -std=c++11 $(INC)  -maes -mpclmul -Wall -fPIC -O3
 $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
 LINKER_OPTIONS = $(INCLUDE_ARCHIVES_START) install/lib/libOTExtensionBristol.a install/lib/libsimpleot.a install/lib/libntl.a install/lib/libmiracl.a -lpthread -lgmp -lcrypto -lssl -lboost_system -lboost_thread -lOTExtension -lMaliciousOTExtension -ldl $(INCLUDE_ARCHIVES_END)
 LIBRARIES_DIR  = -L../boost_1_60_0/stage/lib -Linstall/lib
@@ -47,7 +47,7 @@ $(SLib): $(OBJ_FILES)
 obj/circuits/%.o: src/circuits/%.cpp
 	g++ -c $(CPP_OPTIONS) -o $@ $< 	 
 obj/circuits_c/%.o: src/circuits_c/%.c
-	gcc -fPIC -mavx -maes -mpclmul -DRDTSC -DTEST=AES128 -O3 -c -o $@ $< 
+	gcc -fPIC -mavx -maes -mpclmul -DRDTSC -DTEST=AES128  -c -o $@ $< 
 obj/comm/%.o: src/comm/%.cpp
 	g++ -c $(CPP_OPTIONS) -o $@ $< 	 
 obj/infra/%.o: src/infra/%.cpp

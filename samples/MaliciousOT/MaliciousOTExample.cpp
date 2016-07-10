@@ -31,7 +31,7 @@
 void mainR() {
 	// init phase
 	int baseOts = 190;
-	int numOts = 12800000;
+	int numOts = 128000;
 	int bitLength = 128;
 	srand(time(NULL));
 	SocketPartyData senderParty(IpAdress::from_string("127.0.0.1"), 7766);
@@ -81,7 +81,7 @@ void mainR() {
 void mainS() {
 	// init phase
 	int baseOts = 190;
-	int numOts = 12800000;
+	int numOts = 128000;
 	int bitLength = 128;
 	srand(time(NULL));
 	SocketPartyData senderParty(IpAdress::from_string("127.0.0.1"), 7766);
