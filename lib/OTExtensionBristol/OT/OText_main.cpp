@@ -44,7 +44,7 @@ void* run_otext_thread(void* ptr)
 }
 
 
-int main2(int argc, const char** argv)
+int main(int argc, const char** argv)
 {
     ezOptionParser opt;
 
