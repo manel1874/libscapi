@@ -1,7 +1,6 @@
 //
 // Created by liork on 30/05/16.
 //
-
 #ifndef SCAPIPRG_PRG_HPP
 #define SCAPIPRG_PRG_HPP
 
@@ -11,6 +10,7 @@
 #include <emmintrin.h>
 #include <malloc.h>
 #include "Prg.hpp"
+#include <bitset>
 
 
 using namespace std;
@@ -18,32 +18,7 @@ using namespace std;
 typedef unsigned char byte;
 typedef __m128i block;
 
-#define DEFAULT_CACHE_SIZE 60000
-
-
-/*
- * Helper class for the AES_PRG
- */
-class PRG_CTR128
-{
-public:
-    PRG_CTR128(int max_size);
-    ~PRG_CTR128();
-    byte *inc(int size);
-
-private:
-    void spillCounter();
-    void recordCounter(int size);
-    void doInc(int size);
-    void AES_ctr128_inc(byte *counter);
-
-
-    byte *m_buf;
-    int m_max_size;
-    byte *m_ctr;
-    block m_CONST_ONE;
-
-};
+#define DEFAULT_CACHE_SIZE 640
 
 
 class AES_PRG : public PseudorandomGenerator
@@ -60,7 +35,7 @@ public:
     AES_PRG(int cahchedSize=DEFAULT_CACHE_SIZE);
     AES_PRG(byte *key,int cahchedSize=DEFAULT_CACHE_SIZE);
     AES_PRG(byte *key, byte *iv,int cahchedSize=DEFAULT_CACHE_SIZE);
-    ~AES_PRG();
+    virtual ~AES_PRG();
 
     /*
      * @return byte* of the random values.
@@ -114,7 +89,7 @@ public:
     * @param outOffset - output offset
     * @param outlen - the required output length
      */
-    void getPRGBytes(vector<byte> & outBytes, int outOffset, int outLen) override;
+	void getPRGBytes(vector<byte> & outBytes, int outOffset, int outlen);
 
     /*
      * @param size - the size og the output vector
@@ -137,25 +112,23 @@ public:
 
 private:
 
-    static unsigned char m_defualtkey[16];
-    static unsigned char m_defaultiv[16];
+    unsigned char m_defualtkey[16] = { 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6,
+		0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c };
+    unsigned char m_defaultiv[16] = { 0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7,
+		0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff };
 
-    PRG_CTR128 m_ctr128;
     EVP_CIPHER_CTX m_enc;
-    byte* m_key;
+	SecretKey *m_key;
+    //byte* m_key;
     int m_cahchedSize;
     byte *m_cachedRandoms;
     byte *m_iv;
-    byte* m_ctr;
+    //byte* m_ctr;
     int m_cachedRandomsIdx;
-    int m_idx;
-    uint32_t *m_pIdx;
-    uint32_t m_u1;
-    uint32_t m_u2;
-    uint32_t m_u3;
-    uint32_t m_u4;
 
     bool m_isKeySet;
+
+	void updateCachedRandomsIdx(int size);
 };
 
 
