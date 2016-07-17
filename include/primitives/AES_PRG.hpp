@@ -35,7 +35,18 @@ public:
     AES_PRG(int cahchedSize=DEFAULT_CACHE_SIZE);
     AES_PRG(byte *key,int cahchedSize=DEFAULT_CACHE_SIZE);
     AES_PRG(byte *key, byte *iv,int cahchedSize=DEFAULT_CACHE_SIZE);
+
+	//move constructor
+	AES_PRG(AES_PRG&& old);
+	//copy constructor
+	AES_PRG(AES_PRG& other);
+
     virtual ~AES_PRG();
+
+	//move assignment
+	AES_PRG& operator=(AES_PRG&& other);
+	//copy assignment
+	AES_PRG& operator=(AES_PRG& other);
 
     /*
      * @return byte* of the random values.
@@ -117,13 +128,12 @@ private:
     unsigned char m_defaultiv[16] = { 0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7,
 		0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff };
 
-    EVP_CIPHER_CTX m_enc;
-	SecretKey *m_key;
-    //byte* m_key;
+    //EVP_CIPHER_CTX* m_enc;
+	shared_ptr<EVP_CIPHER_CTX> m_enc;
+	SecretKey *m_secretKey;
     int m_cahchedSize;
     byte *m_cachedRandoms;
     byte *m_iv;
-    //byte* m_ctr;
     int m_cachedRandomsIdx;
 
     bool m_isKeySet;
@@ -131,5 +141,13 @@ private:
 	void updateCachedRandomsIdx(int size);
 };
 
+class EVP_CIPHER_CTX_DELETER
+{
+public:
+	static void deleter(EVP_CIPHER_CTX* enc)
+	{
+		EVP_CIPHER_CTX_cleanup(enc);
+	}
+};
 
 #endif //SCAPIPRG_PRG_HPP
