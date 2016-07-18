@@ -39,7 +39,6 @@ void HKDF::nextRounds(int outLen, const vector<byte> * iv, int hmacLength, vecto
 	//the result of the current computation
 	byte* currentInBytes = new byte[currentInBytesSize];
 
-	int roundIndex;
 	//for rounds 2 to t 
 	if (iv != NULL)
 		//in case we have an iv. puts it (ctxInfo after the K from the previous round at position hmacLength).
@@ -96,7 +95,7 @@ void HKDF::firstRound(vector<byte>& outBytes, const vector<byte> * iv, vector<by
 
 SecretKey HKDF::deriveKey(const vector<byte> & entropySource, int inOff, int inLen, int outLen, const vector<byte>* iv) {
 	//checks that the offset and length are correct
-	if ((inOff > entropySource.size()) || (inOff + inLen > entropySource.size()))
+	if ((inOff > (int)entropySource.size()) || (inOff + inLen >  (int) entropySource.size()))
 		throw out_of_range("wrong offset for the given input buffer");
 
 	//In order to be thread safe we have to synchronized this function.

@@ -129,15 +129,13 @@ private:
 		0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff };
 
     //EVP_CIPHER_CTX* m_enc;
+	byte *m_iv;
+	int m_cahchedSize;
+	int m_cachedRandomsIdx;
 	shared_ptr<EVP_CIPHER_CTX> m_enc;
+	bool m_isKeySet;
 	SecretKey *m_secretKey;
-    int m_cahchedSize;
     byte *m_cachedRandoms;
-    byte *m_iv;
-    int m_cachedRandomsIdx;
-
-    bool m_isKeySet;
-
 	void updateCachedRandomsIdx(int size);
 };
 

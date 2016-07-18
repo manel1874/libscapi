@@ -358,7 +358,7 @@ shared_ptr<CmtCommitValue> CmtElGamalOnByteArrayReceiver::verifyDecommitment(Cmt
 	const string tmp = decommitment->getXValue();
 	x.assign(tmp.begin(), tmp.end());
 	
-	int len = x.size();
+	size_t len = x.size();
 	auto u = dlog->reconstructElement(true, commitment->getCipher1().get());
 	auto v = commitment->getCipher2();
 	
@@ -374,13 +374,13 @@ shared_ptr<CmtCommitValue> CmtElGamalOnByteArrayReceiver::verifyDecommitment(Cmt
 	auto c2 = kdf->deriveKey(hToRBytes, 0, hToRBytes.size(), len).getEncoded();
 	
 	//Xores the result from the kdf with the plaintext.
-	for (int i = 0; i<len; i++) {
+	for (size_t i = 0; i<len; i++) {
 		c2[i] = (byte)(c2[i] ^ x[i]);
 	}
 	
 	bool valid = *u == *gToR;
 	
-	for (int i = 0; i<len; i++) {
+	for (size_t i = 0; i<len; i++) {
 		valid = valid && (v[i] == c2[i]);
 	}
 	

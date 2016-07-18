@@ -118,7 +118,7 @@ bool SigmaDJEncryptedZeroSimulator::checkSoundnessParam(biginteger modulus) {
 */
 bool SigmaDJEncryptedZeroSimulator::checkChallengeLength(vector<byte> challenge) {
 	//If the challenge's length is equal to t, return true. else, return false.
-	return (challenge.size() == (t / 8) ? true : false);
+	return ((int) challenge.size() == (t / 8) ? true : false);
 }
 
 /**

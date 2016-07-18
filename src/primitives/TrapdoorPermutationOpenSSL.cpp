@@ -119,7 +119,7 @@ KeyPair OpenSSLRSAPermutation::generateKey(int keySize) {
 	RSA* pair = RSA_new();
 	BIGNUM* bne = BN_new();
 	BN_set_word(bne, 65537);
-	int ret = RSA_generate_key_ex(pair, keySize, bne, NULL);
+	RSA_generate_key_ex(pair, keySize, bne, NULL);
 	biginteger mod = opensslbignum_to_biginteger(pair->n);
 	biginteger pubExp = opensslbignum_to_biginteger(pair->e);
 	biginteger privExp = opensslbignum_to_biginteger(pair->d);
@@ -200,7 +200,7 @@ TPElement* OpenSSLRSAPermutation::invert(TPElement * tpEl) {
 	string st(encodedBi.get(), encodedBi.get()+encodedSize);
 
 	// invert the RSA permutation on the given bytes.
-	int sucess = RSA_private_decrypt(encodedSize, encodedBi.get(), ret.get(), rsa, RSA_NO_PADDING);
+	RSA_private_decrypt(encodedSize, encodedBi.get(), ret.get(), rsa, RSA_NO_PADDING);
 	biginteger resValue = decodeBigInteger(ret.get(), size);
 	// creates and initialize a RSAElement with the result.
 	RSAElement * returnEl = new RSAElement(modulus, resValue, false);

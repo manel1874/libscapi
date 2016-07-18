@@ -30,7 +30,6 @@
 
 void SigmaOrTwoSecondMsg::initFromString(const string & s) {
 	auto str_vec = explode(s, ':');
-	int len = str_vec.size();
 	assert(str_vec.size() == 4);
 	z0->initFromString(str_vec[0]);
 	e0.assign(str_vec[1].begin(), str_vec[1].end());

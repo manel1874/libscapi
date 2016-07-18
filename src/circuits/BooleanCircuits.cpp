@@ -90,7 +90,7 @@ int Gate::calculateIndexOfTruthTable(map<int, Wire> computedWires) const {
 	int truthTableIndex = 0;
 	int numberOfInputs = inputWireIndices.size();
 	for (int i = numberOfInputs - 1, j = 0; j < numberOfInputs; i--, j++) 
-		truthTableIndex += computedWires[inputWireIndices[i]].getValue() * pow(2, j);
+		truthTableIndex += (int) computedWires[inputWireIndices[i]].getValue() * pow(2, j);
 	return truthTableIndex;
 }
 
@@ -158,7 +158,7 @@ BooleanCircuit::BooleanCircuit(scannerpp::Scanner s) {
 		*/
 		vector<bool> truthTable;
 		string tTable = read(s);
-		for (int j = 0; j < tTable.length(); j++) {
+		for (size_t j = 0; j < tTable.length(); j++) {
 			if (tTable.at(j) == '1') 
 				truthTable.push_back(true);
 			else 
@@ -221,7 +221,7 @@ bool BooleanCircuit::operator==(const BooleanCircuit &other) const {
 	}
 	// calls the equals method of the Gate class to compare each corresponding Gate. 
 	// if any of them return false, the circuits are not the same.
-	for (int i = 0; i < getGates().size(); i++) 
+	for (size_t i = 0; i < getGates().size(); i++) 
 		if ( getGates()[i]!= other.getGates()[i] )
 			return false;
 
@@ -239,7 +239,7 @@ int BooleanCircuit::getNumberOfInputs(int partyNumber) const {
 	if (partyNumber < 1 || partyNumber > numberOfParties)
 		throw NoSuchPartyException("wrong number of party. got: " + to_string(partyNumber));
 	// we subtract one from the party number since the parties are indexed beginning from one, but the ArrayList is indexed from 0
-	return eachPartysInputWires[partyNumber - 1].size();
+	return (int) eachPartysInputWires[partyNumber - 1].size();
 }
 
 string BooleanCircuit::read(scannerpp::Scanner s) {

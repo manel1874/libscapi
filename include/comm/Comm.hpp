@@ -153,9 +153,9 @@ public:
 	virtual ~CommPartyTCPSynced(); 
 
 private:
-	tcp::acceptor acceptor_;
 	boost::asio::io_service& ioServiceServer;
 	boost::asio::io_service& ioServiceClient;
+	tcp::acceptor acceptor_;
 	tcp::socket serverSocket;
 	tcp::socket clientSocket;
 	SocketPartyData me;
@@ -178,9 +178,9 @@ public:
 	virtual ~CommPartyTcpSslSynced();
 
 private:
-	tcp::acceptor acceptor_;
 	boost::asio::io_service& ioServiceServer;
 	boost::asio::io_service& ioServiceClient;
+	tcp::acceptor acceptor_;
 	ssl_socket* serverSocket;
 	ssl_socket* clientSocket;
 	SocketPartyData me;

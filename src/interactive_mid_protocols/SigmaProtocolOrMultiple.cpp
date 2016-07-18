@@ -58,20 +58,20 @@ shared_ptr<SigmaCommonInput> SigmaOrMultipleProverInput::getCommonInput() {
 string SigmaOrMultipleSecondMsg::toString() {
 	string output = to_string(polynomial.size());
 	output += ":";
-	for (int i = 0; i < polynomial.size(); i++) {
+	for (size_t i = 0; i < polynomial.size(); i++) {
 		const byte * poly = polynomial[i].data();
 		output += string(reinterpret_cast<char const*>(poly), polynomial[i].size());
 		output += ":";
 	}
 	output += to_string(z.size());
 	output += ":";
-	for (int i = 0; i < z.size(); i++) {
+	for (size_t i = 0; i < z.size(); i++) {
 		output += z[i]->toString();
 		output += ":";
 	}
 	output += to_string(challenges.size());
 	output += ":";
-	for (int i = 0; i < challenges.size(); i++) {
+	for (size_t i = 0; i < challenges.size(); i++) {
 		const byte * challenge = challenges[i].data();
 		output += string(reinterpret_cast<char const*>(challenge), challenges[i].size());
 		output += ":";
@@ -524,7 +524,7 @@ shared_ptr<SigmaSimulator> SigmaOrMultipleProverComputation::getSimulator() {
 */
 SigmaOrMultipleVerifierComputation::SigmaOrMultipleVerifierComputation(vector<shared_ptr<SigmaVerifierComputation>> verifiers, int t) {
 	//If the given t is different from one of the underlying object's t values, throw exception.
-	for (int i = 0; i < verifiers.size(); i++) {
+	for (size_t i = 0; i < verifiers.size(); i++) {
 		if (t != verifiers[i]->getSoundnessParam()) {
 			throw invalid_argument("the given t does not equal to one of the t values in the underlying verifiers objects.");
 		}

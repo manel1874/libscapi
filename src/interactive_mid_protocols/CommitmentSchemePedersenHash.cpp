@@ -63,7 +63,7 @@ string CmtPedersenHashDecommitmentMessage::toString() {
 */
 CmtPedersenHashCommitter::CmtPedersenHashCommitter(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash) : CmtPedersenCommitterCore(channel, dlog) {
 
-	if (hash->getHashedMsgSize() > bytesCount(dlog->getOrder())) {
+	if (hash->getHashedMsgSize() > (int)bytesCount(dlog->getOrder())) {
 		throw invalid_argument("The size in bytes of the resulting hash is bigger than the size in bytes of the order of the DlogGroup.");
 	}
 	this->hash = hash;
@@ -147,7 +147,7 @@ vector<byte> CmtPedersenHashCommitter::generateBytesFromCommitValue(CmtCommitVal
 */
 CmtPedersenHashReceiver::CmtPedersenHashReceiver(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash) : CmtPedersenReceiverCore(channel, dlog) {
 
-	if (hash->getHashedMsgSize() > bytesCount(dlog->getOrder())) {
+	if (hash->getHashedMsgSize() > (int) bytesCount(dlog->getOrder())) {
 		throw invalid_argument("The size in bytes of the resulting hash is bigger than the size in bytes of the order of the DlogGroup.");
 	}
 	this->hash = hash;

@@ -38,8 +38,8 @@ AES_PRG::AES_PRG(byte *key, byte *iv, int cahchedSize)
 }
 
 AES_PRG::AES_PRG(AES_PRG && old):
-        m_enc(old.m_enc), m_secretKey(old.m_secretKey), m_cahchedSize(old.m_cahchedSize), m_cachedRandoms(old.m_cachedRandoms),
-        m_iv(old.m_iv), m_cachedRandomsIdx(old.m_cachedRandomsIdx), m_isKeySet(old.m_isKeySet)
+		m_iv(old.m_iv), m_cahchedSize(old.m_cahchedSize), m_cachedRandomsIdx(old.m_cachedRandomsIdx), 
+		m_enc(old.m_enc), m_isKeySet(old.m_isKeySet), m_secretKey(old.m_secretKey),  m_cachedRandoms(old.m_cachedRandoms)
 {
     old.m_secretKey = nullptr;
     old.m_cachedRandoms = nullptr;
@@ -47,7 +47,7 @@ AES_PRG::AES_PRG(AES_PRG && old):
 }
 
 AES_PRG::AES_PRG(AES_PRG & other): m_iv(nullptr), m_cahchedSize(other.m_cahchedSize),
-                                   m_cachedRandomsIdx(other.m_cachedRandomsIdx), m_isKeySet(other.m_isKeySet), m_enc(other.m_enc)
+                                   m_cachedRandomsIdx(other.m_cachedRandomsIdx),  m_enc(other.m_enc)
 {
     //secret key
     byte* tempKey = &vector<byte>()[0];

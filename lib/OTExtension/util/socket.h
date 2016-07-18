@@ -20,8 +20,8 @@ namespace semihonestot {
 		BOOL Socket()
 		{
 			BOOL success = false;
-			BOOL bOptVal = true;
-			int bOptLen = sizeof(BOOL);
+			//BOOL bOptVal = true;
+			//int bOptLen = sizeof(BOOL);
 
 #ifdef WIN32
 			static BOOL s_bInit = FALSE;
@@ -184,7 +184,6 @@ namespace semihonestot {
 #else
 
 			timeval	tv;
-			socklen_t len;
 
 			if (lTOSMilisec > 0)
 			{

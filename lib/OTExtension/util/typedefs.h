@@ -17,19 +17,19 @@
 #include <openssl/aes.h>
 namespace semihonestot {
 
-	static int CEIL_LOG2(int bits)
-	{
-		int targetlevel = 0, bitstemp = bits;
-		while (bitstemp >>= 1) ++targetlevel;
-		return targetlevel + ((1 << targetlevel) > bits);
-	}
+	//static int CEIL_LOG2(int bits)
+	//{
+	//	int targetlevel = 0, bitstemp = bits;
+	//	while (bitstemp >>= 1) ++targetlevel;
+	//	return targetlevel + ((1 << targetlevel) > bits);
+	//}
 
-	static int FLOOR_LOG2(int bits)
-	{
-		int targetlevel = 0;
-		while (bits >>= 1) ++targetlevel;
-		return targetlevel;
-	}
+	//static int FLOOR_LOG2(int bits)
+	//{
+	//	int targetlevel = 0;
+	//	while (bits >>= 1) ++targetlevel;
+	//	return targetlevel;
+	//}
 
 	//static double getMillies(timeval timestart, timeval timeend)
 	//{
@@ -99,7 +99,7 @@ namespace semihonestot {
 #define OTEXT_HASH_FINAL(sha, sha_buf) SHA_Final(sha_buf, sha)
 
 	const BYTE ZERO_IV[AES_BYTES] = { 0 };
-	static int otextaesencdummy;
+	//static int otextaesencdummy;
 
 #define OTEXT_AES_KEY_INIT(ctx, buf) { \
 	EVP_CIPHER_CTX_init(ctx); \

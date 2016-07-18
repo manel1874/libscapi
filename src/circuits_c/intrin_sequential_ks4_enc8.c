@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <wmmintrin.h>
+#include <inttypes.h>
 
 #if defined(__INTEL_COMPILER)
 # include <ia32intrin.h> 
@@ -105,7 +106,7 @@ typedef struct KEY_SCHEDULE
 void print128_num(__m128i var) 
 {
     int64_t *v64val = (int64_t*) &var;
-    printf("%.16llx %.16llx\n", v64val[1], v64val[0]);
+    printf("%.16" PRIu64 "%.16" PRIu64 "\n", v64val[1], v64val[0]);
 }
 
 //#pragma intrinsic( _mm_lddqu_si128 )

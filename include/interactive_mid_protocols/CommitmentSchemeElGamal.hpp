@@ -105,7 +105,7 @@ public:
 		auto vec = explode(s, ':');
 		id = stol(vec[0]);
 		string inner = "";
-		for (int i = 0; i < vec.size() - 1; i++) {
+		for (size_t i = 0; i < vec.size() - 1; i++) {
 			inner += vec[1 + i];
 			inner += ":";
 		}

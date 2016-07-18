@@ -19,7 +19,7 @@ namespace semihonestot {
 
 	public:
 		MaskingFunction() {};
-		~MaskingFunction() {};
+		virtual ~MaskingFunction() {};
 
 		virtual void	Mask(int progress, int len, CBitVector* values, CBitVector& snd_buf, CBitVector& delta) = 0;
 		virtual void 	UnMask(int progress, int len, CBitVector& choices, CBitVector& output, CBitVector& rcv_buf) = 0;

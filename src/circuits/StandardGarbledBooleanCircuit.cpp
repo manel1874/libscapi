@@ -350,7 +350,6 @@ bool StandardGarbledBooleanCircuit::internalVerify(block *bothInputKeys, block *
 		bool isK1Set = false;
 
 		for (int firstIndex = 0; firstIndex<2; firstIndex++){
-			block A = input0Both[firstIndex];
 			//get the signal bit of A from the pre-claculated array
 			int a = wire0signalBitsArray[firstIndex];
 			for (int secondIndex = 0; secondIndex<2; secondIndex++){
@@ -359,8 +358,6 @@ bool StandardGarbledBooleanCircuit::internalVerify(block *bothInputKeys, block *
 				r = garbledGates[i].truthTableBits[2 * firstIndex + secondIndex];
 
 				int rowIndex;//the row in the current garbled table 
-
-				block B = input1Both[secondIndex];
 
 				//get the signal bit of A from the pre-claculated array
 				int b = wire1signalBitsArray[secondIndex];

@@ -117,7 +117,7 @@ shared_ptr<SymmetricCiphertext> OpenSSLEncWithIVAbs::encrypt(Plaintext* plaintex
 		throw IllegalStateException("no SecretKey was set");
 	}
 	//Check validity of IV's length:
-	if (iv.size() != getIVSize()) {
+	if ((int) iv.size() != getIVSize()) {
 		throw out_of_range("The length of the IV passed is not equal to the block size of current PRP");
 	}
 

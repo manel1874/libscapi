@@ -110,7 +110,7 @@ shared_ptr<GroupElement> DlogGroup::GroupElementsExponentiations::getExponentiat
 	* and continue the calculations from there.
 	*/
 	// find the the closest power 2 exponent
-	int index = find_log2_floor(size);
+	size_t index = find_log2_floor(size);
 
 	shared_ptr<GroupElement> exponent = NULL;
 	/* if the requested index out of the vector bounds, the exponents have not been calculated yet, so calculates them.*/
@@ -154,8 +154,8 @@ shared_ptr<GroupElement> DlogGroup::createRandomGenerator() {
 shared_ptr<GroupElement> DlogGroup::computeLoop(vector<biginteger> exponentiations, int w,
 	int h, vector<vector<shared_ptr<GroupElement>>> preComp, shared_ptr<GroupElement> result, int bitIndex){
 	int e = 0;
-	for (int k = 0; k<h; k++) {
-		for (int i = k*w; i<(k * w + w); i++) {
+	for (size_t k = 0; (int) k<h; k++) {
+		for (size_t i = k*w; i<(k * w + w); i++) {
 			if (i < exponentiations.size()) {
 				//if the bit is set, change the e value
 				if (boost::multiprecision::bit_test(exponentiations[i], bitIndex)){
@@ -184,7 +184,7 @@ vector<vector<shared_ptr<GroupElement>>> DlogGroup::createLLPreCompTable(
 
 
 	shared_ptr<GroupElement> base = NULL;
-	int baseIndex;
+	size_t baseIndex;
 
 	//fill the table
 	for (int k = 0; k<h; k++) {
@@ -283,7 +283,7 @@ shared_ptr<GroupElement> DlogGroup::computeLL(
 
     //get the biggest exponent
 	biginteger bigExp = 0;
-	for (int i = 0; i<exponentiations.size(); i++)
+	for (size_t i = 0; i<exponentiations.size(); i++)
 		if (bigExp < exponentiations[i])
 			bigExp = exponentiations[i];
 

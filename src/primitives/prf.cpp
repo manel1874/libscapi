@@ -31,9 +31,9 @@
 void PrpFromPrfFixed::computeBlock(const vector<byte> & inBytes, int inOff, int inLen, vector<byte>& outBytes, int outOff, int outLen) {
 	if (!isKeySet())
 		throw IllegalStateException("secret key isn't set");
-	if ((inOff > inBytes.size()) || (inOff + inLen > inBytes.size()))
+	if ((inOff > (int)inBytes.size()) || (inOff + inLen > (int)inBytes.size()))
 		throw out_of_range("wrong offset for the given input buffer");
-	if ((outOff > outBytes.size()) || (outOff + outLen > outBytes.size()))
+	if ((outOff > (int)outBytes.size()) || (outOff + outLen > (int)outBytes.size()))
 		throw out_of_range("wrong offset for the given output buffer");
 
 	// if the input and output length are equal to the blockSize, call the computeBlock that doesn't take length arguments.
@@ -46,9 +46,9 @@ void PrpFromPrfFixed::computeBlock(const vector<byte> & inBytes, int inOff, int 
 void PrpFromPrfFixed::computeBlock(const vector<byte> & inBytes, int inOff, int inLen, vector<byte>& outBytes, int outOff) {
 	if (!isKeySet())
 		throw IllegalStateException("secret key isn't set");
-	if ((inOff > inBytes.size()) || (inOff + inLen > inBytes.size()))
+	if ((inOff > (int)inBytes.size()) || (inOff + inLen > (int)inBytes.size()))
 		throw out_of_range("wrong offset for the given input buffer");
-	if ((outOff > outBytes.size()) || (outOff + getBlockSize() > outBytes.size()))
+	if ((outOff > (int)outBytes.size()) || (outOff + getBlockSize() > (int)outBytes.size()))
 		throw out_of_range("wrong offset for the given output buffer");
 
 	// if the input and output length are equal to the blockSize, call the computeBlock that doesn't take length arguments.
@@ -61,9 +61,9 @@ void PrpFromPrfFixed::computeBlock(const vector<byte> & inBytes, int inOff, int 
 void PrpFromPrfFixed::invertBlock(const vector<byte> & inBytes, int inOff, vector<byte>& outBytes, int outOff, int len) {
 	if (!isKeySet())
 		throw IllegalStateException("secret key isn't set");
-	if ((inOff > inBytes.size()) || (inOff + len > inBytes.size()))
+	if ((inOff > (int)inBytes.size()) || (inOff + len > (int)inBytes.size()))
 		throw out_of_range("wrong offset for the given input buffer");
-	if ((outOff > outBytes.size()) || (outOff + len > outBytes.size()))
+	if ((outOff > (int)outBytes.size()) || (outOff + len > (int)outBytes.size()))
 		throw out_of_range("wrong offset for the given output buffer");
 	// checks that the offset and length are correct 
 	if (len == getBlockSize())//the length is correct
@@ -80,9 +80,9 @@ void IteratedPrfVarying::computeBlock(const vector<byte> & inBytes, int inOff, i
 		throw invalid_argument("secret key isn't set");
 	
 	// checks that the offset and length are correct 
-	if ((inOff > inBytes.size()) || (inOff + inLen > inBytes.size()))
+	if ((inOff > (int)inBytes.size()) || (inOff + inLen >(int)inBytes.size()))
 		throw out_of_range("wrong offset for the given input buffer");
-	if ((outOff > outBytes.size()) || (outOff + outLen > outBytes.size()))
+	if ((outOff > (int)outBytes.size()) || (outOff + outLen >(int)outBytes.size()))
 		throw out_of_range("wrong offset for the given output buffer");
 
 	int prfLength = prfVaryingInputLength->getBlockSize(); // the output size of the prfVaryingInputLength
@@ -124,9 +124,9 @@ LubyRackoffPrpFromPrfVarying::LubyRackoffPrpFromPrfVarying(PrfVaryingIOLength * 
 void LubyRackoffPrpFromPrfVarying::computeBlock(const vector<byte> & inBytes, int inOff, int inLen, vector<byte>& outBytes, int outOff) {
 	if (!isKeySet())
 		throw IllegalStateException("secret key isn't set");
-	if ((inOff > inBytes.size()) || (inOff + inLen > inBytes.size()))
+	if ((inOff > (int)inBytes.size()) || (inOff + inLen > (int)inBytes.size()))
 		throw out_of_range("wrong offset for the given input buffer");
-	if ((outOff > outBytes.size()) || (outOff + inLen > outBytes.size()))
+	if ((outOff > (int)outBytes.size()) || (outOff + inLen > (int)outBytes.size()))
 		throw out_of_range("wrong offset for the given output buffer");
 	if (inLen % 2 != 0) // checks that the input is of even length.
 		throw invalid_argument("Length of input must be even");
@@ -177,15 +177,16 @@ void LubyRackoffPrpFromPrfVarying::computeBlock(const vector<byte> & inBytes, in
 	outBytes.insert(outBytes.begin() + outOff, leftCurrent->begin(), leftCurrent->begin() + (inLen / 2));
 	outBytes.insert(outBytes.begin() + outOff+inLen/2, rightCurrent->begin(), rightCurrent->begin() + (inLen / 2));
 
-	delete leftCurrent, leftNext, rightCurrent, rightNext; // no need to delete tmpRefernece points to rightNext
+	delete leftCurrent; delete leftNext;
+	delete rightCurrent; delete rightNext; // no need to delete tmpRefernece points to rightNext
 }
 
 void LubyRackoffPrpFromPrfVarying::invertBlock(const vector<byte> & inBytes, int inOff, vector<byte>& outBytes, int outOff, int len){
 	if (!isKeySet())
 		throw IllegalStateException("secret key isn't set");
-	if ((inOff > inBytes.size()) || (inOff + len  > inBytes.size()))
+	if ((inOff > (int)inBytes.size()) || (inOff + len  > (int)inBytes.size()))
 		throw out_of_range("wrong offset for the given input buffer");
-	if ((outOff > outBytes.size()) || (outOff + len > outBytes.size()))
+	if ((outOff > (int)outBytes.size()) || (outOff + len > (int)outBytes.size()))
 		throw out_of_range("wrong offset for the given output buffer");
 	if (len % 2 != 0) // checks that the input is of even length.
 		throw invalid_argument("Length of input must be even");
@@ -233,7 +234,10 @@ void LubyRackoffPrpFromPrfVarying::invertBlock(const vector<byte> & inBytes, int
 	outBytes.insert(outBytes.begin() + outOff, leftNext->begin(), leftNext->begin()+sideSize);
 	outBytes.insert(outBytes.begin() + outOff + sideSize, rightNext->begin(), rightNext->begin() + sideSize);
 
-	delete leftCurrent, leftNext, rightCurrent, rightNext; // no need to delete tmpRefernece points to rightNext
+	delete leftCurrent;
+	delete leftNext;
+	delete rightCurrent;
+	delete rightNext; // no need to delete tmpRefernece points to rightNext
 }
 
 
@@ -247,9 +251,9 @@ void PrpFromPrfVarying::computeBlock(const vector<byte> & inBytes, int inOff, in
 	if (!isKeySet())
 		throw new IllegalStateException("secret key isn't set");
 	// checks that the offsets and lengths are correct 
-	if ((inOff > inBytes.size()) || (inOff + inLen > inBytes.size()))
+	if ((inOff > (int)inBytes.size()) || (inOff + inLen > (int)inBytes.size()))
 		throw out_of_range("wrong offset for the given input buffer");
-	if ((outOff > outBytes.size()) || (outOff + outLen > outBytes.size()))
+	if ((outOff > (int)outBytes.size()) || (outOff + outLen > (int)outBytes.size()))
 		throw out_of_range("wrong offset for the given output buffer");
 
 	//if the input and output lengths are equal, call the computeBlock which takes just one length argument

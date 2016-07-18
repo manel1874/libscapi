@@ -75,7 +75,7 @@ bool OTSemiHonestExtensionSender::Listen()
 		cout << "Receiver connected" << endl;
 		semihonestot::UINT threadID;
 		sock.Receive(&threadID, sizeof(int));
-		if (threadID >= m_nNumOTThreads)
+		if ((int) threadID >= m_nNumOTThreads)
 		{
 			sock.Close();
 			i--;
@@ -182,7 +182,7 @@ shared_ptr<OTBatchSOutput> OTSemiHonestExtensionSender::transfer(OTBatchSInput *
 void OTSemiHonestExtensionSender::runOtAsSender(vector<byte> x1, vector<byte> x2, vector<byte> deltaArr, int numOfOts, int bitLength, string version) {
 	//The masking function with which the values that are sent in the last communication step are processed
 	//Choose OT extension version: G_OT, C_OT or R_OT
-	semihonestot::BYTE ver;
+	semihonestot::BYTE ver=0;
 	// supports all of the SHA hashes. Get the name of the required hash and instanciate that hash.
 	if (version=="general")
 		ver = semihonestot::G_OT;
@@ -241,7 +241,6 @@ void OTSemiHonestExtensionSender::runOtAsSender(vector<byte> x1, vector<byte> x2
 bool OTSemiHonestExtensionSender::ObliviouslySend(semihonestot::OTExtensionSender* sender, semihonestot::CBitVector& X1, semihonestot::CBitVector& X2, int numOTs, int bitlength, byte version, semihonestot::CBitVector& delta)
 {
 	bool success = FALSE;
-	int nSndVals = 2; //Perform 1-out-of-2 OT
 	// Execute OT sender routine 	
 	success = sender->send(numOTs, bitlength, X1, X2, delta, version, m_nNumOTThreads, m_fMaskFct);
 	return success;
@@ -268,7 +267,6 @@ bool OTSemiHonestExtensionBase::Init(int numOfThreads)
 }
 
 bool OTSemiHonestExtensionReceiver::Connect(){
-	bool bFail = false;
 	semihonestot::LONG lTO = CONNECT_TIMEO_MILISEC;
 	//cout << "connecting to addr: " << m_nAddr << " port: " << m_nPort << endl;
 	for (int k = m_nNumOTThreads - 1; k >= 0; k--)
@@ -373,8 +371,6 @@ shared_ptr<OTBatchROutput> OTSemiHonestExtensionReceiver::transfer(OTBatchRInput
 	int numOfOts = ((OTExtensionRInput *)input)->getSigmaArrSize();
 	int elementSize = ((OTExtensionRInput *)input)->getElementSize();
 
-	int outbytesLength = numOfOts*elementSize / 8;
-	
 	// run the protocol using the native code in the dll.
 	vector<byte> output = runOtAsReceiver(sigmaArr, numOfOts, elementSize, version);
 	return make_shared<OTOnByteArrayROutput>(output);

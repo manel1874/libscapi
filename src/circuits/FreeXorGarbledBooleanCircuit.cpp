@@ -412,7 +412,6 @@ bool FreeXorGarbledBooleanCircuit::internalVerify(block *bothInputKeys, block *e
 			bool isK1Set = false;
 
 			for (int firstIndex = 0; firstIndex < 2; firstIndex++){
-				block A = input0Both[firstIndex];
 				//get the signal bit of A from the pre-claculated array
 				int a = wire0signalBitsArray[firstIndex];
 
@@ -421,7 +420,6 @@ bool FreeXorGarbledBooleanCircuit::internalVerify(block *bothInputKeys, block *e
 					//check the result for the indices firstIndex and secondIndex in the truth table of the gate
 					r = garbledGates[i].truthTableBits[2 * firstIndex + secondIndex];
 
-					block B = input1Both[secondIndex];
 					//get the signal bit of A from the pre-claculated array
 					int b = wire1signalBitsArray[secondIndex];
 

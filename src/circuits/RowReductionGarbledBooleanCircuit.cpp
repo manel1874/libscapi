@@ -426,7 +426,6 @@ bool RowReductionGarbledBooleanCircuit::internalVerify(block *bothInputKeys, blo
 			bool isK1Set = false;
 
 			for (int firstIndex = 0; firstIndex<2; firstIndex++){
-				block A = input0Both[firstIndex];
 				//get the signal bit of A from the pre-claculated array
 				int a = wire0signalBitsArray[firstIndex];
 				for (int secondIndex = 0; secondIndex<2; secondIndex++){
@@ -438,11 +437,7 @@ bool RowReductionGarbledBooleanCircuit::internalVerify(block *bothInputKeys, blo
 
 					int rowIndex;//the row in the current garbled table 
 					//get the keys from the already calculated wires
-					
-					block B = input1Both[secondIndex];
-
-
-					
+				
 					int b = wire1signalBitsArray[secondIndex];
 
 					rowIndex = 2 * a + b - 1;

@@ -453,9 +453,6 @@ bool HalfGatesGarbledBooleanCircuit::internalVerify(block *bothInputKeys, block 
 			//declare temp variables to store the 0-wire key and the 1-wire key
 			block k0;
 
-			//flags that indicate if we have already calcaulated the keys before
-			bool isK0Set = false;
-
 			//for more information look at the pseudo-code of compute.
 			for (int index0 = 0; index0< 2; index0++){
 				wire0SignalBit = getSignalBitOf(inputs[index0]);
@@ -489,7 +486,6 @@ bool HalfGatesGarbledBooleanCircuit::internalVerify(block *bothInputKeys, block 
 					//first iteration that computes the k0 wire
 					if (index0 == 0 && j == 0){//this is a zero value output
 						k0 = garbledWires[garbledGates[i].output] = _mm_xor_si128(tempK0, tempK1);
-						isK0Set = true;
 					}
 					//cases 0,1 and 1,0. These cases should also compute k0, we compare it to the k0 calculated in the first iteration.
 					else {

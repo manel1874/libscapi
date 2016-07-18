@@ -99,7 +99,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaDHExtendedSimulator::simulate(SigmaCommonI
 	//Get the array from the input.
 	vector<shared_ptr<GroupElement>> gArray = dhInput->getGArray();
 	vector<shared_ptr<GroupElement>> hArray = dhInput->getHArray();
-	int size = gArray.size();
+	size_t size = gArray.size();
 
 	//Check that the arrays are in the same size.
 	if (size != hArray.size()) {
@@ -124,7 +124,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaDHExtendedSimulator::simulate(SigmaCommonI
 	shared_ptr<GroupElement> hToE;
 	shared_ptr<GroupElement> a;
 	//For every i=1,...,m, Compute ai = gi^z*hi^(-e) 
-	for (int i = 0; i<size; i++) {
+	for (size_t i = 0; i<size; i++) {
 
 		gToZ = dlog->exponentiate(gArray[i].get(), z);
 		hToE = dlog->exponentiate(hArray[i].get(), minusE);

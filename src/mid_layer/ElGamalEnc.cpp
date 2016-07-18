@@ -249,7 +249,7 @@ shared_ptr<AsymmetricCiphertext> ElGamalOnGroupElementEnc::completeEncryption(sh
 * @throws IllegalArgumentException if the given message's length is greater than the maximum.
 */
 shared_ptr<Plaintext> ElGamalOnGroupElementEnc::generatePlaintext(vector<byte> text) {
-	if (text.size() > getMaxLengthOfByteArrayForPlaintext()) {
+	if ((int) text.size() > getMaxLengthOfByteArrayForPlaintext()) {
 		throw invalid_argument("the given text is too big for plaintext");
 	}
 

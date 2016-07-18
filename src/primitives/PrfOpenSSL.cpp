@@ -48,7 +48,7 @@ void OpenSSLPRP::computeBlock(const vector<byte> & inBytes, int inOff, vector<by
 	if (!isKeySet())
 		throw IllegalStateException("secret key isn't set");
 	// Checks that the offset and length are correct.
-	if ((inOff > inBytes.size()) || (inOff + getBlockSize() > inBytes.size()))
+	if ((inOff > (int)inBytes.size()) || (inOff + getBlockSize() > (int)inBytes.size()))
 		throw out_of_range("wrong offset for the given input buffer");
 	//if ((outOff > outBytes.size()) || (outOff + getBlockSize() > outBytes.size()))
 	//	throw out_of_range("wrong offset for the given output buffer");
@@ -112,9 +112,9 @@ void OpenSSLPRP::invertBlock(const vector<byte> & inBytes, int inOff, vector<byt
 	if (!isKeySet())
 		throw IllegalStateException("secret key isn't set");
 	// Checks that the offsets are correct. 
-	if ((inOff > inBytes.size()) || (inOff + getBlockSize() > inBytes.size()))
+	if ((inOff > (int)inBytes.size()) || (inOff + getBlockSize() > (int)inBytes.size()))
 		throw out_of_range("wrong offset for the given input buffer");
-	if ((outOff > outBytes.size()) || (outOff + getBlockSize() > outBytes.size()))
+	if ((outOff > (int)outBytes.size()) || (outOff + getBlockSize() > (int)outBytes.size()))
 		throw out_of_range("wrong offset for the given output buffer");
 
 	// allocate a new byte array with the size of the specific prp algorithm.
@@ -184,7 +184,7 @@ void OpenSSLAES::setKey(SecretKey secretKey) {
 	int bitLen = len * 8; //number of bits in key.
 
 	// create the requested block cipher.
-	const EVP_CIPHER* cipher;
+	const EVP_CIPHER* cipher=NULL;
 	switch (bitLen) {
 	case 128: cipher = EVP_aes_128_ecb();
 		break;
@@ -269,7 +269,7 @@ void OpenSSLHMAC::computeBlock(const vector<byte> & inBytes, int inOffset, int i
 		throw IllegalStateException("secret key isn't set");
 	
 	// check that the offset and length are correct.
-	if ((inOffset > inBytes.size()) || (inOffset + inLen > inBytes.size()))
+	if ((inOffset > (int) inBytes.size()) || (inOffset + inLen > (int) inBytes.size()))
 		throw out_of_range("wrong offset for the given input buffer");
 	//if ((outOffset > outBytes.size()) || (outOffset + getBlockSize() > outBytes.size()))
 	//	throw out_of_range("wrong offset for the given output buffer");
@@ -324,7 +324,7 @@ bool OpenSSLHMAC::verify(const vector<byte> &msg, int offset, int msgLength, vec
 	if (!isKeySet())
 		throw IllegalStateException("secret key isn't set");
 	// if the tag size is not the mac size - returns false.
-	if (tag.size() != getMacSize())
+	if ((int) tag.size() != getMacSize())
 		return false;
 	// calculates the mac on the msg to get the real tag.
 	vector<byte> macTag = mac(msg, offset, msgLength);

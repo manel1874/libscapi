@@ -47,7 +47,7 @@ $(SLib): $(OBJ_FILES)
 obj/circuits/%.o: src/circuits/%.cpp
 	g++ -c $(CPP_OPTIONS) -o $@ $< 	 
 obj/circuits_c/%.o: src/circuits_c/%.c
-	gcc -fPIC -mavx -maes -mpclmul -DRDTSC -DTEST=AES128  -c -o $@ $< 
+	gcc -fPIC -mavx -maes -mpclmul -DRDTSC -DTEST=AES128  -O3 -c -o $@ $< 
 obj/comm/%.o: src/comm/%.cpp
 	g++ -c $(CPP_OPTIONS) -o $@ $< 	 
 obj/infra/%.o: src/infra/%.cpp

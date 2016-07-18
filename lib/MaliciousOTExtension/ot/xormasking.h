@@ -27,8 +27,6 @@ namespace maliciousot {
 
 		void Mask(int progress, int processedOTs, CBitVector* values, CBitVector* snd_buf, BYTE protocol)
 		{
-			int nsndvals = 2;
-
 			if (protocol == G_OT)
 			{
 				snd_buf[0].XORBytes(values[0].GetArr() + CEIL_DIVIDE(progress * m_nBitLength, 8), 0, CEIL_DIVIDE(processedOTs * m_nBitLength, 8));
@@ -135,7 +133,7 @@ namespace maliciousot {
 			{
 				BYTE m_bBuf[AES_BYTES];
 				BYTE ctr_buf[AES_BYTES] = { 0 };
-				int counter = *((int*)ctr_buf);
+				int counter;// = (int) ctr_buf[0];*((int*)ctr_buf);
 				AES_KEY_CTX tkey;
 				MPC_AES_KEY_INIT(&tkey);
 				for (int i = 0, rem; i < processedOTs; i++, sbp += AES_KEY_BYTES)

@@ -355,7 +355,7 @@ vector<byte> CramerShoupOnGroupElementEnc::calcAlpha(vector<byte> u1ToByteArray,
 * @throws IllegalArgumentException if the given message's length is greater than the maximum.
 */
 shared_ptr<Plaintext> CramerShoupOnGroupElementEnc::generatePlaintext(vector<byte> text) {
-	if (text.size() > getMaxLengthOfByteArrayForPlaintext()) {
+	if ((int) text.size() > getMaxLengthOfByteArrayForPlaintext()) {
 		throw invalid_argument("the given text is too big for plaintext");
 	}
 

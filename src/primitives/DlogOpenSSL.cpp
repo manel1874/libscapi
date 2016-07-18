@@ -190,7 +190,7 @@ bool OpenSSLDlogZpSafePrime::validateElement(BIGNUM* el) {
 	auto exp = BN_new();
 
 	//Check that the element raised to q is 1 mod p.
-	int suc = BN_mod_exp(exp, el, q, p, ctx.get());
+	BN_mod_exp(exp, el, q, p, ctx.get());
 
 	if (!BN_is_one(exp)) {
 		result = false;
@@ -246,7 +246,7 @@ bool OpenSSLDlogZpSafePrime::isGenerator() {
 bool OpenSSLDlogZpSafePrime::validateGroup() {
 	int result;
 	// Run a check of the group.
-	int suc = DH_check(dlog.get(), &result);
+	DH_check(dlog.get(), &result);
 
 	//In case the generator is 2, OpenSSL checks the prime is congruent to 11.
 	//while the IETF's primes are congruent to 23 when g = 2. Without the next check, the IETF parameters would fail validation.
@@ -331,7 +331,7 @@ shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::multiplyGroupElements(GroupElem
 
 shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::simultaneousMultipleExponentiations(
 	vector<shared_ptr<GroupElement>> groupElements, vector<biginteger> exponentiations) {
-	for (int i = 0; i < groupElements.size(); i++) {
+	for (size_t i = 0; i < groupElements.size(); i++) {
 		OpenSSLZpSafePrimeElement * zp_element = dynamic_cast<OpenSSLZpSafePrimeElement *>(groupElements[i].get());
 		if (!zp_element)
 			throw invalid_argument("groupElement doesn't match the DlogGroup");

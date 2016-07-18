@@ -89,11 +89,11 @@ public:
 	* @param random a source of randomness
 	* @return an RSAModulus structure that holds N, p and q.
 	*/
-	RSAModulus(int length, int certainty, mt19937 & random) {
+	RSAModulus(size_t length, int certainty, mt19937 & random) {
 
 		int pbitlength = (length + 1) / 2;
 		int qbitlength = length - pbitlength;
-		int mindiffbits = length / 3;
+		size_t mindiffbits = length / 3;
 
 
 		// generate p prime

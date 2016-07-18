@@ -363,9 +363,8 @@ public:
 		nOTs(nOTs), receiverInput(receiverInput) {
 	}
 
-
-	const BitVector& receiverInput; // Each byte holds a sigma bit for each OT in the OT extension protocol.
 	int nOTs; // The size of each element in the ot extension. All elements must be of the same size.
+	const BitVector& receiverInput; // Each byte holds a sigma bit for each OT in the OT extension protocol.
 };
 
 class OTExtensionBristolGeneralRInput: public OTExtensionBristolRInput{

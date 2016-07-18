@@ -100,7 +100,7 @@ public:
 	*/
 	CmtPedersenHashCommitter(shared_ptr<CommParty> channel) : CmtPedersenCommitterCore(channel) {
 		hash = make_shared<OpenSSLSHA256>(); 	//This default hash suits the default DlogGroup of the underlying Committer.
-		if (hash->getHashedMsgSize() > bytesCount(dlog->getOrder())) {
+		if (hash->getHashedMsgSize() > (int) bytesCount(dlog->getOrder())) {
 			throw invalid_argument("The size in bytes of the resulting hash is bigger than the size in bytes of the order of the DlogGroup.");
 		}
 	}

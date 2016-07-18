@@ -37,6 +37,7 @@ public:
 	*/
 	virtual string getAlgorithm()=0;
 	virtual vector<byte> getEncoded()=0;
+	virtual ~Key() {};
 };
 
 class SecretKey : Key {
@@ -56,6 +57,7 @@ public:
 	};
 	string getAlgorithm() override { return algorithm; };
 	vector<byte> getEncoded() override { return key; };
+	virtual ~SecretKey() {};
 };
 
 class PublicKey : public Key {};

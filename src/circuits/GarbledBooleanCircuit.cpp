@@ -323,9 +323,6 @@ void GarbledBooleanCircuit::readCircuitFromFile(const char* fileName)
 
 	int **partiesInputs;
 
-	int numOfNonXorGate = 0;
-
-
 	if (myfile.is_open())
 	{
 		

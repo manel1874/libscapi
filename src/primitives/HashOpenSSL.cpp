@@ -66,7 +66,7 @@ string OpenSSLHash::getAlgorithmName() {
 
 void OpenSSLHash::update(const vector<byte> &in, int inOffset, int inLen){
 	//Check that the offset and length are correct.
-	if ((inOffset > in.size()) || (inOffset + inLen > in.size()) || (inOffset<0))
+	if ((inOffset > (int)in.size()) || (inOffset + inLen > (int)in.size()) || (inOffset<0))
 		throw out_of_range("wrong offset for the given input buffer");
 	if (inLen < 0)
 		throw invalid_argument("wrong length for the given input buffer");

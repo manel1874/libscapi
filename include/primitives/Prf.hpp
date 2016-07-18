@@ -365,7 +365,7 @@ public:
 /**
 * This class implements some common functionality of PrpVaryingIOLength by having an instance of prfVaryingIOLength.
 */
-class PrpFromPrfVarying : public PrpVaryingIOLength {
+class PrpFromPrfVarying : public virtual PrpVaryingIOLength {
 protected:
 	PrfVaryingIOLength * prfVaryingIOLength; // the underlying prf
 public:
@@ -389,9 +389,7 @@ public:
 * (as long as input length = output length). We take the interpretation that there is essentially a different random permutation
 * for every input/output length.
 */
-#pragma vtordisp(push, 2)
-class LubyRackoffPrpFromPrfVarying : public PrpFromPrfVarying {
-#pragma vtordisp(pop)
+class LubyRackoffPrpFromPrfVarying : public virtual PrpFromPrfVarying {
 	LubyRackoffPrpFromPrfVarying();
 	/**
 	* Constructor that accepts a name of a prfVaryingIOLength to be the underlying PRF.

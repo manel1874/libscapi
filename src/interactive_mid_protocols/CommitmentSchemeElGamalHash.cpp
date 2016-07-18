@@ -32,7 +32,7 @@ CmtElGamalHashCommitter::CmtElGamalHashCommitter(shared_ptr<CommParty> channel, 
 				: CmtElGamalCommitterCore(channel, dlog, make_shared<ElGamalOnByteArrayEnc>(dlog, make_shared<HKDF>(new OpenSSLHMAC()))) {
 	
 	//During the construction of this object, the Public Key with which we set the El Gamal object gets sent to the receiver.
-	if (hash->getHashedMsgSize() > bytesCount(dlog->getOrder())) {
+	if (hash->getHashedMsgSize() > (int) bytesCount(dlog->getOrder())) {
 		throw invalid_argument("The size in bytes of the resulting hash is bigger than the size in bytes of the order of the DlogGroup.");
 	}
 	this->hash = hash;
@@ -122,7 +122,7 @@ vector<byte> CmtElGamalHashCommitter::generateBytesFromCommitValue(CmtCommitValu
 CmtElGamalHashReceiver::CmtElGamalHashReceiver(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash) 
 					: CmtElGamalReceiverCore(channel, dlog, make_shared<ElGamalOnByteArrayEnc>(dlog, make_shared<HKDF>(new OpenSSLHMAC()))) {
 		
-	if (hash->getHashedMsgSize() > bytesCount(dlog->getOrder())) {
+	if (hash->getHashedMsgSize() > (int) bytesCount(dlog->getOrder())) {
 		throw invalid_argument("The size in bytes of the resulting hash is bigger than the size in bytes of the order of the DlogGroup.");
 	}
 	this->hash = hash;

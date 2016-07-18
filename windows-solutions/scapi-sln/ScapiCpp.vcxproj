@@ -106,6 +106,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <WholeProgramOptimization>true</WholeProgramOptimization>
+      <WarningLevel>Level1</WarningLevel>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>

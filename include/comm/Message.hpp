@@ -103,7 +103,6 @@ public:
 
 private:
 	int vector_size = header_length + max_body_length;
-	std::vector<char> data_;
-	//char data_[header_length + max_body_length];
 	size_t body_length_;
+	std::vector<char> data_;
 };

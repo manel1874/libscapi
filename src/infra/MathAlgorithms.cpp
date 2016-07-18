@@ -46,9 +46,9 @@ biginteger MathAlgorithms::chineseRemainderTheorem(const vector<biginteger> & co
 {
 	biginteger retval = 0;
 	biginteger all = 1;
-	for (int i = 0; i < moduli.size(); i++)
+	for (size_t i = 0; i < moduli.size(); i++)
 		all *= moduli[i];
-	for (int i = 0; i < moduli.size(); i++)
+	for (size_t i = 0; i < moduli.size(); i++)
 	{
 		biginteger a = moduli[i];
 		biginteger b = all / a; 
