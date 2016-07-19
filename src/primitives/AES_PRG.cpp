@@ -252,7 +252,7 @@ void AES_PRG::initData()
 	m_cachedRandoms = nullptr;
 
 #ifndef _WIN32
-	m_cachedRandoms = (byte*)memalign(m_cahchedSize * 16, 16);
+	m_cachedRandoms = (byte*)memalign(m_cahchedSize, 16);
 #else
 	m_cachedRandoms = (byte*)_aligned_malloc(m_cahchedSize, 16);
 #endif
