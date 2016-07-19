@@ -183,17 +183,17 @@ vector<byte> AES_PRG::getPRGBitsBytes(int size)
     updateCachedRandomsIdx(byteNum);
 
     vector<bitset<8>> bits(byteNum);
+    int idx = 0;
     for (int i = 0; i < byteNum; i++)
     {
         bits[i] = data[i];
-    }
-
-    for (int i = 0; i < size; i++)
-    {
-        if (bits[i] == 0)
-            prg[i] = 0;
-        else
-            prg[i] = 1;
+        for (int j = 0; j < 8 && idx < size; j++, idx++)
+        {
+            if (bits[i][j] == 0)
+                prg[idx] = 0;
+            else
+                prg[idx] = 1;
+        }
     }
 
     return prg;
