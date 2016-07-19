@@ -225,6 +225,7 @@ public:
 	 * This way the parallel executions of the function will not block each other.<p>
 	 */
 	virtual shared_ptr<OTBatchSOutput> transfer(OTBatchSInput * input) = 0;
+	virtual ~OTBatchSender(){};
 };
 
 /**
@@ -413,4 +414,5 @@ class OTBatchReceiver {
 	 */
 public:
 	virtual shared_ptr<OTBatchROutput> transfer(OTBatchRInput * input) = 0;
+	virtual ~OTBatchReceiver() {};
 };

@@ -112,7 +112,7 @@ void execute_party_one(YaoConfig yao_config) {
 		<< "Average time per iteration: " << elapsed_ms / (float)yao_config.number_of_iterations << " milliseconds" << endl;
 	
 	// exit cleanly
-	delete p1, channel, circuit, otSender, ungarbledInput;
+	delete p1; delete  channel; delete circuit; delete otSender; delete ungarbledInput;
 	io_service.stop();
 	t.join();
 }
@@ -164,7 +164,7 @@ void execute_party_two(YaoConfig yao_config) {
 		" iterations took: " << elapsed_ms << " milliseconds" << endl;
 	cout << "Average time per iteration: " << elapsed_ms / (float)yao_config.number_of_iterations 
 		<< " milliseconds" << endl;
-	delete p2, channel, circuit, otReceiver, ungarbledInput;
+	delete p2; delete  channel; delete circuit; delete otReceiver; delete ungarbledInput;
 	io_service.stop();
 	t.join();
 }
@@ -186,8 +186,6 @@ YaoConfig read_yao_config(string config_file) {
 	string input_file_2 = cf.Value(input_section, "input_file_party_2");
 	string sender_ip_str = cf.Value("", "sender_ip");
 	string receiver_ip_str = cf.Value("", "receiver_ip");
-	auto sender_ip = IpAdress::from_string(sender_ip_str);
-	auto receiver_ip = IpAdress::from_string(receiver_ip_str);
 	string circuit_type = cf.Value("", "circuit_type");
 	return YaoConfig(number_of_iterations, print_output, circuit_file, input_file_1,
 		input_file_2, sender_ip_str, receiver_ip_str, circuit_type);

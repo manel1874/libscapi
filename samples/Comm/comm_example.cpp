@@ -97,11 +97,10 @@ void send_messages(CommParty* commParty, string * messages, int start, int end) 
 
 void recv_messages(CommParty* commParty, string * messages, int start, int end, 
 	byte * buffer, int expectedSize) {
-	auto sizeRead = commParty->read(buffer, expectedSize);
+	commParty->read(buffer, expectedSize);
 	// the size of all strings is 2. Parse the message to get the original strings
 	int j = 0;
 	for (int i = start; i < end; i++, j++) {
-		unsigned char* uc = buffer;
 		auto s = string(reinterpret_cast<char const*>(buffer+j*2), 2);
 		print_recv_message(s, i);
 		messages[i] = s;

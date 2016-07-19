@@ -30,9 +30,7 @@
 
 void mainR() {
 	// init phase
-	int baseOts = 190;
 	int numOts = 128000;
-	int bitLength = 128;
 	srand(time(NULL));
 	SocketPartyData senderParty(IpAdress::from_string("127.0.0.1"), 7766);
 	OTExtensionMaliciousReceiver* receiver_interface = new OTExtensionMaliciousReceiver(senderParty, numOts); // total ots
@@ -40,7 +38,7 @@ void mainR() {
 	cerr << "finished initOtReceiver." << endl;
 	cerr << "Started runOtAsSender." << endl;
 
-	maliciousot::MaskingFunction * masking_function = new maliciousot::XORMasking(bitLength);
+	//maliciousot::MaskingFunction * masking_function = new maliciousot::XORMasking(bitLength);
 
 	vector<byte> choices, response;
 	//choices.Create(numOts);
@@ -65,7 +63,7 @@ void mainR() {
 	//prepare the out array
 	cerr << "response bitvector:" << endl;
 	auto arr = ((OTOnByteArrayROutput*)(output.get()))->getXSigma();
-	for (int i = 0; i < arr.size(); i++) {
+	for (size_t i = 0; i < arr.size(); i++) {
 		cout << (int) arr.at(i) << " ";
 	}
 	cout << endl;
@@ -73,14 +71,13 @@ void mainR() {
 	//choices.delCBitVector();
 	//response.delCBitVector();
 
-	delete masking_function;
+	//delete masking_function;
 	cerr << "ended runOtAsReceiver." << endl;
 	delete receiver_interface;
 }
 
 void mainS() {
 	// init phase
-	int baseOts = 190;
 	int numOts = 128000;
 	int bitLength = 128;
 	srand(time(NULL));
@@ -90,7 +87,7 @@ void mainS() {
 
 	// run ot as sender phase
 	vector<byte> delta, X1, X2;
-	maliciousot::MaskingFunction * masking_function = new maliciousot::XORMasking(bitLength);
+	//maliciousot::MaskingFunction * masking_function = new maliciousot::XORMasking(bitLength);
 
 	//Create X1 and X2 as two arrays with "numOTs" entries of "bitlength" bit-values
 	//X1.Create(numOts, bitLength);

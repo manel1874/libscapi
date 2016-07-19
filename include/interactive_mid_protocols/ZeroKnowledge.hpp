@@ -43,6 +43,7 @@ public:
 	* @param input holds necessary values to the proof calculations.
 	*/
 	virtual void prove(shared_ptr<ZKProverInput> input) = 0;
+	virtual ~ZKProver() {};
 };
 
 /**
@@ -69,6 +70,7 @@ public:
 	* @return true if the proof was verified; false, otherwise.
 	*/
 	virtual bool verify(ZKCommonInput* input, SigmaProtocolMsg* emptyA, SigmaProtocolMsg* emptyZ) = 0;
+	virtual ~ZKVerifier() {};
 };
 
 /**
@@ -76,7 +78,7 @@ public:
 * Zero Knowledge proof of knowledge. <p>
 * Every class that implements it is signed as ZKPOK verifier.
 */
-class ZKPOKVerifier : public ZKVerifier {};
+class ZKPOKVerifier : public virtual ZKVerifier {};
 
 /**
 * Concrete implementation of Zero Knowledge prover.<p>
@@ -86,7 +88,7 @@ class ZKPOKVerifier : public ZKVerifier {};
 * The pseudo code of this protocol can be found in Protocol 2.1 of pseudo codes document
 * at {@link http://cryptobiu.github.io/scapi/SDK_Pseudocode.pdf}.<p>
 */
-class ZKFromSigmaProver : public ZKProver {
+class ZKFromSigmaProver : public virtual ZKProver {
 public:
 	/**
 	* Constructor that accepts the underlying channel, sigma protocol's prover and 
@@ -403,7 +405,7 @@ private:
 * The pseudo code of this protocol can be found in Protocol 2.2 of pseudo
 * codes document at {@link http://cryptobiu.github.io/scapi/SDK_Pseudocode.pdf}.<p>
 */
-class ZKPOKFromSigmaCmtPedersenVerifier : public ZKPOKVerifier {
+class ZKPOKFromSigmaCmtPedersenVerifier : public virtual ZKPOKVerifier {
 private:
 	shared_ptr<CommParty> channel;
 	// underlying verifier that computes the proof of the sigma protocol.

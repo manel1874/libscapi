@@ -76,6 +76,7 @@ namespace semihonestot {
 
 		BOOL Init(int secparam, BYTE* seed, bool useecc)
 		{
+			(void)useecc; // avoid unused variable
 #ifdef OTEXT_USE_GMP
 			m_bUseECC = useecc;
 			if (m_bUseECC)
