@@ -18,8 +18,8 @@ namespace maliciousot {
 		BOOL Socket()
 		{
 			BOOL success = false;
-			BOOL bOptVal = true;
-			int bOptLen = sizeof(BOOL);
+			//BOOL bOptVal = true;
+			//int bOptLen = sizeof(BOOL);
 
 #ifdef WIN32
 			static BOOL s_bInit = FALSE;
@@ -195,7 +195,7 @@ namespace maliciousot {
 #else
 
 			timeval	tv;
-			socklen_t len;
+			//socklen_t len;
 
 			if (lTOSMilisec > 0)
 			{

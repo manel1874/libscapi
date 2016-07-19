@@ -46,7 +46,6 @@
 #include <fstream>
 #include <unordered_map>
 #include <chrono>
-#include "Log.hpp"
 
 using namespace std;
 

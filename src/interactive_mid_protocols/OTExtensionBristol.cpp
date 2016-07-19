@@ -168,8 +168,8 @@ shared_ptr<OTBatchROutput> OTExtensionBristolReciever::transfer(OTBatchRInput * 
 			__m128i* x1Arr = (__m128i *) _mm_malloc(sizeof(__m128i) * nOTs, 16);
 			//byte* bufferx0 = new byte[sizeInBytes];
 			//byte* bufferx1 = new byte[sizeInBytes];
-			auto sizeRead = channel->read((byte *)x0Arr, sizeInBytes);
-			sizeRead = channel->read((byte *)x1Arr, sizeInBytes);
+			channel->read((byte *)x0Arr, sizeInBytes);
+			channel->read((byte *)x1Arr, sizeInBytes);
 
 			BitMatrix outputMatrix(nOTs);
 

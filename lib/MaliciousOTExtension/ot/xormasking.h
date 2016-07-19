@@ -17,7 +17,7 @@ namespace maliciousot {
 	public:
 		XORMasking(int bitlength) { init(bitlength); };
 		XORMasking(int bitlength, CBitVector& delta) { m_vDelta = &delta; init(bitlength); };
-		~XORMasking() {};
+		virtual ~XORMasking() {};
 
 
 		void init(int bitlength)

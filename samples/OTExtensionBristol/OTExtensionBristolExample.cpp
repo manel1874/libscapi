@@ -155,7 +155,7 @@ int mainBristol(string partyNum) {
 
 		vector<byte> x1Arr;
 		x1Arr.resize(size*16);
-		for(int i=0; i<x1Arr.size();i++)
+		for(size_t i=0; i<x1Arr.size();i++)
 			x1Arr[i] = 1;
     	OTBatchSInput * input = new OTExtensionGeneralSInput(x0Arr, x1Arr, size);
     		// run the OT's transfer phase.

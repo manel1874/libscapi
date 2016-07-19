@@ -489,7 +489,7 @@ ConnectionManagerServer::ConnectionManagerServer(int role, int num_of_threads, S
 */
 BOOL ConnectionManagerServer::setup_connection() {
 
-	int num_connections = m_num_of_threads + 1;
+	unsigned int num_connections = m_num_of_threads + 1;
 
 	//cerr << "ConnectionManagerServer->setup_connection() started." << endl;
 	//cout << m_address << endl;
@@ -500,7 +500,7 @@ BOOL ConnectionManagerServer::setup_connection() {
 		goto listen_failure;
 	}
 
-	for (int i = 0; i<num_connections; i++) { //twice the actual number, due to double sockets for OT
+	for (unsigned int i = 0; i<num_connections; i++) { //twice the actual number, due to double sockets for OT
 		maliciousot::CSocket sock;
 
 		// try: CSocket sock = accept()
@@ -554,7 +554,6 @@ ConnectionManagerClient::ConnectionManagerClient(int role, int num_of_threads, S
 * initiates a connection (via socket) for each thread on the client
 */
 BOOL ConnectionManagerClient::setup_connection() {
-	BOOL bFail = FALSE;
 	maliciousot::LONG lTO = CONNECT_TIMEO_MILISEC;
 	int num_connections = m_num_of_threads + 1;
 

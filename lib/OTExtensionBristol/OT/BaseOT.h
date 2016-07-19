@@ -36,7 +36,7 @@ public:
 	TwoPartyPlayer* P;
 
 	BaseOT(int nOT, int ot_length, int other_player_num, TwoPartyPlayer* player, OT_ROLE role=BOTH)
-		: nOT(nOT), ot_length(ot_length), other_player_num(other_player_num), P(player), ot_role(role)
+		: P(player), nOT(nOT), ot_length(ot_length), other_player_num(other_player_num), ot_role(role)
 	{
 		receiver_inputs.resize(nOT);
 		sender_inputs.resize(nOT, vector<BitVector>(2));

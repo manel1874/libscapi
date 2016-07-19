@@ -25,7 +25,7 @@ namespace maliciousot {
 		timeval tend;
 	};
 
-	static int m_nTimings = P_LAST - P_FIRST + 1;
+	static int m_nTimings __attribute__ ((unused)) = P_LAST - P_FIRST + 1;
 	static aby_timings m_tTimes[P_LAST - P_FIRST + 1];
 	
 

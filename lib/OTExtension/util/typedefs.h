@@ -99,7 +99,7 @@ namespace semihonestot {
 #define OTEXT_HASH_FINAL(sha, sha_buf) SHA_Final(sha_buf, sha)
 
 	const BYTE ZERO_IV[AES_BYTES] = { 0 };
-	static int otextaesencdummy;
+	static int otextaesencdummy __attribute__ ((unused));;
 
 #define OTEXT_AES_KEY_INIT(ctx, buf) { \
 	EVP_CIPHER_CTX_init(ctx); \

@@ -1,7 +1,7 @@
 # compiler options
 CXX=g++ -g
 CFLAGS=-fPIC
-COMPILER_OPTIONS=-O3
+COMPILER_OPTIONS=-O3 -Wall
 BATCH=
 
 

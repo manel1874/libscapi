@@ -207,7 +207,7 @@ namespace semihonestot {
 			return ret >= 0;
 		}
 
-		int Receive(void* pBuf, int nLen, int nFlags = 0)
+		int Receive(void* pBuf, int nLen)
 		{
 			/* Note to Michael: count number of received Bytes and messages here */
 					//cout << "rcv = " << nLen << endl;
@@ -249,7 +249,7 @@ namespace semihonestot {
 			return nLen;
 		}
 
-		int Send(const void* pBuf, int nLen, int nFlags = 0)
+		int Send(const void* pBuf, int nLen, int nFlags=0)
 		{
 			/* Note to Michael: count number of sent Bytes and messages here */
 					//cout << "snd = " << nLen << endl;
