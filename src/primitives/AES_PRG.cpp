@@ -1,59 +1,52 @@
 //#include "stdafx.h"
 #include "../../include/primitives/AES_PRG.hpp"
 
-/*
-unsigned char AES_PRG::m_defualtkey[16] = { 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6,
-0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c };
+AES_PRG::AES_PRG(int cahchedSize)
+{ 
+	m_key = make_shared<vector<byte>>(vector<byte>{0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6,
+		0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c });
 
-unsigned char AES_PRG::m_defaultiv[16] = { 0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7,
-0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff };
-*/
+	m_iv = make_shared<vector<byte>>(vector<byte>{ 0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7,
+		0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff });
 
-AES_PRG::AES_PRG(int cahchedSize) : AES_PRG((byte*)m_defualtkey, (byte*)m_defaultiv, cahchedSize) { }
+	m_cahchedSize = cahchedSize;
+
+	initData();
+}
 
 
-AES_PRG::AES_PRG(byte *key, int cahchedSize) : AES_PRG(key, (byte*)m_defaultiv, cahchedSize) { }
+AES_PRG::AES_PRG(shared_ptr<vector<byte>> key, int cahchedSize)
+{ 
+	m_key = key;
 
-AES_PRG::AES_PRG(byte *key, byte *iv, int cahchedSize)
+	m_iv = make_shared<vector<byte>>(vector<byte>{ 0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7,
+		0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff });
+
+	m_cahchedSize = cahchedSize;
+
+	initData();
+}
+
+AES_PRG::AES_PRG(shared_ptr<vector<byte>> key, shared_ptr<vector<byte>> iv, int cahchedSize)
 {
-    m_secretKey = new SecretKey(key, 16, "AES");
+	m_key = key;
     m_iv = iv;
     m_cahchedSize = cahchedSize;
-    m_cachedRandomsIdx = m_cahchedSize;
-    EVP_CIPHER_CTX* temp = new EVP_CIPHER_CTX();
-    m_enc = shared_ptr<EVP_CIPHER_CTX>(temp, EVP_CIPHER_CTX_DELETER::deleter);
-    EVP_CIPHER_CTX_init(m_enc.get());
-    EVP_EncryptInit(m_enc.get(), EVP_aes_128_ecb(), m_secretKey->getEncoded().data(), m_iv);
-    m_cachedRandoms = nullptr;
 
-#ifndef _WIN32
-    m_cachedRandoms = (byte*)memalign(m_cahchedSize * 16, 16);
-#else
-    m_cachedRandoms = (byte*)_aligned_malloc(m_cahchedSize, 16);
-#endif
-
-    assert(m_cachedRandoms != nullptr);
-    m_isKeySet = true;
-    prepare(1);
+	initData();
 }
 
 AES_PRG::AES_PRG(AES_PRG && old):
 		m_iv(old.m_iv), m_cahchedSize(old.m_cahchedSize), m_cachedRandomsIdx(old.m_cachedRandomsIdx), 
-		m_enc(old.m_enc), m_isKeySet(old.m_isKeySet), m_secretKey(old.m_secretKey),  m_cachedRandoms(old.m_cachedRandoms)
+		m_enc(old.m_enc), m_isKeySet(old.m_isKeySet), m_key(old.m_key),  m_cachedRandoms(old.m_cachedRandoms)
 {
-    old.m_secretKey = nullptr;
     old.m_cachedRandoms = nullptr;
     old.m_iv = nullptr;
 }
 
-AES_PRG::AES_PRG(AES_PRG & other): m_iv(nullptr), m_cahchedSize(other.m_cahchedSize),
-                                   m_cachedRandomsIdx(other.m_cachedRandomsIdx),  m_enc(other.m_enc)
+AES_PRG::AES_PRG(AES_PRG & other): m_iv(other.m_iv), m_cahchedSize(other.m_cahchedSize),
+                                   m_cachedRandomsIdx(other.m_cachedRandomsIdx),  m_enc(other.m_enc), m_key(other.m_key)
 {
-    //secret key
-    byte* tempKey = &vector<byte>()[0];
-    m_secretKey = new SecretKey(tempKey, 16, "AES");
-    *m_secretKey = *other.m_secretKey;
-
     //m_cachedRandoms
 #ifndef _WIN32
     m_cachedRandoms = (byte*)memalign(m_cahchedSize * 16, 16);
@@ -66,8 +59,6 @@ AES_PRG::AES_PRG(AES_PRG & other): m_iv(nullptr), m_cahchedSize(other.m_cahchedS
 
 AES_PRG::~AES_PRG()
 {
-    delete m_secretKey;
-
     if (m_cachedRandoms != nullptr)
     {
 #ifndef _WIN32
@@ -84,7 +75,7 @@ AES_PRG & AES_PRG::operator=(AES_PRG && other)
 {
     //copy values
     m_enc = other.m_enc;
-    m_secretKey = other.m_secretKey;
+    m_key = other.m_key;
     m_cahchedSize = other.m_cahchedSize;
     m_cachedRandoms = other.m_cachedRandoms;
     m_iv = other.m_iv;
@@ -92,7 +83,6 @@ AES_PRG & AES_PRG::operator=(AES_PRG && other)
     m_isKeySet = other.m_isKeySet;
 
     //set other values to null
-    other.m_secretKey = nullptr;
     other.m_cachedRandoms = nullptr;
     other.m_iv = nullptr;
 
@@ -101,15 +91,11 @@ AES_PRG & AES_PRG::operator=(AES_PRG && other)
 
 AES_PRG & AES_PRG::operator=(AES_PRG & other)
 {
-    //secret key
-    byte* tempKey = &vector<byte>()[0];
-    m_secretKey = new SecretKey(tempKey, 16, "AES");
-    *m_secretKey = *other.m_secretKey;
-
-    m_iv = nullptr;
+    m_iv = other.m_iv;
     m_cahchedSize = other.m_cahchedSize;
     m_cachedRandomsIdx = other.m_cachedRandomsIdx;
     m_isKeySet = other.m_isKeySet;
+	m_key = m_key;
     m_enc = other.m_enc;
 
     //m_cachedRandoms
@@ -128,9 +114,8 @@ AES_PRG & AES_PRG::operator=(AES_PRG & other)
 
 SecretKey AES_PRG::generateKey(int keySize)
 {
-
-    vector<byte> genBytes(m_secretKey->getEncoded().data(), m_secretKey->getEncoded().data() + keySize);
-    SecretKey generatedKey(genBytes.data(),keySize,"AES");
+	auto key = getRandomBytes(keySize);
+    SecretKey generatedKey(key,"AES");
     return generatedKey;
 
 }
@@ -153,7 +138,13 @@ bool AES_PRG::isKeySet()
 
 void AES_PRG::setKey(SecretKey secretKey)
 {
-    //m_secretKey = &secretKey;
+	m_key = make_shared<vector<byte>>(secretKey.getEncoded());
+	
+	EVP_EncryptInit(m_enc.get(), EVP_aes_128_ecb(), &m_key->at(0), &m_iv->at(0));
+
+	m_isKeySet = true;
+	prepare(1);
+
 }
 
 void AES_PRG::getPRGBytes(vector<byte> & outBytes, int outOffset, int outLen)
@@ -216,9 +207,9 @@ void AES_PRG::prepare(int isPlanned)
     int actual;
     byte *ctr;
 #ifndef _WIN32
-    ctr = (byte*)memalign(m_cahchedSize * 16, 16);
+    ctr = (byte*)memalign(m_key->size(), 16);
 #else
-    ctr = (byte*)_aligned_malloc(m_cahchedSize, 16);
+    ctr = (byte*)_aligned_malloc(m_key->size(), 16);
 #endif
     EVP_EncryptUpdate(m_enc.get(), m_cachedRandoms, &actual, ctr, m_cahchedSize);
     m_cachedRandomsIdx = 0;
@@ -250,6 +241,25 @@ block* AES_PRG::getRandomBytesBlock(int size)
 
     return data;
 
+}
+
+void AES_PRG::initData()
+{
+	EVP_CIPHER_CTX* temp = new EVP_CIPHER_CTX();
+	m_enc = shared_ptr<EVP_CIPHER_CTX>(temp, EVP_CIPHER_CTX_DELETER::deleter);
+	EVP_CIPHER_CTX_init(m_enc.get());
+	EVP_EncryptInit(m_enc.get(), EVP_aes_128_ecb(), &m_key->at(0), &m_iv->at(0));
+	m_cachedRandoms = nullptr;
+
+#ifndef _WIN32
+	m_cachedRandoms = (byte*)memalign(m_cahchedSize * 16, 16);
+#else
+	m_cachedRandoms = (byte*)_aligned_malloc(m_cahchedSize, 16);
+#endif
+
+	assert(m_cachedRandoms != nullptr);
+	m_isKeySet = true;
+	prepare(1);
 }
 
 void AES_PRG::updateCachedRandomsIdx(int size)

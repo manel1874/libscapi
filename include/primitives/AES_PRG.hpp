@@ -18,7 +18,7 @@ using namespace std;
 typedef unsigned char byte;
 typedef __m128i block;
 
-#define DEFAULT_CACHE_SIZE 640
+#define DEFAULT_CACHE_SIZE 64
 
 
 class AES_PRG : public PseudorandomGenerator
@@ -33,8 +33,8 @@ public:
      * 3. Constructor with initial key, initial iv and initial size
      */
     AES_PRG(int cahchedSize=DEFAULT_CACHE_SIZE);
-    AES_PRG(byte *key,int cahchedSize=DEFAULT_CACHE_SIZE);
-    AES_PRG(byte *key, byte *iv,int cahchedSize=DEFAULT_CACHE_SIZE);
+    AES_PRG(shared_ptr<vector<byte>> key,int cahchedSize=DEFAULT_CACHE_SIZE);
+    AES_PRG(shared_ptr<vector<byte>> key, shared_ptr<vector<byte>> iv,int cahchedSize=DEFAULT_CACHE_SIZE);
 
 	//move constructor
 	AES_PRG(AES_PRG&& old);
@@ -123,19 +123,23 @@ public:
 
 private:
 
-    unsigned char m_defualtkey[16] = { 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6,
-		0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c };
-    unsigned char m_defaultiv[16] = { 0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7,
-		0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff };
-
     //EVP_CIPHER_CTX* m_enc;
-	byte *m_iv;
+	shared_ptr<vector<byte>> m_iv;
 	int m_cahchedSize;
 	int m_cachedRandomsIdx;
 	shared_ptr<EVP_CIPHER_CTX> m_enc;
 	bool m_isKeySet;
-	SecretKey *m_secretKey;
-    byte *m_cachedRandoms;
+	shared_ptr<vector<byte>> m_key;
+	byte* m_cachedRandoms;
+
+	/*
+	 Initialization class data
+	*/
+	void initData();
+
+	/*
+	 Update cache index in a safe way.
+	*/
 	void updateCachedRandomsIdx(int size);
 };
 
