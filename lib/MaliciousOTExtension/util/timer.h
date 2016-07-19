@@ -25,7 +25,11 @@ namespace maliciousot {
 		timeval tend;
 	};
 
+#ifndef _WIN32
 	static int m_nTimings __attribute__ ((unused)) = P_LAST - P_FIRST + 1;
+#else
+	static int m_nTimings = P_LAST - P_FIRST + 1;
+#endif
 	static aby_timings m_tTimes[P_LAST - P_FIRST + 1];
 	
 
