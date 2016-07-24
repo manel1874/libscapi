@@ -6,7 +6,7 @@
     <LocalDebuggerCommand>$(TargetPath)</LocalDebuggerCommand>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LocalDebuggerCommandArguments>commitment 2 C:\Github\libScapiDev\samples\Commitment\CommitmentConfig.txt</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>yao 1 C:\code\libscapi\samples\Yao\YaoConfig.txt</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>

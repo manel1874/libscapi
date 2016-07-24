@@ -62,4 +62,9 @@ input_file_party_1 = C:\code\libscapi\samples\assets\circuits\AESMULT/AESPartyOn
 input_file_party_2 = C:\code\libscapi\samples\assets\circuits\AESMULT/AESPartyTwoInputs.txt
 
 
+[DEP-Windows]
+circuit_file = C:\cryptobiu\YaoProtocol/C1000GatesWith500Depth.txt
+input_file_party_1 = C:\cryptobiu\YaoProtocol/C1000GatesWith500DepthPartyOneInputs.txt
+input_file_party_2 = C:\cryptobiu\YaoProtocol/C1000GatesWith500DepthPartyTwoInputs.txt
+
 
