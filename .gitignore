@@ -60,3 +60,4 @@ config_for_test.txt
 *.VC.db
 *~
 
+windows-solutions/CodeExamples/code examples.vcxproj.user.orig

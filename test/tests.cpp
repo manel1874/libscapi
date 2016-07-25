@@ -493,7 +493,7 @@ TEST_CASE("PRF", "[AES, PRF]")
 void test_prg(PseudorandomGenerator * prg, string expected_name)
 {
 	REQUIRE(!prg->isKeySet()); // verify key is not set yet
-	auto sk = prg->generateKey(32);
+	auto sk = prg->generateKey(16);
 	prg->setKey(sk);
 	REQUIRE(prg->isKeySet());
 
@@ -510,6 +510,13 @@ void test_prg(PseudorandomGenerator * prg, string expected_name)
 
 TEST_CASE("PRG", "[PRG]")
 {
+
+	SECTION("prgFromOpenSSLAES")
+	{
+		prgFromOpenSSLAES * scprg = new prgFromOpenSSLAES();
+		test_prg(scprg, "prgFromOpenSSLAES");
+	}
+
 	SECTION("ScPrgFromPrf")
 	{
 		PseudorandomFunction * prf = new OpenSSLAES();
@@ -522,6 +529,35 @@ TEST_CASE("PRG", "[PRG]")
 		test_prg(new OpenSSLRC4(), "RC4");
 	}
 }
+
+
+TEST_CASE("random", "[prgFromOpenSSLAES]")
+{
+	SECTION("test seeded random")
+	{
+
+		prgFromOpenSSLAES random1;
+		prgFromOpenSSLAES random2;
+
+		auto sk = random1.generateKey(16);
+
+
+
+		for (int k = 0; k < 10; k++) {
+			auto int1 = random1.getRandom32();
+			auto int2 = random2.getRandom32();
+
+			bool equal = false;
+
+			if(int1 = int2)
+				equal = true;
+			REQUIRE(equal == true);
+		}
+
+	}
+}
+
+
 
 TEST_CASE("KDF","")
 {

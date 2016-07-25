@@ -34,6 +34,15 @@
 #include "Prf.hpp"
 #include <openssl/rc4.h>
 #include <openssl/rand.h>
+#include <openssl/evp.h>
+#include <emmintrin.h>
+
+
+typedef unsigned char byte;
+typedef __m128i block;
+
+#define DEFAULT_CACHE_SIZE 64
+#define BLOCK_SIZE 16
 
 /**
 * Parameters for PrgFromPrf key generation.
@@ -140,6 +149,53 @@ public:
 	SecretKey generateKey(int keySize) override { return prf->generateKey(keySize); };
 	void getPRGBytes(vector<byte> & outBytes, int outOffset, int outLen) override;
 };
+
+
+/**
+* This is a simple way of generating a pseudorandom stream from a pseudorandom function.
+* The seed for the pseudorandom generator is the key to the pseudorandom function.
+* Then, the algorithm initializes a counter to 1 and applies the pseudorandom function to the counter,
+* increments it, and repeats.
+*/
+class prgFromOpenSSLAES : public PseudorandomGenerator {
+private:
+			// Counter used for key generation.
+	block iv = _mm_setzero_si128();
+
+	int cachedSize;
+	int idxForBytes = 0;
+	int startingIndex = 0;
+	EVP_CIPHER_CTX* aes;
+	bool _isKeySet = false;
+	block* cipherChunk;
+	block* indexPlaintext;
+	bool isStrict;
+
+public:
+	/**
+	* Constructor that lets the user choose the underlying PRF algorithm.
+	* @param prf underlying PseudorandomFunction.
+	*/
+	prgFromOpenSSLAES(int cachedSize = 1280, bool isStrict = false);
+	//~prgFromOpenSSLAES();
+	
+
+	void setKey(SecretKey secretKey) override;
+	bool isKeySet() override { return _isKeySet; };
+	string getAlgorithmName() override { return "prgFromOpenSSLAES"; };
+	SecretKey generateKey(AlgorithmParameterSpec keyParams) override {
+		throw NotImplementedException("To generate a key for this prg object use the generateKey(int keySize) function");
+	}
+	SecretKey generateKey(int keySize) override;
+	void getPRGBytes(vector<byte> & outBytes, int outOffset, int outLen) override;
+	uint32_t getRandom32();
+	uint64_t getRandom64();
+	block getRandom128();
+
+	void prepare();
+};
+
+
 
 /**
 * This class wraps the OpenSSL implementation of RC4.

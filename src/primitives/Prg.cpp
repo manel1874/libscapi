@@ -103,6 +103,111 @@ void ScPrgFromPrf::increaseCtr() {
 	}
 }
 
+
+SecretKey prgFromOpenSSLAES::generateKey(int keySize) {
+	byte * buf = new byte[keySize];
+	if (!RAND_bytes(buf, keySize))
+		throw runtime_error("key generation failed");
+	vector<byte> vec;
+	copy_byte_array_to_byte_vector(buf, keySize, vec, 0);
+	SecretKey sk(vec, getAlgorithmName());
+	delete buf;
+	return sk;
+}
+
+void prgFromOpenSSLAES::setKey(SecretKey secretKey) {
+
+	int outLength;
+
+	aes = new EVP_CIPHER_CTX();
+	EVP_CIPHER_CTX_init(aes);
+	EVP_EncryptInit(aes, EVP_aes_128_ecb(), &(secretKey.getEncoded()).at(0), (byte *)&iv);
+
+	EVP_EncryptUpdate(aes, (byte *)cipherChunk, &outLength, (byte *)indexPlaintext, cachedSize);
+
+	_isKeySet = true;
+}
+
+prgFromOpenSSLAES::prgFromOpenSSLAES(int cachedSize, bool isStrict) : cachedSize(cachedSize), isStrict(isStrict) {
+
+	//allocate memory for the plaintext which is an array of indices and for the ciphertext which is the output
+	//of the encryption
+	cipherChunk = (block *) _mm_malloc(sizeof(block) * cachedSize, 16);
+	indexPlaintext = (block *)_mm_malloc(sizeof(block) * cachedSize, 16);
+
+	//init the array of indices which are set as the plaintext. Note that we only use the list sagnificant long part of the 128 bit.
+	memset(indexPlaintext, 0, sizeof(block) * cachedSize);
+
+
+	long *plaintextArray = (long *)indexPlaintext;
+	//go over the array and set the long for evey other long, we use only half of the 128 bit variables
+	for (long i = 0; i < cachedSize; i++) {
+		plaintextArray[i * 2 + 1] = i;
+	}
+
+}
+
+
+void prgFromOpenSSLAES::getPRGBytes(vector<byte> & outBytes, int outOffset, int outLen) {
+
+	//the required number of random bytes exceeds the avaliable randoms, prepare new randoms
+	if (outLen + idxForBytes > cachedSize * 16) {
+		prepare();
+	}
+
+	byte* cipherInBytes = (byte*)cipherChunk;
+
+	//Copy the output bytes to the given output array.
+	copy_byte_array_to_byte_vector(&cipherInBytes[idxForBytes], outLen, outBytes, 0);
+
+	//increment the byte counter 
+	idxForBytes += outLen;
+}
+
+uint32_t prgFromOpenSSLAES::getRandom32() {
+
+	if (idxForBytes + 4 >= cachedSize*BLOCK_SIZE) {
+		prepare();
+	}
+	uint32_t* cipherInInts = (uint32_t*)cipherChunk;
+
+	idxForBytes += 4;
+	return  cipherInInts[(idxForBytes + 3)/4];
+}
+uint64_t prgFromOpenSSLAES::getRandom64() {
+	if (idxForBytes + 8 >= cachedSize*BLOCK_SIZE) {
+		prepare();
+	}
+	uint64_t* cipherInLong = (uint64_t*)cipherChunk;
+
+	idxForBytes += 8;
+	return  cipherInLong[(idxForBytes + 7) / 8];
+}
+block prgFromOpenSSLAES::getRandom128() {
+	if (idxForBytes + 16 >= cachedSize*BLOCK_SIZE) {
+		prepare();
+	}
+	idxForBytes += 16;
+	return  cipherChunk[(idxForBytes + 15) / 16];
+}
+
+
+void prgFromOpenSSLAES::prepare() {
+
+	//set the starting point of the index. We want the ceiling of the division by 16
+	startingIndex = (idxForBytes + 16 - 1) / 16;
+	long *plaintextArray = (long *)indexPlaintext;
+	//go over the array and set the long for evey other long, we use only half of the 128 bit variables
+	for (long i = 0; i < cachedSize; i++) {
+		plaintextArray[i * 2 + 1] = startingIndex + i;
+	}
+
+	idxForBytes = 0;
+}
+
+
+
+
 void OpenSSLRC4::setKey(SecretKey secretKey) {
 	vector<byte> encodedKey = secretKey.getEncoded();
 	RC4_set_key(rc4, encodedKey.size(), &encodedKey[0]); 	// set the key to the openssl object.
@@ -110,6 +215,8 @@ void OpenSSLRC4::setKey(SecretKey secretKey) {
 	vector<byte> out(128); // RC4 has a problem in the first 1024 bits. by ignoring these bytes, we bypass this problem.
 	getPRGBytes(out, 0, 128);
 }
+
+
 
 SecretKey OpenSSLRC4::generateKey(int keySize) {
 	// generate a random string of bits of length keySize, which has to be greater that zero. 
