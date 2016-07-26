@@ -540,6 +540,8 @@ TEST_CASE("random", "[prgFromOpenSSLAES]")
 		prgFromOpenSSLAES random2;
 
 		auto sk = random1.generateKey(16);
+		random1.setKey(sk);
+		random2.setKey(sk);
 
 
 
@@ -549,11 +551,88 @@ TEST_CASE("random", "[prgFromOpenSSLAES]")
 
 			bool equal = false;
 
-			if(int1 = int2)
+			if(int1 == int2)
 				equal = true;
 			REQUIRE(equal == true);
 		}
 
+		for (int k = 0; k < 10; k++) {
+			auto int1 = random1.getRandom64();
+			auto int2 = random2.getRandom64();
+
+			bool equal = false;
+
+			if (int1 == int2)
+				equal = true;
+			REQUIRE(equal == true);
+		}
+
+		for (int k = 0; k < 10; k++) {
+			auto int1 = random1.getRandom128();
+			auto int2 = random2.getRandom128();
+
+			bool equal = false;
+
+
+			__m128i neq = _mm_xor_si128(int1, int2);
+			if (_mm_test_all_zeros(neq, neq)) {//int1 == int2
+				equal = true;
+			}
+			REQUIRE(equal == true);
+		}
+
+		for (int k = 0; k < 10; k++) {
+
+			vector<byte> out;
+			random1.getPRGBytes(out, 0, 10);
+			REQUIRE(out.size() == 10);
+			vector<byte> out2;
+			random2.getPRGBytes(out2, 0, 10);
+			bool equal = false;
+
+
+			if (out == out2) {
+				equal = true;
+			}
+			REQUIRE(equal == true);
+		}
+
+		random1.prepare();
+		random2.prepare();
+
+		for (int k = 0; k < 10; k++) {
+
+			vector<byte> out;
+			random1.getPRGBytes(out, 0, 10);
+			REQUIRE(out.size() == 10);
+			vector<byte> out2;
+			random2.getPRGBytes(out2, 0, 10);
+			bool equal = false;
+
+
+			if (out == out2) {
+				equal = true;
+			}
+			REQUIRE(equal == true);
+		}
+
+		auto random3 = move(random1);
+
+		for (int k = 0; k < 10; k++) {
+
+			vector<byte> out;
+			random3.getPRGBytes(out, 0, 10);
+			REQUIRE(out.size() == 10);
+			vector<byte> out2;
+			random2.getPRGBytes(out2, 0, 10);
+			bool equal = false;
+
+
+			if (out == out2) {
+				equal = true;
+			}
+			REQUIRE(equal == true);
+		}
 	}
 }
 

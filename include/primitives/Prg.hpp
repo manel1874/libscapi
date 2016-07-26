@@ -165,7 +165,7 @@ private:
 	int cachedSize;
 	int idxForBytes = 0;
 	int startingIndex = 0;
-	EVP_CIPHER_CTX* aes;
+	unique_ptr<EVP_CIPHER_CTX> aes;
 	bool _isKeySet = false;
 	block* cipherChunk;
 	block* indexPlaintext;
@@ -177,7 +177,18 @@ public:
 	* @param prf underlying PseudorandomFunction.
 	*/
 	prgFromOpenSSLAES(int cachedSize = 1280, bool isStrict = false);
-	//~prgFromOpenSSLAES();
+
+	//move assignment
+	prgFromOpenSSLAES& operator=(prgFromOpenSSLAES&& other);
+	//copy assignment
+	prgFromOpenSSLAES& operator=(prgFromOpenSSLAES& other) = delete;
+	
+	//move constructor
+	prgFromOpenSSLAES(prgFromOpenSSLAES&& old);
+	//copy constructor
+	prgFromOpenSSLAES(prgFromOpenSSLAES& other) = delete;
+
+	~prgFromOpenSSLAES();
 	
 
 	void setKey(SecretKey secretKey) override;

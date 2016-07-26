@@ -103,52 +103,104 @@ void ScPrgFromPrf::increaseCtr() {
 	}
 }
 
-
-SecretKey prgFromOpenSSLAES::generateKey(int keySize) {
-	byte * buf = new byte[keySize];
-	if (!RAND_bytes(buf, keySize))
-		throw runtime_error("key generation failed");
-	vector<byte> vec;
-	copy_byte_array_to_byte_vector(buf, keySize, vec, 0);
-	SecretKey sk(vec, getAlgorithmName());
-	delete buf;
-	return sk;
-}
-
-void prgFromOpenSSLAES::setKey(SecretKey secretKey) {
-
-	int outLength;
-
-	aes = new EVP_CIPHER_CTX();
-	EVP_CIPHER_CTX_init(aes);
-	EVP_EncryptInit(aes, EVP_aes_128_ecb(), &(secretKey.getEncoded()).at(0), (byte *)&iv);
-
-	EVP_EncryptUpdate(aes, (byte *)cipherChunk, &outLength, (byte *)indexPlaintext, cachedSize);
-
-	_isKeySet = true;
-}
-
 prgFromOpenSSLAES::prgFromOpenSSLAES(int cachedSize, bool isStrict) : cachedSize(cachedSize), isStrict(isStrict) {
 
 	//allocate memory for the plaintext which is an array of indices and for the ciphertext which is the output
 	//of the encryption
-	cipherChunk = (block *) _mm_malloc(sizeof(block) * cachedSize, 16);
+	cipherChunk = (block *)_mm_malloc(sizeof(block) * cachedSize, 16);
 	indexPlaintext = (block *)_mm_malloc(sizeof(block) * cachedSize, 16);
 
-	//init the array of indices which are set as the plaintext. Note that we only use the list sagnificant long part of the 128 bit.
+	//assin zero to the array of indices which are set as the plaintext. Note that we only use the list sagnificant long part of each 128 bit.
 	memset(indexPlaintext, 0, sizeof(block) * cachedSize);
 
 
 	long *plaintextArray = (long *)indexPlaintext;
-	//go over the array and set the long for evey other long, we use only half of the 128 bit variables
+
+	//go over the array and set the 64 list sagnificat bits for evey 128 bit value, we use only half of the 128 bit variables
 	for (long i = 0; i < cachedSize; i++) {
 		plaintextArray[i * 2 + 1] = i;
 	}
 
 }
 
+prgFromOpenSSLAES::prgFromOpenSSLAES(prgFromOpenSSLAES && old) :
+	cachedSize(old.cachedSize), idxForBytes(old.idxForBytes), startingIndex(old.startingIndex),
+	_isKeySet(old._isKeySet), cipherChunk(old.cipherChunk), indexPlaintext(old.indexPlaintext), isStrict(old.isStrict)
+{
+	aes = move(old.aes);
+	old.cipherChunk = nullptr;
+	old.indexPlaintext = nullptr;
+}
+
+prgFromOpenSSLAES & prgFromOpenSSLAES::operator=(prgFromOpenSSLAES && other)
+{
+
+	//copy values
+	cachedSize = other.cachedSize;
+	idxForBytes = other.idxForBytes;
+	aes = move(other.aes);
+	startingIndex = other.startingIndex;
+	_isKeySet = other._isKeySet;
+	cipherChunk = other.cipherChunk;
+	indexPlaintext = other.indexPlaintext;
+	isStrict = other.isStrict;
+	
+
+	//set other values to null
+	other.cipherChunk = nullptr;
+	other.indexPlaintext = nullptr;
+
+	return *this;
+}
+
+prgFromOpenSSLAES::~prgFromOpenSSLAES() {
+	//free allocated aligned memory
+	_mm_free(cipherChunk);
+	_mm_free(indexPlaintext);
+}
+
+SecretKey prgFromOpenSSLAES::generateKey(int keySize) {
+
+	//NOTE----A temp way to produce a secret key. Will be changed later
+	byte * buf = new byte[keySize];
+	if (!RAND_bytes(buf, keySize))
+		throw runtime_error("key generation failed");
+	vector<byte> vec;
+	//copy the random bytes to a vector held in the secret key
+	copy_byte_array_to_byte_vector(buf, keySize, vec, 0);
+	SecretKey sk(vec, getAlgorithmName());
+	//free the dynamic buffer
+	delete buf;
+	return sk;
+}
+
+void prgFromOpenSSLAES::setKey(SecretKey secretKey) {
+
+	
+
+	//an int for to get the actual size that was encrypted. This is not used
+	int outLength;
+
+	//set the uniqu_ptr aes
+	aes.reset(new EVP_CIPHER_CTX());
+
+	//init the aes prp using openssl
+	EVP_CIPHER_CTX_init(aes.get());
+	EVP_EncryptInit(aes.get(), EVP_aes_128_ecb(), &(secretKey.getEncoded()).at(0), (byte *)&iv);
+
+	//encrypt the array of indices that was created in the constructor
+	EVP_EncryptUpdate(aes.get(), (byte *)cipherChunk, &outLength, (byte *)indexPlaintext, cachedSize);
+
+	_isKeySet = true;
+}
+
+
 
 void prgFromOpenSSLAES::getPRGBytes(vector<byte> & outBytes, int outOffset, int outLen) {
+
+	//key must be set in order to get randoms
+	if (!isKeySet())
+		throw IllegalStateException("secret key isn't set");
 
 	//the required number of random bytes exceeds the avaliable randoms, prepare new randoms
 	if (outLen + idxForBytes > cachedSize * 16) {
@@ -166,6 +218,11 @@ void prgFromOpenSSLAES::getPRGBytes(vector<byte> & outBytes, int outOffset, int 
 
 uint32_t prgFromOpenSSLAES::getRandom32() {
 
+	//key must be set in order to get randoms
+	if (!isKeySet())
+		throw IllegalStateException("secret key isn't set");
+
+	//the required number of random bytes exceeds the avaliable randoms, prepare new randoms
 	if (idxForBytes + 4 >= cachedSize*BLOCK_SIZE) {
 		prepare();
 	}
@@ -175,6 +232,12 @@ uint32_t prgFromOpenSSLAES::getRandom32() {
 	return  cipherInInts[(idxForBytes + 3)/4];
 }
 uint64_t prgFromOpenSSLAES::getRandom64() {
+
+	//key must be set in order to get randoms
+	if (!isKeySet())
+		throw IllegalStateException("secret key isn't set");
+
+	//the required number of random bytes exceeds the avaliable randoms, prepare new randoms
 	if (idxForBytes + 8 >= cachedSize*BLOCK_SIZE) {
 		prepare();
 	}
@@ -184,6 +247,11 @@ uint64_t prgFromOpenSSLAES::getRandom64() {
 	return  cipherInLong[(idxForBytes + 7) / 8];
 }
 block prgFromOpenSSLAES::getRandom128() {
+
+	//key must be set in order to get randoms
+	if (!isKeySet())
+		throw IllegalStateException("secret key isn't set");
+	//the required number of random bytes exceeds the avaliable randoms, prepare new randoms
 	if (idxForBytes + 16 >= cachedSize*BLOCK_SIZE) {
 		prepare();
 	}
