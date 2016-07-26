@@ -34,6 +34,9 @@ void OTExtensionWithMatrix::transfer(int nOTs,
 
     receiverOutputMatrix.resize(nOTs);
 
+    senderOutputMatrices[0].resize(nOTs);
+    senderOutputMatrices[1].resize(nOTs);
+
     for (int loop = 0; loop < nloops; loop++)
     {
         // randomize last 128 + 128 bits that will be discarded
