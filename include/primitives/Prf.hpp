@@ -167,7 +167,10 @@ class PrpFixed : public virtual PseudorandomPermutation, public virtual PrfFixed
 * Marker interface. Every class that implements it is signed as AES.
 * AES is a blockCipher with fixed input and output lengths and thus implements the interface PrpFixed.
 */
-class AES : public PrpFixed {};
+class AES : public PrpFixed {
+public:
+	virtual ~AES() {}
+};
 
 /**
 * Marker interface. Every class that implements it is signed as TripleDes.
