@@ -191,7 +191,7 @@ void prgFromOpenSSLAES::setKey(SecretKey secretKey) {
 		//an int for to get the actual size that was encrypted. This is not used
 		int outLength;
 		//encrypt the array of indices that was created in the constructor
-		EVP_EncryptUpdate(aes, (byte *)cipherChunk, &outLength, (byte *)indexPlaintext, cachedSize);
+		EVP_EncryptUpdate(aes, (byte *)cipherChunk, &outLength, (byte *)indexPlaintext, cachedSize*16);
 
 		_isKeySet = true;
 
@@ -288,7 +288,7 @@ void prgFromOpenSSLAES::prepare() {
 
 	int outLength;
 	//encrypt the array of indices that was created in the constructor
-	EVP_EncryptUpdate(aes, (byte *)cipherChunk, &outLength, (byte *)indexPlaintext, cachedSize);
+	EVP_EncryptUpdate(aes, (byte *)cipherChunk, &outLength, (byte *)indexPlaintext, cachedSize*16);
 
 	idxForBytes = 0;
 }
