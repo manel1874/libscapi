@@ -124,10 +124,9 @@ prgFromOpenSSLAES::prgFromOpenSSLAES(int cachedSize, bool isStrict) : cachedSize
 }
 
 prgFromOpenSSLAES::prgFromOpenSSLAES(prgFromOpenSSLAES && old) :
-	cachedSize(old.cachedSize), idxForBytes(old.idxForBytes), startingIndex(old.startingIndex),
+	cachedSize(old.cachedSize), idxForBytes(old.idxForBytes), startingIndex(old.startingIndex), aes(old.aes),
 	_isKeySet(old._isKeySet), cipherChunk(old.cipherChunk), indexPlaintext(old.indexPlaintext), isStrict(old.isStrict)
 {
-	aes = move(old.aes);
 	old.cipherChunk = nullptr;
 	old.indexPlaintext = nullptr;
 }
@@ -157,6 +156,9 @@ prgFromOpenSSLAES::~prgFromOpenSSLAES() {
 	//free allocated aligned memory
 	_mm_free(cipherChunk);
 	_mm_free(indexPlaintext);
+
+	//free aes
+	EVP_CIPHER_CTX_cleanup(aes);
 }
 
 SecretKey prgFromOpenSSLAES::generateKey(int keySize) {
@@ -176,22 +178,32 @@ SecretKey prgFromOpenSSLAES::generateKey(int keySize) {
 
 void prgFromOpenSSLAES::setKey(SecretKey secretKey) {
 
-	
+	if (_isKeySet == false) {
 
-	//an int for to get the actual size that was encrypted. This is not used
-	int outLength;
+		aes = new EVP_CIPHER_CTX();
 
-	//set the uniqu_ptr aes
-	aes.reset(new EVP_CIPHER_CTX());
+		//init the aes prp using openssl
+		EVP_CIPHER_CTX_init(aes);
+		EVP_EncryptInit(aes, EVP_aes_128_ecb(), &(secretKey.getEncoded()).at(0), (byte *)&iv);
 
-	//init the aes prp using openssl
-	EVP_CIPHER_CTX_init(aes.get());
-	EVP_EncryptInit(aes.get(), EVP_aes_128_ecb(), &(secretKey.getEncoded()).at(0), (byte *)&iv);
+		//an int for to get the actual size that was encrypted. This is not used
+		int outLength;
+		//encrypt the array of indices that was created in the constructor
+		EVP_EncryptUpdate(aes, (byte *)cipherChunk, &outLength, (byte *)indexPlaintext, cachedSize);
 
-	//encrypt the array of indices that was created in the constructor
-	EVP_EncryptUpdate(aes.get(), (byte *)cipherChunk, &outLength, (byte *)indexPlaintext, cachedSize);
+		_isKeySet = true;
 
-	_isKeySet = true;
+	}
+	else {
+		//create a new aes and init it with the new secret key
+		EVP_CIPHER_CTX_cleanup(aes);
+		aes = new EVP_CIPHER_CTX();
+		EVP_CIPHER_CTX_init(aes);
+		EVP_EncryptInit(aes, EVP_aes_128_ecb(), &(secretKey.getEncoded()).at(0), (byte *)&iv);
+		idxForBytes = 0; //makes sure the indices are starting from 0
+		prepare();
+	}
+
 }
 
 
@@ -229,7 +241,7 @@ uint32_t prgFromOpenSSLAES::getRandom32() {
 	uint32_t* cipherInInts = (uint32_t*)cipherChunk;
 
 	idxForBytes += 4;
-	return  cipherInInts[(idxForBytes + 3)/4];
+	return  cipherInInts[(idxForBytes-4 + 3)/4];
 }
 uint64_t prgFromOpenSSLAES::getRandom64() {
 
@@ -244,7 +256,7 @@ uint64_t prgFromOpenSSLAES::getRandom64() {
 	uint64_t* cipherInLong = (uint64_t*)cipherChunk;
 
 	idxForBytes += 8;
-	return  cipherInLong[(idxForBytes + 7) / 8];
+	return  cipherInLong[(idxForBytes-8 + 7) / 8];
 }
 block prgFromOpenSSLAES::getRandom128() {
 
@@ -256,12 +268,14 @@ block prgFromOpenSSLAES::getRandom128() {
 		prepare();
 	}
 	idxForBytes += 16;
-	return  cipherChunk[(idxForBytes + 15) / 16];
+	return  cipherChunk[(idxForBytes - 16 + 15) / 16];
 }
 
 
 void prgFromOpenSSLAES::prepare() {
 
+	if (isStrict == true)
+		throw overflow_error("No randoms left for a strict class");
 	//set the starting point of the index. We want the ceiling of the division by 16
 	startingIndex = (idxForBytes + 16 - 1) / 16;
 	long *plaintextArray = (long *)indexPlaintext;
@@ -269,6 +283,10 @@ void prgFromOpenSSLAES::prepare() {
 	for (long i = 0; i < cachedSize; i++) {
 		plaintextArray[i * 2 + 1] = startingIndex + i;
 	}
+
+	int outLength;
+	//encrypt the array of indices that was created in the constructor
+	EVP_EncryptUpdate(aes, (byte *)cipherChunk, &outLength, (byte *)indexPlaintext, cachedSize);
 
 	idxForBytes = 0;
 }

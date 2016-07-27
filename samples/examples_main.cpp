@@ -37,6 +37,7 @@ To run an example:
 example_name can one of the following: 
 	* dlog
 	* sha1
+	* prg
 	* maliciousOT <party_number (1|2)>
 	* comm		  <party_number (1|2)> <config_file_path>
 	* yao		  <party_number (1|2)> <config_file_path>
@@ -56,6 +57,8 @@ int main(int argc, char* argv[]) {
 		return mainDlog();
 	if (exampleName == "sha1")
 		return mainSha1();
+	if (exampleName == "prg")
+		return mainPrg();
 	if (argc == 2)
 		return exampleUsage();
 	if (exampleName == "maliciousOT")

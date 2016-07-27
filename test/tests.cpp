@@ -595,6 +595,7 @@ TEST_CASE("random", "[prgFromOpenSSLAES]")
 				equal = true;
 			}
 			REQUIRE(equal == true);
+			REQUIRE(equal == true);
 		}
 
 		random1.prepare();
@@ -634,6 +635,33 @@ TEST_CASE("random", "[prgFromOpenSSLAES]")
 			REQUIRE(equal == true);
 		}
 	}
+
+	//make sure that 2 prg with different secret key dont give the same randoms
+	prgFromOpenSSLAES random4;
+	prgFromOpenSSLAES random5;
+
+	auto sk1 = random4.generateKey(16);
+	auto sk2 = random4.generateKey(16);
+	random4.setKey(sk1);
+	random5.setKey(sk2);
+
+	auto int1 = random4.getRandom64();
+	auto int2 = random5.getRandom64();
+
+	bool equal = false;
+
+	if (int1 == int2)
+		equal = true;
+	REQUIRE(equal == false);
+
+	//set to the key that random4 holds
+	random5.setKey(sk1);
+	int2 = random5.getRandom64();
+
+	if (int1 == int2)
+		equal = true;
+	REQUIRE(equal == true);
+
 }
 
 

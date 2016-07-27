@@ -32,6 +32,7 @@ int mainComm(string partyNumber, string filePath);
 int mainYao(string partyNum, string configPath);
 int mainDlog();
 int mainSha1();
+int mainPrg();
 int mainSigma(string, string);
 int mainOT(string  party);
 #ifndef _WIN32
