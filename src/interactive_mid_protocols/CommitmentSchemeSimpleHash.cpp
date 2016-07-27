@@ -34,17 +34,18 @@
 /****************************************/
 void CmtSimpleHashCommitmentMessage::initFromString(const string & s) {
 	auto vec = explode(s, ':');
-	assert(vec.size() == 2);
-	vector<byte> tmp(vec[0].begin(), vec[0].end());
-	c = make_shared<vector<byte>>(tmp);
-	id = stol(vec[1]);
+	id = stol(vec[0]);
+	for (int i = 2; i < vec.size(); i++) {
+		vec[1] += ":" + vec[i];
+	}
+	c = make_shared<vector<byte>>(vec[1].begin(), vec[1].end());
 }
 
 string CmtSimpleHashCommitmentMessage::toString() {
-	const byte * uc = &((*c)[0]);
-	string output(reinterpret_cast<char const*>(uc), c->size());
+	string output = to_string(id);
 	output += ":";
-	output += to_string(id);
+	const byte * uc = &((*c)[0]);
+	output += string(reinterpret_cast<char const*>(uc), c->size());
 	return output;
 };
 
@@ -53,17 +54,25 @@ string CmtSimpleHashCommitmentMessage::toString() {
 /****************************************/
 void CmtSimpleHashDecommitmentMessage::initFromString(const string & s) {
 	auto vec = explode(s, ':');
-	assert(vec.size() == 2);
-	vector<byte> random(vec[0].begin(), vec[0].end());
+	auto size = stoull(vec[0]);
+	int counter = 2;
+	while (vec[1].size() != size)
+		vec[1] += ":" + vec[counter++];
+	vector<byte> random(vec[1].begin(), vec[1].end());
 	r = make_shared<ByteArrayRandomValue>(random);
-	vector<byte> tmp(vec[1].begin(), vec[1].end());
+	for (int i = counter + 1; i < vec.size(); i++)
+		vec[counter] += ":" + vec[i];
+	vector<byte> tmp(vec[counter].begin(), vec[counter].end());
 	x = make_shared<vector<byte>>(tmp);
 }
 
 string CmtSimpleHashDecommitmentMessage::toString() {
 	auto random = r->getR();
+	auto size = random.size();
+	string output = to_string(size);
+	output += ":";
 	const byte * uc = &(random[0]);
-	string output(reinterpret_cast<char const*>(uc), random.size());
+	output += string(reinterpret_cast<char const*>(uc), random.size());
 	const byte * xBytes = &((*x)[0]);
 	output += ":";
 	output += string(reinterpret_cast<char const*>(xBytes), x->size());
@@ -105,7 +114,7 @@ shared_ptr<CmtCCommitmentMsg> CmtSimpleHashCommitter::generateCommitmentMsg(shar
 	vector<byte> r(n);
 	RAND_bytes(r.data(), n);
 
-	
+
 	//Compute the hash function
 	auto hashValArray = computeCommitment(*x, r);
 
@@ -229,7 +238,7 @@ shared_ptr<CmtCommitValue> CmtSimpleHashReceiver::verifyDecommitment(CmtCCommitm
 	
 	//create an array that will hold the concatenation of r with x
 	vector<byte> cTag(r);
-	cTag.insert(cTag.end(), x.begin(), x.end());
+	cTag.insert(cTag.end(), x.begin(), x.end());	
 	vector<byte> hashValArrayTag;
 	hash->update(cTag, 0, cTag.size());
 	hash->hashFinal(hashValArrayTag, 0);
