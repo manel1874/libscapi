@@ -79,23 +79,17 @@ string CmtSimpleHashDecommitmentMessage::toString() {
 	return output;
 };
 
-void CmtSimpleHashCommitter::doConstruct(shared_ptr<CommParty> channel, shared_ptr<CryptographicHash> hash, int n) {
-	this->channel = channel;
-	this->hash = hash;
-	this->n = n;
-	random = get_seeded_random();
-
-	//No pre-process in SimpleHash Commitment
-}
-
 /**
 * Constructor that receives a connected channel (to the receiver) and chosses default
 * values for the hash function, SecureRandom object and a security parameter n.
 *  @param channel
 */
-CmtSimpleHashCommitter::CmtSimpleHashCommitter(shared_ptr<CommParty> channel) {
-	auto hash = make_shared<OpenSSLSHA256>();
-	doConstruct(channel, hash, 32);
+CmtSimpleHashCommitter::CmtSimpleHashCommitter(shared_ptr<CommParty> channel, shared_ptr<CryptographicHash> hash, int n/*, shared_ptr<AES_PRG> random = make_shared<AES_PRG>()*/) {
+	this->channel = channel;
+	this->hash = hash;
+	this->n = n;
+
+	//No pre-process in SimpleHash Commitment
 }
 
 /**
