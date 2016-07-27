@@ -168,7 +168,7 @@ private:
 	int cachedSize;
 	int idxForBytes = 0;
 	int startingIndex = 0;
-	EVP_CIPHER_CTX *aes;
+	EVP_CIPHER_CTX *aes = nullptr;
 	bool _isKeySet = false;
 	block* cipherChunk;
 	block* indexPlaintext;

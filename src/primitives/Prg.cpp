@@ -105,6 +105,7 @@ void ScPrgFromPrf::increaseCtr() {
 
 prgFromOpenSSLAES::prgFromOpenSSLAES(int cachedSize, bool isStrict) : cachedSize(cachedSize), isStrict(isStrict) {
 
+
 	//allocate memory for the plaintext which is an array of indices and for the ciphertext which is the output
 	//of the encryption
 	cipherChunk = (block *)_mm_malloc(sizeof(block) * cachedSize, 16);
@@ -158,7 +159,8 @@ prgFromOpenSSLAES::~prgFromOpenSSLAES() {
 	_mm_free(indexPlaintext);
 
 	//free aes
-	EVP_CIPHER_CTX_cleanup(aes);
+	if(aes != nullptr)
+		EVP_CIPHER_CTX_cleanup(aes);
 }
 
 SecretKey prgFromOpenSSLAES::generateKey(int keySize) {
