@@ -124,7 +124,7 @@ public:
 	* @param numOfThreads
 	*/
 	OTExtensionMaliciousSender(SocketPartyData bindAddress, int numOts, int numOfThreads = 1, int numBaseOts = 190);
-
+	~OTExtensionMaliciousSender();
 	/**
 	* The overloaded function that runs the protocol.<p>
 	* After the base OT was done by the constructor, call to this function will be optimized and fast, no matter how much OTs there are.
@@ -183,7 +183,7 @@ public:
 	*
 	*/
 	OTExtensionMaliciousReceiver(SocketPartyData serverAddress, int numOts, int numOfThreads = 1, int numBaseOts = 190);
-
+	~OTExtensionMaliciousReceiver();
 	/**
 	* The overloaded function that runs the protocol.<p>
 	* After the base OT was done by the constructor, call to this function will be optimized and fast, no matter how much OTs there are.

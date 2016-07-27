@@ -76,12 +76,11 @@ OTExtensionMaliciousSender::OTExtensionMaliciousSender(SocketPartyData bindAddre
 	int s2ots = nblocks * m_num_base_ots;
 
 	// key seed matrix used for the 1-step base OTs
-	m_receiver_key_seeds_matrix = (maliciousot::BYTE*)malloc(AES_KEY_BYTES * m_num_base_ots * nSndVals);
+	m_receiver_key_seeds_matrix = new maliciousot::BYTE[AES_KEY_BYTES * m_num_base_ots * nSndVals];
 	// key seeds for the 2-nd step base OTs
-	m_sender_key_seeds = (maliciousot::BYTE*)malloc(AES_KEY_BYTES * s2ots);//m_security_level.symbits);
+	m_sender_key_seeds = new maliciousot::BYTE[AES_KEY_BYTES * s2ots];//m_security_level.symbits);
 
-															  // Server listen
-	
+	// Server listen
 	//m_connection_manager = unique_ptr<ConnectionManager>(tempS);
 	m_connection_manager->setup_connection();
 
@@ -117,6 +116,14 @@ OTExtensionMaliciousSender::OTExtensionMaliciousSender(SocketPartyData bindAddre
 		m_num_checks, s2ots, m_sender_seed);
 	//m_sender = unique_ptr<Mal_OTExtensionSender>(tempSnd);
 	
+}
+
+OTExtensionMaliciousSender::~OTExtensionMaliciousSender() {
+	delete m_connection_manager;
+	delete [] m_receiver_key_seeds_matrix;
+	delete [] m_sender_key_seeds;
+	delete m_sender;
+	delete m_receiver;
 }
 
 BOOL OTExtensionMaliciousSender::precompute_base_ots_sender() {
@@ -339,6 +346,14 @@ OTExtensionMaliciousReceiver::OTExtensionMaliciousReceiver(SocketPartyData serve
 		m_receiver_key_seeds_matrix, m_receiver_seed,
 		m_num_base_ots, s2ots);
 
+}
+
+OTExtensionMaliciousReceiver::~OTExtensionMaliciousReceiver() {
+	delete m_connection_manager;
+	delete [] m_sender_key_seeds;
+	delete [] m_receiver_key_seeds_matrix;
+	delete m_sender;
+	delete m_receiver;
 }
 
 BOOL OTExtensionMaliciousReceiver::precompute_base_ots_receiver() {
