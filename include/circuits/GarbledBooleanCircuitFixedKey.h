@@ -89,7 +89,7 @@ protected:
 public:
 	
 	GarbledBooleanCircuitFixedKey(void);
-	virtual  ~GarbledBooleanCircuitFixedKey(void);
+	virtual  ~GarbledBooleanCircuitFixedKey(void) {};
 
 	bool getIsNonXorOutputsRequired() const{ return isNonXorOutputsRequired; };
 

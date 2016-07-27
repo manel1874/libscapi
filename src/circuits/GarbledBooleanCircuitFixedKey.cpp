@@ -49,17 +49,6 @@ GarbledBooleanCircuitFixedKey::GarbledBooleanCircuitFixedKey(void)
 {
 }
 
-
-GarbledBooleanCircuitFixedKey::~GarbledBooleanCircuitFixedKey(void)
-{
-		
-	if (computedWires != nullptr){
-		computedWires--;
-		_aligned_free(computedWires);
-	}
-
-}
-
 void GarbledBooleanCircuitFixedKey::createCircuit(const char* fileName, bool isFreeXor, bool isNonXorOutputsRequired){
 	
 	//Set the fixed key.
