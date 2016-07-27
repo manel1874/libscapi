@@ -1,28 +1,28 @@
 /**
 * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-* 
+*
 * Copyright (c) 2016 LIBSCAPI (http://crypto.biu.ac.il/SCAPI)
 * This file is part of the SCAPI project.
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
-* 
+*
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"),
-* to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+* to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
 * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-* 
+*
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-* 
+*
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-* 
+*
 * We request that any publication and/or code referring to and/or based on SCAPI contain an appropriate citation to SCAPI, including a reference to
 * http://crypto.biu.ac.il/SCAPI.
-* 
+*
 * Libscapi uses several open source libraries. Please see these projects for any further licensing issues.
 * For more information , See https://github.com/cryptobiu/libscapi/blob/master/LICENSE.MD
 *
 * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-* 
+*
 */
 
 
@@ -53,13 +53,13 @@ public:
 	* @param commitVal the committed value
 	* @param computedCommitment the commitment
 	*/
-	CmtSimpleHashCommitmentValues(shared_ptr<RandomValue> r, shared_ptr<CmtCommitValue> commitVal, shared_ptr<vector<byte>> computedCommitment) 
+	CmtSimpleHashCommitmentValues(shared_ptr<RandomValue> r, shared_ptr<CmtCommitValue> commitVal, shared_ptr<vector<byte>> computedCommitment)
 		: CmtCommitmentPhaseValues(r, commitVal) {
 		this->computedCommitment = computedCommitment;
 	}
 
 	shared_ptr<void> getComputedCommitment() override { return computedCommitment; };
-		
+
 };
 
 /**
@@ -88,7 +88,7 @@ public:
 	/**
 	* Returns the commitment value
 	*/
-	shared_ptr<void> getCommitment() override {	return c; }
+	shared_ptr<void> getCommitment() override { return c; }
 
 	/**
 	* Returns the commitment id.
@@ -109,7 +109,7 @@ class CmtSimpleHashDecommitmentMessage : public CmtCDecommitmentMessage {
 private:
 	shared_ptr<ByteArrayRandomValue> r; //Random value sampled during the commitment stage;
 	shared_ptr<vector<byte>> x; //Committer's private input x 
-	
+
 public:
 	CmtSimpleHashDecommitmentMessage() {}
 
@@ -126,7 +126,7 @@ public:
 	shared_ptr<void> getX() override { return x; }
 	vector<byte> getXValue() { return *x; }
 
-	shared_ptr<RandomValue> getR() override { return r;	}
+	shared_ptr<RandomValue> getR() override { return r; }
 
 	// network serialization implementation:
 	void initFromString(const string & s) override;
@@ -163,9 +163,7 @@ class CmtSimpleHashCommitter : public CmtCommitter, public SecureCommit, public 
 private:
 	shared_ptr<CryptographicHash> hash;
 	int n;
-	mt19937 random;
-	
-	void doConstruct(shared_ptr<CommParty> channel, shared_ptr<CryptographicHash> hash, int n = 32);
+	//shared_ptr<AES_PRG> random;
 
 	/**
 	* Computes the hash function on the concatination of the inputs.
@@ -176,12 +174,6 @@ private:
 	shared_ptr<vector<byte>> computeCommitment(vector<byte> x, vector<byte> r);
 
 public:
-	/**
-	* Constructor that receives a connected channel (to the receiver) and chosses default
-	* values for the hash function, SecureRandom object and a security parameter n.
-	*  @param channel
-	*/
-	CmtSimpleHashCommitter(shared_ptr<CommParty> channel);
 
 	/**
 	* Constructor that receives a connected channel (to the receiver), the hash function
@@ -193,9 +185,7 @@ public:
 	* @param n security parameter
 	*
 	*/
-	CmtSimpleHashCommitter(shared_ptr<CommParty> channel, shared_ptr<CryptographicHash> hash, int n = 32) {
-		doConstruct(channel, hash, n);
-	}
+	CmtSimpleHashCommitter(shared_ptr<CommParty> channel, shared_ptr<CryptographicHash> hash = make_shared<OpenSSLSHA256>(), int n = 32/*, shared_ptr<AES_PRG> random = make_shared<AES_PRG>()*/);
 
 	/**
 	* Runs the following lines of the commitment scheme:
@@ -204,7 +194,7 @@ public:
 	* @return the generated commitment.
 	*
 	*/
-	shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(shared_ptr<CmtCommitValue> input, long id) override; 
+	shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(shared_ptr<CmtCommitValue> input, long id) override;
 
 	shared_ptr<CmtCDecommitmentMessage> generateDecommitmentMsg(long id) override;
 
@@ -222,7 +212,7 @@ public:
 	* No pre-process is performed for Simple Hash Committer, therefore this function
 	* returns empty vector.
 	*/
-	vector<shared_ptr<void>> getPreProcessValues() override { 
+	vector<shared_ptr<void>> getPreProcessValues() override {
 		vector<shared_ptr<void>> empty;
 		return empty;
 	}
@@ -232,7 +222,7 @@ public:
 	* @param value
 	* @return the generated bytes.
 	*/
-	vector<byte> generateBytesFromCommitValue(CmtCommitValue* value) override; 
+	vector<byte> generateBytesFromCommitValue(CmtCommitValue* value) override;
 };
 
 /**
@@ -265,7 +255,7 @@ class CmtSimpleHashReceiver : public CmtReceiver, public SecureCommit, public Cm
 	*/
 
 private:
-	
+
 	shared_ptr<CommParty> channel;
 	shared_ptr<CryptographicHash> hash;
 	int n; //security parameter.
@@ -301,7 +291,7 @@ public:
 	* "WAIT for a value c
 	*	STORE c".
 	*/
-	shared_ptr<CmtRCommitPhaseOutput> receiveCommitment() override; 
+	shared_ptr<CmtRCommitPhaseOutput> receiveCommitment() override;
 
 	/**
 	* Run the decommit phase of the protocol:
@@ -313,9 +303,9 @@ public:
 	*	ELSE
 	*	  	OUTPUT ACC and value x".
 	*/
-	shared_ptr<CmtCommitValue> receiveDecommitment(long id) override; 
+	shared_ptr<CmtCommitValue> receiveDecommitment(long id) override;
 
-	shared_ptr<CmtCommitValue> verifyDecommitment(CmtCCommitmentMsg* commitmentMsg,	CmtCDecommitmentMessage* decommitmentMsg) override; 
+	shared_ptr<CmtCommitValue> verifyDecommitment(CmtCCommitmentMsg* commitmentMsg, CmtCDecommitmentMessage* decommitmentMsg) override;
 
 	/**
 	* No pre-process is performed for Simple Hash Receiver, therefore this function returns null!
@@ -323,13 +313,13 @@ public:
 	vector<shared_ptr<void>> getPreProcessedValues() override {
 		vector<shared_ptr<void>> empty;
 		return empty;
-	}	
+	}
 
 	/**
 	* This function converts the given commit value to a byte array.
 	* @param value
 	* @return the generated bytes.
 	*/
-	vector<byte> generateBytesFromCommitValue(CmtCommitValue* value) override; 
+	vector<byte> generateBytesFromCommitValue(CmtCommitValue* value) override;
 };
 
