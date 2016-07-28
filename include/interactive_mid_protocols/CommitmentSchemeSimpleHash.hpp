@@ -68,7 +68,7 @@ public:
 *
 */
 class CmtSimpleHashCommitmentMessage : public CmtCCommitmentMsg {
-
+	friend class boost::serialization::access;
 private:
 	// In SimpleHash schemes the commitment object is a vector<byte>. 
 	shared_ptr<vector<byte>> c;
@@ -98,6 +98,15 @@ public:
 	// network serialization implementation:
 	void initFromString(const string & s) override;
 	string toString() override;
+
+	template<class Archive>
+	void serialize(Archive & ar, const unsigned int version)
+	{
+		ar & boost::serialization::base_object<CmtCCommitmentMsg>(*this);
+		ar & c;
+		ar & id;
+	}
+
 };
 
 /**
@@ -106,6 +115,7 @@ public:
 *
 */
 class CmtSimpleHashDecommitmentMessage : public CmtCDecommitmentMessage {
+	friend class boost::serialization::access;
 private:
 	shared_ptr<ByteArrayRandomValue> r; //Random value sampled during the commitment stage;
 	shared_ptr<vector<byte>> x; //Committer's private input x 
@@ -132,6 +142,13 @@ public:
 	void initFromString(const string & s) override;
 	string toString() override;
 
+	template<class Archive>
+	void serialize(Archive & ar, const unsigned int version)
+	{
+		ar & boost::serialization::base_object<CmtCDecommitmentMessage>(*this);
+		ar & x;
+		ar & r;
+	}
 };
 
 /**
@@ -164,7 +181,7 @@ private:
 	shared_ptr<CryptographicHash> hash;
 	int n;
 	//shared_ptr<AES_PRG> random;
-
+	
 	/**
 	* Computes the hash function on the concatination of the inputs.
 	* @param x user input
@@ -174,7 +191,7 @@ private:
 	shared_ptr<vector<byte>> computeCommitment(vector<byte> x, vector<byte> r);
 
 public:
-
+	
 	/**
 	* Constructor that receives a connected channel (to the receiver), the hash function
 	* agreed upon between them, a SecureRandom object and a security parameter n.
@@ -323,3 +340,5 @@ public:
 	vector<byte> generateBytesFromCommitValue(CmtCommitValue* value) override;
 };
 
+BOOST_SERIALIZATION_ASSUME_ABSTRACT(CmtCCommitmentMsg)
+BOOST_SERIALIZATION_ASSUME_ABSTRACT(CmtCDecommitmentMessage)

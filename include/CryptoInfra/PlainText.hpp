@@ -254,6 +254,9 @@ public:
 	* @return the length of the byte array representation of the ciphertext.
 	*/
 	virtual int getLength() = 0;
+
+	template<class Archive>
+	void serialize(Archive & ar, const unsigned int version) {}
 };
 
 /**
@@ -264,12 +267,13 @@ public:
 *
 */
 class SymCiphertextDecorator : public SymmetricCiphertext{
-
+	friend class boost::serialization::access;
 protected:
 	//The symmetric ciphertext we want to decorate.
 	shared_ptr<SymmetricCiphertext> cipher;
 
 public:
+	SymCiphertextDecorator(){}
 	/**
 	* This constructor gets the symmetric ciphertext that we need to decorate.
 	* @param cipher
@@ -291,6 +295,13 @@ public:
 	* Delegate to underlying (decorated) ciphertext. This behavior can be overridden by inheriting classes.
 	*/
 	int getLength() override { return cipher->getLength();	}
+
+	template<class Archive>
+	void serialize(Archive & ar, const unsigned int version)
+	{
+		ar & boost::serialization::base_object<SymmetricCiphertext>(*this);
+		ar & cipher;
+	}
 };
 
 /**
@@ -301,11 +312,12 @@ public:
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
 */
 class ByteArraySymCiphertext : public SymmetricCiphertext {
-
+	friend class boost::serialization::access;
 private:
 	vector<byte> data;
 
 public:
+	ByteArraySymCiphertext(){}
 	/**
 	* The encrypted bytes need to be passed to construct this holder.
 	* @param data
@@ -324,6 +336,13 @@ public:
 	void initFromString(const string & s) override {
 		data.assign(s.begin(), s.end());
 	}
+
+	template<class Archive>
+	void serialize(Archive & ar, const unsigned int version)
+	{
+		ar & boost::serialization::base_object<SymmetricCiphertext>(*this);
+		ar & data;
+	}
 };
 
 /**
@@ -333,11 +352,12 @@ public:
 *
 */
 class IVCiphertext : public SymCiphertextDecorator {
-
+	friend class boost::serialization::access;
 private:
 	vector<byte> iv;
 
 public:
+	IVCiphertext(){}
 	/**
 	* Constructs a container for Ciphertexts that need an IV.
 	* @param cipher symmetric ciphertext to which we need to add an IV.
@@ -363,7 +383,15 @@ public:
 		cipher->initFromString(vec[0]);
 		iv.assign(vec[1].begin(), vec[1].end());
 	}
+
+	template<class Archive>
+	void serialize(Archive & ar, const unsigned int version)
+	{
+		//boost::serialization::void_cast_register<SymCiphertextDecorator, IVCiphertext>();
+		ar & boost::serialization::base_object<SymCiphertextDecorator>(*this);
+		ar & iv;
+	}
 };
 
-
-
+BOOST_SERIALIZATION_ASSUME_ABSTRACT(SymmetricCiphertext)
+BOOST_SERIALIZATION_ASSUME_ABSTRACT(SymCiphertextDecorator)

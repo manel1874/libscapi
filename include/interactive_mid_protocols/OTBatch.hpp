@@ -235,6 +235,8 @@ public:
  * for each OT protocol.
  */
 class OTBatchROutput {
+public:
+	virtual ~OTBatchROutput() { }
 };
 
 /**
