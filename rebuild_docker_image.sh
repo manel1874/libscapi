@@ -9,8 +9,8 @@ docker ps -a -q | xargs --no-run-if-empty docker rm
 echo 'deleting all images'
 docker images -q | xargs --no-run-if-empty docker rmi
 
-echo 'building image $1 using dockerfile $2'
-docker build--build-arg tag=$3 --no-cache -t $1 -f $2 .
+echo 'building image' $1 'using dockerfile' $2
+docker build --build-arg tag=$3 --no-cache -t $1 -f $2 .
 
 echo 'pushing image to docker hub'
 docker login -u scapicryptobiu -p maliciousyao
