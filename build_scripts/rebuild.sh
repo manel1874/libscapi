@@ -8,5 +8,5 @@ dockerfilePath='dockerfiles/Dockerfile'
 
 docker pull $base_image
 docker tag $base_image libscapi_libs
-build_scripts//rebuild_docker_image.sh $image $dockerfilePath $1
+build_scripts/rebuild_docker_image.sh $image $dockerfilePath $1
 
