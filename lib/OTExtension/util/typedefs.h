@@ -97,7 +97,7 @@ namespace semihonestot {
 #define OTEXT_HASH_INIT(sha) SHA_Init(sha)
 #define OTEXT_HASH_UPDATE(sha, buf, bufsize) SHA_Update(sha, buf, bufsize)
 #define OTEXT_HASH_FINAL(sha, sha_buf) SHA_Final(sha_buf, sha)
-
+	
 	const BYTE ZERO_IV[AES_BYTES] = { 0 };
 #ifndef _WIN32
 	static int otextaesencdummy __attribute__ ((unused));;
