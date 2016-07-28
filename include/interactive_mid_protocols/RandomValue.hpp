@@ -54,9 +54,18 @@ public:
 *
 */
 class ByteArrayRandomValue : public RandomValue {
+	friend class boost::serialization::access;
 private:
 	vector<byte> r;
 public:
+	ByteArrayRandomValue(){}	// for cereal
+
 	ByteArrayRandomValue(vector<byte> r) { this->r = r; }
 	vector<byte> getR() { return r; };
+
+	template<class Archive>
+	void serialize(Archive & ar, const unsigned int version)
+	{
+		ar & r;
+	}
 };

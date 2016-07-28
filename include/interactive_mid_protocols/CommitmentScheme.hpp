@@ -285,6 +285,9 @@ public:
 	* @return the commitment object.
 	*/
 	virtual shared_ptr<void> getCommitment()=0;
+
+	template<class Archive>
+	void serialize(Archive & ar, const unsigned int version){}
 };	
 
 /**
@@ -298,6 +301,9 @@ public:
 	virtual shared_ptr<RandomValue> getR() = 0;
 	virtual shared_ptr<void> getX() = 0;
 
+
+	template<class Archive>
+	void serialize(Archive & ar, const unsigned int version) {}
 };
 
 /**

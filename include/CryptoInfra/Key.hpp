@@ -30,6 +30,7 @@
 #define SCAPI_KEY_H
 
 #include "../infra/Common.hpp"
+
 class Key {
 public:
 	/*
@@ -41,6 +42,7 @@ public:
 };
 
 class SecretKey : Key {
+	friend class boost::serialization::access;
 private:
 	vector<byte> key;
 	string algorithm;
@@ -58,6 +60,13 @@ public:
 	string getAlgorithm() override { return algorithm; };
 	vector<byte> getEncoded() override { return key; };
 	virtual ~SecretKey() {};
+	
+	template<class Archive>
+	void serialize(Archive & ar, const unsigned int version)
+	{
+		ar & key;
+		ar & algorithm;
+	}
 };
 
 class PublicKey : public Key {};

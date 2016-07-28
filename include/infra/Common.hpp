@@ -47,6 +47,15 @@
 #include <unordered_map>
 #include <chrono>
 
+#include <boost/serialization/serialization.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/string.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+#include <boost/serialization/export.hpp>
+
+
 using namespace std;
 
 class IllegalStateException : public logic_error
