@@ -227,7 +227,6 @@ namespace semihonestot {
 		int uppermask = 8 - lowermask;
 
 		int i;
-		BYTE temp;
 		for (i = 0; i < len / (sizeof(BYTE) * 8); i++, posctr++)
 		{
 			p[i] = ((m_pBits[posctr] & GET_BIT_POSITIONS[lowermask]) >> lowermask) & 0xFF;
@@ -574,7 +573,7 @@ namespace semihonestot {
 		int p;
 
 		//If swapping is performed on bit-level
-		for (int i = 0, j; i < LOG2_REGISTER_SIZE; i++, srcidx *= 2)
+		for (int i = 0; i < LOG2_REGISTER_SIZE; i++, srcidx *= 2)
 		{
 			destidx = offset*srcidx;
 			rowaptr = (REGISTER_SIZE*)m_pBits;
@@ -623,7 +622,7 @@ namespace semihonestot {
 		}
 
 
-		for (int i = LOG2_REGISTER_SIZE, j, swapoffset = 1, dswapoffset; i < numiters; i++, srcidx *= 2, swapoffset = swapoffset << 1)
+		for (int i = LOG2_REGISTER_SIZE, swapoffset = 1, dswapoffset; i < numiters; i++, srcidx *= 2, swapoffset = swapoffset << 1)
 		{
 			destidx = offset*srcidx;
 			dswapoffset = swapoffset << 1;

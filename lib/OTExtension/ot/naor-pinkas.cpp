@@ -203,7 +203,7 @@ namespace semihonestot {
 
 		Miracl_InitBrick(&bg, &g);
 
-		int itmp, coordSize = (m_SecParam + 7) / 8;
+		int coordSize = (m_SecParam + 7) / 8;
 
 
 		BYTE* pBuf = new BYTE[nOTs * (coordSize + 1)];
@@ -281,7 +281,7 @@ namespace semihonestot {
 
 	BOOL NaorPinkas::SenderECC(int nSndVals, int nOTs, CSocket& socket, BYTE* ret)
 	{
-		irand(time(NULL) + 100);
+		irand((unsigned int) time(NULL) + 100);
 		Big alpha, PKr, bigtmp, x, y, xtmp, ytmp;
 #ifdef USE_PRIME_FIELD
 		ECn pCr[nSndVals], pC[nSndVals], ecctmp, PK0r, invtmp, g;
@@ -293,7 +293,7 @@ namespace semihonestot {
 		vector<EC2> pC(nSndVals);
 		//EC2 ecctmp, PK0r, invtmp, g;
 #endif
-		int itmp, coordSize = (m_SecParam + 7) / 8;
+		int coordSize = (m_SecParam + 7) / 8;
 
 		BYTE* pBuf = new BYTE[(coordSize + 1) * nOTs];
 		Miracl_InitPoint(&g, *m_X, *m_Y);//g = EC2(*m_X, *m_Y);
