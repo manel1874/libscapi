@@ -5,8 +5,7 @@
 ############################################################
 
 # Set the base image to libscapi base
-ARG tag
-FROM scapicryptobiu/libscapi_base:${tag}
+FROM libscapi_base
 
 # fetch libscapi and build it
 WORKDIR /root
