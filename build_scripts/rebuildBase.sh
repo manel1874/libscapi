@@ -1,8 +1,8 @@
 # $1 tag for the image
 
-./docker_clean.sh
+build_scripts/docker_clean.sh
 
 image='scapicryptobiu/libscapi_base:'$1
 dockerfilePath='dockerfiles/PrerequisitesDockerfie'
 
-./rebuild_docker_image $image $dockerfilePath $1
+build_scripts/rebuild_docker_image.sh $image $dockerfilePath $1
