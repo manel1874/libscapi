@@ -6,12 +6,7 @@
 ############################################################
 
 # set the base image to libscapi base
-from williamyeh/dummy
-RUN echo "null"
-
-
-ARG tag
-FROM scapicryptobiu/libscapi_libs:$tag
+FROM scapicryptobiu/libscapi_libs:latest
 
 # recopying to invalidate new files
 WORKDIR /root
