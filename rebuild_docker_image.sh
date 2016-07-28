@@ -9,8 +9,8 @@ echo 'deleting all images'
 docker images -q | xargs --no-run-if-empty docker rmi
 
 echo 'building image $1 using dockerfile $2'
-docker build --no-cache -t $0 -f $1 .
+docker build --no-cache -t $1 -f $2 .
 
 echo 'pushing image to docker hub'
 docker login -u scapicryptobiu -p maliciousyao
-docker push $0
+docker push $1
