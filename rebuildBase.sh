@@ -3,4 +3,4 @@
 image='scapicryptobiu/libscapi_base:'$1
 dockerfilePath='dockerfiles/PrerequisitesDockerfie'
 
-./rebuild_docker_image $image $dockerfilePath
+./rebuild_docker_image $image $dockerfilePath $1

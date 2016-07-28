@@ -6,7 +6,8 @@
 ############################################################
 
 # set the base image to libscapi base
-FROM scapicryptobiu/libscapi_libs:latest
+ARG tag
+FROM scapicryptobiu/libscapi_libs:${tag}
 
 # recopying to invalidate new files
 WORKDIR /root
