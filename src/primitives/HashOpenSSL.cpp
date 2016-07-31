@@ -1,28 +1,28 @@
 /**
 * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-* 
+*
 * Copyright (c) 2016 LIBSCAPI (http://crypto.biu.ac.il/SCAPI)
 * This file is part of the SCAPI project.
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
-* 
+*
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"),
-* to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+* to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
 * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-* 
+*
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-* 
+*
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-* 
+*
 * We request that any publication and/or code referring to and/or based on SCAPI contain an appropriate citation to SCAPI, including a reference to
 * http://crypto.biu.ac.il/SCAPI.
-* 
+*
 * Libscapi uses several open source libraries. Please see these projects for any further licensing issues.
 * For more information , See https://github.com/cryptobiu/libscapi/blob/master/LICENSE.MD
 *
 * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-* 
+*
 */
 
 
@@ -33,7 +33,7 @@ OpenSSLHash::OpenSSLHash(string hashName) {
 	//Remember to delete it using the finalize method.
 	EVP_MD_CTX* mdctx;
 	const EVP_MD *md;
-	
+
 	OpenSSL_add_all_digests();
 
 	//Get the string from java.
@@ -76,7 +76,8 @@ void OpenSSLHash::update(const vector<byte> &in, int inOffset, int inLen){
 	//The dll function does the update from offset 0.
 	//If the given offset is greater than 0, copy the relevant bytes to a new array and send it to the dll function.
 	byte * input = new byte[inLen];
-	copy_byte_vector_to_byte_array(in, input, inOffset);
+	memcpy(input, in.data() + inOffset, inLen);
+	//copy_byte_vector_to_byte_array(in, input, inOffset);
 
 	// Update the hash with the message.
 	EVP_DigestUpdate(hash, input, inLen);
@@ -93,7 +94,8 @@ void OpenSSLHash::hashFinal(vector<byte> &out, int outOffset) {
 	EVP_DigestFinal_ex(hash, tempOut, NULL);
 	//Initialize the hash structure again to enable repeated calls.
 	EVP_DigestInit(hash, EVP_MD_CTX_md(hash));
-	copy_byte_array_to_byte_vector(tempOut, length, out, outOffset);
+	out.insert(out.begin() + outOffset, tempOut, tempOut + length);
+	//copy_byte_array_to_byte_vector(tempOut, length, out, outOffset);
 	delete tempOut;
 }
 
