@@ -493,7 +493,7 @@ TEST_CASE("PRF", "[AES, PRF]")
 void test_prg(PseudorandomGenerator * prg, string expected_name)
 {
 	REQUIRE(!prg->isKeySet()); // verify key is not set yet
-	auto sk = prg->generateKey(16);
+	auto sk = prg->generateKey(128);
 	prg->setKey(sk);
 	REQUIRE(prg->isKeySet());
 
@@ -511,10 +511,10 @@ void test_prg(PseudorandomGenerator * prg, string expected_name)
 TEST_CASE("PRG", "[PRG]")
 {
 
-	SECTION("prgFromOpenSSLAES")
+	SECTION("PrgFromOpenSSLAES")
 	{
-		prgFromOpenSSLAES * scprg = new prgFromOpenSSLAES();
-		test_prg(scprg, "prgFromOpenSSLAES");
+		PrgFromOpenSSLAES * scprg = new PrgFromOpenSSLAES();
+		test_prg(scprg, "PrgFromOpenSSLAES");
 	}
 
 	SECTION("ScPrgFromPrf")
@@ -531,15 +531,15 @@ TEST_CASE("PRG", "[PRG]")
 }
 
 
-TEST_CASE("random", "[prgFromOpenSSLAES]")
+TEST_CASE("random", "[PrgFromOpenSSLAES]")
 {
 	SECTION("test seeded random")
 	{
 
-		prgFromOpenSSLAES random1;
-		prgFromOpenSSLAES random2;
+		PrgFromOpenSSLAES random1;
+		PrgFromOpenSSLAES random2;
 
-		auto sk = random1.generateKey(16);
+		auto sk = random1.generateKey(128);
 		random1.setKey(sk);
 		random2.setKey(sk);
 
@@ -637,11 +637,11 @@ TEST_CASE("random", "[prgFromOpenSSLAES]")
 	}
 
 	//make sure that 2 prg with different secret key dont give the same randoms
-	prgFromOpenSSLAES random4;
-	prgFromOpenSSLAES random5;
+	PrgFromOpenSSLAES random4;
+	PrgFromOpenSSLAES random5;
 
-	auto sk1 = random4.generateKey(16);
-	auto sk2 = random4.generateKey(16);
+	auto sk1 = random4.generateKey(128);
+	auto sk2 = random4.generateKey(128);
 	random4.setKey(sk1);
 	random5.setKey(sk2);
 
