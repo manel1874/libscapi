@@ -96,13 +96,19 @@ void GarbledBooleanCircuit::createCircuit(const char* fileName, bool isFreeXor, 
 	//read the file and fill the gates, number of parties, input indices, output indices and so on.
 	readCircuitFromFile(fileName);
 
-	computedWires = (block *) _aligned_malloc(sizeof(block) * ((lastWireIndex +1) + 1),16);//the wires that have been already computed. It is assumed that when a gate is handled the
-
+	int sizeOfWires;
+	if (isNonXorOutputsRequired) {
+		sizeOfWires = (lastWireIndex + 1) + 1 + numberOfOutputs;
+		computedWires = (block *)_aligned_malloc(sizeof(block) * sizeOfWires, 16);//the wires that have been already computed. It is assumed that when a gate is handled the
+	} else {
+		sizeOfWires = (lastWireIndex + 1) + 1;
+		computedWires = (block *)_aligned_malloc(sizeof(block) * sizeOfWires, 16);//the wires that have been already computed. It is assumed that when a gate is handled the
+	}
 	if (computedWires== nullptr) {
 		cout<<"computedWires could not be allocated";
 		exit(0);
 	}
-	memset(computedWires, 0, sizeof(block) * ((lastWireIndex + 1)+1));
+	memset(computedWires, 0, sizeof(block) * sizeOfWires);
 	computedWires++;
 
 	//allocate memory for the translation table
