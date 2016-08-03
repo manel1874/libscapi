@@ -160,7 +160,7 @@ public:
 * The seed for the pseudorandom generator is the key to the underlying aes and if two prg are set with the same 
 * key, they generated the same randoms.
 */
-class prgFromOpenSSLAES : public PseudorandomGenerator {
+class PrgFromOpenSSLAES : public PseudorandomGenerator {
 private:
 	// Counter used for key generation.
 	block iv = _mm_setzero_si128();
@@ -185,21 +185,21 @@ public:
 	*					are all used up, or throws an exception if the user asks for more randoms.
 	*					If isStrict is true, the user can only use cachedSize*16 random bytes.		
 	*/
-	prgFromOpenSSLAES( int cachedSize = DEFAULT_NUM_OF_RANDOMS, bool isStrict = false);
+	PrgFromOpenSSLAES( int cachedSize = DEFAULT_NUM_OF_RANDOMS, bool isStrict = false);
 
 	//move assignment
 
-	prgFromOpenSSLAES& operator=(prgFromOpenSSLAES&& other);
+	PrgFromOpenSSLAES& operator=(PrgFromOpenSSLAES&& other);
 
 	//copy assignment - not allowed to prevent unneccessary copy of arrays.
-	prgFromOpenSSLAES& operator=(prgFromOpenSSLAES& other) = delete;
+	PrgFromOpenSSLAES& operator=(PrgFromOpenSSLAES& other) = delete;
 	
 	//move constructor
-	prgFromOpenSSLAES(prgFromOpenSSLAES&& old);
+	PrgFromOpenSSLAES(PrgFromOpenSSLAES&& old);
 	//copy constructor - not allowed to prevent unneccessary copy of arrays.
-	prgFromOpenSSLAES(prgFromOpenSSLAES& other) = delete;
+	PrgFromOpenSSLAES(PrgFromOpenSSLAES& other) = delete;
 
-	~prgFromOpenSSLAES();
+	~PrgFromOpenSSLAES();
 	
 	/**
 	* This function does the following.
@@ -209,7 +209,7 @@ public:
 	*/
 	void setKey(SecretKey secretKey) override;
 	bool isKeySet() override { return _isKeySet; };
-	string getAlgorithmName() override { return "prgFromOpenSSLAES"; };
+	string getAlgorithmName() override { return "PrgFromOpenSSLAES"; };
 	SecretKey generateKey(AlgorithmParameterSpec keyParams) override {
 		throw NotImplementedException("To generate a key for this prg object use the generateKey(int keySize) function");
 	}

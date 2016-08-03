@@ -103,7 +103,7 @@ void ScPrgFromPrf::increaseCtr() {
 	}
 }
 
-prgFromOpenSSLAES::prgFromOpenSSLAES(int cachedSize, bool isStrict) : cachedSize(cachedSize), isStrict(isStrict) {
+PrgFromOpenSSLAES::PrgFromOpenSSLAES(int cachedSize, bool isStrict) : cachedSize(cachedSize), isStrict(isStrict) {
 
 
 	//allocate memory for the plaintext which is an array of indices and for the ciphertext which is the output
@@ -124,7 +124,7 @@ prgFromOpenSSLAES::prgFromOpenSSLAES(int cachedSize, bool isStrict) : cachedSize
 
 }
 
-prgFromOpenSSLAES::prgFromOpenSSLAES(prgFromOpenSSLAES && old) :
+PrgFromOpenSSLAES::PrgFromOpenSSLAES(PrgFromOpenSSLAES && old) :
 	cachedSize(old.cachedSize), idxForBytes(old.idxForBytes), startingIndex(old.startingIndex), aes(old.aes),
 	_isKeySet(old._isKeySet), cipherChunk(old.cipherChunk), indexPlaintext(old.indexPlaintext), isStrict(old.isStrict)
 {
@@ -132,7 +132,7 @@ prgFromOpenSSLAES::prgFromOpenSSLAES(prgFromOpenSSLAES && old) :
 	old.indexPlaintext = nullptr;
 }
 
-prgFromOpenSSLAES & prgFromOpenSSLAES::operator=(prgFromOpenSSLAES && other)
+PrgFromOpenSSLAES & PrgFromOpenSSLAES::operator=(PrgFromOpenSSLAES && other)
 {
 
 	//copy values
@@ -153,7 +153,7 @@ prgFromOpenSSLAES & prgFromOpenSSLAES::operator=(prgFromOpenSSLAES && other)
 	return *this;
 }
 
-prgFromOpenSSLAES::~prgFromOpenSSLAES() {
+PrgFromOpenSSLAES::~PrgFromOpenSSLAES() {
 	//free allocated aligned memory
 	_mm_free(cipherChunk);
 	_mm_free(indexPlaintext);
@@ -163,22 +163,22 @@ prgFromOpenSSLAES::~prgFromOpenSSLAES() {
 		EVP_CIPHER_CTX_cleanup(aes);
 }
 
-SecretKey prgFromOpenSSLAES::generateKey(int keySize) {
+SecretKey PrgFromOpenSSLAES::generateKey(int keySize) {
 
 	//NOTE----A temp way to produce a secret key. Will be changed later
-	byte * buf = new byte[keySize];
-	if (!RAND_bytes(buf, keySize))
+	byte * buf = new byte[keySize / 8];
+	if (!RAND_bytes(buf, keySize / 8))
 		throw runtime_error("key generation failed");
 	vector<byte> vec;
 	//copy the random bytes to a vector held in the secret key
-	copy_byte_array_to_byte_vector(buf, keySize, vec, 0);
+	copy_byte_array_to_byte_vector(buf, keySize / 8, vec, 0);
 	SecretKey sk(vec, getAlgorithmName());
 	//free the dynamic buffer
 	delete buf;
 	return sk;
 }
 
-void prgFromOpenSSLAES::setKey(SecretKey secretKey) {
+void PrgFromOpenSSLAES::setKey(SecretKey secretKey) {
 
 	if (_isKeySet == false) {
 
@@ -210,7 +210,7 @@ void prgFromOpenSSLAES::setKey(SecretKey secretKey) {
 
 
 
-void prgFromOpenSSLAES::getPRGBytes(vector<byte> & outBytes, int outOffset, int outLen) {
+void PrgFromOpenSSLAES::getPRGBytes(vector<byte> & outBytes, int outOffset, int outLen) {
 
 	//key must be set in order to get randoms
 	if (!isKeySet())
@@ -230,7 +230,7 @@ void prgFromOpenSSLAES::getPRGBytes(vector<byte> & outBytes, int outOffset, int 
 	idxForBytes += outLen;
 }
 
-uint32_t prgFromOpenSSLAES::getRandom32() {
+uint32_t PrgFromOpenSSLAES::getRandom32() {
 
 	//key must be set in order to get randoms
 	if (!isKeySet())
@@ -245,7 +245,7 @@ uint32_t prgFromOpenSSLAES::getRandom32() {
 	idxForBytes += 4;
 	return  cipherInInts[(idxForBytes-4 + 3)/4];
 }
-uint64_t prgFromOpenSSLAES::getRandom64() {
+uint64_t PrgFromOpenSSLAES::getRandom64() {
 
 	//key must be set in order to get randoms
 	if (!isKeySet())
@@ -260,7 +260,7 @@ uint64_t prgFromOpenSSLAES::getRandom64() {
 	idxForBytes += 8;
 	return  cipherInLong[(idxForBytes-8 + 7) / 8];
 }
-block prgFromOpenSSLAES::getRandom128() {
+block PrgFromOpenSSLAES::getRandom128() {
 
 	//key must be set in order to get randoms
 	if (!isKeySet())
@@ -274,7 +274,7 @@ block prgFromOpenSSLAES::getRandom128() {
 }
 
 
-void prgFromOpenSSLAES::prepare() {
+void PrgFromOpenSSLAES::prepare() {
 
 	if (isStrict == true)
 		throw overflow_error("No randoms left for a strict class");
