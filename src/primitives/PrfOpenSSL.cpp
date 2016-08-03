@@ -34,11 +34,11 @@
 /*************************************************/
 
 SecretKey OpenSSLPRP::generateKey(int keySize) {
-	byte * buf = new byte[keySize];
-	if (!RAND_bytes(buf, keySize))
+	byte * buf = new byte[keySize / 8];
+	if (!RAND_bytes(buf, keySize / 8))
 		throw runtime_error("key generation failed");
 	vector<byte> vec;
-	copy_byte_array_to_byte_vector(buf, keySize, vec, 0);
+	copy_byte_array_to_byte_vector(buf, keySize / 8, vec, 0);
 	SecretKey sk(vec, getAlgorithmName());
 	delete buf;
 	return sk;
