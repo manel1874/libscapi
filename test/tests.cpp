@@ -39,7 +39,6 @@
 #include "../include/primitives/Prg.hpp"
 #include "../include/primitives/Kdf.hpp"
 #include "../include/primitives/RandomOracle.hpp"
-#include "../include/primitives/AES_PRG.hpp"
 #include "../include/comm/Comm.hpp"
 #include "../include/circuits/BooleanCircuits.hpp"
 #include "../include/interactive_mid_protocols/CommitmentSchemePedersen.hpp"
