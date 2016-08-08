@@ -120,11 +120,11 @@ BooleanCircuit::BooleanCircuit(scannerpp::Scanner s) {
 		isInputSet[i] = isThisPartyInputSet;
 
 		vector<int> currentPartyInput(numberOfInputsForCurrentParty);
-		eachPartysInputWires.push_back(currentPartyInput);
 		//Read the input wires indices.
 		for (int j = 0; j < numberOfInputsForCurrentParty; j++) {
-			currentPartyInput.push_back(atoi(read(s).c_str()));
+			currentPartyInput[j] = atoi(read(s).c_str());
 		}
+		eachPartysInputWires.push_back(currentPartyInput);
 	}
 	
 	/*
