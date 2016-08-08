@@ -101,7 +101,7 @@ private:
 	* emptyBothOutputKeys : An empty block array that will be filled with both output keys generated in garble.
 	* emptyTranslationTable : An empty char array that will be filled with 0/1 signal bits that wre choosen in random in this function.
 	*/
-	void garble(block *emptyBothInputKeys, block *emptyBothOutputKeys, std::vector<byte> emptyTranslationTable, block seed) override;
+	void garble(block *emptyBothInputKeys, block *emptyBothOutputKeys, std::vector<byte> & emptyTranslationTable, block seed) override;
 	
 
 	/*

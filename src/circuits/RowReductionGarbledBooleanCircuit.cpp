@@ -138,7 +138,7 @@ void RowReductionGarbledBooleanCircuit::createCircuitMemory(const char* fileName
 
 
 
-void RowReductionGarbledBooleanCircuit::garble(block *emptyBothInputKeys, block *emptyBothOutputKeys, vector<unsigned char> emptyTranslationTable, block seed){
+void RowReductionGarbledBooleanCircuit::garble(block *emptyBothInputKeys, block *emptyBothOutputKeys, vector<unsigned char> & emptyTranslationTable, block seed){
 
 	this->seed = seed;
 

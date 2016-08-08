@@ -133,7 +133,7 @@ FreeXorGarbledBooleanCircuit::~FreeXorGarbledBooleanCircuit(void)
 
 }
 
-void FreeXorGarbledBooleanCircuit::garble(block *emptyBothInputKeys, block *emptyBothOutputKeys, vector<unsigned char> emptyTranslationTable, block seed){
+void FreeXorGarbledBooleanCircuit::garble(block *emptyBothInputKeys, block *emptyBothOutputKeys, vector<unsigned char> & emptyTranslationTable, block seed){
 
 	this->seed = seed;
 

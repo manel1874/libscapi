@@ -126,7 +126,7 @@ void FourToTwoGarbledBoleanCircuitNoAssumptions::createCircuitMemory(const char*
 
 
 
-void FourToTwoGarbledBoleanCircuitNoAssumptions::garble(block *emptyBothInputKeys, block *emptyBothOutputKeys, vector<byte> emptyTranslationTable, block seed){
+void FourToTwoGarbledBoleanCircuitNoAssumptions::garble(block *emptyBothInputKeys, block *emptyBothOutputKeys, vector<byte> & emptyTranslationTable, block seed){
 
 	this->seed = seed;
 

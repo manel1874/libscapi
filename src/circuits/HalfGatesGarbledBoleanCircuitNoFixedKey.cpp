@@ -123,7 +123,7 @@ void HalfGatesGarbledBoleanCircuitNoFixedKey::createCircuitMemory(const char* fi
 
 
 
-void HalfGatesGarbledBoleanCircuitNoFixedKey::garble(block *emptyBothInputKeys, block *emptyBothOutputKeys, vector<byte> emptyTranslationTable, block seed){
+void HalfGatesGarbledBoleanCircuitNoFixedKey::garble(block *emptyBothInputKeys, block *emptyBothOutputKeys, vector<byte> & emptyTranslationTable, block seed){
 
 	this->seed = seed;
 

@@ -105,7 +105,7 @@ void StandardGarbledBooleanCircuit::createCircuitMemory(const char* fileName, bo
 
 }
 
-void StandardGarbledBooleanCircuit::garble(block *emptyBothInputKeys, block *emptyBothOutputKeys, vector<unsigned char> emptyTranslationTable, block seed){
+void StandardGarbledBooleanCircuit::garble(block *emptyBothInputKeys, block *emptyBothOutputKeys, vector<unsigned char> & emptyTranslationTable, block seed){
 	
 	this->seed = seed;
 

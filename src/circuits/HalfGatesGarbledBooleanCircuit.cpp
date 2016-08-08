@@ -134,7 +134,7 @@ HalfGatesGarbledBooleanCircuit::~HalfGatesGarbledBooleanCircuit(void)
 
 }
 
-void HalfGatesGarbledBooleanCircuit::garble(block *emptyBothInputKeys, block *emptyBothOutputKeys, vector<unsigned char> emptyTranslationTable, block seed){
+void HalfGatesGarbledBooleanCircuit::garble(block *emptyBothInputKeys, block *emptyBothOutputKeys, vector<unsigned char> & emptyTranslationTable, block seed){
 
 	this->seed = seed;
 
