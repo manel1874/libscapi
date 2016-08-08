@@ -55,17 +55,19 @@ GarbledBooleanCircuit::GarbledBooleanCircuit(void)
 GarbledBooleanCircuit::~GarbledBooleanCircuit(void)
 {
 
-	if (garbledGates != nullptr){
+	if (garbledGates != nullptr) {
 		delete[] garbledGates;
 	}
-	
-	if(garbledTables != nullptr)
-			_aligned_free(garbledTables);
 
+	if (garbledTables != nullptr) {
+		_aligned_free(garbledTables);
+		garbledTables = nullptr;
+	}
 
 	if (computedWires != nullptr){
 		computedWires--;
 		_aligned_free(computedWires);
+		computedWires = nullptr;
 	}
 
 	
@@ -141,7 +143,7 @@ tuple<block*, block*, vector<unsigned char> > GarbledBooleanCircuit::garble(bloc
 {
 	block *allInputWireValues = (block *)_aligned_malloc(sizeof(block) * 2 * numberOfInputs, SIZE_OF_BLOCK);
 	block *allOutputWireValues = (block *)_aligned_malloc(sizeof(block) * 2 * numberOfOutputs, SIZE_OF_BLOCK);
-	vector<unsigned char> translationTable(numberOfOutputs);
+	vector<unsigned char> translationTable;
 
 	if (seed == nullptr) {
 
