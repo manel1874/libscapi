@@ -30,6 +30,7 @@
 #include "CommitmentScheme.hpp"
 #include "../comm/Comm.hpp"
 #include "../../include/primitives/HashOpenSSL.hpp"
+#include "../../include/primitives/prg.hpp"
 
 /**
 * This class holds the values used by the SimpleHash Committer during the commitment phase
@@ -180,7 +181,7 @@ class CmtSimpleHashCommitter : public CmtCommitter, public SecureCommit, public 
 private:
 	shared_ptr<CryptographicHash> hash;
 	int n;
-	//shared_ptr<AES_PRG> random;
+	shared_ptr<PrgFromOpenSSLAES> prg;
 	
 	/**
 	* Computes the hash function on the concatination of the inputs.
@@ -189,6 +190,8 @@ private:
 	* @return the hash result.
 	*/
 	shared_ptr<vector<byte>> computeCommitment(vector<byte> x, vector<byte> r);
+
+	void init(shared_ptr<CommParty> channel, shared_ptr<PrgFromOpenSSLAES> random, shared_ptr<CryptographicHash> hash, int n);
 
 public:
 	
@@ -202,7 +205,19 @@ public:
 	* @param n security parameter
 	*
 	*/
-	CmtSimpleHashCommitter(shared_ptr<CommParty> channel, shared_ptr<CryptographicHash> hash = make_shared<OpenSSLSHA256>(), int n = 32/*, shared_ptr<AES_PRG> random = make_shared<AES_PRG>()*/);
+	CmtSimpleHashCommitter(shared_ptr<CommParty> channel, shared_ptr<CryptographicHash> hash = make_shared<OpenSSLSHA256>(), int n = 32);
+
+	/**
+	* Constructor that receives a connected channel (to the receiver), the hash function
+	* agreed upon between them, a SecureRandom object and a security parameter n.
+	* The Receiver needs to be instantiated with the same hash, otherwise nothing will work properly.
+	* @param channel
+	* @param hash
+	* @param random
+	* @param n security parameter
+	*
+	*/
+	CmtSimpleHashCommitter(shared_ptr<CommParty> channel, shared_ptr<PrgFromOpenSSLAES> random, shared_ptr<CryptographicHash> hash = make_shared<OpenSSLSHA256>(), int n = 32);
 
 	/**
 	* Runs the following lines of the commitment scheme:

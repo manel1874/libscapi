@@ -84,10 +84,27 @@ string CmtSimpleHashDecommitmentMessage::toString() {
 * values for the hash function, SecureRandom object and a security parameter n.
 *  @param channel
 */
-CmtSimpleHashCommitter::CmtSimpleHashCommitter(shared_ptr<CommParty> channel, shared_ptr<CryptographicHash> hash, int n/*, shared_ptr<AES_PRG> random = make_shared<AES_PRG>()*/) {
+CmtSimpleHashCommitter::CmtSimpleHashCommitter(shared_ptr<CommParty> channel, shared_ptr<CryptographicHash> hash, int n) {
+	auto prg = make_shared<PrgFromOpenSSLAES>();
+	prg->setKey(prg->generateKey(128));
+	
+	init(channel, prg, hash, n);
+}
+
+/**
+* Constructor that receives a connected channel (to the receiver) and chosses default
+* values for the hash function, SecureRandom object and a security parameter n.
+*  @param channel
+*/
+CmtSimpleHashCommitter::CmtSimpleHashCommitter(shared_ptr<CommParty> channel, shared_ptr<PrgFromOpenSSLAES> prg, shared_ptr<CryptographicHash> hash, int n) {
+	init(channel, prg, hash, n);
+}
+
+void CmtSimpleHashCommitter::init(shared_ptr<CommParty> channel, shared_ptr<PrgFromOpenSSLAES> prg, shared_ptr<CryptographicHash> hash, int n) {
 	this->channel = channel;
 	this->hash = hash;
 	this->n = n;
+	this->prg = prg;
 
 	//No pre-process in SimpleHash Commitment
 }
@@ -105,9 +122,9 @@ shared_ptr<CmtCCommitmentMsg> CmtSimpleHashCommitter::generateCommitmentMsg(shar
 		throw invalid_argument("The input has to be of type CmtByteArrayCommitValue");
 	auto x = in->getXVector();
 	//Sample random byte array r
-	vector<byte> r(n);
-	RAND_bytes(r.data(), n);
-
+	vector<byte> r;
+	//RAND_bytes(r.data(), n);
+	prg->getPRGBytes(r, 0, n);
 
 	//Compute the hash function
 	auto hashValArray = computeCommitment(*x, r);
@@ -131,8 +148,9 @@ shared_ptr<CmtCDecommitmentMessage> CmtSimpleHashCommitter::generateDecommitment
 * @return the sampled commit value
 */
 shared_ptr<CmtCommitValue> CmtSimpleHashCommitter::sampleRandomCommitValue() {
-	vector<byte> val(32);
-	RAND_bytes(val.data(), 32);
+	vector<byte> val;
+	//RAND_bytes(val.data(), 32);
+	prg->getPRGBytes(val, 0, 32);
 
 	return make_shared<CmtByteArrayCommitValue>(make_shared<vector<byte>>(val));
 }
@@ -160,10 +178,10 @@ shared_ptr<vector<byte>> CmtSimpleHashCommitter::computeCommitment(vector<byte> 
 	vector<byte> c(r);
 	c.insert(c.end(), x.begin(), x.end());
 
-	vector<byte> hashValArray;
+	auto hashValArray = make_shared<vector<byte>>();
 	hash->update(c, 0, c.size());
-	hash->hashFinal(hashValArray, 0);
-	return make_shared<vector<byte>>(hashValArray);
+	hash->hashFinal(*hashValArray, 0);
+	return hashValArray;
 }
 
 void CmtSimpleHashReceiver::doConstruct(shared_ptr<CommParty> channel, shared_ptr<CryptographicHash> hash, int n) {
