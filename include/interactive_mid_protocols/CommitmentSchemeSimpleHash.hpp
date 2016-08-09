@@ -30,7 +30,7 @@
 #include "CommitmentScheme.hpp"
 #include "../comm/Comm.hpp"
 #include "../../include/primitives/HashOpenSSL.hpp"
-#include "../../include/primitives/prg.hpp"
+#include "../../include/primitives/Prg.hpp"
 
 /**
 * This class holds the values used by the SimpleHash Committer during the commitment phase
