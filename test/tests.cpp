@@ -116,6 +116,7 @@ TEST_CASE("Common methods", "[boost, common, math, log, bitLength, helper]") {
 
 	SECTION("copy byte array to byte vector")
 	{
+		
 		byte src[10] = { 0xb1, 0xb2, 0xb3, 0xb4,  0xb5, 0xb6, 0xb7, 0xb8, 0xb9, 0xc1 };
 		vector<byte> target;
 		copy_byte_array_to_byte_vector(src, 10, target, 0);
@@ -124,9 +125,24 @@ TEST_CASE("Common methods", "[boost, common, math, log, bitLength, helper]") {
 		for (byte & b : target) 
 			REQUIRE(src[i++] == b);
 		target.clear();
-		copy_byte_array_to_byte_vector(src, 10, target, 5);
+		copy_byte_array_to_byte_vector(src + 5, 5, target, 0);
 		i = 5;
 		REQUIRE(target.size() == 5);
+		for (byte & b : target)
+			REQUIRE(src[i++] == b);
+		target.clear();
+		copy_byte_array_to_byte_vector(src, 5, target, 5);
+		i = 5;
+		REQUIRE(target.size() == 10);
+		for (int i = 0; i < 5; i++)
+			REQUIRE(target[i] == 0);
+		for (int i = 5; i < 5; i++)
+			REQUIRE(target[i] == src[5+i]);
+		target.clear();
+		target.resize(10);
+		copy_byte_array_to_byte_vector(src, 10, target, 0);
+		REQUIRE(target.size() == 10);
+		i = 0;
 		for (byte & b : target)
 			REQUIRE(src[i++] == b);
 	}
@@ -439,7 +455,7 @@ void test_prp(string key, string in, string expected_out)
 	char const *c = s.c_str();
 	SecretKey sk = SecretKey((byte *)c, strlen(c), prp->getAlgorithmName());
 	prp->setKey(sk);
-
+	
 	string sin = boost::algorithm::unhex(in);
 	char const * cin = sin.c_str();
 	vector<byte> in_vec, out_vec;
@@ -474,7 +490,7 @@ TEST_CASE("PRF", "[AES, PRF]")
 		char const *c = s.c_str();
 		SecretKey sk = SecretKey((byte *)c, strlen(c), mac->getAlgorithmName());
 		mac->setKey(sk);
-
+		
 		// compute_block for plain 
 		int in_len = strlen(plain);
 		vector<byte> in_vec, out_vec;

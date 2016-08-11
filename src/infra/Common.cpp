@@ -72,7 +72,10 @@ void copy_byte_vector_to_byte_array(const vector<byte> &source_vector, byte * de
 
 void copy_byte_array_to_byte_vector(const byte* src, int src_len, vector<byte>& target_vector, int beginIndex)
 {
-	target_vector.insert(target_vector.end(), &src[beginIndex], &src[src_len]);
+	if (target_vector.size() < beginIndex + src_len)
+		target_vector.resize(beginIndex + src_len);
+	memcpy(target_vector.data() + beginIndex, src, src_len);
+	//target_vector.insert(target_vector.begin() + beginIndex, src, &src[src_len]);
 }
 
 /*

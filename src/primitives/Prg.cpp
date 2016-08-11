@@ -224,7 +224,7 @@ void PrgFromOpenSSLAES::getPRGBytes(vector<byte> & outBytes, int outOffset, int 
 	byte* cipherInBytes = (byte*)cipherChunk;
 
 	//Copy the output bytes to the given output array.
-	copy_byte_array_to_byte_vector(&cipherInBytes[idxForBytes], outLen, outBytes, 0);
+	copy_byte_array_to_byte_vector(&cipherInBytes[idxForBytes], outLen, outBytes, outOffset);
 
 	//increment the byte counter 
 	idxForBytes += outLen;
