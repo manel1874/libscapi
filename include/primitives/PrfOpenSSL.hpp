@@ -31,6 +31,7 @@
 
 #include "Prf.hpp"
 #include "HashOpenSSL.hpp"
+#include "Prg.hpp"
 #include "../CryptoInfra/Key.hpp"
 #include <openssl/rand.h>
 #include <openssl/hmac.h>
@@ -40,14 +41,13 @@
 class OpenSSLPRP : public PrpFixed {
 	
 protected:
-	mt19937 random;
+	shared_ptr<PrgFromOpenSSLAES> prg;
 	EVP_CIPHER_CTX* computeP;	//Native object used to compute the prp.
 	EVP_CIPHER_CTX* invertP;		//Native object used to invert the prp.
 	bool _isKeySet;
 
 public:
-	OpenSSLPRP() { random = get_seeded_random(); };
-	bool isKeySet() override { return _isKeySet; };
+	bool isKeySet() override { return _isKeySet; }
 	SecretKey generateKey(AlgorithmParameterSpec keyParams) override {
 		throw NotImplementedException("To generate a key for this prf object use the generateKey(int keySize) function");
 	};
@@ -87,13 +87,15 @@ public:
 * Concrete class of PRF family for AES. This class wraps the implementation of OpenSSL library.
 */
 class OpenSSLAES : public OpenSSLPRP, public AES {
+private: 
+	void init(shared_ptr<PrgFromOpenSSLAES> setRandom);
 public:
 	/**
 	* Default constructor that creates the AES objects. Uses default implementation of SecureRandom.
 	*/
 	OpenSSLAES();
 
-	OpenSSLAES(mt19937 &setRandom) : OpenSSLAES(){ this->random = setRandom; }
+	OpenSSLAES(shared_ptr<PrgFromOpenSSLAES> setRandom) { init(setRandom); }
 
 	/**
 	* Initializes this AES objects with the given secret key.

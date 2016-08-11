@@ -34,13 +34,9 @@
 /*************************************************/
 
 SecretKey OpenSSLPRP::generateKey(int keySize) {
-	byte * buf = new byte[keySize / 8];
-	if (!RAND_bytes(buf, keySize / 8))
-		throw runtime_error("key generation failed");
-	vector<byte> vec;
-	copy_byte_array_to_byte_vector(buf, keySize / 8, vec, 0);
+	vector<byte> vec(keySize / 8);
+	prg->getPRGBytes(vec, 0, keySize / 8);
 	SecretKey sk(vec, getAlgorithmName());
-	delete buf;
 	return sk;
 }
 
@@ -168,6 +164,13 @@ OpenSSLPRP::~OpenSSLPRP() {
 /*************************************************/
 
 OpenSSLAES::OpenSSLAES() {
+	auto random = make_shared<PrgFromOpenSSLAES>();
+	random->setKey(random->generateKey(128));
+	init(random);
+}
+
+void OpenSSLAES::init(shared_ptr<PrgFromOpenSSLAES> setRandom) {
+	prg = setRandom;
 	computeP = EVP_CIPHER_CTX_new();
 	invertP = EVP_CIPHER_CTX_new();
 }
@@ -385,6 +388,8 @@ OpenSSLTripleDES::OpenSSLTripleDES() {
 	// create the native objects.
 	computeP = EVP_CIPHER_CTX_new();
 	invertP = EVP_CIPHER_CTX_new();
+	prg = make_shared<PrgFromOpenSSLAES>();
+	prg->setKey(prg->generateKey(128));
 }
 
 void OpenSSLTripleDES::setKey(SecretKey secretKey) {
