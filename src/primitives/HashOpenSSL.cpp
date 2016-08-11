@@ -73,14 +73,8 @@ void OpenSSLHash::update(const vector<byte> &in, int inOffset, int inLen){
 	if (inLen == 0)
 		throw new out_of_range("wrong length for the given input buffer");
 
-	//The dll function does the update from offset 0.
-	//If the given offset is greater than 0, copy the relevant bytes to a new array and send it to the dll function.
-	byte * input = new byte[inLen];
-	memcpy(input, in.data() + inOffset, inLen);
-	//copy_byte_vector_to_byte_array(in, input, inOffset);
-
 	// Update the hash with the message.
-	EVP_DigestUpdate(hash, input, inLen);
+	EVP_DigestUpdate(hash, in.data() + inOffset, inLen);
 }
 
 void OpenSSLHash::hashFinal(vector<byte> &out, int outOffset) {
@@ -90,13 +84,12 @@ void OpenSSLHash::hashFinal(vector<byte> &out, int outOffset) {
 		throw new out_of_range("wrong offset for the given output buffer");
 
 	int length = EVP_MD_CTX_size(hash);
-	byte* tempOut = new byte[length];
-	EVP_DigestFinal_ex(hash, tempOut, NULL);
+	if (out.size() < outOffset + length) {
+		out.resize(outOffset + length);
+	}
+	EVP_DigestFinal_ex(hash, out.data() + outOffset, NULL);
 	//Initialize the hash structure again to enable repeated calls.
 	EVP_DigestInit(hash, EVP_MD_CTX_md(hash));
-	out.insert(out.begin() + outOffset, tempOut, tempOut + length);
-	//copy_byte_array_to_byte_vector(tempOut, length, out, outOffset);
-	delete tempOut;
 }
 
 CryptographicHash* CryptographicHash::get_new_cryptographic_hash(string hashName)

@@ -122,8 +122,7 @@ shared_ptr<CmtCCommitmentMsg> CmtSimpleHashCommitter::generateCommitmentMsg(shar
 		throw invalid_argument("The input has to be of type CmtByteArrayCommitValue");
 	auto x = in->getXVector();
 	//Sample random byte array r
-	vector<byte> r;
-	//RAND_bytes(r.data(), n);
+	vector<byte> r(n);
 	prg->getPRGBytes(r, 0, n);
 
 	//Compute the hash function
@@ -178,7 +177,7 @@ shared_ptr<vector<byte>> CmtSimpleHashCommitter::computeCommitment(vector<byte> 
 	vector<byte> c(r);
 	c.insert(c.end(), x.begin(), x.end());
 
-	auto hashValArray = make_shared<vector<byte>>();
+	auto hashValArray = make_shared<vector<byte>>(hash->getHashedMsgSize());
 	hash->update(c, 0, c.size());
 	hash->hashFinal(*hashValArray, 0);
 	return hashValArray;
