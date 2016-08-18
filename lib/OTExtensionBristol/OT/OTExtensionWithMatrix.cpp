@@ -9,7 +9,7 @@ void OTExtensionWithMatrix::transfer(int nOTs,
     timeval totalstartv, totalendv;
     gettimeofday(&totalstartv, NULL);
 #endif
-    cout << "\tDoing " << nOTs << " extended OTs as " << role_to_str(ot_role) << endl;
+    //cout << "\tDoing " << nOTs << " extended OTs as " << role_to_str(ot_role) << endl;
     if (nOTs % nbaseOTs != 0)
         throw invalid_length(); //"nOTs must be a multiple of nbaseOTs\n");
     if (nOTs == 0)
@@ -94,13 +94,13 @@ void OTExtensionWithMatrix::transfer(int nOTs,
 #ifdef OTEXT_TIMER
             gettimeofday(&commst2, NULL);
             double commstime = timeval_diff(&commst1, &commst2);
-            cout << "\t\tCommunication took time " << commstime/1000000 << endl << flush;
+            //cout << "\t\tCommunication took time " << commstime/1000000 << endl << flush;
             times["Communication"] += timeval_diff(&commst1, &commst2);
 #endif
 
             // transpose t0[i] onto receiverOutput and tmp (q[i]) onto senderOutput[i][0]
 
-            cout << "Starting matrix transpose\n" << flush << endl;
+            //cout << "Starting matrix transpose\n" << flush << endl;
 #ifdef OTEXT_TIMER
             timeval transt1, transt2;
             gettimeofday(&transt1, NULL);
@@ -114,7 +114,7 @@ void OTExtensionWithMatrix::transfer(int nOTs,
 #ifdef OTEXT_TIMER
             gettimeofday(&transt2, NULL);
             double transtime = timeval_diff(&transt1, &transt2);
-            cout << "\t\tMatrix transpose took time " << transtime/1000000 << endl << flush;
+            //cout << "\t\tMatrix transpose took time " << transtime/1000000 << endl << flush;
             times["Matrix transpose"] += timeval_diff(&transt1, &transt2);
 #endif
         }
@@ -131,7 +131,7 @@ void OTExtensionWithMatrix::transfer(int nOTs,
 #ifdef OTEXT_TIMER
             gettimeofday(&endv, NULL);
             elapsed = timeval_diff(&startv, &endv);
-            cout << "\t\tTotal correlation check time: " << elapsed/1000000 << endl << flush;
+            //cout << "\t\tTotal correlation check time: " << elapsed/1000000 << endl << flush;
             times["Total correlation check"] += timeval_diff(&startv, &endv);
 #endif
         }
@@ -140,7 +140,7 @@ void OTExtensionWithMatrix::transfer(int nOTs,
 #ifdef OTEXT_TIMER
         gettimeofday(&totalendv, NULL);
         elapsed = timeval_diff(&totalstartv, &totalendv);
-        cout << "\t\tTotal thread time: " << elapsed/1000000 << endl << flush;
+        //cout << "\t\tTotal thread time: " << elapsed/1000000 << endl << flush;
 #endif
     }
 
@@ -159,7 +159,7 @@ void OTExtensionWithMatrix::transfer(int nOTs,
  */
 void OTExtensionWithMatrix::hash_outputs(int nOTs)
 {
-    cout << "Hashing... " << flush;
+    //cout << "Hashing... " << flush;
     octetStream os, h_os(HASH_SIZE);
     square128 tmp;
     MMO mmo;
@@ -182,11 +182,11 @@ void OTExtensionWithMatrix::hash_outputs(int nOTs)
             receiverOutputMatrix.squares[i].hash_row_wise(mmo, receiverOutputMatrix.squares[i]);
         }
     }
-    cout << "done.\n";
+    //cout << "done.\n";
 #ifdef OTEXT_TIMER
     gettimeofday(&endv, NULL);
     double elapsed = timeval_diff(&startv, &endv);
-    cout << "\t\tOT ext hashing took time " << elapsed/1000000 << endl << flush;
+    //cout << "\t\tOT ext hashing took time " << elapsed/1000000 << endl << flush;
     times["Hashing"] += timeval_diff(&startv, &endv);
 #endif
 }
