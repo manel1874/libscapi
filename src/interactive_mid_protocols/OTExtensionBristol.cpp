@@ -28,7 +28,7 @@ void OTExtensionBristolBase::init(const string& senderAddress, int port, int my_
 	BaseOT baseOT = BaseOT(128, 128, 1 - my_num, pParty.get(), INV_ROLE(ot_role));
 	gettimeofday(&baseOTend, NULL);
 	double basetime = timeval_diff(&baseOTstart, &baseOTend);
-	cout << "\t\tBaseTime (" << role_to_str(ot_role) << "): " << basetime/1000000 << endl << flush;
+	//cout << "\t\tBaseTime (" << role_to_str(ot_role) << "): " << basetime/1000000 << endl << flush;
 
 	//run the base OT
 	baseOT.exec_base();
@@ -59,7 +59,7 @@ void OTExtensionBristolBase::init(const string& senderAddress, int port, int my_
 
 void OTExtensionBristolBase::transfer(int nOTs, const BitVector& receiverInput) {
 
-	cout<<"nOTs in transfer: "<< nOTs<<endl;
+	//cout<<"nOTs in transfer: "<< nOTs<<endl;
 
 
 	timeval transStart,transEnd;
@@ -68,7 +68,7 @@ void OTExtensionBristolBase::transfer(int nOTs, const BitVector& receiverInput) 
 	pOtExt->transfer(nOTs, receiverInput);
 	gettimeofday(&transEnd, NULL);
 	double transTime = timeval_diff(&transStart, &transEnd);
-	cout << "\t\tTransfer (" << "): " << transTime/1000000 << endl << flush;
+	//cout << "\t\tTransfer (" << "): " << transTime/1000000 << endl << flush;
 
 
 }
@@ -162,7 +162,7 @@ shared_ptr<OTBatchROutput> OTExtensionBristolReciever::transfer(OTBatchRInput * 
 				throw runtime_error("In order to execute a general ot extension the channel must be given");
 			}
 
-			cout<<"in transfer general"<<endl;
+			//cout<<"in transfer general"<<endl;
 			auto sizeInBytes = nOTs*16;
 			__m128i* x0Arr = (__m128i *) _mm_malloc(sizeof(__m128i) * nOTs, 16);
 			__m128i* x1Arr = (__m128i *) _mm_malloc(sizeof(__m128i) * nOTs, 16);
@@ -179,8 +179,8 @@ shared_ptr<OTBatchROutput> OTExtensionBristolReciever::transfer(OTBatchRInput * 
 			//memcpy ( x0Arr, bufferx0, sizeInBytes );
 			//memcpy ( x1Arr, bufferx1, sizeInBytes );
 
-			cout<<"x0Arr[0] = "<<(((int*)x0Arr)[0])<<endl;
-			cout<<"x1Arr[0] = "<<(((int*)x1Arr)[0])<<endl;
+			//cout<<"x0Arr[0] = "<<(((int*)x0Arr)[0])<<endl;
+			//cout<<"x1Arr[0] = "<<(((int*)x1Arr)[0])<<endl;
 
 
 			//xor each randomized output with the relevant xored sent from the sender

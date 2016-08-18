@@ -178,7 +178,7 @@ void eklundh_transpose128(vector<BitVector>& output, const vector<BitVector>& in
             exit(1);
         }
     }
-    cout << "\ttranspose with offset " << offset << " ok\n";
+    //cout << "\ttranspose with offset " << offset << " ok\n";
 #endif
 }
 
@@ -265,7 +265,7 @@ void OTExtension::transfer(int nOTs,
     timeval totalstartv, totalendv;
     gettimeofday(&totalstartv, NULL);
 #endif
-    cout << "\tDoing " << nOTs << " extended OTs as " << role_to_str(ot_role) << endl;
+    //cout << "\tDoing " << nOTs << " extended OTs as " << role_to_str(ot_role) << endl;
     if (nOTs % nbaseOTs != 0)
         throw invalid_length(); //"nOTs must be a multiple of nbaseOTs\n");
     if (nOTs == 0)
@@ -343,13 +343,13 @@ void OTExtension::transfer(int nOTs,
 #ifdef OTEXT_TIMER
         gettimeofday(&commst2, NULL);
         double commstime = timeval_diff(&commst1, &commst2);
-        cout << "\t\tCommunication took time " << commstime/1000000 << endl << flush;
+        //cout << "\t\tCommunication took time " << commstime/1000000 << endl << flush;
         times["Communication"] += timeval_diff(&commst1, &commst2);
 #endif
 
         // transpose t0[i] onto receiverOutput and tmp (q[i]) onto senderOutput[i][0]
 
-        cout << "Starting matrix transpose\n" << flush << endl;
+        //cout << "Starting matrix transpose\n" << flush << endl;
 #ifdef OTEXT_TIMER
         timeval transt1, transt2;
         gettimeofday(&transt1, NULL);
@@ -373,7 +373,7 @@ void OTExtension::transfer(int nOTs,
 #ifdef OTEXT_TIMER
         gettimeofday(&transt2, NULL);
         double transtime = timeval_diff(&transt1, &transt2);
-        cout << "\t\tMatrix transpose took time " << transtime/1000000 << endl << flush;
+        //cout << "\t\tMatrix transpose took time " << transtime/1000000 << endl << flush;
         times["Matrix transpose"] += timeval_diff(&transt1, &transt2);
 #endif
 
@@ -382,7 +382,7 @@ void OTExtension::transfer(int nOTs,
         // i.e. senderOutput[0][i] + x_i * Delta = receiverOutput[i]
         // (where Delta = baseReceiverOutput)
         BitVector tmp_vector1(nbaseOTs), tmp_vector2(nOTs);//nbaseOTs);
-        cout << "\tVerifying OT extensions (debugging)\n";
+        //cout << "\tVerifying OT extensions (debugging)\n";
         for (int i = 0; i < nOTs; i++)
         {
             os[0].reset_write_head();
@@ -414,7 +414,7 @@ void OTExtension::transfer(int nOTs,
                 }
             }
         }
-        cout << "Correlated OTs all OK\n";
+        //cout << "Correlated OTs all OK\n";
 #endif
 
         double elapsed;
@@ -429,7 +429,7 @@ void OTExtension::transfer(int nOTs,
 #ifdef OTEXT_TIMER
             gettimeofday(&endv, NULL);
             elapsed = timeval_diff(&startv, &endv);
-            cout << "\t\tTotal correlation check time: " << elapsed/1000000 << endl << flush;
+            //cout << "\t\tTotal correlation check time: " << elapsed/1000000 << endl << flush;
             times["Total correlation check"] += timeval_diff(&startv, &endv);
 #endif
         }
@@ -438,14 +438,14 @@ void OTExtension::transfer(int nOTs,
 #ifdef OTEXT_TIMER
         gettimeofday(&totalendv, NULL);
         elapsed = timeval_diff(&totalstartv, &totalendv);
-        cout << "\t\tTotal thread time: " << elapsed/1000000 << endl << flush;
+        //cout << "\t\tTotal thread time: " << elapsed/1000000 << endl << flush;
 #endif
 
 #ifdef OTEXT_DEBUG
         // verify correctness of the random OTs
         // i.e. senderOutput[0][i] + x_i * Delta = receiverOutput[i]
         // (where Delta = baseReceiverOutput)
-        cout << "Verifying random OTs (debugging)\n";
+        //cout << "Verifying random OTs (debugging)\n";
         for (int i = 0; i < nOTs; i++)
         {
             os[0].reset_write_head();
@@ -481,7 +481,7 @@ void OTExtension::transfer(int nOTs,
                 }
             }
         }
-        cout << "Random OTs all OK\n";
+        //cout << "Random OTs all OK\n";
 #endif
     }
 
@@ -500,7 +500,7 @@ void OTExtension::transfer(int nOTs,
  */
 void OTExtension::hash_outputs(int nOTs, vector<BitVector>& receiverOutput)
 {
-    cout << "Hashing... " << flush;
+    //cout << "Hashing... " << flush;
     octetStream os, h_os(HASH_SIZE);
     BitVector tmp(nbaseOTs);
     RO ro;
@@ -553,11 +553,11 @@ void OTExtension::hash_outputs(int nOTs, vector<BitVector>& receiverOutput)
             }
         }
     }
-    cout << "done.\n";
+    //cout << "done.\n";
 #ifdef OTEXT_TIMER
     gettimeofday(&endv, NULL);
     double elapsed = timeval_diff(&startv, &endv);
-    cout << "\t\tOT ext hashing took time " << elapsed/1000000 << endl << flush;
+    //cout << "\t\tOT ext hashing took time " << elapsed/1000000 << endl << flush;
     times["Hashing"] += timeval_diff(&startv, &endv);
 #endif
 }
@@ -580,7 +580,7 @@ void random_m128i(PRNG& G, __m128i *r)
 
 void test_mul()
 {
-    cout << "Testing GF(2^128) multiplication\n";
+    //cout << "Testing GF(2^128) multiplication\n";
     __m128i t1, t2, t3, t4, t5, t6, t7, t8;
     PRNG G;
     G.ReSeed();
@@ -619,10 +619,10 @@ void test_mul()
     t2 = _mm_set_epi32(0, 0, 0, 11);
     //gfmul128(t1, t2, &t3);
     mul128(t1, t2, &t3, &t4);
-    cout << "t1 = " << __m128i_toString<octet>(t1) << endl;
-    cout << "t2 = " << __m128i_toString<octet>(t2) << endl;
-    cout << "t3 = " << __m128i_toString<octet>(t3) << endl;
-    cout << "t4 = " << __m128i_toString<octet>(t4) << endl;
+    //cout << "t1 = " << __m128i_toString<octet>(t1) << endl;
+    //cout << "t2 = " << __m128i_toString<octet>(t2) << endl;
+    //cout << "t3 = " << __m128i_toString<octet>(t3) << endl;
+    //cout << "t4 = " << __m128i_toString<octet>(t4) << endl;
 
     uint64_t cc[] __attribute__((aligned (16))) = { 0,0 };
     _mm_store_si128((__m128i*)cc, t1);
@@ -630,10 +630,10 @@ void test_mul()
     _mm_store_si128((__m128i*)cc, t2);
     word t2w = cc[0];
 
-    cout << "t1w = " << t1w << endl;
-    cout << "t1 = " << word_to_bytes(t1w) << endl;
-    cout << "t2 = " << word_to_bytes(t2w) << endl;
-    cout << "t1 * t2 = " << word_to_bytes(t1w*t2w) << endl;
+    //cout << "t1w = " << t1w << endl;
+    //cout << "t1 = " << word_to_bytes(t1w) << endl;
+    //cout << "t2 = " << word_to_bytes(t2w) << endl;
+    //cout << "t1 * t2 = " << word_to_bytes(t1w*t2w) << endl;
 }
 
 
@@ -641,7 +641,7 @@ void test_mul()
 void OTExtension::check_correlation(int nOTs,
     const BitVector& receiverInput)
 {
-    cout << "\tStarting correlation check\n" << flush;
+    //cout << "\tStarting correlation check\n" << flush;
 #ifdef OTEXT_TIMER
     timeval startv, endv;
     gettimeofday(&startv, NULL);
@@ -657,7 +657,7 @@ void OTExtension::check_correlation(int nOTs,
 #ifdef OTEXT_TIMER
     gettimeofday(&endv, NULL);
     double elapsed = timeval_diff(&startv, &endv);
-    cout << "\t\tCommitment for seed took time " << elapsed/1000000 << endl << flush;
+    //cout << "\t\tCommitment for seed took time " << elapsed/1000000 << endl << flush;
     times["Commitment for seed"] += timeval_diff(&startv, &endv);
     gettimeofday(&startv, NULL);
 #endif
@@ -711,17 +711,17 @@ void OTExtension::check_correlation(int nOTs,
 #ifdef OTEXT_DEBUG
     if (ot_role & RECEIVER)
     {
-        cout << "\tSending x,t\n";
-        cout << "\tsend x = " << __m128i_toString<octet>(x128i) << endl;
-        cout << "\tsend t = " << __m128i_toString<octet>(t) << endl;
-        cout << "\tsend t2 = " << __m128i_toString<octet>(t2) << endl;
+        //cout << "\tSending x,t\n";
+        //cout << "\tsend x = " << __m128i_toString<octet>(x128i) << endl;
+        //cout << "\tsend t = " << __m128i_toString<octet>(t) << endl;
+        //cout << "\tsend t2 = " << __m128i_toString<octet>(t2) << endl;
     }
 #endif
     check_iteration(Delta, q, q2, t, t2, x128i);
 #ifdef OTEXT_TIMER
     gettimeofday(&endv, NULL);
     elapsed = timeval_diff(&startv, &endv);
-    cout << "\t\tChecking correlation took time " << elapsed/1000000 << endl << flush;
+    //cout << "\t\tChecking correlation took time " << elapsed/1000000 << endl << flush;
     times["Checking correlation"] += timeval_diff(&startv, &endv);
 #endif
 }
@@ -754,14 +754,14 @@ void OTExtension::check_iteration(__m128i delta, __m128i q, __m128i q2,
 
         if (eq_m128i(tmp1, received_t) && eq_m128i(tmp2, received_t2))
         {
-            cout << "\tCheck passed\n";
+            //cout << "\tCheck passed\n";
         }
         else
         {
             cerr << "Correlation check failed\n";
-            cout << "rec t = " << __m128i_toString<octet>(received_t) << endl;
-            cout << "tmp1  = " << __m128i_toString<octet>(tmp1) << endl;
-            cout << "q  = " << __m128i_toString<octet>(q) << endl;
+            //cout << "rec t = " << __m128i_toString<octet>(received_t) << endl;
+            //cout << "tmp1  = " << __m128i_toString<octet>(tmp1) << endl;
+            //cout << "q  = " << __m128i_toString<octet>(q) << endl;
             exit(1);
         }
     }
