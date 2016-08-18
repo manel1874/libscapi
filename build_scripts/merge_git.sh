@@ -10,3 +10,5 @@ git checkout master
 git merge dev
 #push changes
 git push
+#change back to dev
+git checkout dev
