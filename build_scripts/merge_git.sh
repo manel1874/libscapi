@@ -1,5 +1,5 @@
 #check if I'm clean
-git pull --rebase
+git pull origin master
 #change to dev branch
 git checkout dev
 #merge with master
@@ -9,6 +9,6 @@ git checkout master
 #merge master with dev
 git merge dev
 #push changes
-git push
+git push origin master
 #change back to dev
 git checkout dev
