@@ -5,7 +5,7 @@
  *   muldvm, muldvd and muldvd2 will be necessary. See mrmuldv.any 
  *
  *   Also suitable for DJGPP GNU C Compiler
- *   ... but change __int64 to long long
+ *   ... but change long long to long long
  */
 
 #define MIRACL 32
@@ -22,8 +22,8 @@
                              * only version of MIRACL required    */
                             /* Number of bits per double mantissa */
 
-#define mr_dltype __int64   /* ... or long long for Unix/Linux */
-#define mr_unsign64 unsigned __int64
+#define mr_dltype long long   /* ... or long long for Unix/Linux */
+#define mr_unsign64 unsigned long long
 
 #define MAXBASE ((mr_small)1<<(MIRACL-1))
 
