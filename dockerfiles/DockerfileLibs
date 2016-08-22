@@ -17,5 +17,4 @@ WORKDIR libscapi
 RUN make libs
 
 # publish libscapi and boost artificats
-RUN sudo ldconfig ~/boost_1_60_0/stage/lib/ ~/libscapi/install/lib/
-
+RUN ldconfig ~/boost_1_60_0/stage/lib/ ~/libscapi/install/lib/
