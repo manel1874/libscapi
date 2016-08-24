@@ -55,9 +55,7 @@ public:
 	* @param computedCommitment the commitment
 	*/
 	CmtSimpleHashCommitmentValues(shared_ptr<RandomValue> r, shared_ptr<CmtCommitValue> commitVal, shared_ptr<vector<byte>> computedCommitment)
-		: CmtCommitmentPhaseValues(r, commitVal) {
-		this->computedCommitment = computedCommitment;
-	}
+		: CmtCommitmentPhaseValues(r, commitVal), computedCommitment(computedCommitment){}
 
 	shared_ptr<void> getComputedCommitment() override { return computedCommitment; };
 
@@ -81,15 +79,13 @@ public:
 	* @param c the actual commitment object. In simple hash schemes the commitment object is a byte[].
 	* @param id the commitment id.
 	*/
-	CmtSimpleHashCommitmentMessage(shared_ptr<vector<byte>> c = NULL, long id = 0) {
-		this->c = c;
-		this->id = id;
-	}
+	CmtSimpleHashCommitmentMessage(shared_ptr<vector<byte>> c = NULL, long id = 0) : c(c), id(id){}
 
 	/**
 	* Returns the commitment value
 	*/
 	shared_ptr<void> getCommitment() override { return c; }
+	shared_ptr<vector<byte>> getCommitmentArray() { return c; }
 
 	/**
 	* Returns the commitment id.
@@ -129,15 +125,13 @@ public:
 	* @param x the committed value
 	* @param r the random value used for commit.
 	*/
-	CmtSimpleHashDecommitmentMessage(shared_ptr<ByteArrayRandomValue> r, shared_ptr<vector<byte>> x) {
-		this->r = r;
-		this->x = x;
-	}
+	CmtSimpleHashDecommitmentMessage(shared_ptr<ByteArrayRandomValue> r, shared_ptr<vector<byte>> x) : r(r), x(x){}
 
 	shared_ptr<void> getX() override { return x; }
-	vector<byte> getXValue() { return *x; }
+	shared_ptr<vector<byte>> getXValue() { return x; }
 
 	shared_ptr<RandomValue> getR() override { return r; }
+	vector<byte> getRArray() { return r->getR(); }
 
 	// network serialization implementation:
 	void initFromString(const string & s) override;
@@ -183,14 +177,6 @@ private:
 	int n;
 	shared_ptr<PrgFromOpenSSLAES> prg;
 	
-	/**
-	* Computes the hash function on the concatination of the inputs.
-	* @param x user input
-	* @param r random value
-	* @return the hash result.
-	*/
-	shared_ptr<vector<byte>> computeCommitment(vector<byte> x, vector<byte> r);
-
 	void init(shared_ptr<CommParty> channel, shared_ptr<PrgFromOpenSSLAES> random, shared_ptr<CryptographicHash> hash, int n);
 
 public:
@@ -236,7 +222,7 @@ public:
 	*/
 	shared_ptr<CmtCommitValue> sampleRandomCommitValue() override;
 
-	shared_ptr<CmtCommitValue> generateCommitValue(vector<byte> x) override {
+	shared_ptr<CmtCommitValue> generateCommitValue(vector<byte> & x) override {
 		return make_shared<CmtByteArrayCommitValue>(make_shared<vector<byte>>(x));
 	}
 

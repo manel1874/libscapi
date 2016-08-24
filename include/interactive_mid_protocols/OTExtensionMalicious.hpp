@@ -111,7 +111,7 @@ private:
 	* @param bitLength The length (in bits) of each item in the OT. can be derived from |x0|, |x1|, numOfOts
 	* @param version the OT extension version the user wants to use.
 	*/
-	void runOtAsSender(vector<byte> x0, vector<byte> x1, vector<byte> delta, int numOfOts, int bitLength, maliciousot::BYTE version);
+	void runOtAsSender(vector<byte>& x0, vector<byte>& x1, vector<byte>& delta, int numOfOts, int bitLength, maliciousot::BYTE version);
 	
 public:
 	/**
@@ -168,7 +168,7 @@ private:
 	* 				 array is given empty and the native code fills it with the result of the multiple OT results.
 	* @param version The particular OT type to run.
 	*/
-	vector<byte> runOtAsReceiver(vector<byte> sigma, int numOfOts, int bitLength, maliciousot::BYTE version);
+	vector<byte> runOtAsReceiver(vector<byte>& sigma, int numOfOts, int bitLength, maliciousot::BYTE version);
 	
 public:
 

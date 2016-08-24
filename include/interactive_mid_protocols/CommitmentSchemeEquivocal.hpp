@@ -109,7 +109,7 @@ public:
 	/**
 	* Generates CommitValue from the given byte array.
 	*/
-	shared_ptr<CmtCommitValue> generateCommitValue(vector<byte> x) override	{
+	shared_ptr<CmtCommitValue> generateCommitValue(vector<byte> & x) override	{
 		//Delegate to the underlying committer.
 		return committer->generateCommitValue(x);
 	}

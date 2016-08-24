@@ -60,7 +60,7 @@ private:
 public:
 	ByteArrayRandomValue(){}	// for cereal
 
-	ByteArrayRandomValue(vector<byte> r) { this->r = r; }
+	ByteArrayRandomValue(vector<byte> & r) { this->r = r; }
 	vector<byte> getR() { return r; };
 
 	template<class Archive>

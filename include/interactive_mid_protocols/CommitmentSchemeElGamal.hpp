@@ -283,7 +283,7 @@ public:
 		return make_shared<CmtGroupElementCommitValue>(dlog->createRandomElement());
 	}
 
-	shared_ptr<CmtCommitValue> generateCommitValue(vector<byte> x) override {
+	shared_ptr<CmtCommitValue> generateCommitValue(vector<byte> & x) override {
 		throw UnsupportedOperationException("El Gamal committer cannot generate a CommitValue from a byte[], since there isn't always a suitable encoding");
 	}
 
@@ -476,7 +476,7 @@ public:
 	*/
 	shared_ptr<CmtCommitValue> sampleRandomCommitValue() override;
 
-	shared_ptr<CmtCommitValue> generateCommitValue(vector<byte> x) override {
+	shared_ptr<CmtCommitValue> generateCommitValue(vector<byte> & x) override {
 		return make_shared<CmtByteArrayCommitValue>(make_shared<vector<byte>>(x));
 	}
 

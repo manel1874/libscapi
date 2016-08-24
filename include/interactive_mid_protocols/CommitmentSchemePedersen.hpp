@@ -359,7 +359,7 @@ public:
 	CmtPedersenCommitter(shared_ptr<CommParty> channel,	shared_ptr<DlogGroup> dlog) :
 		CmtPedersenCommitterCore(channel, dlog) {};
 	
-	shared_ptr<CmtCommitValue> generateCommitValue(vector<byte> x) override {
+	shared_ptr<CmtCommitValue> generateCommitValue(vector<byte> & x) override {
 		biginteger bi = decodeBigInteger(x.data(), x.size());
 		return make_shared<CmtBigIntegerCommitValue>(make_shared<biginteger>(bi));
 	};

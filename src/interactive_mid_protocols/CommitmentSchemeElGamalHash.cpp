@@ -49,8 +49,8 @@ shared_ptr<CmtCCommitmentMsg> CmtElGamalHashCommitter::generateCommitmentMsg(sha
 	//After the input has been manipulated with the Hash call the super's commit function. Since the super has been initialized with ScElGamalOnByteArray
 	//it will know how to take care of the byte array input.
 	auto output = CmtElGamalCommitterCore::generateCommitmentMsg(make_shared<CmtByteArrayCommitValue>(make_shared<vector<byte>>(hashValArray)), id);
-	auto values = commitmentMap[id];
-	commitmentMap[id] = make_shared<CmtElGamalCommitmentPhaseValues>(values->getR(), input, static_pointer_cast<AsymmetricCiphertext>(values->getComputedCommitment()));
+	CmtElGamalCommitmentPhaseValues* tmp = new CmtElGamalCommitmentPhaseValues(commitmentMap[id]->getR(), input, static_pointer_cast<AsymmetricCiphertext>(commitmentMap[id]->getComputedCommitment()));
+	commitmentMap[id].reset(tmp);
 	return output;
 }
 

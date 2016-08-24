@@ -91,8 +91,8 @@ shared_ptr<CmtCCommitmentMsg> CmtPedersenHashCommitter::generateCommitmentMsg(sh
 	//After the input has been manipulated with the Hash call the super's commit function. 
 	auto biCom = make_shared<CmtBigIntegerCommitValue>(make_shared<biginteger>(newInput));
 	auto output = CmtPedersenCommitterCore::generateCommitmentMsg(biCom, id);
-	auto values = commitmentMap[id];
-	commitmentMap[id] = make_shared<CmtPedersenCommitmentPhaseValues>(values->getR(), input, static_pointer_cast<GroupElement>(values->getComputedCommitment()));
+	CmtPedersenCommitmentPhaseValues* tmp = new CmtPedersenCommitmentPhaseValues(commitmentMap[id]->getR(), input, static_pointer_cast<GroupElement>(commitmentMap[id]->getComputedCommitment()));
+	commitmentMap[id].reset(tmp);
 	return output;
 }
 

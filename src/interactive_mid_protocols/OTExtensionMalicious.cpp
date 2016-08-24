@@ -225,7 +225,7 @@ shared_ptr<OTBatchSOutput> OTExtensionMaliciousSender::transfer(OTBatchSInput * 
 * @param bitLength The length (in bits) of each item in the OT. can be derived from |x0|, |x1|, numOfOts
 * @param version the OT extension version the user wants to use.
 */
-void OTExtensionMaliciousSender::runOtAsSender(vector<byte> x0, vector<byte> x1, vector<byte> delta, int numOfOts, int bitLength, maliciousot::BYTE version) {
+void OTExtensionMaliciousSender::runOtAsSender(vector<byte> & x0, vector<byte> & x1, vector<byte> & delta, int numOfOts, int bitLength, maliciousot::BYTE version) {
 	
 	maliciousot::CBitVector /*delta,*/ X1, X2;
 	maliciousot::MaskingFunction * masking_function = new maliciousot::XORMasking(bitLength);
@@ -411,7 +411,7 @@ shared_ptr<OTBatchROutput> OTExtensionMaliciousReceiver::transfer(OTBatchRInput 
 	return make_shared<OTOnByteArrayROutput>(output);
 }
 
-vector<byte> OTExtensionMaliciousReceiver::runOtAsReceiver(vector<byte> sigma, int numOfOts, int bitLength, maliciousot::BYTE version) {
+vector<byte> OTExtensionMaliciousReceiver::runOtAsReceiver(vector<byte>& sigma, int numOfOts, int bitLength, maliciousot::BYTE version) {
 	// The masking function with which the values that are sent 
 	// in the last communication step are processed
 	
@@ -425,17 +425,17 @@ vector<byte> OTExtensionMaliciousReceiver::runOtAsReceiver(vector<byte> sigma, i
 
 	//copy the sigma values received from java
 	for (int i = 0; i<numOfOts; i++) {
-		choices.SetBit((i / 8) * 8 + 7 - (i % 8), sigma.at(i));
+		choices.SetBit((i / 8) * 8 + 7 - (i % 8), sigma[i]);
 	}
 
 	m_receiver->receive(numOfOts, bitLength, choices, response, version, m_connection_manager->get_num_of_threads(), masking_function);
 	
 	//prepare the out array
 	int sizeResponseInBytes = numOfOts*bitLength / 8;
-	vector<byte> output;
+	vector<byte> output(sizeResponseInBytes);
 	for (int i = 0; i < sizeResponseInBytes; i++) {
 		//copy each byte result to out
-		output.push_back(response.GetByte(i));
+		output[i] = response.GetByte(i);
 	}
 
 	//free the pointer of choises and reponse

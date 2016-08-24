@@ -126,18 +126,21 @@ shared_ptr<CmtCCommitmentMsg> CmtSimpleHashCommitter::generateCommitmentMsg(shar
 	prg->getPRGBytes(r, 0, n);
 
 	//Compute the hash function
-	auto hashValArray = computeCommitment(*x, r);
+	auto hashValArray = make_shared<vector<byte>>(hash->getHashedMsgSize());
+	hash->update(r, 0, r.size());
+	hash->update(*x, 0, x->size());
+	hash->hashFinal(*hashValArray, 0);
 
 	//After succeeding in sending the commitment, keep the committed value in the map together with its ID.
-	commitmentMap[id] = make_shared<CmtSimpleHashCommitmentValues>(make_shared<ByteArrayRandomValue>(r), input, hashValArray);
+	CmtSimpleHashCommitmentValues* tmp = new CmtSimpleHashCommitmentValues(make_shared<ByteArrayRandomValue>(r), input, hashValArray);
+	commitmentMap[id].reset(tmp);
 
 	return make_shared<CmtSimpleHashCommitmentMessage>(hashValArray, id);
 }
 
 shared_ptr<CmtCDecommitmentMessage> CmtSimpleHashCommitter::generateDecommitmentMsg(long id)  {
 	//fetch the commitment according to the requested ID
-	auto vals = commitmentMap[id];
-	auto x = static_pointer_cast<vector<byte>>(vals->getX()->getX());
+	auto x = static_pointer_cast<vector<byte>>(commitmentMap[id]->getX()->getX());
 	auto r = static_pointer_cast<ByteArrayRandomValue>(commitmentMap[id]->getR());
 	return make_shared<CmtSimpleHashDecommitmentMessage>(r, x);
 }
@@ -164,23 +167,6 @@ vector<byte> CmtSimpleHashCommitter::generateBytesFromCommitValue(CmtCommitValue
 	if (val == NULL)
 		throw invalid_argument("The given value must be of type CmtByteArrayCommitValue");
 	return *val->getXVector();
-}
-
-/**
-* Computes the hash function on the concatination of the inputs.
-* @param x user input
-* @param r random value
-* @return the hash result.
-*/
-shared_ptr<vector<byte>> CmtSimpleHashCommitter::computeCommitment(vector<byte> x, vector<byte> r) {
-	//create an array that will hold the concatenation of r with x
-	vector<byte> c(r);
-	c.insert(c.end(), x.begin(), x.end());
-
-	auto hashValArray = make_shared<vector<byte>>(hash->getHashedMsgSize());
-	hash->update(c, 0, c.size());
-	hash->hashFinal(*hashValArray, 0);
-	return hashValArray;
 }
 
 void CmtSimpleHashReceiver::doConstruct(shared_ptr<CommParty> channel, shared_ptr<CryptographicHash> hash, int n) {
@@ -245,19 +231,18 @@ shared_ptr<CmtCommitValue> CmtSimpleHashReceiver::verifyDecommitment(CmtCCommitm
 	
 	//Compute c = H(r,x)
 	auto x = decomMsg->getXValue();
-	auto r = dynamic_pointer_cast<ByteArrayRandomValue>(decomMsg->getR())->getR();
+	auto r = decomMsg->getRArray();
 	
 	//create an array that will hold the concatenation of r with x
-	vector<byte> cTag(r);
-	cTag.insert(cTag.end(), x.begin(), x.end());	
-	vector<byte> hashValArrayTag;
-	hash->update(cTag, 0, cTag.size());
-	hash->hashFinal(hashValArrayTag, 0);
+	hash->update(r, 0, r.size());
+	hash->update(*x, 0, x->size());
+	vector<byte> hashValArray(hash->getHashedMsgSize());
+	hash->hashFinal(hashValArray, 0);
 
 	//Checks that c = H(r,x)
-	auto commitment = *static_pointer_cast<vector<byte>>(comMsg->getCommitment());
-	if (commitment == hashValArrayTag)
-		return make_shared<CmtByteArrayCommitValue>(make_shared<vector<byte>>(x));
+	auto commitment = *comMsg->getCommitmentArray();
+	if (commitment == hashValArray)
+		return make_shared<CmtByteArrayCommitValue>(x);
 	//In the pseudocode it says to return X and ACCEPT if valid commitment else, REJECT.
 	//For now we return null as a mode of reject. If the returned value of this function is not null then it means ACCEPT
 	return NULL;

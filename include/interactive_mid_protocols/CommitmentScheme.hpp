@@ -167,11 +167,8 @@ private:
 	// commitment phase, it is sent in the decommitment phase.
 	shared_ptr<CmtCommitValue> x;
 public:
-
-	CmtCommitmentPhaseValues(shared_ptr<RandomValue> r, shared_ptr<CmtCommitValue> x) {
-		this->r = r;
-		this->x = x;
-	}
+	CmtCommitmentPhaseValues() {}
+	CmtCommitmentPhaseValues(shared_ptr<RandomValue> r, shared_ptr<CmtCommitValue> x) : r(r), x(x){}
 
 	/**
 	* Returns the random value used for commit the value.
@@ -320,7 +317,7 @@ protected:
 	// some data structure. This is necessary in the cases that the same instances of committer
 	// and receiver can be used for performing various commitments utilizing the values calculated
 	// during the pre-process stage for the sake of efficiency.
-	map<long, shared_ptr<CmtCommitmentPhaseValues>> commitmentMap;
+	map<long, unique_ptr<CmtCommitmentPhaseValues>> commitmentMap;
 
 public:
 	/**
@@ -440,7 +437,7 @@ public:
 	* @param x array to convert into a commitValue.
 	* @return the created CommitValue.
 	*/
-	virtual shared_ptr<CmtCommitValue>  generateCommitValue(vector<byte> x) =0;
+	virtual shared_ptr<CmtCommitValue>  generateCommitValue(vector<byte> & x) =0;
 
 	/**
 	* This function converts the given commit value to a byte array.
@@ -466,8 +463,8 @@ public:
 	* @param id of the specific commitment
 	* @return values calculated during the commit phase
 	*/
-	shared_ptr<CmtCommitmentPhaseValues> getCommitmentPhaseValues(long id) {
-		return commitmentMap[id];
+	CmtCommitmentPhaseValues* getCommitmentPhaseValues(long id) {
+		return commitmentMap[id].get();
 	}
 };
 

@@ -95,15 +95,15 @@ shared_ptr<CmtCCommitmentMsg> CmtElGamalCommitterCore::generateCommitmentMsg(sha
 	//This is actually the encryption of x.
 	auto c = elGamal->encrypt(input->convertToPlaintext(), r);
 	//keep the committed value in the map together with its ID.
-	commitmentMap[id] = make_shared<CmtElGamalCommitmentPhaseValues>(make_shared<BigIntegerRandomValue>(r), input, c);
+	CmtElGamalCommitmentPhaseValues* tmp = new CmtElGamalCommitmentPhaseValues(make_shared<BigIntegerRandomValue>(r), input, c);
+	commitmentMap[id].reset(tmp);
 	return make_shared<CmtElGamalCommitmentMessage>(dynamic_pointer_cast<AsymmetricCiphertextSendableData>(c->generateSendableData()), id);
 }
 
 shared_ptr<CmtCDecommitmentMessage> CmtElGamalCommitterCore::generateDecommitmentMsg(long id)  {
 
 	//fetch the commitment according to the requested ID
-	auto values = commitmentMap[id];
-	return make_shared<CmtElGamalDecommitmentMessage>(make_shared<string>(values->getX()->toString()), dynamic_pointer_cast<BigIntegerRandomValue>(values->getR()));
+	return make_shared<CmtElGamalDecommitmentMessage>(make_shared<string>(commitmentMap[id]->getX()->toString()), dynamic_pointer_cast<BigIntegerRandomValue>(commitmentMap[id]->getR()));
 }
 
 vector<shared_ptr<void>> CmtElGamalCommitterCore::getPreProcessValues() {

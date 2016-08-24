@@ -138,7 +138,7 @@ public:
 	*/
 	shared_ptr<CmtCommitValue> sampleRandomCommitValue() override;
 
-	shared_ptr<CmtCommitValue> generateCommitValue(vector<byte> x) override {
+	shared_ptr<CmtCommitValue> generateCommitValue(vector<byte> & x) override {
 		return make_shared<CmtByteArrayCommitValue>(make_shared<vector<byte>>(x));
 	}
 

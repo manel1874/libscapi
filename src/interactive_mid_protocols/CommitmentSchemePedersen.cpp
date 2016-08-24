@@ -195,18 +195,18 @@ shared_ptr<CmtCCommitmentMsg> CmtPedersenCommitterCore::generateCommitmentMsg(sh
 
 	// keep the committed value in the map together with its ID.
 	auto sharedR = make_shared<BigIntegerRandomValue>(r);
-	commitmentMap[id] = make_shared<CmtPedersenCommitmentPhaseValues>(sharedR, input, c);
+	CmtPedersenCommitmentPhaseValues* tmp = new CmtPedersenCommitmentPhaseValues(sharedR, input, c);
+	commitmentMap[id].reset(tmp);
 
 	// send c
 	return make_shared<CmtPedersenCommitmentMessage>(c->generateSendableData(), id);
 }
 
 shared_ptr<CmtCDecommitmentMessage> CmtPedersenCommitterCore::generateDecommitmentMsg(long id) {
-	auto values = commitmentMap[id];
-	auto cmtValue = values->getX();
+	auto cmtValue = commitmentMap[id]->getX();
 	auto biCmt = dynamic_pointer_cast<CmtBigIntegerCommitValue>(cmtValue);
 	auto x = static_pointer_cast<biginteger>(biCmt->getX());
-	auto randomValuePtr = values->getR();
+	auto randomValuePtr = commitmentMap[id]->getR();
 	auto biRVPtr = dynamic_pointer_cast<BigIntegerRandomValue>(randomValuePtr);
 	return make_shared<CmtPedersenDecommitmentMessage>(x, biRVPtr);
 }
