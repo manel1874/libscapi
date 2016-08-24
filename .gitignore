@@ -59,5 +59,6 @@ test/config_for_test.txt
 config_for_test.txt
 *.VC.db
 *~
+samples/libscapi_examples
 
 windows-solutions/CodeExamples/code examples.vcxproj.user.orig
