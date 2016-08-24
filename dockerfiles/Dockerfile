@@ -19,8 +19,8 @@ RUN make libscapi
 # build the samples and run one of them
 WORKDIR samples
 RUN make
-RUN ./libscapi_example.exe dlog
-RUN ./libscapi_example.exe sha1
+RUN ./libscapi_example dlog
+RUN ./libscapi_example sha1
 
 # build the tests and run them
 WORKDIR ../test
