@@ -1,0 +1,1710 @@
+In file included from ../../build/Miracl/ecn.h:56:0,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/big.h:118:2: error: #error "The generic method isn't supported for C++, its C only"
+ #error "The generic method isn't supported for C++, its C only"
+  ^
+../../build/Miracl/big.h: In destructor ‘Miracl::~Miracl()’:
+../../build/Miracl/big.h:135:43: error: too few arguments to function ‘void mirexit(miracl*)’
+     ~Miracl()                    {mirexit();}
+                                           ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:914:14: note: declared here
+ extern void  mirexit(_MIPTO_ );
+              ^
+In file included from ../../build/Miracl/ecn.h:56:0,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/big.h: In constructor ‘Big::Big()’:
+../../build/Miracl/big.h:151:32: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_BIG fn=mirvar(0);
+                                ^
+../../build/Miracl/big.h:173:19: note: in expansion of macro ‘MR_INIT_BIG’
+     Big()        {MR_INIT_BIG } 
+                   ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn.h:56:0,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/big.h: In constructor ‘Big::Big(int)’:
+../../build/Miracl/big.h:151:32: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_BIG fn=mirvar(0);
+                                ^
+../../build/Miracl/big.h:174:19: note: in expansion of macro ‘MR_INIT_BIG’
+     Big(int j)   {MR_INIT_BIG convert(j,fn); }
+                   ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn.h:56:0,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/big.h:174:43: error: invalid conversion from ‘int’ to ‘miracl*’ [-fpermissive]
+     Big(int j)   {MR_INIT_BIG convert(j,fn); }
+                                           ^
+../../build/Miracl/big.h:174:43: error: invalid conversion from ‘big’ to ‘int’ [-fpermissive]
+../../build/Miracl/big.h:174:43: error: too few arguments to function ‘void convert(miracl*, int, big)’
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:889:14: note: declared here
+ extern void  convert(_MIPT_ int,big);
+              ^
+In file included from ../../build/Miracl/ecn.h:56:0,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/big.h: In constructor ‘Big::Big(unsigned int)’:
+../../build/Miracl/big.h:151:32: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_BIG fn=mirvar(0);
+                                ^
+../../build/Miracl/big.h:175:26: note: in expansion of macro ‘MR_INIT_BIG’
+     Big(unsigned int j) {MR_INIT_BIG uconvert(j,fn); }
+                          ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn.h:56:0,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/big.h:175:51: error: invalid conversion from ‘unsigned int’ to ‘miracl*’ [-fpermissive]
+     Big(unsigned int j) {MR_INIT_BIG uconvert(j,fn); }
+                                                   ^
+../../build/Miracl/big.h:175:51: error: invalid conversion from ‘big’ to ‘unsigned int’ [-fpermissive]
+../../build/Miracl/big.h:175:51: error: too few arguments to function ‘void uconvert(miracl*, unsigned int, big)’
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:890:14: note: declared here
+ extern void  uconvert(_MIPT_ unsigned int,big);
+              ^
+In file included from ../../build/Miracl/ecn.h:56:0,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/big.h: In constructor ‘Big::Big(long int)’:
+../../build/Miracl/big.h:151:32: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_BIG fn=mirvar(0);
+                                ^
+../../build/Miracl/big.h:176:19: note: in expansion of macro ‘MR_INIT_BIG’
+     Big(long lg) {MR_INIT_BIG lgconv(lg,fn);}
+                   ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn.h:56:0,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/big.h:176:43: error: invalid conversion from ‘long int’ to ‘miracl*’ [-fpermissive]
+     Big(long lg) {MR_INIT_BIG lgconv(lg,fn);}
+                                           ^
+../../build/Miracl/big.h:176:43: error: invalid conversion from ‘big’ to ‘long int’ [-fpermissive]
+../../build/Miracl/big.h:176:43: error: too few arguments to function ‘void lgconv(miracl*, long int, big)’
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:891:14: note: declared here
+ extern void  lgconv(_MIPT_ long,big);
+              ^
+In file included from ../../build/Miracl/ecn.h:56:0,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/big.h: In constructor ‘Big::Big(long unsigned int)’:
+../../build/Miracl/big.h:151:32: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_BIG fn=mirvar(0);
+                                ^
+../../build/Miracl/big.h:177:28: note: in expansion of macro ‘MR_INIT_BIG’
+     Big(unsigned long lg) {MR_INIT_BIG ulgconv(lg,fn);}
+                            ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn.h:56:0,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/big.h:177:53: error: invalid conversion from ‘long unsigned int’ to ‘miracl*’ [-fpermissive]
+     Big(unsigned long lg) {MR_INIT_BIG ulgconv(lg,fn);}
+                                                     ^
+../../build/Miracl/big.h:177:53: error: invalid conversion from ‘big’ to ‘long unsigned int’ [-fpermissive]
+../../build/Miracl/big.h:177:53: error: too few arguments to function ‘void ulgconv(miracl*, long unsigned int, big)’
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:892:14: note: declared here
+ extern void  ulgconv(_MIPT_ unsigned long,big);
+              ^
+In file included from ../../build/Miracl/ecn.h:56:0,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/big.h: In constructor ‘Big::Big(char*)’:
+../../build/Miracl/big.h:151:32: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_BIG fn=mirvar(0);
+                                ^
+../../build/Miracl/big.h:195:19: note: in expansion of macro ‘MR_INIT_BIG’
+     Big(char* s) {MR_INIT_BIG cinstr(fn,s);}
+                   ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn.h:56:0,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/big.h:195:42: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘int cinstr(miracl*, flash, char*)’
+     Big(char* s) {MR_INIT_BIG cinstr(fn,s);}
+                                          ^
+../../build/Miracl/big.h: In constructor ‘Big::Big(bigtype*&)’:
+../../build/Miracl/big.h:151:32: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_BIG fn=mirvar(0);
+                                ^
+../../build/Miracl/big.h:198:19: note: in expansion of macro ‘MR_INIT_BIG’
+     Big(big& c)  {MR_INIT_BIG copy(c,fn);}
+                   ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn.h:56:0,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/big.h: In copy constructor ‘Big::Big(const Big&)’:
+../../build/Miracl/big.h:151:32: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_BIG fn=mirvar(0);
+                                ^
+../../build/Miracl/big.h:199:25: note: in expansion of macro ‘MR_INIT_BIG’
+     Big(const Big& c)  {MR_INIT_BIG copy(c.fn,fn);}
+                         ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn.h:56:0,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/big.h: In member function ‘Big& Big::operator=(int)’:
+../../build/Miracl/big.h:202:41: error: invalid conversion from ‘int’ to ‘miracl*’ [-fpermissive]
+     Big& operator=(int i)  {convert(i,fn); return *this;}
+                                         ^
+../../build/Miracl/big.h:202:41: error: invalid conversion from ‘big’ to ‘int’ [-fpermissive]
+../../build/Miracl/big.h:202:41: error: too few arguments to function ‘void convert(miracl*, int, big)’
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:889:14: note: declared here
+ extern void  convert(_MIPT_ int,big);
+              ^
+In file included from ../../build/Miracl/ecn.h:56:0,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/big.h: In member function ‘Big& Big::operator=(long int)’:
+../../build/Miracl/big.h:203:41: error: invalid conversion from ‘long int’ to ‘miracl*’ [-fpermissive]
+     Big& operator=(long lg){lgconv(lg,fn); return *this;}
+                                         ^
+../../build/Miracl/big.h:203:41: error: invalid conversion from ‘big’ to ‘long int’ [-fpermissive]
+../../build/Miracl/big.h:203:41: error: too few arguments to function ‘void lgconv(miracl*, long int, big)’
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:891:14: note: declared here
+ extern void  lgconv(_MIPT_ long,big);
+              ^
+In file included from ../../build/Miracl/ecn.h:56:0,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/big.h: In member function ‘Big& Big::operator=(char*)’:
+../../build/Miracl/big.h:225:40: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘int cinstr(miracl*, flash, char*)’
+     Big& operator=(char* s){cinstr(fn,s);return *this;}
+                                        ^
+../../build/Miracl/big.h: In member function ‘Big& Big::operator++()’:
+../../build/Miracl/big.h:228:41: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void incr(miracl*, big, int, big)’
+     Big& operator++()      {incr(fn,1,fn); return *this;}
+                                         ^
+../../build/Miracl/big.h: In member function ‘Big& Big::operator--()’:
+../../build/Miracl/big.h:229:41: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void decr(miracl*, big, int, big)’
+     Big& operator--()      {decr(fn,1,fn); return *this;}
+                                         ^
+../../build/Miracl/big.h: In member function ‘Big& Big::operator+=(int)’:
+../../build/Miracl/big.h:230:41: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void incr(miracl*, big, int, big)’
+     Big& operator+=(int i) {incr(fn,i,fn); return *this;}
+                                         ^
+../../build/Miracl/big.h: In member function ‘Big& Big::operator+=(const Big&)’:
+../../build/Miracl/big.h:231:49: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void add(miracl*, big, big, big)’
+     Big& operator+=(const Big& b){add(fn,b.fn,fn); return *this;}
+                                                 ^
+../../build/Miracl/big.h: In member function ‘Big& Big::operator-=(int)’:
+../../build/Miracl/big.h:233:42: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void decr(miracl*, big, int, big)’
+     Big& operator-=(int i)  {decr(fn,i,fn); return *this;}
+                                          ^
+../../build/Miracl/big.h: In member function ‘Big& Big::operator-=(const Big&)’:
+../../build/Miracl/big.h:234:55: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void subtract(miracl*, big, big, big)’
+     Big& operator-=(const Big& b) {subtract(fn,b.fn,fn); return *this;}
+                                                       ^
+../../build/Miracl/big.h: In member function ‘Big& Big::operator*=(int)’:
+../../build/Miracl/big.h:236:45: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void premult(miracl*, big, int, big)’
+     Big& operator*=(int i)  {premult(fn,i,fn); return *this;}
+                                             ^
+../../build/Miracl/big.h: In member function ‘Big& Big::operator*=(const Big&)’:
+../../build/Miracl/big.h:237:55: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void multiply(miracl*, big, big, big)’
+     Big& operator*=(const Big& b) {multiply(fn,b.fn,fn); return *this;}
+                                                       ^
+../../build/Miracl/big.h: In member function ‘Big& Big::operator/=(int)’:
+../../build/Miracl/big.h:239:44: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘int subdiv(miracl*, big, int, big)’
+     Big& operator/=(int i)  {subdiv(fn,i,fn);    return *this;}
+                                            ^
+../../build/Miracl/big.h: In member function ‘Big& Big::operator/=(const Big&)’:
+../../build/Miracl/big.h:240:53: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void divide(miracl*, big, big, big)’
+     Big& operator/=(const Big& b) {divide(fn,b.fn,fn); return *this;}
+                                                     ^
+../../build/Miracl/big.h: In member function ‘Big& Big::operator%=(int)’:
+../../build/Miracl/big.h:242:52: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘int subdiv(miracl*, big, int, big)’
+     Big& operator%=(int i)  {convert(subdiv(fn,i,fn),fn); return *this;}
+                                                    ^
+../../build/Miracl/big.h: In member function ‘Big& Big::operator%=(const Big&)’:
+../../build/Miracl/big.h:243:55: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void divide(miracl*, big, big, big)’
+     Big& operator%=(const Big& b) {divide(fn,b.fn,b.fn); return *this;}
+                                                       ^
+../../build/Miracl/big.h: In member function ‘Big& Big::operator<<=(int)’:
+../../build/Miracl/big.h:245:44: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void sftbit(miracl*, big, int, big)’
+     Big& operator<<=(int i) {sftbit(fn,i,fn); return *this;}
+                                            ^
+../../build/Miracl/big.h: In member function ‘Big& Big::operator>>=(int)’:
+../../build/Miracl/big.h:246:45: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void sftbit(miracl*, big, int, big)’
+     Big& operator>>=(int i) {sftbit(fn,-i,fn); return *this;}
+                                             ^
+../../build/Miracl/big.h: In member function ‘Big& Big::shift(int)’:
+../../build/Miracl/big.h:248:40: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void mr_shift(miracl*, big, int, big)’
+     Big& shift(int n) {mr_shift(fn,n,fn); return *this;}
+                                        ^
+../../build/Miracl/big.h: In member function ‘int Big::get(int)’:
+../../build/Miracl/big.h:255:59: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘int getdig(miracl*, big, int)’
+     int get(int index)          { int m; m=getdig(fn,index); return m; }
+                                                           ^
+../../build/Miracl/big.h: In member function ‘void Big::set(int, int)’:
+../../build/Miracl/big.h:256:52: error: invalid conversion from ‘int’ to ‘miracl*’ [-fpermissive]
+     void set(int index,int n)   { putdig(n,fn,index);}
+                                                    ^
+../../build/Miracl/big.h:256:52: error: invalid conversion from ‘big’ to ‘int’ [-fpermissive]
+../../build/Miracl/big.h:256:52: error: invalid conversion from ‘int’ to ‘big’ [-fpermissive]
+../../build/Miracl/big.h:256:52: error: too few arguments to function ‘void putdig(miracl*, int, big, int)’
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:919:14: note: declared here
+ extern void  putdig(_MIPT_ int,big,int);
+              ^
+In file included from ../../build/Miracl/ecn.h:56:0,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/big.h: In function ‘void set_zzn3(int, Big&)’:
+../../build/Miracl/big.h:309:92: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void nres(miracl*, big, big)’
+     friend void set_zzn3(int cnr,Big& sru)  {get_mip()->cnr=cnr; nres(sru.fn,get_mip()->sru);}
+                                                                                            ^
+../../build/Miracl/big.h: In function ‘int recode(const Big&, int, int, int)’:
+../../build/Miracl/big.h:310:77: error: cannot convert ‘const big {aka bigtype* const}’ to ‘miracl*’ for argument ‘1’ to ‘int recode(miracl*, big, int, int, int)’
+  friend int recode(const Big& e,int t,int w,int i) {return recode(e.fn,t,w,i);}
+                                                                             ^
+../../build/Miracl/big.h: In function ‘int bit(const Big&, int)’:
+../../build/Miracl/big.h:337:66: error: cannot convert ‘const big {aka bigtype* const}’ to ‘miracl*’ for argument ‘1’ to ‘int mr_testbit(miracl*, big, int)’
+     friend int bit(const Big& b,int i)  {return mr_testbit(b.fn,i);}
+                                                                  ^
+../../build/Miracl/big.h: In function ‘int bits(const Big&)’:
+../../build/Miracl/big.h:338:53: error: cannot convert ‘const big {aka bigtype* const}’ to ‘miracl*’ for argument ‘1’ to ‘int logb2(miracl*, big)’
+     friend int bits(const Big& b) {return logb2(b.fn);}
+                                                     ^
+../../build/Miracl/big.h: In function ‘int ham(const Big&)’:
+../../build/Miracl/big.h:339:55: error: cannot convert ‘const big {aka bigtype* const}’ to ‘miracl*’ for argument ‘1’ to ‘int hamming(miracl*, big)’
+     friend int ham(const Big& b)  {return hamming(b.fn);}
+                                                       ^
+../../build/Miracl/big.h: In function ‘int jacobi(const Big&, const Big&)’:
+../../build/Miracl/big.h:340:76: error: cannot convert ‘const big {aka bigtype* const}’ to ‘miracl*’ for argument ‘1’ to ‘int jack(miracl*, big, big)’
+     friend int jacobi(const Big& b1,const Big& b2) {return jack(b1.fn,b2.fn);}
+                                                                            ^
+../../build/Miracl/big.h: In function ‘BOOL prime(const Big&)’:
+../../build/Miracl/big.h:342:57: error: cannot convert ‘const big {aka bigtype* const}’ to ‘miracl*’ for argument ‘1’ to ‘BOOL isprime(miracl*, big)’
+     friend BOOL prime(const Big& b) {return isprime(b.fn);}  
+                                                         ^
+In file included from ../../build/Miracl/pairing_3.h:51:0,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/ecn.h: In constructor ‘ECn::ECn()’:
+../../build/Miracl/ecn.h:61:47: error: invalid conversion from ‘int’ to ‘miracl*’ [-fpermissive]
+ #define MR_INIT_ECN mem=(char *)ecp_memalloc(1); p=(epoint *)epoint_init_mem(mem,0); 
+                                               ^
+../../build/Miracl/ecn.h:73:38: note: in expansion of macro ‘MR_INIT_ECN’
+     ECn()                           {MR_INIT_ECN }
+                                      ^
+../../build/Miracl/ecn.h:61:47: error: too few arguments to function ‘void* ecp_memalloc(miracl*, int)’
+ #define MR_INIT_ECN mem=(char *)ecp_memalloc(1); p=(epoint *)epoint_init_mem(mem,0); 
+                                               ^
+../../build/Miracl/ecn.h:73:38: note: in expansion of macro ‘MR_INIT_ECN’
+     ECn()                           {MR_INIT_ECN }
+                                      ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:948:14: note: declared here
+ extern void* ecp_memalloc(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/pairing_3.h:51:0,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/ecn.h:61:83: error: cannot convert ‘char*’ to ‘miracl*’ for argument ‘1’ to ‘epoint* epoint_init_mem(miracl*, char*, int)’
+ #define MR_INIT_ECN mem=(char *)ecp_memalloc(1); p=(epoint *)epoint_init_mem(mem,0); 
+                                                                                   ^
+../../build/Miracl/ecn.h:73:38: note: in expansion of macro ‘MR_INIT_ECN’
+     ECn()                           {MR_INIT_ECN }
+                                      ^
+../../build/Miracl/ecn.h: In constructor ‘ECn::ECn(const Big&, const Big&)’:
+../../build/Miracl/ecn.h:61:47: error: invalid conversion from ‘int’ to ‘miracl*’ [-fpermissive]
+ #define MR_INIT_ECN mem=(char *)ecp_memalloc(1); p=(epoint *)epoint_init_mem(mem,0); 
+                                               ^
+../../build/Miracl/ecn.h:75:38: note: in expansion of macro ‘MR_INIT_ECN’
+     ECn(const Big &x,const Big& y)  {MR_INIT_ECN 
+                                      ^
+../../build/Miracl/ecn.h:61:47: error: too few arguments to function ‘void* ecp_memalloc(miracl*, int)’
+ #define MR_INIT_ECN mem=(char *)ecp_memalloc(1); p=(epoint *)epoint_init_mem(mem,0); 
+                                               ^
+../../build/Miracl/ecn.h:75:38: note: in expansion of macro ‘MR_INIT_ECN’
+     ECn(const Big &x,const Big& y)  {MR_INIT_ECN 
+                                      ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:948:14: note: declared here
+ extern void* ecp_memalloc(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/pairing_3.h:51:0,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/ecn.h:61:83: error: cannot convert ‘char*’ to ‘miracl*’ for argument ‘1’ to ‘epoint* epoint_init_mem(miracl*, char*, int)’
+ #define MR_INIT_ECN mem=(char *)ecp_memalloc(1); p=(epoint *)epoint_init_mem(mem,0); 
+                                                                                   ^
+../../build/Miracl/ecn.h:75:38: note: in expansion of macro ‘MR_INIT_ECN’
+     ECn(const Big &x,const Big& y)  {MR_INIT_ECN 
+                                      ^
+../../build/Miracl/ecn.h:76:72: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘BOOL epoint_set(miracl*, big, big, int, epoint*)’
+                                    epoint_set(x.getbig(),y.getbig(),0,p); }
+                                                                        ^
+../../build/Miracl/ecn.h: In constructor ‘ECn::ECn(const Big&, int)’:
+../../build/Miracl/ecn.h:61:47: error: invalid conversion from ‘int’ to ‘miracl*’ [-fpermissive]
+ #define MR_INIT_ECN mem=(char *)ecp_memalloc(1); p=(epoint *)epoint_init_mem(mem,0); 
+                                               ^
+../../build/Miracl/ecn.h:82:43: note: in expansion of macro ‘MR_INIT_ECN’
+     ECn(const Big& x,int cb)             {MR_INIT_ECN
+                                           ^
+../../build/Miracl/ecn.h:61:47: error: too few arguments to function ‘void* ecp_memalloc(miracl*, int)’
+ #define MR_INIT_ECN mem=(char *)ecp_memalloc(1); p=(epoint *)epoint_init_mem(mem,0); 
+                                               ^
+../../build/Miracl/ecn.h:82:43: note: in expansion of macro ‘MR_INIT_ECN’
+     ECn(const Big& x,int cb)             {MR_INIT_ECN
+                                           ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:948:14: note: declared here
+ extern void* ecp_memalloc(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/pairing_3.h:51:0,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/ecn.h:61:83: error: cannot convert ‘char*’ to ‘miracl*’ for argument ‘1’ to ‘epoint* epoint_init_mem(miracl*, char*, int)’
+ #define MR_INIT_ECN mem=(char *)ecp_memalloc(1); p=(epoint *)epoint_init_mem(mem,0); 
+                                                                                   ^
+../../build/Miracl/ecn.h:82:43: note: in expansion of macro ‘MR_INIT_ECN’
+     ECn(const Big& x,int cb)             {MR_INIT_ECN
+                                           ^
+../../build/Miracl/ecn.h:83:73: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘BOOL epoint_set(miracl*, big, big, int, epoint*)’
+                                    epoint_set(x.getbig(),x.getbig(),cb,p); }
+                                                                         ^
+../../build/Miracl/ecn.h: In copy constructor ‘ECn::ECn(const ECn&)’:
+../../build/Miracl/ecn.h:61:47: error: invalid conversion from ‘int’ to ‘miracl*’ [-fpermissive]
+ #define MR_INIT_ECN mem=(char *)ecp_memalloc(1); p=(epoint *)epoint_init_mem(mem,0); 
+                                               ^
+../../build/Miracl/ecn.h:86:42: note: in expansion of macro ‘MR_INIT_ECN’
+     ECn(const ECn &b)                   {MR_INIT_ECN epoint_copy(b.p,p);}
+                                          ^
+../../build/Miracl/ecn.h:61:47: error: too few arguments to function ‘void* ecp_memalloc(miracl*, int)’
+ #define MR_INIT_ECN mem=(char *)ecp_memalloc(1); p=(epoint *)epoint_init_mem(mem,0); 
+                                               ^
+../../build/Miracl/ecn.h:86:42: note: in expansion of macro ‘MR_INIT_ECN’
+     ECn(const ECn &b)                   {MR_INIT_ECN epoint_copy(b.p,p);}
+                                          ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:948:14: note: declared here
+ extern void* ecp_memalloc(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/pairing_3.h:51:0,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/ecn.h:61:83: error: cannot convert ‘char*’ to ‘miracl*’ for argument ‘1’ to ‘epoint* epoint_init_mem(miracl*, char*, int)’
+ #define MR_INIT_ECN mem=(char *)ecp_memalloc(1); p=(epoint *)epoint_init_mem(mem,0); 
+                                                                                   ^
+../../build/Miracl/ecn.h:86:42: note: in expansion of macro ‘MR_INIT_ECN’
+     ECn(const ECn &b)                   {MR_INIT_ECN epoint_copy(b.p,p);}
+                                          ^
+../../build/Miracl/ecn.h: In member function ‘ECn& ECn::operator+=(const ECn&)’:
+../../build/Miracl/ecn.h:92:52: error: cannot convert ‘epoint* const’ to ‘miracl*’ for argument ‘1’ to ‘int ecurve_add(miracl*, epoint*, epoint*)’
+     ECn& operator+=(const ECn& b) {ecurve_add(b.p,p); return *this;}
+                                                    ^
+../../build/Miracl/ecn.h: In member function ‘ECn& ECn::operator-=(const ECn&)’:
+../../build/Miracl/ecn.h:98:52: error: cannot convert ‘epoint* const’ to ‘miracl*’ for argument ‘1’ to ‘int ecurve_sub(miracl*, epoint*, epoint*)’
+     ECn& operator-=(const ECn& b) {ecurve_sub(b.p,p); return *this;}
+                                                    ^
+../../build/Miracl/ecn.h: In member function ‘ECn& ECn::operator*=(const Big&)’:
+../../build/Miracl/ecn.h:102:62: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘int ecurve_mult(miracl*, big, epoint*, epoint*)’
+     ECn& operator*=(const Big& k) {ecurve_mult(k.getbig(),p,p); return *this;}
+                                                              ^
+../../build/Miracl/ecn.h: In member function ‘void ECn::clear()’:
+../../build/Miracl/ecn.h:104:43: error: invalid conversion from ‘epoint*’ to ‘int’ [-fpermissive]
+     void clear() {epoint_set(NULL,NULL,0,p);}
+                                           ^
+../../build/Miracl/ecn.h:104:43: error: too few arguments to function ‘BOOL epoint_set(miracl*, big, big, int, epoint*)’
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:1147:13: note: declared here
+ extern BOOL epoint_set(_MIPT_ big,big,int,epoint*);
+             ^
+In file included from ../../build/Miracl/pairing_3.h:51:0,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/ecn.h: In member function ‘BOOL ECn::set(const Big&, const Big&)’:
+../../build/Miracl/ecn.h:105:88: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘BOOL epoint_set(miracl*, big, big, int, epoint*)’
+     BOOL set(const Big& x,const Big& y)    {return epoint_set(x.getbig(),y.getbig(),0,p);}
+                                                                                        ^
+../../build/Miracl/ecn.h: In member function ‘void ECn::setz(const Big&)’:
+../../build/Miracl/ecn.h:108:47: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void nres(miracl*, big, big)’
+  void setz(const Big& z) {nres(z.getbig(),p->Z); p->marker=MR_EPOINT_GENERAL;}
+                                               ^
+../../build/Miracl/ecn.h: In member function ‘BOOL ECn::set(const Big&, int)’:
+../../build/Miracl/ecn.h:125:83: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘BOOL epoint_set(miracl*, big, big, int, epoint*)’
+     BOOL set(const Big& x,int cb=0)  {return epoint_set(x.getbig(),x.getbig(),cb,p);}
+                                                                                   ^
+../../build/Miracl/ecn.h: In function ‘void normalise(ECn&)’:
+../../build/Miracl/ecn.h:134:51: error: cannot convert ‘epoint*’ to ‘miracl*’ for argument ‘1’ to ‘BOOL epoint_norm(miracl*, epoint*)’
+     friend void normalise(ECn &e) {epoint_norm(e.p);}
+                                                   ^
+../../build/Miracl/ecn.h: In function ‘BOOL operator==(const ECn&, const ECn&)’:
+../../build/Miracl/ecn.h:138:62: error: cannot convert ‘epoint* const’ to ‘miracl*’ for argument ‘1’ to ‘BOOL epoint_comp(miracl*, epoint*, epoint*)’
+                                   {return epoint_comp(a.p,b.p);}    
+                                                              ^
+../../build/Miracl/ecn.h: In function ‘BOOL operator!=(const ECn&, const ECn&)’:
+../../build/Miracl/ecn.h:140:64: error: cannot convert ‘epoint* const’ to ‘miracl*’ for argument ‘1’ to ‘BOOL epoint_comp(miracl*, epoint*, epoint*)’
+                                   {return (!epoint_comp(a.p,b.p));}    
+                                                                ^
+In file included from ../../build/Miracl/zzn2.h:50:0,
+                 from ../../build/Miracl/zzn4.h:65,
+                 from ../../build/Miracl/ecn4.h:55,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn.h: In constructor ‘ZZn::ZZn()’:
+../../build/Miracl/zzn.h:82:32: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN fn=mirvar(0);
+                                ^
+../../build/Miracl/zzn.h:104:26: note: in expansion of macro ‘MR_INIT_ZZN’
+     ZZn()               {MR_INIT_ZZN MR_ZERO_ZZN} 
+                          ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/zzn2.h:50:0,
+                 from ../../build/Miracl/zzn4.h:65,
+                 from ../../build/Miracl/ecn4.h:55,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn.h: In constructor ‘ZZn::ZZn(int)’:
+../../build/Miracl/zzn.h:82:32: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN fn=mirvar(0);
+                                ^
+../../build/Miracl/zzn.h:105:26: note: in expansion of macro ‘MR_INIT_ZZN’
+     ZZn(int i)          {MR_INIT_ZZN if (i==0) MR_ZERO_ZZN else {convert(i,fn); nres(fn,fn);} }
+                          ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/zzn2.h:50:0,
+                 from ../../build/Miracl/zzn4.h:65,
+                 from ../../build/Miracl/ecn4.h:55,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn.h:105:78: error: invalid conversion from ‘int’ to ‘miracl*’ [-fpermissive]
+     ZZn(int i)          {MR_INIT_ZZN if (i==0) MR_ZERO_ZZN else {convert(i,fn); nres(fn,fn);} }
+                                                                              ^
+../../build/Miracl/zzn.h:105:78: error: invalid conversion from ‘big’ to ‘int’ [-fpermissive]
+../../build/Miracl/zzn.h:105:78: error: too few arguments to function ‘void convert(miracl*, int, big)’
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:889:14: note: declared here
+ extern void  convert(_MIPT_ int,big);
+              ^
+In file included from ../../build/Miracl/zzn2.h:50:0,
+                 from ../../build/Miracl/zzn4.h:65,
+                 from ../../build/Miracl/ecn4.h:55,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn.h:105:91: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void nres(miracl*, big, big)’
+     ZZn(int i)          {MR_INIT_ZZN if (i==0) MR_ZERO_ZZN else {convert(i,fn); nres(fn,fn);} }
+                                                                                           ^
+../../build/Miracl/zzn.h: In constructor ‘ZZn::ZZn(const Big&)’:
+../../build/Miracl/zzn.h:82:32: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN fn=mirvar(0);
+                                ^
+../../build/Miracl/zzn.h:106:26: note: in expansion of macro ‘MR_INIT_ZZN’
+     ZZn(const Big& c)   {MR_INIT_ZZN nres(c.getbig(),fn); }   /* Big -> ZZn */
+                          ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/zzn2.h:50:0,
+                 from ../../build/Miracl/zzn4.h:65,
+                 from ../../build/Miracl/ecn4.h:55,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn.h:106:56: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void nres(miracl*, big, big)’
+     ZZn(const Big& c)   {MR_INIT_ZZN nres(c.getbig(),fn); }   /* Big -> ZZn */
+                                                        ^
+../../build/Miracl/zzn.h: In constructor ‘ZZn::ZZn(bigtype*&)’:
+../../build/Miracl/zzn.h:82:32: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN fn=mirvar(0);
+                                ^
+../../build/Miracl/zzn.h:107:26: note: in expansion of macro ‘MR_INIT_ZZN’
+     ZZn(big& c)         {MR_INIT_ZZN MR_CLONE_ZZN(c);}
+                          ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/zzn2.h:50:0,
+                 from ../../build/Miracl/zzn4.h:65,
+                 from ../../build/Miracl/ecn4.h:55,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn.h: In copy constructor ‘ZZn::ZZn(const ZZn&)’:
+../../build/Miracl/zzn.h:82:32: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN fn=mirvar(0);
+                                ^
+../../build/Miracl/zzn.h:108:26: note: in expansion of macro ‘MR_INIT_ZZN’
+     ZZn(const ZZn& c)   {MR_INIT_ZZN MR_CLONE_ZZN(c.fn);}
+                          ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/zzn2.h:50:0,
+                 from ../../build/Miracl/zzn4.h:65,
+                 from ../../build/Miracl/ecn4.h:55,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn.h: In constructor ‘ZZn::ZZn(char*)’:
+../../build/Miracl/zzn.h:82:32: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN fn=mirvar(0);
+                                ^
+../../build/Miracl/zzn.h:109:26: note: in expansion of macro ‘MR_INIT_ZZN’
+     ZZn(char* s)        {MR_INIT_ZZN cinstr(fn,s); nres(fn,fn);}
+                          ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/zzn2.h:50:0,
+                 from ../../build/Miracl/zzn4.h:65,
+                 from ../../build/Miracl/ecn4.h:55,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn.h:109:49: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘int cinstr(miracl*, flash, char*)’
+     ZZn(char* s)        {MR_INIT_ZZN cinstr(fn,s); nres(fn,fn);}
+                                                 ^
+../../build/Miracl/zzn.h:109:62: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void nres(miracl*, big, big)’
+     ZZn(char* s)        {MR_INIT_ZZN cinstr(fn,s); nres(fn,fn);}
+                                                              ^
+../../build/Miracl/zzn.h: In member function ‘ZZn& ZZn::operator=(int)’:
+../../build/Miracl/zzn.h:114:69: error: invalid conversion from ‘int’ to ‘miracl*’ [-fpermissive]
+     ZZn& operator=(int i)  {if (i==0) MR_ZERO_ZZN else {convert(i,fn); nres(fn,fn);} return *this;}
+                                                                     ^
+../../build/Miracl/zzn.h:114:69: error: invalid conversion from ‘big’ to ‘int’ [-fpermissive]
+../../build/Miracl/zzn.h:114:69: error: too few arguments to function ‘void convert(miracl*, int, big)’
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:889:14: note: declared here
+ extern void  convert(_MIPT_ int,big);
+              ^
+In file included from ../../build/Miracl/zzn2.h:50:0,
+                 from ../../build/Miracl/zzn4.h:65,
+                 from ../../build/Miracl/ecn4.h:55,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn.h:114:82: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void nres(miracl*, big, big)’
+     ZZn& operator=(int i)  {if (i==0) MR_ZERO_ZZN else {convert(i,fn); nres(fn,fn);} return *this;}
+                                                                                  ^
+../../build/Miracl/zzn.h: In member function ‘ZZn& ZZn::operator=(char*)’:
+../../build/Miracl/zzn.h:115:40: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘int cinstr(miracl*, flash, char*)’
+     ZZn& operator=(char* s){cinstr(fn,s); nres(fn,fn); return *this;}
+                                        ^
+../../build/Miracl/zzn.h:115:53: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void nres(miracl*, big, big)’
+     ZZn& operator=(char* s){cinstr(fn,s); nres(fn,fn); return *this;}
+                                                     ^
+../../build/Miracl/zzn.h: In member function ‘ZZn& ZZn::operator++()’:
+../../build/Miracl/zzn.h:121:42: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void nres_modadd(miracl*, big, big, big)’
+         {nres_modadd(fn,get_mip()->one,fn);return *this;}
+                                          ^
+../../build/Miracl/zzn.h: In member function ‘ZZn& ZZn::operator--()’:
+../../build/Miracl/zzn.h:123:42: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void nres_modsub(miracl*, big, big, big)’
+         {nres_modsub(fn,get_mip()->one,fn);return *this;}
+                                          ^
+../../build/Miracl/zzn.h: In member function ‘ZZn& ZZn::operator+=(int)’:
+../../build/Miracl/zzn.h:125:45: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void nres_modadd(miracl*, big, big, big)’
+         {ZZn inc=i; nres_modadd(fn,inc.fn,fn);return *this;}
+                                             ^
+../../build/Miracl/zzn.h: In member function ‘ZZn& ZZn::operator-=(int)’:
+../../build/Miracl/zzn.h:127:45: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void nres_modsub(miracl*, big, big, big)’
+         {ZZn dec=i; nres_modsub(fn,dec.fn,fn); return *this;}
+                                             ^
+../../build/Miracl/zzn.h: In member function ‘ZZn& ZZn::operator+=(const ZZn&)’:
+../../build/Miracl/zzn.h:129:32: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void nres_modadd(miracl*, big, big, big)’
+         {nres_modadd(fn,b.fn,fn); return *this;}
+                                ^
+../../build/Miracl/zzn.h: In member function ‘ZZn& ZZn::operator-=(const ZZn&)’:
+../../build/Miracl/zzn.h:131:32: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void nres_modsub(miracl*, big, big, big)’
+         {nres_modsub(fn,b.fn,fn); return *this;}
+                                ^
+../../build/Miracl/zzn.h: In member function ‘ZZn& ZZn::operator*=(const ZZn&)’:
+../../build/Miracl/zzn.h:133:33: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void nres_modmult(miracl*, big, big, big)’
+         {nres_modmult(fn,b.fn,fn); return *this;}
+                                 ^
+../../build/Miracl/zzn.h: In member function ‘ZZn& ZZn::operator*=(int)’:
+../../build/Miracl/zzn.h:135:30: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void nres_premult(miracl*, big, int, big)’
+         {nres_premult(fn,i,fn); return *this;}
+                              ^
+../../build/Miracl/zzn.h: In member function ‘ZZn& ZZn::negate()’:
+../../build/Miracl/zzn.h:138:27: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void nres_negate(miracl*, big, big)’
+         {nres_negate(fn,fn); return *this;}
+                           ^
+../../build/Miracl/zzn.h: In member function ‘ZZn::operator Big()’:
+../../build/Miracl/zzn.h:142:46: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void redc(miracl*, big, big)’
+     operator Big() {Big c; redc(fn,c.getbig()); return c;}   /* ZZn -> Big */
+                                              ^
+../../build/Miracl/zzn.h: In member function ‘ZZn& ZZn::operator/=(const ZZn&)’:
+../../build/Miracl/zzn.h:145:58: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘int nres_moddiv(miracl*, big, big, big)’
+     ZZn& operator/=(const ZZn& b) {nres_moddiv(fn,b.fn,fn); return *this;}
+                                                          ^
+In file included from ../../build/Miracl/zzn4.h:65:0,
+                 from ../../build/Miracl/ecn4.h:55,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn2.h: In constructor ‘ZZn2::ZZn2()’:
+../../build/Miracl/zzn2.h:57:36: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN2 {fn.a=mirvar(0); fn.b=mirvar(0);}
+                                    ^
+../../build/Miracl/zzn2.h:72:15: note: in expansion of macro ‘MR_INIT_ZZN2’
+     ZZn2()   {MR_INIT_ZZN2 MR_ZERO_ZZN2 }
+               ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/zzn4.h:65:0,
+                 from ../../build/Miracl/ecn4.h:55,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn2.h:57:52: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN2 {fn.a=mirvar(0); fn.b=mirvar(0);}
+                                                    ^
+../../build/Miracl/zzn2.h:72:15: note: in expansion of macro ‘MR_INIT_ZZN2’
+     ZZn2()   {MR_INIT_ZZN2 MR_ZERO_ZZN2 }
+               ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/zzn4.h:65:0,
+                 from ../../build/Miracl/ecn4.h:55,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn2.h: In constructor ‘ZZn2::ZZn2(int)’:
+../../build/Miracl/zzn2.h:57:36: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN2 {fn.a=mirvar(0); fn.b=mirvar(0);}
+                                    ^
+../../build/Miracl/zzn2.h:73:18: note: in expansion of macro ‘MR_INIT_ZZN2’
+     ZZn2(int w) {MR_INIT_ZZN2 if (w==0) MR_ZERO_ZZN2 else zzn2_from_int(w,&fn);}
+                  ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/zzn4.h:65:0,
+                 from ../../build/Miracl/ecn4.h:55,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn2.h:57:52: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN2 {fn.a=mirvar(0); fn.b=mirvar(0);}
+                                                    ^
+../../build/Miracl/zzn2.h:73:18: note: in expansion of macro ‘MR_INIT_ZZN2’
+     ZZn2(int w) {MR_INIT_ZZN2 if (w==0) MR_ZERO_ZZN2 else zzn2_from_int(w,&fn);}
+                  ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/zzn4.h:65:0,
+                 from ../../build/Miracl/ecn4.h:55,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn2.h:73:78: error: invalid conversion from ‘int’ to ‘miracl*’ [-fpermissive]
+     ZZn2(int w) {MR_INIT_ZZN2 if (w==0) MR_ZERO_ZZN2 else zzn2_from_int(w,&fn);}
+                                                                              ^
+../../build/Miracl/zzn2.h:73:78: error: invalid conversion from ‘zzn2*’ to ‘int’ [-fpermissive]
+../../build/Miracl/zzn2.h:73:78: error: too few arguments to function ‘void zzn2_from_int(miracl*, int, zzn2*)’
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:1204:13: note: declared here
+ extern void zzn2_from_int(_MIPT_ int,zzn2 *);
+             ^
+In file included from ../../build/Miracl/zzn4.h:65:0,
+                 from ../../build/Miracl/ecn4.h:55,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn2.h: In constructor ‘ZZn2::ZZn2(int, int)’:
+../../build/Miracl/zzn2.h:57:36: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN2 {fn.a=mirvar(0); fn.b=mirvar(0);}
+                                    ^
+../../build/Miracl/zzn2.h:74:23: note: in expansion of macro ‘MR_INIT_ZZN2’
+     ZZn2(int w,int z){MR_INIT_ZZN2 zzn2_from_ints(w,z,&fn);}
+                       ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/zzn4.h:65:0,
+                 from ../../build/Miracl/ecn4.h:55,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn2.h:57:52: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN2 {fn.a=mirvar(0); fn.b=mirvar(0);}
+                                                    ^
+../../build/Miracl/zzn2.h:74:23: note: in expansion of macro ‘MR_INIT_ZZN2’
+     ZZn2(int w,int z){MR_INIT_ZZN2 zzn2_from_ints(w,z,&fn);}
+                       ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/zzn4.h:65:0,
+                 from ../../build/Miracl/ecn4.h:55,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn2.h:74:58: error: invalid conversion from ‘int’ to ‘miracl*’ [-fpermissive]
+     ZZn2(int w,int z){MR_INIT_ZZN2 zzn2_from_ints(w,z,&fn);}
+                                                          ^
+../../build/Miracl/zzn2.h:74:58: error: invalid conversion from ‘zzn2*’ to ‘int’ [-fpermissive]
+../../build/Miracl/zzn2.h:74:58: error: too few arguments to function ‘void zzn2_from_ints(miracl*, int, int, zzn2*)’
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:1205:13: note: declared here
+ extern void zzn2_from_ints(_MIPT_ int,int,zzn2 *);
+             ^
+In file included from ../../build/Miracl/zzn4.h:65:0,
+                 from ../../build/Miracl/ecn4.h:55,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn2.h: In copy constructor ‘ZZn2::ZZn2(const ZZn2&)’:
+../../build/Miracl/zzn2.h:57:36: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN2 {fn.a=mirvar(0); fn.b=mirvar(0);}
+                                    ^
+../../build/Miracl/zzn2.h:75:26: note: in expansion of macro ‘MR_INIT_ZZN2’
+     ZZn2(const ZZn2& w) {MR_INIT_ZZN2 MR_CLONE_ZZN2(w) }
+                          ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/zzn4.h:65:0,
+                 from ../../build/Miracl/ecn4.h:55,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn2.h:57:52: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN2 {fn.a=mirvar(0); fn.b=mirvar(0);}
+                                                    ^
+../../build/Miracl/zzn2.h:75:26: note: in expansion of macro ‘MR_INIT_ZZN2’
+     ZZn2(const ZZn2& w) {MR_INIT_ZZN2 MR_CLONE_ZZN2(w) }
+                          ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/zzn4.h:65:0,
+                 from ../../build/Miracl/ecn4.h:55,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn2.h: In constructor ‘ZZn2::ZZn2(const Big&, const Big&)’:
+../../build/Miracl/zzn2.h:57:36: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN2 {fn.a=mirvar(0); fn.b=mirvar(0);}
+                                    ^
+../../build/Miracl/zzn2.h:76:38: note: in expansion of macro ‘MR_INIT_ZZN2’
+     ZZn2(const Big &x,const Big& y) {MR_INIT_ZZN2 zzn2_from_bigs(x.getbig(),y.getbig(),&fn); }
+                                      ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/zzn4.h:65:0,
+                 from ../../build/Miracl/ecn4.h:55,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn2.h:57:52: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN2 {fn.a=mirvar(0); fn.b=mirvar(0);}
+                                                    ^
+../../build/Miracl/zzn2.h:76:38: note: in expansion of macro ‘MR_INIT_ZZN2’
+     ZZn2(const Big &x,const Big& y) {MR_INIT_ZZN2 zzn2_from_bigs(x.getbig(),y.getbig(),&fn); }
+                                      ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/zzn4.h:65:0,
+                 from ../../build/Miracl/ecn4.h:55,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn2.h:76:91: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void zzn2_from_bigs(miracl*, big, big, zzn2*)’
+     ZZn2(const Big &x,const Big& y) {MR_INIT_ZZN2 zzn2_from_bigs(x.getbig(),y.getbig(),&fn); }
+                                                                                           ^
+../../build/Miracl/zzn2.h: In constructor ‘ZZn2::ZZn2(const ZZn&, const ZZn&)’:
+../../build/Miracl/zzn2.h:57:36: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN2 {fn.a=mirvar(0); fn.b=mirvar(0);}
+                                    ^
+../../build/Miracl/zzn2.h:77:38: note: in expansion of macro ‘MR_INIT_ZZN2’
+     ZZn2(const ZZn &x,const ZZn& y) {MR_INIT_ZZN2 zzn2_from_zzns(x.getzzn(),y.getzzn(),&fn); }
+                                      ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/zzn4.h:65:0,
+                 from ../../build/Miracl/ecn4.h:55,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn2.h:57:52: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN2 {fn.a=mirvar(0); fn.b=mirvar(0);}
+                                                    ^
+../../build/Miracl/zzn2.h:77:38: note: in expansion of macro ‘MR_INIT_ZZN2’
+     ZZn2(const ZZn &x,const ZZn& y) {MR_INIT_ZZN2 zzn2_from_zzns(x.getzzn(),y.getzzn(),&fn); }
+                                      ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/zzn4.h:65:0,
+                 from ../../build/Miracl/ecn4.h:55,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn2.h: In constructor ‘ZZn2::ZZn2(const ZZn&)’:
+../../build/Miracl/zzn2.h:57:36: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN2 {fn.a=mirvar(0); fn.b=mirvar(0);}
+                                    ^
+../../build/Miracl/zzn2.h:78:25: note: in expansion of macro ‘MR_INIT_ZZN2’
+     ZZn2(const ZZn &x) {MR_INIT_ZZN2 zzn2_from_zzn(x.getzzn(),&fn);}
+                         ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/zzn4.h:65:0,
+                 from ../../build/Miracl/ecn4.h:55,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn2.h:57:52: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN2 {fn.a=mirvar(0); fn.b=mirvar(0);}
+                                                    ^
+../../build/Miracl/zzn2.h:78:25: note: in expansion of macro ‘MR_INIT_ZZN2’
+     ZZn2(const ZZn &x) {MR_INIT_ZZN2 zzn2_from_zzn(x.getzzn(),&fn);}
+                         ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/zzn4.h:65:0,
+                 from ../../build/Miracl/ecn4.h:55,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn2.h: In constructor ‘ZZn2::ZZn2(const Big&)’:
+../../build/Miracl/zzn2.h:57:36: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN2 {fn.a=mirvar(0); fn.b=mirvar(0);}
+                                    ^
+../../build/Miracl/zzn2.h:79:38: note: in expansion of macro ‘MR_INIT_ZZN2’
+     ZZn2(const Big &x)              {MR_INIT_ZZN2 zzn2_from_big(x.getbig(),&fn); }
+                                      ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/zzn4.h:65:0,
+                 from ../../build/Miracl/ecn4.h:55,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn2.h:57:52: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN2 {fn.a=mirvar(0); fn.b=mirvar(0);}
+                                                    ^
+../../build/Miracl/zzn2.h:79:38: note: in expansion of macro ‘MR_INIT_ZZN2’
+     ZZn2(const Big &x)              {MR_INIT_ZZN2 zzn2_from_big(x.getbig(),&fn); }
+                                      ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/zzn4.h:65:0,
+                 from ../../build/Miracl/ecn4.h:55,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn2.h:79:79: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void zzn2_from_big(miracl*, big, zzn2*)’
+     ZZn2(const Big &x)              {MR_INIT_ZZN2 zzn2_from_big(x.getbig(),&fn); }
+                                                                               ^
+../../build/Miracl/zzn2.h: In member function ‘void ZZn2::set(const Big&, const Big&)’:
+../../build/Miracl/zzn2.h:81:82: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void zzn2_from_bigs(miracl*, big, big, zzn2*)’
+     void set(const Big &x,const Big &y) {zzn2_from_bigs(x.getbig(),y.getbig(),&fn); }
+                                                                                  ^
+../../build/Miracl/zzn2.h: In member function ‘void ZZn2::set(const Big&)’:
+../../build/Miracl/zzn2.h:83:70: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void zzn2_from_big(miracl*, big, zzn2*)’
+     void set(const Big &x)              {zzn2_from_big(x.getbig(),&fn); }
+                                                                      ^
+../../build/Miracl/zzn2.h: In member function ‘void ZZn2::set(int, int)’:
+../../build/Miracl/zzn2.h:84:64: error: invalid conversion from ‘int’ to ‘miracl*’ [-fpermissive]
+     void set(int x,int y)               {zzn2_from_ints(x,y,&fn);}
+                                                                ^
+../../build/Miracl/zzn2.h:84:64: error: invalid conversion from ‘zzn2*’ to ‘int’ [-fpermissive]
+../../build/Miracl/zzn2.h:84:64: error: too few arguments to function ‘void zzn2_from_ints(miracl*, int, int, zzn2*)’
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:1205:13: note: declared here
+ extern void zzn2_from_ints(_MIPT_ int,int,zzn2 *);
+             ^
+In file included from ../../build/Miracl/zzn4.h:65:0,
+                 from ../../build/Miracl/ecn4.h:55,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn2.h: In member function ‘BOOL ZZn2::isunity() const’:
+../../build/Miracl/zzn2.h:94:59: error: cannot convert ‘zzn2*’ to ‘miracl*’ for argument ‘1’ to ‘BOOL zzn2_isunity(miracl*, zzn2*)’
+     BOOL isunity() const { return zzn2_isunity((zzn2 *)&fn); }
+                                                           ^
+../../build/Miracl/zzn2.h: In member function ‘ZZn2& ZZn2::negate()’:
+../../build/Miracl/zzn2.h:99:29: error: cannot convert ‘zzn2*’ to ‘miracl*’ for argument ‘1’ to ‘void zzn2_negate(miracl*, zzn2*, zzn2*)’
+         {zzn2_negate(&fn,&fn); return *this;}
+                             ^
+../../build/Miracl/zzn2.h: In member function ‘ZZn2& ZZn2::operator=(int)’:
+../../build/Miracl/zzn2.h:101:76: error: invalid conversion from ‘int’ to ‘miracl*’ [-fpermissive]
+     ZZn2& operator=(int i) {if (i==0) MR_ZERO_ZZN2 else zzn2_from_int(i,&fn); return *this;}
+                                                                            ^
+../../build/Miracl/zzn2.h:101:76: error: invalid conversion from ‘zzn2*’ to ‘int’ [-fpermissive]
+../../build/Miracl/zzn2.h:101:76: error: too few arguments to function ‘void zzn2_from_int(miracl*, int, zzn2*)’
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:1204:13: note: declared here
+ extern void zzn2_from_int(_MIPT_ int,zzn2 *);
+             ^
+In file included from ../../build/Miracl/zzn4.h:65:0,
+                 from ../../build/Miracl/ecn4.h:55,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn2.h: In member function ‘ZZn2& ZZn2::operator+=(const ZZn&)’:
+../../build/Miracl/zzn2.h:104:65: error: cannot convert ‘zzn2*’ to ‘miracl*’ for argument ‘1’ to ‘void zzn2_sadd(miracl*, zzn2*, big, zzn2*)’
+     ZZn2& operator+=(const ZZn& x) {zzn2_sadd(&fn,x.getzzn(),&fn); return *this; }
+                                                                 ^
+../../build/Miracl/zzn2.h: In member function ‘ZZn2& ZZn2::operator+=(const ZZn2&)’:
+../../build/Miracl/zzn2.h:105:67: error: cannot convert ‘zzn2*’ to ‘miracl*’ for argument ‘1’ to ‘void zzn2_add(miracl*, zzn2*, zzn2*, zzn2*)’
+     ZZn2& operator+=(const ZZn2& x){zzn2_add(&fn,(zzn2 *)&x.fn,&fn); return *this;}
+                                                                   ^
+../../build/Miracl/zzn2.h: In member function ‘ZZn2& ZZn2::operator-=(const ZZn&)’:
+../../build/Miracl/zzn2.h:106:65: error: cannot convert ‘zzn2*’ to ‘miracl*’ for argument ‘1’ to ‘void zzn2_ssub(miracl*, zzn2*, big, zzn2*)’
+     ZZn2& operator-=(const ZZn& x) {zzn2_ssub(&fn,x.getzzn(),&fn); return *this; }
+                                                                 ^
+../../build/Miracl/zzn2.h: In member function ‘ZZn2& ZZn2::operator-=(const ZZn2&)’:
+../../build/Miracl/zzn2.h:107:68: error: cannot convert ‘zzn2*’ to ‘miracl*’ for argument ‘1’ to ‘void zzn2_sub(miracl*, zzn2*, zzn2*, zzn2*)’
+     ZZn2& operator-=(const ZZn2& x) {zzn2_sub(&fn,(zzn2 *)&x.fn,&fn); return *this; }
+                                                                    ^
+../../build/Miracl/zzn2.h: In member function ‘ZZn2& ZZn2::operator*=(const ZZn2&)’:
+../../build/Miracl/zzn2.h:108:68: error: cannot convert ‘zzn2*’ to ‘miracl*’ for argument ‘1’ to ‘void zzn2_mul(miracl*, zzn2*, zzn2*, zzn2*)’
+     ZZn2& operator*=(const ZZn2& x) {zzn2_mul(&fn,(zzn2 *)&x.fn,&fn); return *this; }
+                                                                    ^
+../../build/Miracl/zzn2.h: In member function ‘ZZn2& ZZn2::operator*=(const ZZn&)’:
+../../build/Miracl/zzn2.h:109:65: error: cannot convert ‘zzn2*’ to ‘miracl*’ for argument ‘1’ to ‘void zzn2_smul(miracl*, zzn2*, big, zzn2*)’
+     ZZn2& operator*=(const ZZn& x) {zzn2_smul(&fn,x.getzzn(),&fn); return *this; }
+                                                                 ^
+../../build/Miracl/zzn2.h: In member function ‘ZZn2& ZZn2::operator*=(int)’:
+../../build/Miracl/zzn2.h:110:49: error: cannot convert ‘zzn2*’ to ‘miracl*’ for argument ‘1’ to ‘void zzn2_imul(miracl*, zzn2*, int, zzn2*)’
+     ZZn2& operator*=(int x) {zzn2_imul(&fn,x,&fn); return *this;}
+                                                 ^
+../../build/Miracl/zzn2.h: In member function ‘ZZn2& ZZn2::conj()’:
+../../build/Miracl/zzn2.h:112:36: error: cannot convert ‘zzn2*’ to ‘miracl*’ for argument ‘1’ to ‘void zzn2_conj(miracl*, zzn2*, zzn2*)’
+     ZZn2& conj() {zzn2_conj(&fn,&fn); return *this;}
+                                    ^
+In file included from ../../build/Miracl/ecn4.h:55:0,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn4.h: In constructor ‘ZZn4::ZZn4()’:
+../../build/Miracl/zzn4.h:72:38: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN4 {fn.a.a=mirvar(0); fn.a.b=mirvar(0); fn.b.a=mirvar(0); fn.b.b=mirvar(0); fn.unitary=FALSE;}
+                                      ^
+../../build/Miracl/zzn4.h:89:15: note: in expansion of macro ‘MR_INIT_ZZN4’
+     ZZn4()   {MR_INIT_ZZN4 MR_ZERO_ZZN4 }
+               ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn4.h:55:0,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn4.h:72:56: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN4 {fn.a.a=mirvar(0); fn.a.b=mirvar(0); fn.b.a=mirvar(0); fn.b.b=mirvar(0); fn.unitary=FALSE;}
+                                                        ^
+../../build/Miracl/zzn4.h:89:15: note: in expansion of macro ‘MR_INIT_ZZN4’
+     ZZn4()   {MR_INIT_ZZN4 MR_ZERO_ZZN4 }
+               ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn4.h:55:0,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn4.h:72:74: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN4 {fn.a.a=mirvar(0); fn.a.b=mirvar(0); fn.b.a=mirvar(0); fn.b.b=mirvar(0); fn.unitary=FALSE;}
+                                                                          ^
+../../build/Miracl/zzn4.h:89:15: note: in expansion of macro ‘MR_INIT_ZZN4’
+     ZZn4()   {MR_INIT_ZZN4 MR_ZERO_ZZN4 }
+               ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn4.h:55:0,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn4.h:72:92: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN4 {fn.a.a=mirvar(0); fn.a.b=mirvar(0); fn.b.a=mirvar(0); fn.b.b=mirvar(0); fn.unitary=FALSE;}
+                                                                                            ^
+../../build/Miracl/zzn4.h:89:15: note: in expansion of macro ‘MR_INIT_ZZN4’
+     ZZn4()   {MR_INIT_ZZN4 MR_ZERO_ZZN4 }
+               ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn4.h:55:0,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn4.h: In constructor ‘ZZn4::ZZn4(int)’:
+../../build/Miracl/zzn4.h:72:38: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN4 {fn.a.a=mirvar(0); fn.a.b=mirvar(0); fn.b.a=mirvar(0); fn.b.b=mirvar(0); fn.unitary=FALSE;}
+                                      ^
+../../build/Miracl/zzn4.h:90:19: note: in expansion of macro ‘MR_INIT_ZZN4’
+     ZZn4(int w)  {MR_INIT_ZZN4 if (w==0) MR_ZERO_ZZN4 else zzn4_from_int(w,&fn); }
+                   ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn4.h:55:0,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn4.h:72:56: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN4 {fn.a.a=mirvar(0); fn.a.b=mirvar(0); fn.b.a=mirvar(0); fn.b.b=mirvar(0); fn.unitary=FALSE;}
+                                                        ^
+../../build/Miracl/zzn4.h:90:19: note: in expansion of macro ‘MR_INIT_ZZN4’
+     ZZn4(int w)  {MR_INIT_ZZN4 if (w==0) MR_ZERO_ZZN4 else zzn4_from_int(w,&fn); }
+                   ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn4.h:55:0,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn4.h:72:74: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN4 {fn.a.a=mirvar(0); fn.a.b=mirvar(0); fn.b.a=mirvar(0); fn.b.b=mirvar(0); fn.unitary=FALSE;}
+                                                                          ^
+../../build/Miracl/zzn4.h:90:19: note: in expansion of macro ‘MR_INIT_ZZN4’
+     ZZn4(int w)  {MR_INIT_ZZN4 if (w==0) MR_ZERO_ZZN4 else zzn4_from_int(w,&fn); }
+                   ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn4.h:55:0,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn4.h:72:92: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN4 {fn.a.a=mirvar(0); fn.a.b=mirvar(0); fn.b.a=mirvar(0); fn.b.b=mirvar(0); fn.unitary=FALSE;}
+                                                                                            ^
+../../build/Miracl/zzn4.h:90:19: note: in expansion of macro ‘MR_INIT_ZZN4’
+     ZZn4(int w)  {MR_INIT_ZZN4 if (w==0) MR_ZERO_ZZN4 else zzn4_from_int(w,&fn); }
+                   ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn4.h:55:0,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn4.h:90:79: error: invalid conversion from ‘int’ to ‘miracl*’ [-fpermissive]
+     ZZn4(int w)  {MR_INIT_ZZN4 if (w==0) MR_ZERO_ZZN4 else zzn4_from_int(w,&fn); }
+                                                                               ^
+../../build/Miracl/zzn4.h:90:79: error: invalid conversion from ‘zzn4*’ to ‘int’ [-fpermissive]
+../../build/Miracl/zzn4.h:90:79: error: too few arguments to function ‘void zzn4_from_int(miracl*, int, zzn4*)’
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:1271:13: note: declared here
+ extern void zzn4_from_int(_MIPT_ int,zzn4 *);
+             ^
+In file included from ../../build/Miracl/ecn4.h:55:0,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn4.h: In copy constructor ‘ZZn4::ZZn4(const ZZn4&)’:
+../../build/Miracl/zzn4.h:72:38: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN4 {fn.a.a=mirvar(0); fn.a.b=mirvar(0); fn.b.a=mirvar(0); fn.b.b=mirvar(0); fn.unitary=FALSE;}
+                                      ^
+../../build/Miracl/zzn4.h:91:26: note: in expansion of macro ‘MR_INIT_ZZN4’
+     ZZn4(const ZZn4& w) {MR_INIT_ZZN4 MR_CLONE_ZZN4(w)  }
+                          ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn4.h:55:0,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn4.h:72:56: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN4 {fn.a.a=mirvar(0); fn.a.b=mirvar(0); fn.b.a=mirvar(0); fn.b.b=mirvar(0); fn.unitary=FALSE;}
+                                                        ^
+../../build/Miracl/zzn4.h:91:26: note: in expansion of macro ‘MR_INIT_ZZN4’
+     ZZn4(const ZZn4& w) {MR_INIT_ZZN4 MR_CLONE_ZZN4(w)  }
+                          ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn4.h:55:0,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn4.h:72:74: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN4 {fn.a.a=mirvar(0); fn.a.b=mirvar(0); fn.b.a=mirvar(0); fn.b.b=mirvar(0); fn.unitary=FALSE;}
+                                                                          ^
+../../build/Miracl/zzn4.h:91:26: note: in expansion of macro ‘MR_INIT_ZZN4’
+     ZZn4(const ZZn4& w) {MR_INIT_ZZN4 MR_CLONE_ZZN4(w)  }
+                          ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn4.h:55:0,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn4.h:72:92: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN4 {fn.a.a=mirvar(0); fn.a.b=mirvar(0); fn.b.a=mirvar(0); fn.b.b=mirvar(0); fn.unitary=FALSE;}
+                                                                                            ^
+../../build/Miracl/zzn4.h:91:26: note: in expansion of macro ‘MR_INIT_ZZN4’
+     ZZn4(const ZZn4& w) {MR_INIT_ZZN4 MR_CLONE_ZZN4(w)  }
+                          ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn4.h:55:0,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn4.h: In constructor ‘ZZn4::ZZn4(const ZZn2&)’:
+../../build/Miracl/zzn4.h:72:38: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN4 {fn.a.a=mirvar(0); fn.a.b=mirvar(0); fn.b.a=mirvar(0); fn.b.b=mirvar(0); fn.unitary=FALSE;}
+                                      ^
+../../build/Miracl/zzn4.h:92:26: note: in expansion of macro ‘MR_INIT_ZZN4’
+     ZZn4(const ZZn2 &x) {MR_INIT_ZZN4 zzn4_from_zzn2(x.getzzn2(),&fn); }
+                          ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn4.h:55:0,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn4.h:72:56: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN4 {fn.a.a=mirvar(0); fn.a.b=mirvar(0); fn.b.a=mirvar(0); fn.b.b=mirvar(0); fn.unitary=FALSE;}
+                                                        ^
+../../build/Miracl/zzn4.h:92:26: note: in expansion of macro ‘MR_INIT_ZZN4’
+     ZZn4(const ZZn2 &x) {MR_INIT_ZZN4 zzn4_from_zzn2(x.getzzn2(),&fn); }
+                          ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn4.h:55:0,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn4.h:72:74: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN4 {fn.a.a=mirvar(0); fn.a.b=mirvar(0); fn.b.a=mirvar(0); fn.b.b=mirvar(0); fn.unitary=FALSE;}
+                                                                          ^
+../../build/Miracl/zzn4.h:92:26: note: in expansion of macro ‘MR_INIT_ZZN4’
+     ZZn4(const ZZn2 &x) {MR_INIT_ZZN4 zzn4_from_zzn2(x.getzzn2(),&fn); }
+                          ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn4.h:55:0,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn4.h:72:92: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN4 {fn.a.a=mirvar(0); fn.a.b=mirvar(0); fn.b.a=mirvar(0); fn.b.b=mirvar(0); fn.unitary=FALSE;}
+                                                                                            ^
+../../build/Miracl/zzn4.h:92:26: note: in expansion of macro ‘MR_INIT_ZZN4’
+     ZZn4(const ZZn2 &x) {MR_INIT_ZZN4 zzn4_from_zzn2(x.getzzn2(),&fn); }
+                          ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn4.h:55:0,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn4.h: In constructor ‘ZZn4::ZZn4(const ZZn&)’:
+../../build/Miracl/zzn4.h:72:38: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN4 {fn.a.a=mirvar(0); fn.a.b=mirvar(0); fn.b.a=mirvar(0); fn.b.b=mirvar(0); fn.unitary=FALSE;}
+                                      ^
+../../build/Miracl/zzn4.h:93:24: note: in expansion of macro ‘MR_INIT_ZZN4’
+  ZZn4(const ZZn &x)  { MR_INIT_ZZN4 zzn4_from_zzn(x.getzzn(),&fn);}
+                        ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn4.h:55:0,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn4.h:72:56: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN4 {fn.a.a=mirvar(0); fn.a.b=mirvar(0); fn.b.a=mirvar(0); fn.b.b=mirvar(0); fn.unitary=FALSE;}
+                                                        ^
+../../build/Miracl/zzn4.h:93:24: note: in expansion of macro ‘MR_INIT_ZZN4’
+  ZZn4(const ZZn &x)  { MR_INIT_ZZN4 zzn4_from_zzn(x.getzzn(),&fn);}
+                        ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn4.h:55:0,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn4.h:72:74: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN4 {fn.a.a=mirvar(0); fn.a.b=mirvar(0); fn.b.a=mirvar(0); fn.b.b=mirvar(0); fn.unitary=FALSE;}
+                                                                          ^
+../../build/Miracl/zzn4.h:93:24: note: in expansion of macro ‘MR_INIT_ZZN4’
+  ZZn4(const ZZn &x)  { MR_INIT_ZZN4 zzn4_from_zzn(x.getzzn(),&fn);}
+                        ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn4.h:55:0,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn4.h:72:92: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN4 {fn.a.a=mirvar(0); fn.a.b=mirvar(0); fn.b.a=mirvar(0); fn.b.b=mirvar(0); fn.unitary=FALSE;}
+                                                                                            ^
+../../build/Miracl/zzn4.h:93:24: note: in expansion of macro ‘MR_INIT_ZZN4’
+  ZZn4(const ZZn &x)  { MR_INIT_ZZN4 zzn4_from_zzn(x.getzzn(),&fn);}
+                        ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn4.h:55:0,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn4.h: In constructor ‘ZZn4::ZZn4(const Big&)’:
+../../build/Miracl/zzn4.h:72:38: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN4 {fn.a.a=mirvar(0); fn.a.b=mirvar(0); fn.b.a=mirvar(0); fn.b.b=mirvar(0); fn.unitary=FALSE;}
+                                      ^
+../../build/Miracl/zzn4.h:94:35: note: in expansion of macro ‘MR_INIT_ZZN4’
+  ZZn4(const Big &x)              {MR_INIT_ZZN4 zzn4_from_big(x.getbig(),&fn); }
+                                   ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn4.h:55:0,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn4.h:72:56: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN4 {fn.a.a=mirvar(0); fn.a.b=mirvar(0); fn.b.a=mirvar(0); fn.b.b=mirvar(0); fn.unitary=FALSE;}
+                                                        ^
+../../build/Miracl/zzn4.h:94:35: note: in expansion of macro ‘MR_INIT_ZZN4’
+  ZZn4(const Big &x)              {MR_INIT_ZZN4 zzn4_from_big(x.getbig(),&fn); }
+                                   ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn4.h:55:0,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn4.h:72:74: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN4 {fn.a.a=mirvar(0); fn.a.b=mirvar(0); fn.b.a=mirvar(0); fn.b.b=mirvar(0); fn.unitary=FALSE;}
+                                                                          ^
+../../build/Miracl/zzn4.h:94:35: note: in expansion of macro ‘MR_INIT_ZZN4’
+  ZZn4(const Big &x)              {MR_INIT_ZZN4 zzn4_from_big(x.getbig(),&fn); }
+                                   ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn4.h:55:0,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn4.h:72:92: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN4 {fn.a.a=mirvar(0); fn.a.b=mirvar(0); fn.b.a=mirvar(0); fn.b.b=mirvar(0); fn.unitary=FALSE;}
+                                                                                            ^
+../../build/Miracl/zzn4.h:94:35: note: in expansion of macro ‘MR_INIT_ZZN4’
+  ZZn4(const Big &x)              {MR_INIT_ZZN4 zzn4_from_big(x.getbig(),&fn); }
+                                   ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn4.h:55:0,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn4.h:94:76: error: cannot convert ‘big’ to ‘miracl*’ for argument ‘1’ to ‘void zzn4_from_big(miracl*, big, zzn4*)’
+  ZZn4(const Big &x)              {MR_INIT_ZZN4 zzn4_from_big(x.getbig(),&fn); }
+                                                                            ^
+../../build/Miracl/zzn4.h: In constructor ‘ZZn4::ZZn4(const ZZn2&, const ZZn2&)’:
+../../build/Miracl/zzn4.h:72:38: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN4 {fn.a.a=mirvar(0); fn.a.b=mirvar(0); fn.b.a=mirvar(0); fn.b.b=mirvar(0); fn.unitary=FALSE;}
+                                      ^
+../../build/Miracl/zzn4.h:95:40: note: in expansion of macro ‘MR_INIT_ZZN4’
+     ZZn4(const ZZn2 &x,const ZZn2& y) {MR_INIT_ZZN4 zzn4_from_zzn2s(x.getzzn2(),y.getzzn2(),&fn); }
+                                        ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn4.h:55:0,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn4.h:72:56: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN4 {fn.a.a=mirvar(0); fn.a.b=mirvar(0); fn.b.a=mirvar(0); fn.b.b=mirvar(0); fn.unitary=FALSE;}
+                                                        ^
+../../build/Miracl/zzn4.h:95:40: note: in expansion of macro ‘MR_INIT_ZZN4’
+     ZZn4(const ZZn2 &x,const ZZn2& y) {MR_INIT_ZZN4 zzn4_from_zzn2s(x.getzzn2(),y.getzzn2(),&fn); }
+                                        ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn4.h:55:0,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn4.h:72:74: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN4 {fn.a.a=mirvar(0); fn.a.b=mirvar(0); fn.b.a=mirvar(0); fn.b.b=mirvar(0); fn.unitary=FALSE;}
+                                                                          ^
+../../build/Miracl/zzn4.h:95:40: note: in expansion of macro ‘MR_INIT_ZZN4’
+     ZZn4(const ZZn2 &x,const ZZn2& y) {MR_INIT_ZZN4 zzn4_from_zzn2s(x.getzzn2(),y.getzzn2(),&fn); }
+                                        ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn4.h:55:0,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn4.h:72:92: error: too few arguments to function ‘bigtype* mirvar(miracl*, int)’
+ #define MR_INIT_ZZN4 {fn.a.a=mirvar(0); fn.a.b=mirvar(0); fn.b.a=mirvar(0); fn.b.b=mirvar(0); fn.unitary=FALSE;}
+                                                                                            ^
+../../build/Miracl/zzn4.h:95:40: note: in expansion of macro ‘MR_INIT_ZZN4’
+     ZZn4(const ZZn2 &x,const ZZn2& y) {MR_INIT_ZZN4 zzn4_from_zzn2s(x.getzzn2(),y.getzzn2(),&fn); }
+                                        ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:899:14: note: declared here
+ extern flash mirvar(_MIPT_ int);
+              ^
+In file included from ../../build/Miracl/ecn4.h:55:0,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn4.h: In member function ‘BOOL ZZn4::isunity() const’:
+../../build/Miracl/zzn4.h:110:58: error: cannot convert ‘zzn4*’ to ‘miracl*’ for argument ‘1’ to ‘BOOL zzn4_isunity(miracl*, zzn4*)’
+     BOOL isunity() const {return zzn4_isunity((zzn4 *)&fn); }
+                                                          ^
+../../build/Miracl/zzn4.h: In member function ‘ZZn4& ZZn4::operator=(int)’:
+../../build/Miracl/zzn4.h:113:77: error: invalid conversion from ‘int’ to ‘miracl*’ [-fpermissive]
+     ZZn4& operator=(int i) {if (i==0) MR_ZERO_ZZN4 else  zzn4_from_int(i,&fn);  return *this;}
+                                                                             ^
+../../build/Miracl/zzn4.h:113:77: error: invalid conversion from ‘zzn4*’ to ‘int’ [-fpermissive]
+../../build/Miracl/zzn4.h:113:77: error: too few arguments to function ‘void zzn4_from_int(miracl*, int, zzn4*)’
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:1271:13: note: declared here
+ extern void zzn4_from_int(_MIPT_ int,zzn4 *);
+             ^
+In file included from ../../build/Miracl/ecn4.h:55:0,
+                 from ../../build/Miracl/pairing_3.h:99,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/zzn4.h: In member function ‘ZZn4& ZZn4::operator+=(const ZZn2&)’:
+../../build/Miracl/zzn4.h:117:67: error: cannot convert ‘zzn4*’ to ‘miracl*’ for argument ‘1’ to ‘void zzn4_sadd(miracl*, zzn4*, zzn2*, zzn4*)’
+     ZZn4& operator+=(const ZZn2& x) {zzn4_sadd(&fn,x.getzzn2(),&fn); return *this; }
+                                                                   ^
+../../build/Miracl/zzn4.h: In member function ‘ZZn4& ZZn4::operator+=(const ZZn&)’:
+../../build/Miracl/zzn4.h:118:73: error: cannot convert ‘zzn2*’ to ‘miracl*’ for argument ‘1’ to ‘void zzn2_sadd(miracl*, zzn2*, big, zzn2*)’
+     ZZn4& operator+=(const ZZn& x) {zzn2_sadd(&(fn.a),x.getzzn(),&(fn.a)); return *this; }
+                                                                         ^
+../../build/Miracl/zzn4.h: In member function ‘ZZn4& ZZn4::operator+=(const ZZn4&)’:
+../../build/Miracl/zzn4.h:119:68: error: cannot convert ‘zzn4*’ to ‘miracl*’ for argument ‘1’ to ‘void zzn4_add(miracl*, zzn4*, zzn4*, zzn4*)’
+     ZZn4& operator+=(const ZZn4& x) {zzn4_add(&fn,(zzn4 *)&x.fn,&fn); return *this; }
+                                                                    ^
+../../build/Miracl/zzn4.h: In member function ‘ZZn4& ZZn4::operator-=(const ZZn2&)’:
+../../build/Miracl/zzn4.h:120:67: error: cannot convert ‘zzn4*’ to ‘miracl*’ for argument ‘1’ to ‘void zzn4_ssub(miracl*, zzn4*, zzn2*, zzn4*)’
+     ZZn4& operator-=(const ZZn2& x) {zzn4_ssub(&fn,x.getzzn2(),&fn);  return *this; }
+                                                                   ^
+../../build/Miracl/zzn4.h: In member function ‘ZZn4& ZZn4::operator-=(const ZZn&)’:
+../../build/Miracl/zzn4.h:121:70: error: cannot convert ‘zzn2*’ to ‘miracl*’ for argument ‘1’ to ‘void zzn2_ssub(miracl*, zzn2*, big, zzn2*)’
+  ZZn4& operator-=(const ZZn& x) {zzn2_ssub(&(fn.a),x.getzzn(),&(fn.a));  return *this; }
+                                                                      ^
+../../build/Miracl/zzn4.h: In member function ‘ZZn4& ZZn4::operator-=(const ZZn4&)’:
+../../build/Miracl/zzn4.h:122:68: error: cannot convert ‘zzn4*’ to ‘miracl*’ for argument ‘1’ to ‘void zzn4_sub(miracl*, zzn4*, zzn4*, zzn4*)’
+     ZZn4& operator-=(const ZZn4& x) {zzn4_sub(&fn,(zzn4 *)&x.fn,&fn); return *this; }
+                                                                    ^
+../../build/Miracl/zzn4.h: In member function ‘ZZn4& ZZn4::operator*=(const ZZn4&)’:
+../../build/Miracl/zzn4.h:123:68: error: cannot convert ‘zzn4*’ to ‘miracl*’ for argument ‘1’ to ‘void zzn4_mul(miracl*, zzn4*, zzn4*, zzn4*)’
+     ZZn4& operator*=(const ZZn4& x) {zzn4_mul(&fn,(zzn4 *)&x.fn,&fn); return *this;} 
+                                                                    ^
+../../build/Miracl/zzn4.h: In member function ‘ZZn4& ZZn4::operator*=(const ZZn2&)’:
+../../build/Miracl/zzn4.h:124:67: error: cannot convert ‘zzn4*’ to ‘miracl*’ for argument ‘1’ to ‘void zzn4_smul(miracl*, zzn4*, zzn2*, zzn4*)’
+     ZZn4& operator*=(const ZZn2& x) {zzn4_smul(&fn,x.getzzn2(),&fn); return *this; }
+                                                                   ^
+../../build/Miracl/zzn4.h: In member function ‘ZZn4& ZZn4::operator*=(const ZZn&)’:
+../../build/Miracl/zzn4.h:125:63: error: cannot convert ‘zzn4*’ to ‘miracl*’ for argument ‘1’ to ‘void zzn4_lmul(miracl*, zzn4*, big, zzn4*)’
+  ZZn4& operator*=(const ZZn& x)  {zzn4_lmul(&fn,x.getzzn(),&fn); return *this; }
+                                                               ^
+../../build/Miracl/zzn4.h: In member function ‘ZZn4& ZZn4::operator*=(int)’:
+../../build/Miracl/zzn4.h:126:46: error: cannot convert ‘zzn4*’ to ‘miracl*’ for argument ‘1’ to ‘void zzn4_imul(miracl*, zzn4*, int, zzn4*)’
+  ZZn4& operator*=(int i) {zzn4_imul(&fn,i,&fn); return *this; }
+                                              ^
+../../build/Miracl/zzn4.h: In member function ‘ZZn4& ZZn4::conj()’:
+../../build/Miracl/zzn4.h:132:36: error: cannot convert ‘zzn4*’ to ‘miracl*’ for argument ‘1’ to ‘void zzn4_conj(miracl*, zzn4*, zzn4*)’
+     ZZn4& conj() {zzn4_conj(&fn,&fn); return *this;}
+                                    ^
+../../build/Miracl/bls_pair.cpp: In destructor ‘PFC::~PFC()’:
+../../build/Miracl/bls_pair.cpp:763:10: error: too few arguments to function ‘void mirexit(miracl*)’
+  mirexit();
+          ^
+In file included from ../../build/Miracl/big.h:103:0,
+                 from ../../build/Miracl/ecn.h:56,
+                 from ../../build/Miracl/pairing_3.h:51,
+                 from ../../build/Miracl/bls_pair.cpp:57:
+../../build/Miracl/miracl.h:914:14: note: declared here
+ extern void  mirexit(_MIPTO_ );
+              ^
+make: *** [all] Error 1
