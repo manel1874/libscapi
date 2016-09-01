@@ -17,7 +17,7 @@ int main()
 	auto st1 = "StringForG1"; // will be mapped to G1
 	auto st2 = "StringForG2"; // will be mapped to G2
 	PFC pfc(AES_SECURITY);  // initialise pairing-friendly curve
-	G1 g1, g1PowA;
+	G1 g1(NULL,20), g1PowA;
 	G2 g2, g2PowB;
 	GT res, res2, res3;
 	Big a,b;
@@ -25,7 +25,7 @@ int main()
 	// map the strings to g1 and g2
 	pfc.hash_and_map(g1, (char *)st1);
 	pfc.hash_and_map(g2, (char *)st2);
-
+	
 	cout << "mapped string to g1 and g2.\ng1:" << g1.g << "\n\ng2:" << g2.g << endl;
 
 	a = 300;
