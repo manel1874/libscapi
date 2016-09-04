@@ -95,9 +95,9 @@ GF2X_INCDIR=$(GF2X_PREFIX)/include
 GF2X_LIBDIR=$(GF2X_PREFIX)/lib
 # directory containing libgf2x.a
 
-GF2X_OPT_INCDIR= -I$(GF2X_INCDIR) # GF2X
-GF2X_OPT_LIBDIR= -L$(GF2X_LIBDIR) # GF2X
-GF2X_OPT_LIB= -lgf2x # GF2X
+GF2X_OPT_INCDIR=# -I$(GF2X_INCDIR) # GF2X
+GF2X_OPT_LIBDIR=# -L$(GF2X_LIBDIR) # GF2X
+GF2X_OPT_LIB=# -lgf2x # GF2X
 # uncomment these if using gf2x
 
 
