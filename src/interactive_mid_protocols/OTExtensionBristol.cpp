@@ -82,15 +82,15 @@ OTExtensionBristolSender::OTExtensionBristolSender(int port,bool isSemiHonest, s
 
 shared_ptr<OTBatchSOutput> OTExtensionBristolSender::transfer(OTBatchSInput * input){
 
-	if(input->getType()!= OTBatchSInputTypes::OTExtensionRandomizedSInput && input->getType()!= OTBatchSInputTypes::OTExtensionGeneralBristolSInput){
-		throw invalid_argument("input should be instance of OTExtensionRandomizedSInput or OTExtensionGeneralBristolSInput.");
+	if(input->getType()!= OTBatchSInputTypes::OTExtensionRandomizedSInput && input->getType()!= OTBatchSInputTypes::OTExtensionGeneralSInput){
+		throw invalid_argument("input should be instance of OTExtensionRandomizedSInput or OTExtensionGeneralSInput.");
 	}
 	else{
 		int nOTs;
 
-		if(input->getType()== OTBatchSInputTypes::OTExtensionGeneralBristolSInput){
+		if(input->getType()== OTBatchSInputTypes::OTExtensionGeneralSInput){
 
-			nOTs = (((OTExtensionGeneralSInput*)input)->getNumOfOts());
+			nOTs = ((OTExtensionGeneralSInput *)input)->getNumOfOts();
 		}
 		else{
 			nOTs = (((OTExtensionRandomizedSInput*)input)->getNumOfOts());
@@ -105,23 +105,26 @@ shared_ptr<OTBatchSOutput> OTExtensionBristolSender::transfer(OTBatchSInput * in
 		//call the base class transfer that eventually calls the ot extenstion of the bristol library
 		OTExtensionBristolBase::transfer(nOTs,receiverInput);
 
-		if(input->getType()== OTBatchSInputTypes::OTExtensionGeneralBristolSInput){//need another round of communication using the channel member
+		if(input->getType()== OTBatchSInputTypes::OTExtensionGeneralSInput){//need another round of communication using the channel member
 
 			if (channel == NULL) {
 					throw runtime_error("In order to execute a general ot extension the channel must be given");
-				}
+			}
 
+			auto x0Vec = ((OTExtensionGeneralSInput *)input)->getX0Arr();
+			auto x1Vec = ((OTExtensionGeneralSInput *)input)->getX1Arr();
 
-			//xor every input with the randomized output
-			((OTExtensionGeneralBristolSInput *)input)->x0Arr ^=   pOtExt->senderOutputMatrices[0];
-			((OTExtensionGeneralBristolSInput *)input)->x1Arr ^=   pOtExt->senderOutputMatrices[1];
+			__m128i* x0 = (__m128i*)x0Vec.data();
+			__m128i* x1 = (__m128i*)x1Vec.data();
+			for(int i=0; i<nOTs; i++){
 
-			auto *arrayx0 = &((OTExtensionGeneralBristolSInput *)input)->x0Arr.squares.at(0);
-			auto *arrayx1 = &((OTExtensionGeneralBristolSInput *)input)->x1Arr.squares.at(0);
+					x0[i] =  x0[i]^ pOtExt->senderOutputMatrices[0].squares[i/128].rows[i % 128];
+					x1[i] =  x1[i]^ pOtExt->senderOutputMatrices[1].squares[i/128].rows[i % 128];
+			}
 
 			//send the bitmatrix over the channel. The underlying array of the vector of squares can be viewed as one long array of bytes.
-			channel->write((byte *)arrayx0, ((OTExtensionGeneralBristolSInput *)input)->x0Arr.squares.size()*128*16);
-			channel->write((byte *)arrayx1, ((OTExtensionGeneralBristolSInput *)input)->x1Arr.squares.size()*128*16);
+			channel->write((byte *)x0, (((OTExtensionGeneralSInput *)input)->getX0Arr()).size());
+			channel->write((byte *)x1, (((OTExtensionGeneralSInput *)input)->getX1Arr()).size());
 
 			return nullptr;
 
@@ -153,6 +156,8 @@ shared_ptr<OTBatchROutput> OTExtensionBristolReciever::transfer(OTBatchRInput * 
 
 		auto nOTs = ((OTExtensionBristolRInput *)input)->nOTs;
 
+		cout<<"num of ot's is:" << nOTs << "\n";
+
 		OTExtensionBristolBase::transfer(nOTs,inputBits);
 
 		//we need to get the xor of the randomized and real data from the sender.
@@ -162,12 +167,12 @@ shared_ptr<OTBatchROutput> OTExtensionBristolReciever::transfer(OTBatchRInput * 
 				throw runtime_error("In order to execute a general ot extension the channel must be given");
 			}
 
+
 			//cout<<"in transfer general"<<endl;
 			auto sizeInBytes = nOTs*16;
 			__m128i* x0Arr = (__m128i *) _mm_malloc(sizeof(__m128i) * nOTs, 16);
 			__m128i* x1Arr = (__m128i *) _mm_malloc(sizeof(__m128i) * nOTs, 16);
-			//byte* bufferx0 = new byte[sizeInBytes];
-			//byte* bufferx1 = new byte[sizeInBytes];
+
 			channel->read((byte *)x0Arr, sizeInBytes);
 			channel->read((byte *)x1Arr, sizeInBytes);
 

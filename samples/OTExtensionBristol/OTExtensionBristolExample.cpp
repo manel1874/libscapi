@@ -21,7 +21,7 @@ int mainBristol(string partyNum) {
 
 
 
-  if (my_num == 0) {
+  /*if (my_num == 0) {
         cout<<"nOTS: "<< nOTs<<endl;
         OTExtensionBristolSender sender(12000,true);
 
@@ -53,7 +53,8 @@ int mainBristol(string partyNum) {
 
 
     cout<<"Done running randomized"<<endl;
- /*
+    */
+
 
     if (my_num == 0) {
     	boost::asio::io_service io_service;
@@ -68,15 +69,23 @@ int mainBristol(string partyNum) {
 		cout<<"nOTS: "<< nOTs<<endl;
 		OTExtensionBristolSender sender(12001,true,channel);
 
-		BitMatrix x0(nOTs);
-		BitMatrix x1(nOTs);
+		//BitMatrix x0(nOTs);
+		//BitMatrix x1(nOTs);
 
-		for(int i=0; i<nOTs; i++){
-			x1.squares[i/128].rows[i % 128] = _mm_set_epi32(1,1,1,1);
-		}
+		//for(int i=0; i<nOTs; i++){
+		//	x1.squares[i/128].rows[i % 128] = _mm_set_epi32(1,1,1,1);
+		//}
+
+		vector<byte> x0Arr;
+		x0Arr.resize(nOTs * 16);
+
+		vector<byte> x1Arr;
+		x1Arr.resize(nOTs*16);
+		for(size_t i=0; i<x1Arr.size();i++)
+			x1Arr[i] = 1;
 
 
-		OTBatchSInput * input = new OTExtensionGeneralBristolSInput(x0, x1, nOTs);
+		OTBatchSInput * input = new OTExtensionGeneralSInput(x0Arr, x1Arr, nOTs);
 		auto start = scapi_now();
 		auto output = sender.transfer(input);
 		 print_elapsed_ms(start, "Transfer for general");
@@ -97,7 +106,7 @@ int mainBristol(string partyNum) {
 
 		OTExtensionBristolReciever reciever("localhost", 12001,true,channel);
 
-		OTBatchRInput * input = new OTExtensionBristolGeneralRInput(nOTs, receiverInput);
+		OTBatchRInput * input = new OTExtensionBristolGeneralRInput(nOTs,receiverInput);
 
         auto start = scapi_now();
 		auto output = reciever.transfer(input);
@@ -113,7 +122,7 @@ int mainBristol(string partyNum) {
 
 
 	}
-*/
+
     int size = 1280000;
     SocketPartyData senderParty(IpAdress::from_string("127.0.0.1"), 7766);
     if (my_num == 0) {
