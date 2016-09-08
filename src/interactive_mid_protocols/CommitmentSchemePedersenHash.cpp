@@ -73,7 +73,7 @@ CmtPedersenHashCommitter::CmtPedersenHashCommitter(shared_ptr<CommParty> channel
 * Runs COMMIT_ElGamal to commit to value H(x).
 * @return the created commitment.
 */
-shared_ptr<CmtCCommitmentMsg> CmtPedersenHashCommitter::generateCommitmentMsg(shared_ptr<CmtCommitValue> input, long id) {
+shared_ptr<CmtCCommitmentMsg> CmtPedersenHashCommitter::generateCommitmentMsg(const shared_ptr<CmtCommitValue> & input, long id) {
 	auto in = dynamic_pointer_cast<CmtByteArrayCommitValue>(input);
 	//Check that the input x is in the end a byte[]
 	if (in == NULL)

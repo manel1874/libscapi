@@ -49,7 +49,7 @@ public:
 	* @param c the actual commitment object. In Pedersen schemes the commitment object is a groupElement.
 	* @param id the commitment id.
 	*/
-	CmtPedersenCommitmentMessage(shared_ptr<GroupElementSendableData> c, long id = 0) {
+	CmtPedersenCommitmentMessage(const shared_ptr<GroupElementSendableData> & c, long id = 0) {
 		this->c = c;
 		this->id = id;
 	};
@@ -85,7 +85,7 @@ public:
 	* @param x the committed value
 	* @param r the random value used for commit.
 	*/
-	CmtPedersenDecommitmentMessage(shared_ptr<biginteger> x = make_shared<biginteger>(0), shared_ptr<BigIntegerRandomValue> r = NULL) {
+	CmtPedersenDecommitmentMessage(const shared_ptr<biginteger> & x = make_shared<biginteger>(0), const shared_ptr<BigIntegerRandomValue> & r = NULL) {
 		this->x = x;
 		this->r = r;
 	};
@@ -125,8 +125,8 @@ public:
 	* @param commitVal the committed value
 	* @param computedCommitment the commitment
 	*/
-	CmtPedersenCommitmentPhaseValues(shared_ptr<RandomValue> r, 
-		shared_ptr<CmtCommitValue> commitVal, shared_ptr<GroupElement> computedCommitment) : CmtCommitmentPhaseValues(r, commitVal) {
+	CmtPedersenCommitmentPhaseValues(const shared_ptr<RandomValue> & r,
+		const shared_ptr<CmtCommitValue> & commitVal, const shared_ptr<GroupElement> & computedCommitment) : CmtCommitmentPhaseValues(r, commitVal) {
 		this->computedCommitment = computedCommitment;
 	};
 
@@ -321,7 +321,7 @@ public:
 	* "SAMPLE a random value r <- Zq<P>
 	* 	COMPUTE  c = g^r * h^x". <p>
 	*/
-	shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(shared_ptr<CmtCommitValue> input, long id) override;
+	shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(const shared_ptr<CmtCommitValue> & input, long id) override;
 	
 	shared_ptr<CmtCDecommitmentMessage> generateDecommitmentMsg(long id) override;
 	

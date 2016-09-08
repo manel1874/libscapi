@@ -54,7 +54,7 @@ public:
 	* @param commitVal the committed value
 	* @param computedCommitment the commitment
 	*/
-	CmtSimpleHashCommitmentValues(shared_ptr<RandomValue> r, shared_ptr<CmtCommitValue> commitVal, shared_ptr<vector<byte>> computedCommitment)
+	CmtSimpleHashCommitmentValues(const shared_ptr<RandomValue> & r, const shared_ptr<CmtCommitValue> & commitVal, const shared_ptr<vector<byte>> & computedCommitment)
 		: CmtCommitmentPhaseValues(r, commitVal), computedCommitment(computedCommitment){}
 
 	shared_ptr<void> getComputedCommitment() override { return computedCommitment; };
@@ -79,7 +79,7 @@ public:
 	* @param c the actual commitment object. In simple hash schemes the commitment object is a byte[].
 	* @param id the commitment id.
 	*/
-	CmtSimpleHashCommitmentMessage(shared_ptr<vector<byte>> c = NULL, long id = 0) : c(c), id(id){}
+	CmtSimpleHashCommitmentMessage(const shared_ptr<vector<byte>> & c = NULL, long id = 0) : c(c), id(id){}
 
 	/**
 	* Returns the commitment value
@@ -125,7 +125,7 @@ public:
 	* @param x the committed value
 	* @param r the random value used for commit.
 	*/
-	CmtSimpleHashDecommitmentMessage(shared_ptr<ByteArrayRandomValue> r, shared_ptr<vector<byte>> x) : r(r), x(x){}
+	CmtSimpleHashDecommitmentMessage(const shared_ptr<ByteArrayRandomValue> & r, const shared_ptr<vector<byte>> & x) : r(r), x(x){}
 
 	shared_ptr<void> getX() override { return x; }
 	shared_ptr<vector<byte>> getXValue() { return x; }
@@ -212,7 +212,7 @@ public:
 	* @return the generated commitment.
 	*
 	*/
-	shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(shared_ptr<CmtCommitValue> input, long id) override;
+	shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(const shared_ptr<CmtCommitValue> & input, long id) override;
 
 	shared_ptr<CmtCDecommitmentMessage> generateDecommitmentMsg(long id) override;
 

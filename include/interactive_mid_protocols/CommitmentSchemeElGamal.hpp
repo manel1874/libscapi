@@ -53,7 +53,7 @@ public:
 	* @param commitVal the committed value
 	* @param computedCommitment the commitment
 	*/
-	CmtElGamalCommitmentPhaseValues(shared_ptr<RandomValue> r, shared_ptr<CmtCommitValue> commitVal, shared_ptr<AsymmetricCiphertext> computedCommitment) 
+	CmtElGamalCommitmentPhaseValues(const shared_ptr<RandomValue> & r, const shared_ptr<CmtCommitValue> & commitVal, const shared_ptr<AsymmetricCiphertext> & computedCommitment)
 		: CmtCommitmentPhaseValues(r, commitVal) {
 		this->computedCommitment = computedCommitment;
 	}
@@ -85,7 +85,7 @@ public:
 	* @param cipherData the actual commitment object. In ElGamal schemes the commitment object is a ElGamalCiphertextSendableData.
 	* @param id the commitment id.
 	*/
-	CmtElGamalCommitmentMessage(shared_ptr<AsymmetricCiphertextSendableData> cipherData = NULL, long id = 0) {
+	CmtElGamalCommitmentMessage(const shared_ptr<AsymmetricCiphertextSendableData> & cipherData = NULL, long id = 0) {
 		this->cipherData = cipherData;
 		this->id = id;
 	}
@@ -134,7 +134,7 @@ public:
 	* @param x the committed value
 	* @param r the random value used for commit.
 	*/
-	CmtElGamalDecommitmentMessage(shared_ptr<string> x = NULL, shared_ptr<BigIntegerRandomValue> r = NULL) {
+	CmtElGamalDecommitmentMessage(const shared_ptr<string> & x = NULL, const shared_ptr<BigIntegerRandomValue> & r = NULL) {
 		this->x = x;
 		this->r = r;
 	}
@@ -239,7 +239,7 @@ public:
 	*	COMPUTE u = g^r and v = h^r * x". <p>
 	* @return the created commitment.
 	*/
-	shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(shared_ptr<CmtCommitValue> input, long id) override;
+	shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(const shared_ptr<CmtCommitValue> & input, long id) override;
 
 	shared_ptr<CmtCDecommitmentMessage> generateDecommitmentMsg(long id) override; 
 
@@ -273,7 +273,7 @@ public:
 	CmtElGamalOnGroupElementCommitter(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog = make_shared<OpenSSLDlogECF2m>("K-233"))
 		: CmtElGamalCommitterCore(channel, dlog, make_shared<ElGamalOnGroupElementEnc>(dlog)) {}
 
-	shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(shared_ptr<CmtCommitValue> input, long id) override; 
+	shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(const shared_ptr<CmtCommitValue> & input, long id) override; 
 
 	/**
 	* This function samples random commit value and returns it.
@@ -468,7 +468,7 @@ public:
 		shared_ptr<KeyDerivationFunction> kdf = make_shared<HKDF>(new OpenSSLHMAC())) 
 		: CmtElGamalCommitterCore(channel, dlog, make_shared<ElGamalOnByteArrayEnc>(dlog, kdf)) {}
 	
-	shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(shared_ptr<CmtCommitValue> input, long id) override;
+	shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(const shared_ptr<CmtCommitValue> & input, long id) override;
 
 	/**
 	* This function samples random commit value and returns it.

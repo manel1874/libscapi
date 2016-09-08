@@ -49,11 +49,11 @@ public:
 	* @param x the committed value
 	* @param r the random value used for commit.
 	*/
-	CmtPedersenHashDecommitmentMessage(shared_ptr<BigIntegerRandomValue> r, shared_ptr<vector<byte>> x) {
+	CmtPedersenHashDecommitmentMessage(const shared_ptr<BigIntegerRandomValue> & r, const shared_ptr<vector<byte>> & x) {
 		this->r = r;
 		this->x = x;
 	}
-
+	
 	shared_ptr<void> getX() override { return x; }
 	vector<byte> getXValue() { return *x; }
 
@@ -128,7 +128,7 @@ public:
 	* Runs COMMIT_ElGamal to commit to value H(x).
 	* @return the created commitment.
 	*/
-	shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(shared_ptr<CmtCommitValue> input, long id) override; 
+	shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(const shared_ptr<CmtCommitValue> & input, long id) override; 
 
 	shared_ptr<CmtCDecommitmentMessage> generateDecommitmentMsg(long id) override;
 

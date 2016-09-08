@@ -42,7 +42,7 @@ CmtElGamalHashCommitter::CmtElGamalHashCommitter(shared_ptr<CommParty> channel, 
 * Runs COMMIT_ElGamal to commit to value H(x).
 * @return the created commitment.
 */
-shared_ptr<CmtCCommitmentMsg> CmtElGamalHashCommitter::generateCommitmentMsg(shared_ptr<CmtCommitValue> input, long id){
+shared_ptr<CmtCCommitmentMsg> CmtElGamalHashCommitter::generateCommitmentMsg(const shared_ptr<CmtCommitValue> & input, long id){
 
 	vector<byte> hashValArray = getHashOfX(input, id);
 

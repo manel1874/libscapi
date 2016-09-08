@@ -88,7 +88,7 @@ void CmtElGamalCommitterCore::preProcess() {
 *	COMPUTE u = g^r and v = h^r * x". <p>
 * @return the created commitment.
 */
-shared_ptr<CmtCCommitmentMsg> CmtElGamalCommitterCore::generateCommitmentMsg(shared_ptr<CmtCommitValue> input, long id) {
+shared_ptr<CmtCCommitmentMsg> CmtElGamalCommitterCore::generateCommitmentMsg(const shared_ptr<CmtCommitValue> & input, long id) {
 	//Sample random r <-Zq.
 	biginteger r = getRandomInRange(0, qMinusOne, random);
 	//Compute u = g^r and v = h^r * x.
@@ -113,7 +113,7 @@ vector<shared_ptr<void>> CmtElGamalCommitterCore::getPreProcessValues() {
 	return values;
 }
 
-shared_ptr<CmtCCommitmentMsg> CmtElGamalOnGroupElementCommitter::generateCommitmentMsg(shared_ptr<CmtCommitValue> input, long id)  {
+shared_ptr<CmtCCommitmentMsg> CmtElGamalOnGroupElementCommitter::generateCommitmentMsg(const shared_ptr<CmtCommitValue> & input, long id)  {
 	auto in = dynamic_pointer_cast<CmtGroupElementCommitValue>(input);
 	if (in == NULL)
 		throw invalid_argument("The input must be of type CmtGroupElementCommitValue");
@@ -288,7 +288,7 @@ vector<byte> CmtElGamalOnGroupElementReceiver::generateBytesFromCommitValue(CmtC
 	return dlog->mapAnyGroupElementToByteArray(static_cast<GroupElement*>(tmp->getX().get()));
 }
 
-shared_ptr<CmtCCommitmentMsg> CmtElGamalOnByteArrayCommitter::generateCommitmentMsg(shared_ptr<CmtCommitValue> input, long id)  {
+shared_ptr<CmtCCommitmentMsg> CmtElGamalOnByteArrayCommitter::generateCommitmentMsg(const shared_ptr<CmtCommitValue> & input, long id)  {
 	auto in = dynamic_pointer_cast<CmtByteArrayCommitValue>(input);
 	if (in == NULL)
 		throw invalid_argument("The input must be of type CmtByteArrayCommitValue");

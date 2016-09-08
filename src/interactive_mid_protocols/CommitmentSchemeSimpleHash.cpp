@@ -116,7 +116,7 @@ void CmtSimpleHashCommitter::init(shared_ptr<CommParty> channel, shared_ptr<PrgF
 * @return the generated commitment.
 *
 */
-shared_ptr<CmtCCommitmentMsg> CmtSimpleHashCommitter::generateCommitmentMsg(shared_ptr<CmtCommitValue> input, long id) {
+shared_ptr<CmtCCommitmentMsg> CmtSimpleHashCommitter::generateCommitmentMsg(const shared_ptr<CmtCommitValue> & input, long id) {
 	auto in = dynamic_pointer_cast<CmtByteArrayCommitValue>(input);
 	if (in == NULL)
 		throw invalid_argument("The input has to be of type CmtByteArrayCommitValue");

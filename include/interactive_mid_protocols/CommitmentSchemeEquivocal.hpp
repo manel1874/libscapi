@@ -77,7 +77,7 @@ public:
 		doConstruct(channel, make_shared<CmtPedersenWithProofsCommitter>(channel, t));
 	}
 
-	shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(shared_ptr<CmtCommitValue> input, long id) override{
+	shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(const shared_ptr<CmtCommitValue> & input, long id) override{
 		// Delegate to the underlying committer.
 		return committer->generateCommitmentMsg(input, id);
 	}

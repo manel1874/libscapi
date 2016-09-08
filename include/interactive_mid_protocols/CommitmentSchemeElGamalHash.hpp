@@ -76,7 +76,7 @@ public:
 	* Runs COMMIT_ElGamal to commit to value H(x).
 	* @return the created commitment.
 	*/
-	shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(shared_ptr<CmtCommitValue> input, long id) override;
+	shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(const shared_ptr<CmtCommitValue> & input, long id) override;
 
 	shared_ptr<CmtCDecommitmentMessage> generateDecommitmentMsg(long id) override;
 

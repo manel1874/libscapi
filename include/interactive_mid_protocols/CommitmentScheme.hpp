@@ -130,7 +130,7 @@ public:
 	/**
 	* Constructor that sets the commit value.
 	*/
-	CmtGroupElementCommitValue(shared_ptr<GroupElement> x) { this->x = x; };
+	CmtGroupElementCommitValue(const shared_ptr<GroupElement> & x) { this->x = x; };
 	/**
 	* Returns the committed GroupElement. Client needs to cast result to GroupElement*
 	*/
@@ -168,8 +168,8 @@ private:
 	shared_ptr<CmtCommitValue> x;
 public:
 	CmtCommitmentPhaseValues() {}
-	CmtCommitmentPhaseValues(shared_ptr<RandomValue> r, shared_ptr<CmtCommitValue> x) : r(r), x(x){}
-
+	CmtCommitmentPhaseValues(const shared_ptr<RandomValue> & r, const shared_ptr<CmtCommitValue> & x) : r(r), x(x){}
+	
 	/**
 	* Returns the random value used for commit the value.
 	*/
@@ -199,7 +199,7 @@ public:
 	* Constructor that sets the commit value.
 	* @param x BigInteger to commit on.
 	*/
-	CmtBigIntegerCommitValue(shared_ptr<biginteger> x) { this->x = x; };
+	CmtBigIntegerCommitValue(const shared_ptr<biginteger> & x) { this->x = x; };
 
 	/**
 	* Returns the committed BigInteger. Client should cast to biginteger.
@@ -235,7 +235,7 @@ public:
 	/**
 	* Constructor that sets the commit value.
 	*/
-	CmtByteArrayCommitValue(shared_ptr<vector<byte>> x) { this->x = x; }
+	CmtByteArrayCommitValue(const shared_ptr<vector<byte>> & x) { this->x = x; }
 	/**
 	* Returns the committed byte*. client need to cast to byte*
 	*/
@@ -357,7 +357,7 @@ public:
 	* that many commitments are performed one after the other without decommiting them yet.
 	* @return the generated commitment object.
 	*/
-	virtual shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(shared_ptr<CmtCommitValue> input, long id) = 0;
+	virtual shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(const shared_ptr<CmtCommitValue> & input, long id) = 0;
 
 	/**
 	* This function is the heart of the commitment phase from the Committer's point of view.
@@ -365,7 +365,7 @@ public:
 	* @param id Unique value attached to the input to keep track of the commitments in
 	* the case that many commitments are performed one after the other without decommiting them yet.
 	*/
-	virtual void commit(shared_ptr<CmtCommitValue> input, long id) {
+	virtual void commit(const shared_ptr<CmtCommitValue> & input, long id) {
 		auto msg = generateCommitmentMsg(input, id);
 		try {
 			auto msgStr = msg->toString();

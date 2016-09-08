@@ -175,7 +175,7 @@ shared_ptr<GroupElementSendableData> CmtPedersenCommitterCore::waitForMessageFro
 	return dummySendableData;
 }
 
-shared_ptr<CmtCCommitmentMsg> CmtPedersenCommitterCore::generateCommitmentMsg(shared_ptr<CmtCommitValue> input, long id) {
+shared_ptr<CmtCCommitmentMsg> CmtPedersenCommitterCore::generateCommitmentMsg(const shared_ptr<CmtCommitValue> & input, long id) {
 	auto biCmt = dynamic_pointer_cast<CmtBigIntegerCommitValue>(input);
 	if (!biCmt)
 		throw invalid_argument("The input must be of type CmtBigIntegerCommitValue");
