@@ -41,40 +41,49 @@ class OTBatchSOutput {
 };
 
 
+class OTExtensionRandomizedSOutput: public OTBatchSOutput {
+
+protected:
+
+	vector<byte> r0Arr;
+	vector<byte> r1Arr;
+
+public:
+
+	/**
+	 * @return the array that holds all the x0 for all the senders serially.
+	 */
+	vector<byte> getR0Arr() {
+		return r0Arr;
+	}
+	;
+	/**
+	 * @return the array that holds all the x1 for all the senders serially.
+	 */
+	vector<byte> getR1Arr() {
+		return r1Arr;
+	}
+};
+
+
 #ifndef _WIN32
-class OTExtensionBristolRandomizedSOutput: public OTBatchSOutput {
+class OTExtensionBristolRandomizedSOutput: public OTExtensionRandomizedSOutput {
 
 public:
 
 	OTExtensionBristolRandomizedSOutput(const vector<BitMatrix>& senderOutputMatrices) {
 
-		//copy the bitmatrix
-		this->senderOutputMatrices.reserve(senderOutputMatrices.size());
+		copy_byte_array_to_byte_vector((byte*)senderOutputMatrices[0].squares.data(), senderOutputMatrices[0].squares.size()*128*16, r0Arr, 0);
+		copy_byte_array_to_byte_vector((byte*)senderOutputMatrices[1].squares.data(), senderOutputMatrices[1].squares.size()*128*16, r1Arr, 0);
 
-		/*//copy the vector of bitmatrices
-		 for (BitMatrix element : senderOutputMatrices) {
-		 BitMatrix copyElement;
-		 copyElement.squares = element.squares;
-		 this->senderOutputMatrices.push_back(copyElement);
-		 }*/
+	};
 
-		for (auto it = begin(senderOutputMatrices); it != end(
-				senderOutputMatrices); ++it) {
-			BitMatrix copyElement;
-			copyElement.squares = it->squares;
-			this->senderOutputMatrices.push_back(copyElement);
-		}
-
-	}
-	;
-
-	vector<BitMatrix> senderOutputMatrices;
 };
 
 #endif
 
 enum class OTBatchSInputTypes {
-	OTExtensionGeneralSInput, OTExtensionRandomizedSInput, OTExtensionGeneralBristolSInput
+	OTExtensionGeneralSInput, OTExtensionRandomizedSInput
 };
 
 /**
@@ -146,41 +155,6 @@ public:
 	}
 	;
 };
-
-#ifndef _WIN32
-
-/**
- * A concrete class for OT extension input for the sender. <p>
- * In the general OT extension scenario the sender gets x0 and x1 for each OT.
- */
-class OTExtensionGeneralBristolSInput: public OTBatchSInput {
-public:
-	BitMatrix x0Arr; // An array that holds all the x0 for all the senders serially.
-	// For optimization reasons, all the x0 inputs are held in one dimensional array one after the other
-	// rather than a two dimensional array.
-	// The size of each element can be calculated by x0ArrSize/numOfOts.
-	BitMatrix x1Arr; // An array that holds all the x1 for all the senders serially.
-	int numOfOts; // Number of OTs in the OT extension.
-
-
-	OTBatchSInputTypes getType() override {return OTBatchSInputTypes::OTExtensionGeneralBristolSInput;};
-	/**
-	 * Constructor that sets x0, x1 for each OT element and the number of OTs.
-	 * @param x1Arr holds all the x0 for all the senders serially.
-	 * @param x0Arr holds all the x1 for all the senders serially.
-	 * @param numOfOts Number of OTs in the OT extension.
-	 */
-	OTExtensionGeneralBristolSInput(const BitMatrix& x0Arr, const BitMatrix& x1Arr,int numOfOts) {
-		this->x0Arr.squares = x0Arr.squares;
-		this->x1Arr.squares = x1Arr.squares;
-		this->numOfOts = numOfOts;
-	};
-
-};
-
-#endif
-
-
 
 
 /**
@@ -255,7 +229,9 @@ class OTROutput {
  */
 class OTOnByteArrayROutput: public OTROutput, public OTBatchROutput {
 public:
-	OTOnByteArrayROutput(vector<byte> xSigma) {
+
+	OTOnByteArrayROutput(){};
+	OTOnByteArrayROutput(const vector<byte>& xSigma) {
 		this->xSigma = xSigma;
 	}
 	;
@@ -267,12 +243,12 @@ public:
 		return xSigma.size();
 	}
 	;
-private:
+protected:
 	vector<byte> xSigma;
 };
 
 enum class OTBatchRInputTypes {
-	OTExtensionGeneralRInput, OTExtensionBristolGeneralRInput, OTExtensionBristolRandomizedRInput
+	OTExtensionGeneralRInput, OTExtensionRandomizedRInput
 };
 
 /**
@@ -339,63 +315,36 @@ public:
 	OTExtensionGeneralRInput(vector<byte> sigmaArr, int elementSize) :
 		OTExtensionRInput(sigmaArr, elementSize) {
 	}
-	;
+
 	OTBatchRInputTypes getType() {
 		return OTBatchRInputTypes::OTExtensionGeneralRInput;
 	}
-	;
+
 };
 
 
+
+class OTExtensionRandomizedRInput: public OTExtensionRInput{
+public:
+	OTExtensionRandomizedRInput(vector<byte> sigmaArr, int elementSize) : OTExtensionRInput(sigmaArr,elementSize) {}
+	OTBatchRInputTypes getType() override {	return OTBatchRInputTypes::OTExtensionRandomizedRInput;}
+};
 
 #ifndef _WIN32
-	/**
-	 * A concrete class for OT extension for bristol implementation. <p>
-	 * All the classes are the same and differ only in the name.
-	 * The reason a class is created for each version is due to the fact that a respective class is created for the sender and we wish to be consistent.
-	 * The name of the class determines the version of the OT extension we wish to run and in this case the general case.
-	 */
-class OTExtensionBristolRInput: public OTBatchRInput {
-public:
-	/**
-	 * Constructor that sets the number of ot's and the bitvector that contains the receiver input.
-	 * @param nOTs number of OT's.
-	 * @param receiverInput The receiver input in Bitvector instance that is defined in the ot extension of bristol library.
-	 */
-	OTExtensionBristolRInput(int nOTs, const BitVector& receiverInput) :
-		nOTs(nOTs), receiverInput(receiverInput) {
-	}
-
-	int nOTs; // The size of each element in the ot extension. All elements must be of the same size.
-	const BitVector& receiverInput; // Each byte holds a sigma bit for each OT in the OT extension protocol.
-};
-
-class OTExtensionBristolGeneralRInput: public OTExtensionBristolRInput{
-public:
-	OTExtensionBristolGeneralRInput(int nOTs, const BitVector& receiverInput) : OTExtensionBristolRInput(nOTs,receiverInput) {}
-
-	OTBatchRInputTypes getType() override {return OTBatchRInputTypes::OTExtensionBristolGeneralRInput;}
-};
-class OTExtensionBristolRandomizedRInput: public OTExtensionBristolRInput{
-public:
-	OTExtensionBristolRandomizedRInput(int nOTs, const BitVector& receiverInput) : OTExtensionBristolRInput(nOTs,receiverInput) {}
-	OTBatchRInputTypes getType() override {return OTBatchRInputTypes::OTExtensionBristolRandomizedRInput;}
-};
-
-
 /**
  * Concrete implementation of OT receiver of bristol output.<p>
  * In the bristol scenario, the receiver outputs xSigma as a bitvector.
  * This output class also can be viewed as the output of batch OT when xSigma is a concatenation of all xSigma byte array of all OTs.
  */
-class OTExtensionBristolROutput: public OTROutput, public OTBatchROutput {
+class OTExtensionBristolROutput: public OTOnByteArrayROutput, public OTBatchROutput {
 
 public:
 	OTExtensionBristolROutput(const BitMatrix& receiverOutputMatrix) {
-		this->receiverOutputMatrix.squares = receiverOutputMatrix.squares;
+
+		copy_byte_array_to_byte_vector((byte*)receiverOutputMatrix.squares.data(), receiverOutputMatrix.squares.size()*128*16, xSigma, 0);
 	}
 
-	BitMatrix receiverOutputMatrix;
+
 };
 #endif
 

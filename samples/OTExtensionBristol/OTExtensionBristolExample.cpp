@@ -10,7 +10,7 @@ int mainBristol(string partyNum) {
     int my_num = stoi(partyNum);
 
 
-    int nOTs = 128;
+    int nOTs = 1280000;
 
 
     BitVector receiverInput(nOTs);
@@ -22,13 +22,27 @@ int mainBristol(string partyNum) {
 
 
   /*if (my_num == 0) {
-        cout<<"nOTS: "<< nOTs<<endl;
         OTExtensionBristolSender sender(12000,true);
 
         OTBatchSInput * input = new OTExtensionRandomizedSInput(nOTs);
+
         auto output = sender.transfer(input);
 
-        ((OTExtensionBristolRandomizedSOutput*)output.get())->senderOutputMatrices[0].print_side_by_side(((OTExtensionBristolRandomizedSOutput*)output.get())->senderOutputMatrices[1]);
+        vector<byte> outputbytes = ((OTExtensionRandomizedSOutput *)output.get())->getR0Arr();
+
+		cout<<"the size is :" <<outputbytes.size() <<" r0Arr " <<endl;
+		for(int i=0; i<100; i++){
+
+			cout<< (int)outputbytes[i];
+		}
+
+		outputbytes = ((OTExtensionRandomizedSOutput *)output.get())->getR1Arr();
+
+		cout<<"the size is :" <<outputbytes.size() <<" r1Arr " <<endl;
+		for(int i=0; i<100; i++){
+
+			cout<< (int)outputbytes[i];
+		}
 
 
     }
@@ -36,25 +50,32 @@ int mainBristol(string partyNum) {
         cout<<"nOTS: "<< nOTs<<endl;
         OTExtensionBristolReciever reciever("localhost", 12000,true);
 
-        OTBatchRInput * input = new OTExtensionBristolRandomizedRInput(nOTs, receiverInput);
+        vector<byte> sigma;
+		sigma.resize(nOTs);
+		sigma[0] = 1;
+		sigma[1] = 1;
+
+
+		int elementSize = 128;
+
+        OTBatchRInput * input = new OTExtensionRandomizedRInput(sigma, elementSize);
 
         auto output = reciever.transfer(input);
 
+        vector<byte> outputbytes = ((OTOnByteArrayROutput *)output.get())->getXSigma();
 
+        		cout<<"the size is :" <<outputbytes.size();
+        		for(int i=0; i<100; i++){
 
-        for (int i = 0; i < 32; i++){
-			for (int j = 0; j < 128; j++)
-				cout << ((OTExtensionBristolROutput*)output.get())->receiverOutputMatrix.squares[0].get_bit(i,j);
-
-			cout << " "<<endl;
-		}
+        			cout<< (int)outputbytes[i];
+        		}
 
     }
 
 
     cout<<"Done running randomized"<<endl;
-    */
 
+*/
 
     if (my_num == 0) {
     	boost::asio::io_service io_service;
@@ -106,28 +127,39 @@ int mainBristol(string partyNum) {
 
 		OTExtensionBristolReciever reciever("localhost", 12001,true,channel);
 
-		OTBatchRInput * input = new OTExtensionBristolGeneralRInput(nOTs,receiverInput);
+		vector<byte> sigma;
+		sigma.resize(nOTs);
+		sigma[0] = 1;
+		sigma[1] = 1;
+
+
+		int elementSize = 128;
+		OTBatchRInput * input = new OTExtensionGeneralRInput(sigma, elementSize);
+
 
         auto start = scapi_now();
 		auto output = reciever.transfer(input);
 		 print_elapsed_ms(start, "Transfer for general");
 
-		for (int i = 0; i < 32; i++){
-			for (int j = 0; j < 128; j++)
-				cout << ((OTExtensionBristolROutput*)output.get())->receiverOutputMatrix.squares[0].get_bit(i,j);
 
-			cout << " "<<endl;
+		vector<byte> outputbytes = ((OTOnByteArrayROutput *)output.get())->getXSigma();
+
+		cout<<"the size is :" <<outputbytes.size();
+		for(int i=0; i<100; i++){
+
+			cout<< (int)outputbytes[i];
 		}
+
+		cout<<endl;
 
 
 
 	}
 
+    /*
     int size = 1280000;
     SocketPartyData senderParty(IpAdress::from_string("127.0.0.1"), 7766);
     if (my_num == 0) {
-
-
 
 
     	OTBatchReceiver * otReceiver = new OTSemiHonestExtensionReceiver(senderParty, 163, 1);
@@ -173,7 +205,7 @@ int mainBristol(string partyNum) {
     	print_elapsed_ms(start, "Transfer for general semi-honest");
     }
 
-
+*/
     return 0;
 }
 #endif
