@@ -140,9 +140,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\miracl\big.cpp" />
+    <ClCompile Include="source\miracl\bls_pair.cpp" />
     <ClCompile Include="source\miracl\crt.cpp" />
     <ClCompile Include="source\miracl\ec2.cpp" />
     <ClCompile Include="source\miracl\ecn.cpp" />
+    <ClCompile Include="source\miracl\ecn4.cpp" />
     <ClCompile Include="source\miracl\flash.cpp" />
     <ClCompile Include="source\miracl\mraes.c" />
     <ClCompile Include="source\miracl\mralloc.c" />
@@ -196,6 +198,10 @@
     <ClCompile Include="source\miracl\mrzzn3.c" />
     <ClCompile Include="source\miracl\mrzzn4.c" />
     <ClCompile Include="source\miracl\zzn.cpp" />
+    <ClCompile Include="source\miracl\zzn2.cpp" />
+    <ClCompile Include="source\miracl\zzn24.cpp" />
+    <ClCompile Include="source\miracl\zzn4.cpp" />
+    <ClCompile Include="source\miracl\zzn8.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\miracl\big.h" />
