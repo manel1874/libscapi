@@ -252,6 +252,9 @@
     <ClCompile Include="..\..\src\interactive_mid_protocols\OTExtensionBristol.cpp">
       <Filter>Source Files\InteractiveMidProtocols</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\mid_layer\BiLinearMaps.cpp">
+      <Filter>Source Files\mid_layer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\circuits\BooleanCircuits.hpp">
@@ -493,6 +496,9 @@
     </ClInclude>
     <ClInclude Include="..\..\include\interactive_mid_protocols\OTExtensionBristol.hpp">
       <Filter>Header Files\InteractiveMidProtocols</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\mid_layer\BiLinearMaps.hpp">
+      <Filter>Header Files\MidLayer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
