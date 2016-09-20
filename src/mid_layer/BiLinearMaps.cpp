@@ -54,11 +54,11 @@ void G1Element::fromStrings(vector<string> & data) {
 	mirElement.g.set(x, y);
 }
 
-void G1Element::hashAndMap(string strToHash) {
+void G1Element::hashAndMap(string strToHash, BiLinearMapWrapper & mapper) {
 	mapper.pfc.hash_and_map(mirElement, (char*) strToHash.c_str());
 }
 
-void G1Element::exponent(biginteger bi) {
+void G1Element::exponent(biginteger bi, BiLinearMapWrapper & mapper) {
 	Big b((char*)bi.str().c_str());
 	mapper.pfc.mult(mirElement, b);
 }
@@ -68,50 +68,50 @@ void G1Element::exponent(biginteger bi) {
 /******************/
 vector<string> G2Element::toStrings() {
 	vector<string> data(8);
-	ZZn4 zzn4_1, zzn4_2;
-	mirElement.g.get(zzn4_1, zzn4_2);
+	//ZZn4 zzn4_1, zzn4_2;
+	//mirElement.g.get(zzn4_1, zzn4_2);
 
-	ZZn2 zzn2_1x, zzn2_1y, zzn2_2x, zzn2_2y;
-	zzn4_1.get(zzn2_1x, zzn2_1y);
-	zzn4_2.get(zzn2_2x, zzn2_2y);
+	//ZZn2 zzn2_1x, zzn2_1y, zzn2_2x, zzn2_2y;
+	//zzn4_1.get(zzn2_1x, zzn2_1y);
+	//zzn4_2.get(zzn2_2x, zzn2_2y);
 
-	vector<Big> res(8);
-	zzn2_1x.get(res[0], res[1]);
-	zzn2_1y.get(res[2], res[3]);
-	zzn2_2x.get(res[4], res[5]);
-	zzn2_2y.get(res[6], res[7]);
+	//vector<Big> res(8);
+	//zzn2_1x.get(res[0], res[1]);
+	//zzn2_1y.get(res[2], res[3]);
+	//zzn2_2x.get(res[4], res[5]);
+	//zzn2_2y.get(res[6], res[7]);
 
-	for (int i = 0; i<8; i++)
-		data[i] = bigToString(res[i]);
+	//for (int i = 0; i<8; i++)
+	//	data[i] = bigToString(res[i]);
 
 	return data;
 }
 
 void G2Element::fromStrings(vector<string> & data)
 {
-	vector<Big> bigs(8);
-	for (int i = 0; i<8; i++)
-		bigs[i] = (char *)data[i].c_str();
+	//vector<Big> bigs(8);
+	//for (int i = 0; i<8; i++)
+	//	bigs[i] = (char *)data[i].c_str();
 
-	ZZn2 zzn2_1x, zzn2_1y, zzn2_2x, zzn2_2y;
+	//ZZn2 zzn2_1x, zzn2_1y, zzn2_2x, zzn2_2y;
 
-	zzn2_1x.set(bigs[0], bigs[1]);
-	zzn2_1y.set(bigs[2], bigs[3]);
-	zzn2_2x.set(bigs[4], bigs[5]);
-	zzn2_2y.set(bigs[6], bigs[7]);
+	//zzn2_1x.set(bigs[0], bigs[1]);
+	//zzn2_1y.set(bigs[2], bigs[3]);
+	//zzn2_2x.set(bigs[4], bigs[5]);
+	//zzn2_2y.set(bigs[6], bigs[7]);
 
-	ZZn4 zzn4x, zzn4y;
-	zzn4x.set(zzn2_1x, zzn2_1y);
-	zzn4y.set(zzn2_2x, zzn2_2y);
-	
-	mirElement.g.set(zzn4x, zzn4y);
+	//ZZn4 zzn4x, zzn4y;
+	//zzn4x.set(zzn2_1x, zzn2_1y);
+	//zzn4y.set(zzn2_2x, zzn2_2y);
+	//
+	//mirElement.g.set(zzn4x, zzn4y);
 }
 
-void G2Element::hashAndMap(string strToHash) {
-	mapper.pfc.hash_and_map(mirElement, (char*)strToHash.c_str());
+void G2Element::hashAndMap(string strToHash, BiLinearMapWrapper & mapper) {
+	mapper.pfc.hash_and_map(this->mirElement, (char*)strToHash.c_str());
 }
 
-void G2Element::exponent(biginteger bi) {
+void G2Element::exponent(biginteger bi, BiLinearMapWrapper & mapper) {
 	Big b((char*)bi.str().c_str());
 	mapper.pfc.mult(mirElement, b);
 }
@@ -125,7 +125,7 @@ void G2Element::exponent(biginteger bi) {
 /* BiLinearMapWrapper     */
 /**************************/
 GTElement BiLinearMapWrapper::doBilinearMapping(G1Element & g1, G2Element & g2) {
-	GTElement res(*this);
+	GTElement res;
 	res.mirElement = pfc.pairing(g2.mirElement, g1.mirElement);
 	return res;
 }

@@ -26,8 +26,7 @@
 */
 #include "OSPSIServer.hpp"
 
-OsPsiServer::OsPsiServer(OsPsiParty &party0, OsPsiParty &party1) : 
-	m_token(G1Element(bilinearMapper), G1Element(bilinearMapper))
+OsPsiServer::OsPsiServer(OsPsiParty &party0, OsPsiParty &party1)
 {
 	m_clientInputs[0] = party0.getEncryptedInputs();
 	m_clientInputs[1] = party1.getEncryptedInputs();
@@ -47,7 +46,7 @@ void OsPsiServer::calculate_intersection_indexes(int clientId1, int clientId2)
 	do_bilinear_mapping(client1Mappings, m_clientInputs[clientId1], m_token.first);
 	do_bilinear_mapping(client2Mappings, m_clientInputs[clientId2], m_token.second);
 	auto intersected_indices = find_intersection(client1Mappings, client2Mappings);
-	for (auto idx1 = 0; idx1<intersected_indices.first.size(); idx1++)
+	for (size_t idx1 = 0; idx1<intersected_indices.first.size(); idx1++)
 	{
 		cout << "instersection at idx1 : " << intersected_indices.first[idx1]
 			<< " and at idx2 : " << intersected_indices.second[idx1] << endl;
@@ -72,9 +71,9 @@ pair<vector<int>, vector<int>> OsPsiServer::find_intersection(
 	auto t1 = scapi_now();
 	pair<vector<int>, vector<int>> res;
 
-	for (auto idx1 = 0; idx1<target1.size(); idx1++)
+	for (size_t idx1 = 0; idx1<target1.size(); idx1++)
 	{
-		for (auto idx2 = 0; idx2<target2.size(); idx2++)
+		for (size_t idx2 = 0; idx2<target2.size(); idx2++)
 		{
 
 			if (target1[idx1] == target2[idx2])

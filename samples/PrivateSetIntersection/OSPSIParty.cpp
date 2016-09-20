@@ -27,17 +27,15 @@
 
 #include "OSPSIParty.hpp"
 
-OsPsiParty::OsPsiParty(const OsPsiPartyConfig & config, BiLinearMapWrapper mapper) : 
-	m_half_token(mapper)
+OsPsiParty::OsPsiParty(const OsPsiPartyConfig & config)
 {
-	this->mapper = mapper;
 	m_partyId = config.partyId;
 	inputFilePath = config.inputFilePath;
 	m_sk_private = config.sk_private;
 	m_sk = config.sk_public;
 	auto res = m_sk / m_sk_private; 	// TODO mod inverse of sk/sk1
-	m_half_token.hashAndMap(config.generatorSource);
-	m_half_token.exponent(res);
+	m_half_token.hashAndMap(config.generatorSource, mapper);
+	m_half_token.exponent(res, mapper);
 
 }
 
@@ -66,12 +64,14 @@ void OsPsiParty::read_input()
 
 void OsPsiParty::encrypt_input()
 {
-	for (auto i = 0; i<m_inputs.size(); i++)
+	for (size_t i = 0; i<m_inputs.size(); i++)
 	{
-		G2Element encG2(mapper);
-		encG2.hashAndMap(m_inputs[i]);
-		encG2.exponent(m_sk);
+		G2Element encG2;
+		encG2.hashAndMap(m_inputs[i], mapper);
+		encG2.exponent(m_sk, mapper);
 		m_encrypted_inputs.push_back(encG2);
+		if (i != 0 && i % 100 == 0)
+			cout << "encrypted " << i << " inputs\n";
 	}
 	//convert all inputs to one string with * delimiter and send it to the server
 	//TODO send inputs to the server

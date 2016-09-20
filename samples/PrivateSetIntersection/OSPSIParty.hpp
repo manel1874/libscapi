@@ -33,13 +33,13 @@
 class OsPsiPartyConfig {
 public:
 	int partyId;
-	const char * generatorSource;
+	string generatorSource;
 	string inputFilePath;
 	biginteger sk_private;
 	biginteger sk_public;
 	OsPsiPartyConfig(int partyId, string gen, biginteger publicKey, string inputFilePath) {
 		this->partyId = partyId;
-		this->generatorSource = gen.c_str();
+		this->generatorSource = gen;
 		this->inputFilePath = inputFilePath;
 		PrgFromOpenSSLAES prg;
 		SecretKey key = prg.generateKey(128);
@@ -52,7 +52,7 @@ public:
 class OsPsiParty
 {
 public:
-	OsPsiParty(const OsPsiPartyConfig & config, BiLinearMapWrapper mapper);
+	OsPsiParty(const OsPsiPartyConfig & config);
 	void run();
 	vector<G2Element> getEncryptedInputs() { return m_encrypted_inputs; };
 	G1Element getHalfToken() { return m_half_token; };

@@ -31,11 +31,8 @@
 int mainOSPSI(string inputFilePath_0, string inputFilePath_1) {
 	try {
 		biginteger publicKey = 100; // TODO - RANDOM
-		BiLinearMapWrapper mapper;
-		cout << "creating parties" << endl;
-		OsPsiParty party_0(OsPsiPartyConfig(0, "gen", publicKey, inputFilePath_0), mapper);
-		OsPsiParty party_1(OsPsiPartyConfig(1, "gen", publicKey, inputFilePath_1), mapper);
-
+		OsPsiParty party_0(OsPsiPartyConfig(0, "gen", publicKey, inputFilePath_0));
+		OsPsiParty party_1(OsPsiPartyConfig(1, "gen", publicKey, inputFilePath_1));
 		cout << "running parties" << endl;
 		party_0.run();
 		party_1.run();
