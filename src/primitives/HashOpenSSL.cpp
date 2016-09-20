@@ -84,7 +84,7 @@ void OpenSSLHash::hashFinal(vector<byte> &out, int outOffset) {
 		throw new out_of_range("wrong offset for the given output buffer");
 
 	int length = EVP_MD_CTX_size(hash);
-	if (out.size() < outOffset + length) {
+	if ((int) out.size() < outOffset + length) {
 		out.resize(outOffset + length);
 	}
 	EVP_DigestFinal_ex(hash, out.data() + outOffset, NULL);

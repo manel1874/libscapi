@@ -166,7 +166,7 @@ shared_ptr<OTBatchROutput> OTExtensionBristolReciever::transfer(OTBatchRInput * 
 
 		//fill the bit vector that bristol needs from the sigma array
 
-		for(int i=0; i<nOTs; i++){
+		for(size_t i=0; i<nOTs; i++){
 
 			if(sigmaArr[i]==1)
 				inputBits.set_bit(i,1);
@@ -203,7 +203,7 @@ shared_ptr<OTBatchROutput> OTExtensionBristolReciever::transfer(OTBatchRInput * 
 
 
 			//xor each randomized output with the relevant xored sent from the sender
-			for(int i=0; i<nOTs; i++){
+			for(size_t i=0; i<nOTs; i++){
 				if(inputBits.get_bit(i)==0)
 					outputSigma[i] =  x0Arr[i]^ pOtExt->receiverOutputMatrix.squares[i/128].rows[i % 128];
 				else

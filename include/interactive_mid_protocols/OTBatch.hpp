@@ -336,7 +336,7 @@ public:
  * In the bristol scenario, the receiver outputs xSigma as a bitvector.
  * This output class also can be viewed as the output of batch OT when xSigma is a concatenation of all xSigma byte array of all OTs.
  */
-class OTExtensionBristolROutput: public OTOnByteArrayROutput, public OTBatchROutput {
+class OTExtensionBristolROutput: public OTOnByteArrayROutput {
 
 public:
 	OTExtensionBristolROutput(const BitMatrix& receiverOutputMatrix) {

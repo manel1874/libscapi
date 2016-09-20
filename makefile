@@ -26,7 +26,7 @@ OBJ_FILES     := $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES))
 OBJ_FILES     += $(patsubst src/%.c,obj/%.o,$(C_FILES))
 OUT_DIR        = obj obj/mid_layer obj/circuits obj/comm obj/infra obj/interactive_mid_protocols obj/primitives obj/circuits_c
 INC            = -I../boost_1_60_0 -Ilib -Iinstall/include -Ilib/OTExtensionBristol 
-CPP_OPTIONS   := -std=c++11 $(INC)  -maes -mpclmul -Wall -Wno-unused-function -fPIC -O3
+CPP_OPTIONS   := -std=c++11 $(INC)  -maes -mpclmul -Wall -Wno-unused-function -Wno-unused-variable -fPIC -O3
 $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
 LINKER_OPTIONS = $(INCLUDE_ARCHIVES_START) install/lib/libOTExtensionBristol.a install/lib/libsimpleot.a install/lib/libntl.a install/lib/libmiracl.a -lpthread -lgmp -lcrypto -lssl -lboost_system -lboost_thread -lOTExtension -lMaliciousOTExtension -ldl $(INCLUDE_ARCHIVES_END)
 LIBRARIES_DIR  = -L../boost_1_60_0/stage/lib -Linstall/lib
