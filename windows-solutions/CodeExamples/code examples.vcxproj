@@ -107,6 +107,10 @@
     <ClCompile Include="..\..\samples\MaliciousOT\MaliciousOTExample.cpp" />
     <ClCompile Include="..\..\samples\OTExtensionBristol\OTExtensionBristolExample.cpp" />
     <ClCompile Include="..\..\samples\Paillier\FdrPaillierParty.cpp" />
+    <ClCompile Include="..\..\samples\PrivateSetIntersection\OSPSIParty.cpp" />
+    <ClCompile Include="..\..\samples\PrivateSetIntersection\OSPSIServer.cpp" />
+    <ClCompile Include="..\..\samples\PrivateSetIntersection\ospsi_main.cpp" />
+    <ClCompile Include="..\..\samples\PrivateSetIntersection\unity.cpp" />
     <ClCompile Include="..\..\samples\SigmaProtocols\SigmaProtocolExample.cpp" />
     <ClCompile Include="..\..\samples\Simple\simple_dlog.cpp" />
     <ClCompile Include="..\..\samples\Simple\simple_sha1.cpp" />
@@ -116,6 +120,8 @@
   <ItemGroup>
     <ClInclude Include="..\..\samples\Commitment\CommitmentExample.hpp" />
     <ClInclude Include="..\..\samples\examples_main.hpp" />
+    <ClInclude Include="..\..\samples\PrivateSetIntersection\OSPSIParty.hpp" />
+    <ClInclude Include="..\..\samples\PrivateSetIntersection\OSPSIServer.hpp" />
     <ClInclude Include="..\..\samples\SigmaProtocols\SigmaProtocolExample.hpp" />
     <ClInclude Include="..\..\samples\Yao\YaoExample.hpp" />
   </ItemGroup>

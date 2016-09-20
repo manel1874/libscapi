@@ -6,7 +6,7 @@
     <LocalDebuggerCommand>$(TargetPath)</LocalDebuggerCommand>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LocalDebuggerCommandArguments>yao 1 C:\code\libscapi\samples\Yao\YaoConfig.txt</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>ospsi \code\libscapi\samples\PrivateSetIntersection\input1.txt ..\..\..\..\samples\PrivateSetIntersection\input2.txt</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>

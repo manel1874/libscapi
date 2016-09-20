@@ -31,7 +31,13 @@
 // must define these before the include - TODO make this dynamic
 #define MR_PAIRING_BLS    // AES-256 security
 #define AES_SECURITY 256
+
+#ifndef _WIN32
+#include <miracl/pairing_3.h>
+#else
 #include <Miracl/pairing_3.h>
+#endif
+
 
 string bigToString(Big x);
 class G1Element; //forward decleration
@@ -51,7 +57,7 @@ class BMGroupElement {
 protected:
 	BiLinearMapWrapper mapper;
 public:
-	BMGroupElement(BiLinearMapWrapper mapper) { this->mapper = mapper; }
+	BMGroupElement(BiLinearMapWrapper & mapper) { this->mapper = mapper; }
 	virtual void hashAndMap(string strToHash)       = 0;
 	virtual void exponent(biginteger bi)            = 0;
 	virtual vector<string> toStrings()              = 0;
@@ -63,7 +69,7 @@ class G1Element : public BMGroupElement {
 private:
 	G1 mirElement;
 public:
-	G1Element(BiLinearMapWrapper mapper) : BMGroupElement(mapper) {};
+	G1Element(BiLinearMapWrapper & mapper) : BMGroupElement(mapper) {};
 	virtual vector<string> toStrings() override;
 	virtual void fromStrings(vector<string> & data) override;
 	virtual void hashAndMap(string strToHash) override;
@@ -75,7 +81,7 @@ class G2Element : public BMGroupElement {
 private:
 	G2 mirElement;
 public:
-	G2Element(BiLinearMapWrapper mapper) : BMGroupElement(mapper) {};
+	G2Element(BiLinearMapWrapper & mapper) : BMGroupElement(mapper) {};
 	virtual vector<string> toStrings() override;
 	virtual void fromStrings(vector<string> & data) override;
 	virtual void hashAndMap(string strToHash) override;
@@ -88,9 +94,12 @@ private:
 	GT mirElement;
 public:
 	GTElement(BiLinearMapWrapper mapper) : BMGroupElement(mapper) {};
-	virtual vector<string> toStrings() override {};
+	virtual vector<string> toStrings() override { return vector<string>(); };
 	virtual void fromStrings(vector<string> & data) override {};
 	virtual void hashAndMap(string strToHash) override {};
 	virtual void exponent(biginteger bi) override {};
+	bool operator==(const GTElement &other) const {
+		return mirElement == other.mirElement;
+	}
 };
 

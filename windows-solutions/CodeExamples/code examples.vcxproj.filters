@@ -37,6 +37,9 @@
     <Filter Include="Source Files\OTExtensionBristol">
       <UniqueIdentifier>{85b4572b-ec74-4456-9210-51e8876b92ea}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\SetIntersection">
+      <UniqueIdentifier>{eedddefe-6ae5-4693-9b04-9a832661b9ba}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\samples\Yao\App1.cpp">
@@ -72,6 +75,18 @@
     <ClCompile Include="..\..\samples\OTExtensionBristol\OTExtensionBristolExample.cpp">
       <Filter>Source Files\OTExtensionBristol</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\samples\PrivateSetIntersection\OSPSIServer.cpp">
+      <Filter>Source Files\SetIntersection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\samples\PrivateSetIntersection\OSPSIParty.cpp">
+      <Filter>Source Files\SetIntersection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\samples\PrivateSetIntersection\ospsi_main.cpp">
+      <Filter>Source Files\SetIntersection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\samples\PrivateSetIntersection\unity.cpp">
+      <Filter>Source Files\SetIntersection</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\samples\Yao\YaoExample.hpp">
@@ -85,6 +100,12 @@
     </ClInclude>
     <ClInclude Include="..\..\samples\Commitment\CommitmentExample.hpp">
       <Filter>Source Files\Commitment</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\samples\PrivateSetIntersection\OSPSIServer.hpp">
+      <Filter>Source Files\SetIntersection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\samples\PrivateSetIntersection\OSPSIParty.hpp">
+      <Filter>Source Files\SetIntersection</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

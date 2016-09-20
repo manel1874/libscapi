@@ -2,4 +2,4 @@
 image='scapicryptobiu/libscapi:'$1
 dockerfilePath='dockerfiles/Dockerfile'
 
-docker build--build-arg tag=$1 --no-cache -t $image -f $dockerfilePath .
+docker build --tag $1 --no-cache -t $image -f $dockerfilePath .
