@@ -172,7 +172,14 @@ class PerfectlyBindingCmt : public SecureCommit {};
 /**
 * Any protocol that is secure in the presence of semi-honest adversaries should implement this interface.
 */
-class SemiHonest : ProtocolSecLevel {};
+class SemiHonest : public ProtocolSecLevel {};
+
+class PrivacyOnly : public ProtocolSecLevel {};
+
+/**
+* Any protocol that is proven secure in the stand-alone model (where secure protocols are run sequentially and not concurrently) should implement this interface.
+*/
+class StandAlone : public ProtocolSecLevel {};
 
 /**
 * Any protocol that is secure in the presence of covert adversaries should implement this interface.

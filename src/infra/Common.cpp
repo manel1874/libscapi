@@ -30,6 +30,7 @@
 #include "../../include/infra/Common.hpp"
 #include <chrono>
 #include <boost/multiprecision/cpp_dec_float.hpp>
+#include "../../include/primitives/Prg.hpp"
 
 /******************************/
 /* Helper Methods *************/
@@ -218,6 +219,15 @@ biginteger getRandomInRange(biginteger min, biginteger max, std::mt19937 & rando
 	boost::random::uniform_int_distribution<biginteger> ui(min, max);
 	biginteger res = ui(random);
 	return res;
+}
+
+biginteger getRandomInRange(biginteger min, biginteger max, PrgFromOpenSSLAES* random) {
+	int num;
+	do {
+		num = random->getRandom32();
+	} while (num < min || num > max);
+	
+	return (biginteger)num;
 }
 
 biginteger getRandomPrime(int numBytes, int certainty, mt19937 & random) {

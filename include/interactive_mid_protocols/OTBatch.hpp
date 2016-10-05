@@ -27,6 +27,7 @@
 
 #pragma once
 #include "../infra/Common.hpp"
+#include "OT.hpp"
 #include <emmintrin.h>
 #ifndef _WIN32
 #include <OTExtensionBristol/OT/BitMatrix.h>
@@ -202,50 +203,7 @@ public:
 	virtual ~OTBatchSender(){};
 };
 
-/**
- * Every Batch OT receiver outputs a result in the end of the protocol execution, but every concrete
- * protocol output different data.<p>
- * This interface is a marker interface for OT receiver output, where there is an implementing class
- * for each OT protocol.
- */
-class OTBatchROutput {
-public:
-	virtual ~OTBatchROutput() { }
-};
 
-/**
- * Every OT receiver outputs a result in the end of the protocol execution, but every concrete
- * protocol output different data.<p>
- * This interface is a marker interface for OT receiver output, where there is an implementing class
- * for each OT protocol.
- */
-class OTROutput {
-};
-
-/**
- * Concrete implementation of OT receiver (on byteArray) output.<p>
- * In the byteArray scenario, the receiver outputs xSigma as a byte array.
- * This output class also can be viewed as the output of batch OT when xSigma is a concatenation of all xSigma byte array of all OTs.
- */
-class OTOnByteArrayROutput: public OTROutput, public OTBatchROutput {
-public:
-
-	OTOnByteArrayROutput(){};
-	OTOnByteArrayROutput(const vector<byte>& xSigma) {
-		this->xSigma = xSigma;
-	}
-	;
-	vector<byte> getXSigma() {
-		return xSigma;
-	}
-	;
-	int getLength() {
-		return xSigma.size();
-	}
-	;
-protected:
-	vector<byte> xSigma;
-};
 
 enum class OTBatchRInputTypes {
 	OTExtensionGeneralRInput, OTExtensionRandomizedRInput

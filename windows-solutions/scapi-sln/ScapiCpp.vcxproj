@@ -101,7 +101,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\lib;C:\OpenSSL-Win64\include;C:\local\boost_1_60_0;..\..\lib\MiraclWin64\source;..\..\lib\NTL\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\lib;C:\OpenSSL-Win64\include;C:\local\boost_1_60_0;..\..\lib\MiraclWin64\source;..\..\lib\NTL\windows\include;C:\MaliciousYaoProject\libscapi\lib\BLAKE2\sse;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_SCL_SECURE_NO_WARNINGS;_WIN32_WINNT=0x06030000;__WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -136,8 +136,12 @@
     <ClCompile Include="..\..\src\interactive_mid_protocols\CommitmentSchemePedersen.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\CommitmentSchemePedersenHash.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\CommitmentSchemeSimpleHash.cpp" />
+    <ClCompile Include="..\..\src\interactive_mid_protocols\OT.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\OTExtensionBristol.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\OTExtensionMalicious.cpp" />
+    <ClCompile Include="..\..\src\interactive_mid_protocols\OTOneSidedSimulation.cpp" />
+    <ClCompile Include="..\..\src\interactive_mid_protocols\OTPrivacyOnly.cpp" />
+    <ClCompile Include="..\..\src\interactive_mid_protocols\OTSemiHonest.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\OTSemiHonestExtension.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocol.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\SigmaProtocolAnd.cpp" />
@@ -165,6 +169,7 @@
     <ClCompile Include="..\..\src\primitives\Dlog.cpp" />
     <ClCompile Include="..\..\src\primitives\DlogCryptopp.cpp" />
     <ClCompile Include="..\..\src\primitives\DlogOpenSSL.cpp" />
+    <ClCompile Include="..\..\src\primitives\HashBlake2.cpp" />
     <ClCompile Include="..\..\src\primitives\HashOpenSSL.cpp" />
     <ClCompile Include="..\..\src\primitives\Kdf.cpp" />
     <ClCompile Include="..\..\src\primitives\prf.cpp" />
@@ -203,7 +208,6 @@
     <ClInclude Include="..\..\include\infra\File.hpp" />
     <ClInclude Include="..\..\include\infra\Log.hpp" />
     <ClInclude Include="..\..\include\infra\MathAlgorithms.hpp" />
-    <ClInclude Include="..\..\include\infra\NTLWrapper.hpp" />
     <ClInclude Include="..\..\include\infra\Scanner.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentScheme.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentSchemeElGamal.hpp" />
@@ -213,9 +217,14 @@
     <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentSchemePedersenHash.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentSchemePedersenTrapdoor.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentSchemeSimpleHash.hpp" />
+    <ClInclude Include="..\..\include\interactive_mid_protocols\OT.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\OTBatch.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\OTExtensionBristol.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\OTExtensionMalicious.hpp" />
+    <ClInclude Include="..\..\include\interactive_mid_protocols\OTFullSimulation.hpp" />
+    <ClInclude Include="..\..\include\interactive_mid_protocols\OTOneSidedSimulation.hpp" />
+    <ClInclude Include="..\..\include\interactive_mid_protocols\OTPrivacyOnly.hpp" />
+    <ClInclude Include="..\..\include\interactive_mid_protocols\OTSemiHonest.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolCramerShoupEncryptedValue.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolDamgardJurikEncryptedValue.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\SigmaProtocolDamgardJurikEncryptedZero.hpp" />
@@ -247,6 +256,7 @@
     <ClInclude Include="..\..\include\primitives\Dlog.hpp" />
     <ClInclude Include="..\..\include\primitives\DlogOpenSSL.hpp" />
     <ClInclude Include="..\..\include\primitives\Hash.hpp" />
+    <ClInclude Include="..\..\include\primitives\HashBlake2.hpp" />
     <ClInclude Include="..\..\include\primitives\HashOpenSSL.hpp" />
     <ClInclude Include="..\..\include\primitives\Kdf.hpp" />
     <ClInclude Include="..\..\include\primitives\mac.hpp" />

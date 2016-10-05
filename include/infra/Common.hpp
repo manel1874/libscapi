@@ -144,6 +144,14 @@ biginteger convert_hex_to_biginteger(const string & hex);
 * Returns a random biginteger uniformly distributed in [min, max]
 */
 biginteger getRandomInRange(biginteger min, biginteger max, std::mt19937 & random);
+
+class PrgFromOpenSSLAES;
+
+/*
+* Returns a random biginteger uniformly distributed in [min, max]
+*/
+biginteger getRandomInRange(biginteger min, biginteger max, PrgFromOpenSSLAES* random);
+
 /*
 * Returns a random prime number with the given number of bytes.
 */

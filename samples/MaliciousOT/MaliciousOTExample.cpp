@@ -115,7 +115,7 @@ void mainS() {
 }
 
 
-int mainOT(string party) {
+int mainOTMalicious(string party) {
 
 	cout << "argv[2] = " << party << endl;
 	if (party == "1") {

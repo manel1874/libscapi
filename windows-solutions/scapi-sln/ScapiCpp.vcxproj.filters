@@ -255,6 +255,21 @@
     <ClCompile Include="..\..\src\mid_layer\BiLinearMaps.cpp">
       <Filter>Source Files\mid_layer</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\interactive_mid_protocols\OTSemiHonest.cpp">
+      <Filter>Source Files\InteractiveMidProtocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\interactive_mid_protocols\OT.cpp">
+      <Filter>Source Files\InteractiveMidProtocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\interactive_mid_protocols\OTPrivacyOnly.cpp">
+      <Filter>Source Files\InteractiveMidProtocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\interactive_mid_protocols\OTOneSidedSimulation.cpp">
+      <Filter>Source Files\InteractiveMidProtocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\primitives\HashBlake2.cpp">
+      <Filter>Source Files\primitives</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\circuits\BooleanCircuits.hpp">
@@ -491,14 +506,29 @@
     <ClInclude Include="..\..\include\mid_layer\Paillier.hpp">
       <Filter>Header Files\MidLayer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\infra\NTLWrapper.hpp">
-      <Filter>Header Files\infra</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\interactive_mid_protocols\OTExtensionBristol.hpp">
       <Filter>Header Files\InteractiveMidProtocols</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\mid_layer\BiLinearMaps.hpp">
       <Filter>Header Files\MidLayer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\interactive_mid_protocols\OTSemiHonest.hpp">
+      <Filter>Header Files\InteractiveMidProtocols</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\interactive_mid_protocols\OT.hpp">
+      <Filter>Header Files\InteractiveMidProtocols</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\interactive_mid_protocols\OTPrivacyOnly.hpp">
+      <Filter>Header Files\InteractiveMidProtocols</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\interactive_mid_protocols\OTOneSidedSimulation.hpp">
+      <Filter>Header Files\InteractiveMidProtocols</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\interactive_mid_protocols\OTFullSimulation.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\primitives\HashBlake2.hpp">
+      <Filter>Header Files\Primitives</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

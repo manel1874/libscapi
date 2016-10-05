@@ -37,8 +37,8 @@
     <Filter Include="Source Files\OTExtensionBristol">
       <UniqueIdentifier>{85b4572b-ec74-4456-9210-51e8876b92ea}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\SetIntersection">
-      <UniqueIdentifier>{eedddefe-6ae5-4693-9b04-9a832661b9ba}</UniqueIdentifier>
+    <Filter Include="Source Files\OT">
+      <UniqueIdentifier>{e0eaf65e-d403-4d1f-9f12-493bd52e4406}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -75,17 +75,8 @@
     <ClCompile Include="..\..\samples\OTExtensionBristol\OTExtensionBristolExample.cpp">
       <Filter>Source Files\OTExtensionBristol</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\samples\PrivateSetIntersection\OSPSIServer.cpp">
-      <Filter>Source Files\SetIntersection</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\samples\PrivateSetIntersection\OSPSIParty.cpp">
-      <Filter>Source Files\SetIntersection</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\samples\PrivateSetIntersection\ospsi_main.cpp">
-      <Filter>Source Files\SetIntersection</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\samples\PrivateSetIntersection\unity.cpp">
-      <Filter>Source Files\SetIntersection</Filter>
+    <ClCompile Include="..\..\samples\OT\OTExample.cpp">
+      <Filter>Source Files\OT</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -101,11 +92,8 @@
     <ClInclude Include="..\..\samples\Commitment\CommitmentExample.hpp">
       <Filter>Source Files\Commitment</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\samples\PrivateSetIntersection\OSPSIServer.hpp">
-      <Filter>Source Files\SetIntersection</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\samples\PrivateSetIntersection\OSPSIParty.hpp">
-      <Filter>Source Files\SetIntersection</Filter>
+    <ClInclude Include="..\..\samples\OT\OTExample.h">
+      <Filter>Source Files\OT</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -6,7 +6,7 @@
     <LocalDebuggerCommand>$(TargetPath)</LocalDebuggerCommand>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LocalDebuggerCommandArguments>ospsi \code\libscapi\samples\PrivateSetIntersection\input1.txt \code\libscapi\samples\PrivateSetIntersection\input2.txt</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>ot 1 C:\MaliciousYaoProject\libscapi\samples\OT\OTConfig.txt</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>
