@@ -1,0 +1,9 @@
+senderIp      = 127.0.0.1
+receiverIp    = 127.0.0.1
+senderPort    = 1222
+receiverPort  = 1223
+#protocolName = SemiHonestOnGroupElement
+#protocolName = SemiHonestOnByteArray
+#protocolName = PrivacyOnlyOnGroupElement
+#protocolName = PrivacyOnlyOnByteArray
+protocolName = OneSidedSimulationOnGroupElement
