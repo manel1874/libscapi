@@ -34,6 +34,7 @@
 #include "../include/primitives/Dlog.hpp"
 #include "../include/primitives/DlogOpenSSL.hpp"
 #include "../include/primitives/HashOpenSSL.hpp"
+#include "../include/primitives/HashBlake2.hpp"
 #include "../include/primitives/PrfOpenSSL.hpp"
 #include "../include/primitives/TrapdoorPermutationOpenSSL.hpp"
 #include "../include/primitives/Prg.hpp"
@@ -415,10 +416,8 @@ TEST_CASE("DlogGroup", "[Dlog, DlogGroup, CryptoPpDlogZpSafePrime]")
 	}
 }
 
-template<typename T>
-void test_hash(string in, string expect)
+void test_hash(CryptographicHash * hash, string in, string expect)
 {
-	CryptographicHash * hash = new T();
 	const char *cstr = in.c_str();
 	int len = in.size();
 	vector<byte> vec(cstr, cstr + len);
@@ -432,18 +431,51 @@ void test_hash(string in, string expect)
 	CAPTURE(expect.size());
 	CAPTURE(hash->getHashedMsgSize());
 	REQUIRE(actual == expect);
-	delete hash;
 }
 
-TEST_CASE("Hash", "[HASH, SHA1]")
+TEST_CASE("HashOpenSSL", "[HASH, SHA1]")
 {
 	SECTION("Testing OpenSSL SHA1") {
 		string input_msg = "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq";
-		test_hash<OpenSSLSHA1>(input_msg, "84983e441c3bd26ebaae4aa1f95129e5e54670f1");
-		test_hash<OpenSSLSHA224>(input_msg, "75388b16512776cc5dba5da1fd890150b0c6455cb4f58b1952522525");
-		test_hash<OpenSSLSHA256>(input_msg, "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1");
-		test_hash<OpenSSLSHA384>(input_msg, "3391fdddfc8dc7393707a65b1b4709397cf8b1d162af05abfe8f450de5f36bc6b0455a8520bc4e6f5fe95b1fe3c8452b");
-		test_hash<OpenSSLSHA512>(input_msg, "204a8fc6dda82f0a0ced7beb8e08a41657c16ef468b228a8279be331a703c33596fd15c13b1b07f9aa1d3bea57789ca031ad85c7a71dd70354ec631238ca3445");
+		CryptographicHash * hash = new OpenSSLSHA1();
+		test_hash(hash, input_msg, "84983e441c3bd26ebaae4aa1f95129e5e54670f1");
+		delete hash;
+		hash = new OpenSSLSHA224();
+		test_hash(hash, input_msg, "75388b16512776cc5dba5da1fd890150b0c6455cb4f58b1952522525");
+		delete hash;
+		hash = new OpenSSLSHA256();
+		test_hash(hash, input_msg, "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1");
+		delete hash;
+		hash = new OpenSSLSHA384();
+		test_hash(hash, input_msg, "3391fdddfc8dc7393707a65b1b4709397cf8b1d162af05abfe8f450de5f36bc6b0455a8520bc4e6f5fe95b1fe3c8452b");
+		delete hash;
+		hash = new OpenSSLSHA512();
+		test_hash(hash, input_msg, "204a8fc6dda82f0a0ced7beb8e08a41657c16ef468b228a8279be331a703c33596fd15c13b1b07f9aa1d3bea57789ca031ad85c7a71dd70354ec631238ca3445");
+		delete hash;
+
+
+	}
+}
+
+TEST_CASE("HashBlake2", "")
+{
+	SECTION("Testing OpenSSL SHA1") {
+		string input_msg = "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq";
+		CryptographicHash * hash = new Blake2Hash(20);
+		test_hash(hash, input_msg, "4fc6d7704103fc8aca4690f70432c8d35acfb833");
+		delete hash;
+		hash = new Blake2Hash(28);
+		test_hash(hash, input_msg, "2634ceb48faf94cd6a424287aab968ce3fef39ee5d841760aa5b3164");
+		delete hash;
+		hash = new Blake2Hash(32);
+		test_hash(hash, input_msg, "5f7a93da9c5621583f22e49e8e91a40cbba37536622235a380f434b9f68e49c4");
+		delete hash;
+		hash = new Blake2Hash(48);
+		test_hash(hash, input_msg, "5643daabfc919190d373a3d58935804d731b58812f30184f98793f7321d0cb34bb41b217fabce6bdf28ca6be1c923b81");
+		delete hash;
+		hash = new Blake2Hash(64);
+		test_hash(hash, input_msg, "7285ff3e8bd768d69be62b3bf18765a325917fa9744ac2f582a20850bc2b1141ed1b3e4528595acc90772bdf2d37dc8a47130b44f33a02e8730e5ad8e166e888");
+		delete hash;
 	}
 }
 
