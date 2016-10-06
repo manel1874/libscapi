@@ -26,7 +26,3 @@
 - cd ~/libscapi/test
 - make
 - ./tests.exe
-
-### Docker Image
-
-### Windows 7/8/10
