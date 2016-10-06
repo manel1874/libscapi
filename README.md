@@ -15,13 +15,13 @@ libscapi is the C++ high performance version of scapi (Secure Multiparty Computa
 - __Communication Channel__: To be elaborated
 
 - ## License information
-Libscapi is released under the MIT open source license. However, some of the libraries we use have different licenses. For further information pleare refer to [LICENSE.MD](LICENSE.MD)
+Libscapi is released under the MIT open source license. However, some of the libraries we use have different licenses. For further information pleare refer to [build-scripts/LICENSE.MD](LICENSE.MD)
 
 ##Installing libscapi
 
 Libscapi has is tested on Ubuntu 14.04 and should run on all major versions of Linux. It also executes on Windows 8.1/10 but with performance limitations. Internally we use the Windows option for development only. All tests execute on Linux.
 Mac OSX has not been tested so far. 
-For detailed instructions, see [INSTALL.MD](INSTALL.MD)
+For detailed instructions, see [build-scripts/INSTALL.MD](INSTALL.MD)
 
 ## Libraries used by libscapi
 
