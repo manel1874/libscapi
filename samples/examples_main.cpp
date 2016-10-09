@@ -79,8 +79,8 @@ int main(int argc, char* argv[]) {
 		return mainSigma(argv[2], argv[3]);
 	if (exampleName == "commitment")
 		return mainCommitment(argv[2], argv[3]);
-	if (exampleName == "ot")
-		return mainOT(argv[2], argv[3]);
+	//if (exampleName == "ot")
+		//return mainOT(argv[2], argv[3]);
 
 	
 	

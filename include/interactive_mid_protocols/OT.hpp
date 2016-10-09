@@ -186,7 +186,7 @@ public:
 */
 class OTOnByteArrayROutput : public OTROutput, public OTBatchROutput {
 
-private:
+protected:
 	vector<byte> xSigma;
 
 public:
@@ -195,6 +195,7 @@ public:
 	* @param xSigma outputed from the protocol.
 	*/
 	OTOnByteArrayROutput(vector<byte> & xSigma) : xSigma(xSigma) {}
+	OTOnByteArrayROutput(){}
 
 	/**
 	* Return the output array of the protocol.

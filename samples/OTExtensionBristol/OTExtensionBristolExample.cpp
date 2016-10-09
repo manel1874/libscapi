@@ -77,7 +77,7 @@ int mainBristol(string partyNum) {
 
 */
 
-    if (my_num == 0) {
+   /* if (my_num == 0) {
     	boost::asio::io_service io_service;
 		SocketPartyData me(IpAdress::from_string("127.0.0.1"), 1212);
 		SocketPartyData other(IpAdress::from_string("127.0.0.1"), 1213);
@@ -155,6 +155,120 @@ int mainBristol(string partyNum) {
 
 
 	}
+    */
+
+    if (my_num == 0) {
+        	boost::asio::io_service io_service;
+    		SocketPartyData me(IpAdress::from_string("127.0.0.1"), 1212);
+    		SocketPartyData other(IpAdress::from_string("127.0.0.1"), 1213);
+    		shared_ptr<CommParty> channel = make_shared<CommPartyTCPSynced>(io_service, me, other);
+
+    		// connect to party one
+    		channel->join(500, 5000);
+
+
+    		cout<<"nOTS: "<< nOTs<<endl;
+    		OTExtensionBristolSender sender(12001,true,channel);
+
+    		//BitMatrix x0(nOTs);
+    		//BitMatrix x1(nOTs);
+
+    		//for(int i=0; i<nOTs; i++){
+    		//	x1.squares[i/128].rows[i % 128] = _mm_set_epi32(1,1,1,1);
+    		//}
+
+
+    		vector<byte> delta;
+    		delta.resize(nOTs*16);
+    		for(size_t i=0; i<delta.size();i++)
+    			delta[i] = 1;
+
+
+    		OTBatchSInput * input = new OTExtensionCorrelatedSInput(delta, nOTs);
+    		auto start = scapi_now();
+    		auto output = sender.transfer(input);
+    		 print_elapsed_ms(start, "Transfer for correlated");
+
+
+
+    		 vector<byte> outputbytes = ((OTExtensionCorrelatedSOutput *)output.get())->getx0Arr();
+
+			cout<<"the size is :" <<outputbytes.size() <<" x0Arr " <<endl;
+			for(int i=0; i<100; i++){
+
+				if ((i%16)==0){
+									cout<<endl;
+								}
+				cout<< (int)outputbytes[i]<<"--";
+
+
+			}
+
+			outputbytes = ((OTExtensionCorrelatedSOutput *)output.get())->getx1Arr();
+
+			cout<<"\n" <<"the size is :" <<outputbytes.size() <<" x1Arr " <<endl;
+			for(int i=0; i<100; i++){
+
+				if (i%16==0){
+								 	cout<<endl;
+								}
+				cout<< (int)outputbytes[i]<<"--";
+
+
+			}
+
+
+
+            }
+    	else {
+    		boost::asio::io_service io_service;
+    		SocketPartyData me(IpAdress::from_string("127.0.0.1"), 1213);
+    		SocketPartyData other(IpAdress::from_string("127.0.0.1"), 1212);
+    		//SocketPartyData receiverParty(yao_config.receiver_ip, 7766);
+    		//CommParty * channel = new CommPartyTCPSynced(io_service, me, other);
+
+    		shared_ptr<CommParty> channel = make_shared<CommPartyTCPSynced>(io_service, me, other);
+
+    		// connect to party one
+    		channel->join(500, 5000);
+
+    		OTExtensionBristolReciever reciever("localhost", 12001,true,channel);
+
+    		vector<byte> sigma;
+    		sigma.resize(nOTs);
+    		sigma[0] = 1;
+    		sigma[1] = 1;
+    		sigma[2] = 0;
+
+
+    		int elementSize = 128;
+    		OTBatchRInput * input = new OTExtensionCorrelatedRInput(sigma, elementSize);
+
+
+            auto start = scapi_now();
+    		auto output = reciever.transfer(input);
+    		 print_elapsed_ms(start, "Transfer for correlated");
+
+
+    		vector<byte> outputbytes = ((OTOnByteArrayROutput *)output.get())->getXSigma();
+
+    		cout<<"the size is :" <<outputbytes.size()<<endl;
+    		for(int i=0; i<100; i++){
+
+    			if (i%16==0){
+    			    				cout<<endl;
+    			    			}
+    			cout<< (int)outputbytes[i]<<"--";
+
+    		}
+
+    		cout<<endl;
+
+
+
+    	}
+
+
 
     /*
     int size = 1280000;
