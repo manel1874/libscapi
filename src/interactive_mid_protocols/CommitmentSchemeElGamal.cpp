@@ -459,9 +459,9 @@ void CmtElGamalWithProofsReceiver::doConstruct(int t) {
 bool CmtElGamalWithProofsReceiver::verifyKnowledge(long id) {
 	auto key = static_pointer_cast<ElGamalPublicKey>(getPreProcessedValues()[0]);
 	SigmaElGamalCmtKnowledgeCommonInput input(*key);
-	SigmaGroupElementMsg emptyA(dlog->getGenerator()->generateSendableData());
-	SigmaBIMsg emptyZ;
-	return knowledgeVerifier->verify(&input, &emptyA, &emptyZ);
+	auto emptyA = make_shared<SigmaGroupElementMsg>(dlog->getGenerator()->generateSendableData());
+	auto emptyZ = make_shared<SigmaBIMsg>();
+	return knowledgeVerifier->verify(&input, emptyA, emptyZ);
 }
 
 shared_ptr<CmtCommitValue> CmtElGamalWithProofsReceiver::verifyCommittedValue(long id) {
@@ -480,9 +480,9 @@ shared_ptr<CmtCommitValue> CmtElGamalWithProofsReceiver::verifyCommittedValue(lo
 	SigmaElGamalCommittedValueCommonInput input(key, commitment, committedVal);
 	//Computes the verification.
 
-	SigmaDHMsg emptyA(dlog->getGenerator()->generateSendableData(), dlog->getGenerator()->generateSendableData());
-	SigmaBIMsg emptyZ;
-	bool verified = committedValVerifier->verify(&input, &emptyA, &emptyZ);
+	auto emptyA = make_shared<SigmaDHMsg>(dlog->getGenerator()->generateSendableData(), dlog->getGenerator()->generateSendableData());
+	auto emptyZ = make_shared<SigmaBIMsg>();
+	bool verified = committedValVerifier->verify(&input, emptyA, emptyZ);
 	if (verified) 
 		return make_shared<CmtGroupElementCommitValue>(committedVal);
 	return NULL;

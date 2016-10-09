@@ -293,9 +293,9 @@ bool CmtPedersenWithProofsReceiver::verifyKnowledge(long id) {
 	auto commitment = static_pointer_cast<GroupElement>(commitmentVal);
 	SigmaPedersenCmtKnowledgeCommonInput input(h, commitment);
 
-	SigmaGroupElementMsg emptyA(dlog->getGenerator()->generateSendableData());
-	SigmaPedersenCmtKnowledgeMsg emptyZ(0,0);
-	return knowledgeVerifier->verify(&input, &emptyA, &emptyZ);
+	auto emptyA = make_shared<SigmaGroupElementMsg>(dlog->getGenerator()->generateSendableData());
+	auto emptyZ = make_shared<SigmaPedersenCmtKnowledgeMsg>(0,0);
+	return knowledgeVerifier->verify(&input, emptyA, emptyZ);
 }
 
 shared_ptr<CmtCommitValue> CmtPedersenWithProofsReceiver::verifyCommittedValue(long id) {
@@ -313,9 +313,9 @@ shared_ptr<CmtCommitValue> CmtPedersenWithProofsReceiver::verifyCommittedValue(l
 	auto commitment = static_pointer_cast<GroupElement>(commitmentVal);
 	SigmaPedersenCommittedValueCommonInput input(h, commitment, x);
 	
-	SigmaGroupElementMsg emptyA(dlog->getGenerator()->generateSendableData());
-	SigmaBIMsg emptyZ;
-	bool verified = committedValVerifier->verify(&input, &emptyA, &emptyZ);
+	auto emptyA = make_shared<SigmaGroupElementMsg>(dlog->getGenerator()->generateSendableData());
+	auto emptyZ = make_shared<SigmaBIMsg>();
+	bool verified = committedValVerifier->verify(&input, emptyA, emptyZ);
 	if (verified)
 		return make_shared<CmtBigIntegerCommitValue>(make_shared<biginteger>(x));
 	return NULL;

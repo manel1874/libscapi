@@ -147,7 +147,7 @@ public:
 		auto committer = make_shared<CmtPedersenCommitter>(server, dg);
 		auto v = new ZKFromSigmaVerifier(server, verifierComputation, committer);
 		cout << "--> running ZK verify" << endl;
-		bool verificationPassed = v->verify(commonInput.get(), msgA.get(), msgZ.get());
+		bool verificationPassed = v->verify(commonInput.get(), msgA, msgZ);
 		delete v;
 		return verificationPassed;
 	}
@@ -172,7 +172,34 @@ public:
 		auto emptyTrap = make_shared<CmtRTrapdoorCommitPhaseOutput>();
 		auto v = new ZKPOKFromSigmaCmtPedersenVerifier(server, verifierComputation, emptyTrap, dg);
 		cout << "--> running pedersen verify" << endl;
-		bool verificationPassed = v->verify(commonInput.get(), msgA.get(), msgZ.get());
+		bool verificationPassed = v->verify(commonInput.get(), msgA, msgZ);
+		delete v;
+		return verificationPassed;
+	}
+};
+
+class ZKPOKFiatShamir : public ProverVerifierExample {
+public:
+	virtual void prove(shared_ptr<CommParty> server,
+		shared_ptr<SigmaDlogProverComputation> proverComputation,
+		shared_ptr<DlogGroup> dg,
+		shared_ptr<SigmaDlogProverInput> proverinput) {
+		auto sp = new ZKPOKFiatShamirFromSigmaProver(server, proverComputation);
+		cout << "--> running Fiat Shamir prover" << endl;
+		auto input = make_shared<ZKPOKFiatShamirProverInput>(proverinput);
+		sp->prove(input);
+	}
+	virtual bool verify(shared_ptr<CommParty> server,
+		shared_ptr<SigmaDlogVerifierComputation> verifierComputation,
+		shared_ptr<SigmaGroupElementMsg> msgA,
+		shared_ptr<SigmaBIMsg> msgZ,
+		shared_ptr<SigmaDlogCommonInput> commonInput,
+		shared_ptr<DlogGroup> dg) override {
+		auto emptyTrap = make_shared<CmtRTrapdoorCommitPhaseOutput>();
+		auto v = new ZKPOKFiatShamirFromSigmaVerifier(server, verifierComputation);
+		cout << "--> running Fiat Shamir verify" << endl;
+		auto input = make_shared<ZKPOKFiatShamirCommonInput>(commonInput.get());
+		bool verificationPassed = v->verify(input.get(), msgA, msgZ);
 		delete v;
 		return verificationPassed;
 	}
@@ -188,6 +215,7 @@ shared_ptr<ProverVerifierExample> getProverVerifier(SigmaDlogParams sdp)
 		sds = make_shared<ZKFromSigma>();
 	else if(sdp.protocolName=="ZKPedersen")
 		sds = make_shared<PedersenZKSigma>();
-
+	else if (sdp.protocolName == "ZKFiatShamir")
+		sds = make_shared<ZKPOKFiatShamir>();
 	return sds;
 }
