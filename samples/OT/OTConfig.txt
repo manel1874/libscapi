@@ -10,4 +10,5 @@ receiverPort  = 1223
 #protocolName = OneSidedSimulationOnByteArray
 #protocolName = FullSimulationOnGroupElement
 #protocolName = FullSimulationOnByteArray
-protocolName = FullSimulationROMOnGroupElement
+#protocolName = FullSimulationROMOnGroupElement
+protocolName = FullSimulationROMOnByteArray

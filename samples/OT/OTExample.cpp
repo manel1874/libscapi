@@ -37,6 +37,8 @@ shared_ptr<OTSender> getSender(const shared_ptr<CommParty> & channel, const shar
 		sender = make_shared<OTFullSimDDHOnByteArraySender>(channel, random, dlog);
 	} else if (sdp.protocolName == "FullSimulationROMOnGroupElement") {
 		sender = make_shared<OTFullSimROMDDHOnGroupElementSender>(channel, random, dlog);
+	} else if (sdp.protocolName == "FullSimulationROMOnByteArray") {
+		sender = make_shared<OTFullSimROMDDHOnByteArraySender>(channel, random, dlog);
 	}
 
 	return sender;
@@ -62,6 +64,8 @@ shared_ptr<OTReceiver> getReceiver(const shared_ptr<CommParty> & channel, const 
 		receiver = make_shared<OTFullSimDDHOnByteArrayReceiver>(channel, random, dlog);
 	} else if (sdp.protocolName == "FullSimulationROMOnGroupElement") {
 		receiver = make_shared<OTFullSimROMDDHOnGroupElementReceiver>(channel, random, dlog);
+	} else if (sdp.protocolName == "FullSimulationROMOnByteArray") {
+		receiver = make_shared<OTFullSimROMDDHOnByteArrayReceiver>(channel, random, dlog);
 	}
 
 	return receiver;
@@ -77,7 +81,7 @@ shared_ptr<OTSInput> getInput(DlogGroup* dlog, OTParams params) {
 		cout << "X1 = " << x1->generateSendableData()->toString() << endl;
 		return make_shared<OTOnGroupElementSInput>(x0, x1);
 	} else if (params.protocolName == "SemiHonestOnByteArray" || params.protocolName == "PrivacyOnlyOnByteArray" || params.protocolName == "OneSidedSimulationOnByteArray"
-		|| params.protocolName == "FullSimulationOnByteArray") {
+		|| params.protocolName == "FullSimulationOnByteArray" || params.protocolName == "FullSimulationROMOnByteArray") {
 		vector<byte> x0(10, '0'), x1(10, '1');
 		cout << "x0 = " << endl;
 		for (int i = 0; i < x0.size(); i++)
@@ -97,7 +101,7 @@ void printOutput(OTROutput* output, OTParams params) {
 		auto out = (OTOnGroupElementROutput*)output;
 		cout << "output = " << out->getXSigma()->generateSendableData()->toString() << endl;
 	} else if (params.protocolName == "SemiHonestOnByteArray" || params.protocolName == "PrivacyOnlyOnByteArray" || params.protocolName == "OneSidedSimulationOnByteArray"
-		|| params.protocolName == "FullSimulationOnByteArray") {
+		|| params.protocolName == "FullSimulationOnByteArray" || params.protocolName == "FullSimulationROMOnByteArray") {
 		auto out = ((OTOnByteArrayROutput*)output)->getXSigma();
 		cout << "output = " << endl;
 		for (int i = 0; i < out.size(); i++)
