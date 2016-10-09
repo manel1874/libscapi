@@ -222,12 +222,9 @@ biginteger getRandomInRange(biginteger min, biginteger max, std::mt19937 & rando
 }
 
 biginteger getRandomInRange(biginteger min, biginteger max, PrgFromOpenSSLAES* random) {
-	int num;
-	do {
-		num = random->getRandom32();
-	} while (num < min || num > max);
-	
-	return (biginteger)num;
+	biginteger num = (biginteger)(random->getRandom32());
+	num = num % (max + 1 - min); // max + 1 because max also can be chosen.
+	return num + min;
 }
 
 biginteger getRandomPrime(int numBytes, int certainty, mt19937 & random) {
