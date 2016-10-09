@@ -68,7 +68,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaDlogSimulator::simulate(SigmaCommonInput* 
 
 	// COMPUTE a = g^z*h^(-e)  (where -e here means -e mod q)
 	auto gToZ = dlog->exponentiate(dlog->getGenerator().get(), z);
-	biginteger e = decodeBigInteger(challenge.data(), challenge.size());
+	biginteger e = abs(decodeBigInteger(challenge.data(), challenge.size()));
 	biginteger minusE = dlog->getOrder() - e;
 	auto hToE = dlog->exponentiate(dlogInput->getH().get(), minusE);
 	auto a = dlog->multiplyGroupElements(gToZ.get(), hToE.get());
@@ -124,7 +124,7 @@ shared_ptr<SigmaProtocolMsg> SigmaDlogProverComputation::computeSecondMsg(vector
 
 	// compute z = (r+ew) mod q
 	biginteger q = dlog->getOrder();
-	biginteger e = decodeBigInteger(challenge.data(), challenge.size());
+	biginteger e = abs(decodeBigInteger(challenge.data(), challenge.size()));
 	biginteger ew = (e * input->getW()) % q;
 	biginteger z = (r + ew) % q;
 
@@ -184,18 +184,19 @@ bool SigmaDlogVerifierComputation::verify(SigmaCommonInput* input,
 	auto h = cInput->getH();
 	// if h is not member in the group, set verified to false.
 	verified = verified && dlog->isMember(h.get());
-
+	
 	// compute g^z (left size of the verify equation).
 	auto left = dlog->exponentiate(dlog->getGenerator().get(), exponent->getMsg());
 	
 	// compute a*h^e (right side of the verify equation).
-	biginteger eBI = decodeBigInteger(e.data(), e.size()); 	// convert e to biginteger.
+	biginteger eBI = abs(decodeBigInteger(e.data(), e.size())); 	// convert e to biginteger.
+	
 	auto hToe = dlog->exponentiate(h.get(), eBI); // calculate h^e.
 	// calculate a*h^e.
 	auto right = dlog->multiplyGroupElements(aElement.get(), hToe.get());
 	// if left and right sides of the equation are not equal, set verified to false.
 	verified = verified && (*left==*right);
-
+	
 	e.clear();  //reset the challenge for re-use.
 
 	// return true if all checks returned true; false, otherwise.
