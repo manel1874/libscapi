@@ -87,10 +87,9 @@ void HKDF::firstRound(vector<byte>& outBytes, const vector<byte> * iv, vector<by
 	vector<byte> v_in;
 	copy_byte_array_to_byte_vector(firstRoundInput, firstRoundSize, v_in, 0);
 	hmac->computeBlock(v_in, 0, firstRoundSize, intermediateOutBytes, 0);
-
+	
 	// copies the results to the output array
-	outBytes = intermediateOutBytes;
-	//outBytes.insert(outBytes.begin(), &intermediateOutBytes[0], &intermediateOutBytes[outLength-1]);
+	outBytes.assign(intermediateOutBytes.begin(), intermediateOutBytes.begin() + outLength);
 }
 
 SecretKey HKDF::deriveKey(const vector<byte> & entropySource, int inOff, int inLen, int outLen, const vector<byte>* iv) {

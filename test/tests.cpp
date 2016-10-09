@@ -514,7 +514,7 @@ TEST_CASE("PRF", "[AES, PRF]")
 	{
 		string key = "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b";
 		char const * plain = "Hi There";
-		string expected_out_hex = "b617318655057264e28bc0b6fb378c8ef146be00";
+		string expected_out_hex = "b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7";
 
 		// create mac and set key
 		auto mac = new OpenSSLHMAC();
