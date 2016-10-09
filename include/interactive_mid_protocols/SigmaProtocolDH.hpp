@@ -57,6 +57,8 @@ public:
 
 	shared_ptr<GroupElement> getV() { return v; }
 
+	string toString() override;
+
 private:
 	shared_ptr<GroupElement> h;
 	shared_ptr<GroupElement> u;

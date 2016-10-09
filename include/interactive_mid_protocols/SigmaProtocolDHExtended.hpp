@@ -64,6 +64,8 @@ public:
 	vector<shared_ptr<GroupElement>> getHArray() {
 		return hArray;
 	}
+
+	string toString() override;
 };
 
 /**

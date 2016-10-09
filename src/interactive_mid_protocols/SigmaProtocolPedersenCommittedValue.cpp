@@ -28,6 +28,16 @@
 
 #include "../../include/interactive_mid_protocols/SigmaProtocolPedersenCommittedValue.hpp"
 
+string SigmaPedersenCommittedValueCommonInput::toString() {
+	string output = string(x);
+	output += ":";
+	output += h->generateSendableData()->toString();
+	output += ":";
+	output += commitment->generateSendableData()->toString();
+	return output;
+
+}
+
 /**
 * Constructor that gets the underlying DlogGroup, soundness parameter and SecureRandom.
 * @param dlog

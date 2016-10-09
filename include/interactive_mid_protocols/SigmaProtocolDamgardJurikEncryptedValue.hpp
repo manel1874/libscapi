@@ -73,6 +73,7 @@ public:
 	*/
 	BigIntegerPlainText getPlaintext() { return plaintext;	}
 
+	string toString() override;
 };
 
 /**

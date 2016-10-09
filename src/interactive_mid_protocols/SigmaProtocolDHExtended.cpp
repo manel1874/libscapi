@@ -29,6 +29,23 @@
 #include "../../include/interactive_mid_protocols/SigmaProtocolDHExtended.hpp"
 
 /**************************************************/
+/**************** Input*** ************************/
+/**************************************************/
+string SigmaDHExtendedCommonInput::toString() {
+
+	string output = "";
+	for (int i = 0; i < gArray.size(); i++) {
+		output += gArray[i]->generateSendableData()->toString();
+		output += ":";
+	}
+	for (int i = 0; i < hArray.size(); i++) {
+		output += gArray[i]->generateSendableData()->toString();
+		output += ":";
+	}
+	return output;
+}
+
+/**************************************************/
 /**************** Messages ************************/
 /**************************************************/
 

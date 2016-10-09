@@ -45,6 +45,9 @@ class SigmaDlogCommonInput : public SigmaCommonInput {
 public:
 	SigmaDlogCommonInput(shared_ptr<GroupElement> h) { this->h = h; };
 	shared_ptr<GroupElement> getH() { return h; };
+
+	string toString() override { return h->generateSendableData()->toString(); }
+
 private:
 	shared_ptr<GroupElement> h;
 };

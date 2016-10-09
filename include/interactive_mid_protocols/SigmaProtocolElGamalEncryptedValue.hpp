@@ -79,6 +79,8 @@ public:
 	* Returns the ciphertext.
 	*/
 	ElGamalOnGroupElementCiphertext getCipher() { return cipher; }
+
+	string toString() override;
 };
 
 /**

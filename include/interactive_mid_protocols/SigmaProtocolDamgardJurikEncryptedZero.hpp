@@ -61,6 +61,8 @@ public:
 	* @return ciphertext which is an encryption on the plaintext.
 	*/
 	BigIntegerCiphertext getCiphertext() { return cipher; }
+
+	string toString() override;
 };
 
 /**

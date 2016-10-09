@@ -28,6 +28,21 @@
 
 #include "../include/interactive_mid_protocols/SigmaProtocolOrMultiple.hpp"
 
+string SigmaOrMultipleCommonInput::toString() {
+	vector<shared_ptr<SigmaCommonInput>> sigmaInputs;
+	int k;
+
+	string output = "";
+	for (int i = 0; i < sigmaInputs.size(); i++) {
+		output += sigmaInputs[i]->toString();
+		output += ":";
+	}
+	output += k;
+	output += ":";
+	return output;
+
+}
+
 shared_ptr<SigmaCommonInput> SigmaOrMultipleProverInput::getCommonInput() {
 	/*
 	*

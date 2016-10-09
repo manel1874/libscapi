@@ -28,6 +28,12 @@
 
 #include "../../include/interactive_mid_protocols/SigmaProtocolDamgardJurikEncryptedZero.hpp"
 
+string SigmaDJEncryptedZeroCommonInput::toString() {
+	string output = publicKey.generateSendableData()->toString();
+	output += ":";
+	output += cipher.generateSendableData()->toString();
+	return output;
+}
 /**
 * Constructor that gets the soundness parameter, length parameter and SecureRandom.
 * @param t Soundness parameter in BITS.

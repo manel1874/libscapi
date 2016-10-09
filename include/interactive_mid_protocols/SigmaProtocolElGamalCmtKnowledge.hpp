@@ -55,6 +55,8 @@ public:
 	* @return the public key used for commit.
 	*/
 	ElGamalPublicKey getPublicKey() { return publicKey; }
+
+	string toString() override { return publicKey.generateSendableData()->toString(); }
 };
 
 /**

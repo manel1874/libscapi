@@ -28,6 +28,14 @@
 
 #include "../../include/interactive_mid_protocols/SigmaProtocolDamgardJurikEncryptedValue.hpp"
 
+string SigmaDJEncryptedValueCommonInput::toString() {
+	string output = publicKey.generateSendableData()->toString();
+	output += ":";
+	output += cipher.generateSendableData()->toString();
+	output += ":";
+	output += plaintext.generateSendableData()->toString();
+	return output;
+}
 /**
 * Sets the given public key, ciphertext, plaintext and random value used to encrypt.
 * @param publicKey used to encrypt.

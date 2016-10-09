@@ -76,6 +76,8 @@ public:
 	* @return the third ciphertext.
 	*/
 	BigIntegerCiphertext getC3() { return cipher3;}
+
+	string toString() override;
 };
 
 /**

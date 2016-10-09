@@ -65,6 +65,8 @@ public:
 	*/
 	int getK() { return k; };
 
+	string toString() override;
+
 private:
 	vector<shared_ptr<SigmaCommonInput>> sigmaInputs;
 	int k; //number of statements that have a witness.

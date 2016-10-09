@@ -73,6 +73,8 @@ public:
 	* Returns the public key used to commit.
 	*/
 	shared_ptr<ElGamalPublicKey> getPublicKey() { return publicKey;	}
+
+	string toString() override;
 };
 
 /**

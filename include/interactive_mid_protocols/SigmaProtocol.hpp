@@ -55,7 +55,11 @@ public:
 * Each Sigma Protocol has a common input for the prover and the verifier, 
 * such input should implement this interface.
 */
-class SigmaCommonInput : public ZKCommonInput {};
+class SigmaCommonInput : public ZKCommonInput {
+public:
+	virtual string toString() = 0;
+};
+
 /**
 * Every Sigma protocol prover needs inputs during the protocol execution, but every concrete
 * prover needs different inputs.<p>
@@ -450,6 +454,8 @@ public:
 	* Returns the input array contains inputs for all the underlying sigma protocol.
 	*/
 	vector<shared_ptr<SigmaCommonInput>> getInputs() { return sigmaInputs; };
+
+	string toString() override;
 
 private:
 	vector<shared_ptr<SigmaCommonInput>> sigmaInputs;

@@ -70,6 +70,8 @@ public:
 	* Returns the ciphertext.
 	*/
 	CramerShoupOnGroupElementCiphertext getCipher() { return cipher; }
+
+	string toString() override;
 };
 
 /**

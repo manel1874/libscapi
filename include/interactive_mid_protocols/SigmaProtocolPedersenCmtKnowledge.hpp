@@ -70,6 +70,8 @@ public:
 	* @return the actual commitment value.
 	*/
 	 shared_ptr<GroupElement> getCommitment() {	return commitment; }
+
+	 string toString() override;
 };
 
 /**

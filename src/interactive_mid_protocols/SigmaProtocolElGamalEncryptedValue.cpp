@@ -41,6 +41,17 @@ SigmaElGamalEncryptedValueCommonInput::SigmaElGamalEncryptedValueCommonInput(boo
 	this->x = x;
 }
 
+string SigmaElGamalEncryptedValueCommonInput::toString() {
+	string output = isRandom? "1" : "0";
+	output += ":";
+	output += x->generateSendableData()->toString();
+	output += ":";
+	output += publicKey.generateSendableData()->toString();
+	output += ":";
+	output += cipher.generateSendableData()->toString();
+	return output;
+}
+
 /**
 * Sets the given ciphertext, public key, encrypted value and private key.
 * @param isRandomness represents if the encryption was done by private key knowledge or by a randomness knowledge.

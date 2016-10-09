@@ -28,6 +28,17 @@
 
 #include "../../include/interactive_mid_protocols/SigmaProtocolDH.hpp"
 
+
+string SigmaDHCommonInput::toString(){
+	string output = h->generateSendableData()->toString();
+	output += ":";
+	output += u->generateSendableData()->toString();
+	output += ":";
+	output += v->generateSendableData()->toString();
+	output += ":";
+	return output;
+}
+
 void SigmaDHMsg::initFromString(const string & s) {
 	auto str_vec = explode(s, ':');
 	assert(str_vec.size() == 2 || str_vec.size() == 4);

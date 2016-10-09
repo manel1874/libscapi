@@ -39,6 +39,16 @@ SigmaCramerShoupEncryptedValueCommonInput::SigmaCramerShoupEncryptedValueCommonI
 	this->x = x;
 }
 
+string SigmaCramerShoupEncryptedValueCommonInput::toString() {
+	string output = x->generateSendableData()->toString();
+	output += ":";
+	output += publicKey.generateSendableData()->toString();
+	output += ":";
+	output += cipher.generateSendableData()->toString();
+	output += ":";
+	return output;
+}
+
 /**
 * Sets the ciphertext, public key, the encrypted element and the random value used to encrypt x.
 * @param cipher ciphertext the output of the encryption scheme on the encrypted element.

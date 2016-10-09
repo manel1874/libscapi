@@ -28,6 +28,14 @@
 
 #include "../../include/interactive_mid_protocols/SigmaProtocolElGamalCommittedValue.hpp"
 
+string SigmaElGamalCommittedValueCommonInput::toString() {
+	string output = publicKey->generateSendableData()->toString();
+	output += ":";
+	output += commitment->toString();
+	output += ":";
+	output += x->generateSendableData()->toString();
+	return output;
+}
 /**
 * Converts the input to an input object for the underlying simulator.
 * @param in

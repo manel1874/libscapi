@@ -28,6 +28,18 @@
 
 #include "../../include/interactive_mid_protocols/SigmaProtocolDamgardJurikProduct.hpp"
 
+
+string SigmaDJProductCommonInput::toString() {
+	string output = publicKey.generateSendableData()->toString();
+	output += ":";
+	output += cipher1.generateSendableData()->toString();
+	output += ":";
+	output += cipher2.generateSendableData()->toString();
+	output += ":";
+	output += cipher3.generateSendableData()->toString();
+	return output;
+}
+
 /**
 * Sets the given public key, three ciphertexts, three random values, and two plaintexts.
 * @param publicKey used to encrypt.

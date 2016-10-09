@@ -28,6 +28,14 @@
 
 #include "../../include/interactive_mid_protocols/SigmaProtocolPedersenCmtKnowledge.hpp"
 
+string SigmaPedersenCmtKnowledgeCommonInput::toString() {
+	string output = h->generateSendableData()->toString();
+	output += ":";
+	output += commitment->generateSendableData()->toString();
+	return output;
+
+}
+
 void SigmaPedersenCmtKnowledgeMsg::initFromString(const string & s) {
 	auto str_vec = explode(s, ':');
 	assert(str_vec.size() == 2);

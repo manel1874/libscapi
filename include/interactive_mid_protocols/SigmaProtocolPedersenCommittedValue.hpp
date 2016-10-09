@@ -78,6 +78,7 @@ public:
 	*/
 	shared_ptr<GroupElement> getCommitment() { return commitment; }
 
+	string toString() override;
 };
 
 /**
