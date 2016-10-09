@@ -437,4 +437,51 @@ public:
 	void initFromString(const string & row);
 };
 
+/**
+* Utility class used by OT implementations.
+*
+* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
+*
+*/
+class OTUtil {
+public:
+
+	/**
+	* Holds the output of the above RAND function.
+	* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
+	*
+	*/
+	class RandOutput {
+	private:
+		shared_ptr<GroupElement> u;
+		shared_ptr<GroupElement> v;
+
+	public:
+		RandOutput(const shared_ptr<GroupElement> & u, const shared_ptr<GroupElement> & v) : u(u), v(v) {}
+
+		shared_ptr<GroupElement> getU() {
+			return u;
+		}
+
+		shared_ptr<GroupElement> getV() {
+			return v;
+		}
+	};
+
+	/**
+	* Some OT protocols uses the function RAND(w,x,y,z).
+	* This function defined as follows.<p>
+	*	1.	SAMPLE random values s,t <- {0, . . . , q-1}<p>
+	*	2.	COMPUTE u = w^s * y^t<p>
+	*	3.	COMPUTE v = x^s * z^t<p>
+	*	4.	OUTPUT (u,v)
+	* @param w
+	* @param x
+	* @param y
+	* @param z
+	*/
+	static OTUtil::RandOutput rand(DlogGroup* dlog, GroupElement* w, GroupElement* x, GroupElement* y, GroupElement* z, PrgFromOpenSSLAES* random);
+};
+
+
 

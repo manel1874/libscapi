@@ -81,7 +81,6 @@ void OTOnGroupElementSMsg::initFromString(const string & row) {
 
 string OTOnByteArraySMsg::toString() {
 	string output = w0->toString() + ":" + w1->toString() + ":";
-	const byte * uc = &(c0[0]);
 	output += string(reinterpret_cast<char const*>(c0.data()), c0.size());
 	output += ":";
 	output += string(reinterpret_cast<char const*>(c1.data()), c1.size());
@@ -108,4 +107,38 @@ void OTOnByteArraySMsg::initFromString(const string & row) {
 		c0.assign(str_vec[4].begin(), str_vec[4].end());
 		c1.assign(str_vec[5].begin(), str_vec[5].end());
 	}
+}
+
+/**
+* Some OT protocols uses the function RAND(w,x,y,z).
+* This function defined as follows.<p>
+*	1.	SAMPLE random values s,t <- {0, . . . , q-1}<p>
+*	2.	COMPUTE u = w^s * y^t<p>
+*	3.	COMPUTE v = x^s * z^t<p>
+*	4.	OUTPUT (u,v)
+* @param w
+* @param x
+* @param y
+* @param z
+*/
+OTUtil::RandOutput OTUtil::rand(DlogGroup* dlog, GroupElement* w, GroupElement* x, GroupElement* y, GroupElement* z, PrgFromOpenSSLAES* random) {
+	//Compute q-1
+	biginteger q = dlog->getOrder();
+	biginteger qMinusOne = q - 1;
+
+	//Sample random values s,t <- {0, . . . , q-1}
+	biginteger s = getRandomInRange(0, qMinusOne, random);
+	biginteger t = getRandomInRange(0, qMinusOne, random);
+
+	//Compute u = w^s * y^t
+	auto wToS = dlog->exponentiate(w, s);
+	auto yToT = dlog->exponentiate(y, t);
+	auto u = dlog->multiplyGroupElements(wToS.get(), yToT.get());
+
+	//Compute v = x^s * z^t
+	auto xToS = dlog->exponentiate(x, s);
+	auto zToT = dlog->exponentiate(z, t);
+	auto v = dlog->multiplyGroupElements(xToS.get(), zToT.get());
+
+	return OTUtil::RandOutput(u, v);
 }

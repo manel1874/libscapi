@@ -139,6 +139,8 @@
     <ClCompile Include="..\..\src\interactive_mid_protocols\OT.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\OTExtensionBristol.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\OTExtensionMalicious.cpp" />
+    <ClCompile Include="..\..\src\interactive_mid_protocols\OTFullSimulation.cpp" />
+    <ClCompile Include="..\..\src\interactive_mid_protocols\OTFullSimulationROM.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\OTOneSidedSimulation.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\OTPrivacyOnly.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\OTSemiHonest.cpp" />
@@ -222,6 +224,7 @@
     <ClInclude Include="..\..\include\interactive_mid_protocols\OTExtensionBristol.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\OTExtensionMalicious.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\OTFullSimulation.hpp" />
+    <ClInclude Include="..\..\include\interactive_mid_protocols\OTFullSimulationROM.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\OTOneSidedSimulation.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\OTPrivacyOnly.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\OTSemiHonest.hpp" />
