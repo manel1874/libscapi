@@ -28,6 +28,7 @@
 
 #pragma once
 #include "Prf.hpp"
+#include "PrfOpenSSL.hpp"
 #include <mutex>
 
 /**
@@ -80,7 +81,7 @@ private:
 	void firstRound(vector<byte>& outBytes, const vector<byte> * iv, vector<byte> & intermediateOutBytes, int outLength);
 
 public:
-	HKDF(Hmac * hmac) { this->hmac = hmac; };
+	HKDF(Hmac * hmac = new OpenSSLHMAC()) { this->hmac = hmac; };
 	/**
 	* This function derives a new key from the source key material key.
 	* The pseudo-code of this function is as follows:

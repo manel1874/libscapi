@@ -119,7 +119,7 @@ public:
 	/**
 	* Default constructor that uses SHA1.
 	*/
-	OpenSSLHMAC() { construct("SHA-1"); };
+	OpenSSLHMAC() { construct("SHA-256"); };
 	/**
 	* This constructor receives a hashName and builds the underlying hmac according to it. It can be called from the factory.
 	* @param hashName - the hash function to translate into OpenSSL's hash.

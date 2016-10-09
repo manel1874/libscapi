@@ -76,7 +76,7 @@ private:
 	HKDF* hkdf; //The underlying object used to compute the random oracle function.
 
 public:	
-	HKDFBasedRO(HKDF * hkdf) { this->hkdf = hkdf; };
+	HKDFBasedRO(HKDF * hkdf = new HKDF()) { this->hkdf = hkdf; };
 	void compute(const vector<byte> & input, int inOffset, int inLen, vector<byte> & output, int outLen) override;
 	string getAlgorithmName() override { return "HKDFBasedRO"; };
 	~HKDFBasedRO();
