@@ -538,7 +538,7 @@ public:
 	* @param input for the underlying sigma protocol
 	* @param cont possible context information
 	*/
-	ZKPOKFiatShamirCommonInput(SigmaCommonInput* input, vector<byte> & cont = vector<byte>())
+	ZKPOKFiatShamirCommonInput(SigmaCommonInput* input, vector<byte> & cont)
 		: input(input), context(cont) {}
 
 	/**
@@ -571,7 +571,7 @@ public:
 	* @param input for the underlying sigma protocol.
 	* @param cont context information
 	*/
-	ZKPOKFiatShamirProverInput(const shared_ptr<SigmaProverInput> & input, vector<byte> & cont = vector<byte>()) 
+	ZKPOKFiatShamirProverInput(const shared_ptr<SigmaProverInput> & input, vector<byte> & cont)
 		: input(input), context(cont){}
 
 	/**

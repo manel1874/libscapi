@@ -10,10 +10,10 @@ int mainBristol(string partyNum) {
     int my_num = stoi(partyNum);
 
 
-    int nOTs = 1280000;
+    int nOTs = 200;
 
 
-    BitVector receiverInput(nOTs);
+    BitVector receiverInput(256);
     receiverInput.assign_zero();
 
     receiverInput.set_bit(0,1);
@@ -184,6 +184,9 @@ int mainBristol(string partyNum) {
     			delta[i] = 1;
 
 
+
+    		cout<<"before transfer"<<endl;
+
     		OTBatchSInput * input = new OTExtensionCorrelatedSInput(delta, nOTs);
     		auto start = scapi_now();
     		auto output = sender.transfer(input);
@@ -241,9 +244,12 @@ int mainBristol(string partyNum) {
     		sigma[2] = 0;
 
 
+
+
     		int elementSize = 128;
     		OTBatchRInput * input = new OTExtensionCorrelatedRInput(sigma, elementSize);
 
+    		cout<<"before transfer"<<endl;
 
             auto start = scapi_now();
     		auto output = reciever.transfer(input);

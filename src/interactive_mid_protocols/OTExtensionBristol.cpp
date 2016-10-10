@@ -83,24 +83,31 @@ OTExtensionBristolSender::OTExtensionBristolSender(int port,bool isSemiHonest, s
 shared_ptr<OTBatchSOutput> OTExtensionBristolSender::transfer(OTBatchSInput * input){
 
 
+
 	if(input->getType()!= OTBatchSInputTypes::OTExtensionRandomizedSInput &&
 	   input->getType()!= OTBatchSInputTypes::OTExtensionGeneralSInput &&
 	   input->getType()!= OTBatchSInputTypes::OTExtensionCorrelatedSInput){
 		throw invalid_argument("input should be instance of OTExtensionRandomizedSInput or OTExtensionGeneralSInput or OTExtensionCorrelatedSInput.");
 	}
 	else{
-		int nOTs;
+		int nOTs, nOTsReal;
+
+
 
 		if(input->getType()== OTBatchSInputTypes::OTExtensionGeneralSInput){
 
-			nOTs = ((OTExtensionGeneralSInput *)input)->getNumOfOts();
+			nOTsReal = ((OTExtensionGeneralSInput *)input)->getNumOfOts();
 		}
 		else if (input->getType()== OTBatchSInputTypes::OTExtensionRandomizedSInput){
-			nOTs = (((OTExtensionRandomizedSInput*)input)->getNumOfOts());
+			nOTsReal = (((OTExtensionRandomizedSInput*)input)->getNumOfOts());
 		}
 		else{
-			nOTs = (((OTExtensionCorrelatedSInput*)input)->getNumOfOts());
+			nOTsReal = (((OTExtensionCorrelatedSInput*)input)->getNumOfOts());
 		}
+
+		//round to the nearest 128 multiplication
+		nOTs = ((nOTsReal + 128 - 1) / 128) * 128;
+
 
 
 		//we create a bitvector since the transfer of the bristol library demands that. There is no use of it and thus
@@ -143,13 +150,20 @@ shared_ptr<OTBatchSOutput> OTExtensionBristolSender::transfer(OTBatchSInput * in
 
 			auto deltaVec = ((OTExtensionCorrelatedSInput *)input)->getDeltaArr();
 
+
+			//resize to 128 multiplications
+			deltaVec.resize(nOTs*16);
+
+
 			__m128i* delta = (__m128i*)deltaVec.data();
+
+
+
 			__m128i* x1Arr = (__m128i *) _mm_malloc(sizeof(__m128i) * nOTs, 16);
 
 			//send to the receiver R1^R0^delta
 			for(int i=0; i<nOTs; i++){
 
-				//x0Arr[i] = pOtExt->senderOutputMatrices[0].squares[i/128].rows[i % 128];
 
 				x1Arr[i] = delta[i]^ pOtExt->senderOutputMatrices[0].squares[i/128].rows[i % 128];
 
@@ -158,18 +172,16 @@ shared_ptr<OTBatchSOutput> OTExtensionBristolSender::transfer(OTBatchSInput * in
 			}
 
 			//send the vector of R1^R0^delta over the channel.
-			channel->write((byte *)delta, (((OTExtensionCorrelatedSInput *)input)->getDeltaArrSize()));
+			channel->write((byte *)delta, nOTs*16);
 
 
 			vector<byte> x1Output;
 
-			copy_byte_array_to_byte_vector((byte*)x1Arr, nOTs*16, x1Output, 0);
+			copy_byte_array_to_byte_vector((byte*)x1Arr, nOTsReal*16, x1Output, 0);
 
 			vector<byte> x0Output;
 
-			//copy_byte_array_to_byte_vector((byte*)x0Arr, nOTs*16, x0Output, 0);
-
-			copy_byte_array_to_byte_vector((byte*)(pOtExt->senderOutputMatrices[0].squares.data()), nOTs*16, x0Output, 0);
+			copy_byte_array_to_byte_vector((byte*)(pOtExt->senderOutputMatrices[0].squares.data()), nOTsReal*16, x0Output, 0);
 
 			_mm_free(x1Arr);
 
@@ -206,8 +218,11 @@ shared_ptr<OTBatchROutput> OTExtensionBristolReciever::transfer(OTBatchRInput * 
 
 		auto sigmaArr = ((OTExtensionRInput *)input)->getSigmaArr();
 
-		auto nOTs = sigmaArr.size();
+		auto nOTsReal = sigmaArr.size();
 
+		auto nOTs = ((nOTsReal + 128 - 1) / 128) * 128;
+
+		//make the number of ot's to be a multiplication of 128
 
 		BitVector inputBits(nOTs);
 
@@ -215,7 +230,7 @@ shared_ptr<OTBatchROutput> OTExtensionBristolReciever::transfer(OTBatchRInput * 
 
 		//fill the bit vector that bristol needs from the sigma array
 
-		for(size_t i=0; i<nOTs; i++){
+		for(size_t i=0; i<nOTsReal; i++){
 
 			if(sigmaArr[i]==1)
 				inputBits.set_bit(i,1);
@@ -261,7 +276,7 @@ shared_ptr<OTBatchROutput> OTExtensionBristolReciever::transfer(OTBatchRInput * 
 
 			vector<byte> output;
 
-			copy_byte_array_to_byte_vector((byte*)outputSigma, nOTs, output, 0);
+			copy_byte_array_to_byte_vector((byte*)outputSigma, nOTsReal*16, output, 0);
 
 			 _mm_free(x0Arr);
 			 _mm_free(x1Arr);
@@ -309,7 +324,7 @@ shared_ptr<OTBatchROutput> OTExtensionBristolReciever::transfer(OTBatchRInput * 
 
 			vector<byte> output;
 
-			copy_byte_array_to_byte_vector((byte*)outputSigma, nOTs, output, 0);
+			copy_byte_array_to_byte_vector((byte*)outputSigma, nOTsReal*16, output, 0);
 
 			 _mm_free(adjustArr);
 			 _mm_free(outputSigma);
@@ -323,7 +338,7 @@ shared_ptr<OTBatchROutput> OTExtensionBristolReciever::transfer(OTBatchRInput * 
 
 			vector<byte> output;
 
-			copy_byte_array_to_byte_vector((byte*)(pOtExt->receiverOutputMatrix.squares.data()), nOTs*16, output, 0);
+			copy_byte_array_to_byte_vector((byte*)(pOtExt->receiverOutputMatrix.squares.data()), nOTsReal*16, output, 0);
 
 
 			return make_shared<OTOnByteArrayROutput>(output);

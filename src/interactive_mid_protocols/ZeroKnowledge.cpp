@@ -362,8 +362,11 @@ ZKPOKFiatShamirProof ZKPOKFiatShamirFromSigmaProver::generateFiatShamirProof(con
 		throw invalid_argument("the given input must be an instance of ZKPOKFiatShamirProverInput or SigmaProverInput");
 	}
 
+
+	vector<byte> vec;
+
 	if (sigmaInput != nullptr) {
-		fsInput = make_shared<ZKPOKFiatShamirProverInput>(sigmaInput);
+		fsInput = make_shared<ZKPOKFiatShamirProverInput>(sigmaInput, vec);
 	}
 
 	//Compute the first message a in sigma, using (x,w) as input and 
@@ -389,8 +392,10 @@ shared_ptr<ZKPOKFiatShamirProof> ZKPOKFiatShamirFromSigmaVerifier::receiveMsgFro
 	vector<byte> raw_msg;
 	channel->readWithSizeIntoVector(raw_msg);
 
+
+	vector<byte> vec;
 	// create an empty OTRGroupElementPairMsg and initialize it with the received data. 
-	auto msg = make_shared<ZKPOKFiatShamirProof>(emptyA, vector<byte>(), emptyZ);
+	auto msg = make_shared<ZKPOKFiatShamirProof>(emptyA, vec, emptyZ);
 	msg->initFromByteVector(raw_msg);
 
 	return msg;
@@ -493,7 +498,8 @@ bool ZKPOKFiatShamirFromSigmaVerifier::verifyFiatShamirProof(ZKCommonInput* inpu
 		throw invalid_argument("the given input must be an instance of ZKPOKFiatShamirCommonInput or SigmaCommonInput");
 	}
 	if (sigmaInput != nullptr) {
-		fsInput = new ZKPOKFiatShamirCommonInput(sigmaInput);
+		vector<byte> vec;
+		fsInput = new ZKPOKFiatShamirCommonInput(sigmaInput,vec);
 	}
 
 	//get the given a
