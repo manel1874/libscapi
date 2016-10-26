@@ -186,7 +186,8 @@ public:
 		shared_ptr<SigmaDlogProverInput> proverinput) {
 		auto sp = new ZKPOKFiatShamirFromSigmaProver(server, proverComputation);
 		cout << "--> running Fiat Shamir prover" << endl;
-		auto input = make_shared<ZKPOKFiatShamirProverInput>(proverinput);
+		vector<byte> cont;
+		auto input = make_shared<ZKPOKFiatShamirProverInput>(proverinput, cont);
 		sp->prove(input);
 	}
 	virtual bool verify(shared_ptr<CommParty> server,
@@ -198,7 +199,8 @@ public:
 		auto emptyTrap = make_shared<CmtRTrapdoorCommitPhaseOutput>();
 		auto v = new ZKPOKFiatShamirFromSigmaVerifier(server, verifierComputation);
 		cout << "--> running Fiat Shamir verify" << endl;
-		auto input = make_shared<ZKPOKFiatShamirCommonInput>(commonInput.get());
+		vector<byte> cont;
+		auto input = make_shared<ZKPOKFiatShamirCommonInput>(commonInput.get(), cont);
 		bool verificationPassed = v->verify(input.get(), msgA, msgZ);
 		delete v;
 		return verificationPassed;
