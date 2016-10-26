@@ -167,8 +167,7 @@ private:
 	SigmaDlogProverComputation sigmaDlog;	//underlying SigmaDlogProver to use.
 	shared_ptr<DlogGroup> dlog;				//We need the DlogGroup instance in order to calculate the input for the underlying SigmaDlogProver
 	int t;
-	mt19937 random;
-
+	
 public:
 	/**
 	* Constructor that gets the underlying DlogGroup, soundness parameter and SecureRandom.

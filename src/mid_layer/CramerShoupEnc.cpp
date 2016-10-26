@@ -112,7 +112,7 @@ void CrShOnGroupElSendableData::initFromString(const string & row) {
 * @param random source of randomness.
 * @throws SecurityLevelException if the Dlog Group or the Hash function do not meet the required Security Level
 */
-CramerShoupOnGroupElementEnc::CramerShoupOnGroupElementEnc(shared_ptr<DlogGroup> dlogGroup, shared_ptr<CryptographicHash> hash) {
+CramerShoupOnGroupElementEnc::CramerShoupOnGroupElementEnc(shared_ptr<DlogGroup> dlogGroup, shared_ptr<CryptographicHash> hash, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	//The Cramer-Shoup encryption scheme must work with a Dlog Group that has DDH security level
 	//and a Hash function that has CollisionResistant security level. If any of this conditions is not 
 	//met then cannot construct an object of type Cramer-Shoup encryption scheme; therefore throw exception.
@@ -128,7 +128,7 @@ CramerShoupOnGroupElementEnc::CramerShoupOnGroupElementEnc(shared_ptr<DlogGroup>
 	this->hash = hash;
 	// Everything is correct, then sets the member variables and creates object.
 	qMinusOne = dlogGroup->getOrder() - 1;
-	this->random = get_seeded_random();
+	this->random = random;
 }
 
 /**
@@ -182,11 +182,11 @@ pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> CramerShoupOnGroupElementEnc
 	} while (*generator1 == *generator2);
 
 	//Chooses five random values (x1, x2, y1, y2, z) in Zq.
-	biginteger x1 = getRandomInRange(0, qMinusOne, random);
-	biginteger x2 = getRandomInRange(0, qMinusOne, random);
-	biginteger y1 = getRandomInRange(0, qMinusOne, random);
-	biginteger y2 = getRandomInRange(0, qMinusOne, random);
-	biginteger z = getRandomInRange(0, qMinusOne, random);
+	biginteger x1 = getRandomInRange(0, qMinusOne, random.get());
+	biginteger x2 = getRandomInRange(0, qMinusOne, random.get());
+	biginteger y1 = getRandomInRange(0, qMinusOne, random.get());
+	biginteger y2 = getRandomInRange(0, qMinusOne, random.get());
+	biginteger z = getRandomInRange(0, qMinusOne, random.get());
 
 
 	//Calculates c, d and h:
@@ -250,7 +250,7 @@ shared_ptr<AsymmetricCiphertext> CramerShoupOnGroupElementEnc::encrypt(shared_pt
 	*/
 
 	//Choose the random r.
-	biginteger r = getRandomInRange(0, qMinusOne, random);
+	biginteger r = getRandomInRange(0, qMinusOne, random.get());
 
 	return encrypt(plaintext, r);
 }

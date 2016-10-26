@@ -49,7 +49,7 @@ ZpSafePrimeElement::ZpSafePrimeElement(const biginteger & x, const biginteger & 
 		
 }
 
-ZpSafePrimeElement::ZpSafePrimeElement(const biginteger & p, mt19937 & prg)
+ZpSafePrimeElement::ZpSafePrimeElement(const biginteger & p, PrgFromOpenSSLAES* prg)
 {
 	// find a number in the range [1, ..., p-1]
 	biginteger rand_in_range = getRandomInRange(1, p - 1, prg);
@@ -134,7 +134,7 @@ shared_ptr<GroupElement> DlogGroup::createRandomElement() {
 	// This is a default implementation that is valid for all the Dlog Groups and relies on mathematical properties of the generators.
 	// However, if a specific Dlog Group has a more efficient implementation then is it advised to override this function in that concrete
 	// Dlog group. For example we do so in CryptoPpDlogZpSafePrime.
-	biginteger randNum = getRandomInRange(1, groupParams->getQ() - 1, random_element_gen);
+	biginteger randNum = getRandomInRange(1, groupParams->getQ() - 1, random_element_gen.get());
 
 	// compute g^x to get a new element
 	return exponentiate(generator.get(), randNum);
@@ -424,7 +424,7 @@ void ECElementSendableData::initFromString(const string & raw) {
 * @param curveName - name of curve to initialized
 * @throws IOException
 */
-void DlogEllipticCurve::init(string fileName, string curveName) {
+void DlogEllipticCurve::init(string fileName, string curveName, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	
 	ecConfig = make_shared<ConfigFile>(fileName); //get ConfigFile object containing the curves data
 																//EC_FILE_PATH = fileName;
@@ -434,5 +434,5 @@ void DlogEllipticCurve::init(string fileName, string curveName) {
 	this->curveName = curveName;
 	this->fileName = fileName;
 
-	random_element_gen = get_seeded_random();
+	random_element_gen = random;
 }

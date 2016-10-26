@@ -233,7 +233,7 @@ TPElValidity OpenSSLRSAPermutation::isElement(TPElement* tpEl) {
 TPElement* OpenSSLRSAPermutation::generateRandomTPElement() {
 	if (!isKeySet())
 		throw IllegalStateException("keys aren't set");
-	return new RSAElement(modulus);
+	return new RSAElement(modulus, random);
 }
 
 OpenSSLRSAPermutation::~OpenSSLRSAPermutation() {

@@ -190,18 +190,6 @@ class CmtElGamalCommitterCore : public virtual CmtCommitter {
 
 private:
 	/**
-	* Sets the given parameters and execute the preprocess phase of the scheme.
-	* @param channel
-	* @param dlog
-	* @param elGamal
-	* @param random
-	* @throws SecurityLevelException if the given dlog is not DDH secure
-	* @throws InvalidDlogGroupException if the given dlog is not valid.
-	* @throws IOException if there was a problem in the communication
-	*/
-	void doConstruct(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, shared_ptr<ElGamalEnc> elGamal);
-
-	/**
 	* The pre-process is performed once within the construction of this object.
 	* If the user needs to generate new pre-process values then it needs to disregard
 	* this instance and create a new one.
@@ -214,7 +202,7 @@ private:
 
 protected:
 	shared_ptr<DlogGroup> dlog;
-	mt19937 random;
+	shared_ptr<PrgFromOpenSSLAES> random;
 	biginteger qMinusOne;
 	shared_ptr<ElGamalEnc> elGamal;
 	shared_ptr<ElGamalPublicKey> publicKey;
@@ -226,9 +214,7 @@ protected:
 	* The Receiver needs to be instantiated with the same DlogGroup,
 	* otherwise nothing will work properly.
 	*/
-	CmtElGamalCommitterCore(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, shared_ptr<ElGamalEnc> elGamal) {
-		doConstruct(channel, dlog, elGamal);
-	}
+	CmtElGamalCommitterCore(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, shared_ptr<ElGamalEnc> elGamal, const shared_ptr<PrgFromOpenSSLAES> & random);
 
 public:
 
@@ -270,8 +256,8 @@ public:
 	* @throws InvalidDlogGroupException
 	* @throws IOException
 	*/
-	CmtElGamalOnGroupElementCommitter(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog = make_shared<OpenSSLDlogECF2m>("K-233"))
-		: CmtElGamalCommitterCore(channel, dlog, make_shared<ElGamalOnGroupElementEnc>(dlog)) {}
+	CmtElGamalOnGroupElementCommitter(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog = make_shared<OpenSSLDlogECF2m>("K-233"), const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg())
+		: CmtElGamalCommitterCore(channel, dlog, make_shared<ElGamalOnGroupElementEnc>(dlog), random) {}
 
 	shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(const shared_ptr<CmtCommitValue> & input, long id) override; 
 
@@ -465,8 +451,8 @@ class CmtElGamalOnByteArrayCommitter : public CmtElGamalCommitterCore, public Pe
 	*/
 public:
 	CmtElGamalOnByteArrayCommitter(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog = make_shared<OpenSSLDlogECF2m>("K-233"), 
-		shared_ptr<KeyDerivationFunction> kdf = make_shared<HKDF>(new OpenSSLHMAC())) 
-		: CmtElGamalCommitterCore(channel, dlog, make_shared<ElGamalOnByteArrayEnc>(dlog, kdf)) {}
+		shared_ptr<KeyDerivationFunction> kdf = make_shared<HKDF>(new OpenSSLHMAC()), const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg())
+		: CmtElGamalCommitterCore(channel, dlog, make_shared<ElGamalOnByteArrayEnc>(dlog, kdf), random) {}
 	
 	shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(const shared_ptr<CmtCommitValue> & input, long id) override;
 

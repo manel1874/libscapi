@@ -121,8 +121,9 @@ int NumberOfBits(biginteger bi);
 */
 size_t bytesCount(biginteger value);
 
-mt19937 get_seeded_random();
-mt19937_64 get_seeded_random64();
+class PrgFromOpenSSLAES;
+shared_ptr<PrgFromOpenSSLAES> get_seeded_prg();
+
 void copy_byte_vector_to_byte_array(const vector<byte> &source_vector, byte * dest, int beginIndex);
 void copy_byte_array_to_byte_vector(const byte* src, int src_len, vector<byte>& target_vector, int beginIndex);
 
@@ -143,19 +144,12 @@ biginteger convert_hex_to_biginteger(const string & hex);
 /*
 * Returns a random biginteger uniformly distributed in [min, max]
 */
-biginteger getRandomInRange(biginteger min, biginteger max, std::mt19937 & random);
-
-class PrgFromOpenSSLAES;
-
-/*
-* Returns a random biginteger uniformly distributed in [min, max]
-*/
 biginteger getRandomInRange(biginteger min, biginteger max, PrgFromOpenSSLAES* random);
 
 /*
 * Returns a random prime number with the given number of bytes.
 */
-biginteger getRandomPrime(int numBytes, int certainty, mt19937 & random);
+biginteger getRandomPrime(int numBytes, int certainty, PrgFromOpenSSLAES* random);
 const vector<string> explode(const string& s, const char& c);
 
 bool isPrime(biginteger bi, int certainty = 40);
@@ -169,7 +163,7 @@ void print_elapsed_micros(std::chrono::time_point<std::chrono::system_clock> sta
 std::chrono::time_point<std::chrono::system_clock> scapi_now();
 string hexStr(vector<byte> const & data);
 void print_byte_array(byte * arr, int len, string message);
-void gen_random_bytes_vector(vector<byte> &v, const int len, mt19937 & random);
+void gen_random_bytes_vector(vector<byte> &v, const int len, PrgFromOpenSSLAES* random);
 
 /**
 * Abstract marker interface that allow serialization and deserialization from byte array and size

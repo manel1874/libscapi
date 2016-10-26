@@ -232,7 +232,7 @@ private:
 	shared_ptr<CryptographicHash> hash;				// Underlying hash function.
 	shared_ptr<CramerShoupPublicKey> publicKey;
 	shared_ptr<CramerShoupPrivateKey> privateKey;
-	mt19937 random;
+	shared_ptr<PrgFromOpenSSLAES> random;
 	biginteger qMinusOne; 				// Saved to avoid many calculations.
 	bool keySet;
 
@@ -274,7 +274,7 @@ public:
 	* @param random source of randomness.
 	* @throws SecurityLevelException if the Dlog Group or the Hash function do not meet the required Security Level
 	*/
-	CramerShoupOnGroupElementEnc(shared_ptr<DlogGroup> dlogGroup = make_shared<OpenSSLDlogZpSafePrime>("1024"), shared_ptr<CryptographicHash> hash = make_shared<OpenSSLSHA256>());
+	CramerShoupOnGroupElementEnc(shared_ptr<DlogGroup> dlogGroup = make_shared<OpenSSLDlogZpSafePrime>("1024"), shared_ptr<CryptographicHash> hash = make_shared<OpenSSLSHA256>(), const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* This function sets the Public\Private key.

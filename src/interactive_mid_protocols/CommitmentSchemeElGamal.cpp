@@ -40,7 +40,7 @@
 * @throws InvalidDlogGroupException if the given dlog is not valid.
 * @throws IOException if there was a problem in the communication
 */
-void CmtElGamalCommitterCore::doConstruct(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, shared_ptr<ElGamalEnc> elGamal) {
+CmtElGamalCommitterCore::CmtElGamalCommitterCore(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, shared_ptr<ElGamalEnc> elGamal, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	//The underlying dlog group must be DDH secure.
 	auto ddh = dynamic_pointer_cast<DDH>(dlog);
 	if (ddh == NULL) {
@@ -51,7 +51,7 @@ void CmtElGamalCommitterCore::doConstruct(shared_ptr<CommParty> channel, shared_
 
 	this->channel = channel;
 	this->dlog = dlog;
-	this->random = get_seeded_random();
+	this->random = random;
 	qMinusOne = dlog->getOrder() - 1;
 	this->elGamal = elGamal;
 	preProcess();
@@ -90,7 +90,7 @@ void CmtElGamalCommitterCore::preProcess() {
 */
 shared_ptr<CmtCCommitmentMsg> CmtElGamalCommitterCore::generateCommitmentMsg(const shared_ptr<CmtCommitValue> & input, long id) {
 	//Sample random r <-Zq.
-	biginteger r = getRandomInRange(0, qMinusOne, random);
+	biginteger r = getRandomInRange(0, qMinusOne, random.get());
 	//Compute u = g^r and v = h^r * x.
 	//This is actually the encryption of x.
 	auto c = elGamal->encrypt(input->convertToPlaintext(), r);
@@ -301,7 +301,7 @@ shared_ptr<CmtCCommitmentMsg> CmtElGamalOnByteArrayCommitter::generateCommitment
 */
 shared_ptr<CmtCommitValue> CmtElGamalOnByteArrayCommitter::sampleRandomCommitValue() {
 	vector<byte> val(32);
-	RAND_bytes(val.data(), 32);
+	random->getPRGBytes(val, 0, 32);
 	
 	return make_shared<CmtByteArrayCommitValue>(make_shared<vector<byte>>(val));
 }

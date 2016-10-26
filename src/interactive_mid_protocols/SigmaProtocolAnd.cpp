@@ -97,7 +97,7 @@ SigmaMultipleProverInput* SigmaANDProverComputation::checkInput(SigmaProverInput
 /*   SigmaANDSimulator                 */
 /***************************************/
 
-SigmaANDSimulator::SigmaANDSimulator(vector<shared_ptr<SigmaSimulator>> simulators, int t) {
+SigmaANDSimulator::SigmaANDSimulator(vector<shared_ptr<SigmaSimulator>> simulators, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	// if the given t is different from one of the underlying object's t values, throw exception.
 	for(auto sigmaSimulator : simulators)
 		if(t!=sigmaSimulator->getSoundnessParam())
@@ -106,7 +106,7 @@ SigmaANDSimulator::SigmaANDSimulator(vector<shared_ptr<SigmaSimulator>> simulato
 	this->simulators = simulators;
 	len = simulators.size();
 	this->t = t;
-	this->random = get_seeded_random();
+	this->random = random;
 }
 
 shared_ptr<SigmaSimulatorOutput> SigmaANDSimulator::simulate(SigmaCommonInput* input,
@@ -147,7 +147,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaANDSimulator::simulate(SigmaCommonInput* i
 shared_ptr<SigmaSimulatorOutput> SigmaANDSimulator::simulate(SigmaCommonInput* input) {
 	//Create a new byte array of size t/8, to get the required byte size and fill it with random values.
 	vector<byte> e(t / 8);
-	RAND_bytes(e.data(), t / 8);
+	random->getPRGBytes(e, 0, t / 8);
 	//modify the challenge to be positive.
 	e.data()[e.size() - 1] = e.data()[e.size() - 1] & 127;
 	// call the other simulate function with the given input and the samples e.
@@ -158,7 +158,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaANDSimulator::simulate(SigmaCommonInput* i
 /***************************************/
 /*   SigmaANDVerifierComputation       */
 /***************************************/
-SigmaANDVerifierComputation::SigmaANDVerifierComputation(vector<shared_ptr<SigmaVerifierComputation>> verifiers, int t) {
+SigmaANDVerifierComputation::SigmaANDVerifierComputation(vector<shared_ptr<SigmaVerifierComputation>> verifiers, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	// if the given t is different from one of the underlying object's t values, throw exception.
 	for(auto verifier : verifiers)
 		if(t != verifier->getSoundnessParam())
@@ -167,13 +167,13 @@ SigmaANDVerifierComputation::SigmaANDVerifierComputation(vector<shared_ptr<Sigma
 	this->verifiers = verifiers;
 	len = verifiers.size();
 	this->t = t;
-	this->random = get_seeded_random();
+	this->random = random;
 }
 
 void SigmaANDVerifierComputation::sampleChallenge() {
 	//make space for t/8 bytes and fill it with random values.
 	e.resize(t / 8);
-	RAND_bytes(e.data(), t / 8);
+	random->getPRGBytes(e, 0, t / 8);
 	//modify the challenge to be positive.
 	e.data()[e.size() - 1] = e.data()[e.size() - 1] & 127;
 	

@@ -258,7 +258,6 @@ private:
 	SigmaDHProverComputation sigmaDH;	//underlying SigmaDHProver to use.
 	shared_ptr<DlogGroup> dlog;			//We save the dlog because we need it to calculate the input for the underlying Sigma prover.
 	int t;
-	mt19937 random;
 										
 	/**
 	* Converts the input for the underlying Sigma protocol.

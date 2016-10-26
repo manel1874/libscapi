@@ -86,7 +86,7 @@ shared_ptr<SigmaCommonInput> SigmaOrTwoProverInput::getCommonInput() {
 * @throws IllegalArgumentException if the given t is not equal to both t values of the underlying simulators.
 * @throws IllegalArgumentException if the given simulators array does not contains two objects.
 */
-SigmaOrTwoSimulator::SigmaOrTwoSimulator(vector<shared_ptr<SigmaSimulator>> simulators, int t) {
+SigmaOrTwoSimulator::SigmaOrTwoSimulator(vector<shared_ptr<SigmaSimulator>> simulators, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	if (simulators.size() != 2) {
 		throw invalid_argument("The given simulators array must contains two objects.");
 	}
@@ -98,7 +98,7 @@ SigmaOrTwoSimulator::SigmaOrTwoSimulator(vector<shared_ptr<SigmaSimulator>> simu
 
 	this->simulators = simulators;
 	this->t = t;
-	random = get_seeded_random();
+	this->random = random;
 }
 
 /**
@@ -129,7 +129,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaOrTwoSimulator::simulate(SigmaCommonInput*
 	
 	//Sample a random e0.
 	vector<byte> e0(len);
-	RAND_bytes(e0.data(), len);
+	random->getPRGBytes(e0, 0, t / 8);
 
 	
 	//Set e1 = challenge XOR e0.
@@ -162,7 +162,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaOrTwoSimulator::simulate(SigmaCommonInput*
 shared_ptr<SigmaSimulatorOutput> SigmaOrTwoSimulator::simulate(SigmaCommonInput* input) {
 	//Create a new byte array of size t/8, to get the required byte size.
 	vector<byte> e(t / 8);
-	RAND_bytes(e.data(), t / 8);
+	random->getPRGBytes(e, 0, t / 8);
 	
 	return simulate(input, e);
 }
@@ -183,7 +183,7 @@ bool SigmaOrTwoSimulator::checkChallengeLength(int size) {
 * @throws IllegalArgumentException if the given t is not equal to both t values of the underlying provers.
 * @throws IllegalArgumentException if the given provers array does not contains two objects.
 */
-SigmaOrTwoProverComputation::SigmaOrTwoProverComputation(shared_ptr<SigmaProverComputation> prover, shared_ptr<SigmaSimulator> simulator, int t) {
+SigmaOrTwoProverComputation::SigmaOrTwoProverComputation(shared_ptr<SigmaProverComputation> prover, shared_ptr<SigmaSimulator> simulator, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 
 	//If the given t is different from one of the underlying object's t values, throw exception.
 	if ((t != prover->getSoundnessParam()) || (t != simulator->getSoundnessParam())) {
@@ -193,7 +193,7 @@ SigmaOrTwoProverComputation::SigmaOrTwoProverComputation(shared_ptr<SigmaProverC
 	this->prover = prover;
 	this->simulator = simulator;
 	this->t = t;
-	random = get_seeded_random();
+	this->random = random;
 }
 
 /**
@@ -218,7 +218,7 @@ shared_ptr<SigmaProtocolMsg> SigmaOrTwoProverComputation::computeFirstMsg(shared
 
 	//Create the challenge for the Simulator.
 	eOneMinusB.resize(t / 8);
-	RAND_bytes(eOneMinusB.data(), t / 8);
+	random->getPRGBytes(eOneMinusB, 0, t / 8);
 
 	//Call the sigma WITH THE WITNESS to compute first message ab.
 	//The second prover will not be in use so it does not need to compute messages.
@@ -311,7 +311,7 @@ shared_ptr<SigmaSimulator> SigmaOrTwoProverComputation::getSimulator() {
 * @throws IllegalArgumentException if the given t is not equal to both t values of the underlying verifiers.
 * @throws IllegalArgumentException if the given verifiers array does not contains two objects.
 */
-SigmaOrTwoVerifierComputation::SigmaOrTwoVerifierComputation(vector<shared_ptr<SigmaVerifierComputation>> verifiers, int t) {
+SigmaOrTwoVerifierComputation::SigmaOrTwoVerifierComputation(vector<shared_ptr<SigmaVerifierComputation>> verifiers, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	if (verifiers.size() != 2) {
 		throw invalid_argument("The given verifiers array must contains two objects.");
 	}
@@ -322,7 +322,7 @@ SigmaOrTwoVerifierComputation::SigmaOrTwoVerifierComputation(vector<shared_ptr<S
 
 	this->verifiers = verifiers;
 	this->t = t;
-	random = get_seeded_random();
+	this->random = random;
 }
 
 /**

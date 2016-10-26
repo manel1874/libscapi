@@ -31,6 +31,7 @@
 #include <openssl/rand.h>
 #include <openssl/evp.h>
 #include "../primitives/Prf.hpp"
+#include "../primitives/Prg.hpp"
 
 /**
 * This is an abstract class that manage the common behavior of symmetric encryption using Open SSL library.
@@ -40,6 +41,9 @@
 *
 */
 class OpenSSLEncWithIVAbs : public virtual SymmetricEnc {
+private:
+	shared_ptr<PrgFromOpenSSLAES> random;
+
 protected:
 	EVP_CIPHER_CTX *enc;							// A pointer to the native object that implements the encryption.
 	EVP_CIPHER_CTX *dec;							// A pointer to the native object that implements the decryption.
@@ -65,7 +69,7 @@ public:
 	* A default source of randomness is used.
 	* @param prp the underlying pseudorandom permutation to get the name of.
 	*/
-	OpenSSLEncWithIVAbs(PseudorandomPermutation* prp) : OpenSSLEncWithIVAbs(prp->getAlgorithmName()) {}
+	OpenSSLEncWithIVAbs(PseudorandomPermutation* prp, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) : OpenSSLEncWithIVAbs(prp->getAlgorithmName(), random) {}
 
 	/**
 	* Sets the name of a Pseudorandom permutation and the source of randomness.<p>
@@ -77,7 +81,7 @@ public:
 	* @param random  a user provided source of randomness.
 	* @throw IllegalArgumentException in case the given prpName is not valid for this encryption scheme.
 	*/
-	OpenSSLEncWithIVAbs(string prpName) { this->prpName = prpName; }
+	OpenSSLEncWithIVAbs(string prpName, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) : prpName(prpName), random(random) {}
 
 	virtual ~OpenSSLEncWithIVAbs();
 

@@ -29,6 +29,7 @@
 #pragma once
 #include "SigmaProtocol.hpp"
 #include "../mid_layer/DamgardJurikEnc.hpp"
+#include "../primitives/Prg.hpp"
 
 /**
 * Concrete implementation of SigmaProtocol input, used by the SigmaDamgardJurikProduct verifier and simulator.<p>
@@ -241,7 +242,7 @@ class SigmaDJProductSimulator : public SigmaSimulator {
 private:
 	int t; 					// Soundness parameter in BITS.
 	int lengthParameter;	// Length parameter in BITS.
-	mt19937 random;
+	shared_ptr<PrgFromOpenSSLAES> random;
 
 	/**
 	* Checks the validity of the given soundness parameter.
@@ -264,7 +265,7 @@ public:
 	* @param lengthParameter length parameter in BITS.
 	* @param random
 	*/
-	SigmaDJProductSimulator(int t = 40, int lengthParameter = 1);
+	SigmaDJProductSimulator(int t = 40, int lengthParameter = 1, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -312,7 +313,7 @@ class SigmaDJProductProverComputation : public SigmaProverComputation, DJBasedSi
 private:
 	int t; 								// Soundness parameter in BITS.
 	int lengthParameter;				// Length parameter in BITS.
-	mt19937 random;
+	shared_ptr<PrgFromOpenSSLAES> random;
 	shared_ptr<SigmaDJProductProverInput> input;	// Contains n, 3 ciphertexts, 3 plaintexts and 3 random values used to encrypt.
 	biginteger n;						// Modulus
 	biginteger N, NTag;					// N = n^lengthParameter and N' = n^(lengthParameter+1).
@@ -338,7 +339,7 @@ public:
 	* @param lengthParameter length parameter in BITS.
 	* @param random
 	*/
-	SigmaDJProductProverComputation(int t = 40, int lengthParameter = 1);
+	SigmaDJProductProverComputation(int t = 40, int lengthParameter = 1, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 
 	/**
@@ -399,7 +400,7 @@ class SigmaDJProductVerifierComputation : public SigmaVerifierComputation, DJBas
 private:
 	int t; 						// Soundness parameter in BITS.
 	int lengthParameter;		// Length parameter in BITS.
-	mt19937 random;
+	shared_ptr<PrgFromOpenSSLAES> random;
 	vector<byte> e;					// The challenge.
 
 	/**
@@ -425,7 +426,7 @@ public:
 	* @param lengthParameter length parameter in BITS.
 	* @param random
 	*/
-	SigmaDJProductVerifierComputation(int t = 40, int lengthParameter = 1);
+	SigmaDJProductVerifierComputation(int t = 40, int lengthParameter = 1, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.

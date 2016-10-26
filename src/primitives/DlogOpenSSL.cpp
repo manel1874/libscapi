@@ -108,7 +108,7 @@ void OpenSSLDlogZpSafePrime::createRandomOpenSSLDlogZp(int numBits) {
 	}
 }
 
-OpenSSLDlogZpSafePrime::OpenSSLDlogZpSafePrime(shared_ptr<ZpGroupParams> groupParams)
+OpenSSLDlogZpSafePrime::OpenSSLDlogZpSafePrime(shared_ptr<ZpGroupParams> groupParams, const shared_ptr<PrgFromOpenSSLAES> & random)
 {
 	// TODO - unify with cryptoPP
 	biginteger p = groupParams->getP();
@@ -124,7 +124,7 @@ OpenSSLDlogZpSafePrime::OpenSSLDlogZpSafePrime(shared_ptr<ZpGroupParams> groupPa
 
 	// set the inner parameters
 	this->groupParams = groupParams;
-	this->random_element_gen = get_seeded_random();
+	this->random_element_gen = random;
 
 	//Create a native Dlog object with dh and ctx.
 	createOpenSSLDlogZp(p, q, g);
@@ -141,9 +141,9 @@ OpenSSLDlogZpSafePrime::OpenSSLDlogZpSafePrime(shared_ptr<ZpGroupParams> groupPa
 	k = calcK(p);
 }
 
-OpenSSLDlogZpSafePrime::OpenSSLDlogZpSafePrime(int numBits) {
+OpenSSLDlogZpSafePrime::OpenSSLDlogZpSafePrime(int numBits, const shared_ptr<PrgFromOpenSSLAES> & random) {
 
-	this->random_element_gen = get_seeded_random();
+	this->random_element_gen = random;
 
 	// Create random Zp dlog group.
 	createRandomOpenSSLDlogZp(numBits);
@@ -226,7 +226,7 @@ shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::getIdentity() {
 }
 
 shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::createRandomElement() {
-	OpenSSLZpSafePrimeElement * el = new OpenSSLZpSafePrimeElement(((ZpGroupParams*)groupParams.get())->getP(), random_element_gen);
+	OpenSSLZpSafePrimeElement * el = new OpenSSLZpSafePrimeElement(((ZpGroupParams*)groupParams.get())->getP(), random_element_gen.get());
 	return shared_ptr<OpenSSLZpSafePrimeElement>(el);
 }
 
@@ -635,7 +635,7 @@ shared_ptr<ECElement> OpenSSLDlogEC::getInfinity() {
 }
 
 /************************concrete classes***********************/
-void OpenSSLDlogECFp::init(string fileName, string curveName) {
+void OpenSSLDlogECFp::init(string fileName, string curveName, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	// check that the given curve is in the field that matches the group.
 	size_t index = curveName.find("P-");
 	if (index != 0) {
@@ -661,7 +661,7 @@ void OpenSSLDlogECFp::init(string fileName, string curveName) {
 	createCurve(p, a, b);
 	
 	groupParams = fpParams;
-	
+	this->random = random;
 	// Create the generator.
 	OpenSSLECFpPoint* temp = new OpenSSLECFpPoint(fpParams->getXg(), fpParams->getYg(), this, true);
 	generator = shared_ptr<OpenSSLECFpPoint>(temp);
@@ -838,12 +838,13 @@ shared_ptr<GroupElement> OpenSSLDlogECFp::encodeByteArrayToGroupElement(const ve
 	biginteger p = (dynamic_pointer_cast<ECFpGroupParams>(groupParams))->getP();
 	int l = bytesCount(p);
 
-	std::shared_ptr<char> randomArray(new char[l - k - 2], default_delete<char[]>());
+	//std::shared_ptr<char> randomArray(new char[l - k - 2], default_delete<char[]>());
+	vector<byte> randomArray(l - k - 2);
 	std::shared_ptr<char> newString(new char[l - k - 1 + len], default_delete<char[]>());
 	//copy the given string into the right place within the new string and put it length at the end of the new string.
 	memcpy(newString.get() + l - k - 2, binaryString.data(), len);
 	newString.get()[l - k - 2 + len] = (char)len;
-	randomArray.get()[0] = 1; // we fix the first bytes in the random array in order to fix the x value to be positive.
+	randomArray[0] = 1; // we fix the first bytes in the random array in order to fix the x value to be positive.
 	//Create the openssl point. This point should contain the calculated value according to the given input.
 	shared_ptr<EC_POINT> point(EC_POINT_new(curve.get()), EC_POINT_free);
 	if (NULL == point) {
@@ -854,8 +855,9 @@ shared_ptr<GroupElement> OpenSSLDlogECFp::encodeByteArrayToGroupElement(const ve
 	bool success = 0;
 	BIGNUM * x = BN_new();
 	do {
-		RAND_bytes((unsigned char*)randomArray.get() +1, l - k - 3);
-		memcpy(newString.get(), randomArray.get(), l - k - 2);
+		//RAND_bytes((unsigned char*)randomArray.get() +1, l - k - 3);
+		random->getPRGBytes(randomArray, 1, l - k - 3);
+		memcpy(newString.get(), randomArray.data(), l - k - 2);
 
 		//Convert the result to a BigInteger (bIString)
 		if (NULL == (x = BN_bin2bn((unsigned char*)newString.get(), l - k - 1 + len, NULL))) break;
@@ -903,7 +905,7 @@ shared_ptr<GroupElement> OpenSSLDlogECFp::reconstructElement(bool bCheckMembersh
 }
 
 
-void OpenSSLDlogECF2m::init(string fileName, string curveName) {
+void OpenSSLDlogECF2m::init(string fileName, string curveName, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	//Get the parameters of the group from the config file and create the groupParams member.
 	createGroupParams();
 
@@ -913,6 +915,8 @@ void OpenSSLDlogECF2m::init(string fileName, string curveName) {
 	//Create the generator.
 	OpenSSLECF2mPoint* temp = new OpenSSLECF2mPoint(dynamic_pointer_cast<ECF2mGroupParams>(groupParams)->getXg(), dynamic_pointer_cast<ECF2mGroupParams>(groupParams)->getYg(), this, true);
 	generator = shared_ptr<OpenSSLECF2mPoint>(temp);
+
+	this->random_element_gen = random;
 
 	/*Initialize the native curve with the generator, order and cofactor.*/
 	//Convert the order and cofactor into BIGNUM objects.

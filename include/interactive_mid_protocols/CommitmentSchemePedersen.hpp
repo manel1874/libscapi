@@ -162,7 +162,7 @@ class CmtPedersenReceiverCore : public virtual CmtReceiver {
 protected:
 	shared_ptr<CommParty> channel;
 	shared_ptr<DlogGroup> dlog;
-	mt19937 random;
+	shared_ptr<PrgFromOpenSSLAES> random;
 	biginteger trapdoor; // sampled random value in Zq that will be the trpadoor.
 	// h is a value calculated during the creation of this receiver and is sent to
 	// the committer once in the beginning.
@@ -174,26 +174,10 @@ protected:
 	* If this constructor is used for the recevier then also the default constructor 
 	* needs to be used by the committer.
 	*/
-	CmtPedersenReceiverCore(shared_ptr<CommParty> channel);
-
-	/**
-	* Constructor that receives a connected channel (to the committer),the DlogGroup agreed upon between them and a SecureRandom object.
-	* The Committer needs to be instantiated with the same DlogGroup, otherwise nothing will work properly.
-	*/
-	CmtPedersenReceiverCore(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog) {
-		doConstruct(channel, dlog);
-	}
+	CmtPedersenReceiverCore(shared_ptr<CommParty> channel, const shared_ptr<PrgFromOpenSSLAES> & random, shared_ptr<DlogGroup> dlog = make_shared<OpenSSLDlogECF2m>("K-233"));
 
 private:
 	biginteger qMinusOne;
-
-	/**
-	* Sets the given parameters and execute the preprocess phase of the scheme.
-	* @param channel
-	* @param dlog
-	* @param random
-	*/
-	void doConstruct(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog);
 
 	/**
 	* Runs the preprocess stage of the protocol:
@@ -267,20 +251,10 @@ class CmtPedersenCommitterCore : public virtual CmtCommitter {
 protected:
 	
 	shared_ptr<DlogGroup> dlog;
-	mt19937 random;
+	shared_ptr<PrgFromOpenSSLAES> random;
 	
 	// the content of the message obtained from the receiver during the pre-process phase which occurs upon construction.
 	shared_ptr<GroupElement> h;
-
-	/**
-	* Constructor that receives a connected channel (to the receiver) and chooses 
-	* default dlog and random.
-	* The receiver needs to be instantiated with the default constructor too.
-	*/
-	CmtPedersenCommitterCore(shared_ptr<CommParty> channel) {
-		auto dg = make_shared<OpenSSLDlogECF2m>("K-233");
-		doConstruct(channel, dg);
-	}
 
 	/**
 	* Constructor that receives a connected channel (to the receiver),
@@ -288,19 +262,10 @@ protected:
 	* The Receiver needs to be instantiated with the same DlogGroup, 
 	* otherwise nothing will work properly.
 	*/
-	CmtPedersenCommitterCore(shared_ptr<CommParty> channel,	shared_ptr<DlogGroup> dlog) {
-		doConstruct(channel, dlog);
-	}
+	CmtPedersenCommitterCore(shared_ptr<CommParty> channel, const shared_ptr<PrgFromOpenSSLAES> & random, shared_ptr<DlogGroup> dlog = make_shared<OpenSSLDlogECF2m>("K-233"));
 
 private:
 	biginteger qMinusOne;
-	/**
-	* Sets the given parameters and execute the preprocess phase of the scheme.
-	* @param channel
-	* @param dlog
-	* @param random
-	*/
-	void doConstruct(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog);
 
 	/**
 	* Runs the preprocess phase of the commitment scheme:
@@ -344,7 +309,7 @@ public:
 	* The receiver needs to be instantiated with the default constructor too.
 	* @param channel
 	*/
-	CmtPedersenCommitter(shared_ptr<CommParty> channel) : CmtPedersenCommitterCore(channel) {};
+	CmtPedersenCommitter(shared_ptr<CommParty> channel, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) : CmtPedersenCommitterCore(channel, random) {};
 
 	
 	/**
@@ -356,8 +321,8 @@ public:
 	* @param dlog
 	* @param random
 	*/
-	CmtPedersenCommitter(shared_ptr<CommParty> channel,	shared_ptr<DlogGroup> dlog) :
-		CmtPedersenCommitterCore(channel, dlog) {};
+	CmtPedersenCommitter(shared_ptr<CommParty> channel,	shared_ptr<DlogGroup> dlog, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) :
+		CmtPedersenCommitterCore(channel, random, dlog) {};
 	
 	shared_ptr<CmtCommitValue> generateCommitValue(vector<byte> & x) override {
 		biginteger bi = decodeBigInteger(x.data(), x.size());
@@ -366,7 +331,7 @@ public:
 	vector<byte> generateBytesFromCommitValue(CmtCommitValue* value) override;
 
 	shared_ptr<CmtCommitValue> sampleRandomCommitValue() override {
-		auto val = getRandomInRange(0, dlog->getOrder() - 1, random);
+		auto val = getRandomInRange(0, dlog->getOrder() - 1, random.get());
 		return make_shared<CmtBigIntegerCommitValue>(make_shared<biginteger>(val));
 	}
 };
@@ -386,7 +351,7 @@ public:
 	* The committer needs to be instantiated with the default constructor too.
 	* @param channel
 	*/
-	CmtPedersenReceiver(shared_ptr<CommParty> channel) : CmtPedersenReceiverCore(channel) {};
+	CmtPedersenReceiver(shared_ptr<CommParty> channel, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) : CmtPedersenReceiverCore(channel, random) {};
 
 	/**
 	* Constructor that receives a connected channel (to the receiver), the DlogGroup agreed upon between them and a SecureRandom object.
@@ -398,8 +363,8 @@ public:
 	* @throws InvalidDlogGroupException if the given dlog is not valid.
 	* @throws IOException if there was a problem in the communication
 	*/
-	CmtPedersenReceiver(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog) :
-		CmtPedersenReceiverCore(channel, dlog) {};
+	CmtPedersenReceiver(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) :
+		CmtPedersenReceiverCore(channel, random, dlog) {};
 
 	/**
 	* This function converts the given commit value to a byte array.
@@ -428,15 +393,15 @@ private:
 	* Creates the ZK provers using sigma protocols that prove Pedersen's proofs.
 	* @param t
 	*/
-	void doConstruct(int t);
+	void doConstruct(int t, const shared_ptr<PrgFromOpenSSLAES> & random);
 
 public:
 	/**
 	* Default constructor that gets the channel and creates the ZK provers with default Dlog group.
 	* @param channel
 	*/
-	CmtPedersenWithProofsCommitter(shared_ptr<CommParty> channel, int t) : CmtPedersenCommitter(channel) {
-		doConstruct(t);
+	CmtPedersenWithProofsCommitter(shared_ptr<CommParty> channel, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) : CmtPedersenCommitter(channel, random) {
+		doConstruct(t, random);
 	};
 
 	/**
@@ -447,9 +412,9 @@ public:
 	* @param t statistical parameter
 	* @param random
 	*/
-	CmtPedersenWithProofsCommitter(shared_ptr<CommParty> channel, int t, shared_ptr<DlogGroup> dlog) :
-		CmtPedersenCommitter(channel, dlog) {
-		doConstruct(t);
+	CmtPedersenWithProofsCommitter(shared_ptr<CommParty> channel, int t, shared_ptr<DlogGroup> dlog, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) :
+		CmtPedersenCommitter(channel, dlog, random) {
+		doConstruct(t, random);
 	};
 
 	void proveKnowledge(long id) override;

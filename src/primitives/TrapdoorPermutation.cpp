@@ -81,17 +81,16 @@ byte* TrapdoorPermutationAbs::hardCoreFunction(TPElement * tpEl) {
 /*RSAElement                                     */
 /*************************************************/
 
-RSAElement::RSAElement(biginteger modN){
+RSAElement::RSAElement(biginteger modN, const shared_ptr<PrgFromOpenSSLAES> & generator){
 	/*
 	* samples a number between 1 to n-1
 	*/
-	mt19937 generator = get_seeded_random();
 	biginteger randNumber;
 	int numbit = NumberOfBits(modN);
 	biginteger expo = mp::pow(biginteger(2), numbit-1);
 	do {
 		// samples a random BigInteger with modN.bitLength()+1 bits
-		randNumber = getRandomInRange(0, expo, generator); 
+		randNumber = getRandomInRange(0, expo, generator.get()); 
 	} while (randNumber > (modN - 2)); // drops the element if it's bigger than mod(N)-2
 	// gets a random biginteger between 1 to modN-1
 	randNumber += 1;

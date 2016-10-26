@@ -253,14 +253,10 @@ public:
 class OpenSSLRC4 : public RC4 {
 private:
 	RC4_KEY *rc4; //pointer to the openssl RC4 object.
-	mt19937 random;
 	bool _isKeySet=false;
 
 public:
-	OpenSSLRC4() {
-		this->random = get_seeded_random();
-		rc4 = new RC4_KEY();
-	}
+	OpenSSLRC4() { rc4 = new RC4_KEY();	}
 	void setKey(SecretKey secretKey) override;	
 	bool isKeySet() override { return _isKeySet; };
 	string getAlgorithmName() override { return "RC4"; };

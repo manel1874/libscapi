@@ -61,7 +61,6 @@ OTFullSimDDHReceiverMsg OTFullSimSenderPreprocessUtil::waitForFullSimMessageFrom
 * @throws CommitValueException can occur in case of ElGamal commitment scheme.
 */
 shared_ptr<OTFullSimPreprocessPhaseValues> OTFullSimSenderPreprocessUtil::preProcess(CommParty* channel, DlogGroup* dlog, ZKPOKVerifier* zkVerifier) {
-
 	//Wait for message from R
 	OTFullSimDDHReceiverMsg message = waitForFullSimMessageFromReceiver(channel);
 
@@ -185,7 +184,6 @@ OTRGroupElementPairMsg OTFullSimSenderTransferUtilAbs::waitForMessageFromReceive
 * @throws ClassNotFoundException if there was a problem during the serialization mechanism
 */
 void OTFullSimSenderTransferUtilAbs::transfer(CommParty* channel, OTSInput* input, OTFullSimPreprocessPhaseValues* preprocessValues) {
-
 	//Wait for message from R
 	OTRGroupElementPairMsg message = waitForMessageFromReceiver(channel);
 

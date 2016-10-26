@@ -89,7 +89,7 @@ public:
 	* @param random a source of randomness
 	* @return an RSAModulus structure that holds N, p and q.
 	*/
-	RSAModulus(size_t length, int certainty, mt19937 & random) {
+	RSAModulus(size_t length, int certainty, PrgFromOpenSSLAES* random) {
 
 		int pbitlength = (length + 1) / 2;
 		int qbitlength = length - pbitlength;
@@ -101,7 +101,6 @@ public:
 		for (;;) {
 			do {
 				q = getRandomPrime(qbitlength, certainty, random);
-				
 			} while ((bytesCount(mp::abs(q - p)) * 8) < mindiffbits);
 			
 			// calculate the modulus
@@ -318,7 +317,7 @@ public:
 	* Constructor that chooses a random element according to the given modulus.
 	* @param modN the modulus
 	*/
-	RSAElement(biginteger modN);
+	RSAElement(biginteger modN, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 	/**
 	* Constructor that gets a modulus and a value. If the value is a valid RSA element according to the modulus, sets it to be the element.
 	* @param modN - the modulus

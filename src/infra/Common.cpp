@@ -50,14 +50,14 @@ int NumberOfBits(const biginteger bi) {
 	return find_log2_floor(bis)+ 1;
 }
 
-void gen_random_bytes_vector(vector<byte> &v, const int len, mt19937 & random) {
+void gen_random_bytes_vector(vector<byte> &v, const int len, PrgFromOpenSSLAES* random) {
 	static const char alphanum[] =
 		"0123456789"
 		"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 		"abcdefghijklmnopqrstuvwxyz";
 
 	for (int i = 0; i < len; ++i) 
-		v.push_back(alphanum[random() % (sizeof(alphanum) - 1)]);
+		v.push_back(alphanum[random->getRandom64() % (sizeof(alphanum) - 1)]);
 }
 
 /**
@@ -184,18 +184,11 @@ string hexStr(vector<byte> const & data)
 	return res;
 }
 
-mt19937 get_seeded_random() {
-	mt19937 mt;
-	auto seed = chrono::high_resolution_clock::now().time_since_epoch().count();
-	mt.seed(seed);
-	return mt;
-}
+shared_ptr<PrgFromOpenSSLAES> get_seeded_prg() {
+	auto prg = make_shared<PrgFromOpenSSLAES>();
+	prg->setKey(prg->generateKey(128));
+	return prg;
 
-mt19937_64 get_seeded_random64() {
-	mt19937_64 mt;
-	auto seed = chrono::high_resolution_clock::now().time_since_epoch().count();
-	mt.seed(seed);
-	return mt;
 }
 
 void print_elapsed_ms(std::chrono::time_point<std::chrono::system_clock> start, string message) {
@@ -214,23 +207,18 @@ std::chrono::time_point<std::chrono::system_clock> scapi_now() {
 	return chrono::system_clock::now();
 }
 
-biginteger getRandomInRange(biginteger min, biginteger max, std::mt19937 & random)
-{
-	boost::random::uniform_int_distribution<biginteger> ui(min, max);
-	biginteger res = ui(random);
-	return res;
-}
-
 biginteger getRandomInRange(biginteger min, biginteger max, PrgFromOpenSSLAES* random) {
-	biginteger num = (biginteger)(random->getRandom32());
+	int bytesNum = bytesCount(max);
+	vector<byte> out(bytesNum);
+	random->getPRGBytes(out, 0, bytesNum);
+	biginteger num = abs(decodeBigInteger(out.data(), out.size()));
 	num = num % (max + 1 - min); // max + 1 because max also can be chosen.
 	return num + min;
 }
 
-biginteger getRandomPrime(int numBytes, int certainty, mt19937 & random) {
+biginteger getRandomPrime(int numBytes, int certainty, PrgFromOpenSSLAES* random) {
 	biginteger p;
 	biginteger max = mp::pow(biginteger(2),numBytes);
-	
 	do {
 		p = getRandomInRange(0, max, random);
 	} while (!isPrime(p, certainty));
@@ -246,6 +234,8 @@ void print_byte_array(byte * arr, int len, string message)
 }
 
 bool isPrime(biginteger bi, int certainty) {
-	auto prg = get_seeded_random();
-	return (miller_rabin_test(bi, certainty, prg));
+	mt19937 mt;
+	auto seed = chrono::high_resolution_clock::now().time_since_epoch().count();
+	mt.seed(seed);
+	return (miller_rabin_test(bi, certainty, mt));
 }

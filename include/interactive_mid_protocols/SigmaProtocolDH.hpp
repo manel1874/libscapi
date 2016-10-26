@@ -29,6 +29,7 @@
 #pragma once
 #include "SigmaProtocol.hpp"
 #include "../primitives/Dlog.hpp"
+#include "../primitives/Prg.hpp"
 
 /**
 * Concrete implementation of SigmaProtocol input, used by the SigmaDH verifier and simulator.<p>
@@ -147,7 +148,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaDHSimulator(shared_ptr<DlogGroup> dlog, int t);
+	SigmaDHSimulator(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -177,7 +178,7 @@ private:
 
 	shared_ptr<DlogGroup> dlog; 		//Underlying DlogGroup.
 	int t;								//Soundness parameter.
-	mt19937 random;
+	shared_ptr<PrgFromOpenSSLAES> random;
 	biginteger qMinusOne;
 
 	/**
@@ -222,7 +223,7 @@ public:
 	* @param random
 	* @throws IllegalArgumentException if soundness parameter is invalid.
 	*/
-	SigmaDHProverComputation(shared_ptr<DlogGroup> dlog, int t);
+	SigmaDHProverComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -261,7 +262,7 @@ public:
 private:
 	shared_ptr<DlogGroup> dlog;				// Underlying DlogGroup.
 	int t; 									// soundness parameter in BITS.
-	mt19937 random;							//source of randomness to use.
+	shared_ptr<PrgFromOpenSSLAES> random;							//source of randomness to use.
 	shared_ptr<SigmaDHProverInput> input;	// Contains h, u, v and w. 
 	biginteger r;							// The value chosen in the protocol.
 	biginteger qMinusOne;
@@ -307,7 +308,7 @@ public:
 	* @throws InvalidDlogGroupException if the given dlog is invalid.
 	* @throws IllegalArgumentException if soundness parameter is invalid.
 	*/
-	SigmaDHVerifierComputation(shared_ptr<DlogGroup> dlog, int t);
+	SigmaDHVerifierComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -352,7 +353,7 @@ private:
 		shared_ptr<DlogGroup> dlog;			// Underlying DlogGroup.
 		int t; 								//Soundness parameter in BITS.
 		vector<byte> e;						// The challenge.
-		mt19937 random;
+		shared_ptr<PrgFromOpenSSLAES> random;
 
 		/**
 		* Checks the validity of the given soundness parameter.

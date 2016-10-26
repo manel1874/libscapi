@@ -50,7 +50,7 @@ void SigmaPedersenCmtKnowledgeMsg::initFromString(const string & s) {
 * @param random
 * @throws IllegalArgumentException if soundness parameter is invalid.
 */
-SigmaPedersenCmtKnowledgeSimulator::SigmaPedersenCmtKnowledgeSimulator(shared_ptr<DlogGroup> dlog, int t) {
+SigmaPedersenCmtKnowledgeSimulator::SigmaPedersenCmtKnowledgeSimulator(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 
 	//Sets the parameters.
 	this->dlog = dlog;
@@ -61,7 +61,7 @@ SigmaPedersenCmtKnowledgeSimulator::SigmaPedersenCmtKnowledgeSimulator(shared_pt
 		throw invalid_argument("soundness parameter t does not satisfy 2^t<q");
 	}
 
-	this->random = get_seeded_random();
+	this->random = random;
 }
 
 bool SigmaPedersenCmtKnowledgeSimulator::checkSoundnessParam() {
@@ -89,8 +89,8 @@ shared_ptr<SigmaSimulatorOutput> SigmaPedersenCmtKnowledgeSimulator::simulate(Si
 	
 	//SAMPLE a random u, v <- Zq
 	biginteger qMinusOne = dlog->getOrder() - 1;
-	biginteger u = getRandomInRange(0, qMinusOne, random);
-	biginteger v = getRandomInRange(0, qMinusOne, random);
+	biginteger u = getRandomInRange(0, qMinusOne, random.get());
+	biginteger v = getRandomInRange(0, qMinusOne, random.get());
 
 	//COMPUTE a = h^u*g^v*c^(-e) (where -e here means -e mod q)
 	//Compute h^u
@@ -112,7 +112,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaPedersenCmtKnowledgeSimulator::simulate(Si
 shared_ptr<SigmaSimulatorOutput> SigmaPedersenCmtKnowledgeSimulator::simulate(SigmaCommonInput* input) {
 	//Create a new byte array of size t/8, to get the required byte size.
 	vector<byte> e(t / 8);
-	RAND_bytes(e.data(), t / 8);
+	random->getPRGBytes(e, 0, t / 8);
 
 	//Call the other simulate function with the given input and the sampled e.
 	return simulate(input, e);
@@ -125,7 +125,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaPedersenCmtKnowledgeSimulator::simulate(Si
 * @param random
 * @throws IllegalArgumentException if soundness parameter is invalid.
 */
-SigmaPedersenCmtKnowledgeProverComputation::SigmaPedersenCmtKnowledgeProverComputation(shared_ptr<DlogGroup> dlog, int t) {
+SigmaPedersenCmtKnowledgeProverComputation::SigmaPedersenCmtKnowledgeProverComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 
 	//Sets the parameters.
 	this->dlog = dlog;
@@ -136,7 +136,7 @@ SigmaPedersenCmtKnowledgeProverComputation::SigmaPedersenCmtKnowledgeProverCompu
 		throw invalid_argument("soundness parameter t does not satisfy 2^t<q");
 	}
 
-	this->random = get_seeded_random();
+	this->random = random;
 }
 
 /**
@@ -154,8 +154,8 @@ shared_ptr<SigmaProtocolMsg> SigmaPedersenCmtKnowledgeProverComputation::compute
 	
 	//Sample random alpha, beta.
 	biginteger qMinusOne = dlog->getOrder() - 1;
-	alpha = getRandomInRange(0, qMinusOne, random);
-	beta = getRandomInRange(0, qMinusOne, random);
+	alpha = getRandomInRange(0, qMinusOne, random.get());
+	beta = getRandomInRange(0, qMinusOne, random.get());
 
 	//Compute h^alpha
 	auto hToAlpha = dlog->exponentiate(dynamic_pointer_cast<SigmaPedersenCmtKnowledgeCommonInput>(this->input->getCommonInput())->getH().get(), alpha);
@@ -220,7 +220,7 @@ shared_ptr<SigmaProtocolMsg> SigmaPedersenCmtKnowledgeProverComputation::compute
 * @throws InvalidDlogGroupException if the given DlogGroup is not valid.
 * @throws IllegalArgumentException if soundness parameter is invalid.
 */
-SigmaPedersenCmtKnowledgeVerifierComputation::SigmaPedersenCmtKnowledgeVerifierComputation(shared_ptr<DlogGroup> dlog, int t) {
+SigmaPedersenCmtKnowledgeVerifierComputation::SigmaPedersenCmtKnowledgeVerifierComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 
 	if (!dlog->validateGroup())
 		throw InvalidDlogGroupException("invalid dlog");
@@ -234,7 +234,7 @@ SigmaPedersenCmtKnowledgeVerifierComputation::SigmaPedersenCmtKnowledgeVerifierC
 		throw invalid_argument("soundness parameter t does not satisfy 2^t<q");
 	}
 
-	this->random = get_seeded_random();
+	this->random = random;
 }
 
 /**
@@ -255,7 +255,7 @@ bool SigmaPedersenCmtKnowledgeVerifierComputation::checkSoundnessParam() {
 void SigmaPedersenCmtKnowledgeVerifierComputation::sampleChallenge() {
 	//make space for t/8 bytes and fill it with random values.
 	e.resize(t / 8);
-	RAND_bytes(e.data(), t / 8);
+	random->getPRGBytes(e, 0, t / 8);
 }
 
 /**

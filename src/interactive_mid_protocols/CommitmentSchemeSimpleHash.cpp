@@ -151,7 +151,6 @@ shared_ptr<CmtCDecommitmentMessage> CmtSimpleHashCommitter::generateDecommitment
 */
 shared_ptr<CmtCommitValue> CmtSimpleHashCommitter::sampleRandomCommitValue() {
 	vector<byte> val;
-	//RAND_bytes(val.data(), 32);
 	prg->getPRGBytes(val, 0, 32);
 
 	return make_shared<CmtByteArrayCommitValue>(make_shared<vector<byte>>(val));

@@ -73,8 +73,8 @@ void ZKFromSigmaProver::prove(shared_ptr<ZKProverInput> input) {
 /*   ZKFromSigmaVerifier                        */
 /************************************************/
 
-ZKFromSigmaVerifier::ZKFromSigmaVerifier(shared_ptr<CommParty> channel,
-	shared_ptr<SigmaVerifierComputation> sVerifier, shared_ptr<CmtCommitter> committer) {
+ZKFromSigmaVerifier::ZKFromSigmaVerifier(shared_ptr<CommParty> channel,	shared_ptr<SigmaVerifierComputation> sVerifier, shared_ptr<CmtCommitter> committer, 
+	const shared_ptr<PrgFromOpenSSLAES> & random) {
 	// committer must be an instance of PerfectlyHidingCT
 	auto perfectHidingCommiter = std::dynamic_pointer_cast<PerfectlyHidingCmt>(committer);
 	if (!perfectHidingCommiter) 
@@ -89,7 +89,7 @@ ZKFromSigmaVerifier::ZKFromSigmaVerifier(shared_ptr<CommParty> channel,
 	this->sVerifier = sVerifier;
 	this->committer = committer;
 	this->channel = channel;
-	this->random = get_seeded_random64();
+	this->random = random;
 }
 
 bool ZKFromSigmaVerifier::verify(ZKCommonInput* input, const shared_ptr<SigmaProtocolMsg> & emptyA, const shared_ptr<SigmaProtocolMsg> & emptyZ) {
@@ -168,28 +168,35 @@ bool ZKPOKFromSigmaCmtPedersenVerifier::verify(ZKCommonInput* input,
 	auto sigmaCommonInput = dynamic_cast<SigmaCommonInput*>(input);
 	if (!sigmaCommonInput) 
 		throw invalid_argument("the given input must be an instance of SigmaCommonInput");
-
+	
 	// sample a random challenge  e <- {0, 1}^t 
 	sVerifier->sampleChallenge();
 	auto e = sVerifier->getChallenge();
-
+	//the challenge should be a positive number.
+	if (decodeBigInteger(e.data(), e.size()) < 0) {
+		encodeBigInteger(abs(decodeBigInteger(e.data(), e.size())), e.data(), e.size());
+		sVerifier->setChallenge(e);
+	}
+		
 	// run TRAP_COMMIT.commit as the committer with input e,
 	long id = commit(e);
+	
 	// wait for a message a from P
 	receiveMsgFromProver(emptyA.get());
+	
 	// run COMMIT.decommit as the decommitter
 	committer->decommit(id);
-
+	
 	bool valid = true;
 
 	// wait for a message z from P
 	receiveMsgFromProver(emptyZ.get());
 	// wait for trap from P
 	receiveTrapFromProver(trap.get());
-
+	
 	// run TRAP_COMMIT.valid(T,trap), where T is the transcript from the commit phase
 	valid = valid && committer->validate(trap);
-
+	
 	// run transcript (a, e, z) is accepting in sigma on input x
 	valid = valid && sVerifier->verify(sigmaCommonInput, emptyA.get(), emptyZ.get());
 	
@@ -203,7 +210,7 @@ bool ZKPOKFromSigmaCmtPedersenVerifier::verify(ZKCommonInput* input,
 */
 long ZKPOKFromSigmaCmtPedersenVerifier::commit(vector<byte> e) {
 	auto val = committer->generateCommitValue(e);
-	long id = random();
+	long id = random->getRandom64();
 	id = abs(id);
 	committer->commit(val, id);
 	return id;

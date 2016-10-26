@@ -29,9 +29,6 @@
 #include "../include/interactive_mid_protocols/SigmaProtocolOrMultiple.hpp"
 
 string SigmaOrMultipleCommonInput::toString() {
-	vector<shared_ptr<SigmaCommonInput>> sigmaInputs;
-	int k;
-
 	string output = "";
 	for (int i = 0; i < sigmaInputs.size(); i++) {
 		output += sigmaInputs[i]->toString();
@@ -126,7 +123,7 @@ void SigmaOrMultipleSecondMsg::initFromString(const string & row) {
 * @param t soundness parameter. t MUST be equal to both t values of the underlying simulators object.
 * @param random
 */
-SigmaOrMultipleSimulator::SigmaOrMultipleSimulator(vector<shared_ptr<SigmaSimulator>> simulators, int t) {
+SigmaOrMultipleSimulator::SigmaOrMultipleSimulator(vector<shared_ptr<SigmaSimulator>> simulators, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	len = simulators.size();
 
 	//If the given t is different from one of the underlying object's t values, throw exception.
@@ -137,10 +134,10 @@ SigmaOrMultipleSimulator::SigmaOrMultipleSimulator(vector<shared_ptr<SigmaSimula
 	}
 	this->simulators = simulators;
 	this->t = t;
-	random = get_seeded_random();
+	this->random = random;
 
 	//Initialize the field GF2E with a random irreducible polynomial with degree t.
-	initField(t, random());
+	initField(t, random->getRandom32());
 	
 }
 
@@ -178,7 +175,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaOrMultipleSimulator::simulate(SigmaCommonI
 
 	vector<shared_ptr<NTL::GF2E>> elements;
 	//For every j = 1 to n-k, sample a random element ej <- GF[2^t]. We sample the random elements in one native call.
-	vector<vector<byte>> challenges = sampleRandomFieldElements(nMinusK, t, elements, random);
+	vector<vector<byte>> challenges = sampleRandomFieldElements(nMinusK, t, elements, random.get());
 
 	//Create two arrays of indexes. These arrays used for calculate the interpolated polynomial.
 	vector<int> indexesNotInI;
@@ -304,13 +301,13 @@ NTL::GF2E generateIndexPolynomial(int i) {
 	return to_GF2E(indexPoly);
 }
 
-vector<vector<byte>> sampleRandomFieldElements(int numElements, int t, vector<shared_ptr<NTL::GF2E>> & elements, mt19937 & random) {
+vector<vector<byte>> sampleRandomFieldElements(int numElements, int t, vector<shared_ptr<NTL::GF2E>> & elements, PrgFromOpenSSLAES* random) {
 	vector<vector<byte>> challenges;
 
 	//Samples random elements, puts their bytes in the output array and put their addresses in the pointers array.
 	for (int i = 0; i<numElements; i++) {
 		vector<byte> e(t / 8);
-		RAND_bytes(e.data(), t / 8);
+		random->getPRGBytes(e, 0, t / 8);
 		//modify the challenge to be positive.
 		e.data()[e.size() - 1] = e.data()[e.size() - 1] & 127;
 		//sample random field element.
@@ -353,7 +350,7 @@ NTL::GF2E convertBytesToGF2E(vector<byte> elementByts) {
 shared_ptr<SigmaSimulatorOutput> SigmaOrMultipleSimulator::simulate(SigmaCommonInput* input)  {
 	//Create a new byte array of size t/8, to get the required byte size and fill the byte array with random values.
 	vector<byte> e(t / 8);
-	RAND_bytes(e.data(), t / 8);
+	random->getPRGBytes(e, 0, t / 8);
 	//modify the challenge to be positive.
 	e.data()[e.size() - 1] = e.data()[e.size() - 1] & 127;
 
@@ -381,7 +378,7 @@ bool SigmaOrMultipleSimulator::checkChallengeLength(int size) {
 * @param t soundness parameter. t MUST be equal to all t values of the underlying provers object.
 * @throws IllegalArgumentException if the given t is not equal to all t values of the underlying provers object.
 */
-SigmaOrMultipleProverComputation::SigmaOrMultipleProverComputation(map<int, shared_ptr<SigmaProverComputation>> provers, map<int, shared_ptr<SigmaSimulator>> simulators, int t) {
+SigmaOrMultipleProverComputation::SigmaOrMultipleProverComputation(map<int, shared_ptr<SigmaProverComputation>> provers, map<int, shared_ptr<SigmaSimulator>> simulators, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	//If the given t is different from one of the underlying object's t values, throw exception.
 
 	for (auto prover : provers) {
@@ -399,9 +396,9 @@ SigmaOrMultipleProverComputation::SigmaOrMultipleProverComputation(map<int, shar
 	this->simulators = simulators;
 	len = k + simulators.size();
 	this->t = t;
-	random = get_seeded_random();
+	this->random = random;
 	//Initialize the field GF2E with a random irreducible polynomial with degree t.
-	initField(t, random());
+	initField(t, random->getRandom32());
 }
 
 /**
@@ -434,7 +431,7 @@ shared_ptr<SigmaProtocolMsg> SigmaOrMultipleProverComputation::computeFirstMsg(s
 	
 	//Sample random values for this protocol.
 	//For every j not in I, sample a random element ej <- GF[2^t]. We sample the random elements in one native call.
-	auto sChallenges = sampleRandomFieldElements(len - k, t, elements, random);
+	auto sChallenges = sampleRandomFieldElements(len - k, t, elements, random.get());
 	
 	//Create an array to hold all messages.
 	vector<shared_ptr<SigmaProtocolMsg>> firstMessages;
@@ -537,7 +534,7 @@ shared_ptr<SigmaSimulator> SigmaOrMultipleProverComputation::getSimulator() {
 * @param random source of randomness
 * @throws IllegalArgumentException if the given t is not equal to all t values of the underlying verifiers object.
 */
-SigmaOrMultipleVerifierComputation::SigmaOrMultipleVerifierComputation(vector<shared_ptr<SigmaVerifierComputation>> verifiers, int t) {
+SigmaOrMultipleVerifierComputation::SigmaOrMultipleVerifierComputation(vector<shared_ptr<SigmaVerifierComputation>> verifiers, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	//If the given t is different from one of the underlying object's t values, throw exception.
 	for (size_t i = 0; i < verifiers.size(); i++) {
 		if (t != verifiers[i]->getSoundnessParam()) {
@@ -547,10 +544,10 @@ SigmaOrMultipleVerifierComputation::SigmaOrMultipleVerifierComputation(vector<sh
 	this->verifiers = verifiers;
 	len = verifiers.size();
 	this->t = t;
-	random = get_seeded_random();
+	this->random = random;
 
 	//Initialize the field GF2E with a random irreducible polynomial with degree t.
-	initField(t, get_seeded_random()());
+	initField(t, random->getRandom32());
 }
 
 /**
@@ -560,7 +557,7 @@ SigmaOrMultipleVerifierComputation::SigmaOrMultipleVerifierComputation(vector<sh
 void SigmaOrMultipleVerifierComputation::sampleChallenge() {
 	//make space for t/8 bytes and fill it with random values.
 	challengeBytes.resize(t / 8);
-	RAND_bytes(challengeBytes.data(), t / 8);
+	random->getPRGBytes(challengeBytes, 0, t / 8);
 	//modify the challenge to be positive.
 	challengeBytes.data()[challengeBytes.size() - 1] = challengeBytes.data()[challengeBytes.size() - 1] & 127;
 	challengeElement = convertBytesToGF2E(challengeBytes);

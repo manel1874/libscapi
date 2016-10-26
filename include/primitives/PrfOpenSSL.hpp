@@ -112,20 +112,20 @@ class OpenSSLHMAC : public Hmac {
 private:
 	HMAC_CTX * hmac; //Pointer to the native hmac.
 	bool _isKeySet; //until setKey is called set to false.
-	mt19937 random; //source of randomness used in key generation
-	void construct(string hashName);
+	shared_ptr<PrgFromOpenSSLAES> random; //source of randomness used in key generation
+	void construct(string hashName, const shared_ptr<PrgFromOpenSSLAES> & random);
 
 public: 
 	/**
 	* Default constructor that uses SHA1.
 	*/
-	OpenSSLHMAC() { construct("SHA-256"); };
+	OpenSSLHMAC() { construct("SHA-256", get_seeded_prg()); }
 	/**
 	* This constructor receives a hashName and builds the underlying hmac according to it. It can be called from the factory.
 	* @param hashName - the hash function to translate into OpenSSL's hash.
 	* @throws FactoriesException if there is no hash function with given name.
 	*/
-	OpenSSLHMAC(string hashName) { construct(hashName); };
+	OpenSSLHMAC(string hashName, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) { construct(hashName, random); };
 
 	/**
 	* This constructor gets a random and a SCAPI CryptographicHash to be the underlying hash and retrieves the name of the hash in
@@ -134,7 +134,8 @@ public:
 	* @param random the random object to use.
 	* @throws FactoriesException if there is no hash function with given name.
 	*/
-	OpenSSLHMAC(CryptographicHash *hash) { construct(hash->getAlgorithmName()); };
+	OpenSSLHMAC(CryptographicHash *hash, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) { construct(hash->getAlgorithmName(), random); };
+	
 	/**
 	* Initializes this hmac with a secret key.
 	* @param secretKey the secret key

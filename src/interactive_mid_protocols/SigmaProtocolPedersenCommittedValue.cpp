@@ -90,7 +90,6 @@ SigmaPedersenCommittedValueProverComputation::SigmaPedersenCommittedValueProverC
 
 	this->dlog = dlog;
 	this->t = t;
-	this->random = get_seeded_random();
 }
 
 /**

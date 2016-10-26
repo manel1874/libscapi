@@ -121,7 +121,7 @@ class DlogGroup
 protected:
 	shared_ptr<GroupParams> groupParams;  // group parameters
 	shared_ptr<GroupElement> generator;	// generator of the group
-	mt19937 random_element_gen;
+	shared_ptr<PrgFromOpenSSLAES> random_element_gen;
 
 	int k; // k is the maximum length of a string to be converted to a Group Element of this group.
 		   // If a string exceeds the k length it cannot be converted.
@@ -506,7 +506,7 @@ protected:
 	* choose a random element between 1 to p-1
 	* calculate element^2 mod p
 	*/
-	ZpSafePrimeElement(const biginteger & p, mt19937 & prg);
+	ZpSafePrimeElement(const biginteger & p, PrgFromOpenSSLAES* prg);
 	/*
 	* Constructor that simply create element using the given value
 	*/
@@ -832,12 +832,12 @@ protected:
 	const string NISTEC_PROPERTIES_FILE = "../include/configFiles/NISTEC.txt";
 #endif
 	
-	virtual void init(string fileName, string curveName);
+	virtual void init(string fileName, string curveName, const shared_ptr<PrgFromOpenSSLAES> & random);
 
 public:
-	DlogEllipticCurve(string fileName, string curveName) { init(fileName, curveName); }
+	DlogEllipticCurve(string fileName, string curveName, const shared_ptr<PrgFromOpenSSLAES> & random) { init(fileName, curveName, random); }
 
-	DlogEllipticCurve(string curveName) { init(NISTEC_PROPERTIES_FILE, curveName); }
+	DlogEllipticCurve(string curveName, const shared_ptr<PrgFromOpenSSLAES> & random) { init(NISTEC_PROPERTIES_FILE, curveName, random); }
 	
 	virtual shared_ptr<ECElement> getInfinity() = 0;
 

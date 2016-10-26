@@ -61,7 +61,7 @@ void ElGamalOnByteArraySendableData::initFromString(const string & row) {
 	}
 }
 
-void ElGamalEnc::setMembers(shared_ptr<DlogGroup> dlogGroup) {
+void ElGamalEnc::setMembers(shared_ptr<DlogGroup> dlogGroup, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	auto ddh = dynamic_pointer_cast<DDH>(dlogGroup);
 	//The underlying dlog group must be DDH secure.
 	if (ddh == NULL) {
@@ -69,7 +69,7 @@ void ElGamalEnc::setMembers(shared_ptr<DlogGroup> dlogGroup) {
 	}
 	dlog = dlogGroup;
 	qMinusOne = dlog->getOrder() - 1;
-	this->random = get_seeded_random();
+	this->random = random;
 }
 
 /**
@@ -118,7 +118,7 @@ void ElGamalEnc::setKey(shared_ptr<PublicKey> publicKey, shared_ptr<PrivateKey> 
 pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> ElGamalEnc::generateKey() {
 
 	//Chooses a random value in Zq.
-	biginteger x = getRandomInRange(0, qMinusOne, random);
+	biginteger x = getRandomInRange(0, qMinusOne, random.get());
 	auto generator = dlog->getGenerator();
 	//Calculates h = g^x.
 	auto h = dlog->exponentiate(generator.get(), x);
@@ -167,7 +167,7 @@ shared_ptr<AsymmetricCiphertext> ElGamalEnc::encrypt(shared_ptr<Plaintext> plain
 	*					OR KDF(h^y) XOR plaintext.getBytes()  // For ElGamal on a ByteArray.
 	*/
 	//Chooses a random value y<-Zq.
-	biginteger y = getRandomInRange(0, qMinusOne, random);
+	biginteger y = getRandomInRange(0, qMinusOne, random.get());
 
 	return encrypt(plaintext, y);
 }
@@ -320,7 +320,7 @@ vector<byte> ElGamalOnGroupElementEnc::generateBytesFromPlaintext(Plaintext* pla
 shared_ptr<AsymmetricCiphertext> ElGamalOnGroupElementEnc::multiply(AsymmetricCiphertext* cipher1, AsymmetricCiphertext* cipher2) {
 
 	//Choose a random value in Zq.
-	biginteger w = getRandomInRange(0, qMinusOne, random);
+	biginteger w = getRandomInRange(0, qMinusOne, random.get());
 
 	//Call the other function that computes the multiplication.
 	return multiply(cipher1, cipher2, w);

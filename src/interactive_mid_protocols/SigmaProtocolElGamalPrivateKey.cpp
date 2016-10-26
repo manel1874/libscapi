@@ -78,7 +78,6 @@ shared_ptr<SigmaSimulatorOutput> SigmaElGamalPrivateKeySimulator::simulate(Sigma
 SigmaElGamalPrivateKeyProverComputation::SigmaElGamalPrivateKeyProverComputation(shared_ptr<DlogGroup> dlog, int t) : sigmaDlog(dlog, t) {
 	this->dlog = dlog;
 	this->t = t;
-	this->random = get_seeded_random();
 }
 
 /**

@@ -212,7 +212,7 @@ void OpenSSLAES::setKey(SecretKey secretKey) {
 /*************************************************/
 /**** OpenSSLHMAC ***/
 /*************************************************/
-void OpenSSLHMAC::construct(string hashName) {
+void OpenSSLHMAC::construct(string hashName, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	/*
 	* The way we call the hash is not the same as OpenSSL. For example: we call "SHA-1" while OpenSSL calls it "SHA1".
 	* So the hyphen should be deleted.
@@ -232,7 +232,7 @@ void OpenSSLHMAC::construct(string hashName) {
 	if (0 == res)
 		throw runtime_error("failed to create hmac");
 
-	this->random = get_seeded_random();
+	this->random = random;
 }
 
 void OpenSSLHMAC::setKey(SecretKey secretKey) {
@@ -307,9 +307,9 @@ SecretKey OpenSSLHMAC::generateKey(int keySize) {
 	if ((keySize % 8) != 0)
 		throw invalid_argument("Wrong key size: must be a multiple of 8");
 
-	byte* genBytes = new byte[keySize / 8]; // creates a byte array of size keySize.
-	RAND_bytes(genBytes, keySize / 8);	// generates the bytes using the random.
-	return SecretKey(genBytes, keySize/8, "");
+	vector<byte> genBytes(keySize / 8); // creates a byte array of size keySize.
+	random->getPRGBytes(genBytes, 0, keySize / 8);	// generates the bytes using the random.
+	return SecretKey(genBytes.data(), keySize/8, "");
 }
 
 vector<byte> OpenSSLHMAC::mac(const vector<byte> &msg, int offset, int msgLen) {

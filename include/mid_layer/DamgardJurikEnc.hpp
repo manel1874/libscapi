@@ -162,7 +162,7 @@ class DamgardJurikEnc : public AsymAdditiveHomomorphicEnc {
 private:
 	shared_ptr<DamgardJurikPublicKey> publicKey;
 	shared_ptr<DamgardJurikPrivateKey> privateKey;
-	mt19937 random;
+	shared_ptr<PrgFromOpenSSLAES> random;
 	bool keySet;
 
 	int consts = -1;
@@ -177,7 +177,7 @@ public:
 	* Constructor that lets the user choose the source of randomness.
 	* @param rnd source of randomness.
 	*/
-	DamgardJurikEnc() { random = get_seeded_random(); }
+	DamgardJurikEnc(const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) : random(random) {}
 
 	/**
 	* Initializes this DamgardJurik encryption scheme with (public, private) key pair.

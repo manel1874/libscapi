@@ -210,7 +210,6 @@ private:
 	SigmaDHExtendedProverComputation sigmaDH;	//underlying SigmaDHExtendedProver to use.
 	shared_ptr<DlogGroup> dlog;					//We save the dlog because we need it to calculate the input for the underlying Sigma prover.
 	int t; 
-	mt19937 random;
 	shared_ptr<CryptographicHash> hash;			//Underlying hash function that used in the CramerShoup cryptosystem.
 
 												/**
@@ -230,7 +229,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaCramerShoupEncryptedValueProverComputation(shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, int t);
+	SigmaCramerShoupEncryptedValueProverComputation(shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.

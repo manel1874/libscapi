@@ -255,10 +255,10 @@ protected:
 	shared_ptr<DlogGroup> dlog;						//The underlying DlogGroup
 	shared_ptr<ElGamalPrivateKey> privateKey;		//ElGamal private key (contains x)
 	shared_ptr<ElGamalPublicKey> publicKey;			//ElGamal public key (contains h)
-	mt19937 random;									//Source of randomness
+	shared_ptr<PrgFromOpenSSLAES> random;			//Source of randomness
 	biginteger qMinusOne;							//We keep this value to save unnecessary calculations.
 
-	void setMembers(shared_ptr<DlogGroup> dlogGroup);
+	void setMembers(shared_ptr<DlogGroup> dlogGroup, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	virtual void initPrivateKey(shared_ptr<ElGamalPrivateKey> privateKey) = 0;
 	
@@ -276,8 +276,8 @@ public:
 	* @param dlogGroup underlying DlogGroup to use, it has to have DDH security level
 	* @throws SecurityLevelException if the Dlog Group is not DDH secure
 	*/
-	ElGamalEnc(shared_ptr<DlogGroup> dlogGroup) {
-		setMembers(dlogGroup);
+	ElGamalEnc(shared_ptr<DlogGroup> dlogGroup, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) {
+		setMembers(dlogGroup, random);
 	}
 
 	/**

@@ -202,13 +202,14 @@ private:
 	SigmaDHProverComputation sigmaDH;	//underlying SigmaDHProver to use.
 	shared_ptr<DlogGroup> dlog;			//We need the DlogGroup instance in order to calculate the input for the underlying SigmaDlogProver
 	int t;
-	mt19937 random;
-										/**
-										* Converts the input for this Sigma protocol to the underlying protocol.
-										* @param input MUST be an instance of SigmaElGamalCommittedValueProverInput.
-										* @throws IllegalArgumentException if input is not an instance of SigmaElGamalCommittedValueProverInput.
-										*/
+
+	/**
+	* Converts the input for this Sigma protocol to the underlying protocol.
+	* @param input MUST be an instance of SigmaElGamalCommittedValueProverInput.
+	* @throws IllegalArgumentException if input is not an instance of SigmaElGamalCommittedValueProverInput.
+	*/
 	shared_ptr<SigmaDHProverInput> convertInput(SigmaProverInput* in);
+
 public:
 	/**
 	* Constructor that gets the underlying DlogGroup, soundness parameter and SecureRandom.
@@ -220,7 +221,6 @@ public:
 
 		this->dlog = dlog;
 		this->t = t;
-		this->random = random;
 	}
 
 	/**

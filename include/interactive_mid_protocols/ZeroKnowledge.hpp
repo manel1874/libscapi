@@ -215,7 +215,7 @@ public:
 	* @param committer Must be an instance of PerfectlyHidingCT
 	*/
 	ZKFromSigmaVerifier(shared_ptr<CommParty> channel, shared_ptr<SigmaVerifierComputation> sVerifier,
-		shared_ptr<CmtCommitter> committer);
+		shared_ptr<CmtCommitter> committer, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Constructor that accepts the underlying channel, sigma protocol's verifier and
@@ -223,12 +223,12 @@ public:
 	* @param channel used to communicate between prover and verifier.
 	* @param sVerifier underlying sigma verifier to use.
 	*/
-	ZKFromSigmaVerifier(shared_ptr<CommParty> channel,
-		shared_ptr<SigmaVerifierComputation> sVerifier) {
+	ZKFromSigmaVerifier(shared_ptr<CommParty> channel, shared_ptr<SigmaVerifierComputation> sVerifier, 
+		const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) {
 		this->sVerifier = sVerifier;
 		this->committer = make_shared<CmtPedersenCommitter>(channel);
 		this->channel = channel;
-		this->random = get_seeded_random64();
+		this->random = random;
 	}
 
 	/**
@@ -254,7 +254,7 @@ private:
 	// underlying verifier that computes the proof of the sigma protocol.
 	shared_ptr<SigmaVerifierComputation> sVerifier;
 	shared_ptr<CmtCommitter> committer;	// underlying Commitment committer to use.
-	mt19937_64 random;
+	shared_ptr<PrgFromOpenSSLAES> random;
 
 	/**
 	* Runs COMMIT.commit as the committer with input e.
@@ -262,7 +262,7 @@ private:
 	*/
 	long commit(vector<byte> e) {
 		auto val = committer->generateCommitValue(e);
-		long id = random();
+		long id = random->getRandom64();
 		id = abs(id);
 		committer->commit(val, id);
 		return id;
@@ -413,7 +413,7 @@ private:
 	// underlying verifier that computes the proof of the sigma protocol.
 	shared_ptr<SigmaVerifierComputation> sVerifier;
 	shared_ptr<CmtPedersenTrapdoorCommitter> committer; // underlying Commitment committer to use.
-	std::mt19937_64 random;
+	shared_ptr<PrgFromOpenSSLAES> random;
 	shared_ptr<CmtRCommitPhaseOutput> trap;
 	
 	/**
@@ -441,11 +441,11 @@ public:
 	*/
 	ZKPOKFromSigmaCmtPedersenVerifier(shared_ptr<CommParty> channel,
 		shared_ptr<SigmaVerifierComputation> sVerifier,
-		shared_ptr<CmtRCommitPhaseOutput> emptyTrap, shared_ptr<DlogGroup> dg) {
+		shared_ptr<CmtRCommitPhaseOutput> emptyTrap, shared_ptr<DlogGroup> dg, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) {
 		this->channel = channel;
 		this->sVerifier = sVerifier; 
 		this->committer = make_shared<CmtPedersenTrapdoorCommitter>(channel, dg);
-		this->random = get_seeded_random64();
+		this->random = random;
 		this->trap = emptyTrap;
 	};
 

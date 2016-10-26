@@ -144,7 +144,7 @@ pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> DamgardJurikEnc::generateKey
 	//Let n be the Public Key.
 	//Let rsaMod be the Private Key.
 
-	RSAModulus rsaMod(params->getModulusLength(), params->getCertainty(), random);
+	RSAModulus rsaMod(params->getModulusLength(), params->getCertainty(), random.get());
 	shared_ptr<PublicKey> publicKey = make_shared<DamgardJurikPublicKey>(rsaMod.n);
 	shared_ptr<PrivateKey> privateKey = make_shared<DamgardJurikPrivateKey>(rsaMod);
 	return pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>>(publicKey, privateKey);
@@ -180,7 +180,7 @@ shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::encrypt(shared_ptr<Plaintext> 
 	
 	//Chooses a random r in ZNtag*, this can be done by choosing a random value between 1 and Ntag -1 
 	//which is with overwhelming probability in Zntag*.
-	biginteger r = getRandomInRange(1, Ntag - 1, random);
+	biginteger r = getRandomInRange(1, Ntag - 1, random.get());
 
 	return encrypt(plaintext, r);
 }
@@ -387,7 +387,7 @@ shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::reRandomize(AsymmetricCipherte
 
 	//Chooses a random r in ZNtag*, this can be done by choosing a random value between 1 and Ntag -1 
 	//which is with overwhelming probability in Zntag*.
-	biginteger r = getRandomInRange(1, Ntag - 1, random);
+	biginteger r = getRandomInRange(1, Ntag - 1, random.get());
 
 	return reRandomize(cipher, r);
 }
@@ -471,7 +471,7 @@ shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::add(AsymmetricCiphertext* ciph
 	
 	//Chooses a random r in ZNtag*, this can be done by choosing a random value between 1 and Ntag -1 
 	//which is with overwhelming probability in Zntag*.
-	biginteger r = getRandomInRange(1, Ntag - 1, random);
+	biginteger r = getRandomInRange(1, Ntag - 1, random.get());
 
 	return add(cipher1, cipher2, r);
 }
@@ -574,7 +574,7 @@ shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::multByConst(AsymmetricCipherte
 	
 	//Chooses a random r in ZNtag*, this can be done by choosing a random value between 1 and Ntag -1 
 	//which is with overwhelming probability in Zntag*.
-	biginteger r = getRandomInRange(1, Ntag - 1, random);
+	biginteger r = getRandomInRange(1, Ntag - 1, random.get());
 
 	//Call the other function that computes the multiplication.
 	return multByConst(cipher, constNumber, r);

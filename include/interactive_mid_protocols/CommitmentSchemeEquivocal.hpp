@@ -73,8 +73,8 @@ public:
 	* @throws IOException
 	* @throws ClassNotFoundException
 	*/
-	CmtEquivocalCommitter(shared_ptr<CommParty> channel, int t) { 
-		doConstruct(channel, make_shared<CmtPedersenWithProofsCommitter>(channel, t));
+	CmtEquivocalCommitter(shared_ptr<CommParty> channel, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) { 
+		doConstruct(channel, make_shared<CmtPedersenWithProofsCommitter>(channel, t, random));
 	}
 
 	shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(const shared_ptr<CmtCommitValue> & input, long id) override{

@@ -40,7 +40,7 @@
 class OpenSSLRSAPermutation : public virtual TrapdoorPermutationAbs , public virtual RSAPermutation {
 private:
 	RSA* rsa; // Pointer to the SSL RSA object.
-	mt19937 random;
+	shared_ptr<PrgFromOpenSSLAES> random;
 	RSA* initRSAPublicPrivateCrt(biginteger pubExp, biginteger privExp, biginteger p, 
 		biginteger q, biginteger dp, biginteger dq, biginteger crt);
 	RSA* initRSAPublicPrivate(biginteger pubExponent, biginteger privExponent);
@@ -48,7 +48,7 @@ private:
 	biginteger computeRSA(biginteger elementP);
 
 public:
-	OpenSSLRSAPermutation() { this->random = get_seeded_random(); };
+	OpenSSLRSAPermutation(const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) { this->random = random; };
 	void setKey(PublicKey* publicKey, PrivateKey* privateKey=NULL) override; 
 	string getAlgorithmName() override { return "OpenSSLRSA"; };
 	KeyPair generateKey(int keySize) override;

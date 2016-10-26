@@ -171,7 +171,6 @@ shared_ptr<SigmaDHCommonInput> SigmaElGamalEncryptedValueSimulator::checkAndCrea
 SigmaElGamalEncryptedValueProverComputation::SigmaElGamalEncryptedValueProverComputation(shared_ptr<DlogGroup> dlog, int t) : sigmaDH(dlog, t) {
 	this->dlog = dlog;
 	this->t = t;
-	this->random = get_seeded_random();
 }
 
 shared_ptr<SigmaDHProverInput> SigmaElGamalEncryptedValueProverComputation::convertInput(SigmaProverInput* in) {

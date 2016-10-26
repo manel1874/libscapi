@@ -34,13 +34,7 @@
 /*********************************/
 /*   CmtPedersenReceiverCore     */
 /*********************************/
-CmtPedersenReceiverCore::CmtPedersenReceiverCore(shared_ptr<CommParty> channel) {
-	auto dg = make_shared<OpenSSLDlogECF2m>("K-233");
-	doConstruct(channel, dg);
-};
-
-void CmtPedersenReceiverCore::doConstruct(shared_ptr<CommParty> channel,
-	shared_ptr<DlogGroup> dlog) {
+CmtPedersenReceiverCore::CmtPedersenReceiverCore(shared_ptr<CommParty> channel, const shared_ptr<PrgFromOpenSSLAES> & random, shared_ptr<DlogGroup> dlog) {
 	// the underlying dlog group must be DDH secure.
 	auto ddh = dynamic_pointer_cast<DDH>(dlog);
 	if (!ddh)
@@ -52,7 +46,7 @@ void CmtPedersenReceiverCore::doConstruct(shared_ptr<CommParty> channel,
 
 	this->channel = channel;
 	this->dlog = dlog;
-	this->random = get_seeded_random();
+	this->random = random;
 	qMinusOne = dlog->getOrder()-1;
 	// the pre-process phase is actually performed at construction
 	preProcess();
@@ -62,7 +56,7 @@ void CmtPedersenReceiverCore::preProcess() {
 	if (channel == NULL) {
 		throw runtime_error("In order to pre-compute the channel must be given");
 	}
-	trapdoor = getRandomInRange(0, qMinusOne, random);
+	trapdoor = getRandomInRange(0, qMinusOne, random.get());
 	h = dlog->exponentiate(dlog->getGenerator().get(), trapdoor);
 	auto sendableData = h->generateSendableData();	
 	auto raw_msg = sendableData->toString();
@@ -139,7 +133,7 @@ shared_ptr<void> CmtPedersenReceiverCore::getCommitmentPhaseValues(long id) {
 /*********************************/
 /*   CmtPedersenCommitterCore    */
 /*********************************/
-void CmtPedersenCommitterCore::doConstruct(shared_ptr<CommParty> channel,
+CmtPedersenCommitterCore::CmtPedersenCommitterCore(shared_ptr<CommParty> channel, const shared_ptr<PrgFromOpenSSLAES> & random,
 	shared_ptr<DlogGroup> dlog) {
 	// the underlying dlog group must be DDH secure.
 	auto ddh = std::dynamic_pointer_cast<DDH>(dlog);
@@ -151,7 +145,7 @@ void CmtPedersenCommitterCore::doConstruct(shared_ptr<CommParty> channel,
 
 	this->channel = channel;
 	this->dlog = dlog;
-	this->random = get_seeded_random();
+	this->random = random;
 	qMinusOne = dlog->getOrder()-1;
 	// the pre-process phase is actually performed at construction
 	preProcess();
@@ -186,7 +180,7 @@ shared_ptr<CmtCCommitmentMsg> CmtPedersenCommitterCore::generateCommitmentMsg(co
 		throw invalid_argument("The input must be in Zq");
 
 	// sample a random value r <- Zq
-	biginteger r = getRandomInRange(0, qMinusOne, random);
+	biginteger r = getRandomInRange(0, qMinusOne, random.get());
 
 	// compute  c = g^r * h^x
 	auto gToR = dlog->exponentiate(dlog->getGenerator().get(), r);
@@ -245,9 +239,9 @@ vector<byte> CmtPedersenReceiver::generateBytesFromCommitValue(CmtCommitValue* v
 /********************************************/
 /*   CmtPedersenWithProofsCommitter         */
 /********************************************/
-void CmtPedersenWithProofsCommitter::doConstruct(int t) {
+void CmtPedersenWithProofsCommitter::doConstruct(int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	auto pedersenCommittedValProver = make_shared<SigmaPedersenCommittedValueProverComputation>(dlog, t);
-	auto pedersenCTKnowledgeProver = make_shared<SigmaPedersenCmtKnowledgeProverComputation>(dlog, t);
+	auto pedersenCTKnowledgeProver = make_shared<SigmaPedersenCmtKnowledgeProverComputation>(dlog, t, random);
 	knowledgeProver = make_shared<ZKPOKFromSigmaCmtPedersenProver>(channel, pedersenCTKnowledgeProver, dlog);
 	committedValProver = make_shared<ZKPOKFromSigmaCmtPedersenProver>(channel, pedersenCommittedValProver, dlog);
 }

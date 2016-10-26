@@ -85,9 +85,9 @@ TEST_CASE("Common methods", "[boost, common, math, log, bitLength, helper]") {
 	SECTION("gen_random_bytes_vector")
 	{
 		vector<byte> v, v2;
-		auto prg = get_seeded_random();
-		gen_random_bytes_vector(v, 10, prg);
-		gen_random_bytes_vector(v2, 10, prg);
+		auto prg = get_seeded_prg();
+		gen_random_bytes_vector(v, 10, prg.get());
+		gen_random_bytes_vector(v2, 10, prg.get());
 		REQUIRE(v.size() == 10);
 		for (byte b : v)
 			REQUIRE(isalnum(b));
@@ -99,8 +99,8 @@ TEST_CASE("Common methods", "[boost, common, math, log, bitLength, helper]") {
 	SECTION("copy byte vector to byte array")
 	{
 		vector<byte> v;
-		auto prg = get_seeded_random();
-		gen_random_bytes_vector(v, 20, prg);
+		auto prg = get_seeded_prg();
+		gen_random_bytes_vector(v, 20, prg.get());
 		byte * vb = new byte[40];
 		int index;
 		copy_byte_vector_to_byte_array(v, vb, 0);
@@ -202,8 +202,7 @@ TEST_CASE("Common methods", "[boost, common, math, log, bitLength, helper]") {
 //}
 
 TEST_CASE("boosts multiprecision", "[boost, multiprecision]") {
-
-	mt19937 gen(get_seeded_random());
+	auto gen = get_seeded_prg();
 
 	SECTION("testing pow")
 	{
@@ -222,15 +221,15 @@ TEST_CASE("boosts multiprecision", "[boost, multiprecision]") {
 	SECTION("generating random from range")
 	{
 		for (int i = 0; i < 100; ++i) {
-			biginteger randNum = getRandomInRange(0, 100, gen);
+			biginteger randNum = getRandomInRange(0, 100, gen.get());
 			REQUIRE((randNum >= 0 && randNum <= 100));
 		}
 	}
 
 	SECTION("generating random from range")
 	{
-		biginteger randNum1 = getRandomInRange(0, 1000000, gen);
-		biginteger randNum2 = getRandomInRange(0, 1000000, gen);
+		biginteger randNum1 = getRandomInRange(0, 1000000, gen.get());
+		biginteger randNum2 = getRandomInRange(0, 1000000, gen.get());
 		REQUIRE(randNum1 != randNum2);
 	}
 	
@@ -361,10 +360,10 @@ void test_encode_decode(shared_ptr<DlogGroup> dg)
 	int k = dg->getMaxLengthOfByteArrayForEncoding();
 	REQUIRE(k > 0);
 
-	auto prg = get_seeded_random();
+	auto prg = get_seeded_prg();
 	vector<byte> v;
 	v.reserve(k);
-	gen_random_bytes_vector(v, k, prg);
+	gen_random_bytes_vector(v, k, prg.get());
 
 	auto ge = dg->encodeByteArrayToGroupElement(v);
 	vector<byte> res = dg->decodeGroupElementToByteArray(ge.get());
@@ -990,7 +989,7 @@ TEST_CASE("asymmetric encryption")
 {
 	SECTION("El Gamal on group element")
 	{
-		mt19937 random = get_seeded_random();
+		auto random = get_seeded_prg();
 		auto dlog = make_shared<OpenSSLDlogZpSafePrime>(256);
 		ElGamalOnGroupElementEnc elgamal(dlog);
 		auto keys = elgamal.generateKey();
@@ -1002,7 +1001,7 @@ TEST_CASE("asymmetric encryption")
 		}
 		vector<byte> plainM(message.begin(), message.end());
 		auto plaintext = elgamal.generatePlaintext(plainM);
-		biginteger r = getRandomInRange(0, dlog->getOrder() - 1, random);
+		biginteger r = getRandomInRange(0, dlog->getOrder() - 1, random.get());
 		auto cipher = elgamal.encrypt(plaintext, r);
 		auto returnedP = elgamal.decrypt(cipher.get());
 		REQUIRE(*returnedP == *plaintext);
@@ -1024,7 +1023,7 @@ TEST_CASE("asymmetric encryption")
 
 	SECTION("El Gamal on byte array")
 	{
-		mt19937 random = get_seeded_random();
+		auto random = get_seeded_prg();
 		auto dlog = make_shared<OpenSSLDlogZpSafePrime>(64);
 		auto kdf = make_shared<HKDF>(new OpenSSLHMAC());
 		ElGamalOnByteArrayEnc elgamal(dlog, kdf);
@@ -1037,7 +1036,7 @@ TEST_CASE("asymmetric encryption")
 		}
 		vector<byte> plainM(message.begin(), message.end());
 		auto plaintext = elgamal.generatePlaintext(plainM);
-		biginteger r = getRandomInRange(0, dlog->getOrder() - 1, random);
+		biginteger r = getRandomInRange(0, dlog->getOrder() - 1, random.get());
 		auto cipher = elgamal.encrypt(plaintext, r);
 		auto returnedP = elgamal.decrypt(cipher.get());
 		REQUIRE(*returnedP == *plaintext);
@@ -1052,7 +1051,7 @@ TEST_CASE("asymmetric encryption")
 
 	SECTION("CramerShoup")
 	{
-		mt19937 random = get_seeded_random();
+		auto random = get_seeded_prg();
 		auto dlog = make_shared<OpenSSLDlogZpSafePrime>(256);
 		CramerShoupOnGroupElementEnc cr(dlog);
 		auto keys = cr.generateKey();
@@ -1064,7 +1063,7 @@ TEST_CASE("asymmetric encryption")
 		}
 		vector<byte> plainM(message.begin(), message.end());
 		auto plaintext = cr.generatePlaintext(plainM);
-		biginteger r = getRandomInRange(0, dlog->getOrder() - 1, random);
+		biginteger r = getRandomInRange(0, dlog->getOrder() - 1, random.get());
 		auto cipher = cr.encrypt(plaintext, r);
 		auto returnedP = cr.decrypt(cipher.get());
 		REQUIRE(*returnedP == *plaintext);
@@ -1079,7 +1078,7 @@ TEST_CASE("asymmetric encryption")
 
 	SECTION("DamgardJurik")
 	{
-		/*mt19937 random = get_seeded_random();
+		/*auto random = get_seeded_prg();
 		DamgardJurikEnc dj;
 		auto keys = dj.generateKey(make_shared<DJKeyGenParameterSpec>(DJKeyGenParameterSpec()));
 		dj.setKey(keys.first, keys.second);
@@ -1096,7 +1095,7 @@ TEST_CASE("asymmetric encryption")
 		cout << "number of bits of modulus = " << NumberOfBits(n) << endl;
 		int s = (NumberOfBits(dynamic_pointer_cast<BigIntegerPlainText>(plaintext)->getX()) / (NumberOfBits(n) - 1)) + 1;
 		biginteger Ntag = mp::pow(n, s + 1);
-		//biginteger r = getRandomInRange(0, (Ntag - 1), random);
+		//biginteger r = getRandomInRange(0, (Ntag - 1), random.get());
 		biginteger r = Ntag - 1;
 		cout << "number of bits of random = " << NumberOfBits(r) << endl;
 		auto cipher = dj.encrypt(plaintext, r);
@@ -1122,8 +1121,8 @@ TEST_CASE("asymmetric encryption")
 		auto multC = dj.encrypt(make_shared<BigIntegerPlainText>(c), r2);
 		REQUIRE(*doubleC == *multC);
 
-		biginteger rToMult = getRandomInRange(0, Ntag-1, random);
-		biginteger con = getRandomInRange(0, N - 1, random);
+		biginteger rToMult = getRandomInRange(0, Ntag-1, random.get());
+		biginteger con = getRandomInRange(0, N - 1, random.get());
 		auto multconst = dj.multByConst(cipher, con, rToMult);
 		biginteger base = x * con;
 		biginteger exponent = mp::powm(r, con, Ntag);
@@ -1131,7 +1130,7 @@ TEST_CASE("asymmetric encryption")
 		multC = dj.encrypt(make_shared<BigIntegerPlainText>(base), exponent);
 		REQUIRE(*multconst == *multC);
 
-		biginteger rToRandom = getRandomInRange(0, Ntag - 1, random);
+		biginteger rToRandom = getRandomInRange(0, Ntag - 1, random.get());
 		auto secondCipher = dj.reRandomize(cipher, rToRandom);
 		auto calcCipher = dj.encrypt(plaintext, (r*rToRandom) % Ntag);
 		REQUIRE(*secondCipher == *calcCipher);*/
