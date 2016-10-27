@@ -28,7 +28,7 @@
 
 #pragma once
 #include "AsymmetricEnc.hpp"
-#include "../primitives/TrapdoorPermutations.hpp"
+#include "../primitives/TrapdoorPermutation.hpp"
 #include "../infra/MathAlgorithms.hpp"
 
 /**

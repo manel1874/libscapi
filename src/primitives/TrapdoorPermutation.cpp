@@ -26,7 +26,7 @@
 */
 
 
-#include "../../include/primitives/TrapdoorPermutations.hpp"
+#include "../../include/primitives/TrapdoorPermutation.hpp"
 
 /*************************************************/
 /*TrapdoorPermutationAbs                         */
@@ -49,7 +49,7 @@ byte TrapdoorPermutationAbs::hardCorePredicate(TPElement * tpEl) {
 	return res;
 }
 
-byte* TrapdoorPermutationAbs::hardCoreFunction(TPElement * tpEl) {
+vector<byte> TrapdoorPermutationAbs::hardCoreFunction(TPElement * tpEl) {
 	if (!isKeySet())
 		throw IllegalStateException("keys aren't set");
 	/*
@@ -69,7 +69,7 @@ byte* TrapdoorPermutationAbs::hardCoreFunction(TPElement * tpEl) {
 
 	// if the element length is less than log(N), the return byte[] should be all the element bytes
 	int size = min(logBytes, bytesSize);
-	byte* leastSignificantBytes = new byte[size];
+	vector<byte> leastSignificantBytes(size);
 	
 	// copies the bytes to the output array
 	for (int i = 0; i < size; i++)
@@ -81,7 +81,7 @@ byte* TrapdoorPermutationAbs::hardCoreFunction(TPElement * tpEl) {
 /*RSAElement                                     */
 /*************************************************/
 
-RSAElement::RSAElement(biginteger modN, const shared_ptr<PrgFromOpenSSLAES> & generator){
+RSAElement::RSAElement(biginteger & modN, const shared_ptr<PrgFromOpenSSLAES> & generator){
 	/*
 	* samples a number between 1 to n-1
 	*/
@@ -98,7 +98,7 @@ RSAElement::RSAElement(biginteger modN, const shared_ptr<PrgFromOpenSSLAES> & ge
 	element = randNumber;
 }
 
-RSAElement::RSAElement(biginteger modN, biginteger x, bool check) {
+RSAElement::RSAElement(biginteger & modN, biginteger & x, bool check) {
 	if (!check)
 		element = x;
 	else {

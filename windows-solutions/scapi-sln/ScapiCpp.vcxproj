@@ -272,7 +272,7 @@
     <ClInclude Include="..\..\include\primitives\Prg.hpp" />
     <ClInclude Include="..\..\include\primitives\RandomOracle.hpp" />
     <ClInclude Include="..\..\include\primitives\TrapdoorPermutationOpenSSL.hpp" />
-    <ClInclude Include="..\..\include\primitives\TrapdoorPermutations.hpp" />
+    <ClInclude Include="..\..\include\primitives\TrapdoorPermutation.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -359,9 +359,6 @@
     <ClInclude Include="..\..\include\primitives\TrapdoorPermutationOpenSSL.hpp">
       <Filter>Header Files\Primitives</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\primitives\TrapdoorPermutations.hpp">
-      <Filter>Header Files\Primitives</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\circuits\Compat.h">
       <Filter>Header Files\Circuits</Filter>
     </ClInclude>
@@ -538,6 +535,9 @@
     </ClInclude>
     <ClInclude Include="..\..\include\interactive_mid_protocols\OTFullSimulation.hpp">
       <Filter>Header Files\InteractiveMidProtocols</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\primitives\TrapdoorPermutation.hpp">
+      <Filter>Header Files\Primitives</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

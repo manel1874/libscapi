@@ -756,10 +756,10 @@ TEST_CASE("TrapdoorPermutation", "[OpenSSL]")
 		biginteger public_mod = 55;
 		int public_exponent = 3;
 		int private_exponent = 7;
-		tp.setKey(new RSAPublicKey(public_mod, public_exponent), new RSAPrivateKey(public_mod, private_exponent));
-		RSAElement * re_src = (RSAElement *) tp.generateRandomTPElement();
-		auto re_enc = tp.compute(re_src);
-		auto re_inv = tp.invert(re_enc);
+		tp.setKey(make_shared<RSAPublicKey>(public_mod, public_exponent), make_shared<RSAPrivateKey>(public_mod, private_exponent));
+		auto re_src = tp.generateRandomTPElement();
+		auto re_enc = tp.compute(re_src.get());
+		auto re_inv = tp.invert(re_enc.get());
 		CAPTURE(re_enc->getElement());
 		REQUIRE(re_inv->getElement() == re_src->getElement());
 	}
