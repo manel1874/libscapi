@@ -107,15 +107,15 @@ void IteratedPrfVarying::computeBlock(const vector<byte> & inBytes, int inOff, i
 }
 
 LubyRackoffPrpFromPrfVarying::LubyRackoffPrpFromPrfVarying(){
-	prfVaryingIOLength = new IteratedPrfVarying();
+	prfVaryingIOLength = make_shared<IteratedPrfVarying>();
 }
 
 LubyRackoffPrpFromPrfVarying::LubyRackoffPrpFromPrfVarying(string prfVaryingIOLengthName) {
 	throw NotImplementedException("factories still not implemented");
 }
 
-LubyRackoffPrpFromPrfVarying::LubyRackoffPrpFromPrfVarying(PrfVaryingIOLength * _prfVaryingIOLength) {
-	auto test = dynamic_cast<LubyRackoffPrpFromPrfVarying *>(_prfVaryingIOLength);
+LubyRackoffPrpFromPrfVarying::LubyRackoffPrpFromPrfVarying(const shared_ptr<PrfVaryingIOLength> & _prfVaryingIOLength) {
+	auto test = dynamic_pointer_cast<LubyRackoffPrpFromPrfVarying>(_prfVaryingIOLength);
 	if (test)
 		throw invalid_argument("Cannot create a LubyRackoffPrpFromPrfVarying from a LubyRackoffPrpFromPrfVarying object!");
 	prfVaryingIOLength = prfVaryingIOLength;

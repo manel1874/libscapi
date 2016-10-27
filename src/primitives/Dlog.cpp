@@ -77,7 +77,7 @@ shared_ptr<GroupElementSendableData> ZpSafePrimeElement::generateSendableData() 
 /**************************************/
 
 DlogGroup::GroupElementsExponentiations::GroupElementsExponentiations(
-	shared_ptr<DlogGroup> parent_, shared_ptr<GroupElement> base_) {
+	const shared_ptr<DlogGroup> & parent_, const shared_ptr<GroupElement> & base_) {
 	base = base_;
 	parent = parent_;
 	// build new vector of exponentiations
@@ -151,8 +151,8 @@ shared_ptr<GroupElement> DlogGroup::createRandomGenerator() {
 	return randGen;
 }
 
-shared_ptr<GroupElement> DlogGroup::computeLoop(vector<biginteger> exponentiations, int w,
-	int h, vector<vector<shared_ptr<GroupElement>>> preComp, shared_ptr<GroupElement> result, int bitIndex){
+shared_ptr<GroupElement> DlogGroup::computeLoop(vector<biginteger> & exponentiations, int w,
+	int h, vector<vector<shared_ptr<GroupElement>>> & preComp, shared_ptr<GroupElement> & result, int bitIndex){
 	int e = 0;
 	for (size_t k = 0; (int) k<h; k++) {
 		for (size_t i = k*w; i<(k * w + w); i++) {
@@ -173,7 +173,7 @@ shared_ptr<GroupElement> DlogGroup::computeLoop(vector<biginteger> exponentiatio
 }
 
 vector<vector<shared_ptr<GroupElement>>> DlogGroup::createLLPreCompTable(
-	vector<shared_ptr<GroupElement>> groupElements, int w, int h){
+	vector<shared_ptr<GroupElement>> & groupElements, int w, int h){
 	int twoPowW = (int)(pow(2, w));
 	//create the pre-computation table of size h*(2^(w))
 	vector<vector<shared_ptr<GroupElement>>> preComp; // GroupElement[][] preComp = new GroupElement[h][twoPowW];
@@ -239,7 +239,7 @@ int DlogGroup::getLLW(int t) {
 }
 
 shared_ptr<GroupElement> DlogGroup::exponentiateWithPreComputedValues(
-	shared_ptr<GroupElement> groupElement, const biginteger & exponent){
+	const shared_ptr<GroupElement> & groupElement, const biginteger & exponent){
 	//extracts from the map the GroupElementsExponentiations object corresponding to the accepted base
 	auto it = exponentiationsMap.find(groupElement);
 	
@@ -255,7 +255,7 @@ shared_ptr<GroupElement> DlogGroup::exponentiateWithPreComputedValues(
 }
 
 shared_ptr<GroupElement> DlogGroup::computeNaive(
-	vector<shared_ptr<GroupElement>> groupElements, vector<biginteger> exponentiations)
+	vector<shared_ptr<GroupElement>> & groupElements, vector<biginteger> & exponentiations)
 {
 	int n = groupElements.size(); //number of bases and exponents
 	vector<shared_ptr<GroupElement>> exponentsResult(n); //holds the exponentiations result
@@ -277,7 +277,7 @@ shared_ptr<GroupElement> DlogGroup::computeNaive(
 }
 
 shared_ptr<GroupElement> DlogGroup::computeLL(
-	vector<shared_ptr<GroupElement>> groupElements, vector<biginteger> exponentiations)
+	vector<shared_ptr<GroupElement>> & groupElements, vector<biginteger> & exponentiations)
 {
 	int n = groupElements.size(); //number of bases and exponents
 

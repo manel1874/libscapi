@@ -108,7 +108,7 @@ void OpenSSLDlogZpSafePrime::createRandomOpenSSLDlogZp(int numBits) {
 	}
 }
 
-OpenSSLDlogZpSafePrime::OpenSSLDlogZpSafePrime(shared_ptr<ZpGroupParams> groupParams, const shared_ptr<PrgFromOpenSSLAES> & random)
+OpenSSLDlogZpSafePrime::OpenSSLDlogZpSafePrime(const shared_ptr<ZpGroupParams> & groupParams, const shared_ptr<PrgFromOpenSSLAES> & random)
 {
 	// TODO - unify with cryptoPP
 	biginteger p = groupParams->getP();
@@ -330,7 +330,7 @@ shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::multiplyGroupElements(GroupElem
 }
 
 shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::simultaneousMultipleExponentiations(
-	vector<shared_ptr<GroupElement>> groupElements, vector<biginteger> exponentiations) {
+	vector<shared_ptr<GroupElement>> & groupElements, vector<biginteger> & exponentiations) {
 	for (size_t i = 0; i < groupElements.size(); i++) {
 		OpenSSLZpSafePrimeElement * zp_element = dynamic_cast<OpenSSLZpSafePrimeElement *>(groupElements[i].get());
 		if (!zp_element)
@@ -343,7 +343,7 @@ shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::simultaneousMultipleExponentiat
 	return computeNaive(groupElements, exponentiations);
 }
 
-shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::generateElement(bool bCheckMembership, vector<biginteger> values) {
+shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::generateElement(bool bCheckMembership, vector<biginteger> & values) {
 	if (values.size() != 1)
 		throw invalid_argument("To generate an ZpElement you should pass the x value of the point");
 	auto temp = new OpenSSLZpSafePrimeElement(values[0], ((ZpGroupParams *)groupParams.get())->getP(), bCheckMembership);
@@ -537,7 +537,7 @@ shared_ptr<GroupElement> OpenSSLDlogEC::multiplyGroupElements(GroupElement* grou
 }
 
 std::shared_ptr<GroupElement> OpenSSLDlogEC::exponentiateWithPreComputedValues(
-	shared_ptr<GroupElement> base, const biginteger & exponent){
+	const shared_ptr<GroupElement> & base, const biginteger & exponent){
 	//The exponentiate with pre computed values implemented by OpenSSL deals only with the group generator.
 	if (base != getGenerator()) {
 		return exponentiate(base.get(), exponent);
@@ -573,7 +573,7 @@ std::shared_ptr<GroupElement> OpenSSLDlogEC::exponentiateWithPreComputedValues(
 }
 
 shared_ptr<GroupElement> OpenSSLDlogEC::simultaneousMultipleExponentiations(
-	vector<shared_ptr<GroupElement>> groupElements, vector<biginteger> exponentiations) {
+	vector<shared_ptr<GroupElement>> & groupElements, vector<biginteger> & exponentiations) {
 	int size = groupElements.size(); //Number of points.
 	vector<BIGNUM*> exponentsArr;//Create an array to hold the exponents.
 	vector<EC_POINT*> pointsArr;
@@ -698,7 +698,7 @@ void OpenSSLDlogECFp::createCurve(const biginteger & p, const biginteger & a, co
 		throw runtime_error("failed to create OpenSSL Dlog group");
 }
 
-int OpenSSLDlogECFp::calcK(biginteger p){
+int OpenSSLDlogECFp::calcK(biginteger & p){
 	int bitsInp = NumberOfBits(p);
 	int k = floor((0.4 * bitsInp) / 8) - 1;
 	//For technical reasons of how we chose to do the padding for encoding and decoding (the least significant byte of the encoded string contains the size of the 
@@ -709,7 +709,7 @@ int OpenSSLDlogECFp::calcK(biginteger p){
 	return k;
 }
 
-shared_ptr<ECElement> OpenSSLDlogECFp::createPoint(shared_ptr<EC_POINT> point) {
+shared_ptr<ECElement> OpenSSLDlogECFp::createPoint(const shared_ptr<EC_POINT> & point) {
 	OpenSSLECFpPoint* newPoint = new OpenSSLECFpPoint(point, this);
 	return shared_ptr<OpenSSLECFpPoint>(newPoint);
 }
@@ -803,7 +803,7 @@ bool OpenSSLDlogECFp::checkSubGroupMembership(OpenSSLECFpPoint* point) {
 	else return false;	
 }
 
-shared_ptr<GroupElement> OpenSSLDlogECFp::generateElement(bool bCheckMembership, vector<biginteger> values) {
+shared_ptr<GroupElement> OpenSSLDlogECFp::generateElement(bool bCheckMembership, vector<biginteger> & values) {
 	if (values.size() != 2) {
 		throw invalid_argument("To generate an ECElement you should pass the x and y coordinates of the point");
 	}
@@ -1033,7 +1033,7 @@ void OpenSSLDlogECF2m::createGroupParams() {
 }
 
 
-shared_ptr<ECElement> OpenSSLDlogECF2m::createPoint(shared_ptr<EC_POINT> point) {
+shared_ptr<ECElement> OpenSSLDlogECF2m::createPoint(const shared_ptr<EC_POINT> & point) {
 	OpenSSLECF2mPoint* newPoint = new OpenSSLECF2mPoint(point, this);
 	return shared_ptr<OpenSSLECF2mPoint>(newPoint);
 }
@@ -1127,7 +1127,7 @@ bool OpenSSLDlogECF2m::checkSubGroupMembership(OpenSSLECF2mPoint* point) {
 	else return false;
 }
 
-shared_ptr<GroupElement> OpenSSLDlogECF2m::generateElement(bool bCheckMembership, vector<biginteger> values) {
+shared_ptr<GroupElement> OpenSSLDlogECF2m::generateElement(bool bCheckMembership, vector<biginteger> & values) {
 	if (values.size() != 2) {
 		throw invalid_argument("To generate an ECElement you should pass the x and y coordinates of the point");
 	}
@@ -1136,7 +1136,7 @@ shared_ptr<GroupElement> OpenSSLDlogECF2m::generateElement(bool bCheckMembership
 }
 
 shared_ptr<GroupElement> OpenSSLDlogECF2m::simultaneousMultipleExponentiations(
-	vector<shared_ptr<GroupElement>> groupElements, vector<biginteger> exponentiations) {
+	vector<shared_ptr<GroupElement>> & groupElements, vector<biginteger> & exponentiations) {
 	//Our tests showed that for ECF2m the naive algorithm is faster than the simultaneousMultipleExponentiations algorithm.
 	//TODO check if that is still true in the c++ implementation.
 	return computeNaive(groupElements, exponentiations);
@@ -1257,7 +1257,7 @@ bool OpenSSLECFpPoint::checkCurveMembership(ECFpGroupParams* params, const bigin
 	else return false;
 }
 
-OpenSSLECFpPoint::OpenSSLECFpPoint(shared_ptr<EC_POINT> point, OpenSSLDlogECFp* curve) {
+OpenSSLECFpPoint::OpenSSLECFpPoint(const shared_ptr<EC_POINT> & point, OpenSSLDlogECFp* curve) {
 
 	this->point = point;
 
@@ -1318,7 +1318,7 @@ OpenSSLECF2mPoint::OpenSSLECF2mPoint(const biginteger & x, const biginteger & y,
 	}
 }
 
-OpenSSLECF2mPoint::OpenSSLECF2mPoint(shared_ptr<EC_POINT> point, OpenSSLDlogECF2m* curve) {
+OpenSSLECF2mPoint::OpenSSLECF2mPoint(const shared_ptr<EC_POINT> & point, OpenSSLDlogECF2m* curve) {
 	this->point = point;
 
 	//Set x,y values.

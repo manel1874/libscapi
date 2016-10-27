@@ -512,7 +512,7 @@ public:
 	*/
 	ElGamalOnByteArrayEnc() : ElGamalEnc() {
 		//Creates a default implementation of KDF.
-		this->kdf = make_shared<HKDF>(new OpenSSLHMAC());
+		this->kdf = make_shared<HKDF>(make_shared<OpenSSLHMAC>());
 	}
 
 	/**

@@ -341,9 +341,6 @@
     <ClInclude Include="..\..\include\primitives\Kdf.hpp">
       <Filter>Header Files\Primitives</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\primitives\mac.hpp">
-      <Filter>Header Files\Primitives</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\primitives\Prf.hpp">
       <Filter>Header Files\Primitives</Filter>
     </ClInclude>
@@ -538,6 +535,9 @@
     </ClInclude>
     <ClInclude Include="..\..\include\primitives\TrapdoorPermutation.hpp">
       <Filter>Header Files\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\mid_layer\Mac.hpp">
+      <Filter>Header Files\MidLayer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

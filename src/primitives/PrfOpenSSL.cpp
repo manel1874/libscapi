@@ -169,13 +169,13 @@ OpenSSLAES::OpenSSLAES() {
 	init(random);
 }
 
-void OpenSSLAES::init(shared_ptr<PrgFromOpenSSLAES> setRandom) {
+void OpenSSLAES::init(const shared_ptr<PrgFromOpenSSLAES> & setRandom) {
 	prg = setRandom;
 	computeP = EVP_CIPHER_CTX_new();
 	invertP = EVP_CIPHER_CTX_new();
 }
 
-void OpenSSLAES::setKey(SecretKey secretKey) {
+void OpenSSLAES::setKey(SecretKey & secretKey) {
 	auto keyVec = secretKey.getEncoded();
 	int len = keyVec.size();
 	// AES key size should be 128/192/256 bits long.
@@ -235,7 +235,7 @@ void OpenSSLHMAC::construct(string hashName, const shared_ptr<PrgFromOpenSSLAES>
 	this->random = random;
 }
 
-void OpenSSLHMAC::setKey(SecretKey secretKey) {
+void OpenSSLHMAC::setKey(SecretKey & secretKey) {
 	// initialize the Hmac object with the given key.
 	auto secVec = secretKey.getEncoded();
 	HMAC_Init_ex(hmac, &secVec[0], secVec.size(), NULL, NULL);
@@ -392,7 +392,7 @@ OpenSSLTripleDES::OpenSSLTripleDES() {
 	prg->setKey(prg->generateKey(128));
 }
 
-void OpenSSLTripleDES::setKey(SecretKey secretKey) {
+void OpenSSLTripleDES::setKey(SecretKey & secretKey) {
 	vector<byte> keyBytesVector = secretKey.getEncoded();
 	int len = keyBytesVector.size();
 
@@ -413,13 +413,13 @@ void OpenSSLTripleDES::setKey(SecretKey secretKey) {
 	_isKeySet= true;
 }
 
-PseudorandomFunction* PseudorandomFunction::get_new_prf(string algName) {
+shared_ptr<PseudorandomFunction> PseudorandomFunction::get_new_prf(string algName) {
 	if (algName == "AES")
-		return new OpenSSLAES();
+		return make_shared<OpenSSLAES>();
 	if (algName == "TripleDES")
-		return new OpenSSLTripleDES();
+		return make_shared<OpenSSLTripleDES>();
 	if (algName == "HMAC")
-		return new OpenSSLHMAC();
+		return make_shared<OpenSSLHMAC>();
 	// wrong algorithm name
 	throw invalid_argument("unexpected prf name");
 }

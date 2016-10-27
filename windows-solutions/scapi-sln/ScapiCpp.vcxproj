@@ -257,6 +257,7 @@
     <ClInclude Include="..\..\include\mid_layer\CramerShoupEnc.hpp" />
     <ClInclude Include="..\..\include\mid_layer\DamgardJurikEnc.hpp" />
     <ClInclude Include="..\..\include\mid_layer\ElGamalEnc.hpp" />
+    <ClInclude Include="..\..\include\mid_layer\Mac.hpp" />
     <ClInclude Include="..\..\include\mid_layer\OpenSSLSymmetricEnc.hpp" />
     <ClInclude Include="..\..\include\mid_layer\Paillier.hpp" />
     <ClInclude Include="..\..\include\mid_layer\SymmetricEnc.hpp" />
@@ -266,7 +267,6 @@
     <ClInclude Include="..\..\include\primitives\HashBlake2.hpp" />
     <ClInclude Include="..\..\include\primitives\HashOpenSSL.hpp" />
     <ClInclude Include="..\..\include\primitives\Kdf.hpp" />
-    <ClInclude Include="..\..\include\primitives\mac.hpp" />
     <ClInclude Include="..\..\include\primitives\Prf.hpp" />
     <ClInclude Include="..\..\include\primitives\PrfOpenSSL.hpp" />
     <ClInclude Include="..\..\include\primitives\Prg.hpp" />

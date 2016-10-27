@@ -565,7 +565,7 @@ TEST_CASE("PRG", "[PRG]")
 
 	SECTION("ScPrgFromPrf")
 	{
-		PseudorandomFunction * prf = new OpenSSLAES();
+		auto prf = make_shared<OpenSSLAES>();
 		ScPrgFromPrf * scprg = new ScPrgFromPrf(prf);
 		test_prg(scprg, "PRG_from_AES");
 	}
@@ -716,7 +716,7 @@ TEST_CASE("KDF","")
 {
 	SECTION("HKDF")
 	{
-		HKDF hkdf(new OpenSSLHMAC());
+		HKDF hkdf(make_shared<OpenSSLHMAC>());
 		string s = "0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c";
 		string source = boost::algorithm::unhex(s);
 		vector<byte> v_source(source.begin(), source.end());
@@ -743,8 +743,8 @@ TEST_CASE("Random Oracle", "")
 		random_oracle_test(new HashBasedRO(), "HashBasedRO");
 	}
 	SECTION("HKDFBasedRO") {
-		HKDF hkdf(new OpenSSLHMAC());
-		random_oracle_test(new HKDFBasedRO(&hkdf), "HKDFBasedRO");
+		auto hkdf = make_shared<HKDF>(make_shared<OpenSSLHMAC>());
+		random_oracle_test(new HKDFBasedRO(hkdf), "HKDFBasedRO");
 	}
 }
 
@@ -1025,7 +1025,7 @@ TEST_CASE("asymmetric encryption")
 	{
 		auto random = get_seeded_prg();
 		auto dlog = make_shared<OpenSSLDlogZpSafePrime>(64);
-		auto kdf = make_shared<HKDF>(new OpenSSLHMAC());
+		auto kdf = make_shared<HKDF>(make_shared<OpenSSLHMAC>());
 		ElGamalOnByteArrayEnc elgamal(dlog, kdf);
 		auto keys = elgamal.generateKey();
 		elgamal.setKey(keys.first, keys.second);

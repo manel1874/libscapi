@@ -451,7 +451,7 @@ class CmtElGamalOnByteArrayCommitter : public CmtElGamalCommitterCore, public Pe
 	*/
 public:
 	CmtElGamalOnByteArrayCommitter(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog = make_shared<OpenSSLDlogECF2m>("K-233"), 
-		shared_ptr<KeyDerivationFunction> kdf = make_shared<HKDF>(new OpenSSLHMAC()), const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg())
+		shared_ptr<KeyDerivationFunction> kdf = make_shared<HKDF>(make_shared<OpenSSLHMAC>()), const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg())
 		: CmtElGamalCommitterCore(channel, dlog, make_shared<ElGamalOnByteArrayEnc>(dlog, kdf), random) {}
 	
 	shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(const shared_ptr<CmtCommitValue> & input, long id) override;
@@ -508,7 +508,7 @@ public:
 	* @throws IOException if there was a problem during communication
 	*/
 	CmtElGamalOnByteArrayReceiver(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog = make_shared<OpenSSLDlogECF2m>("K-233"),
-		shared_ptr<KeyDerivationFunction> kdf = make_shared<HKDF>(new OpenSSLHMAC())) : CmtElGamalReceiverCore(channel, dlog, make_shared<ElGamalOnByteArrayEnc>(dlog, kdf)) {
+		shared_ptr<KeyDerivationFunction> kdf = make_shared<HKDF>(make_shared<OpenSSLHMAC>())) : CmtElGamalReceiverCore(channel, dlog, make_shared<ElGamalOnByteArrayEnc>(dlog, kdf)) {
 		this->kdf = kdf;
 	}
 

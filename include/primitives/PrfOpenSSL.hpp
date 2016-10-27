@@ -48,7 +48,7 @@ protected:
 
 public:
 	bool isKeySet() override { return _isKeySet; }
-	SecretKey generateKey(AlgorithmParameterSpec keyParams) override {
+	SecretKey generateKey(AlgorithmParameterSpec & keyParams) override {
 		throw NotImplementedException("To generate a key for this prf object use the generateKey(int keySize) function");
 	};
 	SecretKey generateKey(int keySize) override;
@@ -88,21 +88,21 @@ public:
 */
 class OpenSSLAES : public OpenSSLPRP, public AES {
 private: 
-	void init(shared_ptr<PrgFromOpenSSLAES> setRandom);
+	void init(const shared_ptr<PrgFromOpenSSLAES> & setRandom);
 public:
 	/**
 	* Default constructor that creates the AES objects. Uses default implementation of SecureRandom.
 	*/
 	OpenSSLAES();
 
-	OpenSSLAES(shared_ptr<PrgFromOpenSSLAES> setRandom) { init(setRandom); }
+	OpenSSLAES(const shared_ptr<PrgFromOpenSSLAES> & setRandom) { init(setRandom); }
 
 	/**
 	* Initializes this AES objects with the given secret key.
 	* @param secretKey secret key.
 	* @throws InvalidKeyException if the key is not 128/192/256 bits long.
 	*/
-	void setKey(SecretKey secretKey) override;
+	void setKey(SecretKey & secretKey) override;
 	string getAlgorithmName() override { return "AES"; };
 	int getBlockSize() override { return 16; };
 	virtual ~OpenSSLAES() {};
@@ -140,15 +140,15 @@ public:
 	* Initializes this hmac with a secret key.
 	* @param secretKey the secret key
 	*/
-	void setKey(SecretKey secretKey) override;
-	void setMacKey(SecretKey secretKey) override { setKey(secretKey); };
+	void setKey(SecretKey & secretKey) override;
+	void setMacKey(SecretKey & secretKey) override { setKey(secretKey); };
 	bool isKeySet() override { return _isKeySet; };
 	string getAlgorithmName() override;
 	int getBlockSize() override { return EVP_MD_size(hmac->md); };
 	void computeBlock(const vector<byte> & inBytes, int inOff, vector<byte> &outBytes, int outOff) override;
 	void computeBlock(const vector<byte> & inBytes, int inOff, int inLen, vector<byte> &outBytes, int outOff, int outLen) override;
 	void computeBlock(const vector<byte> & inBytes, int inOffset, int inLen, vector<byte> &outBytes, int outOffset) override;
-	SecretKey generateKey(AlgorithmParameterSpec keyParams) override {
+	SecretKey generateKey(AlgorithmParameterSpec & keyParams) override {
 		throw NotImplementedException("To generate a key for this HMAC object use the generateKey(int keySize) function");
 	};
 	SecretKey generateKey(int keySize) override;
@@ -169,7 +169,7 @@ public:
 	* Default constructor that creates the TripleDES objects. Uses default implementation of SecureRandom.
 	*/
 	OpenSSLTripleDES();
-	void setKey(SecretKey secretKey) override;
+	void setKey(SecretKey & secretKey) override;
 	string getAlgorithmName() override{ return "TripleDES"; };
 	int getBlockSize() override { return 8; }; // TripleDES works on 64 bit block.
 };

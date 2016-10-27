@@ -129,15 +129,15 @@ protected:
 		   /*
 		   * Computes the simultaneousMultiplyExponentiate using a naive algorithm
 		   */
-	std::shared_ptr<GroupElement> computeNaive(vector<std::shared_ptr<GroupElement>> groupElements,
-		vector<biginteger> exponentiations);
+	std::shared_ptr<GroupElement> computeNaive(vector<std::shared_ptr<GroupElement>> & groupElements,
+		vector<biginteger> & exponentiations);
 
 	/*
 	* Compute the simultaneousMultiplyExponentiate by LL algorithm.
 	* The code is taken from the pseudo code of LL algorithm in http://dasan.sejong.ac.kr/~chlim/pub/multi_exp.ps.
 	*/
-	std::shared_ptr<GroupElement> computeLL(vector<std::shared_ptr<GroupElement>> groupElements,
-		vector<biginteger> exponentiations);
+	std::shared_ptr<GroupElement> computeLL(vector<std::shared_ptr<GroupElement>> & groupElements,
+		vector<biginteger> & exponentiations);
 
 private:
 	/**
@@ -166,7 +166,7 @@ private:
 		* @param base
 		* @throws IllegalArgumentException
 		*/
-		GroupElementsExponentiations(shared_ptr<DlogGroup> parent_,	shared_ptr<GroupElement> base_);
+		GroupElementsExponentiations(const shared_ptr<DlogGroup> & parent_,	const shared_ptr<GroupElement> & base_);
 
 		/**
 		* Checks if the exponentiations had already been calculated for the required size.
@@ -190,15 +190,15 @@ private:
 	*		result = result *preComp[k][e]
 	*
 	*/
-	shared_ptr<GroupElement> computeLoop(vector<biginteger> exponentiations, int w, int h,
-		vector<vector<shared_ptr<GroupElement>>> preComp, shared_ptr<GroupElement> result,
+	shared_ptr<GroupElement> computeLoop(vector<biginteger> & exponentiations, int w, int h,
+		vector<vector<shared_ptr<GroupElement>>> & preComp, shared_ptr<GroupElement> & result,
 		int bitIndex);
 
 	/*
 	* Creates the preComputation table.
 	*/
 	vector<vector<shared_ptr<GroupElement>>> createLLPreCompTable(
-		vector<shared_ptr<GroupElement>> groupElements, int w, int h);
+		vector<shared_ptr<GroupElement>> & groupElements, int w, int h);
 
 	/*
 	* returns the w value according to the given t
@@ -326,7 +326,7 @@ public:
 	* @return the generated GroupElement
 	* @throws IllegalArgumentException
 	*/
-	virtual shared_ptr<GroupElement> generateElement(bool bCheckMembership, vector<biginteger> values) = 0;
+	virtual shared_ptr<GroupElement> generateElement(bool bCheckMembership, vector<biginteger> & values) = 0;
 
 	/**
 	* Reconstructs a GroupElement given the GroupElementSendableData data, which might have been received through a Channel open between the party holding this DlogGroup and
@@ -347,7 +347,7 @@ public:
 	* @return the exponentiation result
 	*/
 	virtual shared_ptr<GroupElement> simultaneousMultipleExponentiations(
-		vector<shared_ptr<GroupElement>> groupElements, vector<biginteger> exponentiations) = 0;
+		vector<shared_ptr<GroupElement>> & groupElements, vector<biginteger> & exponentiations) = 0;
 
 	/**
 	* Computes the product of several exponentiations of the same base
@@ -361,7 +361,7 @@ public:
 	* @return the exponentiation result
 	*/
 	virtual shared_ptr<GroupElement> exponentiateWithPreComputedValues(
-		shared_ptr<GroupElement> base, const biginteger & exponent);
+		const shared_ptr<GroupElement> & base, const biginteger & exponent);
 
 	/**
 	* This function cleans up any resources used by exponentiateWithPreComputedValues for the requested base.
@@ -369,7 +369,7 @@ public:
 	*
 	* @param base
 	*/
-	void endExponentiateWithPreComputedValues(shared_ptr<GroupElement> base) {
+	void endExponentiateWithPreComputedValues(const shared_ptr<GroupElement> & base) {
 		exponentiationsMap.erase(base);
 	}
 	
@@ -525,7 +525,7 @@ protected:
 	biginteger x = 0;
 
 public:
-	ZpElementSendableData(biginteger x_) : GroupElementSendableData() {
+	ZpElementSendableData(const biginteger & x_) : GroupElementSendableData() {
 		x = x_;
 	};
 
@@ -718,7 +718,7 @@ public:
 	* @param n order of the sub group
 	* @param h the cofactor
 	*/
-	ECF2mKoblitz(shared_ptr<ECF2mGroupParams> curve, const biginteger &  n, const biginteger & h) : ECF2mGroupParams(curve->getQ(), curve->getXg(), curve->getYg(), curve->getM(), curve->getA(), curve->getB(), curve->getCofactor()) {
+	ECF2mKoblitz(const shared_ptr<ECF2mGroupParams> & curve, const biginteger &  n, const biginteger & h) : ECF2mGroupParams(curve->getQ(), curve->getXg(), curve->getYg(), curve->getM(), curve->getA(), curve->getB(), curve->getCofactor()) {
 		this->curve = curve;
 		this->n = n;
 		this->h = h;

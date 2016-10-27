@@ -45,8 +45,7 @@ class OpenSSLHash : public virtual CryptographicHash {
 private:
 	int hashSize;
 protected:
-	EVP_MD_CTX* hash; //Pointer to the native hash object.
-	virtual ~OpenSSLHash();
+	shared_ptr<EVP_MD_CTX> hash; //Pointer to the native hash object.
 public:
 	/**
 	* Constructs the native hash function using OpenSSL library.

@@ -45,7 +45,7 @@ public:
 	* The key can be changed at any time.
 	* @param secretKey secret key
 	*/
-	virtual void setMacKey(SecretKey secretKey)=0;
+	virtual void setMacKey(SecretKey & secretKey)=0;
 
 	/**
 	* An object trying to use an instance of mac needs to check if it has already been initialized.
@@ -71,7 +71,7 @@ public:
 	* @return the generated secret key.
 	* @throws InvalidParameterSpecException if the given keyParams does not match this mac algoithm.
 	*/
-	virtual SecretKey generateKey(AlgorithmParameterSpec keyParams) = 0 ;
+	virtual SecretKey generateKey(AlgorithmParameterSpec & keyParams) = 0 ;
 
 	/**
 	* Generates a secret key to initialize this mac object.

@@ -31,7 +31,6 @@
 OpenSSLHash::OpenSSLHash(string hashName) {
 	//Instantiates a hash object in OpenSSL. We keep a pointer to the created hash object in c++.
 	//Remember to delete it using the finalize method.
-	EVP_MD_CTX* mdctx;
 	const EVP_MD *md;
 
 	OpenSSL_add_all_digests();
@@ -45,20 +44,16 @@ OpenSSLHash::OpenSSLHash(string hashName) {
 		throw runtime_error("failed to create hash");
 
 	// Create an OpenSSL EVP_MD_CTX struct and initialize it with the created hash.
-	mdctx = EVP_MD_CTX_create();
-	if (0 == (EVP_DigestInit(mdctx, md)))
+	auto mdctx = shared_ptr<EVP_MD_CTX>(EVP_MD_CTX_create(), EVP_MD_CTX_destroy);
+	if (0 == (EVP_DigestInit(mdctx.get(), md)))
 		throw runtime_error("failed to create hash");
 
 	hash = mdctx;
-	hashSize = EVP_MD_CTX_size(hash);
-}
-
-OpenSSLHash::~OpenSSLHash() {
-	EVP_MD_CTX_destroy(hash);
+	hashSize = EVP_MD_CTX_size(hash.get());
 }
 
 string OpenSSLHash::getAlgorithmName() {
-	int type = EVP_MD_CTX_type(hash);
+	int type = EVP_MD_CTX_type(hash.get());
 	const char* name = OBJ_nid2sn(type);
 	return string(name);
 }
@@ -74,7 +69,7 @@ void OpenSSLHash::update(const vector<byte> &in, int inOffset, int inLen){
 		throw new out_of_range("wrong length for the given input buffer");
 
 	// Update the hash with the message.
-	EVP_DigestUpdate(hash, in.data() + inOffset, inLen);
+	EVP_DigestUpdate(hash.get(), in.data() + inOffset, inLen);
 }
 
 void OpenSSLHash::hashFinal(vector<byte> &out, int outOffset) {
@@ -83,19 +78,19 @@ void OpenSSLHash::hashFinal(vector<byte> &out, int outOffset) {
 	if (outOffset<0)
 		throw new out_of_range("wrong offset for the given output buffer");
 
-	int length = EVP_MD_CTX_size(hash);
+	int length = EVP_MD_CTX_size(hash.get());
 	if ((int) out.size() < outOffset + length) {
 		out.resize(outOffset + length);
 	}
-	EVP_DigestFinal_ex(hash, out.data() + outOffset, NULL);
+	EVP_DigestFinal_ex(hash.get(), out.data() + outOffset, NULL);
 	//Initialize the hash structure again to enable repeated calls.
-	EVP_DigestInit(hash, EVP_MD_CTX_md(hash));
+	EVP_DigestInit(hash.get(), EVP_MD_CTX_md(hash.get()));
 }
 
-CryptographicHash* CryptographicHash::get_new_cryptographic_hash(string hashName)
+shared_ptr<CryptographicHash> CryptographicHash::get_new_cryptographic_hash(string hashName)
 {
 	set<string> algSet = { "SHA1", "SHA224", "SHA256", "SHA384", "SHA512" };
 	if (algSet.find(hashName) == algSet.end())
 		throw invalid_argument("unexpected hash_name");
-	return new OpenSSLHash(hashName);
+	return make_shared<OpenSSLHash>(hashName);
 }

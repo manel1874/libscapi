@@ -57,7 +57,7 @@ public:
 	* Constructor that gets a random bit sequence which is the entropy source, and prf key size in 
 	* bits and sets them.
 	*/
-	PrgFromPrfParameterSpec(vector<byte> entropySource, int prfKeySize) {
+	PrgFromPrfParameterSpec(vector<byte> &entropySource, int prfKeySize) {
 		this->entropySource = entropySource;
 		this->prfKeySize = prfKeySize;
 	};
@@ -78,7 +78,7 @@ public:
 	* Sets the secret key for this prg.
 	* The key can be changed at any time.
 	*/
-	virtual void setKey(SecretKey secretKey)=0;
+	virtual void setKey(SecretKey & secretKey)=0;
 	/**
 	* An object trying to use an instance of prg needs to check if it has already been initialized with a key.
 	* @return true if the object was initialized by calling the function setKey.
@@ -93,7 +93,7 @@ public:
 	* @param keyParams algorithmParameterSpec contains the required parameters for the key generation
 	* @return the generated secret key
 	*/
-	virtual SecretKey generateKey(AlgorithmParameterSpec keyParams)=0;
+	virtual SecretKey generateKey(AlgorithmParameterSpec & keyParams)=0;
 	/**
 	* Generates a secret key to initialize this prg object.
 	* @param keySize is the required secret key size in bits
@@ -122,7 +122,7 @@ class RC4 : public PseudorandomGenerator {};
 */
 class ScPrgFromPrf : public PseudorandomGenerator {
 private:
-	PseudorandomFunction * prf;	// Underlying PRF.
+	shared_ptr<PseudorandomFunction> prf;	// Underlying PRF.
 	vector<byte> ctr;			// Counter used for key generation.
 	bool _isKeySet=false;
 	/**
@@ -135,17 +135,17 @@ public:
 	* Constructor that lets the user choose the underlying PRF algorithm.
 	* @param prf underlying PseudorandomFunction.
 	*/
-	ScPrgFromPrf(PseudorandomFunction * prf) {this->prf = prf; };
+	ScPrgFromPrf(const shared_ptr<PseudorandomFunction> & prf) {this->prf = prf; };
 	/**
 	* Constructor that lets the user choose the underlying PRF algorithm.
 	* @param prfName PseudorandomFunction algorithm name.
 	*/
 	ScPrgFromPrf(string prfName) : ScPrgFromPrf(PseudorandomFunction::get_new_prf(prfName)) {};
 
-	void setKey(SecretKey secretKey) override;
+	void setKey(SecretKey & secretKey) override;
 	bool isKeySet() override { return _isKeySet; };
 	string getAlgorithmName() override { return "PRG_from_" + prf->getAlgorithmName(); };
-	SecretKey generateKey(AlgorithmParameterSpec keyParams) override { return prf->generateKey(keyParams); };
+	SecretKey generateKey(AlgorithmParameterSpec & keyParams) override { return prf->generateKey(keyParams); };
 	SecretKey generateKey(int keySize) override { return prf->generateKey(keySize); };
 	void getPRGBytes(vector<byte> & outBytes, int outOffset, int outLen) override;
 };
@@ -207,10 +207,10 @@ public:
 	* - performs the encryption to fill in the cypherbits array
 	*  @param secretKey - the new secret key for the aes to set.
 	*/
-	void setKey(SecretKey secretKey) override;
+	void setKey(SecretKey & secretKey) override;
 	bool isKeySet() override { return _isKeySet; };
 	string getAlgorithmName() override { return "PrgFromOpenSSLAES"; };
-	SecretKey generateKey(AlgorithmParameterSpec keyParams) override {
+	SecretKey generateKey(AlgorithmParameterSpec & keyParams) override {
 		throw NotImplementedException("To generate a key for this prg object use the generateKey(int keySize) function");
 	}
 	SecretKey generateKey(int keySize) override;
@@ -257,10 +257,10 @@ private:
 
 public:
 	OpenSSLRC4() { rc4 = new RC4_KEY();	}
-	void setKey(SecretKey secretKey) override;	
+	void setKey(SecretKey & secretKey) override;	
 	bool isKeySet() override { return _isKeySet; };
 	string getAlgorithmName() override { return "RC4"; };
-	SecretKey generateKey(AlgorithmParameterSpec keyParams) override{
+	SecretKey generateKey(AlgorithmParameterSpec  & keyParams) override{
 		throw NotImplementedException("To generate a key for this prg object use the generateKey(int keySize) function");
 	}
 	SecretKey generateKey(int keySize) override;
