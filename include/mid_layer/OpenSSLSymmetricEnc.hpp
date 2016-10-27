@@ -59,8 +59,8 @@ protected:
 		return EVP_CIPHER_CTX_iv_length(enc);
 	}
 	
-	vector<byte> encryptOpenSSL(vector<byte> plaintext, vector<byte> iv);	//Encrypt the given plaintext.
-	vector<byte> decryptOpenSSL(vector<byte> cipher, vector<byte> iv);		//Decrypt the given ciphertext.
+	vector<byte> encryptOpenSSL(vector<byte> & plaintext, vector<byte> & iv);	//Encrypt the given plaintext.
+	vector<byte> decryptOpenSSL(vector<byte> & cipher, vector<byte> & iv);		//Decrypt the given ciphertext.
 
 																		
 public:
@@ -88,13 +88,13 @@ public:
 	/**
 	* Supply the encryption scheme with a Secret Key.
 	*/
-	void setKey(SecretKey secretKey) override;	
+	void setKey(SecretKey & secretKey) override;	
 
 	/**
 	* This function should not be used to generate a key for the encryption and it throws UnsupportedOperationException.
 	* @throws UnsupportedOperationException
 	*/
-	SecretKey generateKey(AlgorithmParameterSpec* keyParams) override {
+	SecretKey generateKey(AlgorithmParameterSpec & keyParams) override {
 		throw UnsupportedOperationException("To generate a key for this encryption object use the generateKey(int keySize) function");
 	}
 
@@ -120,7 +120,7 @@ public:
 	* @param iv random bytes to use in the encryption of the message.
 	* @return an IVCiphertext, which contains the IV used and the encrypted data.
 	*/
-	shared_ptr<SymmetricCiphertext> encrypt(Plaintext* plaintext, vector<byte> iv) override;
+	shared_ptr<SymmetricCiphertext> encrypt(Plaintext* plaintext, vector<byte> & iv) override;
 
 	/**
 	* Decrypts the given ciphertext using the underlying prp as the block cipher function.
@@ -174,7 +174,7 @@ public:
 	/**
 	* Supply the encryption scheme with a Secret Key.
 	*/
-	void setKey(SecretKey secretKey) {
+	void setKey(SecretKey & secretKey) override {
 		OpenSSLEncWithIVAbs::setKey(secretKey);
 		
 		//Create the requested block cipher according to the given prpName.

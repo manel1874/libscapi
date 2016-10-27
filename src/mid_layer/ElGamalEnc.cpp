@@ -61,7 +61,7 @@ void ElGamalOnByteArraySendableData::initFromString(const string & row) {
 	}
 }
 
-void ElGamalEnc::setMembers(shared_ptr<DlogGroup> dlogGroup, const shared_ptr<PrgFromOpenSSLAES> & random) {
+void ElGamalEnc::setMembers(const shared_ptr<DlogGroup> & dlogGroup, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	auto ddh = dynamic_pointer_cast<DDH>(dlogGroup);
 	//The underlying dlog group must be DDH secure.
 	if (ddh == NULL) {
@@ -91,7 +91,7 @@ ElGamalEnc::ElGamalEnc() {
 * @param privateKey should be ElGamalPrivateKey.
 * @throws InvalidKeyException if the given keys are not instances of ElGamal keys.
 */
-void ElGamalEnc::setKey(shared_ptr<PublicKey> publicKey, shared_ptr<PrivateKey> privateKey) {
+void ElGamalEnc::setKey(const shared_ptr<PublicKey> & publicKey, const shared_ptr<PrivateKey> & privateKey) {
 	this->publicKey = dynamic_pointer_cast<ElGamalPublicKey>(publicKey);
 	//Key should be ElGamalPublicKey.
 	if (this->publicKey == NULL) {
@@ -153,7 +153,7 @@ shared_ptr<PrivateKey> ElGamalEnc::reconstructPrivateKey(KeySendableData* data) 
 * @throws IllegalStateException if no public key was set.
 * @throws IllegalArgumentException if the given Plaintext does not match this ElGamal type.
 */
-shared_ptr<AsymmetricCiphertext> ElGamalEnc::encrypt(shared_ptr<Plaintext> plaintext) {
+shared_ptr<AsymmetricCiphertext> ElGamalEnc::encrypt(const shared_ptr<Plaintext> & plaintext) {
 	// If there is no public key can not encrypt, throws exception.
 	if (!isKeySet()) {
 		throw new IllegalStateException("in order to encrypt a message this object must be initialized with public key");
@@ -185,7 +185,7 @@ shared_ptr<AsymmetricCiphertext> ElGamalEnc::encrypt(shared_ptr<Plaintext> plain
 * @throws IllegalStateException if no public key was set.
 * @throws IllegalArgumentException if the given Plaintext does not match this ElGamal type.
 */
-shared_ptr<AsymmetricCiphertext> ElGamalEnc::encrypt(shared_ptr<Plaintext> plaintext, biginteger r) {
+shared_ptr<AsymmetricCiphertext> ElGamalEnc::encrypt(const shared_ptr<Plaintext> & plaintext, const biginteger & r) {
 
 	/*
 	* Pseudo-code:
@@ -218,7 +218,7 @@ shared_ptr<AsymmetricCiphertext> ElGamalEnc::encrypt(shared_ptr<Plaintext> plain
 * This function computes this changing and saves the new private value as the private key member.
 * @param privateKey to change.
 */
-void ElGamalOnGroupElementEnc::initPrivateKey(shared_ptr<ElGamalPrivateKey> privateKey) {
+void ElGamalOnGroupElementEnc::initPrivateKey(const shared_ptr<ElGamalPrivateKey> & privateKey) {
 
 	//Gets the a value from the private key.
 	biginteger x = privateKey->getX();
@@ -228,7 +228,7 @@ void ElGamalOnGroupElementEnc::initPrivateKey(shared_ptr<ElGamalPrivateKey> priv
 	this->privateKey = make_shared<ElGamalPrivateKey>(xInv);
 }
 
-shared_ptr<AsymmetricCiphertext> ElGamalOnGroupElementEnc::completeEncryption(shared_ptr<GroupElement> c1, GroupElement* hy, Plaintext* plaintext) {
+shared_ptr<AsymmetricCiphertext> ElGamalOnGroupElementEnc::completeEncryption(const shared_ptr<GroupElement> & c1, GroupElement* hy, Plaintext* plaintext) {
 	auto plain = dynamic_cast<GroupElementPlaintext*>(plaintext);
 	if (plain == NULL) {
 		throw invalid_argument("plaintext should be instance of GroupElementPlaintext");
@@ -248,7 +248,7 @@ shared_ptr<AsymmetricCiphertext> ElGamalOnGroupElementEnc::completeEncryption(sh
 * @param text byte array to convert to a Plaintext object.
 * @throws IllegalArgumentException if the given message's length is greater than the maximum.
 */
-shared_ptr<Plaintext> ElGamalOnGroupElementEnc::generatePlaintext(vector<byte> text) {
+shared_ptr<Plaintext> ElGamalOnGroupElementEnc::generatePlaintext(vector<byte> & text) {
 	if ((int) text.size() > getMaxLengthOfByteArrayForPlaintext()) {
 		throw invalid_argument("the given text is too big for plaintext");
 	}
@@ -340,7 +340,7 @@ shared_ptr<AsymmetricCiphertext> ElGamalOnGroupElementEnc::multiply(AsymmetricCi
 * 		1. If one or more of the given ciphertexts is not instance of ElGamalOnGroupElementCiphertext.
 * 		2. If one or more of the GroupElements in the given ciphertexts is not a member of the underlying DlogGroup of this ElGamal encryption scheme.
 */
-shared_ptr<AsymmetricCiphertext> ElGamalOnGroupElementEnc::multiply(AsymmetricCiphertext* cipher1, AsymmetricCiphertext* cipher2, biginteger r) {
+shared_ptr<AsymmetricCiphertext> ElGamalOnGroupElementEnc::multiply(AsymmetricCiphertext* cipher1, AsymmetricCiphertext* cipher2, biginteger & r) {
 	/*
 	* Pseudo-Code:
 	* 	c1 = (u1, v1); c2 = (u2, v2)
@@ -406,7 +406,7 @@ shared_ptr<AsymmetricCiphertext> ElGamalOnGroupElementEnc::reconstructCiphertext
 * @return Ciphertext of type ElGamalOnByteArrayCiphertext containing the encrypted message.
 * @throws IllegalArgumentException if the given Plaintext is not an instance of ByteArrayPlaintext.
 */
-shared_ptr<AsymmetricCiphertext> ElGamalOnByteArrayEnc::completeEncryption(shared_ptr<GroupElement> c1, GroupElement* hy, Plaintext* plaintext) {
+shared_ptr<AsymmetricCiphertext> ElGamalOnByteArrayEnc::completeEncryption(const shared_ptr<GroupElement> & c1, GroupElement* hy, Plaintext* plaintext) {
 
 
 	auto plain = dynamic_cast<ByteArrayPlaintext*>(plaintext);

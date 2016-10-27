@@ -51,7 +51,7 @@ public:
 	* @param privateKey
 	* @throws InvalidKeyException if the given keys don't match this encryption scheme.
 	*/
-	virtual void setKey(shared_ptr<PublicKey> publicKey, shared_ptr<PrivateKey> privateKey) = 0;
+	virtual void setKey(const shared_ptr<PublicKey> & publicKey, const shared_ptr<PrivateKey> & privateKey) = 0;
 
 	/**
 	* Sets this asymmetric encryption with a public key<p>
@@ -59,7 +59,7 @@ public:
 	* @param publicKey
 	* @throws InvalidKeyException if the given key doesn't match this encryption scheme.
 	*/
-	virtual void setKey(shared_ptr<PublicKey> publicKey) = 0;
+	virtual void setKey(const shared_ptr<PublicKey> & publicKey) = 0;
 
 	/**
 	* Checks if this AsymmetricEnc object has been previously initialized with corresponding keys.<p>
@@ -107,7 +107,7 @@ public:
 	* @param text byte array to convert to a Plaintext object.
 	* @throws IllegalArgumentException if the given message's length is greater than the maximum.
 	*/
-	virtual shared_ptr<Plaintext> generatePlaintext(vector<byte> text) = 0;
+	virtual shared_ptr<Plaintext> generatePlaintext(vector<byte> & text) = 0;
 
 	/**
 	* Reconstructs a suitable AsymmetricCiphertext from data that was probably obtained via a Channel or any other means of sending data (including serialization).<p>
@@ -124,7 +124,7 @@ public:
 	* @throws IllegalArgumentException if the given Plaintext doesn't match this encryption type.
 	* @throws IllegalStateException if no public key was set.
 	*/
-	virtual shared_ptr<AsymmetricCiphertext> encrypt(shared_ptr<Plaintext> plainText) = 0;
+	virtual shared_ptr<AsymmetricCiphertext> encrypt(const shared_ptr<Plaintext> & plainText) = 0;
 
 	/**
 	* Encrypts the given plaintext using this asymmetric encryption scheme and using the given random value.<p>
@@ -138,7 +138,7 @@ public:
 	* @throws IllegalArgumentException if the given Plaintext doesn't match this encryption type.
 	* @throws IllegalStateException if no public key was set.
 	*/
-	virtual shared_ptr<AsymmetricCiphertext> encrypt(shared_ptr<Plaintext> plainText, biginteger r) = 0;
+	virtual shared_ptr<AsymmetricCiphertext> encrypt(const shared_ptr<Plaintext> & plainText, const biginteger & r) = 0;
 
 	/**
 	* Decrypts the given ciphertext using this asymmetric encryption scheme.
@@ -164,7 +164,7 @@ public:
 	* @return KeyPair holding the public and private keys relevant to the encryption scheme
 	* @throws InvalidParameterSpecException if the given parameters don't match this encryption scheme.
 	*/
-	virtual pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> generateKey(AlgorithmParameterSpec* keyParams) = 0;
+	virtual pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> generateKey(AlgorithmParameterSpec * keyParams) = 0;
 
 	/**
 	* Generates public and private keys for this asymmetric encryption.
@@ -223,7 +223,7 @@ public:
 	* @throws IllegalStateException if no public key was set.
 	* @throws IllegalArgumentException if the given ciphertexts do not match this asymmetric encryption.
 	*/
-	virtual shared_ptr<AsymmetricCiphertext> multiply(AsymmetricCiphertext* cipher1, AsymmetricCiphertext* cipher2, biginteger r) = 0;
+	virtual shared_ptr<AsymmetricCiphertext> multiply(AsymmetricCiphertext* cipher1, AsymmetricCiphertext* cipher2, biginteger & r) = 0;
 };
 
 /**
@@ -259,7 +259,7 @@ public:
 	* @throws IllegalStateException if no public key was set.
 	* @throws IllegalArgumentException if the given ciphertexts do not match this asymmetric encryption.
 	*/
-	virtual shared_ptr<AsymmetricCiphertext> add(AsymmetricCiphertext* cipher1, AsymmetricCiphertext* cipher2, biginteger r) = 0;
+	virtual shared_ptr<AsymmetricCiphertext> add(AsymmetricCiphertext* cipher1, AsymmetricCiphertext* cipher2, biginteger & r) = 0;
 
 	/**
 	* Receives a cipher and a constant number and returns their multiplication.
@@ -269,7 +269,7 @@ public:
 	* @throws IllegalStateException if no public key was set.
 	* @throws IllegalArgumentException if the given ciphertext does not match this asymmetric encryption.
 	*/
-	virtual shared_ptr<AsymmetricCiphertext> multByConst(AsymmetricCiphertext* cipher, biginteger constNumber) = 0;
+	virtual shared_ptr<AsymmetricCiphertext> multByConst(AsymmetricCiphertext* cipher, biginteger & constNumber) = 0;
 
 	/**
 	* Receives a cipher and a constant number and returns their multiplication.<p>
@@ -284,5 +284,5 @@ public:
 	* @throws IllegalStateException if no public key was set.
 	* @throws IllegalArgumentException if the given ciphertext does not match this asymmetric encryption.
 	*/
-	virtual shared_ptr<AsymmetricCiphertext> multByConst(AsymmetricCiphertext* cipher, biginteger constNumber, biginteger r) = 0;
+	virtual shared_ptr<AsymmetricCiphertext> multByConst(AsymmetricCiphertext* cipher, biginteger & constNumber, biginteger & r) = 0;
 };

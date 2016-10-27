@@ -28,9 +28,9 @@
 
 #include "../../include/mid_layer/CramerShoupEnc.hpp"
 
-CramerShoupPublicKeySendableData::CramerShoupPublicKeySendableData(shared_ptr<GroupElementSendableData> c,
-	shared_ptr<GroupElementSendableData> d, shared_ptr<GroupElementSendableData> h,
-	shared_ptr<GroupElementSendableData> g1, shared_ptr<GroupElementSendableData> g2) {
+CramerShoupPublicKeySendableData::CramerShoupPublicKeySendableData(const shared_ptr<GroupElementSendableData> & c,
+	const shared_ptr<GroupElementSendableData> & d, const shared_ptr<GroupElementSendableData> & h,
+	const shared_ptr<GroupElementSendableData> & g1, const shared_ptr<GroupElementSendableData> & g2) {
 	this->c = c;
 	this->d = d;
 	this->h = h;
@@ -52,7 +52,8 @@ void CramerShoupPublicKeySendableData::initFromString(const string & row) {
 	g2->initFromString(str_vec[4]);
 }
 
-CramerShoupPublicKey::CramerShoupPublicKey(shared_ptr<GroupElement> c, shared_ptr<GroupElement> d, shared_ptr<GroupElement> h, shared_ptr<GroupElement> g1, shared_ptr<GroupElement> g2) {
+CramerShoupPublicKey::CramerShoupPublicKey(const shared_ptr<GroupElement> & c, const shared_ptr<GroupElement> & d, const shared_ptr<GroupElement> & h, 
+	const shared_ptr<GroupElement> & g1, const shared_ptr<GroupElement> & g2) {
 	this->c = c;
 	this->d = d;
 	this->h = h;
@@ -60,7 +61,7 @@ CramerShoupPublicKey::CramerShoupPublicKey(shared_ptr<GroupElement> c, shared_pt
 	this->g2 = g2;
 }
 
-CramerShoupPrivateKey::CramerShoupPrivateKey(biginteger x1, biginteger x2, biginteger y1, biginteger y2, biginteger z) {
+CramerShoupPrivateKey::CramerShoupPrivateKey(biginteger & x1, biginteger & x2, biginteger & y1, biginteger & y2, biginteger & z) {
 	this->x1 = x1;
 	this->x2 = x2;
 	this->y1 = y1;
@@ -82,8 +83,8 @@ void CramerShoupPrivateKey::initFromString(const string & row) {
 	z = biginteger(str_vec[4]);
 }
 
-CrShOnGroupElSendableData::CrShOnGroupElSendableData(shared_ptr<GroupElementSendableData> u1, shared_ptr<GroupElementSendableData> u2,
-	shared_ptr<GroupElementSendableData> v, shared_ptr<GroupElementSendableData> e) {
+CrShOnGroupElSendableData::CrShOnGroupElSendableData(const shared_ptr<GroupElementSendableData> & u1, const shared_ptr<GroupElementSendableData> & u2,
+	const shared_ptr<GroupElementSendableData> & v, const shared_ptr<GroupElementSendableData> & e) {
 	this->u1 = u1;
 	this->u2 = u2;
 	this->v = v;
@@ -112,7 +113,8 @@ void CrShOnGroupElSendableData::initFromString(const string & row) {
 * @param random source of randomness.
 * @throws SecurityLevelException if the Dlog Group or the Hash function do not meet the required Security Level
 */
-CramerShoupOnGroupElementEnc::CramerShoupOnGroupElementEnc(shared_ptr<DlogGroup> dlogGroup, shared_ptr<CryptographicHash> hash, const shared_ptr<PrgFromOpenSSLAES> & random) {
+CramerShoupOnGroupElementEnc::CramerShoupOnGroupElementEnc(const shared_ptr<DlogGroup> & dlogGroup, const shared_ptr<CryptographicHash> & hash, 
+	const shared_ptr<PrgFromOpenSSLAES> & random) {
 	//The Cramer-Shoup encryption scheme must work with a Dlog Group that has DDH security level
 	//and a Hash function that has CollisionResistant security level. If any of this conditions is not 
 	//met then cannot construct an object of type Cramer-Shoup encryption scheme; therefore throw exception.
@@ -137,7 +139,7 @@ CramerShoupOnGroupElementEnc::CramerShoupOnGroupElementEnc(shared_ptr<DlogGroup>
 * @param privateKey the private key has to be of type <link>CramerShoupPrivateKey<link>.
 * @throws InvalidKeyException if the keys are not instances of CramerShoup keys.
 */
-void CramerShoupOnGroupElementEnc::setKey(shared_ptr<PublicKey> publicKey, shared_ptr<PrivateKey> privateKey)  {
+void CramerShoupOnGroupElementEnc::setKey(const shared_ptr<PublicKey> & publicKey, const shared_ptr<PrivateKey> & privateKey)  {
 	this->publicKey = dynamic_pointer_cast<CramerShoupPublicKey>(publicKey);
 	//Public key should be Cramer-Shoup public key.
 	if (this->publicKey == NULL) {
@@ -233,7 +235,7 @@ shared_ptr<PublicKey> CramerShoupOnGroupElementEnc::reconstructPublicKey(KeySend
 * @throws IllegalStateException if no public key was set.
 * @throws IllegalArgumentException if the given Plaintext is not instance of GroupElementPlaintext.
 */
-shared_ptr<AsymmetricCiphertext> CramerShoupOnGroupElementEnc::encrypt(shared_ptr<Plaintext> plaintext)  {
+shared_ptr<AsymmetricCiphertext> CramerShoupOnGroupElementEnc::encrypt(const shared_ptr<Plaintext> & plaintext)  {
 	// If there is no public key can not encrypt, throws exception.
 	if (!isKeySet()) {
 		throw new IllegalStateException("in order to encrypt a message this object must be initialized with public key");
@@ -268,7 +270,7 @@ shared_ptr<AsymmetricCiphertext> CramerShoupOnGroupElementEnc::encrypt(shared_pt
 * @throws IllegalStateException if no public key was set.
 * @throws IllegalArgumentException if the given Plaintext is not instance of GroupElementPlaintext.
 */
-shared_ptr<AsymmetricCiphertext> CramerShoupOnGroupElementEnc::encrypt(shared_ptr<Plaintext> plaintext, biginteger r) {
+shared_ptr<AsymmetricCiphertext> CramerShoupOnGroupElementEnc::encrypt(const shared_ptr<Plaintext> & plaintext, const biginteger & r) {
 	/*
 	* 	Choose a random  r in Zq<p>
 	*	Calculate 	u1 = g1^r<p>
@@ -319,7 +321,7 @@ shared_ptr<AsymmetricCiphertext> CramerShoupOnGroupElementEnc::encrypt(shared_pt
 * @param alpha the value returned from the hash calculation.
 * @return the calculated value v.
 */
-shared_ptr<GroupElement> CramerShoupOnGroupElementEnc::calcV(biginteger r, vector<byte> alpha) {
+shared_ptr<GroupElement> CramerShoupOnGroupElementEnc::calcV(const biginteger & r, vector<byte> & alpha) {
 	auto cExpr = dlogGroup->exponentiate(publicKey->getC().get(), r);
 	biginteger rAlphaModQ = (r * decodeBigInteger(alpha.data(), alpha.size())) % dlogGroup->getOrder();
 	auto dExpRAlpha = dlogGroup->exponentiate(publicKey->getD().get(), rAlphaModQ);
@@ -333,7 +335,7 @@ shared_ptr<GroupElement> CramerShoupOnGroupElementEnc::calcV(biginteger r, vecto
 * @param eToByteArray
 * @return the result of hash(u1ToByteArray+u2ToByteArray+eToByteArray)
 */
-vector<byte> CramerShoupOnGroupElementEnc::calcAlpha(vector<byte> u1ToByteArray, vector<byte> u2ToByteArray, vector<byte> eToByteArray) {
+vector<byte> CramerShoupOnGroupElementEnc::calcAlpha(vector<byte> & u1ToByteArray, vector<byte> & u2ToByteArray, vector<byte> & eToByteArray) {
 	//Concatenates u1, u2 and e into u1.
 	u1ToByteArray.insert(u1ToByteArray.end(), u2ToByteArray.begin(), u2ToByteArray.end());
 	u1ToByteArray.insert(u1ToByteArray.end(), eToByteArray.begin(), eToByteArray.end());
@@ -354,7 +356,7 @@ vector<byte> CramerShoupOnGroupElementEnc::calcAlpha(vector<byte> u1ToByteArray,
 * @param text byte array to convert to a Plaintext object.
 * @throws IllegalArgumentException if the given message's length is greater than the maximum.
 */
-shared_ptr<Plaintext> CramerShoupOnGroupElementEnc::generatePlaintext(vector<byte> text) {
+shared_ptr<Plaintext> CramerShoupOnGroupElementEnc::generatePlaintext(vector<byte> & text) {
 	if ((int) text.size() > getMaxLengthOfByteArrayForPlaintext()) {
 		throw invalid_argument("the given text is too big for plaintext");
 	}
@@ -416,7 +418,7 @@ shared_ptr<Plaintext> CramerShoupOnGroupElementEnc::decrypt(AsymmetricCiphertext
 * @param alpha parameter needs to validation.
 * @throws ScapiRuntimeException if the given cipher is not valid.
 */
-void CramerShoupOnGroupElementEnc::checkValidity(CramerShoupOnGroupElementCiphertext* cipher, vector<byte> alpha) {
+void CramerShoupOnGroupElementEnc::checkValidity(CramerShoupOnGroupElementCiphertext* cipher, vector<byte> & alpha) {
 
 	//Calculates u1^(x1+y1*alpha).
 	biginteger alphaBI = mp::abs(decodeBigInteger(alpha.data(), alpha.size()));

@@ -54,7 +54,7 @@ OpenSSLEncWithIVAbs::~OpenSSLEncWithIVAbs() {
 /**
 * Supply the encryption scheme with a Secret Key.
 */
-void OpenSSLEncWithIVAbs::setKey(SecretKey secretKey) {
+void OpenSSLEncWithIVAbs::setKey(SecretKey & secretKey) {
 	int len = secretKey.getEncoded().size() * 8;
 
 	//The key size should suit the encryption type. 
@@ -112,7 +112,7 @@ shared_ptr<SymmetricCiphertext> OpenSSLEncWithIVAbs::encrypt(Plaintext* plaintex
 * @param iv random bytes to use in the encryption of the message.
 * @return an IVCiphertext, which contains the IV used and the encrypted data.
 */
-shared_ptr<SymmetricCiphertext> OpenSSLEncWithIVAbs::encrypt(Plaintext* plaintext, vector<byte> iv) {
+shared_ptr<SymmetricCiphertext> OpenSSLEncWithIVAbs::encrypt(Plaintext* plaintext, vector<byte> & iv) {
 	if (!keySet) {
 		throw IllegalStateException("no SecretKey was set");
 	}
@@ -162,7 +162,7 @@ shared_ptr<Plaintext> OpenSSLEncWithIVAbs::decrypt(SymmetricCiphertext* cipherte
 	return make_shared<ByteArrayPlaintext>(plaintext);
 }
 
-vector<byte> OpenSSLEncWithIVAbs::encryptOpenSSL(vector<byte> plaintext, vector<byte> iv) {
+vector<byte> OpenSSLEncWithIVAbs::encryptOpenSSL(vector<byte> & plaintext, vector<byte> & iv) {
 	
 	//Initialize the encryption objects with the key.
 	EVP_EncryptInit(enc, NULL, NULL, (unsigned char*)iv.data());
@@ -186,7 +186,7 @@ vector<byte> OpenSSLEncWithIVAbs::encryptOpenSSL(vector<byte> plaintext, vector<
 	return out;
 }
 
-vector<byte> OpenSSLEncWithIVAbs::decryptOpenSSL(vector<byte> cipher, vector<byte> iv) {
+vector<byte> OpenSSLEncWithIVAbs::decryptOpenSSL(vector<byte> & cipher, vector<byte> & iv) {
 
 	//Initialize the encryption object with the key.
 	EVP_DecryptInit(dec, NULL, NULL, (unsigned char*)iv.data());

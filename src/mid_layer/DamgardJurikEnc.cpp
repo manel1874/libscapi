@@ -36,7 +36,7 @@ void DamgardJurikPublicKey::initFromString(const string & row) {
 	modulus = biginteger(row);
 }
 
-DamgardJurikPrivateKey::DamgardJurikPrivateKey(RSAModulus rsaMod) {
+DamgardJurikPrivateKey::DamgardJurikPrivateKey(RSAModulus & rsaMod) {
 
 	this->p = rsaMod.p;
 	this->q = rsaMod.q;
@@ -51,7 +51,7 @@ DamgardJurikPrivateKey::DamgardJurikPrivateKey(RSAModulus rsaMod) {
 	dForS1 = generateD(rsaMod.n, t);
 }
 
-DamgardJurikPrivateKey::DamgardJurikPrivateKey(biginteger p, biginteger q, biginteger t, biginteger dForS1) {
+DamgardJurikPrivateKey::DamgardJurikPrivateKey(biginteger & p, biginteger & q, biginteger & t, biginteger & dForS1) {
 	this->p = p;
 	this->q = q;
 	this->t = t;
@@ -75,7 +75,7 @@ void DamgardJurikPrivateKey::initFromString(const string & row) {
 	q = biginteger(str_vec[3]);
 }
 
-biginteger DamgardJurikPrivateKey::generateD(biginteger N, biginteger t) {
+biginteger DamgardJurikPrivateKey::generateD(biginteger & N, biginteger & t) {
 	vector<biginteger> congruences;
 	congruences.push_back(1);
 	congruences.push_back(0);
@@ -93,7 +93,7 @@ biginteger DamgardJurikPrivateKey::generateD(biginteger N, biginteger t) {
 * @param privateKey should be DamgardJurikPrivateKey.
 * @throws InvalidKeyException if the given keys are not instances of DamgardJurik keys.
 */
-void DamgardJurikEnc::setKey(shared_ptr<PublicKey> publicKey, shared_ptr<PrivateKey> privateKey) {
+void DamgardJurikEnc::setKey(const shared_ptr<PublicKey> & publicKey, const shared_ptr<PrivateKey> & privateKey) {
 	this->publicKey = dynamic_pointer_cast<DamgardJurikPublicKey>(publicKey);
 	//Public key should be Damgard Jurik public key.
 	if (this->publicKey == NULL) {
@@ -132,7 +132,7 @@ shared_ptr<PublicKey> DamgardJurikEnc::getPublicKey() {
 * @return KeyPair contains keys for this DamgardJurik encryption object.
 * @throws InvalidParameterSpecException if keyParams is not instance of DJKeyGenParameterSpec.
 */
-pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> DamgardJurikEnc::generateKey(AlgorithmParameterSpec* keyParams) {
+pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> DamgardJurikEnc::generateKey(AlgorithmParameterSpec * keyParams) {
 
 	auto params = dynamic_cast<DJKeyGenParameterSpec*>(keyParams);
 	if (params == NULL) {
@@ -159,7 +159,7 @@ pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> DamgardJurikEnc::generateKey
 * 		1. If the given plaintext is not instance of BigIntegerPlainText.
 * 		2. If the BigInteger value in the given plaintext is not in ZN.
 */
-shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::encrypt(shared_ptr<Plaintext> plaintext) {
+shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::encrypt(const shared_ptr<Plaintext> & plaintext) {
 	/*
 	* We use the notation N=n^s, and N' = n^(s+1).
 	* Pseudo-Code:
@@ -200,7 +200,7 @@ shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::encrypt(shared_ptr<Plaintext> 
 * 		1. If the given plaintext is not instance of BigIntegerPlainText.
 * 		2. If the BigInteger value in the given plaintext is not in ZN.
 */
-shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::encrypt(shared_ptr<Plaintext> plaintext, biginteger r) {
+shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::encrypt(const shared_ptr<Plaintext> & plaintext, const biginteger & r) {
 	/*
 	* We use the notation N=n^s, and N' = n^(s+1).
 	* Pseudo-Code:
@@ -401,7 +401,7 @@ shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::reRandomize(AsymmetricCipherte
 * 		1. If cipher is not an instance of BigIntegerCiphertext.
 * 		2. If the BigInteger number in the given cipher is not in ZN'.
 */
-shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::reRandomize(AsymmetricCiphertext* cipher, biginteger r) {
+shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::reRandomize(AsymmetricCiphertext* cipher, biginteger & r) {
 	// If there is no public key can not operate the function, throws exception.
 	if (!isKeySet()) {
 		throw IllegalStateException("in order to reRandomize a ciphertext this object must be initialized with public key");
@@ -491,7 +491,7 @@ shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::add(AsymmetricCiphertext* ciph
 * 		2. If the sizes of ciphertexts do not match.
 * 		3. If one or more of the BigInteger numbers in the given ciphertexts is not in ZN'.
 */
-shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::add(AsymmetricCiphertext* cipher1, AsymmetricCiphertext* cipher2, biginteger r) {
+shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::add(AsymmetricCiphertext* cipher1, AsymmetricCiphertext* cipher2, biginteger & r) {
 
 	// If there is no public key can not operate the function, throws exception.
 	if (!isKeySet()) {
@@ -552,7 +552,7 @@ shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::add(AsymmetricCiphertext* ciph
 * 		2. If the BigInteger numbers in the given ciphertext is not in ZN'.
 * 		3. If the constant number is not in ZN.
 */
-shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::multByConst(AsymmetricCiphertext* cipher, biginteger constNumber) {
+shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::multByConst(AsymmetricCiphertext* cipher, biginteger & constNumber) {
 	// If there is no public key can not operate the function, throws exception.
 	if (!isKeySet()) {
 		throw invalid_argument("in order to multiply a ciphertext this object must be initialized with public key");
@@ -599,7 +599,7 @@ shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::multByConst(AsymmetricCipherte
 * 		2. If the BigInteger numbers in the given ciphertext is not in ZN'.
 * 		3. If the constant number is not in ZN.
 */
-shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::multByConst(AsymmetricCiphertext* cipher, biginteger constNumber, biginteger r) {
+shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::multByConst(AsymmetricCiphertext* cipher, biginteger & constNumber, biginteger & r) {
 	// If there is no public key can not operate the function, throws exception.
 	if (!isKeySet()) {
 		throw invalid_argument("in order to multiply a ciphertext this object must be initialized with public key");
@@ -641,7 +641,7 @@ shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::multByConst(AsymmetricCipherte
 	return make_shared<BigIntegerCiphertext>(c);
 }
 
-biginteger DamgardJurikEnc::generateD(biginteger N, biginteger t) {
+biginteger DamgardJurikEnc::generateD(biginteger & N, biginteger & t) {
 	vector<biginteger> congruences;
 	congruences.push_back(1);
 	congruences.push_back(0);
