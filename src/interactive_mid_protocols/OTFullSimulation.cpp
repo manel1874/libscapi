@@ -589,7 +589,7 @@ OTFullSimDDHOnGroupElementSender::OTFullSimDDHOnGroupElementSender(const shared_
 	this->random = random;
 
 	//Create the underlying ZKPOK
-	ZKPOKFromSigmaCmtPedersenVerifier zkVerifier(channel, make_shared<SigmaDHVerifierComputation>(dlog, 80), make_shared<CmtRTrapdoorCommitPhaseOutput>(), dlog);
+	ZKPOKFromSigmaCmtPedersenVerifier zkVerifier(channel, make_shared<SigmaDHVerifierComputation>(dlog, 80, random), make_shared<CmtRTrapdoorCommitPhaseOutput>(), dlog);
 
 	// Some OT protocols have a pre-process stage before the transfer. 
 	// Usually, pre process is done once at the beginning of the protocol and will not be executed later, 
@@ -652,7 +652,7 @@ OTFullSimDDHOnByteArraySender::OTFullSimDDHOnByteArraySender(const shared_ptr<Co
 	this->random = random;
 
 	//Create the underlying ZKPOK
-	ZKPOKFromSigmaCmtPedersenVerifier zkVerifier(channel, make_shared<SigmaDHVerifierComputation>(dlog, 80), make_shared<CmtRTrapdoorCommitPhaseOutput>(), dlog);
+	ZKPOKFromSigmaCmtPedersenVerifier zkVerifier(channel, make_shared<SigmaDHVerifierComputation>(dlog, 80, random), make_shared<CmtRTrapdoorCommitPhaseOutput>(), dlog);
 
 	// Some OT protocols have a pre-process stage before the transfer. 
 	// Usually, pre process is done once at the beginning of the protocol and will not be executed later, 
@@ -711,7 +711,7 @@ OTFullSimDDHOnGroupElementReceiver::OTFullSimDDHOnGroupElementReceiver(const sha
 	this->random = random;
 
 	//Creates the underlying ZKPOK. 
-	ZKPOKFromSigmaCmtPedersenProver zkProver(channel, make_shared<SigmaDHProverComputation>(dlog, 80), dlog);
+	ZKPOKFromSigmaCmtPedersenProver zkProver(channel, make_shared<SigmaDHProverComputation>(dlog, 80, random), dlog);
 
 	// Some OT protocols have a pre-process stage before the transfer. 
 	// Usually, pre process is done once at the beginning of the protocol and will not be executed later, 
@@ -773,7 +773,7 @@ OTFullSimDDHOnByteArrayReceiver::OTFullSimDDHOnByteArrayReceiver(const shared_pt
 	this->random = random;
 
 	//Creates the underlying ZKPOK. 
-	ZKPOKFromSigmaCmtPedersenProver zkProver(channel, make_shared<SigmaDHProverComputation>(dlog, 80), dlog);
+	ZKPOKFromSigmaCmtPedersenProver zkProver(channel, make_shared<SigmaDHProverComputation>(dlog, 80, random), dlog);
 
 	// Some OT protocols have a pre-process stage before the transfer. 
 	// Usually, pre process is done once at the beginning of the protocol and will not be executed later, 

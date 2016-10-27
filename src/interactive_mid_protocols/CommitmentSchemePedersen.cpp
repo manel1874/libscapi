@@ -240,10 +240,10 @@ vector<byte> CmtPedersenReceiver::generateBytesFromCommitValue(CmtCommitValue* v
 /*   CmtPedersenWithProofsCommitter         */
 /********************************************/
 void CmtPedersenWithProofsCommitter::doConstruct(int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
-	auto pedersenCommittedValProver = make_shared<SigmaPedersenCommittedValueProverComputation>(dlog, t);
+	auto pedersenCommittedValProver = make_shared<SigmaPedersenCommittedValueProverComputation>(dlog, t, random);
 	auto pedersenCTKnowledgeProver = make_shared<SigmaPedersenCmtKnowledgeProverComputation>(dlog, t, random);
-	knowledgeProver = make_shared<ZKPOKFromSigmaCmtPedersenProver>(channel, pedersenCTKnowledgeProver, dlog);
-	committedValProver = make_shared<ZKPOKFromSigmaCmtPedersenProver>(channel, pedersenCommittedValProver, dlog);
+	knowledgeProver = make_shared<ZKPOKFromSigmaCmtPedersenProver>(channel, pedersenCTKnowledgeProver, dlog, random);
+	committedValProver = make_shared<ZKPOKFromSigmaCmtPedersenProver>(channel, pedersenCommittedValProver, dlog, random);
 }
 
 void CmtPedersenWithProofsCommitter::proveKnowledge(long id)  {
@@ -272,12 +272,12 @@ void CmtPedersenWithProofsCommitter::proveCommittedValue(long id) {
 /********************************************/
 /*   CmtPedersenWithProofsReceiver         */
 /********************************************/
-void CmtPedersenWithProofsReceiver::doConstruct(int t) {
-	auto pedersenCommittedValVerifier = make_shared<SigmaPedersenCommittedValueVerifierComputation>(dlog, t);
-	auto pedersenCTKnowledgeVerifier = make_shared<SigmaPedersenCmtKnowledgeVerifierComputation>(dlog, t);
+void CmtPedersenWithProofsReceiver::doConstruct(int t, const shared_ptr<PrgFromOpenSSLAES> & prg) {
+	auto pedersenCommittedValVerifier = make_shared<SigmaPedersenCommittedValueVerifierComputation>(dlog, t, prg);
+	auto pedersenCTKnowledgeVerifier = make_shared<SigmaPedersenCmtKnowledgeVerifierComputation>(dlog, t, prg);
 	auto output = make_shared<CmtRTrapdoorCommitPhaseOutput>();
-	knowledgeVerifier = make_shared<ZKPOKFromSigmaCmtPedersenVerifier>(channel, pedersenCTKnowledgeVerifier, output, dlog);
-	committedValVerifier = make_shared<ZKPOKFromSigmaCmtPedersenVerifier>(channel, pedersenCommittedValVerifier, output, dlog);
+	knowledgeVerifier = make_shared<ZKPOKFromSigmaCmtPedersenVerifier>(channel, pedersenCTKnowledgeVerifier, output, dlog, prg);
+	committedValVerifier = make_shared<ZKPOKFromSigmaCmtPedersenVerifier>(channel, pedersenCommittedValVerifier, output, dlog, prg);
 }
 
 bool CmtPedersenWithProofsReceiver::verifyKnowledge(long id) {

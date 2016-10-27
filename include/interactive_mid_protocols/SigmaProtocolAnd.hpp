@@ -52,7 +52,7 @@ public:
 	* 		  and the prover wants to prove to the verify that the AND of all statements are true.
 	* @param t soundness parameter. t MUST be equal to all t values of the underlying provers object.
 	*/
-	SigmaANDProverComputation(vector<shared_ptr<SigmaProverComputation>> provers, int t);
+	SigmaANDProverComputation(vector<shared_ptr<SigmaProverComputation>> provers, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg());
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
 	*/
@@ -79,6 +79,7 @@ public:
 
 private:
 	vector<shared_ptr<SigmaProverComputation>> provers;	// underlying Sigma protocol's provers to the AND calculation.
+	shared_ptr<PrgFromOpenSSLAES> prg;
 	int len;								// number of underlying provers.
 	int t;									// soundness parameter.
 	/**

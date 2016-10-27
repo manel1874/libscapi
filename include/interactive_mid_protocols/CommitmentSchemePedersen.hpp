@@ -439,14 +439,14 @@ private:
 	* Creates the ZK verifiers using sigma protocols that verifies Pedersen's proofs.
 	* @param t
 	*/
-	void doConstruct(int t);
+	void doConstruct(int t, const shared_ptr<PrgFromOpenSSLAES> & prg);
 public:
 	/**
 	* Default constructor that gets the channel and creates the ZK verifiers with default Dlog group.
 	* @param channel
 	*/
-	CmtPedersenWithProofsReceiver(shared_ptr<CommParty> channel, int t) : CmtPedersenReceiver(channel) {
-		doConstruct(t);
+	CmtPedersenWithProofsReceiver(shared_ptr<CommParty> channel, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) : CmtPedersenReceiver(channel, prg) {
+		doConstruct(t, prg);
 	};
 
 	/**
@@ -456,9 +456,9 @@ public:
 	* @param t statistical parameter
 	* @param random
 	*/
-	CmtPedersenWithProofsReceiver(shared_ptr<CommParty> channel, int t, shared_ptr<DlogGroup> dlog) :
-		CmtPedersenReceiver(channel, dlog) {
-		doConstruct(t);
+	CmtPedersenWithProofsReceiver(shared_ptr<CommParty> channel, int t, shared_ptr<DlogGroup> dlog, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) :
+		CmtPedersenReceiver(channel, dlog, prg) {
+		doConstruct(t, prg);
 	};
 
 	bool verifyKnowledge(long id) override;

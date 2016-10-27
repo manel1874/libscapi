@@ -76,11 +76,11 @@ int main(int argc, char* argv[]) {
 	if (exampleName == "yao")
 		return mainYao(argv[2], argv[3]);
 	if (exampleName == "sigma")
-		//return mainSigma(argv[2], argv[3]);
+		return mainSigma(argv[2], argv[3]);
 	if (exampleName == "commitment")
 		return mainCommitment(argv[2], argv[3]);
-	//if (exampleName == "ot")
-		//return mainOT(argv[2], argv[3]);
+	if (exampleName == "ot")
+		return mainOT(argv[2], argv[3]);
 
 	
 	

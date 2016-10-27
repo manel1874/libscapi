@@ -117,7 +117,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaElGamalPrivateKeySimulator(shared_ptr<DlogGroup> dlog, int t) : dlogSim(dlog, t) {}
+	SigmaElGamalPrivateKeySimulator(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) : dlogSim(dlog, t, prg) {}
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -166,6 +166,7 @@ class SigmaElGamalPrivateKeyProverComputation : public SigmaProverComputation, D
 private:
 	SigmaDlogProverComputation sigmaDlog;	//underlying SigmaDlogProver to use.
 	shared_ptr<DlogGroup> dlog;				//We need the DlogGroup instance in order to calculate the input for the underlying SigmaDlogProver
+	shared_ptr<PrgFromOpenSSLAES> prg;
 	int t;
 	
 public:
@@ -175,7 +176,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaElGamalPrivateKeyProverComputation(shared_ptr<DlogGroup> dlog, int t);
+	SigmaElGamalPrivateKeyProverComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -204,7 +205,7 @@ public:
 	* @return SigmaDlogSimulator
 	*/
 	shared_ptr<SigmaSimulator> getSimulator() override {
-		return make_shared<SigmaElGamalPrivateKeySimulator>(dlog, t);
+		return make_shared<SigmaElGamalPrivateKeySimulator>(dlog, t, prg);
 	}
 
 };

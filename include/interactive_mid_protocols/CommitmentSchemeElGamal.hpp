@@ -564,10 +564,7 @@ public:
 	* @param channel
 	* @throws IOException
 	*/
-	CmtElGamalWithProofsCommitter(shared_ptr<CommParty> channel, int t, shared_ptr<DlogGroup> dlog = make_shared<OpenSSLDlogECF2m>("K-233"))
-		: CmtElGamalOnGroupElementCommitter(channel, dlog) {
-		doConstruct(t);
-	}
+	CmtElGamalWithProofsCommitter(shared_ptr<CommParty> channel, int t, shared_ptr<DlogGroup> dlog = make_shared<OpenSSLDlogECF2m>("K-233"), const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg());
 
 	void proveKnowledge(long id) override; 
 	void proveCommittedValue(long id) override;
@@ -605,10 +602,7 @@ public:
 	* @param t statistical parameter
 	* @param random
 	*/
-	CmtElGamalWithProofsReceiver(shared_ptr<CommParty> channel, int t, shared_ptr<DlogGroup> dlog = make_shared<OpenSSLDlogECF2m>("K-233"))
-		: CmtElGamalOnGroupElementReceiver(channel, dlog) {
-		doConstruct(t);
-	}
+	CmtElGamalWithProofsReceiver(shared_ptr<CommParty> channel, int t, shared_ptr<DlogGroup> dlog = make_shared<OpenSSLDlogECF2m>("K-233"), const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg());
 
 	bool verifyKnowledge(long id) override; 
 

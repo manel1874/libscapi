@@ -173,7 +173,7 @@ public:
 	* Returns the simulator that matches this sigma protocol prover.
 	*/
 	shared_ptr<SigmaSimulator> getSimulator() override { 
-		auto res = make_shared<SigmaDlogSimulator>(dlog, t);
+		auto res = make_shared<SigmaDlogSimulator>(dlog, t, random);
 		return res; };
 
 private:

@@ -68,7 +68,8 @@ SigmaCramerShoupEncryptedValueProverInput::SigmaCramerShoupEncryptedValueProverI
 * @param t Soundness parameter in BITS.
 * @param random
 */
-SigmaCramerShoupEncryptedValueSimulator::SigmaCramerShoupEncryptedValueSimulator(shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, int t) : dhSim(dlog, t) {
+SigmaCramerShoupEncryptedValueSimulator::SigmaCramerShoupEncryptedValueSimulator(shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, int t, 
+	const shared_ptr<PrgFromOpenSSLAES> & prg) : dhSim(dlog, t, prg) {
 
 	this->dlog = dlog;
 	this->hash = hash;
@@ -181,11 +182,12 @@ biginteger SigmaCramerShoupEncryptedValueSimulator::calcW(shared_ptr<GroupElemen
 * @param random
 */
 SigmaCramerShoupEncryptedValueProverComputation::SigmaCramerShoupEncryptedValueProverComputation(shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, 
-	int t, const shared_ptr<PrgFromOpenSSLAES> & random) : sigmaDH(dlog, t) {
+	int t, const shared_ptr<PrgFromOpenSSLAES> & random) : sigmaDH(dlog, t, random) {
 
 	this->dlog = dlog;
 	this->hash = hash;
 	this->t = t;
+	prg = random;
 }
 
 biginteger SigmaCramerShoupEncryptedValueProverComputation::calcW(shared_ptr<GroupElement> u1, shared_ptr<GroupElement> u2, shared_ptr<GroupElement> e) {

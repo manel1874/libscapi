@@ -523,7 +523,7 @@ shared_ptr<SigmaSimulator> SigmaOrMultipleProverComputation::getSimulator() {
 		}
 
 	}
-	return make_shared<SigmaOrMultipleSimulator>(sim, t);
+	return make_shared<SigmaOrMultipleSimulator>(sim, t, random);
 }
 
 /**

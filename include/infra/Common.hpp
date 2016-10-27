@@ -122,6 +122,7 @@ int NumberOfBits(biginteger bi);
 size_t bytesCount(biginteger value);
 
 class PrgFromOpenSSLAES;
+
 shared_ptr<PrgFromOpenSSLAES> get_seeded_prg();
 
 void copy_byte_vector_to_byte_array(const vector<byte> &source_vector, byte * dest, int beginIndex);

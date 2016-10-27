@@ -32,7 +32,7 @@ OTFullSimROMDDHOnGroupElementSender::OTFullSimROMDDHOnGroupElementSender(const s
 	this->ro = oracle;
 	
 	//Create the underlying ZKPOK
-	ZKPOKFiatShamirFromSigmaVerifier zkVerifier(channel, make_shared<SigmaDHVerifierComputation>(dlog, 80), ro);
+	ZKPOKFiatShamirFromSigmaVerifier zkVerifier(channel, make_shared<SigmaDHVerifierComputation>(dlog, 80, random), ro);
 	
 	// Some OT protocols have a pre-process stage before the transfer. 
 	// Usually, pre process is done once at the beginning of the protocol and will not be executed later, 
@@ -96,7 +96,7 @@ OTFullSimROMDDHOnByteArraySender::OTFullSimROMDDHOnByteArraySender(const shared_
 	this->ro = oracle;
 
 	//Create the underlying ZKPOK
-	ZKPOKFiatShamirFromSigmaVerifier zkVerifier(channel, make_shared<SigmaDHVerifierComputation>(dlog, 80), ro);
+	ZKPOKFiatShamirFromSigmaVerifier zkVerifier(channel, make_shared<SigmaDHVerifierComputation>(dlog, 80, random), ro);
 
 	// Some OT protocols have a pre-process stage before the transfer. 
 	// Usually, pre process is done once at the beginning of the protocol and will not be executed later, 
@@ -157,7 +157,7 @@ OTFullSimROMDDHOnGroupElementReceiver::OTFullSimROMDDHOnGroupElementReceiver(con
 	this->random = random;
 	this->ro = oracle;
 	
-	ZKPOKFiatShamirFromSigmaProver zkProver(channel, make_shared<SigmaDHProverComputation>(dlog, 80), ro);
+	ZKPOKFiatShamirFromSigmaProver zkProver(channel, make_shared<SigmaDHProverComputation>(dlog, 80, random), ro);
 	
 	// Some OT protocols have a pre-process stage before the transfer. 
 	// Usually, pre process is done once at the beginning of the protocol and will not be executed later, 
@@ -223,7 +223,7 @@ OTFullSimROMDDHOnByteArrayReceiver::OTFullSimROMDDHOnByteArrayReceiver(const sha
 	this->ro = oracle;
 	this->kdf = kdf;
 
-	ZKPOKFiatShamirFromSigmaProver zkProver(channel, make_shared<SigmaDHProverComputation>(dlog, 80), ro);
+	ZKPOKFiatShamirFromSigmaProver zkProver(channel, make_shared<SigmaDHProverComputation>(dlog, 80, random), ro);
 
 	// Some OT protocols have a pre-process stage before the transfer. 
 	// Usually, pre process is done once at the beginning of the protocol and will not be executed later, 

@@ -83,7 +83,8 @@ SigmaElGamalEncryptedValueRandomnessProverInput::SigmaElGamalEncryptedValueRando
 * @param t Soundness parameter in BITS.
 * @param random
 */
-SigmaElGamalEncryptedValueSimulator::SigmaElGamalEncryptedValueSimulator(shared_ptr<DlogGroup> dlog, int t) : dhSim(dlog, t) {
+SigmaElGamalEncryptedValueSimulator::SigmaElGamalEncryptedValueSimulator(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg) 
+	: dhSim(dlog, t, prg) {
 	//Creates the underlying SigmaDHSimulator object with the given parameters.
 	this->dlog = dlog;
 }
@@ -168,8 +169,10 @@ shared_ptr<SigmaDHCommonInput> SigmaElGamalEncryptedValueSimulator::checkAndCrea
 * @param t Soundness parameter in BITS.
 * @param random
 */
-SigmaElGamalEncryptedValueProverComputation::SigmaElGamalEncryptedValueProverComputation(shared_ptr<DlogGroup> dlog, int t) : sigmaDH(dlog, t) {
+SigmaElGamalEncryptedValueProverComputation::SigmaElGamalEncryptedValueProverComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg) 
+	: sigmaDH(dlog, t, prg) {
 	this->dlog = dlog;
+	this->prg = prg;
 	this->t = t;
 }
 

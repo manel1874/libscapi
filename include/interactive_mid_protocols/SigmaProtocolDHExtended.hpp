@@ -271,7 +271,7 @@ public:
 	*/
 
 	shared_ptr<SigmaSimulator> getSimulator() override {
-		return make_shared<SigmaDHExtendedSimulator>(dlog, t);
+		return make_shared<SigmaDHExtendedSimulator>(dlog, t, random);
 	}
 };
 

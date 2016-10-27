@@ -108,9 +108,9 @@ public:
 	* @param channel used to communicate between prover and verifier.
 	* @param sProver underlying sigma prover to use.
 	*/
-	ZKFromSigmaProver(shared_ptr<CommParty> channel, shared_ptr<SigmaProverComputation> sProver) {
+	ZKFromSigmaProver(shared_ptr<CommParty> channel, shared_ptr<SigmaProverComputation> sProver, shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) {
 		this->sProver = sProver;
-		this->receiver = make_shared<CmtPedersenReceiver>(channel);
+		this->receiver = make_shared<CmtPedersenReceiver>(channel, prg);
 		this->channel = channel;
 	};
 
@@ -226,7 +226,7 @@ public:
 	ZKFromSigmaVerifier(shared_ptr<CommParty> channel, shared_ptr<SigmaVerifierComputation> sVerifier, 
 		const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) {
 		this->sVerifier = sVerifier;
-		this->committer = make_shared<CmtPedersenCommitter>(channel);
+		this->committer = make_shared<CmtPedersenCommitter>(channel, random);
 		this->channel = channel;
 		this->random = random;
 	}
@@ -315,9 +315,10 @@ public:
 	* @param sProver underlying sigma prover to use.
 	*/
 	ZKPOKFromSigmaCmtPedersenProver(shared_ptr<CommParty> channel,
-		shared_ptr<SigmaProverComputation> sProver, shared_ptr<DlogGroup> dg) {
+		shared_ptr<SigmaProverComputation> sProver, shared_ptr<DlogGroup> dg, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) {
 		this->sProver = sProver;
-		this->receiver = make_shared<CmtPedersenTrapdoorReceiver>(channel, dg);
+		if (prg == nullptr) cout << "null 1" << endl;
+		this->receiver = make_shared<CmtPedersenTrapdoorReceiver>(channel, dg, prg);
 		this->channel = channel;
 	}
 
@@ -444,7 +445,7 @@ public:
 		shared_ptr<CmtRCommitPhaseOutput> emptyTrap, shared_ptr<DlogGroup> dg, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) {
 		this->channel = channel;
 		this->sVerifier = sVerifier; 
-		this->committer = make_shared<CmtPedersenTrapdoorCommitter>(channel, dg);
+		this->committer = make_shared<CmtPedersenTrapdoorCommitter>(channel, dg, random);
 		this->random = random;
 		this->trap = emptyTrap;
 	};

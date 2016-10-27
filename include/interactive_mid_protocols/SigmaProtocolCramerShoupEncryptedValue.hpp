@@ -156,7 +156,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaCramerShoupEncryptedValueSimulator(shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, int t);
+	SigmaCramerShoupEncryptedValueSimulator(shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, int t, const shared_ptr<PrgFromOpenSSLAES> & prg);
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -211,6 +211,7 @@ private:
 	shared_ptr<DlogGroup> dlog;					//We save the dlog because we need it to calculate the input for the underlying Sigma prover.
 	int t; 
 	shared_ptr<CryptographicHash> hash;			//Underlying hash function that used in the CramerShoup cryptosystem.
+	shared_ptr<PrgFromOpenSSLAES> prg;
 
 												/**
 												* Receives three byte arrays and calculates the hash function on their concatenation.
@@ -259,7 +260,7 @@ public:
 	* @return SigmaCramerShoupEncryptedValueSimulator.
 	*/
 	shared_ptr<SigmaSimulator> getSimulator() override {
-		return make_shared<SigmaCramerShoupEncryptedValueSimulator>(dlog, hash, t);
+		return make_shared<SigmaCramerShoupEncryptedValueSimulator>(dlog, hash, t, prg);
 	}
 };
 

@@ -134,6 +134,7 @@ class SigmaElGamalCommittedValueSimulator : public SigmaSimulator {
 private:
 	SigmaDHSimulator dhSim; 		//underlying SigmaDHSimulator to use.
 	shared_ptr<DlogGroup> dlog;		//We need the DlogGroup instance in order to calculate the input for the underlying SigmaDlogProver
+	shared_ptr<PrgFromOpenSSLAES> prg;
 
 	/**
 	* Converts the input to an input object for the underlying simulator.
@@ -149,8 +150,9 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaElGamalCommittedValueSimulator(shared_ptr<DlogGroup> dlog, int t) : dhSim(dlog, t) {
+	SigmaElGamalCommittedValueSimulator(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) : dhSim(dlog, t, prg) {
 		this->dlog = dlog;
+		this->prg = prg;
 	}
 
 	/**
@@ -201,6 +203,7 @@ class SigmaElGamalCommittedValueProverComputation : public SigmaProverComputatio
 private:
 	SigmaDHProverComputation sigmaDH;	//underlying SigmaDHProver to use.
 	shared_ptr<DlogGroup> dlog;			//We need the DlogGroup instance in order to calculate the input for the underlying SigmaDlogProver
+	shared_ptr<PrgFromOpenSSLAES> prg;
 	int t;
 
 	/**
@@ -217,8 +220,8 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaElGamalCommittedValueProverComputation(shared_ptr<DlogGroup> dlog, int t) : sigmaDH(dlog, t){
-
+	SigmaElGamalCommittedValueProverComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) : sigmaDH(dlog, t, prg){
+		this->prg = prg;
 		this->dlog = dlog;
 		this->t = t;
 	}
@@ -250,7 +253,7 @@ public:
 	* @return SigmaElGamalCommittedValueSimulator
 	*/
 	shared_ptr<SigmaSimulator> getSimulator() override {
-		return make_shared<SigmaElGamalCommittedValueSimulator>(dlog, t);
+		return make_shared<SigmaElGamalCommittedValueSimulator>(dlog, t, prg);
 	}
 
 };
@@ -292,7 +295,8 @@ public:
 	* @param random
 	* @throws InvalidDlogGroupException if the given dlog is invalid.
 	*/
-	SigmaElGamalCommittedValueVerifierComputation(shared_ptr<DlogGroup> dlog, int t) :sigmaDH(dlog, t) {
+	SigmaElGamalCommittedValueVerifierComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) 
+		:sigmaDH(dlog, t, prg) {
 
 		this->dlog = dlog;
 	}

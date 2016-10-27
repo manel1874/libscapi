@@ -91,9 +91,10 @@ shared_ptr<SigmaDlogProverInput> SigmaElGamalCmtKnowledgeProverComputation::conv
 * @param dlog
 * @param t Soundness parameter in BITS.
 */
-SigmaElGamalCmtKnowledgeProverComputation::SigmaElGamalCmtKnowledgeProverComputation(shared_ptr<DlogGroup> dlog, int t) : sigmaDlog(dlog, t) {
+SigmaElGamalCmtKnowledgeProverComputation::SigmaElGamalCmtKnowledgeProverComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg) : sigmaDlog(dlog, t, prg) {
 	this->dlog = dlog;
 	this->t = t;
+	this->prg = prg;
 }
 
 /**

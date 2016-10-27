@@ -372,7 +372,7 @@ public:
 	* @return SigmaDamgardJurikProductSimulator
 	*/
 	shared_ptr<SigmaSimulator> getSimulator() override {
-		return make_shared<SigmaDJProductSimulator>(t, lengthParameter);
+		return make_shared<SigmaDJProductSimulator>(t, lengthParameter, random);
 	}
 };
 

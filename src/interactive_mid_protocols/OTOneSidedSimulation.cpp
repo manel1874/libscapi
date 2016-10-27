@@ -1,7 +1,7 @@
 #include "../../include/interactive_mid_protocols/OTOneSidedSimulation.hpp"
 
 OTOneSidedSimDDHSenderAbs::OTOneSidedSimDDHSenderAbs(const shared_ptr<CommParty> & channel, const shared_ptr<PrgFromOpenSSLAES> & random, const shared_ptr<DlogGroup> & dlog)
-	: zkVerifier(channel, make_shared<SigmaDlogVerifierComputation>(dlog, 80), make_shared<CmtRTrapdoorCommitPhaseOutput>(), dlog) {
+	: zkVerifier(channel, make_shared<SigmaDlogVerifierComputation>(dlog, 80, random), make_shared<CmtRTrapdoorCommitPhaseOutput>(), dlog) {
 
 	//The underlying dlog group must be DDH secure.
 	auto ddh = dynamic_pointer_cast<DDH>(dlog);
@@ -295,7 +295,7 @@ shared_ptr<OTSMsg> OTOneSidedSimDDHOnByteArraySender::computeTuple(OTSInput* inp
 * @throws InvalidDlogGroupException if the given DlogGroup is not valid.
 */
 OTOneSidedSimDDHReceiverAbs::OTOneSidedSimDDHReceiverAbs(const shared_ptr<CommParty> & channel, const shared_ptr<PrgFromOpenSSLAES> & random, const shared_ptr<DlogGroup> & dlog)
-	: zkProver(channel, make_shared<SigmaDlogProverComputation>(dlog, 80), dlog) {
+	: zkProver(channel, make_shared<SigmaDlogProverComputation>(dlog, 80, random), dlog) {
 	// The underlying dlog group must be DDH secure.
 	auto ddh = dynamic_pointer_cast<DDH>(dlog);
 	if (ddh == NULL) {

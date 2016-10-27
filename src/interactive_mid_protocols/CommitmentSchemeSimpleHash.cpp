@@ -84,23 +84,7 @@ string CmtSimpleHashDecommitmentMessage::toString() {
 * values for the hash function, SecureRandom object and a security parameter n.
 *  @param channel
 */
-CmtSimpleHashCommitter::CmtSimpleHashCommitter(shared_ptr<CommParty> channel, shared_ptr<CryptographicHash> hash, int n) {
-	auto prg = make_shared<PrgFromOpenSSLAES>();
-	prg->setKey(prg->generateKey(128));
-	
-	init(channel, prg, hash, n);
-}
-
-/**
-* Constructor that receives a connected channel (to the receiver) and chosses default
-* values for the hash function, SecureRandom object and a security parameter n.
-*  @param channel
-*/
 CmtSimpleHashCommitter::CmtSimpleHashCommitter(shared_ptr<CommParty> channel, shared_ptr<PrgFromOpenSSLAES> prg, shared_ptr<CryptographicHash> hash, int n) {
-	init(channel, prg, hash, n);
-}
-
-void CmtSimpleHashCommitter::init(shared_ptr<CommParty> channel, shared_ptr<PrgFromOpenSSLAES> prg, shared_ptr<CryptographicHash> hash, int n) {
 	this->channel = channel;
 	this->hash = hash;
 	this->n = n;

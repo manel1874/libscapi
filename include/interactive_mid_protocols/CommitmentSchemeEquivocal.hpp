@@ -159,20 +159,13 @@ class CmtEquivocalReceiver : public CmtReceiver, public EquivocalCmt {
 
 private:
 	shared_ptr<CmtWithProofsReceiver> receiver;
-	//shared_ptr<CommParty> channel;
-
-	/*void doConstruct(shared_ptr<CommParty> channel, shared_ptr<CmtWithProofsReceiver> receiver) {
-		this->receiver = receiver;
-		this->channel = channel;
-	}*/
-
+	
 public:
 	/**
 	* Constructor that gets the receiver to use in the protocol execution.
 	* @param receiver
 	*/
 	CmtEquivocalReceiver(shared_ptr<CommParty> channel, shared_ptr<CmtWithProofsReceiver> receiver) {
-		//doConstruct(channel, receiver);
 		this->receiver = receiver;
 	}
 
@@ -183,9 +176,8 @@ public:
 	* @throws IOException
 	* @throws ClassNotFoundException
 	*/
-	CmtEquivocalReceiver(shared_ptr<CommParty> channel, int t) {
-		//doConstruct(channel, make_shared<CmtPedersenWithProofsReceiver>(channel, t));
-		this->receiver = make_shared<CmtPedersenWithProofsReceiver>(channel, t);
+	CmtEquivocalReceiver(shared_ptr<CommParty> channel, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) {
+		this->receiver = make_shared<CmtPedersenWithProofsReceiver>(channel, t, random);
 	}
 
 	/**

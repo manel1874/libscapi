@@ -277,7 +277,7 @@ public:
 	* @return SigmaDamgardJurikEncryptedZeroSimulator
 	*/
 	shared_ptr<SigmaSimulator> getSimulator() override {
-		return make_shared<SigmaDJEncryptedZeroSimulator>(t, lengthParameter);
+		return make_shared<SigmaDJEncryptedZeroSimulator>(t, lengthParameter, random);
 	}
 
 };

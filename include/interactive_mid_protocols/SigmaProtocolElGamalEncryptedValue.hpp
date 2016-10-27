@@ -200,7 +200,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaElGamalEncryptedValueSimulator(shared_ptr<DlogGroup> dlog, int t);
+	SigmaElGamalEncryptedValueSimulator(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -257,6 +257,7 @@ class SigmaElGamalEncryptedValueProverComputation : public SigmaProverComputatio
 private:
 	SigmaDHProverComputation sigmaDH;	//underlying SigmaDHProver to use.
 	shared_ptr<DlogGroup> dlog;			//We save the dlog because we need it to calculate the input for the underlying Sigma prover.
+	shared_ptr<PrgFromOpenSSLAES> prg;
 	int t;
 										
 	/**
@@ -277,7 +278,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaElGamalEncryptedValueProverComputation(shared_ptr<DlogGroup> dlog, int t);
+	SigmaElGamalEncryptedValueProverComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -304,7 +305,7 @@ public:
 	* @return SigmaDlogSimulator
 	*/
 	shared_ptr<SigmaSimulator> getSimulator() override {
-		return make_shared<SigmaElGamalEncryptedValueSimulator>(dlog, t);
+		return make_shared<SigmaElGamalEncryptedValueSimulator>(dlog, t, prg);
 	}
 
 };

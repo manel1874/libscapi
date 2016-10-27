@@ -34,7 +34,7 @@ int mainYao(string partyNum, string configPath);
 int mainDlog();
 int mainSha1();
 int mainPrg();
-//int mainSigma(string, string);
+int mainSigma(string, string);
 int mainOTMalicious(string  party);
 //int mainOSPSI(string inputFilePath_0, string inputFilePath_1);
 #ifndef _WIN32

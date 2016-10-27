@@ -185,9 +185,7 @@ string hexStr(vector<byte> const & data)
 }
 
 shared_ptr<PrgFromOpenSSLAES> get_seeded_prg() {
-	auto prg = make_shared<PrgFromOpenSSLAES>();
-	prg->setKey(prg->generateKey(128));
-	return prg;
+	return PrgSingleton::getInstance();
 
 }
 

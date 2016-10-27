@@ -29,7 +29,7 @@
 #ifndef SCAPI_PRG_H
 #define SCAPI_PRG_H
 
-#include "../infra/Common.hpp"
+//#include "../infra/Common.hpp"
 #include "../CryptoInfra/Key.hpp"
 #include "Prf.hpp"
 #include <openssl/rc4.h>
@@ -268,5 +268,18 @@ public:
 	~OpenSSLRC4();
 };
 
+class PrgSingleton {
+private:
+	static shared_ptr<PrgFromOpenSSLAES> prg;
+	PrgSingleton() {}
+public:
+	static shared_ptr<PrgFromOpenSSLAES> getInstance() { 
+		if (prg == nullptr) {
+			prg = make_shared<PrgFromOpenSSLAES>();
+			prg->setKey(prg->generateKey(128));
+		}
+		return prg; 
+	}
+};
 
 #endif

@@ -52,7 +52,7 @@ public:
 	* The receiver needs to be instantiated with the default constructor too.
 	* @param channel
 	*/
-	CmtPedersenTrapdoorCommitter(shared_ptr<CommParty> channel) : CmtPedersenCommitter(channel) {};
+	CmtPedersenTrapdoorCommitter(shared_ptr<CommParty> channel, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) : CmtPedersenCommitter(channel, random) {};
 
 	/**
 	* Constructor that receives a connected channel (to the receiver), the DlogGroup agreed upon between them and a SecureRandom object.
@@ -61,8 +61,8 @@ public:
 	* @param dlog
 	* @param random
 	*/
-	CmtPedersenTrapdoorCommitter(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog) :
-		CmtPedersenCommitter(channel, dlog) {};
+	CmtPedersenTrapdoorCommitter(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) :
+		CmtPedersenCommitter(channel, dlog, random) {};
 
 	/**
 	* Validate the h value received from the receiver in the pre process phase.
@@ -103,8 +103,8 @@ public:
 	* @param dlog
 	* @param random
 	*/
-	CmtPedersenTrapdoorReceiver(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog) :
-		CmtPedersenReceiver(channel, dlog) {};
+	CmtPedersenTrapdoorReceiver(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) :
+		CmtPedersenReceiver(channel, dlog, prg) {};
 
 	/**
 	* Returns the receiver's trapdoor from the preprocess phase.

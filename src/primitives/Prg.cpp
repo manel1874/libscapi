@@ -350,3 +350,5 @@ void OpenSSLRC4::getPRGBytes(vector<byte> & outBytes, int outOffset, int outLen)
 OpenSSLRC4::~OpenSSLRC4() {
 	delete rc4;
 }
+
+shared_ptr<PrgFromOpenSSLAES> PrgSingleton::prg = nullptr;

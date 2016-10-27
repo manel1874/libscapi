@@ -255,7 +255,7 @@ public:
 	* @return SigmaDHSimulator
 	*/
 	shared_ptr<SigmaSimulator> getSimulator() override {
-		auto res = make_shared<SigmaDHSimulator>(dlog, t);
+		auto res = make_shared<SigmaDHSimulator>(dlog, t, random);
 		return res;
 	}
 

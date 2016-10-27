@@ -301,7 +301,7 @@ shared_ptr<SigmaSimulator> SigmaOrTwoProverComputation::getSimulator() {
 		simulators.push_back(simulator);
 		simulators.push_back(prover->getSimulator());
 	}
-	return make_shared<SigmaOrTwoSimulator>(simulators, t);
+	return make_shared<SigmaOrTwoSimulator>(simulators, t, random);
 }
 
 /**

@@ -383,8 +383,8 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 		auto random = get_seeded_prg();
 		auto dlog = make_shared<OpenSSLDlogECFp>();
 
-		auto dlogProver = make_shared<SigmaDlogProverComputation>(dlog, 80);
-		auto dlogVerifier = make_shared<SigmaDlogVerifierComputation>(dlog, 80);
+		auto dlogProver = make_shared<SigmaDlogProverComputation>(dlog, 80, random);
+		auto dlogVerifier = make_shared<SigmaDlogVerifierComputation>(dlog, 80, random);
 		biginteger w = getRandomInRange(0, dlog->getOrder() - 1, random.get());
 
 		auto h1 = dlog->exponentiate(dlog->getGenerator().get(), w);
@@ -392,8 +392,8 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 		auto proverDlogInput = make_shared<SigmaDlogProverInput>(h1, w);
 
 		//auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
-		auto dhProver = make_shared<SigmaDHProverComputation>(dlog, 80);
-		auto dhVerifier = make_shared<SigmaDHVerifierComputation>(dlog, 80);
+		auto dhProver = make_shared<SigmaDHProverComputation>(dlog, 80, random);
+		auto dhVerifier = make_shared<SigmaDHVerifierComputation>(dlog, 80, random);
 
 		auto u = dlog->exponentiate(dlog->getGenerator().get(), w);
 		auto h = dlog->createRandomElement();
@@ -433,8 +433,8 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 		auto random = get_seeded_prg();
 		auto dlog = make_shared<OpenSSLDlogECFp>();
 
-		auto dlogProver = make_shared<SigmaDlogProverComputation>(dlog, 80);
-		auto dlogVerifier = make_shared<SigmaDlogVerifierComputation>(dlog, 80);
+		auto dlogProver = make_shared<SigmaDlogProverComputation>(dlog, 80, random);
+		auto dlogVerifier = make_shared<SigmaDlogVerifierComputation>(dlog, 80, random);
 		biginteger w = getRandomInRange(0, dlog->getOrder() - 1, random.get());
 
 		auto h1 = dlog->exponentiate(dlog->getGenerator().get(), w);
@@ -442,8 +442,8 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 		auto proverDlogInput = make_shared<SigmaDlogProverInput>(h1, w);
 
 		//auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
-		auto dhProver = make_shared<SigmaDHProverComputation>(dlog, 80);
-		auto dhVerifier = make_shared<SigmaDHVerifierComputation>(dlog, 80);
+		auto dhProver = make_shared<SigmaDHProverComputation>(dlog, 80, random);
+		auto dhVerifier = make_shared<SigmaDHVerifierComputation>(dlog, 80, random);
 
 		auto u = dlog->exponentiate(dlog->getGenerator().get(), w);
 		auto h = dlog->createRandomElement();
@@ -476,8 +476,8 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 		auto random = get_seeded_prg();
 		auto dlog = make_shared<OpenSSLDlogECFp>();
 
-		auto dlogProver = make_shared<SigmaDlogProverComputation>(dlog, 80);
-		auto dlogVerifier = make_shared<SigmaDlogVerifierComputation>(dlog, 80);
+		auto dlogProver = make_shared<SigmaDlogProverComputation>(dlog, 80, random);
+		auto dlogVerifier = make_shared<SigmaDlogVerifierComputation>(dlog, 80, random);
 		biginteger w = getRandomInRange(0, dlog->getOrder() - 1, random.get());
 
 		auto h1 = dlog->exponentiate(dlog->getGenerator().get(), w);
@@ -485,8 +485,8 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 		auto proverDlogInput = make_shared<SigmaDlogProverInput>(h1, w);
 
 		//auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
-		auto dhProver = make_shared<SigmaDHProverComputation>(dlog, 80);
-		auto dhVerifier = make_shared<SigmaDHVerifierComputation>(dlog, 80);
+		auto dhProver = make_shared<SigmaDHProverComputation>(dlog, 80, random);
+		auto dhVerifier = make_shared<SigmaDHVerifierComputation>(dlog, 80, random);
 
 		auto u = dlog->exponentiate(dlog->getGenerator().get(), w);
 		auto h = dlog->createRandomElement();

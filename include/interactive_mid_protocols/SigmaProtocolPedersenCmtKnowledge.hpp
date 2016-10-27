@@ -301,7 +301,7 @@ public:
 	* @return SigmaDlogSimulator
 	*/
 	shared_ptr<SigmaSimulator> getSimulator() override{
-		return make_shared<SigmaPedersenCmtKnowledgeSimulator>(dlog, t);
+		return make_shared<SigmaPedersenCmtKnowledgeSimulator>(dlog, t, random);
 	}
 };
 

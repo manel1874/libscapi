@@ -406,11 +406,11 @@ vector<byte> CmtElGamalOnByteArrayReceiver::generateBytesFromCommitValue(CmtComm
 * @param t statistical parameter
 * @throws IOException if there was a problem in the communication
 */
-void CmtElGamalWithProofsCommitter::doConstruct(int t) {
-	auto elGamalCommittedValProver = make_shared<SigmaElGamalCommittedValueProverComputation>(dlog, t);
-	auto elGamalCTKnowledgeProver = make_shared<SigmaElGamalCmtKnowledgeProverComputation>(dlog, t);
-	knowledgeProver = make_shared<ZKPOKFromSigmaCmtPedersenProver>(channel, elGamalCTKnowledgeProver, dlog);
-	auto receiver = make_shared<CmtPedersenReceiver>(channel, dlog);
+CmtElGamalWithProofsCommitter::CmtElGamalWithProofsCommitter(shared_ptr<CommParty> channel, int t, shared_ptr<DlogGroup> dlog, const shared_ptr<PrgFromOpenSSLAES> & prg) : CmtElGamalOnGroupElementCommitter(channel, dlog, prg) {
+	auto elGamalCommittedValProver = make_shared<SigmaElGamalCommittedValueProverComputation>(dlog, t, prg);
+	auto elGamalCTKnowledgeProver = make_shared<SigmaElGamalCmtKnowledgeProverComputation>(dlog, t, prg);
+	knowledgeProver = make_shared<ZKPOKFromSigmaCmtPedersenProver>(channel, elGamalCTKnowledgeProver, dlog, prg);
+	auto receiver = make_shared<CmtPedersenReceiver>(channel, dlog, prg);
 	committedValProver = make_shared<ZKFromSigmaProver>(channel, elGamalCommittedValProver, receiver);
 
 }
@@ -446,13 +446,13 @@ void CmtElGamalWithProofsCommitter::proveCommittedValue(long id)  {
 * @throws CheatAttemptException if the receiver h is not in the DlogGroup.
 * @throws ClassNotFoundException if there was a problem in the serialization
 */
-void CmtElGamalWithProofsReceiver::doConstruct(int t) {
-	auto elGamalCommittedValVerifier = make_shared<SigmaElGamalCommittedValueVerifierComputation>(dlog, t);
-	auto elGamalCTKnowledgeVerifier = make_shared<SigmaElGamalCmtKnowledgeVerifierComputation>(dlog, t);
+CmtElGamalWithProofsReceiver::CmtElGamalWithProofsReceiver(shared_ptr<CommParty> channel, int t, shared_ptr<DlogGroup> dlog, const shared_ptr<PrgFromOpenSSLAES> & prg) : CmtElGamalOnGroupElementReceiver(channel, dlog) {
+	auto elGamalCommittedValVerifier = make_shared<SigmaElGamalCommittedValueVerifierComputation>(dlog, t, prg);
+	auto elGamalCTKnowledgeVerifier = make_shared<SigmaElGamalCmtKnowledgeVerifierComputation>(dlog, t, prg);
 	auto output = make_shared<CmtRTrapdoorCommitPhaseOutput>();
-	knowledgeVerifier = make_shared<ZKPOKFromSigmaCmtPedersenVerifier>(channel, elGamalCTKnowledgeVerifier, output, dlog);
-	auto committer = make_shared<CmtPedersenCommitter>(channel, dlog);
-	committedValVerifier = make_shared<ZKFromSigmaVerifier>(channel, elGamalCommittedValVerifier, committer);
+	knowledgeVerifier = make_shared<ZKPOKFromSigmaCmtPedersenVerifier>(channel, elGamalCTKnowledgeVerifier, output, dlog, prg);
+	auto committer = make_shared<CmtPedersenCommitter>(channel, dlog, prg);
+	committedValVerifier = make_shared<ZKFromSigmaVerifier>(channel, elGamalCommittedValVerifier, committer, prg);
 
 }
 

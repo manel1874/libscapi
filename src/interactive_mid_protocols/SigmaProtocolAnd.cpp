@@ -33,13 +33,14 @@
 /*   SigmaANDProverComputation         */
 /***************************************/
 
-SigmaANDProverComputation::SigmaANDProverComputation(vector<shared_ptr<SigmaProverComputation>> provers, int t) {
+SigmaANDProverComputation::SigmaANDProverComputation(vector<shared_ptr<SigmaProverComputation>> provers, int t, const shared_ptr<PrgFromOpenSSLAES> & prg) {
 	// if the given t is different from one of the underlying object's t values, throw exception.
 	for (auto prover : provers)
 		if(t != prover->getSoundnessParam())
 			throw invalid_argument("the given t does not equal to one of the t values in the underlying provers objects.");
 
 	this->provers = provers;
+	this->prg = prg;
 	len = provers.size();
 	this->t = t;
 }
@@ -77,7 +78,7 @@ shared_ptr<SigmaSimulator> SigmaANDProverComputation::getSimulator() {
 	vector<shared_ptr<SigmaSimulator>> simulators;
 	for(auto prover:provers)
 		simulators.push_back(prover->getSimulator());
-	return make_shared<SigmaANDSimulator>(simulators, t);
+	return make_shared<SigmaANDSimulator>(simulators, t, prg);
 }
 
 SigmaMultipleProverInput* SigmaANDProverComputation::checkInput(SigmaProverInput* in) {
