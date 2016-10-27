@@ -45,7 +45,7 @@ int find_log2_floor(biginteger bi) {
 	return r;
 }
 
-int NumberOfBits(const biginteger bi) {
+int NumberOfBits(const biginteger & bi) {
 	auto bis = (bi>0) ? bi : -bi;
 	return find_log2_floor(bis)+ 1;
 }
@@ -82,7 +82,7 @@ void copy_byte_array_to_byte_vector(const byte* src, int src_len, vector<byte>& 
 /*
 * Length of biginteger in bytes
 */
-size_t bytesCount(biginteger raw_value)
+size_t bytesCount(const biginteger & raw_value)
 {
 #ifdef _WIN32
 	auto value = raw_value;
@@ -105,7 +105,7 @@ size_t bytesCount(biginteger raw_value)
 	return length;
 }
 
-void encodeBigInteger(biginteger raw_value, byte* output, size_t length)
+void encodeBigInteger(const biginteger & raw_value, byte* output, size_t length)
 {
 #ifdef _WIN32
 	auto value = raw_value;
@@ -205,7 +205,7 @@ std::chrono::time_point<std::chrono::system_clock> scapi_now() {
 	return chrono::system_clock::now();
 }
 
-biginteger getRandomInRange(biginteger min, biginteger max, PrgFromOpenSSLAES* random) {
+biginteger getRandomInRange(const biginteger & min, const biginteger & max, PrgFromOpenSSLAES* random) {
 	int bytesNum = bytesCount(max);
 	vector<byte> out(bytesNum);
 	random->getPRGBytes(out, 0, bytesNum);
@@ -231,7 +231,7 @@ void print_byte_array(byte * arr, int len, string message)
 	cout << endl;
 }
 
-bool isPrime(biginteger bi, int certainty) {
+bool isPrime(const biginteger & bi, int certainty) {
 	mt19937 mt;
 	auto seed = chrono::high_resolution_clock::now().time_since_epoch().count();
 	mt.seed(seed);

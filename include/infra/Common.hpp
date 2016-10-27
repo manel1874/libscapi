@@ -113,13 +113,13 @@ typedef unsigned char byte;		// put in global namespace to avoid ambiguity with 
 
 
 int find_log2_floor(biginteger);
-int NumberOfBits(biginteger bi);
+int NumberOfBits(const biginteger & bi);
 
 /*
 * Retruns the number of bytes needed to represent a biginteger
 * Notice that due to the sign number of byte can exceed log(value)
 */
-size_t bytesCount(biginteger value);
+size_t bytesCount(const biginteger & value);
 
 class PrgFromOpenSSLAES;
 
@@ -133,7 +133,7 @@ void copy_byte_array_to_byte_vector(const byte* src, int src_len, vector<byte>& 
 * Number can be postive or negative - the sign will be preserved in the encoding
 * Use byteCount(biginteger) method to calculate the number of bytes needed.
 */
-void encodeBigInteger(biginteger value, byte* output, size_t length);
+void encodeBigInteger(const biginteger & value, byte* output, size_t length);
 
 /*
 * Decodoing big integer from byte array back to a biginteger object
@@ -145,7 +145,7 @@ biginteger convert_hex_to_biginteger(const string & hex);
 /*
 * Returns a random biginteger uniformly distributed in [min, max]
 */
-biginteger getRandomInRange(biginteger min, biginteger max, PrgFromOpenSSLAES* random);
+biginteger getRandomInRange(const biginteger & min, const biginteger & max, PrgFromOpenSSLAES* random);
 
 /*
 * Returns a random prime number with the given number of bytes.
@@ -153,7 +153,7 @@ biginteger getRandomInRange(biginteger min, biginteger max, PrgFromOpenSSLAES* r
 biginteger getRandomPrime(int numBytes, int certainty, PrgFromOpenSSLAES* random);
 const vector<string> explode(const string& s, const char& c);
 
-bool isPrime(biginteger bi, int certainty = 40);
+bool isPrime(const biginteger & bi, int certainty = 40);
 
 /********************/
 /* Debugging Methods*/

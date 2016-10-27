@@ -72,7 +72,7 @@ public:
 		biginteger root1;
 		biginteger root2;
 	public:
-		SquareRootResults(biginteger root1, biginteger root2) {
+		SquareRootResults(const biginteger & root1, const biginteger & root2) {
 			this->root1 = root1;
 			this->root2 = root2;
 		}
@@ -92,5 +92,5 @@ public:
 	* @throws IllegalArgumentException if p != 3 mod 4
 	* @return SquareRootResults which is a pair of BigIntegers x and -x such that z = x^2  and z = -x^2
 	*/
-	static SquareRootResults sqrtModP_3_4(biginteger z, biginteger p);
+	static SquareRootResults sqrtModP_3_4(const biginteger & z, const biginteger & p);
 };

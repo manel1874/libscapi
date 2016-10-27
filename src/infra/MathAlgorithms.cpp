@@ -75,7 +75,7 @@ biginteger MathAlgorithms::factorialBI(int n) {
 	return fact;
 }
 
-MathAlgorithms::SquareRootResults MathAlgorithms::sqrtModP_3_4(biginteger z, biginteger p) {
+MathAlgorithms::SquareRootResults MathAlgorithms::sqrtModP_3_4(const biginteger & z, const biginteger & p) {
 	//We assume here (and we do not check for efficiency reasons) that p is a prime
 	//We do check that the prime p = 3 mod 4, if not throw exception 
 	if (p%4 != 3)
