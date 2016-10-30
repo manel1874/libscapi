@@ -276,7 +276,8 @@ public:
 	static shared_ptr<PrgFromOpenSSLAES> getInstance() { 
 		if (prg == nullptr) {
 			prg = make_shared<PrgFromOpenSSLAES>();
-			prg->setKey(prg->generateKey(128));
+			auto key = prg->generateKey(128);
+			prg->setKey(key);
 		}
 		return prg; 
 	}
