@@ -28,7 +28,7 @@ OUT_DIR        = obj obj/mid_layer obj/circuits obj/comm obj/infra obj/interacti
 INC            = -I../boost_1_60_0 -Ilib -Iinstall/include -Ilib/OTExtensionBristol 
 CPP_OPTIONS   := -std=c++11 $(INC)  -maes -mpclmul -Wall -Wno-unused-function -Wno-unused-variable -fPIC -O3
 $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
-LINKER_OPTIONS = $(INCLUDE_ARCHIVES_START) install/lib/libOTExtensionBristol.a install/lib/libsimpleot.a install/lib/libntl.a install/lib/libmiracl.a -lpthread -lgmp -lcrypto -lssl -lboost_system -lboost_thread -lOTExtension -lMaliciousOTExtension -ldl $(INCLUDE_ARCHIVES_END)
+LINKER_OPTIONS = $(INCLUDE_ARCHIVES_START) install/lib/libOTExtensionBristol.a install/lib/libsimpleot.a install/lib/libntl.a install/lib/libmiracl.a install/lib/blake2.a -lpthread -lgmp -lcrypto -lssl -lboost_system -lboost_thread -lOTExtension -lMaliciousOTExtension -ldl $(INCLUDE_ARCHIVES_END)
 LIBRARIES_DIR  = -L../boost_1_60_0/stage/lib -Linstall/lib
 LD_FLAGS = 
 
@@ -68,6 +68,7 @@ compile-blake:
 	@mkdir -p $(builddir)/BLAKE2/
 	@cp -r lib/BLAKE2/sse/. $(builddir)/BLAKE2
 	@$(MAKE) -C $(builddir)/BLAKE2
+	@ cp $(builddir)/BLAKE2/blake2.a install/lib
 	@touch compile-blake
 
 compile-ntl:
@@ -155,6 +156,11 @@ clean-ntl:
 	@rm -rf $(builddir)/NTL
 	@rm -f compile-ntl	
 
+clean-blake:
+	@echo "Cleaning blake library"
+	@rm -rf $(builddir)/BLAKE2
+	@rm -f compile-blake
+
 clean-cpp:
 	@echo "cleaning .obj files"
 	@rm -rf $(OUT_DIR)
@@ -164,4 +170,4 @@ clean-cpp:
 clean-install:
 	@rm -rf install/*
 
-clean: clean-otextension-bristol clean-otextension-malicious clean-otextension clean-ntl  clean-miracl clean-miracl-cpp clean-cpp clean-install
+clean: clean-otextension-bristol clean-otextension-malicious clean-otextension clean-ntl clean-blake clean-miracl clean-miracl-cpp clean-cpp clean-install
