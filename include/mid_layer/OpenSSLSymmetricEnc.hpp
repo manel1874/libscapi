@@ -81,7 +81,7 @@ public:
 	* @param random  a user provided source of randomness.
 	* @throw IllegalArgumentException in case the given prpName is not valid for this encryption scheme.
 	*/
-	OpenSSLEncWithIVAbs(string prpName, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) : prpName(prpName), random(random) {}
+	OpenSSLEncWithIVAbs(string prpName, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) : random(random), prpName(prpName) {}
 
 	virtual ~OpenSSLEncWithIVAbs();
 

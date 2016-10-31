@@ -424,7 +424,7 @@ public:
 	* @return TPElement - If the x value is valid for this permutation return the created random element
 	* @throws  IllegalArgumentException if the given value x is invalid for this permutation
 	*/
-	virtual shared_ptr<TPElement> generateTPElement(const biginteger & x) = 0;
+	virtual shared_ptr<TPElement> generateTPElement(biginteger & x) = 0;
 	/**
 	* Creates a TPElement from a specific value x. This function does not guarantee that the the returned "TPElement" is valid.<p>
 	* It is the caller's responsibility to pass a legal x value.
@@ -465,7 +465,8 @@ public:
 	byte hardCorePredicate(TPElement * tpEl) override;
 	vector<byte> hardCoreFunction(TPElement * tpEl) override;
 	shared_ptr<TPElement> reconstructTPElement(TPElementSendableData & data) override {
-		return generateTPElement(data.getX());
+        auto x = data.getX();
+		return generateTPElement(x);
 	};
 };
 

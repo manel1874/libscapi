@@ -336,7 +336,7 @@ OTRGroupElementPairMsg OTFullSimReceiverTransferUtilAbs::computeSecondTuple(byte
 * @param random
 */
 OTFullSimReceiverTransferUtilAbs::OTFullSimReceiverTransferUtilAbs(const shared_ptr<DlogGroup> & dlog, const shared_ptr<PrgFromOpenSSLAES> & random)
-	: dlog(dlog), random(random) {
+	: random(random), dlog(dlog) {
 	qMinusOne = dlog->getOrder() - 1;
 }
 

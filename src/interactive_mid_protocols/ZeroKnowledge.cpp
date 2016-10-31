@@ -240,7 +240,7 @@ void ZKPOKFiatShamirProof::initFromString(const string & row) {
 	//recover a
 	int xSize = atoi(str_vec[0].c_str());
 	int i = 2;
-	for (; str_vec[1].size() != xSize; i++) {
+	for (; (int) str_vec[1].size() != xSize; i++) {
 		str_vec[1] += ":";
 		str_vec[1] += str_vec[i];
 	}
@@ -253,7 +253,7 @@ void ZKPOKFiatShamirProof::initFromString(const string & row) {
 	i++;
 	//recover z
 	int zSize = atoi(str_vec[i++].c_str());
-	for (int k = i + 1; str_vec[i].size() != zSize; k++) {
+	for (int k = i + 1; (int) str_vec[i].size() != zSize; k++) {
 		str_vec[i] += ":";
 		str_vec[i] += str_vec[k];
 	}
@@ -526,7 +526,7 @@ bool ZKPOKFiatShamirFromSigmaVerifier::verifyFiatShamirProof(ZKCommonInput* inpu
 	}
 	
 	//In case that  computed e and received e are not the same, set valid to false.
-	for (int i = 0; i<computedE.size(); i++) {
+	for (int i = 0; i< (int) computedE.size(); i++) {
 		if (computedE[i] != receivedE[i]) {
 			valid = false;
 		}

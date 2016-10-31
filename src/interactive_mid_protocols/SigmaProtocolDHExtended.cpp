@@ -34,11 +34,11 @@
 string SigmaDHExtendedCommonInput::toString() {
 
 	string output = "";
-	for (int i = 0; i < gArray.size(); i++) {
+	for (int i = 0; i < (int) gArray.size(); i++) {
 		output += gArray[i]->generateSendableData()->toString();
 		output += ":";
 	}
-	for (int i = 0; i < hArray.size(); i++) {
+	for (int i = 0; i < (int) hArray.size(); i++) {
 		output += gArray[i]->generateSendableData()->toString();
 		output += ":";
 	}

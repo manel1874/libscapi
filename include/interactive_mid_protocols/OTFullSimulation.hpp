@@ -180,7 +180,7 @@ public:
 	* @param dlog
 	* @param random
 	*/
-	OTFullSimSenderTransferUtilAbs(const shared_ptr<DlogGroup> & dlog, const shared_ptr<PrgFromOpenSSLAES> & random): dlog(dlog), random(random) {}
+	OTFullSimSenderTransferUtilAbs(const shared_ptr<DlogGroup> & dlog, const shared_ptr<PrgFromOpenSSLAES> & random): random(random), dlog(dlog) {}
 
 	/**
 	* Runs the transfer phase of the OT protocol.<p>

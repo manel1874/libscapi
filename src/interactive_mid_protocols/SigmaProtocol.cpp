@@ -150,7 +150,7 @@ shared_ptr<SigmaCommonInput> SigmaMultipleProverInput::getCommonInput() {
 
 string SigmaMultipleCommonInput::toString() {
 	string output = "";
-	for (int i = 0; i < sigmaInputs.size(); i++) {
+	for (int i = 0; i < (int) sigmaInputs.size(); i++) {
 		output += sigmaInputs[i]->toString();
 		output += ":";
 	}
