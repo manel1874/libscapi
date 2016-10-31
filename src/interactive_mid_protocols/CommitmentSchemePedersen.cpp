@@ -34,13 +34,7 @@
 /*********************************/
 /*   CmtPedersenReceiverCore     */
 /*********************************/
-CmtPedersenReceiverCore::CmtPedersenReceiverCore(shared_ptr<CommParty> channel) {
-	auto dg = make_shared<OpenSSLDlogECF2m>("K-233");
-	doConstruct(channel, dg);
-};
-
-void CmtPedersenReceiverCore::doConstruct(shared_ptr<CommParty> channel,
-	shared_ptr<DlogGroup> dlog) {
+CmtPedersenReceiverCore::CmtPedersenReceiverCore(shared_ptr<CommParty> channel, const shared_ptr<PrgFromOpenSSLAES> & random, shared_ptr<DlogGroup> dlog) {
 	// the underlying dlog group must be DDH secure.
 	auto ddh = dynamic_pointer_cast<DDH>(dlog);
 	if (!ddh)
@@ -52,7 +46,7 @@ void CmtPedersenReceiverCore::doConstruct(shared_ptr<CommParty> channel,
 
 	this->channel = channel;
 	this->dlog = dlog;
-	this->random = get_seeded_random();
+	this->random = random;
 	qMinusOne = dlog->getOrder()-1;
 	// the pre-process phase is actually performed at construction
 	preProcess();
@@ -62,7 +56,7 @@ void CmtPedersenReceiverCore::preProcess() {
 	if (channel == NULL) {
 		throw runtime_error("In order to pre-compute the channel must be given");
 	}
-	trapdoor = getRandomInRange(0, qMinusOne, random);
+	trapdoor = getRandomInRange(0, qMinusOne, random.get());
 	h = dlog->exponentiate(dlog->getGenerator().get(), trapdoor);
 	auto sendableData = h->generateSendableData();	
 	auto raw_msg = sendableData->toString();
@@ -139,7 +133,7 @@ shared_ptr<void> CmtPedersenReceiverCore::getCommitmentPhaseValues(long id) {
 /*********************************/
 /*   CmtPedersenCommitterCore    */
 /*********************************/
-void CmtPedersenCommitterCore::doConstruct(shared_ptr<CommParty> channel,
+CmtPedersenCommitterCore::CmtPedersenCommitterCore(shared_ptr<CommParty> channel, const shared_ptr<PrgFromOpenSSLAES> & random,
 	shared_ptr<DlogGroup> dlog) {
 	// the underlying dlog group must be DDH secure.
 	auto ddh = std::dynamic_pointer_cast<DDH>(dlog);
@@ -151,7 +145,7 @@ void CmtPedersenCommitterCore::doConstruct(shared_ptr<CommParty> channel,
 
 	this->channel = channel;
 	this->dlog = dlog;
-	this->random = get_seeded_random();
+	this->random = random;
 	qMinusOne = dlog->getOrder()-1;
 	// the pre-process phase is actually performed at construction
 	preProcess();
@@ -186,7 +180,7 @@ shared_ptr<CmtCCommitmentMsg> CmtPedersenCommitterCore::generateCommitmentMsg(co
 		throw invalid_argument("The input must be in Zq");
 
 	// sample a random value r <- Zq
-	biginteger r = getRandomInRange(0, qMinusOne, random);
+	biginteger r = getRandomInRange(0, qMinusOne, random.get());
 
 	// compute  c = g^r * h^x
 	auto gToR = dlog->exponentiate(dlog->getGenerator().get(), r);
@@ -245,11 +239,11 @@ vector<byte> CmtPedersenReceiver::generateBytesFromCommitValue(CmtCommitValue* v
 /********************************************/
 /*   CmtPedersenWithProofsCommitter         */
 /********************************************/
-void CmtPedersenWithProofsCommitter::doConstruct(int t) {
-	auto pedersenCommittedValProver = make_shared<SigmaPedersenCommittedValueProverComputation>(dlog, t);
-	auto pedersenCTKnowledgeProver = make_shared<SigmaPedersenCmtKnowledgeProverComputation>(dlog, t);
-	knowledgeProver = make_shared<ZKPOKFromSigmaCmtPedersenProver>(channel, pedersenCTKnowledgeProver, dlog);
-	committedValProver = make_shared<ZKPOKFromSigmaCmtPedersenProver>(channel, pedersenCommittedValProver, dlog);
+void CmtPedersenWithProofsCommitter::doConstruct(int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
+	auto pedersenCommittedValProver = make_shared<SigmaPedersenCommittedValueProverComputation>(dlog, t, random);
+	auto pedersenCTKnowledgeProver = make_shared<SigmaPedersenCmtKnowledgeProverComputation>(dlog, t, random);
+	knowledgeProver = make_shared<ZKPOKFromSigmaCmtPedersenProver>(channel, pedersenCTKnowledgeProver, dlog, random);
+	committedValProver = make_shared<ZKPOKFromSigmaCmtPedersenProver>(channel, pedersenCommittedValProver, dlog, random);
 }
 
 void CmtPedersenWithProofsCommitter::proveKnowledge(long id)  {
@@ -278,12 +272,12 @@ void CmtPedersenWithProofsCommitter::proveCommittedValue(long id) {
 /********************************************/
 /*   CmtPedersenWithProofsReceiver         */
 /********************************************/
-void CmtPedersenWithProofsReceiver::doConstruct(int t) {
-	auto pedersenCommittedValVerifier = make_shared<SigmaPedersenCommittedValueVerifierComputation>(dlog, t);
-	auto pedersenCTKnowledgeVerifier = make_shared<SigmaPedersenCmtKnowledgeVerifierComputation>(dlog, t);
+void CmtPedersenWithProofsReceiver::doConstruct(int t, const shared_ptr<PrgFromOpenSSLAES> & prg) {
+	auto pedersenCommittedValVerifier = make_shared<SigmaPedersenCommittedValueVerifierComputation>(dlog, t, prg);
+	auto pedersenCTKnowledgeVerifier = make_shared<SigmaPedersenCmtKnowledgeVerifierComputation>(dlog, t, prg);
 	auto output = make_shared<CmtRTrapdoorCommitPhaseOutput>();
-	knowledgeVerifier = make_shared<ZKPOKFromSigmaCmtPedersenVerifier>(channel, pedersenCTKnowledgeVerifier, output, dlog);
-	committedValVerifier = make_shared<ZKPOKFromSigmaCmtPedersenVerifier>(channel, pedersenCommittedValVerifier, output, dlog);
+	knowledgeVerifier = make_shared<ZKPOKFromSigmaCmtPedersenVerifier>(channel, pedersenCTKnowledgeVerifier, output, dlog, prg);
+	committedValVerifier = make_shared<ZKPOKFromSigmaCmtPedersenVerifier>(channel, pedersenCommittedValVerifier, output, dlog, prg);
 }
 
 bool CmtPedersenWithProofsReceiver::verifyKnowledge(long id) {
@@ -293,9 +287,9 @@ bool CmtPedersenWithProofsReceiver::verifyKnowledge(long id) {
 	auto commitment = static_pointer_cast<GroupElement>(commitmentVal);
 	SigmaPedersenCmtKnowledgeCommonInput input(h, commitment);
 
-	SigmaGroupElementMsg emptyA(dlog->getGenerator()->generateSendableData());
-	SigmaPedersenCmtKnowledgeMsg emptyZ(0,0);
-	return knowledgeVerifier->verify(&input, &emptyA, &emptyZ);
+	auto emptyA = make_shared<SigmaGroupElementMsg>(dlog->getGenerator()->generateSendableData());
+	auto emptyZ = make_shared<SigmaPedersenCmtKnowledgeMsg>(0,0);
+	return knowledgeVerifier->verify(&input, emptyA, emptyZ);
 }
 
 shared_ptr<CmtCommitValue> CmtPedersenWithProofsReceiver::verifyCommittedValue(long id) {
@@ -313,9 +307,9 @@ shared_ptr<CmtCommitValue> CmtPedersenWithProofsReceiver::verifyCommittedValue(l
 	auto commitment = static_pointer_cast<GroupElement>(commitmentVal);
 	SigmaPedersenCommittedValueCommonInput input(h, commitment, x);
 	
-	SigmaGroupElementMsg emptyA(dlog->getGenerator()->generateSendableData());
-	SigmaBIMsg emptyZ;
-	bool verified = committedValVerifier->verify(&input, &emptyA, &emptyZ);
+	auto emptyA = make_shared<SigmaGroupElementMsg>(dlog->getGenerator()->generateSendableData());
+	auto emptyZ = make_shared<SigmaBIMsg>();
+	bool verified = committedValVerifier->verify(&input, emptyA, emptyZ);
 	if (verified)
 		return make_shared<CmtBigIntegerCommitValue>(make_shared<biginteger>(x));
 	return NULL;

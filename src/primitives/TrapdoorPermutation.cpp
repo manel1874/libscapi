@@ -26,7 +26,7 @@
 */
 
 
-#include "../../include/primitives/TrapdoorPermutations.hpp"
+#include "../../include/primitives/TrapdoorPermutation.hpp"
 
 /*************************************************/
 /*TrapdoorPermutationAbs                         */
@@ -49,7 +49,7 @@ byte TrapdoorPermutationAbs::hardCorePredicate(TPElement * tpEl) {
 	return res;
 }
 
-byte* TrapdoorPermutationAbs::hardCoreFunction(TPElement * tpEl) {
+vector<byte> TrapdoorPermutationAbs::hardCoreFunction(TPElement * tpEl) {
 	if (!isKeySet())
 		throw IllegalStateException("keys aren't set");
 	/*
@@ -69,7 +69,7 @@ byte* TrapdoorPermutationAbs::hardCoreFunction(TPElement * tpEl) {
 
 	// if the element length is less than log(N), the return byte[] should be all the element bytes
 	int size = min(logBytes, bytesSize);
-	byte* leastSignificantBytes = new byte[size];
+	vector<byte> leastSignificantBytes(size);
 	
 	// copies the bytes to the output array
 	for (int i = 0; i < size; i++)
@@ -81,17 +81,16 @@ byte* TrapdoorPermutationAbs::hardCoreFunction(TPElement * tpEl) {
 /*RSAElement                                     */
 /*************************************************/
 
-RSAElement::RSAElement(biginteger modN){
+RSAElement::RSAElement(biginteger & modN, const shared_ptr<PrgFromOpenSSLAES> & generator){
 	/*
 	* samples a number between 1 to n-1
 	*/
-	mt19937 generator = get_seeded_random();
 	biginteger randNumber;
 	int numbit = NumberOfBits(modN);
 	biginteger expo = mp::pow(biginteger(2), numbit-1);
 	do {
 		// samples a random BigInteger with modN.bitLength()+1 bits
-		randNumber = getRandomInRange(0, expo, generator); 
+		randNumber = getRandomInRange(0, expo, generator.get()); 
 	} while (randNumber > (modN - 2)); // drops the element if it's bigger than mod(N)-2
 	// gets a random biginteger between 1 to modN-1
 	randNumber += 1;
@@ -99,7 +98,7 @@ RSAElement::RSAElement(biginteger modN){
 	element = randNumber;
 }
 
-RSAElement::RSAElement(biginteger modN, biginteger x, bool check) {
+RSAElement::RSAElement(biginteger & modN, biginteger & x, bool check) {
 	if (!check)
 		element = x;
 	else {

@@ -35,6 +35,7 @@
 #include <NTL/ZZ.h>
 
 #include "SigmaProtocol.hpp"
+#include "../primitives/Prg.hpp"
 #include <map>
 
 /**
@@ -64,6 +65,8 @@ public:
 	* Returns the number of statements that have a witness.
 	*/
 	int getK() { return k; };
+
+	string toString() override;
 
 private:
 	vector<shared_ptr<SigmaCommonInput>> sigmaInputs;
@@ -140,7 +143,7 @@ public:
 //Initializes the field GF2E with a random irreducible polynomial with degree t.
 void initField(int t, int seed);
 //Samples random field elements to be the challenges.
-vector<vector<byte>> sampleRandomFieldElements(int numElements, int t, vector<shared_ptr<NTL::GF2E>> & elements, mt19937 &  random);
+vector<vector<byte>> sampleRandomFieldElements(int numElements, int t, vector<shared_ptr<NTL::GF2E>> & elements, PrgFromOpenSSLAES*  random);
 vector<byte> convertElementToBytes(NTL::GF2E & element);
 NTL::GF2E convertBytesToGF2E(vector<byte> elementByts);
 NTL::GF2E generateIndexPolynomial(int i);
@@ -176,7 +179,7 @@ private:
 	vector<shared_ptr<SigmaSimulator>> simulators;	// Underlying simulators.
 	int t;								// Soundness parameter.
 	int len;							// Number of underlying simulators.
-	mt19937 random;
+	shared_ptr<PrgFromOpenSSLAES> random;
 
 	/**
 	* Checks if the given challenge length is equal to the soundness parameter.
@@ -191,7 +194,7 @@ public:
 	* @param t soundness parameter. t MUST be equal to both t values of the underlying simulators object.
 	* @param random
 	*/
-	SigmaOrMultipleSimulator(vector<shared_ptr<SigmaSimulator>> simulators, int t);
+	SigmaOrMultipleSimulator(vector<shared_ptr<SigmaSimulator>> simulators, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -253,7 +256,7 @@ private:
 	int len;												// Number of underlying provers.
 	int t;													// Soundness parameter.
 	int k;													//number of witnesses.
-	mt19937 random;											// The indexes of the statements which the prover knows the witnesses.
+	shared_ptr<PrgFromOpenSSLAES> random;											// The indexes of the statements which the prover knows the witnesses.
 
 	shared_ptr<SigmaOrMultipleProverInput> input;			// Used in computeFirstMsg function.
 
@@ -274,7 +277,7 @@ public:
 	* @param t soundness parameter. t MUST be equal to all t values of the underlying provers object.
 	* @throws IllegalArgumentException if the given t is not equal to all t values of the underlying provers object.
 	*/
-	SigmaOrMultipleProverComputation(map<int, shared_ptr<SigmaProverComputation>> provers, map<int, shared_ptr<SigmaSimulator>> simulators, int t);
+	SigmaOrMultipleProverComputation(map<int, shared_ptr<SigmaProverComputation>> provers, map<int, shared_ptr<SigmaSimulator>> simulators, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -345,7 +348,7 @@ private:
 	int t;											// Soundness parameter.
 	NTL::GF2E challengeElement;							// Pointer to the sampled challenge element.
 	int k;											// Number of true statements.
-	mt19937 random;
+	shared_ptr<PrgFromOpenSSLAES> random;
 
 	bool checkPolynomialValidity(vector<vector<byte>> polynomial, int k, NTL::GF2E challengeElement, vector<vector<byte>> challenges);
 	NTL::GF2EX createPolynomial(vector<vector<byte>> polynomialBytes);
@@ -359,7 +362,7 @@ public:
 	* @param random source of randomness
 	* @throws IllegalArgumentException if the given t is not equal to all t values of the underlying verifiers object.
 	*/
-	SigmaOrMultipleVerifierComputation(vector<shared_ptr<SigmaVerifierComputation>> verifiers, int t);
+	SigmaOrMultipleVerifierComputation(vector<shared_ptr<SigmaVerifierComputation>> verifiers, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.

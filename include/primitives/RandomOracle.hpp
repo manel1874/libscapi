@@ -59,13 +59,12 @@ public:
 */
 class HashBasedRO : public RandomOracle {
 private:
-	CryptographicHash * hash; //The underlying object used to compute the random oracle function.
+	shared_ptr<CryptographicHash> hash; //The underlying object used to compute the random oracle function.
 public:
-	HashBasedRO(CryptographicHash * hash = new OpenSSLSHA1()) { this->hash = hash; };
+	HashBasedRO(const shared_ptr<CryptographicHash> & hash = make_shared<OpenSSLSHA256>()) { this->hash = hash; };
 	HashBasedRO(string hashName) : HashBasedRO(CryptographicHash::get_new_cryptographic_hash(hashName)) {};
 	void compute(const vector<byte> & input, int inOffset, int inLen, vector<byte> & output, int outLen) override;
 	string getAlgorithmName() override { return "HashBasedRO"; };
-	~HashBasedRO();
 };
 
 /**
@@ -73,11 +72,10 @@ public:
 */
 class HKDFBasedRO : public RandomOracle {
 private:
-	HKDF* hkdf; //The underlying object used to compute the random oracle function.
+	shared_ptr<HKDF> hkdf; //The underlying object used to compute the random oracle function.
 
 public:	
-	HKDFBasedRO(HKDF * hkdf) { this->hkdf = hkdf; };
+	HKDFBasedRO(const shared_ptr<HKDF> & hkdf = make_shared<HKDF>()) { this->hkdf = hkdf; };
 	void compute(const vector<byte> & input, int inOffset, int inLen, vector<byte> & output, int outLen) override;
 	string getAlgorithmName() override { return "HKDFBasedRO"; };
-	~HKDFBasedRO();
 };

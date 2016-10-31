@@ -31,7 +31,7 @@
 #include <openssl/pem.h>
 #include <openssl/rand.h>
 #include <openssl/err.h>
-#include "TrapdoorPermutations.hpp"
+#include "TrapdoorPermutation.hpp"
 #include "DlogOpenSSL.hpp"
 /**
 * Concrete class of trapdoor permutation of RSA algorithm.
@@ -39,30 +39,29 @@
 */
 class OpenSSLRSAPermutation : public virtual TrapdoorPermutationAbs , public virtual RSAPermutation {
 private:
-	RSA* rsa; // Pointer to the SSL RSA object.
-	mt19937 random;
-	RSA* initRSAPublicPrivateCrt(biginteger pubExp, biginteger privExp, biginteger p, 
-		biginteger q, biginteger dp, biginteger dq, biginteger crt);
-	RSA* initRSAPublicPrivate(biginteger pubExponent, biginteger privExponent);
-	RSA * initRSAPublic(biginteger pubExponent);
-	biginteger computeRSA(biginteger elementP);
+	shared_ptr<RSA> rsa; // Pointer to the SSL RSA object.
+	shared_ptr<PrgFromOpenSSLAES> random;
+	shared_ptr<RSA> initRSAPublicPrivateCrt(biginteger & pubExp, biginteger & privExp, biginteger & p,
+		biginteger & q, biginteger & dp, biginteger & dq, biginteger & crt);
+	shared_ptr<RSA> initRSAPublicPrivate(biginteger & pubExponent, biginteger & privExponent);
+	shared_ptr<RSA> initRSAPublic(biginteger & pubExponent);
+	biginteger computeRSA(biginteger & elementP);
 
 public:
-	OpenSSLRSAPermutation() { this->random = get_seeded_random(); };
-	void setKey(PublicKey* publicKey, PrivateKey* privateKey=NULL) override; 
+	OpenSSLRSAPermutation(const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) { this->random = random; };
+	void setKey(const shared_ptr<PublicKey> & publicKey, const shared_ptr<PrivateKey> & privateKey = nullptr) override; 
 	string getAlgorithmName() override { return "OpenSSLRSA"; };
 	KeyPair generateKey(int keySize) override;
-	TPElement* compute(TPElement * tpEl) override;
-	TPElement* invert(TPElement * tpEl) override;
+	shared_ptr<TPElement> compute(TPElement * tpEl) override;
+	shared_ptr<TPElement> invert(TPElement * tpEl) override;
 	TPElValidity isElement(TPElement* tpEl) override;
-	TPElement* generateRandomTPElement() override;
-	TPElement* generateTPElement(biginteger x) override { return new RSAElement(x); };
-	TPElement* generateUncheckedTPElement(biginteger x) override { return new RSAElement(modulus, x, false); };
+	shared_ptr<TPElement> generateRandomTPElement() override;
+	shared_ptr<TPElement> generateTPElement(biginteger & x) override { return make_shared<RSAElement>(x); };
+	shared_ptr<TPElement> generateUncheckedTPElement(biginteger & x) override { return make_shared<RSAElement>(modulus, x, false); };
 	biginteger getModulus() override {
 		if (!isKeySet())
 			throw IllegalStateException("keys aren't set");
 		return modulus;
 	};
-	~OpenSSLRSAPermutation();
 };
 

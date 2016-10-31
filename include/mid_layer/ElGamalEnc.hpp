@@ -39,7 +39,7 @@ private:
 	shared_ptr<GroupElementSendableData> c;
 
 public:
-	ElGamalPublicKeySendableData(shared_ptr<GroupElementSendableData> c) {
+	ElGamalPublicKeySendableData(const shared_ptr<GroupElementSendableData> & c) {
 		this->c = c;
 	}
 
@@ -61,7 +61,7 @@ private:
 	shared_ptr<GroupElement> h;
 
 public:
-	ElGamalPublicKey(shared_ptr<GroupElement> h) {
+	ElGamalPublicKey(const shared_ptr<GroupElement> & h) {
 		this->h = h;
 	}
 
@@ -86,7 +86,7 @@ private:
 	biginteger x;
 
 public:
-	ElGamalPrivateKey(biginteger x) { this->x = x; }
+	ElGamalPrivateKey(const biginteger & x) { this->x = x; }
 
 	biginteger getX() {	return x; }
 
@@ -104,8 +104,8 @@ private:
 	shared_ptr<GroupElementSendableData> cipher2;
 
 public:
-	ElGamalOnGrElSendableData(shared_ptr<GroupElementSendableData> cipher1,
-		shared_ptr<GroupElementSendableData> cipher2) {
+	ElGamalOnGrElSendableData(const shared_ptr<GroupElementSendableData> & cipher1,
+		const shared_ptr<GroupElementSendableData> & cipher2) {
 		this->cipher1 = cipher1;
 		this->cipher2 = cipher2;
 	}
@@ -134,7 +134,7 @@ public:
 	* @param c1 the first part of the cihertext
 	* @param c2 the second part of the ciphertext
 	*/
-	ElGamalOnGroupElementCiphertext(shared_ptr<GroupElement> c1, shared_ptr<GroupElement> c2) {
+	ElGamalOnGroupElementCiphertext(const shared_ptr<GroupElement> & c1, const shared_ptr<GroupElement> & c2) {
 		this->cipher1 = c1;
 		this->cipher2 = c2;
 	}
@@ -174,7 +174,7 @@ private:
 	vector<byte> cipher2;
 
 public:
-	ElGamalOnByteArraySendableData(shared_ptr<GroupElementSendableData> cipher1, vector<byte> cipher2) {
+	ElGamalOnByteArraySendableData(const shared_ptr<GroupElementSendableData> & cipher1, vector<byte> & cipher2) {
 		this->cipher1 = cipher1;
 		this->cipher2 = cipher2;
 	}
@@ -207,7 +207,7 @@ public:
 	* @param c1 the first part of the cihertext
 	* @param c2 the second part of the ciphertext
 	*/
-	ElGamalOnByteArrayCiphertext(shared_ptr<GroupElement> c1, vector<byte> c2) {
+	ElGamalOnByteArrayCiphertext(const shared_ptr<GroupElement> & c1, vector<byte> & c2) {
 		cipher1 = c1;
 		cipher2 = c2;
 	}
@@ -255,14 +255,14 @@ protected:
 	shared_ptr<DlogGroup> dlog;						//The underlying DlogGroup
 	shared_ptr<ElGamalPrivateKey> privateKey;		//ElGamal private key (contains x)
 	shared_ptr<ElGamalPublicKey> publicKey;			//ElGamal public key (contains h)
-	mt19937 random;									//Source of randomness
+	shared_ptr<PrgFromOpenSSLAES> random;			//Source of randomness
 	biginteger qMinusOne;							//We keep this value to save unnecessary calculations.
 
-	void setMembers(shared_ptr<DlogGroup> dlogGroup);
+	void setMembers(const shared_ptr<DlogGroup> & dlogGroup, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
-	virtual void initPrivateKey(shared_ptr<ElGamalPrivateKey> privateKey) = 0;
+	virtual void initPrivateKey(const shared_ptr<ElGamalPrivateKey> & privateKey) = 0;
 	
-	virtual shared_ptr<AsymmetricCiphertext> completeEncryption(shared_ptr<GroupElement> c1, GroupElement* hy, Plaintext* plaintext) = 0;
+	virtual shared_ptr<AsymmetricCiphertext> completeEncryption(const shared_ptr<GroupElement> & c1, GroupElement* hy, Plaintext* plaintext) = 0;
 	
 public:
 	/**
@@ -276,8 +276,8 @@ public:
 	* @param dlogGroup underlying DlogGroup to use, it has to have DDH security level
 	* @throws SecurityLevelException if the Dlog Group is not DDH secure
 	*/
-	ElGamalEnc(shared_ptr<DlogGroup> dlogGroup) {
-		setMembers(dlogGroup);
+	ElGamalEnc(const shared_ptr<DlogGroup> & dlogGroup, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) {
+		setMembers(dlogGroup, random);
 	}
 
 	/**
@@ -287,7 +287,7 @@ public:
 	* @param privateKey should be ElGamalPrivateKey.
 	* @throws InvalidKeyException if the given keys are not instances of ElGamal keys.
 	*/
-	void setKey(shared_ptr<PublicKey> publicKey, shared_ptr<PrivateKey> privateKey) override;
+	void setKey(const shared_ptr<PublicKey> & publicKey, const shared_ptr<PrivateKey> & privateKey) override;
 
 	/**
 	* Initializes this ElGamal encryption scheme with public key.
@@ -295,7 +295,7 @@ public:
 	* @param publicKey should be ElGamalPublicKey
 	* @throws InvalidKeyException if the given key is not instances of ElGamalPuclicKey.
 	*/
-	void setKey(shared_ptr<PublicKey> publicKey) override { setKey(publicKey, NULL); }
+	void setKey(const shared_ptr<PublicKey> & publicKey) override { setKey(publicKey, NULL); }
 
 	bool isKeySet() override { return keySet; }
 
@@ -329,9 +329,9 @@ public:
 	* This function is not supported for this encryption scheme, since there is no need for parameters to generate an ElGamal key pair.
 	* @throws UnsupportedOperationException
 	*/
-	pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> generateKey(AlgorithmParameterSpec* keyParams) override {
+	pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> generateKey(AlgorithmParameterSpec * keyParams) override {
 		//No need for parameters to generate an El Gamal key pair. 
-		throw new UnsupportedOperationException("To Generate ElGamal keys use the generateKey() function");
+		throw UnsupportedOperationException("To Generate ElGamal keys use the generateKey() function");
 	}
 
 	shared_ptr<PublicKey> reconstructPublicKey(KeySendableData* data) override;
@@ -346,7 +346,7 @@ public:
 	* @throws IllegalStateException if no public key was set.
 	* @throws IllegalArgumentException if the given Plaintext does not match this ElGamal type.
 	*/
-	shared_ptr<AsymmetricCiphertext> encrypt(shared_ptr<Plaintext> plaintext) override;
+	shared_ptr<AsymmetricCiphertext> encrypt(const shared_ptr<Plaintext> & plaintext) override;
 
 	/**
 	* Encrypts the given plaintext using this asymmetric encryption scheme and using the given random value.<p>
@@ -361,7 +361,7 @@ public:
 	* @throws IllegalStateException if no public key was set.
 	* @throws IllegalArgumentException if the given Plaintext does not match this ElGamal type.
 	*/
-	shared_ptr<AsymmetricCiphertext> encrypt(shared_ptr<Plaintext> plaintext, biginteger r) override;
+	shared_ptr<AsymmetricCiphertext> encrypt(const shared_ptr<Plaintext> & plaintext, const biginteger & r) override;
 };
 
 
@@ -383,9 +383,9 @@ protected:
 	* This function computes this changing and saves the new private value as the private key member.
 	* @param privateKey to change.
 	*/
-	void initPrivateKey(shared_ptr<ElGamalPrivateKey> privateKey) override;
+	void initPrivateKey(const shared_ptr<ElGamalPrivateKey> & privateKey) override;
 
-	shared_ptr<AsymmetricCiphertext> completeEncryption(shared_ptr<GroupElement> c1, GroupElement* hy, Plaintext* plaintext) override;
+	shared_ptr<AsymmetricCiphertext> completeEncryption(const shared_ptr<GroupElement> & c1, GroupElement* hy, Plaintext* plaintext) override;
 
 public:
 	/**
@@ -399,7 +399,7 @@ public:
 	* @param dlogGroup underlying DlogGroup to use, it has to have DDH security level
 	* @throws SecurityLevelException if the Dlog Group is not DDH secure
 	*/
-	ElGamalOnGroupElementEnc(shared_ptr<DlogGroup> dlogGroup) : ElGamalEnc(dlogGroup) {}
+	ElGamalOnGroupElementEnc(const shared_ptr<DlogGroup> & dlogGroup) : ElGamalEnc(dlogGroup) {}
 
 	
 	/**
@@ -419,7 +419,7 @@ public:
 	* @param text byte array to convert to a Plaintext object.
 	* @throws IllegalArgumentException if the given message's length is greater than the maximum.
 	*/
-	shared_ptr<Plaintext> generatePlaintext(vector<byte> text) override;
+	shared_ptr<Plaintext> generatePlaintext(vector<byte> & text) override;
 
 	/**
 	* Decrypts the given ciphertext using ElGamal encryption scheme.
@@ -465,7 +465,7 @@ public:
 	* 		1. If one or more of the given ciphertexts is not instance of ElGamalOnGroupElementCiphertext.
 	* 		2. If one or more of the GroupElements in the given ciphertexts is not a member of the underlying DlogGroup of this ElGamal encryption scheme.
 	*/
-	shared_ptr<AsymmetricCiphertext> multiply(AsymmetricCiphertext* cipher1, AsymmetricCiphertext* cipher2, biginteger r) override;
+	shared_ptr<AsymmetricCiphertext> multiply(AsymmetricCiphertext* cipher1, AsymmetricCiphertext* cipher2, biginteger & r) override;
 
 	
 	/**
@@ -493,7 +493,7 @@ protected:
 	* Sets the private key.
 	* @param privateKey.
 	*/
-	void initPrivateKey(shared_ptr<ElGamalPrivateKey> privateKey) override	{
+	void initPrivateKey(const shared_ptr<ElGamalPrivateKey> & privateKey) override	{
 		//Sets the given PrivateKey.
 		this->privateKey = privateKey;
 	}
@@ -504,7 +504,7 @@ protected:
 	* @return Ciphertext of type ElGamalOnByteArrayCiphertext containing the encrypted message.
 	* @throws IllegalArgumentException if the given Plaintext is not an instance of ByteArrayPlaintext.
 	*/
-	shared_ptr<AsymmetricCiphertext> completeEncryption(shared_ptr<GroupElement> c1, GroupElement* hy, Plaintext* plaintext) override;
+	shared_ptr<AsymmetricCiphertext> completeEncryption(const shared_ptr<GroupElement> & c1, GroupElement* hy, Plaintext* plaintext) override;
 									
 public:
 	/**
@@ -512,7 +512,7 @@ public:
 	*/
 	ElGamalOnByteArrayEnc() : ElGamalEnc() {
 		//Creates a default implementation of KDF.
-		this->kdf = make_shared<HKDF>(new OpenSSLHMAC());
+		this->kdf = make_shared<HKDF>(make_shared<OpenSSLHMAC>());
 	}
 
 	/**
@@ -521,7 +521,7 @@ public:
 	* @param dlogGroup must be DDH secure.
 	* @throws SecurityLevelException if the given dlog group does not have DDH security level.
 	*/
-	ElGamalOnByteArrayEnc(shared_ptr<DlogGroup> dlogGroup, shared_ptr<KeyDerivationFunction> kdf) : ElGamalEnc(dlogGroup) {
+	ElGamalOnByteArrayEnc(const shared_ptr<DlogGroup> & dlogGroup, const shared_ptr<KeyDerivationFunction> & kdf) : ElGamalEnc(dlogGroup) {
 		this->kdf = kdf;
 	}
 	
@@ -543,7 +543,7 @@ public:
 	* Generates a Plaintext suitable to ElGamal encryption scheme from the given message.
 	* @param text byte array to convert to a Plaintext object.
 	*/
-	shared_ptr<Plaintext> generatePlaintext(vector<byte> text) override {
+	shared_ptr<Plaintext> generatePlaintext(vector<byte> & text) override {
 		return make_shared<ByteArrayPlaintext>(text);
 	}
 

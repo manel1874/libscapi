@@ -43,6 +43,7 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
+    <CLRSupport>false</CLRSupport>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -87,6 +88,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
+    <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -107,6 +110,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <WarningLevel>Level1</WarningLevel>
+      <EnablePREfast>false</EnablePREfast>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -139,6 +143,8 @@
     <ClCompile Include="..\..\src\interactive_mid_protocols\OT.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\OTExtensionBristol.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\OTExtensionMalicious.cpp" />
+    <ClCompile Include="..\..\src\interactive_mid_protocols\OTFullSimulation.cpp" />
+    <ClCompile Include="..\..\src\interactive_mid_protocols\OTFullSimulationROM.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\OTOneSidedSimulation.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\OTPrivacyOnly.cpp" />
     <ClCompile Include="..\..\src\interactive_mid_protocols\OTSemiHonest.cpp" />
@@ -222,6 +228,7 @@
     <ClInclude Include="..\..\include\interactive_mid_protocols\OTExtensionBristol.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\OTExtensionMalicious.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\OTFullSimulation.hpp" />
+    <ClInclude Include="..\..\include\interactive_mid_protocols\OTFullSimulationROM.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\OTOneSidedSimulation.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\OTPrivacyOnly.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\OTSemiHonest.hpp" />
@@ -250,6 +257,7 @@
     <ClInclude Include="..\..\include\mid_layer\CramerShoupEnc.hpp" />
     <ClInclude Include="..\..\include\mid_layer\DamgardJurikEnc.hpp" />
     <ClInclude Include="..\..\include\mid_layer\ElGamalEnc.hpp" />
+    <ClInclude Include="..\..\include\mid_layer\Mac.hpp" />
     <ClInclude Include="..\..\include\mid_layer\OpenSSLSymmetricEnc.hpp" />
     <ClInclude Include="..\..\include\mid_layer\Paillier.hpp" />
     <ClInclude Include="..\..\include\mid_layer\SymmetricEnc.hpp" />
@@ -259,13 +267,12 @@
     <ClInclude Include="..\..\include\primitives\HashBlake2.hpp" />
     <ClInclude Include="..\..\include\primitives\HashOpenSSL.hpp" />
     <ClInclude Include="..\..\include\primitives\Kdf.hpp" />
-    <ClInclude Include="..\..\include\primitives\mac.hpp" />
     <ClInclude Include="..\..\include\primitives\Prf.hpp" />
     <ClInclude Include="..\..\include\primitives\PrfOpenSSL.hpp" />
     <ClInclude Include="..\..\include\primitives\Prg.hpp" />
     <ClInclude Include="..\..\include\primitives\RandomOracle.hpp" />
     <ClInclude Include="..\..\include\primitives\TrapdoorPermutationOpenSSL.hpp" />
-    <ClInclude Include="..\..\include\primitives\TrapdoorPermutations.hpp" />
+    <ClInclude Include="..\..\include\primitives\TrapdoorPermutation.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

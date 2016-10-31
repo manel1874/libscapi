@@ -29,6 +29,7 @@
 #pragma once
 #include "SigmaProtocol.hpp"
 #include "../infra/Common.hpp"
+#include "../primitives/Prg.hpp"
 
 /**
 * Concrete implementation of SigmaProtocol input, used by the SigmaProtocolORTwoProver.<p>
@@ -138,7 +139,7 @@ class SigmaOrTwoSimulator : public SigmaSimulator {
 private:
 	vector<shared_ptr<SigmaSimulator>> simulators;			//underlying simulators.
 	int t;													// Soundness parameter.
-	mt19937 random;
+	shared_ptr<PrgFromOpenSSLAES> random;
 
 	/**
 	* Checks if the given challenge length is equal to the soundness parameter.
@@ -154,7 +155,7 @@ public:
 	* @throws IllegalArgumentException if the given t is not equal to both t values of the underlying simulators.
 	* @throws IllegalArgumentException if the given simulators array does not contains two objects.
 	*/
-	SigmaOrTwoSimulator(vector<shared_ptr<SigmaSimulator>> simulators, int t);
+	SigmaOrTwoSimulator(vector<shared_ptr<SigmaSimulator>> simulators, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -210,8 +211,8 @@ class SigmaOrTwoProverComputation : public SigmaProverComputation {
 private:
 	shared_ptr<SigmaProverComputation> prover;		//Underlying Sigma protocol prover.
 	shared_ptr<SigmaSimulator> simulator;			//Underlying Sigma protocol simulator.
+	shared_ptr<PrgFromOpenSSLAES> random;
 	int t;											//Soundness parameter.
-	mt19937 random;
 	int b;											// The bit b such that (xb,w) is in R.
 	vector<byte> eOneMinusB;						//Sampled challenge for the simulator.
 	shared_ptr<SigmaProtocolMsg> zOneMinusB;		// The output of the simulator.
@@ -230,7 +231,7 @@ public:
 	* @throws IllegalArgumentException if the given t is not equal to both t values of the underlying provers.
 	* @throws IllegalArgumentException if the given provers array does not contains two objects.
 	*/
-	SigmaOrTwoProverComputation(shared_ptr<SigmaProverComputation> prover, shared_ptr<SigmaSimulator> simulator, int t);
+	SigmaOrTwoProverComputation(shared_ptr<SigmaProverComputation> prover, shared_ptr<SigmaSimulator> simulator, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -293,7 +294,7 @@ private:
 	vector<shared_ptr<SigmaVerifierComputation>> verifiers;	// Underlying Sigma protocol verifiers to the OR calculation.
 	vector<byte> e;											//The challenge.
 	int t;													//Soundness parameter.
-	mt19937 random;
+	shared_ptr<PrgFromOpenSSLAES> random;
 
 public:
 	/**
@@ -303,7 +304,7 @@ public:
 	* @throws IllegalArgumentException if the given t is not equal to both t values of the underlying verifiers.
 	* @throws IllegalArgumentException if the given verifiers array does not contains two objects.
 	*/
-	SigmaOrTwoVerifierComputation(vector<shared_ptr<SigmaVerifierComputation>> verifiers, int t);
+	SigmaOrTwoVerifierComputation(vector<shared_ptr<SigmaVerifierComputation>> verifiers, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -318,7 +319,7 @@ public:
 	void sampleChallenge() override {
 		//make space for t/8 bytes and fill it with random values.
 		e.resize(t / 8);
-		RAND_bytes(e.data(), t / 8);
+		random->getPRGBytes(e, 0, t / 8);
 	}
 
 	/**

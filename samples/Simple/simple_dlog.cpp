@@ -39,8 +39,8 @@ int mainDlog(){
 	biginteger q = dlog->getOrder();
 
 	// create a random exponent r
-	mt19937 gen(get_seeded_random());
-	biginteger r = getRandomInRange(0, q - 1, gen);
+	auto gen = get_seeded_prg();
+	biginteger r = getRandomInRange(0, q - 1, gen.get());
 
 	// exponentiate g in r to receive a new group element
 	auto g1 = dlog->exponentiate(g.get(), r);

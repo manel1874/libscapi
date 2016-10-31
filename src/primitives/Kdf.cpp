@@ -28,11 +28,11 @@
 
 #include "../../include/primitives/Kdf.hpp"
 
-void HKDF::nextRounds(int outLen, const vector<byte> * iv, int hmacLength, vector<byte> & outBytes, vector<byte> & intermediateOutBytes) {
+void HKDF::nextRounds(int outLen, const vector<byte> & iv, int hmacLength, vector<byte> & outBytes, vector<byte> & intermediateOutBytes) {
 	int rounds = (int)ceil((float)outLen / (float)hmacLength); // the smallest number so that  hmacLength * rounds >= outLen
 	int currentInBytesSize;	// the size of the CTXInfo and also the round;
-	if (iv != NULL)
-		currentInBytesSize = hmacLength + iv->size() + 1; // the size of the CTXInfo and also the round;
+	if (iv.size() > 0)
+		currentInBytesSize = hmacLength + iv.size() + 1; // the size of the CTXInfo and also the round;
 	else //no CTXInfo
 		currentInBytesSize = hmacLength + 1; // the size without the CTXInfo and also the round;
 
@@ -40,9 +40,9 @@ void HKDF::nextRounds(int outLen, const vector<byte> * iv, int hmacLength, vecto
 	byte* currentInBytes = new byte[currentInBytesSize];
 
 	//for rounds 2 to t 
-	if (iv != NULL)
+	if (iv.size() > 0)
 		//in case we have an iv. puts it (ctxInfo after the K from the previous round at position hmacLength).
-		copy_byte_vector_to_byte_array(*iv, currentInBytes, hmacLength);
+		copy_byte_vector_to_byte_array(iv, currentInBytes, hmacLength);
 
 	for (int i = 2; i <= rounds; i++) {
 		// copies the output of the last results
@@ -64,20 +64,20 @@ void HKDF::nextRounds(int outLen, const vector<byte> * iv, int hmacLength, vecto
 	}
 }
 
-void HKDF::firstRound(vector<byte>& outBytes, const vector<byte> * iv, vector<byte> & intermediateOutBytes, int outLength) {
+void HKDF::firstRound(vector<byte>& outBytes, const vector<byte> & iv, vector<byte> & intermediateOutBytes, int outLength) {
 	// round 1
 	byte* firstRoundInput; //data for the creating K(1)
 	int firstRoundSize;
-	if (iv != NULL)
-		firstRoundSize = iv->size() + 1;
+	if (iv.size() > 0)
+		firstRoundSize = iv.size() + 1;
 	else
 		firstRoundSize = 1;
 	
 	firstRoundInput = new  byte[firstRoundSize];
 
 	// copies the CTXInfo - iv
-	if (iv != NULL)
-		copy_byte_vector_to_byte_array(*iv, firstRoundInput, 0);
+	if (iv.size() > 0)
+		copy_byte_vector_to_byte_array(iv, firstRoundInput, 0);
 
 	// copies the integer with zero to the data array
 	firstRoundInput[firstRoundSize- 1] = (byte)1;
@@ -87,13 +87,12 @@ void HKDF::firstRound(vector<byte>& outBytes, const vector<byte> * iv, vector<by
 	vector<byte> v_in;
 	copy_byte_array_to_byte_vector(firstRoundInput, firstRoundSize, v_in, 0);
 	hmac->computeBlock(v_in, 0, firstRoundSize, intermediateOutBytes, 0);
-
+	
 	// copies the results to the output array
-	outBytes = intermediateOutBytes;
-	//outBytes.insert(outBytes.begin(), &intermediateOutBytes[0], &intermediateOutBytes[outLength-1]);
+	outBytes.assign(intermediateOutBytes.begin(), intermediateOutBytes.begin() + outLength);
 }
 
-SecretKey HKDF::deriveKey(const vector<byte> & entropySource, int inOff, int inLen, int outLen, const vector<byte>* iv) {
+SecretKey HKDF::deriveKey(const vector<byte> & entropySource, int inOff, int inLen, int outLen, const vector<byte>& iv) {
 	//checks that the offset and length are correct
 	if ((inOff > (int)entropySource.size()) || (inOff + inLen >  (int) entropySource.size()))
 		throw out_of_range("wrong offset for the given input buffer");
@@ -116,7 +115,8 @@ SecretKey HKDF::deriveKey(const vector<byte> & entropySource, int inOff, int inL
 	// a key from the same entropy source will be different in subsequent calls to this function (as long as the same instance of HKDF is used). 
 	string str_key = boost::algorithm::unhex(string("606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeaf"));
 	char const *c_key = str_key.c_str();
-	hmac->setKey(SecretKey((byte*) c_key, strlen(c_key), ""));
+	SecretKey key((byte*) c_key, strlen(c_key), "");
+	hmac->setKey(key);
 	int hmacLength = hmac->getBlockSize(); //the size of the output of the hmac.
 	vector<byte> outBytes;// (outLen); //the output key
 	vector<byte> roundKey; //PRK from the pseudocode
@@ -126,9 +126,10 @@ SecretKey HKDF::deriveKey(const vector<byte> & entropySource, int inOff, int inL
 	//roundKey is now K(0)
 	hmac->computeBlock(entropySource, 0, entropySource.size(), roundKey, 0);
 	//init the hmac with the new key. From now on this is the key for all the rounds.
-	hmac->setKey(SecretKey(roundKey, "HKDF"));
+	SecretKey roundSecretKey(roundKey, "HKDF");
+	hmac->setKey(roundSecretKey);
 	
-	// calculates the first round
+	// cdalculates the first round
 	// K(1) = HMAC(PRK,(CTXinfo,1)) [key=PRK, data=(CTXinfo,1)]
 	if (outLen < hmacLength)
 		firstRound(outBytes, iv, intermediateOutBytes, outLen);

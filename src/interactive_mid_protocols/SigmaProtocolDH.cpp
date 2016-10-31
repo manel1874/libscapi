@@ -28,6 +28,17 @@
 
 #include "../../include/interactive_mid_protocols/SigmaProtocolDH.hpp"
 
+
+string SigmaDHCommonInput::toString(){
+	string output = h->generateSendableData()->toString();
+	output += ":";
+	output += u->generateSendableData()->toString();
+	output += ":";
+	output += v->generateSendableData()->toString();
+	output += ":";
+	return output;
+}
+
 void SigmaDHMsg::initFromString(const string & s) {
 	auto str_vec = explode(s, ':');
 	assert(str_vec.size() == 2 || str_vec.size() == 4);
@@ -52,7 +63,7 @@ void SigmaDHMsg::initFromString(const string & s) {
 * @param t Soundness parameter in BITS.
 * @param random
 */
-SigmaDHSimulator::SigmaDHSimulator(shared_ptr<DlogGroup> dlog, int t) {
+SigmaDHSimulator::SigmaDHSimulator(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	//Sets the parameters.
 	this->dlog = dlog;
 	this->t = t;
@@ -62,7 +73,7 @@ SigmaDHSimulator::SigmaDHSimulator(shared_ptr<DlogGroup> dlog, int t) {
 		throw invalid_argument("soundness parameter t does not satisfy 2^t<q");
 	}
 
-	this->random = get_seeded_random();
+	this->random = random;
 	qMinusOne = dlog->getOrder() - 1;
 }
 
@@ -86,7 +97,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaDHSimulator::simulate(SigmaCommonInput* in
 	}
 	
 	//Sample a random z <- Zq
-	biginteger z = getRandomInRange(0, qMinusOne, random);
+	biginteger z = getRandomInRange(0, qMinusOne, random.get());
 
 	//Compute a = g^z*u^(-e) (where -e here means -e mod q)
 	auto gToZ = dlog->exponentiate(dlog->getGenerator().get(), z);
@@ -114,7 +125,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaDHSimulator::simulate(SigmaCommonInput* in
 shared_ptr<SigmaSimulatorOutput> SigmaDHSimulator::simulate(SigmaCommonInput* input) {
 	//Create a new byte array of size t/8, to get the required byte size and fill it with random values.
 	vector<byte> e(t / 8);
-	RAND_bytes(e.data(), t / 8);
+	random->getPRGBytes(e, 0, t / 8);
 
 	//Call the other simulate function with the given input and the sampled e.
 	return simulate(input, e);
@@ -142,7 +153,7 @@ bool SigmaDHSimulator::checkSoundnessParam() {
 * @param random
 * @throws IllegalArgumentException if soundness parameter is invalid.
 */
-SigmaDHProverComputation::SigmaDHProverComputation(shared_ptr<DlogGroup> dlog, int t) {
+SigmaDHProverComputation::SigmaDHProverComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 
 	//Sets the parameters.
 	this->dlog = dlog;
@@ -153,7 +164,7 @@ SigmaDHProverComputation::SigmaDHProverComputation(shared_ptr<DlogGroup> dlog, i
 		throw invalid_argument("soundness parameter t does not satisfy 2^t<q");
 	}
 
-	this->random = get_seeded_random();
+	this->random = random;
 	qMinusOne = dlog->getOrder() - 1;
 }
 
@@ -172,7 +183,7 @@ shared_ptr<SigmaProtocolMsg> SigmaDHProverComputation::computeFirstMsg(shared_pt
 	}
 	
 	//Sample random r in Zq
-	r = getRandomInRange(0, qMinusOne, random);
+	r = getRandomInRange(0, qMinusOne, random.get());
 
 	//Compute a = g^r.
 	auto a = dlog->exponentiate(dlog->getGenerator().get(), r);
@@ -232,7 +243,7 @@ bool SigmaDHProverComputation::checkSoundnessParam() {
 * @throws InvalidDlogGroupException if the given dlog is invalid.
 * @throws IllegalArgumentException if soundness parameter is invalid.
 */
-SigmaDHVerifierComputation::SigmaDHVerifierComputation(shared_ptr<DlogGroup> dlog, int t) {
+SigmaDHVerifierComputation::SigmaDHVerifierComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 
 	if (!dlog->validateGroup())
 		throw InvalidDlogGroupException("invalid dlog");
@@ -246,7 +257,7 @@ SigmaDHVerifierComputation::SigmaDHVerifierComputation(shared_ptr<DlogGroup> dlo
 		throw invalid_argument("soundness parameter t does not satisfy 2^t<q");
 	}
 
-	this->random = get_seeded_random();
+	this->random = random;
 
 }
 
@@ -268,7 +279,7 @@ bool SigmaDHVerifierComputation::checkSoundnessParam() {
 void SigmaDHVerifierComputation::sampleChallenge() {
 	//make space for t/8 bytes and fill it with random values.
 	e.resize(t / 8);
-	RAND_bytes(e.data(), t / 8);
+	random->getPRGBytes(e, 0, t / 8);
 }
 
 /**

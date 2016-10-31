@@ -9,7 +9,7 @@ void Blake2Hash::update(const vector<byte> &in, int inOffset, int inLen) {
 }
 
 void Blake2Hash::hashFinal(vector<byte> &out, int outOffset) {
-	if (out.size() < outOffset + hashSize) {
+	if ((int) out.size() < outOffset + hashSize) {
 		out.resize(outOffset + hashSize);
 	}
 	blake2b_final(S, out.data() + outOffset, hashSize);

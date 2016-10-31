@@ -70,7 +70,8 @@ public:
 	*/
 	CmtElGamalHashCommitter(shared_ptr<CommParty> channel, 
 							shared_ptr<DlogGroup> dlog = make_shared<OpenSSLDlogECF2m>("K-283"),
-							shared_ptr<CryptographicHash> hash = make_shared<OpenSSLSHA256>());
+							shared_ptr<CryptographicHash> hash = make_shared<OpenSSLSHA256>(),
+							const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Runs COMMIT_ElGamal to commit to value H(x).

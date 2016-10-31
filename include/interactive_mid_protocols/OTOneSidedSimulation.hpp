@@ -251,7 +251,7 @@ public:
 	*/
 	OTOneSidedSimDDHOnByteArraySender(const shared_ptr<CommParty> & channel, const shared_ptr<PrgFromOpenSSLAES> & random = make_shared<PrgFromOpenSSLAES>(),
 		const shared_ptr<DlogGroup> & dlog = make_shared<OpenSSLDlogECF2m>("K-233"),
-		const shared_ptr<KeyDerivationFunction> & kdf = make_shared<HKDF>(new OpenSSLHMAC("SHA-256"))) 
+		const shared_ptr<KeyDerivationFunction> & kdf = make_shared<HKDF>(make_shared<OpenSSLHMAC>("SHA-256"))) 
 		: OTOneSidedSimDDHSenderAbs(channel, random, dlog), kdf(kdf) {}
 };
 
@@ -518,7 +518,7 @@ public:
 	*/
 	OTOneSidedSimDDHOnByteArrayReceiver(const shared_ptr<CommParty> & channel, const shared_ptr<PrgFromOpenSSLAES> & random = make_shared<PrgFromOpenSSLAES>(),
 		const shared_ptr<DlogGroup> & dlog = make_shared<OpenSSLDlogECF2m>("K-233"),
-		const shared_ptr<KeyDerivationFunction> & kdf = make_shared<HKDF>(new OpenSSLHMAC("SHA-256")))
+		const shared_ptr<KeyDerivationFunction> & kdf = make_shared<HKDF>(make_shared<OpenSSLHMAC>("SHA-256")))
 		: OTOneSidedSimDDHReceiverAbs(channel, random, dlog), kdf(kdf) {}
 
 };

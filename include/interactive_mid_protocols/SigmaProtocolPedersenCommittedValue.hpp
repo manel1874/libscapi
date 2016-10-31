@@ -78,6 +78,7 @@ public:
 	*/
 	shared_ptr<GroupElement> getCommitment() { return commitment; }
 
+	string toString() override;
 };
 
 /**
@@ -158,7 +159,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaPedersenCommittedValueSimulator(shared_ptr<DlogGroup> dlog, int t);
+	SigmaPedersenCommittedValueSimulator(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -210,9 +211,9 @@ class SigmaPedersenCommittedValueProverComputation : public SigmaProverComputati
 
 private:
 	SigmaDlogProverComputation sigmaDlog;	//underlying SigmaDlogProver to use.
+	shared_ptr<PrgFromOpenSSLAES> prg;
 	shared_ptr<DlogGroup> dlog;				//We need the DlogGroup instance in order to calculate the input for the underlying SigmaDlogProver
 	int t;
-	mt19937 random;
 
 	/**
 	* Converts the input for the underlying prover computation.
@@ -228,7 +229,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaPedersenCommittedValueProverComputation(shared_ptr<DlogGroup> dlog, int t);
+	SigmaPedersenCommittedValueProverComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -257,7 +258,7 @@ public:
 	* @return SigmaDlogSimulator
 	*/
 	shared_ptr<SigmaSimulator> getSimulator() override {
-		return make_shared<SigmaPedersenCommittedValueSimulator>(dlog, t);
+		return make_shared<SigmaPedersenCommittedValueSimulator>(dlog, t, prg);
 	}
 };
 
@@ -299,7 +300,7 @@ public:
 	* @param random
 	* @throws InvalidDlogGroupException if the given dlog is invalid.
 	*/
-	SigmaPedersenCommittedValueVerifierComputation(shared_ptr<DlogGroup> dlog, int t) : sigmaDlog(dlog, t) {
+	SigmaPedersenCommittedValueVerifierComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) : sigmaDlog(dlog, t, prg) {
 		this->dlog = dlog;
 	}
 

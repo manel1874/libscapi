@@ -5,7 +5,8 @@ proverPort    = 1222
 verifierPort  = 1223
 #protocolName = Simple
 #protocolName = SimpleZK
-protocolName = ZKPedersen
+#protocolName = ZKPedersen
+protocolName = ZKFiatShamir
 
 [SMALL]
 p = 7 

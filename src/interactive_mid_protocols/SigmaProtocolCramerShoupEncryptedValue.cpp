@@ -39,6 +39,16 @@ SigmaCramerShoupEncryptedValueCommonInput::SigmaCramerShoupEncryptedValueCommonI
 	this->x = x;
 }
 
+string SigmaCramerShoupEncryptedValueCommonInput::toString() {
+	string output = x->generateSendableData()->toString();
+	output += ":";
+	output += publicKey.generateSendableData()->toString();
+	output += ":";
+	output += cipher.generateSendableData()->toString();
+	output += ":";
+	return output;
+}
+
 /**
 * Sets the ciphertext, public key, the encrypted element and the random value used to encrypt x.
 * @param cipher ciphertext the output of the encryption scheme on the encrypted element.
@@ -58,7 +68,8 @@ SigmaCramerShoupEncryptedValueProverInput::SigmaCramerShoupEncryptedValueProverI
 * @param t Soundness parameter in BITS.
 * @param random
 */
-SigmaCramerShoupEncryptedValueSimulator::SigmaCramerShoupEncryptedValueSimulator(shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, int t) : dhSim(dlog, t) {
+SigmaCramerShoupEncryptedValueSimulator::SigmaCramerShoupEncryptedValueSimulator(shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, int t, 
+	const shared_ptr<PrgFromOpenSSLAES> & prg) : dhSim(dlog, t, prg) {
 
 	this->dlog = dlog;
 	this->hash = hash;
@@ -170,13 +181,13 @@ biginteger SigmaCramerShoupEncryptedValueSimulator::calcW(shared_ptr<GroupElemen
 * @param t Soundness parameter in BITS.
 * @param random
 */
-SigmaCramerShoupEncryptedValueProverComputation::SigmaCramerShoupEncryptedValueProverComputation(shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, int t) 
-	: sigmaDH(dlog, t) {
+SigmaCramerShoupEncryptedValueProverComputation::SigmaCramerShoupEncryptedValueProverComputation(shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, 
+	int t, const shared_ptr<PrgFromOpenSSLAES> & random) : sigmaDH(dlog, t, random) {
 
 	this->dlog = dlog;
 	this->hash = hash;
 	this->t = t;
-	this->random = get_seeded_random();
+	prg = random;
 }
 
 biginteger SigmaCramerShoupEncryptedValueProverComputation::calcW(shared_ptr<GroupElement> u1, shared_ptr<GroupElement> u2, shared_ptr<GroupElement> e) {

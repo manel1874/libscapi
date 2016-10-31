@@ -73,6 +73,7 @@ public:
 	*/
 	BigIntegerPlainText getPlaintext() { return plaintext;	}
 
+	string toString() override;
 };
 
 /**
@@ -154,7 +155,7 @@ public:
 	* @param lengthParameter length parameter in BITS.
 	* @param random
 	*/
-	SigmaDJEncryptedValueSimulator(int t = 40, int lengthParameter = 1) : djSim(t, lengthParameter) {
+	SigmaDJEncryptedValueSimulator(int t = 40, int lengthParameter = 1, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) : djSim(t, lengthParameter, prg) {
 		this->lengthParameter = lengthParameter;
 	}
 
@@ -205,6 +206,7 @@ class SigmaDJEncryptedValueProverComputation : public SigmaProverComputation, DJ
 
 private:
 	SigmaDJEncryptedZeroProverComputation sigmaDamgardJurik;	//underlying SigmaDamgardJurikProver to use.
+	shared_ptr<PrgFromOpenSSLAES> prg;
 	int lengthParameter;									// length parameter in BITS.
 	int t;
 
@@ -215,10 +217,11 @@ public:
 	* @param lengthParameter length parameter in BITS.
 	* @param random
 	*/
-	SigmaDJEncryptedValueProverComputation(int t = 40, int lengthParameter = 1) : sigmaDamgardJurik(t, lengthParameter) {
+	SigmaDJEncryptedValueProverComputation(int t = 40, int lengthParameter = 1, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) : sigmaDamgardJurik(t, lengthParameter, prg) {
 
 		this->lengthParameter = lengthParameter;
 		this->t = t;
+		this->prg = prg;
 	}
 
 	/**
@@ -248,7 +251,7 @@ public:
 	* @return SigmaDamgardJurikEncryptedValueSimulator
 	*/
 	shared_ptr<SigmaSimulator> getSimulator() override {
-		return make_shared<SigmaDJEncryptedValueSimulator>(t, lengthParameter);
+		return make_shared<SigmaDJEncryptedValueSimulator>(t, lengthParameter, prg);
 	}
 };
 

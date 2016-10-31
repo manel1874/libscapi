@@ -28,7 +28,7 @@
 
 #include "../../include/primitives/Prg.hpp"
 
-void ScPrgFromPrf::setKey(SecretKey secretKey) {
+void ScPrgFromPrf::setKey(SecretKey & secretKey) {
 	prf->setKey(secretKey); //Sets the key to the underlying prf.
 	
 	ctr = vector<byte>(prf->getBlockSize());
@@ -178,7 +178,7 @@ SecretKey PrgFromOpenSSLAES::generateKey(int keySize) {
 	return sk;
 }
 
-void PrgFromOpenSSLAES::setKey(SecretKey secretKey) {
+void PrgFromOpenSSLAES::setKey(SecretKey & secretKey) {
 
 	if (_isKeySet == false) {
 
@@ -296,7 +296,7 @@ void PrgFromOpenSSLAES::prepare() {
 
 
 
-void OpenSSLRC4::setKey(SecretKey secretKey) {
+void OpenSSLRC4::setKey(SecretKey & secretKey) {
 	vector<byte> encodedKey = secretKey.getEncoded();
 	RC4_set_key(rc4, encodedKey.size(), &encodedKey[0]); 	// set the key to the openssl object.
 	_isKeySet = true; // marks this object as initialized.
@@ -350,3 +350,5 @@ void OpenSSLRC4::getPRGBytes(vector<byte> & outBytes, int outOffset, int outLen)
 OpenSSLRC4::~OpenSSLRC4() {
 	delete rc4;
 }
+
+shared_ptr<PrgFromOpenSSLAES> PrgSingleton::prg = nullptr;

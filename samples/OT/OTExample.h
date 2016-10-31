@@ -32,6 +32,8 @@
 #include "../../include/interactive_mid_protocols/OTSemiHonest.hpp"
 #include "../../include/interactive_mid_protocols/OTPrivacyOnly.hpp"
 #include "../../include/interactive_mid_protocols/OTOneSidedSimulation.hpp"
+#include "../../include/interactive_mid_protocols/OTFullSimulation.hpp"
+#include "../../include/interactive_mid_protocols/OTFullSimulationROM.hpp"
 #include "../../include/primitives/Prg.hpp"
 
 struct OTParams {

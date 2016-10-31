@@ -1,7 +1,7 @@
 #include "../../include/interactive_mid_protocols/OTOneSidedSimulation.hpp"
 
 OTOneSidedSimDDHSenderAbs::OTOneSidedSimDDHSenderAbs(const shared_ptr<CommParty> & channel, const shared_ptr<PrgFromOpenSSLAES> & random, const shared_ptr<DlogGroup> & dlog)
-	: zkVerifier(channel, make_shared<SigmaDlogVerifierComputation>(dlog, 80), make_shared<CmtRTrapdoorCommitPhaseOutput>(), dlog) {
+	: zkVerifier(channel, make_shared<SigmaDlogVerifierComputation>(dlog, 80, random), make_shared<CmtRTrapdoorCommitPhaseOutput>(), dlog) {
 
 	//The underlying dlog group must be DDH secure.
 	auto ddh = dynamic_pointer_cast<DDH>(dlog);
@@ -56,9 +56,9 @@ void OTOneSidedSimDDHSenderAbs::runZKPOK(const shared_ptr<GroupElement> & h) {
 
 	//If the output of the Zero Knowledge Proof Of Knowledge is REJ, throw CheatAttempException.
 	SigmaDlogCommonInput input(h);
-	SigmaGroupElementMsg msgA(dlog->getGenerator()->generateSendableData());
-	SigmaBIMsg msgZ;
-	if (!zkVerifier.verify(&input, &msgA, &msgZ)) {
+	auto msgA = make_shared<SigmaGroupElementMsg>(dlog->getGenerator()->generateSendableData());
+	auto msgZ = make_shared<SigmaBIMsg>();
+	if (!zkVerifier.verify(&input, msgA, msgZ)) {
 		throw CheatAttemptException("ZKPOK verifier outputed REJECT");
 	}
 }
@@ -162,19 +162,19 @@ void OTOneSidedSimDDHSenderAbs::transfer(CommParty* channel, OTSInput* input) {
 
 	//Wait for message a from R
 	OTRGroupElementQuadMsg message = waitForMessageFromReceiver(channel);
-
+	
 	//Reconstruct the group elements from the given message.
 	auto x = dlog->reconstructElement(false, message.getX().get());
 	auto y = dlog->reconstructElement(false, message.getY().get());
 	auto z0 = dlog->reconstructElement(false, message.getZ0().get());
 	auto z1 = dlog->reconstructElement(false, message.getZ1().get());
-
+	
 	//Run the verifier in ZKPOK_FROM_SIGMA with Sigma protocol SIGMA_DLOG.
 	runZKPOK(x);
-
+	
 	//If not z0 = z1 and x, y, z0, z1 in G throw CheatAttemptException.
 	checkReceivedTuple(x.get(), y.get(), z0.get(), z1.get());
-
+	
 	//Sample random values u0,u1,v0,v1 in  {0, . . . , q-1}
 	biginteger u0 = getRandomInRange(0, qMinusOne, random.get());
 	biginteger u1 = getRandomInRange(0, qMinusOne, random.get());
@@ -184,7 +184,7 @@ void OTOneSidedSimDDHSenderAbs::transfer(CommParty* channel, OTSInput* input) {
 	//Compute values w0, k0, w1, k1
 	auto g = dlog->getGenerator(); //Get the group generator.
 
-									//Calculates w0 = x^u0 � g^v0
+	//Calculates w0 = x^u0 � g^v0
 	auto w0 = dlog->multiplyGroupElements(dlog->exponentiate(x.get(), u0).get(), dlog->exponentiate(g.get(), v0).get());
 	//Calculates k0 = (z0)^u0 � y^v0
 	auto k0 = dlog->multiplyGroupElements(dlog->exponentiate(z0.get(), u0).get(), dlog->exponentiate(y.get(), v0).get());
@@ -248,6 +248,7 @@ shared_ptr<OTSMsg> OTOneSidedSimDDHOnGroupElementSender::computeTuple(OTSInput* 
 * @return tuple contains (u, v0, v1) to send to the receiver.
 */
 shared_ptr<OTSMsg> OTOneSidedSimDDHOnByteArraySender::computeTuple(OTSInput* input, GroupElement* w0, GroupElement* w1, GroupElement* k0, GroupElement* k1) {
+	
 	// If input is not instance of OTSOnGroupElementInput, throw Exception.
 	auto in = dynamic_cast<OTOnByteArraySInput*>(input);
 	if (in == nullptr) {
@@ -262,26 +263,26 @@ shared_ptr<OTSMsg> OTOneSidedSimDDHOnByteArraySender::computeTuple(OTSInput* inp
 	if (x0.size() != x1.size()) {
 		throw invalid_argument("x0 and x1 should be of the same length.");
 	}
-
+	
 	//Calculate c0:
 	auto k0Bytes = dlog->mapAnyGroupElementToByteArray(k0);
 	int len = x0.size();
 	auto c0 = kdf->deriveKey(k0Bytes, 0, k0Bytes.size(), len).getEncoded();
-
+	
 	//Xores the result from the kdf with x0.
 	for (int i = 0; i<len; i++) {
 		c0[i] = c0[i] ^ x0[i];
 	}
-
+	
 	//Calculate c1:
 	auto k1Bytes = dlog->mapAnyGroupElementToByteArray(k1);
 	auto c1 = kdf->deriveKey(k1Bytes, 0, k1Bytes.size(), len).getEncoded();
-
+	
 	//Xores the result from the kdf with x1.
 	for (int i = 0; i<len; i++) {
 		c1[i] = c1[i] ^ x1[i];
 	}
-
+	
 	//Create and return sender message.
 	return make_shared<OTOnByteArraySMsg>(w0->generateSendableData(), c0, w1->generateSendableData(), c1);
 }
@@ -294,7 +295,7 @@ shared_ptr<OTSMsg> OTOneSidedSimDDHOnByteArraySender::computeTuple(OTSInput* inp
 * @throws InvalidDlogGroupException if the given DlogGroup is not valid.
 */
 OTOneSidedSimDDHReceiverAbs::OTOneSidedSimDDHReceiverAbs(const shared_ptr<CommParty> & channel, const shared_ptr<PrgFromOpenSSLAES> & random, const shared_ptr<DlogGroup> & dlog)
-	: zkProver(channel, make_shared<SigmaDlogProverComputation>(dlog, 80), dlog) {
+	: zkProver(channel, make_shared<SigmaDlogProverComputation>(dlog, 80, random), dlog) {
 	// The underlying dlog group must be DDH secure.
 	auto ddh = dynamic_pointer_cast<DDH>(dlog);
 	if (ddh == NULL) {

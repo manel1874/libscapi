@@ -55,6 +55,8 @@ public:
 	* @return the public key used for commit.
 	*/
 	ElGamalPublicKey getPublicKey() { return publicKey; }
+
+	string toString() override { return publicKey.generateSendableData()->toString(); }
 };
 
 /**
@@ -124,7 +126,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaElGamalCmtKnowledgeSimulator(shared_ptr<DlogGroup> dlog, int t) : dlogSim(dlog, t) {}
+	SigmaElGamalCmtKnowledgeSimulator(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) : dlogSim(dlog, t, prg) {}
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -173,10 +175,10 @@ class SigmaElGamalCmtKnowledgeProverComputation : public SigmaProverComputation,
 
 private:
 	SigmaDlogProverComputation sigmaDlog;	//underlying SigmaDlogProver to use.
+	shared_ptr<PrgFromOpenSSLAES> prg;
 	shared_ptr<DlogGroup> dlog;				//We need the DlogGroup instance in order to calculate the input for the underlying SigmaDlogProver
 	int t;
-	mt19937 random;
-
+	
 	/**
 	* Converts the input for this Sigma protocol to the underlying protocol.
 	* @param input MUST be an instance of SigmaElGamalCTKnowledgeProverInput.
@@ -191,7 +193,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaElGamalCmtKnowledgeProverComputation(shared_ptr<DlogGroup> dlog, int t);
+	SigmaElGamalCmtKnowledgeProverComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -220,7 +222,7 @@ public:
 	* @return SigmaDlogSimulator
 	*/
 	shared_ptr<SigmaSimulator> getSimulator() override {
-		return make_shared<SigmaElGamalCmtKnowledgeSimulator>(dlog, t);
+		return make_shared<SigmaElGamalCmtKnowledgeSimulator>(dlog, t, prg);
 	}
 
 };
@@ -261,7 +263,7 @@ public:
 	* @param random
 	* @throws InvalidDlogGroupException if the given dlog is invalid.
 	*/
-	SigmaElGamalCmtKnowledgeVerifierComputation(shared_ptr<DlogGroup> dlog, int t) : sigmaDlog(dlog, t) {}
+	SigmaElGamalCmtKnowledgeVerifierComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) : sigmaDlog(dlog, t, prg) {}
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.

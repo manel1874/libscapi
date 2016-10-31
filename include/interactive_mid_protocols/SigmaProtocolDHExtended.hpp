@@ -29,6 +29,7 @@
 #pragma once
 #include "SigmaProtocol.hpp"
 #include "../primitives/Dlog.hpp"
+#include "../primitives/Prg.hpp"
 
 /******************************************************************/
 /**************** Inputs for DH extended protocol******************/
@@ -64,6 +65,8 @@ public:
 	vector<shared_ptr<GroupElement>> getHArray() {
 		return hArray;
 	}
+
+	string toString() override;
 };
 
 /**
@@ -142,7 +145,7 @@ private:
 
 	shared_ptr<DlogGroup> dlog; 		//Underlying DlogGroup.
 	int t;								//Soundness parameter.
-	mt19937 random;
+	shared_ptr<PrgFromOpenSSLAES> random;
 
 	/**
 	* Checks if the given challenge length is equal to the soundness parameter.
@@ -163,7 +166,7 @@ public:
 	* @param random
 	* @throws IllegalArgumentException if soundness parameter is invalid.
 	*/
-	SigmaDHExtendedSimulator(shared_ptr<DlogGroup> dlog, int t);
+	SigmaDHExtendedSimulator(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -211,7 +214,7 @@ class SigmaDHExtendedProverComputation : public SigmaProverComputation, DlogBase
 private:
 	shared_ptr<DlogGroup> dlog;						// Underlying DlogGroup.
 	int t; 											// Soundness parameter in BITS.
-	mt19937 random;
+	shared_ptr<PrgFromOpenSSLAES> random;
 	shared_ptr<SigmaDHExtendedProverInput> input;	// Contains g and h arrays and w. 
 	biginteger r;									// The value chosen in the protocol.
 
@@ -235,7 +238,7 @@ public:
 	* @param random
 	* @throws IllegalArgumentException if soundness parameter is invalid.
 	*/
-	SigmaDHExtendedProverComputation(shared_ptr<DlogGroup> dlog, int t);
+	SigmaDHExtendedProverComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -268,7 +271,7 @@ public:
 	*/
 
 	shared_ptr<SigmaSimulator> getSimulator() override {
-		return make_shared<SigmaDHExtendedSimulator>(dlog, t);
+		return make_shared<SigmaDHExtendedSimulator>(dlog, t, random);
 	}
 };
 
@@ -296,7 +299,7 @@ private:
 	shared_ptr<DlogGroup> dlog;		// Underlying DlogGroup.
 	int t; 							//Soundness parameter in BITS.
 	vector<byte> e;					//The challenge.
-	mt19937 random;
+	shared_ptr<PrgFromOpenSSLAES> random;
 
 	/**
 	* Checks the validity of the given soundness parameter.
@@ -313,7 +316,7 @@ public:
 	* @throws InvalidDlogGroupException if the given dlog is invalid.
 	* @throws IllegalArgumentException if soundness parameter is invalid.
 	*/
-	SigmaDHExtendedVerifierComputation(shared_ptr<DlogGroup> dlog, int t);
+	SigmaDHExtendedVerifierComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.

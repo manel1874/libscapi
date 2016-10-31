@@ -28,8 +28,8 @@
 
 #include "../../include/interactive_mid_protocols/CommitmentSchemeElGamalHash.hpp"
 
-CmtElGamalHashCommitter::CmtElGamalHashCommitter(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash)
-				: CmtElGamalCommitterCore(channel, dlog, make_shared<ElGamalOnByteArrayEnc>(dlog, make_shared<HKDF>(new OpenSSLHMAC()))) {
+CmtElGamalHashCommitter::CmtElGamalHashCommitter(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, const shared_ptr<PrgFromOpenSSLAES> & random)
+				: CmtElGamalCommitterCore(channel, dlog, make_shared<ElGamalOnByteArrayEnc>(dlog, make_shared<HKDF>(make_shared<OpenSSLHMAC>())), random) {
 	
 	//During the construction of this object, the Public Key with which we set the El Gamal object gets sent to the receiver.
 	if (hash->getHashedMsgSize() > (int) bytesCount(dlog->getOrder())) {
@@ -93,7 +93,7 @@ shared_ptr<CmtCDecommitmentMessage> CmtElGamalHashCommitter::generateDecommitmen
 */
 shared_ptr<CmtCommitValue> CmtElGamalHashCommitter::sampleRandomCommitValue()  {
 	vector<byte> val(32);
-	RAND_bytes(val.data(), 32);
+	random->getPRGBytes(val, 0, 32);
 	return make_shared<CmtByteArrayCommitValue>(make_shared<vector<byte>>(val));
 }
 
@@ -120,7 +120,7 @@ vector<byte> CmtElGamalHashCommitter::generateBytesFromCommitValue(CmtCommitValu
 * @param hash
 */
 CmtElGamalHashReceiver::CmtElGamalHashReceiver(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash) 
-					: CmtElGamalReceiverCore(channel, dlog, make_shared<ElGamalOnByteArrayEnc>(dlog, make_shared<HKDF>(new OpenSSLHMAC()))) {
+					: CmtElGamalReceiverCore(channel, dlog, make_shared<ElGamalOnByteArrayEnc>(dlog, make_shared<HKDF>(make_shared<OpenSSLHMAC>()))) {
 		
 	if (hash->getHashedMsgSize() > (int) bytesCount(dlog->getOrder())) {
 		throw invalid_argument("The size in bytes of the resulting hash is bigger than the size in bytes of the order of the DlogGroup.");

@@ -28,7 +28,7 @@
 
 #pragma once
 #include "AsymmetricEnc.hpp"
-#include "../primitives/TrapdoorPermutations.hpp"
+#include "../primitives/TrapdoorPermutation.hpp"
 #include "../infra/MathAlgorithms.hpp"
 
 /**
@@ -43,7 +43,7 @@ private:
 
 	biginteger modulus;
 public:
-	DamgardJurikPublicKey(biginteger modulus) {	this->modulus = modulus; }
+	DamgardJurikPublicKey(const biginteger & modulus) {	this->modulus = modulus; }
 	
 	string getAlgorithm() override { return "DamgardJurik"; }
 
@@ -94,11 +94,11 @@ private:
 	/**
 	* This function generates a value d such that d = 1 mod N and d = 0 mod t, using the Chinese Remainder Theorem.
 	*/
-	biginteger generateD(biginteger N, biginteger t); 
+	biginteger generateD(biginteger & N, biginteger & t);
 
 public:
-	DamgardJurikPrivateKey(RSAModulus rsaMod);
-	DamgardJurikPrivateKey(biginteger p, biginteger q, biginteger t, biginteger dForS1);
+	DamgardJurikPrivateKey(RSAModulus & rsaMod);
+	DamgardJurikPrivateKey(const biginteger & p, const biginteger & q, const biginteger & t, const biginteger & dForS1);
 
 	string getAlgorithm() override { return "DamgardJurik"; }
 
@@ -162,7 +162,7 @@ class DamgardJurikEnc : public AsymAdditiveHomomorphicEnc {
 private:
 	shared_ptr<DamgardJurikPublicKey> publicKey;
 	shared_ptr<DamgardJurikPrivateKey> privateKey;
-	mt19937 random;
+	shared_ptr<PrgFromOpenSSLAES> random;
 	bool keySet;
 
 	int consts = -1;
@@ -170,14 +170,14 @@ private:
 	/**
 	* This function generates a value d such that d = 1 mod N and d = 0 mod t, using the Chinese Remainder Theorem.
 	*/
-	biginteger generateD(biginteger N, biginteger t);
+	biginteger generateD(biginteger & N, const biginteger & t);
 
 public:
 	/**
 	* Constructor that lets the user choose the source of randomness.
 	* @param rnd source of randomness.
 	*/
-	DamgardJurikEnc() { random = get_seeded_random(); }
+	DamgardJurikEnc(const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) : random(random) {}
 
 	/**
 	* Initializes this DamgardJurik encryption scheme with (public, private) key pair.
@@ -186,7 +186,7 @@ public:
 	* @param privateKey should be DamgardJurikPrivateKey.
 	* @throws InvalidKeyException if the given keys are not instances of DamgardJurik keys.
 	*/
-	void setKey(shared_ptr<PublicKey> publicKey, shared_ptr<PrivateKey> privateKey) override;
+	void setKey(const shared_ptr<PublicKey> & publicKey, const shared_ptr<PrivateKey> & privateKey) override;
 
 	/**
 	* Initializes this DamgardJurik encryption scheme with public key.
@@ -194,7 +194,7 @@ public:
 	* @param publicKey should be DamgardJurikPublicKey
 	* @throws InvalidKeyException if the given key is not instance of DamgardJurikPublicKey.
 	*/
-	void setKey(shared_ptr<PublicKey> publicKey) override {	setKey(publicKey, NULL); }
+	void setKey(const shared_ptr<PublicKey> & publicKey) override {	setKey(publicKey, NULL); }
 
 	bool isKeySet() override { return keySet; }
 
@@ -230,7 +230,7 @@ public:
 	* Generates a Plaintext suitable to DamgardJurik encryption scheme from the given message.
 	* @param msg byte array to convert to a Plaintext object.
 	*/
-	shared_ptr<Plaintext> generatePlaintext(vector<byte> text) override {
+	shared_ptr<Plaintext> generatePlaintext(vector<byte> & text) override {
 		return make_shared<BigIntegerPlainText>(decodeBigInteger(text.data(), text.size()));
 	}
 
@@ -240,7 +240,7 @@ public:
 	* @return KeyPair contains keys for this DamgardJurik encryption object.
 	* @throws InvalidParameterSpecException if keyParams is not instance of DJKeyGenParameterSpec.
 	*/
-	pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> generateKey(AlgorithmParameterSpec* keyParams) override;
+	pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> generateKey(AlgorithmParameterSpec * keyParams) override;
 
 	/**
 	* This function is not supported for this encryption scheme, since there is a need for parameters to generate a DamgardJurik key pair.
@@ -265,7 +265,7 @@ public:
 	* 		1. If the given plaintext is not instance of BigIntegerPlainText.
 	* 		2. If the BigInteger value in the given plaintext is not in ZN.
 	*/
-	shared_ptr<AsymmetricCiphertext> encrypt(shared_ptr<Plaintext> plaintext) override;
+	shared_ptr<AsymmetricCiphertext> encrypt(const shared_ptr<Plaintext> & plaintext) override;
 
 	/**
 	* Encrypts the given plaintext using this asymmetric encryption scheme and using the given random value.<p>
@@ -282,7 +282,7 @@ public:
 	* 		1. If the given plaintext is not instance of BigIntegerPlainText.
 	* 		2. If the BigInteger value in the given plaintext is not in ZN.
 	*/
-	shared_ptr<AsymmetricCiphertext> encrypt(shared_ptr<Plaintext>, biginteger r) override;
+	shared_ptr<AsymmetricCiphertext> encrypt(const shared_ptr<Plaintext> &, const biginteger & r) override;
 
 	/**
 	* Decrypts the given ciphertext using DamgardJurik encryption scheme.
@@ -322,7 +322,7 @@ public:
 	* 		1. If cipher is not an instance of BigIntegerCiphertext.
 	* 		2. If the BigInteger number in the given cipher is not in ZN'.
 	*/
-	shared_ptr<AsymmetricCiphertext> reRandomize(AsymmetricCiphertext* cipher, biginteger r);
+	shared_ptr<AsymmetricCiphertext> reRandomize(AsymmetricCiphertext* cipher, biginteger & r);
 
 	/**
 	* Given two ciphers c1 = Enc(p1)  and c2 = Enc(p2) this function return c1 + c2 = Enc(p1 +p2).
@@ -350,7 +350,7 @@ public:
 	* 		2. If the sizes of ciphertexts do not match.
 	* 		3. If one or more of the BigInteger numbers in the given ciphertexts is not in ZN'.
 	*/
-	shared_ptr<AsymmetricCiphertext> add(AsymmetricCiphertext* cipher1, AsymmetricCiphertext* cipher2, biginteger r) override;
+	shared_ptr<AsymmetricCiphertext> add(AsymmetricCiphertext* cipher1, AsymmetricCiphertext* cipher2, biginteger & r) override;
 
 	/**
 	* This function calculates the homomorphic multiplication by a constant of a ciphertext<p>
@@ -363,7 +363,7 @@ public:
 	* 		2. If the BigInteger numbers in the given ciphertext is not in ZN'.
 	* 		3. If the constant number is not in ZN.
 	*/
-	shared_ptr<AsymmetricCiphertext> multByConst(AsymmetricCiphertext* cipher, biginteger constNumber) override;
+	shared_ptr<AsymmetricCiphertext> multByConst(AsymmetricCiphertext* cipher, biginteger & constNumber) override;
 	
 	/**
 	* This function calculates the homomorphic multiplication by a constant of a ciphertext
@@ -384,7 +384,7 @@ public:
 	* 		2. If the BigInteger numbers in the given ciphertext is not in ZN'.
 	* 		3. If the constant number is not in ZN.
 	*/
-	shared_ptr<AsymmetricCiphertext> multByConst(AsymmetricCiphertext* cipher, biginteger constNumber, biginteger r) override;
+	shared_ptr<AsymmetricCiphertext> multByConst(AsymmetricCiphertext* cipher, biginteger & constNumber, biginteger & r) override;
 
 	shared_ptr<AsymmetricCiphertext> reconstructCiphertext(AsymmetricCiphertextSendableData* data) override;
 

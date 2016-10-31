@@ -43,16 +43,6 @@ void HKDFBasedRO::compute(const vector<byte> & input, int inOffset, int inLen, v
 	string iv_str = "RandomOracle";
 	vector<byte> v_source(iv_str.begin(), iv_str.end());
 	v_source.push_back('\0');
-	SecretKey key = hkdf->deriveKey(input, inOffset, inLen, outLen, &v_source);
+	SecretKey key = hkdf->deriveKey(input, inOffset, inLen, outLen, v_source);
 	output = key.getEncoded();
-}
-
-HashBasedRO::~HashBasedRO()
-{
-	delete this->hash;
-}
-
-HKDFBasedRO::~HKDFBasedRO()
-{
-	//delete this->hkdf;
 }

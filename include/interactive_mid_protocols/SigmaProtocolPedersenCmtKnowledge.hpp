@@ -29,6 +29,7 @@
 #pragma once
 #include "SigmaProtocol.hpp"
 #include "../primitives/Dlog.hpp"
+#include "../primitives/Prg.hpp"
 
 /******************************************************************/
 /**************** Inputs for the protocol *************************/
@@ -70,6 +71,8 @@ public:
 	* @return the actual commitment value.
 	*/
 	 shared_ptr<GroupElement> getCommitment() {	return commitment; }
+
+	 string toString() override;
 };
 
 /**
@@ -170,7 +173,7 @@ class SigmaPedersenCmtKnowledgeSimulator : public SigmaSimulator {
 private:
 	shared_ptr<DlogGroup> dlog; 		//Underlying DlogGroup.
 	int t;								//Soundness parameter.
-	mt19937 random;
+	shared_ptr<PrgFromOpenSSLAES> random;
 
 	/**
 	* Checks the validity of the given soundness parameter.
@@ -192,7 +195,7 @@ public:
 	* @param random
 	* @throws IllegalArgumentException if soundness parameter is invalid.
 	*/
-	SigmaPedersenCmtKnowledgeSimulator(shared_ptr<DlogGroup> dlog, int t);
+	SigmaPedersenCmtKnowledgeSimulator(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -241,7 +244,7 @@ class SigmaPedersenCmtKnowledgeProverComputation : public SigmaProverComputation
 private:
 	shared_ptr<DlogGroup> dlog;								// Underlying DlogGroup.
 	int t; 													// soundness parameter in BITS.
-	mt19937 random;
+	shared_ptr<PrgFromOpenSSLAES> random;
 	shared_ptr<SigmaPedersenCmtKnowledgeProverInput> input;	// Contains h, c, x, r.
 	biginteger alpha, beta;									//random values used in the protocol.
 
@@ -269,7 +272,7 @@ public:
 	* @param random
 	* @throws IllegalArgumentException if soundness parameter is invalid.
 	*/
-	SigmaPedersenCmtKnowledgeProverComputation(shared_ptr<DlogGroup> dlog, int t);
+	SigmaPedersenCmtKnowledgeProverComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -298,7 +301,7 @@ public:
 	* @return SigmaDlogSimulator
 	*/
 	shared_ptr<SigmaSimulator> getSimulator() override{
-		return make_shared<SigmaPedersenCmtKnowledgeSimulator>(dlog, t);
+		return make_shared<SigmaPedersenCmtKnowledgeSimulator>(dlog, t, random);
 	}
 };
 
@@ -324,7 +327,7 @@ private:
 	shared_ptr<DlogGroup> dlog;			// Underlying DlogGroup.
 	int t; 								//Soundness parameter in BITS.
 	vector<byte> e;						//The challenge.
-	mt19937 random;
+	shared_ptr<PrgFromOpenSSLAES> random;
 
 	/**
 	* Checks the validity of the given soundness parameter.
@@ -341,7 +344,7 @@ public:
 	* @throws InvalidDlogGroupException if the given DlogGroup is not valid.
 	* @throws IllegalArgumentException if soundness parameter is invalid.
 	*/
-	SigmaPedersenCmtKnowledgeVerifierComputation(shared_ptr<DlogGroup> dlog, int t);
+	SigmaPedersenCmtKnowledgeVerifierComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.

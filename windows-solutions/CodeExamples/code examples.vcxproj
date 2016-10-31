@@ -78,6 +78,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LibraryPath>C:\local\boost_1_60_0\lib64-msvc-14.0;$(LibraryPath)</LibraryPath>
     <TargetName>libscapi_examples</TargetName>
+    <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -95,6 +97,7 @@
       <PreprocessorDefinitions>_WIN32_WINNT=0x06030000;_SCL_SECURE_NO_WARNINGS;_DBOOST_SYSTEM_NO_DEPRECATED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>C:\local\boost_1_60_0;C:\OpenSSL-Win64\include;..\..\lib;..\..\lib\MiraclWin64\source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
       <AdditionalDependencies>..\scapi-sln\x64\Release\ScapiCpp.lib;C:\OpenSSL-Win64\lib\libeay32.lib;C:\OpenSSL-Win64\lib\ssleay32.lib;..\..\lib\OTExtension\Win64-sln\x64\Release\OTExtension.lib;..\..\lib\MaliciousOTExtension\MaliciousOTExtension\x64\Release\MaliciousOTExtension.lib;..\..\lib\MiraclWin64\x64\Release\MiraclWin64.lib;..\..\lib\MiraclWin64\x64\Release\big.obj;%(AdditionalDependencies)</AdditionalDependencies>

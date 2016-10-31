@@ -40,7 +40,7 @@
 * @throws InvalidDlogGroupException if the given dlog is not valid.
 * @throws IOException if there was a problem in the communication
 */
-void CmtElGamalCommitterCore::doConstruct(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, shared_ptr<ElGamalEnc> elGamal) {
+CmtElGamalCommitterCore::CmtElGamalCommitterCore(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, shared_ptr<ElGamalEnc> elGamal, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	//The underlying dlog group must be DDH secure.
 	auto ddh = dynamic_pointer_cast<DDH>(dlog);
 	if (ddh == NULL) {
@@ -51,7 +51,7 @@ void CmtElGamalCommitterCore::doConstruct(shared_ptr<CommParty> channel, shared_
 
 	this->channel = channel;
 	this->dlog = dlog;
-	this->random = get_seeded_random();
+	this->random = random;
 	qMinusOne = dlog->getOrder() - 1;
 	this->elGamal = elGamal;
 	preProcess();
@@ -90,7 +90,7 @@ void CmtElGamalCommitterCore::preProcess() {
 */
 shared_ptr<CmtCCommitmentMsg> CmtElGamalCommitterCore::generateCommitmentMsg(const shared_ptr<CmtCommitValue> & input, long id) {
 	//Sample random r <-Zq.
-	biginteger r = getRandomInRange(0, qMinusOne, random);
+	biginteger r = getRandomInRange(0, qMinusOne, random.get());
 	//Compute u = g^r and v = h^r * x.
 	//This is actually the encryption of x.
 	auto c = elGamal->encrypt(input->convertToPlaintext(), r);
@@ -301,7 +301,7 @@ shared_ptr<CmtCCommitmentMsg> CmtElGamalOnByteArrayCommitter::generateCommitment
 */
 shared_ptr<CmtCommitValue> CmtElGamalOnByteArrayCommitter::sampleRandomCommitValue() {
 	vector<byte> val(32);
-	RAND_bytes(val.data(), 32);
+	random->getPRGBytes(val, 0, 32);
 	
 	return make_shared<CmtByteArrayCommitValue>(make_shared<vector<byte>>(val));
 }
@@ -406,11 +406,11 @@ vector<byte> CmtElGamalOnByteArrayReceiver::generateBytesFromCommitValue(CmtComm
 * @param t statistical parameter
 * @throws IOException if there was a problem in the communication
 */
-void CmtElGamalWithProofsCommitter::doConstruct(int t) {
-	auto elGamalCommittedValProver = make_shared<SigmaElGamalCommittedValueProverComputation>(dlog, t);
-	auto elGamalCTKnowledgeProver = make_shared<SigmaElGamalCmtKnowledgeProverComputation>(dlog, t);
-	knowledgeProver = make_shared<ZKPOKFromSigmaCmtPedersenProver>(channel, elGamalCTKnowledgeProver, dlog);
-	auto receiver = make_shared<CmtPedersenReceiver>(channel, dlog);
+CmtElGamalWithProofsCommitter::CmtElGamalWithProofsCommitter(shared_ptr<CommParty> channel, int t, shared_ptr<DlogGroup> dlog, const shared_ptr<PrgFromOpenSSLAES> & prg) : CmtElGamalOnGroupElementCommitter(channel, dlog, prg) {
+	auto elGamalCommittedValProver = make_shared<SigmaElGamalCommittedValueProverComputation>(dlog, t, prg);
+	auto elGamalCTKnowledgeProver = make_shared<SigmaElGamalCmtKnowledgeProverComputation>(dlog, t, prg);
+	knowledgeProver = make_shared<ZKPOKFromSigmaCmtPedersenProver>(channel, elGamalCTKnowledgeProver, dlog, prg);
+	auto receiver = make_shared<CmtPedersenReceiver>(channel, dlog, prg);
 	committedValProver = make_shared<ZKFromSigmaProver>(channel, elGamalCommittedValProver, receiver);
 
 }
@@ -446,22 +446,22 @@ void CmtElGamalWithProofsCommitter::proveCommittedValue(long id)  {
 * @throws CheatAttemptException if the receiver h is not in the DlogGroup.
 * @throws ClassNotFoundException if there was a problem in the serialization
 */
-void CmtElGamalWithProofsReceiver::doConstruct(int t) {
-	auto elGamalCommittedValVerifier = make_shared<SigmaElGamalCommittedValueVerifierComputation>(dlog, t);
-	auto elGamalCTKnowledgeVerifier = make_shared<SigmaElGamalCmtKnowledgeVerifierComputation>(dlog, t);
+CmtElGamalWithProofsReceiver::CmtElGamalWithProofsReceiver(shared_ptr<CommParty> channel, int t, shared_ptr<DlogGroup> dlog, const shared_ptr<PrgFromOpenSSLAES> & prg) : CmtElGamalOnGroupElementReceiver(channel, dlog) {
+	auto elGamalCommittedValVerifier = make_shared<SigmaElGamalCommittedValueVerifierComputation>(dlog, t, prg);
+	auto elGamalCTKnowledgeVerifier = make_shared<SigmaElGamalCmtKnowledgeVerifierComputation>(dlog, t, prg);
 	auto output = make_shared<CmtRTrapdoorCommitPhaseOutput>();
-	knowledgeVerifier = make_shared<ZKPOKFromSigmaCmtPedersenVerifier>(channel, elGamalCTKnowledgeVerifier, output, dlog);
-	auto committer = make_shared<CmtPedersenCommitter>(channel, dlog);
-	committedValVerifier = make_shared<ZKFromSigmaVerifier>(channel, elGamalCommittedValVerifier, committer);
+	knowledgeVerifier = make_shared<ZKPOKFromSigmaCmtPedersenVerifier>(channel, elGamalCTKnowledgeVerifier, output, dlog, prg);
+	auto committer = make_shared<CmtPedersenCommitter>(channel, dlog, prg);
+	committedValVerifier = make_shared<ZKFromSigmaVerifier>(channel, elGamalCommittedValVerifier, committer, prg);
 
 }
 
 bool CmtElGamalWithProofsReceiver::verifyKnowledge(long id) {
 	auto key = static_pointer_cast<ElGamalPublicKey>(getPreProcessedValues()[0]);
 	SigmaElGamalCmtKnowledgeCommonInput input(*key);
-	SigmaGroupElementMsg emptyA(dlog->getGenerator()->generateSendableData());
-	SigmaBIMsg emptyZ;
-	return knowledgeVerifier->verify(&input, &emptyA, &emptyZ);
+	auto emptyA = make_shared<SigmaGroupElementMsg>(dlog->getGenerator()->generateSendableData());
+	auto emptyZ = make_shared<SigmaBIMsg>();
+	return knowledgeVerifier->verify(&input, emptyA, emptyZ);
 }
 
 shared_ptr<CmtCommitValue> CmtElGamalWithProofsReceiver::verifyCommittedValue(long id) {
@@ -480,9 +480,9 @@ shared_ptr<CmtCommitValue> CmtElGamalWithProofsReceiver::verifyCommittedValue(lo
 	SigmaElGamalCommittedValueCommonInput input(key, commitment, committedVal);
 	//Computes the verification.
 
-	SigmaDHMsg emptyA(dlog->getGenerator()->generateSendableData(), dlog->getGenerator()->generateSendableData());
-	SigmaBIMsg emptyZ;
-	bool verified = committedValVerifier->verify(&input, &emptyA, &emptyZ);
+	auto emptyA = make_shared<SigmaDHMsg>(dlog->getGenerator()->generateSendableData(), dlog->getGenerator()->generateSendableData());
+	auto emptyZ = make_shared<SigmaBIMsg>();
+	bool verified = committedValVerifier->verify(&input, emptyA, emptyZ);
 	if (verified) 
 		return make_shared<CmtGroupElementCommitValue>(committedVal);
 	return NULL;

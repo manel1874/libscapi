@@ -83,19 +83,31 @@ OTExtensionBristolSender::OTExtensionBristolSender(int port,bool isSemiHonest, s
 shared_ptr<OTBatchSOutput> OTExtensionBristolSender::transfer(OTBatchSInput * input){
 
 
-	if(input->getType()!= OTBatchSInputTypes::OTExtensionRandomizedSInput && input->getType()!= OTBatchSInputTypes::OTExtensionGeneralSInput){
-		throw invalid_argument("input should be instance of OTExtensionRandomizedSInput or OTExtensionGeneralSInput.");
+
+	if(input->getType()!= OTBatchSInputTypes::OTExtensionRandomizedSInput &&
+	   input->getType()!= OTBatchSInputTypes::OTExtensionGeneralSInput &&
+	   input->getType()!= OTBatchSInputTypes::OTExtensionCorrelatedSInput){
+		throw invalid_argument("input should be instance of OTExtensionRandomizedSInput or OTExtensionGeneralSInput or OTExtensionCorrelatedSInput.");
 	}
 	else{
-		int nOTs;
+		int nOTs, nOTsReal;
+
+
 
 		if(input->getType()== OTBatchSInputTypes::OTExtensionGeneralSInput){
 
-			nOTs = ((OTExtensionGeneralSInput *)input)->getNumOfOts();
+			nOTsReal = ((OTExtensionGeneralSInput *)input)->getNumOfOts();
+		}
+		else if (input->getType()== OTBatchSInputTypes::OTExtensionRandomizedSInput){
+			nOTsReal = (((OTExtensionRandomizedSInput*)input)->getNumOfOts());
 		}
 		else{
-			nOTs = (((OTExtensionRandomizedSInput*)input)->getNumOfOts());
+			nOTsReal = (((OTExtensionCorrelatedSInput*)input)->getNumOfOts());
 		}
+
+		//round to the nearest 128 multiplication
+		nOTs = ((nOTsReal + 128 - 1) / 128) * 128;
+
 
 
 		//we create a bitvector since the transfer of the bristol library demands that. There is no use of it and thus
@@ -130,6 +142,53 @@ shared_ptr<OTBatchSOutput> OTExtensionBristolSender::transfer(OTBatchSInput * in
 			return nullptr;
 
 		}
+		else if (input->getType()== OTBatchSInputTypes::OTExtensionCorrelatedSInput){
+
+			if (channel == NULL) {
+				throw runtime_error("In order to execute a correlated ot extension the channel must be given");
+			}
+
+			auto deltaVec = ((OTExtensionCorrelatedSInput *)input)->getDeltaArr();
+
+
+			//resize to 128 multiplications
+			deltaVec.resize(nOTs*16);
+
+
+			__m128i* delta = (__m128i*)deltaVec.data();
+
+
+
+			__m128i* x1Arr = (__m128i *) _mm_malloc(sizeof(__m128i) * nOTs, 16);
+
+			//send to the receiver R1^R0^delta
+			for(int i=0; i<nOTs; i++){
+
+
+				x1Arr[i] = delta[i]^ pOtExt->senderOutputMatrices[0].squares[i/128].rows[i % 128];
+
+				//we use delta in order not to create an additional array
+				delta[i] =  x1Arr[i] ^ pOtExt->senderOutputMatrices[1].squares[i/128].rows[i % 128];
+			}
+
+			//send the vector of R1^R0^delta over the channel.
+			channel->write((byte *)delta, nOTs*16);
+
+
+			vector<byte> x1Output;
+
+			copy_byte_array_to_byte_vector((byte*)x1Arr, nOTsReal*16, x1Output, 0);
+
+			vector<byte> x0Output;
+
+			copy_byte_array_to_byte_vector((byte*)(pOtExt->senderOutputMatrices[0].squares.data()), nOTsReal*16, x0Output, 0);
+
+			_mm_free(x1Arr);
+
+			//the output for the sender is r0 and r0^delta
+			return make_shared<OTExtensionCorrelatedSOutput>(x0Output, x1Output);
+
+		}
 
 		else{
 			//return a shared pointer of the output as it taken from the ot object of the library
@@ -150,15 +209,20 @@ OTExtensionBristolReciever::OTExtensionBristolReciever(const string& senderAddre
 shared_ptr<OTBatchROutput> OTExtensionBristolReciever::transfer(OTBatchRInput * input){
 
 
-	if (input->getType() != OTBatchRInputTypes::OTExtensionGeneralRInput && input->getType() != OTBatchRInputTypes::OTExtensionRandomizedRInput){
-		throw invalid_argument("input should be instance of OTExtensionGeneralRInput or OTExtensionRandomizedRInput.");
+	if (input->getType() != OTBatchRInputTypes::OTExtensionGeneralRInput &&
+		input->getType() != OTBatchRInputTypes::OTExtensionRandomizedRInput &&
+		input->getType() != OTBatchRInputTypes::OTExtensionCorrelatedRInput){
+		throw invalid_argument("input should be instance of OTExtensionGeneralRInput or OTExtensionRandomizedRInput or OTExtensionCorrelatedRInput.");
 	}
 	else{
 
 		auto sigmaArr = ((OTExtensionRInput *)input)->getSigmaArr();
 
-		auto nOTs = sigmaArr.size();
+		auto nOTsReal = sigmaArr.size();
 
+		auto nOTs = ((nOTsReal + 128 - 1) / 128) * 128;
+
+		//make the number of ot's to be a multiplication of 128
 
 		BitVector inputBits(nOTs);
 
@@ -166,7 +230,7 @@ shared_ptr<OTBatchROutput> OTExtensionBristolReciever::transfer(OTBatchRInput * 
 
 		//fill the bit vector that bristol needs from the sigma array
 
-		for(size_t i=0; i<nOTs; i++){
+		for(size_t i=0; i<nOTsReal; i++){
 
 			if(sigmaArr[i]==1)
 				inputBits.set_bit(i,1);
@@ -212,7 +276,7 @@ shared_ptr<OTBatchROutput> OTExtensionBristolReciever::transfer(OTBatchRInput * 
 
 			vector<byte> output;
 
-			copy_byte_array_to_byte_vector((byte*)outputSigma, nOTs, output, 0);
+			copy_byte_array_to_byte_vector((byte*)outputSigma, nOTsReal*16, output, 0);
 
 			 _mm_free(x0Arr);
 			 _mm_free(x1Arr);
@@ -221,11 +285,60 @@ shared_ptr<OTBatchROutput> OTExtensionBristolReciever::transfer(OTBatchRInput * 
 			return make_shared<OTOnByteArrayROutput>(output);
 
 		}
+
+		//we need to get the xor of the randomized and real data from the sender.
+		else if(input->getType() == OTBatchRInputTypes::OTExtensionCorrelatedRInput){
+
+			if (channel == NULL) {
+				throw runtime_error("In order to execute a correlated ot extension the channel must be given");
+			}
+
+
+			//cout<<"in transfer general"<<endl;
+			auto sizeInBytes = nOTs*16;
+			__m128i* adjustArr = (__m128i *) _mm_malloc(sizeof(__m128i) * nOTs, 16);
+
+			channel->read((byte *)adjustArr, sizeInBytes);
+
+			__m128i* outputSigma = (__m128i *) _mm_malloc(sizeof(__m128i) * nOTs, 16);
+
+			//create alligned arrays
+
+
+			//memcpy ( x0Arr, bufferx0, sizeInBytes );
+			//memcpy ( x1Arr, bufferx1, sizeInBytes );
+
+			//cout<<"x0Arr[0] = "<<(((int*)x0Arr)[0])<<endl;
+			//cout<<"x1Arr[0] = "<<(((int*)x1Arr)[0])<<endl;
+
+
+			//xor each randomized output with the relevant xored sent from the sender
+			for(size_t i=0; i<nOTs; i++){
+				if(inputBits.get_bit(i)==0)
+					//if the bit is 0 stay with r0 as the randomized ot generated
+					outputSigma[i] = pOtExt->receiverOutputMatrix.squares[i/128].rows[i % 128];
+				else
+					//x1 = adjustArr^r1 = r1^ r0^delta^r1 = ro^delta=x1
+					outputSigma[i] =  adjustArr[i]^ pOtExt->receiverOutputMatrix.squares[i/128].rows[i % 128];
+			}
+
+			vector<byte> output;
+
+			copy_byte_array_to_byte_vector((byte*)outputSigma, nOTsReal*16, output, 0);
+
+			 _mm_free(adjustArr);
+			 _mm_free(outputSigma);
+
+			return make_shared<OTOnByteArrayROutput>(output);
+
+		}
+
+
 		else{
 
 			vector<byte> output;
 
-			copy_byte_array_to_byte_vector((byte*)(pOtExt->receiverOutputMatrix.squares.data()), nOTs*16, output, 0);
+			copy_byte_array_to_byte_vector((byte*)(pOtExt->receiverOutputMatrix.squares.data()), nOTsReal*16, output, 0);
 
 
 			return make_shared<OTOnByteArrayROutput>(output);

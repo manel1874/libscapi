@@ -32,6 +32,7 @@
 #include <openssl/ec.h>
 #include <openssl/rand.h>
 #include "Dlog.hpp"
+#include "Prg.hpp"
 
 
 /**********************/
@@ -52,7 +53,7 @@ private:
 
 	OpenSSLZpSafePrimeElement(const biginteger & x, const biginteger & p, bool bCheckMembership) :
 		ZpSafePrimeElement(x, p, bCheckMembership) { createOpenSSLElement(); };
-	OpenSSLZpSafePrimeElement(const biginteger & p, mt19937 & prg) : ZpSafePrimeElement(p, prg) { createOpenSSLElement(); };
+	OpenSSLZpSafePrimeElement(const biginteger & p, PrgFromOpenSSLAES* prg) : ZpSafePrimeElement(p, prg) { createOpenSSLElement(); };
 	OpenSSLZpSafePrimeElement(const biginteger & elementValue) : ZpSafePrimeElement(elementValue) { createOpenSSLElement(); };
 public:
 	virtual string toString() {
@@ -80,15 +81,15 @@ public:
 	/**
 	* Initializes the OpenSSL implementation of Dlog over Zp* with the given groupParams.
 	*/
-	OpenSSLDlogZpSafePrime(std::shared_ptr<ZpGroupParams> groupParams);
+	OpenSSLDlogZpSafePrime(const std::shared_ptr<ZpGroupParams> & groupParams, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 	OpenSSLDlogZpSafePrime(string q, string g, string p) : OpenSSLDlogZpSafePrime(
 		make_shared<ZpGroupParams>(biginteger(q), biginteger(g), biginteger(p))) {};
 	/**
 	* Default constructor. Initializes this object with 1024 bit size.
 	*/
-	OpenSSLDlogZpSafePrime(int numBits = 1024);
+	OpenSSLDlogZpSafePrime(int numBits = 1024, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 	OpenSSLDlogZpSafePrime(string numBits) : OpenSSLDlogZpSafePrime(stoi(numBits)) {};
-	OpenSSLDlogZpSafePrime(int numBits, string randNumGenAlg) { /* TODO: implement */ };
+	OpenSSLDlogZpSafePrime(int numBits, string randNumGenAlg, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) { /* TODO: implement */ };
 
 	string getGroupType() override { return "Zp*"; }
 	shared_ptr<GroupElement> getIdentity() override;
@@ -98,13 +99,13 @@ public:
 	bool validateGroup() override;
 	shared_ptr<GroupElement> getInverse(GroupElement* groupElement) override;
 	shared_ptr<GroupElement> exponentiate(GroupElement* base, const biginteger & exponent) override;
-	shared_ptr<GroupElement> exponentiateWithPreComputedValues(shared_ptr<GroupElement> groupElement, 
+	shared_ptr<GroupElement> exponentiateWithPreComputedValues(const shared_ptr<GroupElement> & groupElement, 
 		const biginteger & exponent) override { return exponentiate(groupElement.get(), exponent); };
 	shared_ptr<GroupElement> multiplyGroupElements(GroupElement* groupElement1, 
 		GroupElement* groupElement2) override;
-	shared_ptr<GroupElement> simultaneousMultipleExponentiations(vector<shared_ptr<GroupElement>> groupElements,
-		vector<biginteger> exponentiations) override;
-	shared_ptr<GroupElement> generateElement(bool bCheckMembership, vector<biginteger> values) override;
+	shared_ptr<GroupElement> simultaneousMultipleExponentiations(vector<shared_ptr<GroupElement>> & groupElements,
+		vector<biginteger> & exponentiations) override;
+	shared_ptr<GroupElement> generateElement(bool bCheckMembership, vector<biginteger> & values) override;
 	shared_ptr<GroupElement> reconstructElement(bool bCheckMembership, GroupElementSendableData* data) override;
 	const vector<byte> decodeGroupElementToByteArray(GroupElement* groupElement) override;
 	shared_ptr<GroupElement> encodeByteArrayToGroupElement(const vector<unsigned char> & binaryString) override;
@@ -116,14 +117,14 @@ class OpenSSLDlogEC : public DlogEllipticCurve{
 protected:
 	shared_ptr<EC_GROUP> curve;
 	shared_ptr<BN_CTX> ctx;
-	virtual shared_ptr<ECElement> createPoint(shared_ptr<EC_POINT>) = 0;
+	virtual shared_ptr<ECElement> createPoint(const shared_ptr<EC_POINT> &) = 0;
 	shared_ptr<EC_GROUP> getCurve() { return curve; }
 	shared_ptr<BN_CTX> getCTX() { return ctx; }
 
 public:
-	OpenSSLDlogEC(string fileName, string curveName) : DlogEllipticCurve(fileName, curveName) { }
+	OpenSSLDlogEC(string fileName, string curveName, const shared_ptr<PrgFromOpenSSLAES> & random) : DlogEllipticCurve(fileName, curveName, random) { }
 
-	OpenSSLDlogEC(string curveName) : DlogEllipticCurve(curveName) { }
+	OpenSSLDlogEC(string curveName, const shared_ptr<PrgFromOpenSSLAES> & random) : DlogEllipticCurve(curveName, random) { }
 
 	bool validateGroup() override;
 
@@ -135,10 +136,10 @@ public:
 		GroupElement* groupElement2) override;
 
 	shared_ptr<GroupElement> exponentiateWithPreComputedValues(
-		shared_ptr<GroupElement> base, const biginteger & exponent) override;
+		const shared_ptr<GroupElement> & base, const biginteger & exponent) override;
 
 	shared_ptr<GroupElement> simultaneousMultipleExponentiations(
-		vector<shared_ptr<GroupElement>> groupElements, vector<biginteger> exponentiations) override;
+		vector<shared_ptr<GroupElement>> & groupElements, vector<biginteger> & exponentiations) override;
 
 	const vector<byte> mapAnyGroupElementToByteArray(GroupElement* groupElement) override;
 
@@ -151,28 +152,30 @@ class OpenSSLECFpPoint;
 
 class OpenSSLDlogECFp : public OpenSSLDlogEC, public DDH {
 private:
-	int calcK(biginteger p);
+	shared_ptr<PrgFromOpenSSLAES> random;
+
+	int calcK(biginteger & p);
 	void createCurve(const biginteger & p, const biginteger & a, const biginteger & b);
 	void initCurve(const biginteger & q);
 	bool checkSubGroupMembership(OpenSSLECFpPoint* point);
 	
 
 protected:
-	shared_ptr<ECElement> createPoint(shared_ptr<EC_POINT>) override;
-	void init(string fileName, string curveName) override;
+	shared_ptr<ECElement> createPoint(const shared_ptr<EC_POINT> &) override;
+	void init(string fileName, string curveName, const shared_ptr<PrgFromOpenSSLAES> & random) override;
 
 public:
 	OpenSSLDlogECFp() : OpenSSLDlogECFp("P-192") { }
 
-	OpenSSLDlogECFp(string fileName, string curveName) : OpenSSLDlogEC(fileName, curveName) { init(fileName, curveName); }
+	OpenSSLDlogECFp(string fileName, string curveName, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) : OpenSSLDlogEC(fileName, curveName, random) { init(fileName, curveName, random); }
 
-	OpenSSLDlogECFp(string curveName) : OpenSSLDlogEC(curveName)  { init(NISTEC_PROPERTIES_FILE, curveName); }
+	OpenSSLDlogECFp(string curveName, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) : OpenSSLDlogEC(curveName, random)  { init(NISTEC_PROPERTIES_FILE, curveName, random); }
 
 	string getGroupType() override;
 
 	bool isMember(GroupElement* element) override;
 
-	shared_ptr<GroupElement> generateElement(bool bCheckMembership, vector<biginteger> values) override;
+	shared_ptr<GroupElement> generateElement(bool bCheckMembership, vector<biginteger> & values) override;
 
 	shared_ptr<GroupElement> encodeByteArrayToGroupElement(const vector<unsigned char> & binaryString) override;
 
@@ -191,25 +194,25 @@ private:
 	void createCurve();
 	bool checkSubGroupMembership(OpenSSLECF2mPoint*  point);
 protected:
-	void init(string fileName, string curveName) override;
-	shared_ptr<ECElement> createPoint(shared_ptr<EC_POINT>) override;
+	void init(string fileName, string curveName, const shared_ptr<PrgFromOpenSSLAES> & random) override;
+	shared_ptr<ECElement> createPoint(const shared_ptr<EC_POINT> &) override;
 
 public:
 
 	OpenSSLDlogECF2m() : OpenSSLDlogECF2m("K-163") {}
 
-	OpenSSLDlogECF2m(string fileName, string curveName): OpenSSLDlogEC(fileName, curveName) { init(fileName, curveName); }
+	OpenSSLDlogECF2m(string fileName, string curveName, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()): OpenSSLDlogEC(fileName, curveName, random) { init(fileName, curveName, random); }
 
-	OpenSSLDlogECF2m(string curveName) : OpenSSLDlogEC(curveName) { init(NISTEC_PROPERTIES_FILE, curveName); }
+	OpenSSLDlogECF2m(string curveName, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) : OpenSSLDlogEC(curveName, random) { init(NISTEC_PROPERTIES_FILE, curveName, random); }
 
 	string getGroupType() override;
 
 	bool isMember(GroupElement* element) override;
 
-	shared_ptr<GroupElement> generateElement(bool bCheckMembership, vector<biginteger> values) override;
+	shared_ptr<GroupElement> generateElement(bool bCheckMembership, vector<biginteger> & values) override;
 
 	shared_ptr<GroupElement> simultaneousMultipleExponentiations(
-		vector<shared_ptr<GroupElement>> groupElements, vector<biginteger> exponentiations) override;
+		vector<shared_ptr<GroupElement>> & groupElements, vector<biginteger> & exponentiations) override;
 
 	shared_ptr<GroupElement> encodeByteArrayToGroupElement(const vector<unsigned char> & binaryString) override;
 
@@ -236,7 +239,7 @@ public:
 class OpenSSLECFpPoint : public OpenSSLPoint {
 private:
 	OpenSSLECFpPoint(const biginteger & x, const biginteger & y, OpenSSLDlogECFp* curve, bool bCheckMembership);
-	OpenSSLECFpPoint(shared_ptr<EC_POINT> point, OpenSSLDlogECFp* curve);
+	OpenSSLECFpPoint(const shared_ptr<EC_POINT> & point, OpenSSLDlogECFp* curve);
 
 	bool checkCurveMembership(ECFpGroupParams* params, const biginteger & x, const biginteger & y);
 public:
@@ -246,7 +249,7 @@ public:
 class OpenSSLECF2mPoint : public OpenSSLPoint, public enable_shared_from_this<OpenSSLECF2mPoint> {
 private:
 	OpenSSLECF2mPoint(const biginteger & x, const biginteger & y, OpenSSLDlogECF2m* curve, bool bCheckMembership);
-	OpenSSLECF2mPoint(shared_ptr<EC_POINT> point, OpenSSLDlogECF2m* curve);
+	OpenSSLECF2mPoint(const shared_ptr<EC_POINT> & point, OpenSSLDlogECF2m* curve);
 public:
 	friend class OpenSSLDlogECF2m;
 };

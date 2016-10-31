@@ -69,13 +69,13 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 {
 	SECTION("test sigma protocol dlog")
 	{
-		mt19937 random = get_seeded_random();
+		auto random = get_seeded_prg(); 
 		auto dlog = make_shared<OpenSSLDlogECF2m>();
 		//auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
 
 		SigmaDlogProverComputation prover(dlog, 80);
 		SigmaDlogVerifierComputation verifier(dlog, 80);
-		biginteger w = getRandomInRange(0, dlog->getOrder() - 1, random);
+		biginteger w = getRandomInRange(0, dlog->getOrder() - 1, random.get());
 
 		auto h = dlog->exponentiate(dlog->getGenerator().get(), w);
 		SigmaDlogCommonInput commonInput(h);
@@ -87,12 +87,12 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 
 	SECTION("test sigma protocol DH")
 	{
-		mt19937 random = get_seeded_random();
+		auto random = get_seeded_prg();
 		auto dlog = make_shared<OpenSSLDlogECFp>();
 		//auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
 		SigmaDHProverComputation prover(dlog, 80);
 		SigmaDHVerifierComputation verifier(dlog, 80);
-		biginteger w = getRandomInRange(0, dlog->getOrder() - 1, random);
+		biginteger w = getRandomInRange(0, dlog->getOrder() - 1, random.get());
 
 		auto u = dlog->exponentiate(dlog->getGenerator().get(), w);
 		auto h = dlog->createRandomElement();
@@ -106,12 +106,12 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 
 	SECTION("test sigma protocol DH Extended")
 	{
-		mt19937 random = get_seeded_random();
+		auto random = get_seeded_prg();
 		auto dlog = make_shared<OpenSSLDlogECFp>();
 		//auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
 		SigmaDHExtendedProverComputation prover(dlog, 80);
 		SigmaDHExtendedVerifierComputation verifier(dlog, 80);
-		biginteger w = getRandomInRange(0, dlog->getOrder() - 1, random);
+		biginteger w = getRandomInRange(0, dlog->getOrder() - 1, random.get());
 
 		auto g1 = dlog->getGenerator();
 		auto h1 = dlog->exponentiate(g1.get(), w);
@@ -132,13 +132,13 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 
 	SECTION("test sigma protocol pedersen cmt knowledge")
 	{
-		mt19937 random = get_seeded_random();
+		auto random = get_seeded_prg();
 		auto dlog = make_shared<OpenSSLDlogECFp>();
 		//auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
 		SigmaPedersenCmtKnowledgeProverComputation prover(dlog, 80);
 		SigmaPedersenCmtKnowledgeVerifierComputation verifier(dlog, 80);
-		biginteger x = getRandomInRange(0, dlog->getOrder() - 1, random);
-		biginteger r = getRandomInRange(0, dlog->getOrder() - 1, random);
+		biginteger x = getRandomInRange(0, dlog->getOrder() - 1, random.get());
+		biginteger r = getRandomInRange(0, dlog->getOrder() - 1, random.get());
 		auto g = dlog->getGenerator();
 		auto h1 = dlog->exponentiate(g.get(), r);
 		auto h = dlog->createRandomElement();
@@ -155,13 +155,13 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 
 	SECTION("test sigma protocol pedersen cmt value")
 	{
-		mt19937 random = get_seeded_random();
+		auto random = get_seeded_prg();
 		auto dlog = make_shared<OpenSSLDlogECFp>();
 		//auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
 		SigmaPedersenCommittedValueProverComputation prover(dlog, 80);
 		SigmaPedersenCommittedValueVerifierComputation verifier(dlog, 80);
-		biginteger x = getRandomInRange(0, dlog->getOrder() - 1, random);
-		biginteger r = getRandomInRange(0, dlog->getOrder() - 1, random);
+		biginteger x = getRandomInRange(0, dlog->getOrder() - 1, random.get());
+		biginteger r = getRandomInRange(0, dlog->getOrder() - 1, random.get());
 		auto g = dlog->getGenerator();
 		auto h1 = dlog->exponentiate(g.get(), r);
 		auto h = dlog->createRandomElement();
@@ -178,12 +178,12 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 
 	SECTION("test sigma protocol el gamal cmt knowledge")
 	{
-		mt19937 random = get_seeded_random();
+		auto random = get_seeded_prg();
 		auto dlog = make_shared<OpenSSLDlogECFp>();
 		//auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
 		SigmaElGamalCmtKnowledgeProverComputation prover(dlog, 80);
 		SigmaElGamalCmtKnowledgeVerifierComputation verifier(dlog, 80);
-		biginteger w = getRandomInRange(0, dlog->getOrder() - 1, random);
+		biginteger w = getRandomInRange(0, dlog->getOrder() - 1, random.get());
 		auto g = dlog->getGenerator();
 		auto h = dlog->exponentiate(g.get(), w);
 		ElGamalPublicKey key(h);
@@ -197,12 +197,12 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 
 	SECTION("test sigma protocol el gamal committed value")
 	{
-		mt19937 random = get_seeded_random();
+		auto random = get_seeded_prg();
 		auto dlog = make_shared<OpenSSLDlogECFp>();
 		//auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
 		SigmaElGamalCommittedValueProverComputation prover(dlog, 80);
 		SigmaElGamalCommittedValueVerifierComputation verifier(dlog, 80);
-		biginteger w = getRandomInRange(0, dlog->getOrder() - 1, random);
+		biginteger w = getRandomInRange(0, dlog->getOrder() - 1, random.get());
 		auto x = dlog->createRandomElement();
 		ElGamalOnGroupElementEnc elgamal(dlog);
 		auto pair = elgamal.generateKey();
@@ -220,7 +220,6 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 
 	SECTION("test sigma protocol el gamal private key")
 	{
-		mt19937 random = get_seeded_random();
 		auto dlog = make_shared<OpenSSLDlogECFp>();
 		//auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
 		SigmaElGamalPrivateKeyProverComputation prover(dlog, 80);
@@ -239,12 +238,12 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 
 	SECTION("test sigma protocol el gamal encrypted value")
 	{
-		mt19937 random = get_seeded_random();
+		auto random = get_seeded_prg();
 		auto dlog = make_shared<OpenSSLDlogECFp>();
 		//auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
 		SigmaElGamalEncryptedValueProverComputation prover(dlog, 80);
 		SigmaElGamalEncryptedValueVerifierComputation verifier(dlog, 80);
-		biginteger w = getRandomInRange(0, dlog->getOrder() - 1, random);
+		biginteger w = getRandomInRange(0, dlog->getOrder() - 1, random.get());
 		auto x = dlog->createRandomElement();
 		ElGamalOnGroupElementEnc elgamal(dlog);
 		auto pair = elgamal.generateKey();
@@ -269,13 +268,13 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 
 	SECTION("test sigma protocol Cramer Shoup encrypted value")
 	{
-		mt19937 random = get_seeded_random();
+		auto random = get_seeded_prg();
 		auto dlog = make_shared<OpenSSLDlogECFp>();
 		auto hash = make_shared<OpenSSLSHA256>();
 		//auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
 		SigmaCramerShoupEncryptedValueProverComputation prover(dlog, hash, 80);
 		SigmaCramerShoupEncryptedValueVerifierComputation verifier(dlog, hash, 80);
-		biginteger w = getRandomInRange(0, dlog->getOrder() - 1, random);
+		biginteger w = getRandomInRange(0, dlog->getOrder() - 1, random.get());
 		auto x = dlog->createRandomElement();
 		CramerShoupOnGroupElementEnc cr(dlog, hash);
 		auto pair = cr.generateKey();
@@ -293,14 +292,14 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 
 	SECTION("test sigma protocol Damgard Jurik encrypted zero")
 	{
-		mt19937 random = get_seeded_random();
+		auto random = get_seeded_prg();
 		SigmaDJEncryptedZeroProverComputation prover;
 		SigmaDJEncryptedZeroVerifierComputation verifier;
 		DamgardJurikEnc dj;
 		DJKeyGenParameterSpec spec;
 		auto pair = dj.generateKey(&spec);
 		dj.setKey(pair.first, pair.second);
-		biginteger r = getRandomInRange(0, dynamic_pointer_cast<DamgardJurikPublicKey>(pair.first)->getModulus(), random);
+		biginteger r = getRandomInRange(0, dynamic_pointer_cast<DamgardJurikPublicKey>(pair.first)->getModulus(), random.get());
 		auto cipher = dj.encrypt(make_shared<BigIntegerPlainText>(0), r);
 
 		auto publicKey = *(dynamic_cast<DamgardJurikPublicKey*>(pair.first.get()));
@@ -319,14 +318,14 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 
 	SECTION("test sigma protocol Damgard Jurik encrypted value")
 	{
-		mt19937 random = get_seeded_random();
+		auto random = get_seeded_prg();
 		SigmaDJEncryptedValueProverComputation prover;
 		SigmaDJEncryptedValueVerifierComputation verifier;
 		DamgardJurikEnc dj;
 		DJKeyGenParameterSpec spec;
 		auto pair = dj.generateKey(&spec);
 		dj.setKey(pair.first, pair.second);
-		biginteger r = getRandomInRange(0, dynamic_pointer_cast<DamgardJurikPublicKey>(pair.first)->getModulus(), random);
+		biginteger r = getRandomInRange(0, dynamic_pointer_cast<DamgardJurikPublicKey>(pair.first)->getModulus(), random.get());
 		auto plaintext = make_shared<BigIntegerPlainText>(0);
 		auto cipher = dj.encrypt(plaintext, r);
 
@@ -347,14 +346,14 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 
 	SECTION("test sigma protocol Damgard Jurik product")
 	{
-		mt19937 random = get_seeded_random();
+		auto random = get_seeded_prg();
 		SigmaDJProductProverComputation prover;
 		SigmaDJProductVerifierComputation verifier;
 		DamgardJurikEnc dj;
 		DJKeyGenParameterSpec spec;
 		auto pair = dj.generateKey(&spec);
 		dj.setKey(pair.first, pair.second);
-		biginteger r1 = getRandomInRange(0, dynamic_pointer_cast<DamgardJurikPublicKey>(pair.first)->getModulus(), random);
+		biginteger r1 = getRandomInRange(0, dynamic_pointer_cast<DamgardJurikPublicKey>(pair.first)->getModulus(), random.get());
 		auto p1 = make_shared<BigIntegerPlainText>(2);
 		auto p2 = make_shared<BigIntegerPlainText>(3);
 		auto p3 = make_shared<BigIntegerPlainText>(6);
@@ -381,20 +380,20 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 
 	SECTION("test sigma protocol AND")
 	{
-		mt19937 random = get_seeded_random();
+		auto random = get_seeded_prg();
 		auto dlog = make_shared<OpenSSLDlogECFp>();
 
-		auto dlogProver = make_shared<SigmaDlogProverComputation>(dlog, 80);
-		auto dlogVerifier = make_shared<SigmaDlogVerifierComputation>(dlog, 80);
-		biginteger w = getRandomInRange(0, dlog->getOrder() - 1, random);
+		auto dlogProver = make_shared<SigmaDlogProverComputation>(dlog, 80, random);
+		auto dlogVerifier = make_shared<SigmaDlogVerifierComputation>(dlog, 80, random);
+		biginteger w = getRandomInRange(0, dlog->getOrder() - 1, random.get());
 
 		auto h1 = dlog->exponentiate(dlog->getGenerator().get(), w);
 		auto commonDlogInput = make_shared<SigmaDlogCommonInput>(h1);
 		auto proverDlogInput = make_shared<SigmaDlogProverInput>(h1, w);
 
 		//auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
-		auto dhProver = make_shared<SigmaDHProverComputation>(dlog, 80);
-		auto dhVerifier = make_shared<SigmaDHVerifierComputation>(dlog, 80);
+		auto dhProver = make_shared<SigmaDHProverComputation>(dlog, 80, random);
+		auto dhVerifier = make_shared<SigmaDHVerifierComputation>(dlog, 80, random);
 
 		auto u = dlog->exponentiate(dlog->getGenerator().get(), w);
 		auto h = dlog->createRandomElement();
@@ -431,20 +430,20 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 
 	SECTION("test sigma protocol OR")
 	{
-		mt19937 random = get_seeded_random();
+		auto random = get_seeded_prg();
 		auto dlog = make_shared<OpenSSLDlogECFp>();
 
-		auto dlogProver = make_shared<SigmaDlogProverComputation>(dlog, 80);
-		auto dlogVerifier = make_shared<SigmaDlogVerifierComputation>(dlog, 80);
-		biginteger w = getRandomInRange(0, dlog->getOrder() - 1, random);
+		auto dlogProver = make_shared<SigmaDlogProverComputation>(dlog, 80, random);
+		auto dlogVerifier = make_shared<SigmaDlogVerifierComputation>(dlog, 80, random);
+		biginteger w = getRandomInRange(0, dlog->getOrder() - 1, random.get());
 
 		auto h1 = dlog->exponentiate(dlog->getGenerator().get(), w);
 		auto commonDlogInput = make_shared<SigmaDlogCommonInput>(h1);
 		auto proverDlogInput = make_shared<SigmaDlogProverInput>(h1, w);
 
 		//auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
-		auto dhProver = make_shared<SigmaDHProverComputation>(dlog, 80);
-		auto dhVerifier = make_shared<SigmaDHVerifierComputation>(dlog, 80);
+		auto dhProver = make_shared<SigmaDHProverComputation>(dlog, 80, random);
+		auto dhVerifier = make_shared<SigmaDHVerifierComputation>(dlog, 80, random);
 
 		auto u = dlog->exponentiate(dlog->getGenerator().get(), w);
 		auto h = dlog->createRandomElement();
@@ -474,20 +473,20 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 
 	SECTION("test sigma protocol OR Multiple")
 	{
-		mt19937 random = get_seeded_random();
+		auto random = get_seeded_prg();
 		auto dlog = make_shared<OpenSSLDlogECFp>();
 
-		auto dlogProver = make_shared<SigmaDlogProverComputation>(dlog, 80);
-		auto dlogVerifier = make_shared<SigmaDlogVerifierComputation>(dlog, 80);
-		biginteger w = getRandomInRange(0, dlog->getOrder() - 1, random);
+		auto dlogProver = make_shared<SigmaDlogProverComputation>(dlog, 80, random);
+		auto dlogVerifier = make_shared<SigmaDlogVerifierComputation>(dlog, 80, random);
+		biginteger w = getRandomInRange(0, dlog->getOrder() - 1, random.get());
 
 		auto h1 = dlog->exponentiate(dlog->getGenerator().get(), w);
 		auto commonDlogInput = make_shared<SigmaDlogCommonInput>(h1);
 		auto proverDlogInput = make_shared<SigmaDlogProverInput>(h1, w);
 
 		//auto dlog = make_shared<OpenSSLDlogZpSafePrime>();
-		auto dhProver = make_shared<SigmaDHProverComputation>(dlog, 80);
-		auto dhVerifier = make_shared<SigmaDHVerifierComputation>(dlog, 80);
+		auto dhProver = make_shared<SigmaDHProverComputation>(dlog, 80, random);
+		auto dhVerifier = make_shared<SigmaDHVerifierComputation>(dlog, 80, random);
 
 		auto u = dlog->exponentiate(dlog->getGenerator().get(), w);
 		auto h = dlog->createRandomElement();
@@ -500,7 +499,7 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 		DJKeyGenParameterSpec spec;
 		auto pair = dj.generateKey(&spec);
 		dj.setKey(pair.first, pair.second);
-		biginteger r = getRandomInRange(0, dynamic_pointer_cast<DamgardJurikPublicKey>(pair.first)->getModulus(), random);
+		biginteger r = getRandomInRange(0, dynamic_pointer_cast<DamgardJurikPublicKey>(pair.first)->getModulus(), random.get());
 		auto cipher = dj.encrypt(make_shared<BigIntegerPlainText>(0), r);
 
 		auto publicKey = *(dynamic_cast<DamgardJurikPublicKey*>(pair.first.get()));
@@ -536,6 +535,6 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 
 		computeSigmaProtocol(&prover, &verifier, &commonInput, proverInput);
 		simulate(prover.getSimulator().get(), &verifier, &commonInput);
-
+		
 	}
 }

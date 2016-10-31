@@ -28,16 +28,22 @@
 
 #include "../../include/interactive_mid_protocols/SigmaProtocolDamgardJurikEncryptedZero.hpp"
 
+string SigmaDJEncryptedZeroCommonInput::toString() {
+	string output = publicKey.generateSendableData()->toString();
+	output += ":";
+	output += cipher.generateSendableData()->toString();
+	return output;
+}
 /**
 * Constructor that gets the soundness parameter, length parameter and SecureRandom.
 * @param t Soundness parameter in BITS.
 * @param lengthParameter length parameter in BITS.
 * @param random
 */
-SigmaDJEncryptedZeroSimulator::SigmaDJEncryptedZeroSimulator(int t, int lengthParameter) {
+SigmaDJEncryptedZeroSimulator::SigmaDJEncryptedZeroSimulator(int t, int lengthParameter, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	this->t = t;
 	this->lengthParameter = lengthParameter;
-	random = get_seeded_random();
+	this->random = random;
 }
 
 /**
@@ -66,7 +72,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaDJEncryptedZeroSimulator::simulate(SigmaCo
 	}
 
 	//Sample a random value z <- Z*n
-	biginteger z = getRandomInRange(1, n - 1, random);
+	biginteger z = getRandomInRange(1, n - 1, random.get());
 
 	//Calculate N = n^s and N' = n^(s+1)
 	biginteger N = mp::pow(n, lengthParameter);
@@ -93,7 +99,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaDJEncryptedZeroSimulator::simulate(SigmaCo
 shared_ptr<SigmaSimulatorOutput> SigmaDJEncryptedZeroSimulator::simulate(SigmaCommonInput* input)  {
 	//make space for t/8 bytes and fill it with random values.
 	vector<byte> e(t / 8);
-	RAND_bytes(e.data(), t / 8);
+	random->getPRGBytes(e, 0, t / 8);
 	//modify the challenge to be positive.
 	e.data()[e.size() - 1] = e.data()[e.size() - 1] & 127;
 	
@@ -127,10 +133,10 @@ bool SigmaDJEncryptedZeroSimulator::checkChallengeLength(vector<byte> challenge)
 * @param lengthParameter length parameter in BITS.
 * @param random
 */
-SigmaDJEncryptedZeroProverComputation::SigmaDJEncryptedZeroProverComputation(int t, int lengthParameter) {
+SigmaDJEncryptedZeroProverComputation::SigmaDJEncryptedZeroProverComputation(int t, int lengthParameter, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	this->t = t;
 	this->lengthParameter = lengthParameter;
-	random = get_seeded_random();
+	this->random = random;
 }
 
 /**
@@ -165,7 +171,7 @@ shared_ptr<SigmaProtocolMsg> SigmaDJEncryptedZeroProverComputation::computeFirst
 	}
 
 	//Sample s in Z*n
-	s = getRandomInRange(1, n - 1, random);
+	s = getRandomInRange(1, n - 1, random.get());
 	
 	//Calculate N = n^s and N' = n^(s+1)
 	biginteger N = mp::pow(n, lengthParameter);
@@ -222,11 +228,11 @@ bool SigmaDJEncryptedZeroVerifierComputation::checkSoundnessParam(biginteger mod
 * @param lengthParameter length parameter in BITS.
 * @param random
 */
-SigmaDJEncryptedZeroVerifierComputation::SigmaDJEncryptedZeroVerifierComputation(int t, int lengthParameter) {
+SigmaDJEncryptedZeroVerifierComputation::SigmaDJEncryptedZeroVerifierComputation(int t, int lengthParameter, const shared_ptr<PrgFromOpenSSLAES> & random) {
 
 	this->t = t;
 	this->lengthParameter = lengthParameter;
-	random = get_seeded_random();
+	this->random = random;
 }
 
 /**
@@ -236,7 +242,7 @@ SigmaDJEncryptedZeroVerifierComputation::SigmaDJEncryptedZeroVerifierComputation
 void SigmaDJEncryptedZeroVerifierComputation::sampleChallenge() {
 	//make space for t/8 bytes and fill it with random values.
 	e.resize(t / 8);
-	RAND_bytes(e.data(), t / 8);
+	random->getPRGBytes(e, 0, t / 8);
 	//modify the challenge to be positive.
 	e.data()[e.size()-1] = e.data()[e.size() - 1] & 127;
 }

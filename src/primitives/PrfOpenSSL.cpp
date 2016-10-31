@@ -165,17 +165,18 @@ OpenSSLPRP::~OpenSSLPRP() {
 
 OpenSSLAES::OpenSSLAES() {
 	auto random = make_shared<PrgFromOpenSSLAES>();
-	random->setKey(random->generateKey(128));
+	auto key = random->generateKey(128);
+	random->setKey(key);
 	init(random);
 }
 
-void OpenSSLAES::init(shared_ptr<PrgFromOpenSSLAES> setRandom) {
+void OpenSSLAES::init(const shared_ptr<PrgFromOpenSSLAES> & setRandom) {
 	prg = setRandom;
 	computeP = EVP_CIPHER_CTX_new();
 	invertP = EVP_CIPHER_CTX_new();
 }
 
-void OpenSSLAES::setKey(SecretKey secretKey) {
+void OpenSSLAES::setKey(SecretKey & secretKey) {
 	auto keyVec = secretKey.getEncoded();
 	int len = keyVec.size();
 	// AES key size should be 128/192/256 bits long.
@@ -212,7 +213,7 @@ void OpenSSLAES::setKey(SecretKey secretKey) {
 /*************************************************/
 /**** OpenSSLHMAC ***/
 /*************************************************/
-void OpenSSLHMAC::construct(string hashName) {
+void OpenSSLHMAC::construct(string hashName, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	/*
 	* The way we call the hash is not the same as OpenSSL. For example: we call "SHA-1" while OpenSSL calls it "SHA1".
 	* So the hyphen should be deleted.
@@ -232,10 +233,10 @@ void OpenSSLHMAC::construct(string hashName) {
 	if (0 == res)
 		throw runtime_error("failed to create hmac");
 
-	this->random = get_seeded_random();
+	this->random = random;
 }
 
-void OpenSSLHMAC::setKey(SecretKey secretKey) {
+void OpenSSLHMAC::setKey(SecretKey & secretKey) {
 	// initialize the Hmac object with the given key.
 	auto secVec = secretKey.getEncoded();
 	HMAC_Init_ex(hmac, &secVec[0], secVec.size(), NULL, NULL);
@@ -307,9 +308,9 @@ SecretKey OpenSSLHMAC::generateKey(int keySize) {
 	if ((keySize % 8) != 0)
 		throw invalid_argument("Wrong key size: must be a multiple of 8");
 
-	byte* genBytes = new byte[keySize / 8]; // creates a byte array of size keySize.
-	RAND_bytes(genBytes, keySize / 8);	// generates the bytes using the random.
-	return SecretKey(genBytes, keySize/8, "");
+	vector<byte> genBytes(keySize / 8); // creates a byte array of size keySize.
+	random->getPRGBytes(genBytes, 0, keySize / 8);	// generates the bytes using the random.
+	return SecretKey(genBytes.data(), keySize/8, "");
 }
 
 vector<byte> OpenSSLHMAC::mac(const vector<byte> &msg, int offset, int msgLen) {
@@ -389,10 +390,11 @@ OpenSSLTripleDES::OpenSSLTripleDES() {
 	computeP = EVP_CIPHER_CTX_new();
 	invertP = EVP_CIPHER_CTX_new();
 	prg = make_shared<PrgFromOpenSSLAES>();
-	prg->setKey(prg->generateKey(128));
+	auto key = prg->generateKey(128);
+	prg->setKey(key);
 }
 
-void OpenSSLTripleDES::setKey(SecretKey secretKey) {
+void OpenSSLTripleDES::setKey(SecretKey & secretKey) {
 	vector<byte> keyBytesVector = secretKey.getEncoded();
 	int len = keyBytesVector.size();
 
@@ -413,13 +415,13 @@ void OpenSSLTripleDES::setKey(SecretKey secretKey) {
 	_isKeySet= true;
 }
 
-PseudorandomFunction* PseudorandomFunction::get_new_prf(string algName) {
+shared_ptr<PseudorandomFunction> PseudorandomFunction::get_new_prf(string algName) {
 	if (algName == "AES")
-		return new OpenSSLAES();
+		return make_shared<OpenSSLAES>();
 	if (algName == "TripleDES")
-		return new OpenSSLTripleDES();
+		return make_shared<OpenSSLTripleDES>();
 	if (algName == "HMAC")
-		return new OpenSSLHMAC();
+		return make_shared<OpenSSLHMAC>();
 	// wrong algorithm name
 	throw invalid_argument("unexpected prf name");
 }

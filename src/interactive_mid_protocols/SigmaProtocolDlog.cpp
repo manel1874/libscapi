@@ -45,13 +45,13 @@ bool checkChallengeLength(vector<byte> challenge, int t) {
 /*   SigmaDlogSimulator                */
 /***************************************/
 
-SigmaDlogSimulator::SigmaDlogSimulator(shared_ptr<DlogGroup> dlog, int t) {
+SigmaDlogSimulator::SigmaDlogSimulator(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	this->dlog = dlog;
 	this->t = t;
 	if (!checkSoundnessParam()) // check the soundness validity.
 		throw invalid_argument("soundness parameter t does not satisfy 2^t<q. q=" +
 			(string)dlog->getOrder() + " t=" + to_string(t) + "\n");
-	this->random = get_seeded_random();
+	this->random = random;
 	qMinusOne = dlog->getOrder() - 1;
 }
 
@@ -64,11 +64,11 @@ shared_ptr<SigmaSimulatorOutput> SigmaDlogSimulator::simulate(SigmaCommonInput* 
 	SigmaDlogCommonInput* dlogInput = (SigmaDlogCommonInput*)input;
 
 	// SAMPLE a random z <- Zq
-	biginteger z = getRandomInRange(0, qMinusOne, random);
+	biginteger z = getRandomInRange(0, qMinusOne, random.get());
 
 	// COMPUTE a = g^z*h^(-e)  (where -e here means -e mod q)
 	auto gToZ = dlog->exponentiate(dlog->getGenerator().get(), z);
-	biginteger e = decodeBigInteger(challenge.data(), challenge.size());
+	biginteger e = abs(decodeBigInteger(challenge.data(), challenge.size()));
 	biginteger minusE = dlog->getOrder() - e;
 	auto hToE = dlog->exponentiate(dlogInput->getH().get(), minusE);
 	auto a = dlog->multiplyGroupElements(gToZ.get(), hToE.get());
@@ -82,7 +82,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaDlogSimulator::simulate(SigmaCommonInput* 
 shared_ptr<SigmaSimulatorOutput> SigmaDlogSimulator::simulate(SigmaCommonInput* input) {
 	//Create a new byte array of size t/8, to get the required byte size and fill it with random values.
 	vector<byte> e(t / 8);
-	RAND_bytes(e.data(), t / 8);
+	random->getPRGBytes(e, 0, t / 8);
 
 	// call the other simulate function with the given input and the sampled e.
 	return simulate(input, e);
@@ -96,19 +96,19 @@ bool SigmaDlogSimulator::checkSoundnessParam() {
 /*   SigmaDlogProverComputation        */
 /***************************************/
 
-SigmaDlogProverComputation::SigmaDlogProverComputation(shared_ptr<DlogGroup> dlog, int t) {
+SigmaDlogProverComputation::SigmaDlogProverComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	this->dlog = dlog;
 	this->t = t;
 	if (!checkSoundnessParam()) // check the soundness validity.
 		throw invalid_argument("soundness parameter t does not satisfy 2^t<q");
-	this->random = get_seeded_random();
+	this->random = random;
 	qMinusOne = dlog->getOrder() - 1;
 }
 
 shared_ptr<SigmaProtocolMsg> SigmaDlogProverComputation::computeFirstMsg(shared_ptr<SigmaProverInput> input) {
 	this->input = dynamic_pointer_cast<SigmaDlogProverInput>(input);
 	// sample random r in Zq
-	r = getRandomInRange(0, qMinusOne, random);
+	r = getRandomInRange(0, qMinusOne, random.get());
 	// compute a = g^r.
 	auto a = dlog->exponentiate(dlog->getGenerator().get(), r);
 	auto x = a->generateSendableData();
@@ -124,7 +124,7 @@ shared_ptr<SigmaProtocolMsg> SigmaDlogProverComputation::computeSecondMsg(vector
 
 	// compute z = (r+ew) mod q
 	biginteger q = dlog->getOrder();
-	biginteger e = decodeBigInteger(challenge.data(), challenge.size());
+	biginteger e = abs(decodeBigInteger(challenge.data(), challenge.size()));
 	biginteger ew = (e * input->getW()) % q;
 	biginteger z = (r + ew) % q;
 
@@ -142,7 +142,7 @@ bool SigmaDlogProverComputation::checkSoundnessParam() {
 /*   SigmaDlogVerifierComputation      */
 /***************************************/
 
-SigmaDlogVerifierComputation::SigmaDlogVerifierComputation(shared_ptr<DlogGroup> dlog, int t) {
+SigmaDlogVerifierComputation::SigmaDlogVerifierComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	if (!dlog->validateGroup())
 		throw InvalidDlogGroupException("invalid dlog");
 
@@ -150,11 +150,11 @@ SigmaDlogVerifierComputation::SigmaDlogVerifierComputation(shared_ptr<DlogGroup>
 	this->t = t;
 	if (!checkSoundnessParam()) // check the soundness validity.
 		throw invalid_argument("soundness parameter t does not satisfy 2^t<q");
-	this->random = get_seeded_random();
+	this->random = random;
 }
 
 void SigmaDlogVerifierComputation::sampleChallenge() {
-	biginteger e_number = getRandomInRange(0, mp::pow(biginteger(2), t) - 1, random);
+	biginteger e_number = getRandomInRange(0, mp::pow(biginteger(2), t) - 1, random.get());
 	int eSize = bytesCount(e_number);
 	// create a new byte array of size t/8, to get the required byte size.
 	shared_ptr<byte> e = std::shared_ptr<byte>(new byte[eSize], std::default_delete<byte[]>());
@@ -184,18 +184,19 @@ bool SigmaDlogVerifierComputation::verify(SigmaCommonInput* input,
 	auto h = cInput->getH();
 	// if h is not member in the group, set verified to false.
 	verified = verified && dlog->isMember(h.get());
-
+	
 	// compute g^z (left size of the verify equation).
 	auto left = dlog->exponentiate(dlog->getGenerator().get(), exponent->getMsg());
 	
 	// compute a*h^e (right side of the verify equation).
-	biginteger eBI = decodeBigInteger(e.data(), e.size()); 	// convert e to biginteger.
+	biginteger eBI = abs(decodeBigInteger(e.data(), e.size())); 	// convert e to biginteger.
+	
 	auto hToe = dlog->exponentiate(h.get(), eBI); // calculate h^e.
 	// calculate a*h^e.
 	auto right = dlog->multiplyGroupElements(aElement.get(), hToe.get());
 	// if left and right sides of the equation are not equal, set verified to false.
 	verified = verified && (*left==*right);
-
+	
 	e.clear();  //reset the challenge for re-use.
 
 	// return true if all checks returned true; false, otherwise.

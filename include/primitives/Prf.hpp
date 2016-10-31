@@ -29,7 +29,7 @@
 #ifndef SCAPI_PRF_H
 #define SCAPI_PRF_H
 #include "../infra/Common.hpp"
-#include "mac.hpp"
+#include "../mid_layer/Mac.hpp"
 #include "../CryptoInfra/SecurityLevel.hpp"
 #include "math.h"
 
@@ -46,7 +46,7 @@ public:
 	* Sets the secret key for this prf.
 	* The key can be changed at any time.
 	*/
-	virtual void setKey(SecretKey secretKey)=0;
+	virtual void setKey(SecretKey & secretKey)=0;
 	/**
 	* An object trying to use an instance of prf needs to check if it has already been initialized.
 	* @return true if the object was initialized by calling the function setKey.
@@ -65,7 +65,7 @@ public:
 	* @param keyParams algorithmParameterSpec contains the required parameters for the key generation
 	* @return the generated secret key
 	*/
-	virtual SecretKey generateKey(AlgorithmParameterSpec keyParams)=0;
+	virtual SecretKey generateKey(AlgorithmParameterSpec & keyParams)=0;
 	/**
 	* Generates a secret key to initialize this prf object.
 	* @param keySize is the required secret key size in bits
@@ -114,7 +114,7 @@ public:
 	/**
 	* Factory method. Create concrete instance of the give algorithm name in the default implementation.
 	*/
-	static PseudorandomFunction* get_new_prf(string algName = "AES");
+	static shared_ptr<PseudorandomFunction> get_new_prf(string algName = "AES");
 };
 
 /**
@@ -183,15 +183,15 @@ class TripleDES : public virtual PrpFixed {};
 */
 class PrpFromPrfFixed : public PrpFixed {
 protected:
-	PrfFixed * prfFixed; //the underlying prf
+	shared_ptr<PrfFixed> prfFixed; //the underlying prf
 	virtual ~PrpFromPrfFixed() = 0;
 public:
 	/**
 	* Initialized this PrpFromPrfFixed with a secretKey
 	* @param secretKey the secret key
 	*/
-	void setKey(SecretKey secretKey) { prfFixed->setKey(secretKey); };
-	bool isKeySet() { return prfFixed->isKeySet(); };
+	void setKey(SecretKey & secretKey) override { prfFixed->setKey(secretKey); };
+	bool isKeySet() override { return prfFixed->isKeySet(); };
 	/**
 	* Computes the function using the secret key. <p>
 	*
@@ -286,13 +286,13 @@ class Hmac : public virtual PrfVaryingInputLength, public virtual UniqueTagMac, 
 */
 class PrfVaryingFromPrfVaryingInput : public virtual PrfVaryingIOLength {
 protected:
-	PrfVaryingInputLength * prfVaryingInputLength; //the underlying prf varying input
+	shared_ptr<PrfVaryingInputLength> prfVaryingInputLength; //the underlying prf varying input
 public:
 	/**
 	* Initializes this PrfVaryingFromPrfVaryingInput with the secret key.
 	* @param secretKey secret key
 	*/
-	void setKey(SecretKey secretKey){ prfVaryingInputLength->setKey(secretKey); /*initializes the underlying prf */	};
+	void setKey(SecretKey & secretKey) override { prfVaryingInputLength->setKey(secretKey); /*initializes the underlying prf */	};
 	/**
 	* Check that the Secret Key for this instance has been set
 	* @return true if key had been set<p>
@@ -317,7 +317,7 @@ public:
 	* 					that holds the necessary parameters to generate the key.
 	* @return the generated secret key
 	*/
-	SecretKey generateKey(AlgorithmParameterSpec keyParams) override { return prfVaryingInputLength->generateKey(keyParams); };
+	SecretKey generateKey(AlgorithmParameterSpec & keyParams) override { return prfVaryingInputLength->generateKey(keyParams); };
 	/**
 	* Generate a SecretKey suitable for a Pseudo random permutation obtained from a Varying Prf.
 	* @param keySize bit-length of required Secret Key
@@ -338,7 +338,7 @@ public:
 	* @param prfVaryingInputName  the prf to use.
 	*/
 	IteratedPrfVarying(string prfVaryingInputName) { /* TODO: implement */ };
-	IteratedPrfVarying(PrfVaryingInputLength * prfVaryingInput) { prfVaryingInputLength = prfVaryingInput; };
+	IteratedPrfVarying(const shared_ptr<PrfVaryingInputLength> & prfVaryingInput) { prfVaryingInputLength = prfVaryingInput; };
 	string getAlgorithmName() override { return "ITERATED_PRF_VARY_INOUT"; };
 	int getBlockSize() override { throw runtime_error("prp varying has no fixed block size"); };
 	/**
@@ -370,18 +370,18 @@ public:
 */
 class PrpFromPrfVarying : public virtual PrpVaryingIOLength {
 protected:
-	PrfVaryingIOLength * prfVaryingIOLength; // the underlying prf
+	shared_ptr<PrfVaryingIOLength> prfVaryingIOLength; // the underlying prf
 public:
 	/**
 	* Initializes this PrpFromPrfVarying with secret key
 	* @param secretKey the secret key
 	*/
-	void setKey(SecretKey secretKey) override { prfVaryingIOLength->setKey(secretKey); };
+	void setKey(SecretKey & secretKey) override { prfVaryingIOLength->setKey(secretKey); };
 	bool isKeySet() override { return prfVaryingIOLength->isKeySet(); };
 	void computeBlock(const vector<byte> & inBytes, int inOff, vector<byte>& outBytes, int outOff) override;
 	void computeBlock(const vector<byte> & inBytes, int inOff, int inLen, vector<byte>& outBytes, int outOff, int outLen) override;
 	void invertBlock(const vector<byte> & inBytes, int inOff, vector<byte>& outBytes, int outOff) override;
-	SecretKey generateKey(AlgorithmParameterSpec keyParams) override { return prfVaryingIOLength->generateKey(keyParams); };
+	SecretKey generateKey(AlgorithmParameterSpec & keyParams) override { return prfVaryingIOLength->generateKey(keyParams); };
 	SecretKey generateKey(int keySize) override { return prfVaryingIOLength->generateKey(keySize); };
 	using PseudorandomFunction::computeBlock;
 };
@@ -399,7 +399,7 @@ class LubyRackoffPrpFromPrfVarying : public virtual PrpFromPrfVarying {
 	* @param prfVaryingIOLengthName the underlying PRF name
 	*/
 	LubyRackoffPrpFromPrfVarying(string prfVaryingIOLengthName);
-	LubyRackoffPrpFromPrfVarying(PrfVaryingIOLength * prfVaryingIOLength);
+	LubyRackoffPrpFromPrfVarying(const shared_ptr<PrfVaryingIOLength> & prfVaryingIOLength);
 
 	void computeBlock(const vector<byte> & inBytes, int inOff, int inLen, vector<byte>& outBytes, int outOff) override;
 	/**

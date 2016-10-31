@@ -67,6 +67,35 @@ public:
 };
 
 
+class OTExtensionCorrelatedSOutput: public OTBatchSOutput {
+
+protected:
+
+	vector<byte> x0Arr;
+	vector<byte> x1Arr;
+
+public:
+
+	OTExtensionCorrelatedSOutput(const vector<byte> &x0Arr, const vector<byte> &x1Arr) : x0Arr(x0Arr), x1Arr(x1Arr){};
+
+	/**
+	 * @return the array that holds all the x0 for all the senders serially.
+	 */
+	vector<byte> getx0Arr() {
+		return x0Arr;
+	}
+	;
+	/**
+	 * @return the array that holds all the x1 for all the senders serially.
+	 */
+	vector<byte> getx1Arr() {
+		return x1Arr;
+	}
+};
+
+
+
+
 #ifndef _WIN32
 class OTExtensionBristolRandomizedSOutput: public OTExtensionRandomizedSOutput {
 
@@ -84,7 +113,7 @@ public:
 #endif
 
 enum class OTBatchSInputTypes {
-	OTExtensionGeneralSInput, OTExtensionRandomizedSInput
+	OTExtensionGeneralSInput, OTExtensionRandomizedSInput, OTExtensionCorrelatedSInput
 };
 
 /**
@@ -185,6 +214,38 @@ public:
 
 };
 
+
+
+class OTExtensionCorrelatedSInput: public OTBatchSInput {
+private:
+	vector<byte> deltaArr; // An array that holds all the delta of xo and x1.
+		// For optimization reasons, all the delta inputs are held in one dimensional array one after the other
+		// rather than a two dimensional array.
+		// The size of each element can be calculated by the delta size divided by the numOfOts.
+	int numOfOts; // Number of OTs in the OT extension.
+
+
+public:
+	OTBatchSInputTypes getType()override {return OTBatchSInputTypes::OTExtensionCorrelatedSInput;};
+
+	OTExtensionCorrelatedSInput(const vector<byte>& deltaArr, int numOfOts): deltaArr(deltaArr), numOfOts(numOfOts){}
+
+	/**
+	 * @return the array that holds all the x0 for all the senders serially.
+	 */
+	vector<byte> getDeltaArr() { return deltaArr; }
+
+	/**
+	 * @return the number of OT elements.
+	 */
+	int getNumOfOts() {	return numOfOts;}
+
+	int getDeltaArrSize() {
+		return deltaArr.size();
+	}
+
+};
+
 /**
  * General interface for Batch OT Sender.
  * Every class that implements it is signed as Batch Oblivious Transfer sender.
@@ -206,7 +267,7 @@ public:
 
 
 enum class OTBatchRInputTypes {
-	OTExtensionGeneralRInput, OTExtensionRandomizedRInput
+	OTExtensionGeneralRInput, OTExtensionRandomizedRInput, OTExtensionCorrelatedRInput
 };
 
 /**
@@ -279,6 +340,31 @@ public:
 	}
 
 };
+
+
+/**
+ * A concrete class for correlated OT extension input for the receiver. <p>
+ * All the classes are the same and differ only in the name.
+ * The reason a class is created for each version is due to the fact that a respective class is created for the sender and we wish to be consistent.
+ * The name of the class determines the version of the OT extension we wish to run and in this case the general case.
+ */
+class OTExtensionCorrelatedRInput: public OTExtensionRInput {
+public:
+	/**
+	 * Constructor that sets the sigma array and the number of OT elements.
+	 * @param sigmaArr An array of sigma for each OT.
+	 * @param elementSize The size of each element in the OT extension, in bits.
+	 */
+	OTExtensionCorrelatedRInput(vector<byte> sigmaArr, int elementSize) :
+		OTExtensionRInput(sigmaArr, elementSize) {
+	}
+
+	OTBatchRInputTypes getType() {
+		return OTBatchRInputTypes::OTExtensionCorrelatedRInput;
+	}
+
+};
+
 
 
 

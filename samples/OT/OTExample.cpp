@@ -29,6 +29,16 @@ shared_ptr<OTSender> getSender(const shared_ptr<CommParty> & channel, const shar
 		sender = make_shared<OTPrivacyOnlyDDHOnByteArraySender>(random, dlog);
 	} else if (sdp.protocolName == "OneSidedSimulationOnGroupElement") {
 		sender = make_shared<OTOneSidedSimDDHOnGroupElementSender>(channel, random, dlog);
+	} else if (sdp.protocolName == "OneSidedSimulationOnByteArray") {
+		sender = make_shared<OTOneSidedSimDDHOnByteArraySender>(channel, random, dlog);
+	} else if (sdp.protocolName == "FullSimulationOnGroupElement") {
+		sender = make_shared<OTFullSimDDHOnGroupElementSender>(channel, random, dlog);
+	} else if (sdp.protocolName == "FullSimulationOnByteArray") {
+		sender = make_shared<OTFullSimDDHOnByteArraySender>(channel, random, dlog);
+	} else if (sdp.protocolName == "FullSimulationROMOnGroupElement") {
+		sender = make_shared<OTFullSimROMDDHOnGroupElementSender>(channel, random, dlog);
+	} else if (sdp.protocolName == "FullSimulationROMOnByteArray") {
+		sender = make_shared<OTFullSimROMDDHOnByteArraySender>(channel, random, dlog);
 	}
 
 	return sender;
@@ -46,6 +56,16 @@ shared_ptr<OTReceiver> getReceiver(const shared_ptr<CommParty> & channel, const 
 		receiver = make_shared<OTPrivacyOnlyDDHOnByteArrayReceiver>(random, dlog);
 	} else if (sdp.protocolName == "OneSidedSimulationOnGroupElement") {
 		receiver = make_shared<OTOneSidedSimDDHOnGroupElementReceiver>(channel, random, dlog);
+	} else if (sdp.protocolName == "OneSidedSimulationOnByteArray") {
+		receiver = make_shared<OTOneSidedSimDDHOnByteArrayReceiver>(channel, random, dlog);
+	} else if (sdp.protocolName == "FullSimulationOnGroupElement") {
+		receiver = make_shared<OTFullSimDDHOnGroupElementReceiver>(channel, random, dlog);
+	} else if (sdp.protocolName == "FullSimulationOnByteArray") {
+		receiver = make_shared<OTFullSimDDHOnByteArrayReceiver>(channel, random, dlog);
+	} else if (sdp.protocolName == "FullSimulationROMOnGroupElement") {
+		receiver = make_shared<OTFullSimROMDDHOnGroupElementReceiver>(channel, random, dlog);
+	} else if (sdp.protocolName == "FullSimulationROMOnByteArray") {
+		receiver = make_shared<OTFullSimROMDDHOnByteArrayReceiver>(channel, random, dlog);
 	}
 
 	return receiver;
@@ -53,13 +73,15 @@ shared_ptr<OTReceiver> getReceiver(const shared_ptr<CommParty> & channel, const 
 
 shared_ptr<OTSInput> getInput(DlogGroup* dlog, OTParams params) {
 	
-	if (params.protocolName == "SemiHonestOnGroupElement" || params.protocolName == "PrivacyOnlyOnGroupElement" || params.protocolName == "OneSidedSimulationOnGroupElement") {
+	if (params.protocolName == "SemiHonestOnGroupElement" || params.protocolName == "PrivacyOnlyOnGroupElement" || params.protocolName == "OneSidedSimulationOnGroupElement" 
+		|| params.protocolName == "FullSimulationOnGroupElement" || params.protocolName == "FullSimulationROMOnGroupElement") {
 		auto x0 = dlog->createRandomElement();
 		cout << "X0 = " << x0->generateSendableData()->toString() << endl;
 		auto x1 = dlog->createRandomElement();
 		cout << "X1 = " << x1->generateSendableData()->toString() << endl;
 		return make_shared<OTOnGroupElementSInput>(x0, x1);
-	} else if (params.protocolName == "SemiHonestOnByteArray" || params.protocolName == "PrivacyOnlyOnByteArray" || params.protocolName == "OneSidedSimulationOnByteArray") {
+	} else if (params.protocolName == "SemiHonestOnByteArray" || params.protocolName == "PrivacyOnlyOnByteArray" || params.protocolName == "OneSidedSimulationOnByteArray"
+		|| params.protocolName == "FullSimulationOnByteArray" || params.protocolName == "FullSimulationROMOnByteArray") {
 		vector<byte> x0(10, '0'), x1(10, '1');
 		cout << "x0 = " << endl;
 		for (int i = 0; i < x0.size(); i++)
@@ -74,10 +96,12 @@ shared_ptr<OTSInput> getInput(DlogGroup* dlog, OTParams params) {
 }
 
 void printOutput(OTROutput* output, OTParams params) {
-	if (params.protocolName == "SemiHonestOnGroupElement" || params.protocolName == "PrivacyOnlyOnGroupElement" || params.protocolName == "OneSidedSimulationOnGroupElement") {
+	if (params.protocolName == "SemiHonestOnGroupElement" || params.protocolName == "PrivacyOnlyOnGroupElement" || params.protocolName == "OneSidedSimulationOnGroupElement"
+		|| params.protocolName == "FullSimulationOnGroupElement" || params.protocolName == "FullSimulationROMOnGroupElement") {
 		auto out = (OTOnGroupElementROutput*)output;
 		cout << "output = " << out->getXSigma()->generateSendableData()->toString() << endl;
-	} else if (params.protocolName == "SemiHonestOnByteArray" || params.protocolName == "PrivacyOnlyOnByteArray" || params.protocolName == "OneSidedSimulationOnByteArray") {
+	} else if (params.protocolName == "SemiHonestOnByteArray" || params.protocolName == "PrivacyOnlyOnByteArray" || params.protocolName == "OneSidedSimulationOnByteArray"
+		|| params.protocolName == "FullSimulationOnByteArray" || params.protocolName == "FullSimulationROMOnByteArray") {
 		auto out = ((OTOnByteArrayROutput*)output)->getXSigma();
 		cout << "output = " << endl;
 		for (int i = 0; i < out.size(); i++)
@@ -97,7 +121,8 @@ int mainOT(string side, string configPath) {
 	boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 
 	auto random = make_shared<PrgFromOpenSSLAES>();
-	random->setKey(random->generateKey(128));
+	auto key = random->generateKey(128);
+	random->setKey(key);
 	auto dlog = make_shared<OpenSSLDlogECF2m>();
 	try {
 		if (side == "1") {
@@ -110,7 +135,7 @@ int mainOT(string side, string configPath) {
 		else if (side == "2") {
 			server->join(500, 5000); // sleep time=500, timeout = 5000 (ms);
 			auto receiver = getReceiver(server, random, sdp, dlog);
-			OTRBasicInput input(1);
+			OTRBasicInput input(0);
 			auto output = receiver->transfer(server.get(), &input);
 			printOutput(output.get(), sdp);
 		}

@@ -29,12 +29,12 @@
 #include "../../include/primitives/TrapdoorPermutationOpenSSL.hpp"
 
 
-void OpenSSLRSAPermutation::setKey(PublicKey* publicKey, PrivateKey* privateKey) {
-	RSAPublicKey * rsaPubKey = dynamic_cast<RSAPublicKey *>(publicKey);
-	RSAPrivateKey * rsaPrivKey = dynamic_cast<RSAPrivateKey *>(privateKey);
+void OpenSSLRSAPermutation::setKey(const shared_ptr<PublicKey> & publicKey, const shared_ptr<PrivateKey> & privateKey) {
+	auto rsaPubKey = dynamic_pointer_cast<RSAPublicKey>(publicKey);
+	auto rsaPrivKey = dynamic_pointer_cast<RSAPrivateKey>(privateKey);
 
-	if (!rsaPubKey || (privateKey!=NULL && !rsaPrivKey))
-		throw new InvalidKeyException("Key type doesn't match the trapdoor permutation type");
+	if (!rsaPubKey || (privateKey != nullptr && !rsaPrivKey))
+		throw InvalidKeyException("Key type doesn't match the trapdoor permutation type");
 	
 	// Gets the values of modulus (N), pubExponent (e), privExponent (d).
 	biginteger pubExponent = rsaPubKey->getPublicExponent();
@@ -42,7 +42,7 @@ void OpenSSLRSAPermutation::setKey(PublicKey* publicKey, PrivateKey* privateKey)
 
 	if (privateKey) { // if privateKey is not NULL
 		biginteger privExponent = rsaPrivKey->getPrivateExponent();
-		RSAPrivateCrtKey* crtKey = dynamic_cast<RSAPrivateCrtKey*>(privateKey);
+		auto crtKey = dynamic_pointer_cast<RSAPrivateCrtKey>(privateKey);
 
 		if (crtKey) { // If private key is CRT private key.
 			//gets all the crt parameters
@@ -70,10 +70,10 @@ void OpenSSLRSAPermutation::setKey(PublicKey* publicKey, PrivateKey* privateKey)
 
 }
 
-RSA* OpenSSLRSAPermutation::initRSAPublicPrivateCrt(biginteger pubExp, biginteger privExp, biginteger p,
-	biginteger q, biginteger dp, biginteger dq, biginteger crt) {
-
-	RSA* rsa = RSA_new();
+shared_ptr<RSA> OpenSSLRSAPermutation::initRSAPublicPrivateCrt(biginteger & pubExp, biginteger & privExp, biginteger & p,
+	biginteger & q, biginteger & dp, biginteger & dq, biginteger & crt) {
+	
+	auto rsa = shared_ptr<RSA>(RSA_new(), RSA_free);
 	rsa->n = biginteger_to_opensslbignum(modulus);
 	rsa->e = biginteger_to_opensslbignum(pubExp);
 	rsa->d = biginteger_to_opensslbignum(privExp);
@@ -85,32 +85,29 @@ RSA* OpenSSLRSAPermutation::initRSAPublicPrivateCrt(biginteger pubExp, bigintege
 
 	if ((rsa->n == NULL) || (rsa->e == NULL) || (rsa->d == NULL) || (rsa->p == NULL) ||
 		(rsa->q == NULL) || (rsa->dmp1 == NULL) || (rsa->dmq1 == NULL) || (rsa->iqmp == NULL)) {
-		RSA_free(rsa);
-		return NULL;
+		return nullptr;
 	}
 	return rsa;
 }
 
-RSA* OpenSSLRSAPermutation::initRSAPublicPrivate(biginteger pubExponent, biginteger privExponent) {
-	RSA* rsa = RSA_new();
+shared_ptr<RSA> OpenSSLRSAPermutation::initRSAPublicPrivate(biginteger & pubExponent, biginteger & privExponent) {
+	auto rsa = shared_ptr<RSA>(RSA_new(), RSA_free);
 	rsa->n = biginteger_to_opensslbignum(modulus);
 	rsa->e = biginteger_to_opensslbignum(pubExponent);
 	rsa->d = biginteger_to_opensslbignum(privExponent);
 	if ((rsa->n == NULL) || (rsa->e == NULL) || (rsa->d == NULL)) {
-		RSA_free((RSA *)rsa);
-		return NULL;
+		return nullptr;
 	}
 	return rsa;
 }
 
-RSA* OpenSSLRSAPermutation::initRSAPublic(biginteger pubExponent) {
-	RSA* rsa = RSA_new();
+shared_ptr<RSA> OpenSSLRSAPermutation::initRSAPublic(biginteger & pubExponent) {
+	auto rsa = shared_ptr<RSA>(RSA_new(), RSA_free);
 
 	rsa->n = biginteger_to_opensslbignum(modulus);
 	rsa->e = biginteger_to_opensslbignum(pubExponent);
 	if ((rsa->n == NULL) || (rsa->e == NULL)) {
-		RSA_free(rsa);
-		return NULL;
+		return nullptr;
 	}
 	return rsa;
 }
@@ -130,7 +127,7 @@ KeyPair OpenSSLRSAPermutation::generateKey(int keySize) {
 }
 
 
-TPElement* OpenSSLRSAPermutation::compute(TPElement * tpEl) {
+shared_ptr<TPElement> OpenSSLRSAPermutation::compute(TPElement * tpEl) {
 	if (!isKeySet())
 		throw IllegalStateException("keys aren't set");
 	RSAElement * rsaEl = dynamic_cast<RSAElement *>(tpEl);
@@ -144,12 +141,12 @@ TPElement* OpenSSLRSAPermutation::compute(TPElement * tpEl) {
 	biginteger result = computeRSA(elementP);
 
 	// Create and initialize a RSAElement with the result.
-	RSAElement * returnEl = new RSAElement(modulus, result, false);
+	auto returnEl = make_shared<RSAElement>(modulus, result, false);
 
 	return returnEl; // return the created TPElement.
 }
 
-biginteger OpenSSLRSAPermutation::computeRSA(biginteger elementP) {
+biginteger OpenSSLRSAPermutation::computeRSA(biginteger & elementP) {
 	ERR_load_crypto_strings();
 	//SSL_load_error_strings();
 	// Seed the random geneartor.
@@ -160,13 +157,13 @@ biginteger OpenSSLRSAPermutation::computeRSA(biginteger elementP) {
 #endif
 
 	// Allocate a new byte array to hold the output.
-	int size = RSA_size(rsa);
+	int size = RSA_size(rsa.get());
 	std::shared_ptr<byte> ret(new byte[size], std::default_delete<byte[]>());
 
 	size_t encodedSize = bytesCount(elementP);
 	std::shared_ptr<byte> encodedBi(new byte[encodedSize], std::default_delete<byte[]>());
 	encodeBigInteger(elementP, encodedBi.get(), encodedSize);
-	int success = RSA_public_encrypt(encodedSize, encodedBi.get(), ret.get(), rsa, RSA_NO_PADDING);
+	int success = RSA_public_encrypt(encodedSize, encodedBi.get(), ret.get(), rsa.get(), RSA_NO_PADDING);
 	if (-1 == success)
 	{
 		string error(ERR_reason_error_string(ERR_get_error()));
@@ -176,7 +173,7 @@ biginteger OpenSSLRSAPermutation::computeRSA(biginteger elementP) {
 	return result;
 }
 
-TPElement* OpenSSLRSAPermutation::invert(TPElement * tpEl) {
+shared_ptr<TPElement> OpenSSLRSAPermutation::invert(TPElement * tpEl) {
 	if (!isKeySet())
 		throw IllegalStateException("keys aren't set");
 	// If only the public key was set and not the private key - can't do the invert, throw exception.
@@ -190,7 +187,7 @@ TPElement* OpenSSLRSAPermutation::invert(TPElement * tpEl) {
 	biginteger elementP = rsaEl->getElement();
 	
 	// Allocate a new byte array to hold the output.
-	int size = RSA_size(rsa);
+	int size = RSA_size(rsa.get());
 	std::shared_ptr<byte> ret(new byte[size], std::default_delete<byte[]>());
 
 	size_t encodedSize = bytesCount(elementP);
@@ -200,10 +197,10 @@ TPElement* OpenSSLRSAPermutation::invert(TPElement * tpEl) {
 	string st(encodedBi.get(), encodedBi.get()+encodedSize);
 
 	// invert the RSA permutation on the given bytes.
-	RSA_private_decrypt(encodedSize, encodedBi.get(), ret.get(), rsa, RSA_NO_PADDING);
+	RSA_private_decrypt(encodedSize, encodedBi.get(), ret.get(), rsa.get(), RSA_NO_PADDING);
 	biginteger resValue = decodeBigInteger(ret.get(), size);
 	// creates and initialize a RSAElement with the result.
-	RSAElement * returnEl = new RSAElement(modulus, resValue, false);
+	auto returnEl = make_shared<RSAElement>(modulus, resValue, false);
 	return returnEl; // return the result TPElement.
 }
 TPElValidity OpenSSLRSAPermutation::isElement(TPElement* tpEl) {
@@ -230,12 +227,8 @@ TPElValidity OpenSSLRSAPermutation::isElement(TPElement* tpEl) {
 	return validity;
 }
 
-TPElement* OpenSSLRSAPermutation::generateRandomTPElement() {
+shared_ptr<TPElement> OpenSSLRSAPermutation::generateRandomTPElement() {
 	if (!isKeySet())
 		throw IllegalStateException("keys aren't set");
-	return new RSAElement(modulus);
-}
-
-OpenSSLRSAPermutation::~OpenSSLRSAPermutation() {
-	RSA_free(rsa);
+	return make_shared<RSAElement>(modulus, random);
 }

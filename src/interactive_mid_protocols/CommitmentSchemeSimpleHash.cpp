@@ -35,7 +35,7 @@
 void CmtSimpleHashCommitmentMessage::initFromString(const string & s) {
 	auto vec = explode(s, ':');
 	id = stol(vec[0]);
-	for (int i = 2; i < vec.size(); i++) {
+	for (int i = 2; i < (int) vec.size(); i++) {
 		vec[1] += ":" + vec[i];
 	}
 	c = make_shared<vector<byte>>(vec[1].begin(), vec[1].end());
@@ -60,7 +60,7 @@ void CmtSimpleHashDecommitmentMessage::initFromString(const string & s) {
 		vec[1] += ":" + vec[counter++];
 	vector<byte> random(vec[1].begin(), vec[1].end());
 	r = make_shared<ByteArrayRandomValue>(random);
-	for (int i = counter + 1; i < vec.size(); i++)
+	for (int i = counter + 1; i < (int) vec.size(); i++)
 		vec[counter] += ":" + vec[i];
 	vector<byte> tmp(vec[counter].begin(), vec[counter].end());
 	x = make_shared<vector<byte>>(tmp);
@@ -84,23 +84,7 @@ string CmtSimpleHashDecommitmentMessage::toString() {
 * values for the hash function, SecureRandom object and a security parameter n.
 *  @param channel
 */
-CmtSimpleHashCommitter::CmtSimpleHashCommitter(shared_ptr<CommParty> channel, shared_ptr<CryptographicHash> hash, int n) {
-	auto prg = make_shared<PrgFromOpenSSLAES>();
-	prg->setKey(prg->generateKey(128));
-	
-	init(channel, prg, hash, n);
-}
-
-/**
-* Constructor that receives a connected channel (to the receiver) and chosses default
-* values for the hash function, SecureRandom object and a security parameter n.
-*  @param channel
-*/
 CmtSimpleHashCommitter::CmtSimpleHashCommitter(shared_ptr<CommParty> channel, shared_ptr<PrgFromOpenSSLAES> prg, shared_ptr<CryptographicHash> hash, int n) {
-	init(channel, prg, hash, n);
-}
-
-void CmtSimpleHashCommitter::init(shared_ptr<CommParty> channel, shared_ptr<PrgFromOpenSSLAES> prg, shared_ptr<CryptographicHash> hash, int n) {
 	this->channel = channel;
 	this->hash = hash;
 	this->n = n;
@@ -151,7 +135,6 @@ shared_ptr<CmtCDecommitmentMessage> CmtSimpleHashCommitter::generateDecommitment
 */
 shared_ptr<CmtCommitValue> CmtSimpleHashCommitter::sampleRandomCommitValue() {
 	vector<byte> val;
-	//RAND_bytes(val.data(), 32);
 	prg->getPRGBytes(val, 0, 32);
 
 	return make_shared<CmtByteArrayCommitValue>(make_shared<vector<byte>>(val));

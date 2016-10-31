@@ -270,6 +270,12 @@
     <ClCompile Include="..\..\src\primitives\HashBlake2.cpp">
       <Filter>Source Files\primitives</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\interactive_mid_protocols\OTFullSimulation.cpp">
+      <Filter>Source Files\InteractiveMidProtocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\interactive_mid_protocols\OTFullSimulationROM.cpp">
+      <Filter>Source Files\InteractiveMidProtocols</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\circuits\BooleanCircuits.hpp">
@@ -335,9 +341,6 @@
     <ClInclude Include="..\..\include\primitives\Kdf.hpp">
       <Filter>Header Files\Primitives</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\primitives\mac.hpp">
-      <Filter>Header Files\Primitives</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\primitives\Prf.hpp">
       <Filter>Header Files\Primitives</Filter>
     </ClInclude>
@@ -351,9 +354,6 @@
       <Filter>Header Files\Primitives</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\primitives\TrapdoorPermutationOpenSSL.hpp">
-      <Filter>Header Files\Primitives</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\primitives\TrapdoorPermutations.hpp">
       <Filter>Header Files\Primitives</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\circuits\Compat.h">
@@ -524,11 +524,20 @@
     <ClInclude Include="..\..\include\interactive_mid_protocols\OTOneSidedSimulation.hpp">
       <Filter>Header Files\InteractiveMidProtocols</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\interactive_mid_protocols\OTFullSimulation.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\primitives\HashBlake2.hpp">
       <Filter>Header Files\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\interactive_mid_protocols\OTFullSimulationROM.hpp">
+      <Filter>Header Files\InteractiveMidProtocols</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\interactive_mid_protocols\OTFullSimulation.hpp">
+      <Filter>Header Files\InteractiveMidProtocols</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\primitives\TrapdoorPermutation.hpp">
+      <Filter>Header Files\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\mid_layer\Mac.hpp">
+      <Filter>Header Files\MidLayer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

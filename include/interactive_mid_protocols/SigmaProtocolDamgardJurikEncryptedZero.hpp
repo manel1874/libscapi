@@ -29,6 +29,7 @@
 #pragma once
 #include "SigmaProtocol.hpp"
 #include "../mid_layer/DamgardJurikEnc.hpp"
+#include "../primitives/Prg.hpp"
 
 /**
 * Concrete implementation of SigmaProtocol input, used by the SigmaDamgardJurikEncryptedZero verifier and simulator.
@@ -61,6 +62,8 @@ public:
 	* @return ciphertext which is an encryption on the plaintext.
 	*/
 	BigIntegerCiphertext getCiphertext() { return cipher; }
+
+	string toString() override;
 };
 
 /**
@@ -142,7 +145,7 @@ class SigmaDJEncryptedZeroSimulator : public SigmaSimulator {
 private:
 	int t; 						// Soundness parameter in BITS.
 	int lengthParameter;		// Length parameter in BITS.
-	mt19937 random;
+	shared_ptr<PrgFromOpenSSLAES> random;
 
 	/**
 	* Checks the validity of the given soundness parameter.<p>
@@ -164,7 +167,7 @@ public:
 	* @param lengthParameter length parameter in BITS.
 	* @param random
 	*/
-	SigmaDJEncryptedZeroSimulator(int t = 40, int lengthParameter = 1);
+	SigmaDJEncryptedZeroSimulator(int t = 40, int lengthParameter = 1, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -214,7 +217,7 @@ class SigmaDJEncryptedZeroProverComputation : public SigmaProverComputation, DJB
 private:
 	int t; 									// Soundness parameter in BITS.
 	int lengthParameter;					// Length parameter in BITS.
-	mt19937 random;
+	shared_ptr<PrgFromOpenSSLAES> random;
 	shared_ptr<SigmaDJEncryptedZeroProverInput> input;	// Contains public key n, ciphertext c and the random value used to encrypt.
 	biginteger n;							// Modulus.
 	biginteger s;							// The random value chosen in the protocol.
@@ -242,7 +245,7 @@ public:
 	* @param lengthParameter length parameter in BITS.
 	* @param random
 	*/
-	SigmaDJEncryptedZeroProverComputation(int t = 40, int lengthParameter = 1);
+	SigmaDJEncryptedZeroProverComputation(int t = 40, int lengthParameter = 1, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -274,7 +277,7 @@ public:
 	* @return SigmaDamgardJurikEncryptedZeroSimulator
 	*/
 	shared_ptr<SigmaSimulator> getSimulator() override {
-		return make_shared<SigmaDJEncryptedZeroSimulator>(t, lengthParameter);
+		return make_shared<SigmaDJEncryptedZeroSimulator>(t, lengthParameter, random);
 	}
 
 };
@@ -301,7 +304,7 @@ class SigmaDJEncryptedZeroVerifierComputation : public SigmaVerifierComputation,
 private:
 	int t; 						// Soundness parameter in BITS.
 	int lengthParameter;		// Length parameter in BITS.
-	mt19937 random;
+	shared_ptr<PrgFromOpenSSLAES> random;
 	vector<byte> e;				//The challenge.
 	biginteger n;				//The modulus
 
@@ -319,7 +322,7 @@ public:
 	* @param lengthParameter length parameter in BITS.
 	* @param random
 	*/
-	SigmaDJEncryptedZeroVerifierComputation(int t = 40, int lengthParameter = 1);
+	SigmaDJEncryptedZeroVerifierComputation(int t = 40, int lengthParameter = 1, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 
 	/**

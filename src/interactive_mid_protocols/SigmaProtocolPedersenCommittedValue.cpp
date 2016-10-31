@@ -28,13 +28,24 @@
 
 #include "../../include/interactive_mid_protocols/SigmaProtocolPedersenCommittedValue.hpp"
 
+string SigmaPedersenCommittedValueCommonInput::toString() {
+	string output = string(x);
+	output += ":";
+	output += h->generateSendableData()->toString();
+	output += ":";
+	output += commitment->generateSendableData()->toString();
+	return output;
+
+}
+
 /**
 * Constructor that gets the underlying DlogGroup, soundness parameter and SecureRandom.
 * @param dlog
 * @param t Soundness parameter in BITS.
 * @param random
 */
-SigmaPedersenCommittedValueSimulator::SigmaPedersenCommittedValueSimulator(shared_ptr<DlogGroup> dlog, int t) : dlogSim(dlog, t) {
+SigmaPedersenCommittedValueSimulator::SigmaPedersenCommittedValueSimulator(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg) 
+	: dlogSim(dlog, t, prg) {
 
 	//Creates the underlying SigmaDlogSimulator object with the given parameters.
 	this->dlog = dlog.get();
@@ -76,11 +87,11 @@ shared_ptr<SigmaDlogCommonInput> SigmaPedersenCommittedValueSimulator::convertIn
 * @param t Soundness parameter in BITS.
 * @param random
 */
-SigmaPedersenCommittedValueProverComputation::SigmaPedersenCommittedValueProverComputation(shared_ptr<DlogGroup> dlog, int t) : sigmaDlog(dlog, t) {
-
+SigmaPedersenCommittedValueProverComputation::SigmaPedersenCommittedValueProverComputation(shared_ptr<DlogGroup> dlog, int t, 
+	const shared_ptr<PrgFromOpenSSLAES> & prg) : sigmaDlog(dlog, t, prg) {
+	this->prg = prg;
 	this->dlog = dlog;
 	this->t = t;
-	this->random = get_seeded_random();
 }
 
 /**

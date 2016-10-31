@@ -87,15 +87,14 @@ shared_ptr<SigmaDlogProverInput> SigmaElGamalCmtKnowledgeProverComputation::conv
 }
 
 /**
-* Constructor that gets the underlying DlogGroup, soundness parameter and SecureRandom.
+* Constructor that gets the underlying DlogGroup, soundness parameter.
 * @param dlog
 * @param t Soundness parameter in BITS.
-* @param random
 */
-SigmaElGamalCmtKnowledgeProverComputation::SigmaElGamalCmtKnowledgeProverComputation(shared_ptr<DlogGroup> dlog, int t) : sigmaDlog(dlog, t) {
+SigmaElGamalCmtKnowledgeProverComputation::SigmaElGamalCmtKnowledgeProverComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg) : sigmaDlog(dlog, t, prg) {
 	this->dlog = dlog;
 	this->t = t;
-	this->random = get_seeded_random();
+	this->prg = prg;
 }
 
 /**

@@ -29,6 +29,23 @@
 #include "../../include/interactive_mid_protocols/SigmaProtocolDHExtended.hpp"
 
 /**************************************************/
+/**************** Input*** ************************/
+/**************************************************/
+string SigmaDHExtendedCommonInput::toString() {
+
+	string output = "";
+	for (int i = 0; i < (int) gArray.size(); i++) {
+		output += gArray[i]->generateSendableData()->toString();
+		output += ":";
+	}
+	for (int i = 0; i < (int) hArray.size(); i++) {
+		output += gArray[i]->generateSendableData()->toString();
+		output += ":";
+	}
+	return output;
+}
+
+/**************************************************/
 /**************** Messages ************************/
 /**************************************************/
 
@@ -61,7 +78,7 @@ void SigmaDHExtendedMsg::initFromString(const string & s) {
 * @param random
 * @throws IllegalArgumentException if soundness parameter is invalid.
 */
-SigmaDHExtendedSimulator::SigmaDHExtendedSimulator(shared_ptr<DlogGroup> dlog, int t) {
+SigmaDHExtendedSimulator::SigmaDHExtendedSimulator(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	//Sets the parameters.
 	this->dlog = dlog;
 	this->t = t;
@@ -71,7 +88,7 @@ SigmaDHExtendedSimulator::SigmaDHExtendedSimulator(shared_ptr<DlogGroup> dlog, i
 		throw invalid_argument("soundness parameter t does not satisfy 2^t<q");
 	}
 
-	this->random = get_seeded_random();
+	this->random = random;
 }
 
 /**
@@ -113,7 +130,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaDHExtendedSimulator::simulate(SigmaCommonI
 
 	//Sample a random z <- Zq
 	biginteger qMinusOne = dlog->getOrder() - 1;
-	biginteger z = getRandomInRange(0, qMinusOne, random);
+	biginteger z = getRandomInRange(0, qMinusOne, random.get());
 
 	//Compute -e (where -e here means -e mod q)
 	biginteger e = decodeBigInteger(challenge.data(), challenge.size());
@@ -140,7 +157,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaDHExtendedSimulator::simulate(SigmaCommonI
 shared_ptr<SigmaSimulatorOutput> SigmaDHExtendedSimulator::simulate(SigmaCommonInput* input) {
 	//Create a new byte array of size t/8, to get the required byte size.
 	vector<byte> e(t / 8);
-	RAND_bytes(e.data(), t / 8);
+	random->getPRGBytes(e, 0, t / 8);
 	
 	//Call the other simulate function with the given input and the sampled e.
 	return simulate(input, e);
@@ -150,7 +167,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaDHExtendedSimulator::simulate(SigmaCommonI
 /******** Sigma DH Extended prover ****************/
 /**************************************************/
 
-SigmaDHExtendedProverComputation::SigmaDHExtendedProverComputation(shared_ptr<DlogGroup> dlog, int t) {
+SigmaDHExtendedProverComputation::SigmaDHExtendedProverComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 
 	//Sets the parameters.
 	this->dlog = dlog;
@@ -161,7 +178,7 @@ SigmaDHExtendedProverComputation::SigmaDHExtendedProverComputation(shared_ptr<Dl
 		throw invalid_argument("soundness parameter t does not satisfy 2^t<q");
 	}
 
-	this->random = get_seeded_random();
+	this->random = random;
 
 }
 
@@ -189,7 +206,7 @@ shared_ptr<SigmaProtocolMsg> SigmaDHExtendedProverComputation::computeFirstMsg(s
 	
 	//Sample random r in Zq
 	biginteger qMinusOne = dlog->getOrder() - 1;
-	r = getRandomInRange(0, qMinusOne, random);
+	r = getRandomInRange(0, qMinusOne, random.get());
 
 	//get g array from the input.
 	auto gArray = commonInput->getGArray();
@@ -237,7 +254,7 @@ shared_ptr<SigmaProtocolMsg> SigmaDHExtendedProverComputation::computeSecondMsg(
 * @throws InvalidDlogGroupException if the given dlog is invalid.
 * @throws IllegalArgumentException if soundness parameter is invalid.
 */
-SigmaDHExtendedVerifierComputation::SigmaDHExtendedVerifierComputation(shared_ptr<DlogGroup> dlog, int t) {
+SigmaDHExtendedVerifierComputation::SigmaDHExtendedVerifierComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 
 	if (!dlog->validateGroup())
 		throw InvalidDlogGroupException("invalid dlog");
@@ -251,7 +268,7 @@ SigmaDHExtendedVerifierComputation::SigmaDHExtendedVerifierComputation(shared_pt
 		throw invalid_argument("soundness parameter t does not satisfy 2^t<q");
 	}
 
-	this->random = get_seeded_random();
+	this->random = random;
 }
 
 /**
@@ -272,7 +289,7 @@ bool SigmaDHExtendedVerifierComputation::checkSoundnessParam() {
 void SigmaDHExtendedVerifierComputation::sampleChallenge() {
 	//make space for t/8 bytes and fill it with random values.
 	e.resize(t / 8);
-	RAND_bytes(e.data(), t / 8);
+	random->getPRGBytes(e, 0, t / 8);
 }
 
 bool SigmaDHExtendedVerifierComputation::verify(SigmaCommonInput* input, SigmaProtocolMsg* a, SigmaProtocolMsg* z) {

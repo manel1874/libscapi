@@ -61,7 +61,8 @@ string CmtPedersenHashDecommitmentMessage::toString() {
 * @throws IOException if there was a problem during the communication
 * @throws ClassNotFoundException if there was a problem with the serialization mechanism.
 */
-CmtPedersenHashCommitter::CmtPedersenHashCommitter(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash) : CmtPedersenCommitterCore(channel, dlog) {
+CmtPedersenHashCommitter::CmtPedersenHashCommitter(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, 
+	const shared_ptr<PrgFromOpenSSLAES> & random) : CmtPedersenCommitterCore(channel, random, dlog) {
 
 	if (hash->getHashedMsgSize() > (int)bytesCount(dlog->getOrder())) {
 		throw invalid_argument("The size in bytes of the resulting hash is bigger than the size in bytes of the order of the DlogGroup.");
@@ -114,7 +115,7 @@ shared_ptr<CmtCDecommitmentMessage> CmtPedersenHashCommitter::generateDecommitme
 */
 shared_ptr<CmtCommitValue> CmtPedersenHashCommitter::sampleRandomCommitValue()  {
 	vector<byte> val(32);
-	RAND_bytes(val.data(), 32);
+	random->getPRGBytes(val, 0, 32);
 	return make_shared<CmtByteArrayCommitValue>(make_shared<vector<byte>>(val));
 }
 
@@ -145,7 +146,7 @@ vector<byte> CmtPedersenHashCommitter::generateBytesFromCommitValue(CmtCommitVal
 * @throws InvalidDlogGroupException if the parameters of the group do not conform the type the group is supposed to be
 * @throws IOException if there was a problem during the communication
 */
-CmtPedersenHashReceiver::CmtPedersenHashReceiver(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash) : CmtPedersenReceiverCore(channel, dlog) {
+CmtPedersenHashReceiver::CmtPedersenHashReceiver(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, const shared_ptr<PrgFromOpenSSLAES> & random) : CmtPedersenReceiverCore(channel, random, dlog) {
 
 	if (hash->getHashedMsgSize() > (int) bytesCount(dlog->getOrder())) {
 		throw invalid_argument("The size in bytes of the resulting hash is bigger than the size in bytes of the order of the DlogGroup.");

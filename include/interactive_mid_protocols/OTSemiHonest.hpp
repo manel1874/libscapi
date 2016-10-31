@@ -264,7 +264,7 @@ public:
 	*/
 	OTSemiHonestDDHOnByteArraySender(const shared_ptr<PrgFromOpenSSLAES> & random = make_shared<PrgFromOpenSSLAES>(),
 		const shared_ptr<DlogGroup> & dlog = make_shared<OpenSSLDlogECF2m>("K-233"),
-		const shared_ptr<KeyDerivationFunction> & kdf = make_shared<HKDF>(new OpenSSLHMAC("SHA-256"))) : OTSemiHonestDDHSenderAbs(random, dlog), kdf(kdf) {}
+		const shared_ptr<KeyDerivationFunction> & kdf = make_shared<HKDF>(make_shared<OpenSSLHMAC>("SHA-256"))) : OTSemiHonestDDHSenderAbs(random, dlog), kdf(kdf) {}
 
 protected:
 	/**
@@ -436,7 +436,7 @@ public:
 	*/
 	OTSemiHonestDDHOnByteArrayReceiver(const shared_ptr<PrgFromOpenSSLAES> & random = make_shared<PrgFromOpenSSLAES>(),
 		const shared_ptr<DlogGroup> & dlog = make_shared<OpenSSLDlogECF2m>("K-233"),
-		const shared_ptr<KeyDerivationFunction> & kdf = make_shared<HKDF>(new OpenSSLHMAC("SHA-256"))) : OTSemiHonestDDHReceiverAbs(random, dlog), kdf(kdf) {}
+		const shared_ptr<KeyDerivationFunction> & kdf = make_shared<HKDF>(make_shared<OpenSSLHMAC>("SHA-256"))) : OTSemiHonestDDHReceiverAbs(random, dlog), kdf(kdf) {}
 
 protected:
 

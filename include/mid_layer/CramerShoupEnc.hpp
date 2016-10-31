@@ -47,9 +47,9 @@ private:
 	shared_ptr<GroupElementSendableData> g2;
 
 public:
-	CramerShoupPublicKeySendableData(shared_ptr<GroupElementSendableData> c,
-		shared_ptr<GroupElementSendableData> d, shared_ptr<GroupElementSendableData> h,
-		shared_ptr<GroupElementSendableData> g1, shared_ptr<GroupElementSendableData> g2);
+	CramerShoupPublicKeySendableData(const shared_ptr<GroupElementSendableData> & c,
+		const shared_ptr<GroupElementSendableData> & d, const shared_ptr<GroupElementSendableData> & h,
+		const shared_ptr<GroupElementSendableData> & g1, const shared_ptr<GroupElementSendableData> & g2);
 
 	shared_ptr<GroupElementSendableData> getC() { return c;	}
 
@@ -85,7 +85,8 @@ public:
 	/**
 	* This constructor is used by the Encryption Scheme as a result of a call to function generateKey.
 	*/
-	CramerShoupPublicKey(shared_ptr<GroupElement> c, shared_ptr<GroupElement> d, shared_ptr<GroupElement> h, shared_ptr<GroupElement> g1, shared_ptr<GroupElement> g2);
+	CramerShoupPublicKey(const shared_ptr<GroupElement> & c, const shared_ptr<GroupElement> & d, const shared_ptr<GroupElement> & h, 
+		const shared_ptr<GroupElement> & g1, const shared_ptr<GroupElement> & g2);
 
 	string getAlgorithm() override { return "CramerShoup"; }
 
@@ -122,7 +123,7 @@ private:
 	biginteger z;
 
 public:
-	CramerShoupPrivateKey(biginteger x1, biginteger x2, biginteger y1, biginteger y2, biginteger z);
+	CramerShoupPrivateKey(const biginteger & x1, const biginteger & x2, const biginteger & y1, const biginteger & y2, const biginteger & z);
 
 	string getAlgorithm() override { return "CramerShoup"; }
 
@@ -152,8 +153,8 @@ private:
 	shared_ptr<GroupElementSendableData> e;
 	
 public:
-	CrShOnGroupElSendableData(shared_ptr<GroupElementSendableData> u1, shared_ptr<GroupElementSendableData> u2,
-		shared_ptr<GroupElementSendableData> v, shared_ptr<GroupElementSendableData> e);
+	CrShOnGroupElSendableData(const shared_ptr<GroupElementSendableData> & u1, const shared_ptr<GroupElementSendableData> & u2,
+		const shared_ptr<GroupElementSendableData> & v, const shared_ptr<GroupElementSendableData> & e);
 
 	shared_ptr<GroupElementSendableData> getE() { return e; }
 
@@ -183,7 +184,8 @@ private:
 	shared_ptr<GroupElement> e;
 
 public:
-	CramerShoupOnGroupElementCiphertext(shared_ptr<GroupElement> u1, shared_ptr<GroupElement> u2, shared_ptr<GroupElement> e, shared_ptr<GroupElement> v) {
+	CramerShoupOnGroupElementCiphertext(const shared_ptr<GroupElement> & u1, const shared_ptr<GroupElement> & u2, 
+		const shared_ptr<GroupElement> & e, const shared_ptr<GroupElement> & v) {
 		this->u1 = u1;
 		this->u2 = u2;
 		this->v = v;
@@ -232,7 +234,7 @@ private:
 	shared_ptr<CryptographicHash> hash;				// Underlying hash function.
 	shared_ptr<CramerShoupPublicKey> publicKey;
 	shared_ptr<CramerShoupPrivateKey> privateKey;
-	mt19937 random;
+	shared_ptr<PrgFromOpenSSLAES> random;
 	biginteger qMinusOne; 				// Saved to avoid many calculations.
 	bool keySet;
 
@@ -244,7 +246,7 @@ private:
 	* @param eToByteArray
 	* @return the result of hash(u1ToByteArray+u2ToByteArray+eToByteArray)
 	*/
-	vector<byte> calcAlpha(vector<byte> u1ToByteArray, vector<byte> u2ToByteArray, vector<byte> eToByteArray);
+	vector<byte> calcAlpha(vector<byte> & u1ToByteArray, vector<byte> & u2ToByteArray, vector<byte> & eToByteArray);
 
 	/**
 	* calculate the v value of the encryption.
@@ -253,7 +255,7 @@ private:
 	* @param alpha the value returned from the hash calculation.
 	* @return the calculated value v.
 	*/
-	shared_ptr<GroupElement> calcV(biginteger r, vector<byte> alpha);
+	shared_ptr<GroupElement> calcV(const biginteger & r, vector<byte> & alpha);
 
 	/**
 	* This function is called from the decrypt function. It Validates that the given cipher is correct.
@@ -262,7 +264,7 @@ private:
 	* @param alpha parameter needs to validation.
 	* @throws ScapiRuntimeException if the given cipher is not valid.
 	*/
-	void checkValidity(CramerShoupOnGroupElementCiphertext* cipher, vector<byte> alpha);
+	void checkValidity(CramerShoupOnGroupElementCiphertext* cipher, vector<byte> & alpha);
  
 public:
 	/**
@@ -274,7 +276,8 @@ public:
 	* @param random source of randomness.
 	* @throws SecurityLevelException if the Dlog Group or the Hash function do not meet the required Security Level
 	*/
-	CramerShoupOnGroupElementEnc(shared_ptr<DlogGroup> dlogGroup = make_shared<OpenSSLDlogZpSafePrime>("1024"), shared_ptr<CryptographicHash> hash = make_shared<OpenSSLSHA256>());
+	CramerShoupOnGroupElementEnc(const shared_ptr<DlogGroup> & dlogGroup = make_shared<OpenSSLDlogZpSafePrime>("1024"), 
+		const shared_ptr<CryptographicHash> & hash = make_shared<OpenSSLSHA256>(), const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* This function sets the Public\Private key.
@@ -282,7 +285,7 @@ public:
 	* @param privateKey the private key has to be of type <link>CramerShoupPrivateKey<link>.
 	* @throws InvalidKeyException if the keys are not instances of CramerShoup keys.
 	*/
-	void setKey(shared_ptr<PublicKey> publicKey, shared_ptr<PrivateKey> privateKey) override;
+	void setKey(const shared_ptr<PublicKey> & publicKey, const shared_ptr<PrivateKey> & privateKey) override;
 
 	/**
 	* This function sets only the Public key.
@@ -290,7 +293,7 @@ public:
 	* @param publicKey the public key has to be of type <link>CramerShoupPublicKey<link>.
 	* @throws InvalidKeyException if the key is not instance of CramerShoup key.
 	*/
-	void setKey(shared_ptr<PublicKey> publicKey) override { setKey(publicKey, NULL); }
+	void setKey(const shared_ptr<PublicKey> & publicKey) override { setKey(publicKey, NULL); }
 
 	bool isKeySet() override { return keySet; }
 
@@ -324,9 +327,9 @@ public:
 	* This function is not supported for this encryption scheme, since there is no need for parameters to generate a CramerShoup key pair.
 	* @throws UnsupportedOperationException
 	*/
-	pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> generateKey(AlgorithmParameterSpec* keyParams) override {
+	pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> generateKey(AlgorithmParameterSpec * keyParams) override {
 		//No need for parameters to generate an Cramer-Shoup key pair. Therefore this operation is not supported.
-		throw new UnsupportedOperationException("To generate Cramer-Shoup keys use the generateKey() function");
+		throw UnsupportedOperationException("To generate Cramer-Shoup keys use the generateKey() function");
 	}
 
 	shared_ptr<PrivateKey> reconstructPrivateKey(KeySendableData* data) override;
@@ -343,7 +346,7 @@ public:
 	* @throws IllegalStateException if no public key was set.
 	* @throws IllegalArgumentException if the given Plaintext is not instance of GroupElementPlaintext.
 	*/
-	shared_ptr<AsymmetricCiphertext> encrypt(shared_ptr<Plaintext> plaintext) override; 
+	shared_ptr<AsymmetricCiphertext> encrypt(const shared_ptr<Plaintext> & plaintext) override; 
 
 	/**
 	* Encrypts the given plaintext using this CramerShoup encryption scheme and using the given random value.<p>
@@ -358,7 +361,7 @@ public:
 	* @throws IllegalStateException if no public key was set.
 	* @throws IllegalArgumentException if the given Plaintext is not instance of GroupElementPlaintext.
 	*/
-	shared_ptr<AsymmetricCiphertext> encrypt(shared_ptr<Plaintext> plaintext, biginteger r) override; 
+	shared_ptr<AsymmetricCiphertext> encrypt(const shared_ptr<Plaintext> & plaintext, const biginteger & r) override; 
 
 	/**
 	* Cramer-Shoup on GroupElement encryption scheme has a limit of the byte array length to generate a plaintext from.
@@ -377,7 +380,7 @@ public:
 	* @param text byte array to convert to a Plaintext object.
 	* @throws IllegalArgumentException if the given message's length is greater than the maximum.
 	*/
-	shared_ptr<Plaintext> generatePlaintext(vector<byte> text) override; 
+	shared_ptr<Plaintext> generatePlaintext(vector<byte> & text) override; 
 
 	/**
 	* Decrypts the given ciphertext using this Cramer-Shoup encryption scheme.

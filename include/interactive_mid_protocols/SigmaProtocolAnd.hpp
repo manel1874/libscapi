@@ -28,6 +28,7 @@
 
 #pragma once
 #include "SigmaProtocol.hpp"
+#include "../primitives/Prg.hpp"
 
 /**
 * Concrete implementation of Sigma Protocol prover computation.<p>
@@ -51,7 +52,7 @@ public:
 	* 		  and the prover wants to prove to the verify that the AND of all statements are true.
 	* @param t soundness parameter. t MUST be equal to all t values of the underlying provers object.
 	*/
-	SigmaANDProverComputation(vector<shared_ptr<SigmaProverComputation>> provers, int t);
+	SigmaANDProverComputation(vector<shared_ptr<SigmaProverComputation>> provers, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg());
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
 	*/
@@ -78,6 +79,7 @@ public:
 
 private:
 	vector<shared_ptr<SigmaProverComputation>> provers;	// underlying Sigma protocol's provers to the AND calculation.
+	shared_ptr<PrgFromOpenSSLAES> prg;
 	int len;								// number of underlying provers.
 	int t;									// soundness parameter.
 	/**
@@ -109,7 +111,7 @@ public:
 	* @param t soundness parameter. t MUST be equal to all t values of the underlying simulators object.
 	* @param random source of randomness
 	*/
-	SigmaANDSimulator(vector<shared_ptr<SigmaSimulator>> simulators, int t);
+	SigmaANDSimulator(vector<shared_ptr<SigmaSimulator>> simulators, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 	int getSoundnessParam() override { return t; };
 	/**
 	* Computes the simulator computation with the given challenge.
@@ -130,7 +132,7 @@ private:
 	vector<shared_ptr<SigmaSimulator>> simulators;	// Underlying Sigma protocol's simulators to the AND calculation.
 	int len;							// Number of underlying simulators.
 	int t;								// Soundness parameter.
-	std::mt19937 random;
+	shared_ptr<PrgFromOpenSSLAES> random;
 	/**
 	* Checks if the given challenge length is equal to the soundness parameter.
 	* @return true if the challenge length is t; false, otherwise.
@@ -162,7 +164,7 @@ public:
 	* @param t soundness parameter. t MUST be equal to all t values of the underlying verifiers object.
 	* @param random source of randomness
 	*/
-	SigmaANDVerifierComputation(vector<shared_ptr<SigmaVerifierComputation>> verifiers, int t);
+	SigmaANDVerifierComputation(vector<shared_ptr<SigmaVerifierComputation>> verifiers, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
 	*/
@@ -191,7 +193,7 @@ private:
 	int len;										// number of underlying verifiers
 	vector<byte>  e;								// the challenge
 	int t;											// soundness parameter
-	std::mt19937 random;							// prg
+	shared_ptr<PrgFromOpenSSLAES> random;							// prg
 };
 
 

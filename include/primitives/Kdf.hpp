@@ -28,6 +28,7 @@
 
 #pragma once
 #include "Prf.hpp"
+#include "PrfOpenSSL.hpp"
 #include <mutex>
 
 /**
@@ -46,7 +47,9 @@ public:
 	* @param iv info for the key generation
 	* @return SecretKey the derivated key.
 	*/
-	virtual SecretKey deriveKey(const vector<byte> & entropySource, int inOff, int inLen, int outLen, const vector<byte>* iv = NULL) =0;
+	virtual SecretKey deriveKey(const vector<byte> & entropySource, int inOff, int inLen, int outLen, const vector<byte>& iv) =0;
+
+	virtual SecretKey deriveKey(const vector<byte> & entropySource, int inOff, int inLen, int outLen) = 0;
 };
 
 /**
@@ -56,7 +59,7 @@ public:
 */
 class HKDF : public KeyDerivationFunction {
 private:
-	Hmac * hmac; // the underlying hmac
+	shared_ptr<Hmac> hmac; // the underlying hmac
 	mutex _mutex; // for synchronizing
 	/**
 	* Does round 2 to t of HKDF algorithm. The pseudo code:
@@ -68,7 +71,7 @@ private:
 	* @param outBytes the result of the overall computation
 	* @param intermediateOutBytes round result K(i) in the pseudocode
 	*/
-	void nextRounds(int outLen, const vector<byte> * iv, int hmacLength, vector<byte> & outBytes, vector<byte> & intermediateOutBytes);
+	void nextRounds(int outLen, const vector<byte> & iv, int hmacLength, vector<byte> & outBytes, vector<byte> & intermediateOutBytes);
 	/**
 	* First round of HKDF algorithm. The pseudo code:
 	* K(1) = HMAC(PRK,(CTXinfo,1)) [key=PRK, data=(CTXinfo,1)]
@@ -77,10 +80,11 @@ private:
 	* @param hmacLength the size of the output of the hmac.
 	* @param outBytes the result of the overall computation
 	*/
-	void firstRound(vector<byte>& outBytes, const vector<byte> * iv, vector<byte> & intermediateOutBytes, int outLength);
+	void firstRound(vector<byte>& outBytes, const vector<byte> & iv, vector<byte> & intermediateOutBytes, int outLength);
 
 public:
-	HKDF(Hmac * hmac) { this->hmac = hmac; };
+	HKDF(const shared_ptr<Hmac> & hmac = make_shared<OpenSSLHMAC>()) { this->hmac = hmac; };
+
 	/**
 	* This function derives a new key from the source key material key.
 	* The pseudo-code of this function is as follows:
@@ -96,5 +100,10 @@ public:
 	*
 	* Note that this function is thread safe!
 	*/
-	SecretKey deriveKey(const vector<byte> & entropySource, int inOff, int inLen, int outLen, const vector<byte>* iv = NULL) override;
+	SecretKey deriveKey(const vector<byte> & entropySource, int inOff, int inLen, int outLen, const vector<byte>& iv) override;
+
+	virtual SecretKey deriveKey(const vector<byte> & entropySource, int inOff, int inLen, int outLen) override {
+		vector<byte> empty;
+		return deriveKey(entropySource, inOff, inLen, outLen, empty);
+	}
 };

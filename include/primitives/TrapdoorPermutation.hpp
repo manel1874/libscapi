@@ -51,7 +51,7 @@ private:
 	// The actual value of the element. (This is NOT a TPElement).
 	biginteger x;
 public:
-	TPElementSendableData(biginteger x) { this->x = x; };
+	TPElementSendableData(biginteger & x) { this->x = x; };
 	biginteger getX() { return x; };
 };
 
@@ -76,7 +76,7 @@ public:
 	biginteger p;
 	biginteger q;
 	biginteger n;
-	RSAModulus(biginteger p, biginteger q, biginteger n) {
+	RSAModulus(biginteger & p, biginteger & q, biginteger & n) {
 		this->p = p;
 		this->q = q;
 		this->n = n;
@@ -89,7 +89,7 @@ public:
 	* @param random a source of randomness
 	* @return an RSAModulus structure that holds N, p and q.
 	*/
-	RSAModulus(size_t length, int certainty, mt19937 & random) {
+	RSAModulus(size_t length, int certainty, PrgFromOpenSSLAES* random) {
 
 		int pbitlength = (length + 1) / 2;
 		int qbitlength = length - pbitlength;
@@ -101,7 +101,6 @@ public:
 		for (;;) {
 			do {
 				q = getRandomPrime(qbitlength, certainty, random);
-				
 			} while ((bytesCount(mp::abs(q - p)) * 8) < mindiffbits);
 			
 			// calculate the modulus
@@ -214,7 +213,7 @@ public:
 	* @param q - prime2
 	* @param u - inverse of prime1 mod prime2
 	*/
-	ScRabinPrivateKey(biginteger mod, biginteger p, biginteger q, biginteger u) {
+	ScRabinPrivateKey(biginteger & mod, biginteger & p, biginteger & q, biginteger & u) {
 		modulus = mod;
 		prime1 = p;
 		prime2 = q;
@@ -242,7 +241,7 @@ public:
 	* @param q - prime2
 	* @param u - inverse of prime1 mod prime2
 	*/
-	ScRabinPrivateKeySpec(biginteger mod, biginteger p, biginteger q, biginteger u) {
+	ScRabinPrivateKeySpec(biginteger & mod, biginteger & p, biginteger & q, biginteger & u) {
 		modulus = mod;
 		prime1 = p;
 		prime2 = q;
@@ -271,7 +270,7 @@ private:
 	* @param r - quadratic residue mod prime1
 	* @param s - quadratic residue mod prime2
 	*/
-	ScRabinPublicKey(biginteger mod, biginteger r, biginteger s) {
+	ScRabinPublicKey(biginteger & mod, biginteger & r, biginteger & s) {
 		modulus = mod;
 		quadraticResidueModPrime1 = r;
 		quadraticResidueModPrime2 = s;
@@ -296,7 +295,7 @@ public:
 	* @param r - quadratic residue mod prime1
 	* @param s - quadratic residue mod prime2
 	*/
-	ScRabinPublicKeySpec(biginteger mod, biginteger r, biginteger s) {
+	ScRabinPublicKeySpec(biginteger & mod, biginteger & r, biginteger & s) {
 		modulus = mod;
 		quadraticResidueModPrime1 = r;
 		quadraticResidueModPrime2 = s;
@@ -318,13 +317,13 @@ public:
 	* Constructor that chooses a random element according to the given modulus.
 	* @param modN the modulus
 	*/
-	RSAElement(biginteger modN);
+	RSAElement(biginteger & modN, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 	/**
 	* Constructor that gets a modulus and a value. If the value is a valid RSA element according to the modulus, sets it to be the element.
 	* @param modN - the modulus
 	* @param x - the element value
 	*/
-	RSAElement(biginteger modN, biginteger x, bool check);
+	RSAElement(biginteger & modN, biginteger & x, bool check);
 	/**
 	* Returns the RSA element.
 	* @return the element
@@ -344,7 +343,7 @@ public:
 	/**
 	* Sets this trapdoor permutation with public key and private key.
 	*/
-	virtual void setKey(PublicKey* publicKey, PrivateKey* privateKey=NULL)=0;
+	virtual void setKey(const shared_ptr<PublicKey> & publicKey, const shared_ptr<PrivateKey> & privateKey = nullptr)=0;
 	/**
 	* Checks if this trapdoor permutation object has been previously initialized.<p>
 	* To initialize the object the setKey function has to be called with corresponding parameters after construction.
@@ -356,7 +355,7 @@ public:
 	/**
 	* @return the public key
 	*/
-	virtual PublicKey* getPubKey()=0;
+	virtual shared_ptr<PublicKey> getPubKey()=0;
 	/**
 	* @return the algorithm name. for example - RSA, Rabin.
 	*/
@@ -373,7 +372,7 @@ public:
 	* @return - the result TPElement from the computation
 	* @throws IllegalArgumentException if the given element is invalid for this permutation
 	*/
-	virtual  TPElement* compute(TPElement * tpEl)=0;
+	virtual  shared_ptr<TPElement> compute(TPElement * tpEl)=0;
 	/**
 	* Inverts the operation of this trapdoor permutation on the given TPElement.
 	* @param tpEl - the input to invert
@@ -381,7 +380,7 @@ public:
 	* @throws KeyException if there is no private key
 	* @throws IllegalArgumentException if the given element is invalid for this permutation
 	*/
-	virtual TPElement* invert(TPElement * tpEl) = 0;
+	virtual shared_ptr<TPElement> invert(TPElement * tpEl) = 0;
 	/**
 	* Computes the hard core predicate of the given tpElement. <p>
 	* A hard-core predicate of a one-way function f is a predicate b (i.e., a function whose output is a single bit)
@@ -403,7 +402,7 @@ public:
 	* @param tpEl the input to the hard core function
 	* @return byte* the result of the hard core function. The byte array is allocated inside the method
 	*/
-	virtual byte* hardCoreFunction(TPElement* tpEl)=0;
+	virtual vector<byte> hardCoreFunction(TPElement* tpEl)=0;
 	/**
 	* Checks if the given element is valid for this trapdoor permutation
 	* @param tpEl - the element to check
@@ -419,25 +418,25 @@ public:
 	* creates a random TPElement that is valid for this trapdoor permutation
 	* @return TPElement - the created random element
 	*/
-	virtual TPElement* generateRandomTPElement() = 0;
+	virtual shared_ptr<TPElement> generateRandomTPElement() = 0;
 	/**
 	* Creates a TPElement from a specific value x. It checks that the x value is valid for this trapdoor permutation.
 	* @return TPElement - If the x value is valid for this permutation return the created random element
 	* @throws  IllegalArgumentException if the given value x is invalid for this permutation
 	*/
-	virtual TPElement* generateTPElement(biginteger x) = 0;
+	virtual shared_ptr<TPElement> generateTPElement(biginteger & x) = 0;
 	/**
 	* Creates a TPElement from a specific value x. This function does not guarantee that the the returned "TPElement" is valid.<p>
 	* It is the caller's responsibility to pass a legal x value.
 	* @return TPElement - Set the x value and return the created random element
 	*/
-	virtual TPElement* generateUncheckedTPElement(biginteger x) = 0;
+	virtual shared_ptr<TPElement> generateUncheckedTPElement(biginteger & x) = 0;
 	/**
 	* Creates a TPElement from data that was probably obtained via the serialization mechanism. See explanation in {@link TPElementSendableData}
 	* @param data necessary to reconstruct a given TPElement
 	* @return the reconstructed TPElement
 	*/
-	virtual TPElement* reconstructTPElement(TPElementSendableData data)=0;
+	virtual shared_ptr<TPElement> reconstructTPElement(TPElementSendableData & data)=0;
 	~TrapdoorPermutation() {};
 };
 
@@ -446,27 +445,28 @@ public:
 */
 class TrapdoorPermutationAbs : public virtual TrapdoorPermutation {
 protected:
-	PrivateKey * privKey = NULL;        //private key
-	PublicKey * pubKey = NULL;          //public key
+	shared_ptr<PrivateKey> privKey = nullptr;        //private key
+	shared_ptr<PublicKey> pubKey = nullptr;          //public key
 	biginteger modulus = NULL;		//the modulus of the permutation. It must be such that modulus = p*q and p = q = 3 mod 4
 	bool _isKeySet = false;		    // indicates if this object is initialized or not. Set to false until init is called
 
 public:
-	void setKey(PublicKey * publicKey, PrivateKey * privateKey = NULL) override {
+	void setKey(const shared_ptr<PublicKey> & publicKey, const shared_ptr<PrivateKey> & privateKey) override {
 		privKey = privateKey;
 		pubKey = publicKey;
 		_isKeySet = true;
 	}
 	bool isKeySet() override{ return _isKeySet; };
-	PublicKey * getPubKey() override{
+	shared_ptr<PublicKey> getPubKey() override{
 		if (!isKeySet())
 			throw IllegalStateException("public key isn't set");
 		return pubKey;
 	};
 	byte hardCorePredicate(TPElement * tpEl) override;
-	byte* hardCoreFunction(TPElement * tpEl) override;
-	TPElement * reconstructTPElement(TPElementSendableData data) override {
-		return generateTPElement(data.getX());
+	vector<byte> hardCoreFunction(TPElement * tpEl) override;
+	shared_ptr<TPElement> reconstructTPElement(TPElementSendableData & data) override {
+        auto x = data.getX();
+		return generateTPElement(x);
 	};
 };
 

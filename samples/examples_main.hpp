@@ -29,15 +29,14 @@
 #include "../include/infra/Common.hpp"
 
 int mainComm(string partyNumber, string filePath);
-int mainOT(string partyNumber, string filePath);
+int mainOT(string side, string configPath);
 int mainYao(string partyNum, string configPath);
 int mainDlog();
 int mainSha1();
-int mainPrg();
-int mainSigma(string, string);
+int mainSigma(string side, string configPath);
 int mainOTMalicious(string  party);
 //int mainOSPSI(string inputFilePath_0, string inputFilePath_1);
 #ifndef _WIN32
 int mainBristol(string party);
 #endif
-int mainCommitment(string, string);
+int mainCommitment(string partyNumber, string filePath);

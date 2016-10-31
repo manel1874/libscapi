@@ -28,6 +28,18 @@
 
 #include "../../include/interactive_mid_protocols/SigmaProtocolDamgardJurikProduct.hpp"
 
+
+string SigmaDJProductCommonInput::toString() {
+	string output = publicKey.generateSendableData()->toString();
+	output += ":";
+	output += cipher1.generateSendableData()->toString();
+	output += ":";
+	output += cipher2.generateSendableData()->toString();
+	output += ":";
+	output += cipher3.generateSendableData()->toString();
+	return output;
+}
+
 /**
 * Sets the given public key, three ciphertexts, three random values, and two plaintexts.
 * @param publicKey used to encrypt.
@@ -112,11 +124,11 @@ void SigmaDJProductSecondMsg::initFromString(const string & row) {
 * @param lengthParameter length parameter in BITS.
 * @param random
 */
-SigmaDJProductSimulator::SigmaDJProductSimulator(int t, int lengthParameter) {
+SigmaDJProductSimulator::SigmaDJProductSimulator(int t, int lengthParameter, const shared_ptr<PrgFromOpenSSLAES> & random) {
 
 	this->t = t;
 	this->lengthParameter = lengthParameter;
-	this->random = get_seeded_random();
+	this->random = random;
 }
 
 /**
@@ -155,11 +167,11 @@ shared_ptr<SigmaSimulatorOutput> SigmaDJProductSimulator::simulate(SigmaCommonIn
 	biginteger NTag = mp::pow(n, lengthParameter + 1);
 
 	//Sample a random value z1 <- ZN
-	biginteger z1 = getRandomInRange(0, N - 1, random);
+	biginteger z1 = getRandomInRange(0, N - 1, random.get());
 	//Sample a random value z2 <- Z*n
-	biginteger z2 = getRandomInRange(1, n - 1, random);
+	biginteger z2 = getRandomInRange(1, n - 1, random.get());
 	//Sample a random value z3 <- Z*n
-	biginteger z3 = getRandomInRange(1, n - 1, random);
+	biginteger z3 = getRandomInRange(1, n - 1, random.get());
 
 	//Create the BigInteger value out of the challenge.
 	biginteger e = decodeBigInteger(challenge.data(), challenge.size());
@@ -193,7 +205,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaDJProductSimulator::simulate(SigmaCommonIn
 shared_ptr<SigmaSimulatorOutput> SigmaDJProductSimulator::simulate(SigmaCommonInput* input) { 
 	//Create a new byte array of size t/8, to get the required byte size.
 	vector<byte> e(t / 8);
-	RAND_bytes(e.data(), t / 8);
+	random->getPRGBytes(e, 0, t / 8);
 	//modify the challenge to be positive.
 	e.data()[e.size() - 1] = e.data()[e.size() - 1] & 127;
 	//Call the other simulate function with the given input and the sampled e.
@@ -226,11 +238,11 @@ bool SigmaDJProductSimulator::checkChallengeLength(vector<byte> challenge) {
 * @param lengthParameter length parameter in BITS.
 * @param random
 */
-SigmaDJProductProverComputation::SigmaDJProductProverComputation(int t, int lengthParameter) {
+SigmaDJProductProverComputation::SigmaDJProductProverComputation(int t, int lengthParameter, const shared_ptr<PrgFromOpenSSLAES> & random) {
 
 	this->t = t;
 	this->lengthParameter = lengthParameter;
-	this->random = get_seeded_random();
+	this->random = random;
 }
 
 /**
@@ -263,11 +275,11 @@ shared_ptr<SigmaProtocolMsg> SigmaDJProductProverComputation::computeFirstMsg(sh
 	NTag = mp::pow(n, lengthParameter + 1);
 
 	//Sample d <-[0, ..., N-1]
-	d = getRandomInRange(0, N - 1, random);
+	d = getRandomInRange(0, N - 1, random.get());
 
 	//Sample rd, rdb <-[1, ..., n-1]
-	rd = getRandomInRange(1, n - 1, random);
-	rdb = getRandomInRange(1, n - 1, random);
+	rd = getRandomInRange(1, n - 1, random.get());
+	rdb = getRandomInRange(1, n - 1, random.get());
 
 	//Calculate (1+n)^d
 	biginteger nPlusOneToD = mp::powm(n + 1, d, NTag);
@@ -355,10 +367,10 @@ bool SigmaDJProductProverComputation::checkChallengeLength(vector<byte> challeng
 * @param lengthParameter length parameter in BITS.
 * @param random
 */
-SigmaDJProductVerifierComputation::SigmaDJProductVerifierComputation(int t, int lengthParameter) {
+SigmaDJProductVerifierComputation::SigmaDJProductVerifierComputation(int t, int lengthParameter, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	this->t = t;
 	this->lengthParameter = lengthParameter;
-	this->random = get_seeded_random();
+	this->random = random;
 }
 
 /**
@@ -368,7 +380,7 @@ SigmaDJProductVerifierComputation::SigmaDJProductVerifierComputation(int t, int 
 void SigmaDJProductVerifierComputation::sampleChallenge() {
 	//make space for t/8 bytes and fill it with random values.
 	e.resize(t / 8);
-	RAND_bytes(e.data(), t / 8);
+	random->getPRGBytes(e, 0, t / 8);
 	//modify the challenge to be positive.
 	e.data()[e.size() - 1] = e.data()[e.size() - 1] & 127;
 }

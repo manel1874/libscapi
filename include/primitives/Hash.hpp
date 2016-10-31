@@ -82,7 +82,7 @@ public:
 	/**
 	* Factory method. Create concrete instance of the give algorithm name in the default implementation. 
 	*/
-	static CryptographicHash* get_new_cryptographic_hash(string hash_name="SHA1");
+	static shared_ptr<CryptographicHash> get_new_cryptographic_hash(string hash_name="SHA256");
 };
 
 /*****************************************************************

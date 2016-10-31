@@ -49,7 +49,7 @@ ZpSafePrimeElement::ZpSafePrimeElement(const biginteger & x, const biginteger & 
 		
 }
 
-ZpSafePrimeElement::ZpSafePrimeElement(const biginteger & p, mt19937 & prg)
+ZpSafePrimeElement::ZpSafePrimeElement(const biginteger & p, PrgFromOpenSSLAES* prg)
 {
 	// find a number in the range [1, ..., p-1]
 	biginteger rand_in_range = getRandomInRange(1, p - 1, prg);
@@ -77,7 +77,7 @@ shared_ptr<GroupElementSendableData> ZpSafePrimeElement::generateSendableData() 
 /**************************************/
 
 DlogGroup::GroupElementsExponentiations::GroupElementsExponentiations(
-	shared_ptr<DlogGroup> parent_, shared_ptr<GroupElement> base_) {
+	const shared_ptr<DlogGroup> & parent_, const shared_ptr<GroupElement> & base_) {
 	base = base_;
 	parent = parent_;
 	// build new vector of exponentiations
@@ -134,7 +134,7 @@ shared_ptr<GroupElement> DlogGroup::createRandomElement() {
 	// This is a default implementation that is valid for all the Dlog Groups and relies on mathematical properties of the generators.
 	// However, if a specific Dlog Group has a more efficient implementation then is it advised to override this function in that concrete
 	// Dlog group. For example we do so in CryptoPpDlogZpSafePrime.
-	biginteger randNum = getRandomInRange(1, groupParams->getQ() - 1, random_element_gen);
+	biginteger randNum = getRandomInRange(1, groupParams->getQ() - 1, random_element_gen.get());
 
 	// compute g^x to get a new element
 	return exponentiate(generator.get(), randNum);
@@ -151,8 +151,8 @@ shared_ptr<GroupElement> DlogGroup::createRandomGenerator() {
 	return randGen;
 }
 
-shared_ptr<GroupElement> DlogGroup::computeLoop(vector<biginteger> exponentiations, int w,
-	int h, vector<vector<shared_ptr<GroupElement>>> preComp, shared_ptr<GroupElement> result, int bitIndex){
+shared_ptr<GroupElement> DlogGroup::computeLoop(vector<biginteger> & exponentiations, int w,
+	int h, vector<vector<shared_ptr<GroupElement>>> & preComp, shared_ptr<GroupElement> & result, int bitIndex){
 	int e = 0;
 	for (size_t k = 0; (int) k<h; k++) {
 		for (size_t i = k*w; i<(k * w + w); i++) {
@@ -173,7 +173,7 @@ shared_ptr<GroupElement> DlogGroup::computeLoop(vector<biginteger> exponentiatio
 }
 
 vector<vector<shared_ptr<GroupElement>>> DlogGroup::createLLPreCompTable(
-	vector<shared_ptr<GroupElement>> groupElements, int w, int h){
+	vector<shared_ptr<GroupElement>> & groupElements, int w, int h){
 	int twoPowW = (int)(pow(2, w));
 	//create the pre-computation table of size h*(2^(w))
 	vector<vector<shared_ptr<GroupElement>>> preComp; // GroupElement[][] preComp = new GroupElement[h][twoPowW];
@@ -239,7 +239,7 @@ int DlogGroup::getLLW(int t) {
 }
 
 shared_ptr<GroupElement> DlogGroup::exponentiateWithPreComputedValues(
-	shared_ptr<GroupElement> groupElement, const biginteger & exponent){
+	const shared_ptr<GroupElement> & groupElement, const biginteger & exponent){
 	//extracts from the map the GroupElementsExponentiations object corresponding to the accepted base
 	auto it = exponentiationsMap.find(groupElement);
 	
@@ -255,7 +255,7 @@ shared_ptr<GroupElement> DlogGroup::exponentiateWithPreComputedValues(
 }
 
 shared_ptr<GroupElement> DlogGroup::computeNaive(
-	vector<shared_ptr<GroupElement>> groupElements, vector<biginteger> exponentiations)
+	vector<shared_ptr<GroupElement>> & groupElements, vector<biginteger> & exponentiations)
 {
 	int n = groupElements.size(); //number of bases and exponents
 	vector<shared_ptr<GroupElement>> exponentsResult(n); //holds the exponentiations result
@@ -277,7 +277,7 @@ shared_ptr<GroupElement> DlogGroup::computeNaive(
 }
 
 shared_ptr<GroupElement> DlogGroup::computeLL(
-	vector<shared_ptr<GroupElement>> groupElements, vector<biginteger> exponentiations)
+	vector<shared_ptr<GroupElement>> & groupElements, vector<biginteger> & exponentiations)
 {
 	int n = groupElements.size(); //number of bases and exponents
 
@@ -424,7 +424,7 @@ void ECElementSendableData::initFromString(const string & raw) {
 * @param curveName - name of curve to initialized
 * @throws IOException
 */
-void DlogEllipticCurve::init(string fileName, string curveName) {
+void DlogEllipticCurve::init(string fileName, string curveName, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	
 	ecConfig = make_shared<ConfigFile>(fileName); //get ConfigFile object containing the curves data
 																//EC_FILE_PATH = fileName;
@@ -434,5 +434,5 @@ void DlogEllipticCurve::init(string fileName, string curveName) {
 	this->curveName = curveName;
 	this->fileName = fileName;
 
-	random_element_gen = get_seeded_random();
+	random_element_gen = random;
 }

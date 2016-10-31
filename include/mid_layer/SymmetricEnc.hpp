@@ -55,7 +55,7 @@ public:
 	* @param secretKey secret key.
 	* @throws InvalidKeyException if the given key does not match this encryption scheme.
 	*/
-	virtual void setKey(SecretKey secretKey) = 0;
+	virtual void setKey(SecretKey & secretKey) = 0;
 
 	/**
 	* An object trying to use an instance of symmetric encryption needs to check if it has already been initialized.
@@ -74,7 +74,7 @@ public:
 	* @return the generated secret key.
 	* @throws InvalidParameterSpecException if the given keyParams does not match this symmetric encryption.
 	*/
-	virtual SecretKey generateKey(AlgorithmParameterSpec* keyParams) = 0;
+	virtual SecretKey generateKey(AlgorithmParameterSpec& keyParams) = 0;
 
 	/**
 	* Generates a secret key to initialize this symmetric encryption.
@@ -101,7 +101,7 @@ public:
 	* @throws IllegalArgumentException if the given plaintext does not match this encryption scheme.
 	* @throws IllegalBlockSizeException if the given IV length is not as the block size.
 	*/
-	virtual shared_ptr<SymmetricCiphertext> encrypt(Plaintext* plaintext, vector<byte> iv) = 0;
+	virtual shared_ptr<SymmetricCiphertext> encrypt(Plaintext* plaintext, vector<byte> & iv) = 0;
 
 	/**
 	* This function performs the decryption of a ciphertext returning the corresponding decrypted plaintext.
