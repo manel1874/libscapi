@@ -33,7 +33,7 @@ LIBRARIES_DIR  = -L../boost_1_60_0/stage/lib -Linstall/lib
 LD_FLAGS = 
 
 all:: libs libscapi
-libs:: compile-ntl compile-miracl compile-otextension compile-otextension-malicious compile-otextension-bristol
+libs:: compile-blake compile-ntl compile-miracl compile-otextension compile-otextension-malicious compile-otextension-bristol
 libscapi:: directories $(SLib)
 directories: $(OUT_DIR)
 
@@ -57,10 +57,18 @@ obj/interactive_mid_protocols/%.o: src/interactive_mid_protocols/%.cpp
 obj/primitives/%.o: src/primitives/%.cpp
 	g++ -c $(CPP_OPTIONS) -o $@ $< 	 
 obj/mid_layer/%.o: src/mid_layer/%.cpp
-	g++ -c $(CPP_OPTIONS) -o $@ $< 	 
+	g++ -c $(CPP_OPTIONS) -o $@ $<
+ 
 
 tests:: all
 	$(Program)
+
+compile-blake:
+	@echo "Compiling the BLAKE2 library"
+	@mkdir -p $(builddir)/BLAKE2/
+	@cp -r lib/BLAKE2/sse/. $(builddir)/BLAKE2
+	@$(MAKE) -C $(builddir)/BLAKE2
+	@touch compile-blake
 
 compile-ntl:
 	@echo "Compiling the NTL library..."
