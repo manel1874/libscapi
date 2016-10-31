@@ -94,11 +94,11 @@ private:
 	/**
 	* This function generates a value d such that d = 1 mod N and d = 0 mod t, using the Chinese Remainder Theorem.
 	*/
-	biginteger generateD(biginteger & N, biginteger & t); 
+	biginteger generateD(biginteger & N, biginteger & t);
 
 public:
 	DamgardJurikPrivateKey(RSAModulus & rsaMod);
-	DamgardJurikPrivateKey(biginteger & p, biginteger & q, biginteger & t, biginteger & dForS1);
+	DamgardJurikPrivateKey(const biginteger & p, const biginteger & q, const biginteger & t, const biginteger & dForS1);
 
 	string getAlgorithm() override { return "DamgardJurik"; }
 
@@ -170,7 +170,7 @@ private:
 	/**
 	* This function generates a value d such that d = 1 mod N and d = 0 mod t, using the Chinese Remainder Theorem.
 	*/
-	biginteger generateD(biginteger & N, biginteger & t);
+	biginteger generateD(biginteger & N, const biginteger & t);
 
 public:
 	/**

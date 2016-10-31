@@ -51,7 +51,7 @@ DamgardJurikPrivateKey::DamgardJurikPrivateKey(RSAModulus & rsaMod) {
 	dForS1 = generateD(rsaMod.n, t);
 }
 
-DamgardJurikPrivateKey::DamgardJurikPrivateKey(biginteger & p, biginteger & q, biginteger & t, biginteger & dForS1) {
+DamgardJurikPrivateKey::DamgardJurikPrivateKey(const biginteger & p, const biginteger & q, const biginteger & t, const biginteger & dForS1) {
 	this->p = p;
 	this->q = q;
 	this->t = t;
@@ -641,7 +641,7 @@ shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::multByConst(AsymmetricCipherte
 	return make_shared<BigIntegerCiphertext>(c);
 }
 
-biginteger DamgardJurikEnc::generateD(biginteger & N, biginteger & t) {
+biginteger DamgardJurikEnc::generateD(biginteger & N, const biginteger & t) {
 	vector<biginteger> congruences;
 	congruences.push_back(1);
 	congruences.push_back(0);

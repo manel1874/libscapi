@@ -121,7 +121,8 @@ int mainOT(string side, string configPath) {
 	boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 
 	auto random = make_shared<PrgFromOpenSSLAES>();
-	random->setKey(random->generateKey(128));
+	auto key = random->generateKey(128);
+	random->setKey(key);
 	auto dlog = make_shared<OpenSSLDlogECF2m>();
 	try {
 		if (side == "1") {

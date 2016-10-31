@@ -108,7 +108,7 @@ public:
 	* @param channel used to communicate between prover and verifier.
 	* @param sProver underlying sigma prover to use.
 	*/
-	ZKFromSigmaProver(shared_ptr<CommParty> channel, shared_ptr<SigmaProverComputation> sProver, shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) {
+	ZKFromSigmaProver(shared_ptr<CommParty> channel, shared_ptr<SigmaProverComputation> sProver, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) {
 		this->sProver = sProver;
 		this->receiver = make_shared<CmtPedersenReceiver>(channel, prg);
 		this->channel = channel;

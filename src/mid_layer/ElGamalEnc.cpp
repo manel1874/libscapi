@@ -499,6 +499,6 @@ shared_ptr<AsymmetricCiphertext> ElGamalOnByteArrayEnc::reconstructCiphertext(As
 		throw invalid_argument("The input data has to be of type ElGamalOnByteArraySendableData");
 	
 	auto cipher1 = dlog->reconstructElement(true, data1->getCipher1().get());
-
-	return make_shared<ElGamalOnByteArrayCiphertext>(cipher1, data1->getCipher2());
+	auto cipher2 = data1->getCipher2();
+	return make_shared<ElGamalOnByteArrayCiphertext>(cipher1, cipher2);
 }

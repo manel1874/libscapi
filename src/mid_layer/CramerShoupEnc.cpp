@@ -61,7 +61,7 @@ CramerShoupPublicKey::CramerShoupPublicKey(const shared_ptr<GroupElement> & c, c
 	this->g2 = g2;
 }
 
-CramerShoupPrivateKey::CramerShoupPrivateKey(biginteger & x1, biginteger & x2, biginteger & y1, biginteger & y2, biginteger & z) {
+CramerShoupPrivateKey::CramerShoupPrivateKey(const biginteger & x1, const biginteger & x2, const biginteger & y1, const biginteger & y2, const biginteger & z) {
 	this->x1 = x1;
 	this->x2 = x2;
 	this->y1 = y1;

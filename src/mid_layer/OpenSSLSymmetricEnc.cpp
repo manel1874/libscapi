@@ -127,8 +127,8 @@ shared_ptr<SymmetricCiphertext> OpenSSLEncWithIVAbs::encrypt(Plaintext* plaintex
 	}
 
 	//Call the native function that idoes the encryption. 
-
-	vector<byte> cipher = encryptOpenSSL(plain->getText(), iv);
+	auto plainT = plain->getText();
+	vector<byte> cipher = encryptOpenSSL(plainT, iv);
 
 	//Create and return an IVCiphertext with the iv and encrypted data.
 	return make_shared<IVCiphertext>(make_shared<ByteArraySymCiphertext>(cipher), iv);

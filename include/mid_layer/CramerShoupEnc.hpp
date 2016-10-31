@@ -123,7 +123,7 @@ private:
 	biginteger z;
 
 public:
-	CramerShoupPrivateKey(biginteger & x1, biginteger & x2, biginteger & y1, biginteger & y2, biginteger & z);
+	CramerShoupPrivateKey(const biginteger & x1, const biginteger & x2, const biginteger & y1, const biginteger & y2, const biginteger & z);
 
 	string getAlgorithm() override { return "CramerShoup"; }
 

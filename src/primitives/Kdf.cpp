@@ -115,7 +115,8 @@ SecretKey HKDF::deriveKey(const vector<byte> & entropySource, int inOff, int inL
 	// a key from the same entropy source will be different in subsequent calls to this function (as long as the same instance of HKDF is used). 
 	string str_key = boost::algorithm::unhex(string("606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeaf"));
 	char const *c_key = str_key.c_str();
-	hmac->setKey(SecretKey((byte*) c_key, strlen(c_key), ""));
+	SecretKey key((byte*) c_key, strlen(c_key), "");
+	hmac->setKey(key);
 	int hmacLength = hmac->getBlockSize(); //the size of the output of the hmac.
 	vector<byte> outBytes;// (outLen); //the output key
 	vector<byte> roundKey; //PRK from the pseudocode
@@ -125,9 +126,10 @@ SecretKey HKDF::deriveKey(const vector<byte> & entropySource, int inOff, int inL
 	//roundKey is now K(0)
 	hmac->computeBlock(entropySource, 0, entropySource.size(), roundKey, 0);
 	//init the hmac with the new key. From now on this is the key for all the rounds.
-	hmac->setKey(SecretKey(roundKey, "HKDF"));
+	SecretKey roundSecretKey(roundKey, "HKDF");
+	hmac->setKey(roundSecretKey);
 	
-	// calculates the first round
+	// cdalculates the first round
 	// K(1) = HMAC(PRK,(CTXinfo,1)) [key=PRK, data=(CTXinfo,1)]
 	if (outLen < hmacLength)
 		firstRound(outBytes, iv, intermediateOutBytes, outLen);

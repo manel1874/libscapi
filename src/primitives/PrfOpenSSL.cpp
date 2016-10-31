@@ -165,7 +165,8 @@ OpenSSLPRP::~OpenSSLPRP() {
 
 OpenSSLAES::OpenSSLAES() {
 	auto random = make_shared<PrgFromOpenSSLAES>();
-	random->setKey(random->generateKey(128));
+	auto key = random->generateKey(128);
+	random->setKey(key);
 	init(random);
 }
 
@@ -389,7 +390,8 @@ OpenSSLTripleDES::OpenSSLTripleDES() {
 	computeP = EVP_CIPHER_CTX_new();
 	invertP = EVP_CIPHER_CTX_new();
 	prg = make_shared<PrgFromOpenSSLAES>();
-	prg->setKey(prg->generateKey(128));
+	auto key = prg->generateKey(128);
+	prg->setKey(key);
 }
 
 void OpenSSLTripleDES::setKey(SecretKey & secretKey) {
