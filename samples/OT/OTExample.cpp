@@ -84,15 +84,16 @@ shared_ptr<OTSInput> getInput(DlogGroup* dlog, OTParams params) {
 		|| params.protocolName == "FullSimulationOnByteArray" || params.protocolName == "FullSimulationROMOnByteArray") {
 		vector<byte> x0(10, '0'), x1(10, '1');
 		cout << "x0 = " << endl;
-		for (int i = 0; i < x0.size(); i++)
+		for (int i = 0; i < (int) x0.size(); i++)
 			cout << x0[i] << " ";
 		cout << endl;
 		cout << "x1 = " << endl;
-		for (int i = 0; i < x1.size(); i++)
+		for (int i = 0; i < (int) x1.size(); i++)
 			cout << x1[i] << " ";
 		cout << endl;
 		return make_shared<OTOnByteArraySInput>(x0, x1);
-	} 
+	}
+    return nullptr;
 }
 
 void printOutput(OTROutput* output, OTParams params) {
@@ -104,7 +105,7 @@ void printOutput(OTROutput* output, OTParams params) {
 		|| params.protocolName == "FullSimulationOnByteArray" || params.protocolName == "FullSimulationROMOnByteArray") {
 		auto out = ((OTOnByteArrayROutput*)output)->getXSigma();
 		cout << "output = " << endl;
-		for (int i = 0; i < out.size(); i++)
+		for (int i = 0; i < (int) out.size(); i++)
 			cout << out[i] << " ";
 		cout << endl;
 	}

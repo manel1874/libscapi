@@ -58,7 +58,7 @@ public:
 	* @param publicKey used to encrypt.
 	* @param x encrypted value
 	*/
-	SigmaElGamalEncryptedValueCommonInput(bool isRandomness, ElGamalOnGroupElementCiphertext cipher, ElGamalPublicKey publicKey, shared_ptr<GroupElement> x);
+	SigmaElGamalEncryptedValueCommonInput(bool isRandomness, ElGamalOnGroupElementCiphertext cipher, ElGamalPublicKey publicKey, const shared_ptr<GroupElement> & x);
 
 	/**
 	* Returns a boolean represents if the encryption was done by private key knowledge or by a randomness knowledge.
@@ -110,7 +110,7 @@ public:
 	* @param x encrypted value
 	* @param privateKey used to decrypt.
 	*/
-	SigmaElGamalEncryptedValuePrivKeyProverInput(ElGamalOnGroupElementCiphertext cipher, ElGamalPublicKey pubKey, shared_ptr<GroupElement> x, ElGamalPrivateKey privateKey);
+	SigmaElGamalEncryptedValuePrivKeyProverInput(ElGamalOnGroupElementCiphertext cipher, ElGamalPublicKey pubKey, const shared_ptr<GroupElement> & x, ElGamalPrivateKey privateKey);
 
 	/**
 	* Returns the private key used in order to decrypt the ciphertext.
@@ -147,7 +147,7 @@ public:
 	* @param x encrypted value
 	* @param r random value used to encrypt.
 	*/
-	SigmaElGamalEncryptedValueRandomnessProverInput(ElGamalOnGroupElementCiphertext cipher, ElGamalPublicKey pubKey, shared_ptr<GroupElement> x, biginteger r);
+	SigmaElGamalEncryptedValueRandomnessProverInput(ElGamalOnGroupElementCiphertext cipher, ElGamalPublicKey pubKey, const shared_ptr<GroupElement> & x, const biginteger & r);
 
 	/**
 	* Returns the random value used to encrypt.
@@ -200,7 +200,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaElGamalEncryptedValueSimulator(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg());
+	SigmaElGamalEncryptedValueSimulator(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -215,7 +215,7 @@ public:
 	* @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 	* @throws IllegalArgumentException if input is not the expected.
 	*/
-	shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input, vector<byte> challenge)  override; 
+	shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input, const vector<byte> & challenge)  override;
 
 	/**
 	* Computes the simulator computation with a randomly chosen challenge.
@@ -278,7 +278,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaElGamalEncryptedValueProverComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg());
+	SigmaElGamalEncryptedValueProverComputation(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -290,7 +290,7 @@ public:
 	* Computes the first message of the protocol.
 	* @return the computed message
 	*/
-	shared_ptr<SigmaProtocolMsg> computeFirstMsg(shared_ptr<SigmaProverInput> input) override;
+	shared_ptr<SigmaProtocolMsg> computeFirstMsg(const shared_ptr<SigmaProverInput> & input) override;
 
 	/**
 	* Computes the second message of the protocol.
@@ -298,7 +298,7 @@ public:
 	* @return the computed message.
 	* @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 	*/
-	shared_ptr<SigmaProtocolMsg> computeSecondMsg(vector<byte> challenge) override; 
+	shared_ptr<SigmaProtocolMsg> computeSecondMsg(const vector<byte> & challenge) override;
 
 	/**
 	* Returns the simulator that matches this sigma protocol prover.
@@ -356,7 +356,7 @@ public:
 	* @param random
 	* @throws InvalidDlogGroupException if the given dlog is invalid.
 	*/
-	SigmaElGamalEncryptedValueVerifierComputation(shared_ptr<DlogGroup> dlog, int t);
+	SigmaElGamalEncryptedValueVerifierComputation(const shared_ptr<DlogGroup> & dlog, int t);
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -372,7 +372,7 @@ public:
 	* Sets the given challenge.
 	* @param challenge
 	*/
-	void setChallenge(vector<byte> challenge) override { sigmaDH.setChallenge(challenge); }
+	void setChallenge(const vector<byte> & challenge) override { sigmaDH.setChallenge(challenge); }
 
 	/**
 	* Returns the sampled challenge.

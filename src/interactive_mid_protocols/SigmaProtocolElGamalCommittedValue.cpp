@@ -71,7 +71,7 @@ shared_ptr<SigmaDHCommonInput> SigmaElGamalCommittedValueSimulator::convertInput
 * @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 * @throws IllegalArgumentException if the given input is not an instance of SigmaElGamalCommittedValueCommonInput.
 */
-shared_ptr<SigmaSimulatorOutput> SigmaElGamalCommittedValueSimulator::simulate(SigmaCommonInput* input, vector<byte> challenge)  {
+shared_ptr<SigmaSimulatorOutput> SigmaElGamalCommittedValueSimulator::simulate(SigmaCommonInput* input, const vector<byte> & challenge)  {
 	//Convert the input to an input object for the underlying simulator.
 	//Delegates the computation to the underlying Sigma DH prover.
 	return dhSim.simulate(convertInput(input).get(), challenge);
@@ -126,7 +126,7 @@ shared_ptr<SigmaDHProverInput> SigmaElGamalCommittedValueProverComputation::conv
 * @return the computed message
 * @throws IllegalArgumentException if input is not an instance of SigmaElGamalCommittedValueProverInput.
 */
-shared_ptr<SigmaProtocolMsg> SigmaElGamalCommittedValueProverComputation::computeFirstMsg(shared_ptr<SigmaProverInput> input) {
+shared_ptr<SigmaProtocolMsg> SigmaElGamalCommittedValueProverComputation::computeFirstMsg(const shared_ptr<SigmaProverInput> & input) {
 	//Delegates the computation to the underlying Sigma DH prover.
 	return sigmaDH.computeFirstMsg(convertInput(input.get()));
 }
@@ -137,7 +137,7 @@ shared_ptr<SigmaProtocolMsg> SigmaElGamalCommittedValueProverComputation::comput
 * @return the computed message.
 * @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 */
-shared_ptr<SigmaProtocolMsg> SigmaElGamalCommittedValueProverComputation::computeSecondMsg(vector<byte> challenge) {
+shared_ptr<SigmaProtocolMsg> SigmaElGamalCommittedValueProverComputation::computeSecondMsg(const vector<byte> & challenge) {
 	//Delegates the computation to the underlying Sigma DH prover.
 	return sigmaDH.computeSecondMsg(challenge);
 

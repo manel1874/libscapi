@@ -46,7 +46,7 @@ public:
 	* @param u
 	* @param v
 	*/
-	SigmaDHCommonInput(shared_ptr<GroupElement> h, shared_ptr<GroupElement> u, shared_ptr<GroupElement> v) {
+	SigmaDHCommonInput(const shared_ptr<GroupElement> & h, const shared_ptr<GroupElement> & u, const shared_ptr<GroupElement> & v) {
 		this->h = h;
 		this->u = u;
 		this->v = v;
@@ -83,7 +83,7 @@ public:
 	* @param v
 	* @param w
 	*/
-	SigmaDHProverInput(shared_ptr<GroupElement> h, shared_ptr<GroupElement> u, shared_ptr<GroupElement> v, biginteger w) {
+	SigmaDHProverInput(const shared_ptr<GroupElement> & h, const shared_ptr<GroupElement> & u, const shared_ptr<GroupElement> & v, const biginteger & w) {
 		params = make_shared<SigmaDHCommonInput>(h, u, v);
 		this->w = w;
 	}
@@ -105,7 +105,7 @@ private:
 class SigmaDHMsg: public SigmaProtocolMsg {
 
 public:
-	SigmaDHMsg(shared_ptr<GroupElementSendableData> a, shared_ptr<GroupElementSendableData> b) {
+	SigmaDHMsg(const shared_ptr<GroupElementSendableData> & a, const shared_ptr<GroupElementSendableData> & b) {
 		this->a = a;
 		this->b = b;
 	}
@@ -148,7 +148,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaDHSimulator(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
+	SigmaDHSimulator(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -164,7 +164,7 @@ public:
 	* @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 	* @throws IllegalArgumentException if the given input is not an instance of SigmaDHCommonInput.
 	*/
-	shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input, vector<byte> challenge)  override;
+	shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input, const vector<byte> & challenge)  override;
 
 	/**
 	* Computes the simulator computation.
@@ -223,7 +223,7 @@ public:
 	* @param random
 	* @throws IllegalArgumentException if soundness parameter is invalid.
 	*/
-	SigmaDHProverComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
+	SigmaDHProverComputation(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -239,7 +239,7 @@ public:
 	* @return the computed message
 	* @throws IllegalArgumentException if input is not an instance of SigmaDHProverInput.
 	*/
-	shared_ptr<SigmaProtocolMsg> computeFirstMsg(shared_ptr<SigmaProverInput> input) override;
+	shared_ptr<SigmaProtocolMsg> computeFirstMsg(const shared_ptr<SigmaProverInput> & input) override;
 
 	/**
 	* Computes the second message of the protocol.<p>
@@ -248,7 +248,7 @@ public:
 	* @return the computed message.
 	* @throws CheatAttemptException if the length of the received challenge is not equal to the soundness parameter.
 	*/
-	shared_ptr<SigmaProtocolMsg> computeSecondMsg(vector<byte> challenge) override;
+	shared_ptr<SigmaProtocolMsg> computeSecondMsg(const vector<byte> & challenge) override;
 
 	/**
 	* Returns the simulator that matches this sigma protocol prover.
@@ -308,7 +308,7 @@ public:
 	* @throws InvalidDlogGroupException if the given dlog is invalid.
 	* @throws IllegalArgumentException if soundness parameter is invalid.
 	*/
-	SigmaDHVerifierComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
+	SigmaDHVerifierComputation(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -326,7 +326,7 @@ public:
 	* Sets the given challenge.
 	* @param challenge
 	*/
-	void setChallenge(vector<byte> challenge) override {
+	void setChallenge(const vector<byte> & challenge) override {
 		e = challenge;
 	}
 

@@ -53,7 +53,7 @@ public:
 	* @param commitment the actual commitment value.
 	* @param x committed value.
 	*/
-	SigmaElGamalCommittedValueCommonInput(shared_ptr<ElGamalPublicKey> publicKey, shared_ptr<ElGamalOnGrElSendableData> commitment, shared_ptr<GroupElement> x)  {
+	SigmaElGamalCommittedValueCommonInput(const shared_ptr<ElGamalPublicKey> & publicKey, const shared_ptr<ElGamalOnGrElSendableData> & commitment, const shared_ptr<GroupElement> & x)  {
 		this->publicKey = publicKey;
 		this->commitment = commitment;
 		this->x = x;
@@ -99,7 +99,9 @@ public:
 	* @param x committed value
 	* @param r random value used to commit.
 	*/
-	SigmaElGamalCommittedValueProverInput(shared_ptr<ElGamalPublicKey> publicKey, shared_ptr<ElGamalOnGrElSendableData> commitment, shared_ptr<GroupElement> x, biginteger r) {
+	SigmaElGamalCommittedValueProverInput(const shared_ptr<ElGamalPublicKey> & publicKey,
+		const shared_ptr<ElGamalOnGrElSendableData> & commitment, const shared_ptr<GroupElement> & x, const biginteger & r) {
+
 		input = make_shared<SigmaElGamalCommittedValueCommonInput>(publicKey, commitment, x);
 		this->r = r;
 	}
@@ -150,7 +152,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaElGamalCommittedValueSimulator(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) : dhSim(dlog, t, prg) {
+	SigmaElGamalCommittedValueSimulator(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) : dhSim(dlog, t, prg) {
 		this->dlog = dlog;
 		this->prg = prg;
 	}
@@ -169,7 +171,7 @@ public:
 	* @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 	* @throws IllegalArgumentException if the given input is not an instance of SigmaElGamalCommittedValueCommonInput.
 	*/
-	shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input, vector<byte> challenge)  override;
+	shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input, const vector<byte> & challenge)  override;
 
 	/**
 	* Computes the simulator computation with a randomly chosen challenge.
@@ -220,7 +222,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaElGamalCommittedValueProverComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) : sigmaDH(dlog, t, prg){
+	SigmaElGamalCommittedValueProverComputation(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) : sigmaDH(dlog, t, prg){
 		this->prg = prg;
 		this->dlog = dlog;
 		this->t = t;
@@ -238,7 +240,7 @@ public:
 	* @return the computed message
 	* @throws IllegalArgumentException if input is not an instance of SigmaElGamalCommittedValueProverInput.
 	*/
-	shared_ptr<SigmaProtocolMsg> computeFirstMsg(shared_ptr<SigmaProverInput> input) override; 
+	shared_ptr<SigmaProtocolMsg> computeFirstMsg(const shared_ptr<SigmaProverInput> & input) override;
 
 	/**
 	* Computes the second message of the protocol.
@@ -246,7 +248,7 @@ public:
 	* @return the computed message.
 	* @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 	*/
-	shared_ptr<SigmaProtocolMsg> computeSecondMsg(vector<byte> challenge) override;
+	shared_ptr<SigmaProtocolMsg> computeSecondMsg(const vector<byte> & challenge) override;
 
 	/**
 	* Returns the simulator that matches this sigma protocol prover.
@@ -295,7 +297,7 @@ public:
 	* @param random
 	* @throws InvalidDlogGroupException if the given dlog is invalid.
 	*/
-	SigmaElGamalCommittedValueVerifierComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) 
+	SigmaElGamalCommittedValueVerifierComputation(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg())
 		:sigmaDH(dlog, t, prg) {
 
 		this->dlog = dlog;
@@ -316,7 +318,7 @@ public:
 	* Sets the given challenge.
 	* @param challenge
 	*/
-	void setChallenge(vector<byte> challenge) override { sigmaDH.setChallenge(challenge); }
+	void setChallenge(const vector<byte> & challenge) override { sigmaDH.setChallenge(challenge); }
 
 	/**
 	* Returns the sampled challenge.

@@ -189,7 +189,7 @@ public:
 	* @param n security parameter
 	*
 	*/
-	CmtSimpleHashCommitter(shared_ptr<CommParty> channel, shared_ptr<PrgFromOpenSSLAES> random = get_seeded_prg(), shared_ptr<CryptographicHash> hash = make_shared<OpenSSLSHA256>(), int n = 32);
+	CmtSimpleHashCommitter(const shared_ptr<CommParty> & channel, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg(), const shared_ptr<CryptographicHash> & hash = make_shared<OpenSSLSHA256>(), int n = 32);
 
 	/**
 	* Runs the following lines of the commitment scheme:
@@ -208,7 +208,7 @@ public:
 	*/
 	shared_ptr<CmtCommitValue> sampleRandomCommitValue() override;
 
-	shared_ptr<CmtCommitValue> generateCommitValue(vector<byte> & x) override {
+	shared_ptr<CmtCommitValue> generateCommitValue(const vector<byte> & x) override {
 		return make_shared<CmtByteArrayCommitValue>(make_shared<vector<byte>>(x));
 	}
 
@@ -264,7 +264,7 @@ private:
 	shared_ptr<CryptographicHash> hash;
 	int n; //security parameter.
 
-	void doConstruct(shared_ptr<CommParty> channel, shared_ptr<CryptographicHash> hash, int n = 32);
+	void doConstruct(const shared_ptr<CommParty> & channel, const shared_ptr<CryptographicHash> & hash, int n = 32);
 
 public:
 	/**
@@ -272,7 +272,7 @@ public:
 	* values for the hash function, SecureRandom object and a security parameter n.
 	*  @param channel
 	*/
-	CmtSimpleHashReceiver(shared_ptr<CommParty> channel) {
+	CmtSimpleHashReceiver(const shared_ptr<CommParty> & channel) {
 		doConstruct(channel, make_shared<OpenSSLSHA256>());
 	}
 
@@ -286,7 +286,7 @@ public:
 	* @param n security parameter
 	*
 	*/
-	CmtSimpleHashReceiver(shared_ptr<CommParty> channel, shared_ptr<CryptographicHash> hash, int n = 32) {
+	CmtSimpleHashReceiver(const shared_ptr<CommParty> & channel, const shared_ptr<CryptographicHash> & hash, int n = 32) {
 		doConstruct(channel, hash, n);
 	}
 

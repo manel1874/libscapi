@@ -86,7 +86,7 @@ shared_ptr<SigmaCommonInput> SigmaOrTwoProverInput::getCommonInput() {
 * @throws IllegalArgumentException if the given t is not equal to both t values of the underlying simulators.
 * @throws IllegalArgumentException if the given simulators array does not contains two objects.
 */
-SigmaOrTwoSimulator::SigmaOrTwoSimulator(vector<shared_ptr<SigmaSimulator>> simulators, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
+SigmaOrTwoSimulator::SigmaOrTwoSimulator(const vector<shared_ptr<SigmaSimulator>> & simulators, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	if (simulators.size() != 2) {
 		throw invalid_argument("The given simulators array must contains two objects.");
 	}
@@ -109,7 +109,7 @@ SigmaOrTwoSimulator::SigmaOrTwoSimulator(vector<shared_ptr<SigmaSimulator>> simu
 * @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 * @throws IllegalArgumentException if the given input is not an instance of SigmaORTwoCommonInput.
 */
-shared_ptr<SigmaSimulatorOutput> SigmaOrTwoSimulator::simulate(SigmaCommonInput* input, vector<byte> challenge) {
+shared_ptr<SigmaSimulatorOutput> SigmaOrTwoSimulator::simulate(SigmaCommonInput* input, const vector<byte> & challenge) {
 	/*
 	* SAMPLE a random e0,
 	* 	COMPUTE e1 = e XOR e0
@@ -183,7 +183,7 @@ bool SigmaOrTwoSimulator::checkChallengeLength(int size) {
 * @throws IllegalArgumentException if the given t is not equal to both t values of the underlying provers.
 * @throws IllegalArgumentException if the given provers array does not contains two objects.
 */
-SigmaOrTwoProverComputation::SigmaOrTwoProverComputation(shared_ptr<SigmaProverComputation> prover, shared_ptr<SigmaSimulator> simulator, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
+SigmaOrTwoProverComputation::SigmaOrTwoProverComputation(const shared_ptr<SigmaProverComputation> & prover, const shared_ptr<SigmaSimulator> & simulator, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 
 	//If the given t is different from one of the underlying object's t values, throw exception.
 	if ((t != prover->getSoundnessParam()) || (t != simulator->getSoundnessParam())) {
@@ -206,7 +206,7 @@ SigmaOrTwoProverComputation::SigmaOrTwoProverComputation(shared_ptr<SigmaProverC
 * @return SigmaORFirstMsg contains a0, a1.
 * @throws IllegalArgumentException if input is not an instance of SigmaORTwoProverInput.
 */
-shared_ptr<SigmaProtocolMsg> SigmaOrTwoProverComputation::computeFirstMsg(shared_ptr<SigmaProverInput> input) {
+shared_ptr<SigmaProtocolMsg> SigmaOrTwoProverComputation::computeFirstMsg(const shared_ptr<SigmaProverInput> & input) {
 	
 	auto in = dynamic_pointer_cast<SigmaOrTwoProverInput>(input);
 	if (in == NULL) {
@@ -252,7 +252,7 @@ shared_ptr<SigmaProtocolMsg> SigmaOrTwoProverComputation::computeFirstMsg(shared
 * @return SigmaORTwoSecondMsg contains e0,z0,e1,z1.
 * @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 */
-shared_ptr<SigmaProtocolMsg> SigmaOrTwoProverComputation::computeSecondMsg(vector<byte> challenge) {
+shared_ptr<SigmaProtocolMsg> SigmaOrTwoProverComputation::computeSecondMsg(const vector<byte> & challenge) {
 	//check the challenge validity.
 	int len = challenge.size();
 	if (!checkChallengeLength(len)) {
@@ -311,7 +311,7 @@ shared_ptr<SigmaSimulator> SigmaOrTwoProverComputation::getSimulator() {
 * @throws IllegalArgumentException if the given t is not equal to both t values of the underlying verifiers.
 * @throws IllegalArgumentException if the given verifiers array does not contains two objects.
 */
-SigmaOrTwoVerifierComputation::SigmaOrTwoVerifierComputation(vector<shared_ptr<SigmaVerifierComputation>> verifiers, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
+SigmaOrTwoVerifierComputation::SigmaOrTwoVerifierComputation(const vector<shared_ptr<SigmaVerifierComputation>> & verifiers, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	if (verifiers.size() != 2) {
 		throw invalid_argument("The given verifiers array must contains two objects.");
 	}

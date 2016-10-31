@@ -53,7 +53,7 @@ string SigmaDJProductCommonInput::toString() {
 * @param x2 second plaintext
 */
 SigmaDJProductProverInput::SigmaDJProductProverInput(DamgardJurikPublicKey publicKey, BigIntegerCiphertext c1, BigIntegerCiphertext c2, BigIntegerCiphertext c3,
-	biginteger r1, biginteger r2, biginteger r3, BigIntegerPlainText x1, BigIntegerPlainText x2) : x1(x1), x2(x2) {
+	const biginteger & r1, const biginteger & r2, const biginteger & r3, BigIntegerPlainText x1, BigIntegerPlainText x2) : x1(x1), x2(x2) {
 
 	input = make_shared<SigmaDJProductCommonInput>(publicKey, c1, c2, c3);
 	this->r1 = r1;
@@ -139,7 +139,7 @@ SigmaDJProductSimulator::SigmaDJProductSimulator(int t, int lengthParameter, con
 * @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 * @throws IllegalArgumentException if the given input is not an instance of SigmaDJProductCommonInput.
 */
-shared_ptr<SigmaSimulatorOutput> SigmaDJProductSimulator::simulate(SigmaCommonInput* input, vector<byte> challenge) {
+shared_ptr<SigmaSimulatorOutput> SigmaDJProductSimulator::simulate(SigmaCommonInput* input, const vector<byte> & challenge) {
 	/*
 	* SAMPLE random values z1 <- ZN, z2 <- Z*n, z3 <- Z*n
 	* COMPUTE a1 = (1+n)^z1*(z2^N/c1^e) mod N' AND a2 = c2^z1/(z3^N*c3^e) mod N'
@@ -217,7 +217,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaDJProductSimulator::simulate(SigmaCommonIn
 * t must be less than a third of the length of the public key n.
 * @return true if the soundness parameter is valid; false, otherwise.
 */
-bool SigmaDJProductSimulator::checkSoundnessParam(biginteger modulus) {
+bool SigmaDJProductSimulator::checkSoundnessParam(const biginteger & modulus) {
 	//If soundness parameter is not less than a third of the publicKey n, return false.
 	int third = NumberOfBits(modulus) / 3;
 	return (t < third);
@@ -227,7 +227,7 @@ bool SigmaDJProductSimulator::checkSoundnessParam(biginteger modulus) {
 * Checks if the given challenge length is equal to the soundness parameter.
 * @return true if the challenge length is t; false, otherwise.
 */
-bool SigmaDJProductSimulator::checkChallengeLength(vector<byte> challenge) {
+bool SigmaDJProductSimulator::checkChallengeLength(const vector<byte> & challenge) {
 	//If the challenge's length is equal to t, return true. else, return false.
 	return ((int) challenge.size() == (t / 8) ? true : false);
 }
@@ -253,7 +253,7 @@ SigmaDJProductProverComputation::SigmaDJProductProverComputation(int t, int leng
 * @return the computed message
 * @throws IllegalArgumentException if input is not an instance of SigmaDJProductProverInput.
 */
-shared_ptr<SigmaProtocolMsg> SigmaDJProductProverComputation::computeFirstMsg(shared_ptr<SigmaProverInput> input) {
+shared_ptr<SigmaProtocolMsg> SigmaDJProductProverComputation::computeFirstMsg(const shared_ptr<SigmaProverInput> & input) {
 	this->input = dynamic_pointer_cast<SigmaDJProductProverInput>(input);
 	if (this->input == NULL) {
 		throw invalid_argument("the given input must be an instance of SigmaDJProductProverInput");
@@ -308,7 +308,7 @@ shared_ptr<SigmaProtocolMsg> SigmaDJProductProverComputation::computeFirstMsg(sh
 * @return the computed message.
 * @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 */
-shared_ptr<SigmaProtocolMsg> SigmaDJProductProverComputation::computeSecondMsg(vector<byte> challenge) {
+shared_ptr<SigmaProtocolMsg> SigmaDJProductProverComputation::computeSecondMsg(const vector<byte> & challenge) {
 
 	//check the challenge validity.
 	if (!checkChallengeLength(challenge)) {
@@ -346,7 +346,7 @@ shared_ptr<SigmaProtocolMsg> SigmaDJProductProverComputation::computeSecondMsg(v
 * t must be less than a third of the length of the public key n.
 * @return true if the soundness parameter is valid; false, otherwise.
 */
-bool SigmaDJProductProverComputation::checkSoundnessParam(biginteger modulus) {
+bool SigmaDJProductProverComputation::checkSoundnessParam(const biginteger & modulus) {
 	//If soundness parameter is not less than a third of the publicKey n, return false.
 	int third = NumberOfBits(modulus) / 3;
 	return (t < third);
@@ -356,7 +356,7 @@ bool SigmaDJProductProverComputation::checkSoundnessParam(biginteger modulus) {
 * Checks if the given challenge length is equal to the soundness parameter.
 * @return true if the challenge length is t; false, otherwise.
 */
-bool SigmaDJProductProverComputation::checkChallengeLength(vector<byte> challenge) {
+bool SigmaDJProductProverComputation::checkChallengeLength(const vector<byte> & challenge) {
 	//If the challenge's length is equal to t, return true. else, return false.
 	return ((int) challenge.size() == (t / 8) ? true : false);
 }
@@ -476,8 +476,8 @@ void SigmaDJProductVerifierComputation::checkInput(SigmaCommonInput* input, Sigm
 	}
 }
 
-bool SigmaDJProductVerifierComputation::areRelativelyPrime(biginteger n, biginteger c1, biginteger c2, biginteger a1, 
-	biginteger a2, biginteger z1, biginteger z2, biginteger z3) {
+bool SigmaDJProductVerifierComputation::areRelativelyPrime(const biginteger & n, const biginteger & c1, const biginteger & c2, const biginteger & a1,
+	const biginteger & a2, const biginteger & z1, const biginteger & z2, const biginteger & z3) {
 
 	//Check that the ciphertexts are relatively prime to n. 
 	if ((mp::gcd(c1, n) != 1) || (mp::gcd(c2, n) != 1) || (mp::gcd(c2, n) != 1)) {

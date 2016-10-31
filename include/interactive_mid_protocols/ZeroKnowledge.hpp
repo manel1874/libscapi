@@ -44,7 +44,7 @@ public:
 	* Runs the prover side of the Zero Knowledge proof.
 	* @param input holds necessary values to the proof calculations.
 	*/
-	virtual void prove(shared_ptr<ZKProverInput> input) = 0;
+	virtual void prove(const shared_ptr<ZKProverInput> & input) = 0;
 	virtual ~ZKProver() {};
 };
 
@@ -99,8 +99,8 @@ public:
 	* @param sProver underlying sigma prover to use.
 	* @param receiver Must be an instance of PerfectlyHidingCT
 	*/
-	ZKFromSigmaProver(shared_ptr<CommParty> channel, shared_ptr<SigmaProverComputation> sProver,
-		shared_ptr<CmtReceiver> receiver);
+	ZKFromSigmaProver(const shared_ptr<CommParty> & channel, const shared_ptr<SigmaProverComputation> & sProver,
+		const shared_ptr<CmtReceiver> & receiver);
 
 	/**
 	* Constructor that accepts the underlying channel, sigma protocol's prover and
@@ -108,7 +108,7 @@ public:
 	* @param channel used to communicate between prover and verifier.
 	* @param sProver underlying sigma prover to use.
 	*/
-	ZKFromSigmaProver(shared_ptr<CommParty> channel, shared_ptr<SigmaProverComputation> sProver, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) {
+	ZKFromSigmaProver(const shared_ptr<CommParty> & channel, const shared_ptr<SigmaProverComputation> & sProver, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) {
 		this->sProver = sProver;
 		this->receiver = make_shared<CmtPedersenReceiver>(channel, prg);
 		this->channel = channel;
@@ -132,7 +132,7 @@ public:
 	*      		OUTPUT ERROR (CHEAT_ATTEMPT_BY_V)<p>
 	* @param input must be an instance of SigmaProverInput.
 	*/
-	void prove(shared_ptr<ZKProverInput> input) override;
+	void prove(const shared_ptr<ZKProverInput> & input) override;
 
 private:
 	shared_ptr<CommParty> channel;
@@ -151,7 +151,7 @@ private:
 	*	SEND a to V".
 	* @param input
 	*/
-	void processFirstMsg(shared_ptr<SigmaProverInput> input) {
+	void processFirstMsg(const shared_ptr<SigmaProverInput> & input) {
 		// compute the first message by the underlying proverComputation.
 		auto a = sProver->computeFirstMsg(input);
 		// send the first message.
@@ -214,8 +214,8 @@ public:
 	* @param sVerifier underlying sigma verifier to use.
 	* @param committer Must be an instance of PerfectlyHidingCT
 	*/
-	ZKFromSigmaVerifier(shared_ptr<CommParty> channel, shared_ptr<SigmaVerifierComputation> sVerifier,
-		shared_ptr<CmtCommitter> committer, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
+	ZKFromSigmaVerifier(const shared_ptr<CommParty> & channel, const shared_ptr<SigmaVerifierComputation> & sVerifier,
+		const shared_ptr<CmtCommitter> & committer, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Constructor that accepts the underlying channel, sigma protocol's verifier and
@@ -223,7 +223,7 @@ public:
 	* @param channel used to communicate between prover and verifier.
 	* @param sVerifier underlying sigma verifier to use.
 	*/
-	ZKFromSigmaVerifier(shared_ptr<CommParty> channel, shared_ptr<SigmaVerifierComputation> sVerifier, 
+	ZKFromSigmaVerifier(const shared_ptr<CommParty> & channel, const shared_ptr<SigmaVerifierComputation> & sVerifier,
 		const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) {
 		this->sVerifier = sVerifier;
 		this->committer = make_shared<CmtPedersenCommitter>(channel, random);
@@ -260,7 +260,7 @@ private:
 	* Runs COMMIT.commit as the committer with input e.
 	* @param e
 	*/
-	long commit(vector<byte> e) {
+	long commit(const vector<byte> & e) {
 		auto val = committer->generateCommitValue(e);
 		long id = random->getRandom64();
 		id = abs(id);
@@ -314,8 +314,8 @@ public:
 	* @param channel used for communication
 	* @param sProver underlying sigma prover to use.
 	*/
-	ZKPOKFromSigmaCmtPedersenProver(shared_ptr<CommParty> channel,
-		shared_ptr<SigmaProverComputation> sProver, shared_ptr<DlogGroup> dg, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) {
+	ZKPOKFromSigmaCmtPedersenProver(const shared_ptr<CommParty> & channel, const shared_ptr<SigmaProverComputation> & sProver,
+        const shared_ptr<DlogGroup> & dg, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) {
 		this->sProver = sProver;
 		if (prg == nullptr) cout << "null 1" << endl;
 		this->receiver = make_shared<CmtPedersenTrapdoorReceiver>(channel, dg, prg);
@@ -340,7 +340,7 @@ public:
 	*
 	* @param input must be an instance of SigmaProverInput.
 	*/
-	void prove(shared_ptr<ZKProverInput> input) override;
+	void prove(const shared_ptr<ZKProverInput> & input) override;
 
 private:
 	shared_ptr<CommParty> channel;
@@ -361,7 +361,7 @@ private:
 	*	SEND a to V".
 	* @param input
 	*/
-	void processFirstMsg(shared_ptr<SigmaProverInput>  input) {
+	void processFirstMsg(const shared_ptr<SigmaProverInput> & input) {
 		// compute the first message by the underlying proverComputation.
 		auto a = sProver->computeFirstMsg(input);
 		auto msg = a->toString();
@@ -395,7 +395,7 @@ private:
 	*   OUTPUT nothing".<p>
 	* This is a blocking function!
 	*/
-	void processSecondMsg(vector<byte> e, shared_ptr<CmtRCommitPhaseOutput> trap);
+	void processSecondMsg(const vector<byte> & e, const shared_ptr<CmtRCommitPhaseOutput> & trap);
 
 };
 
@@ -420,7 +420,7 @@ private:
 	/**
 	* Runs COMMIT.commit as the committer with input e.
 	*/
-	long commit(vector<byte> e);
+	long commit(const vector<byte> & e);
 
 	/**
 	* Waits for a message a from the prover.
@@ -440,9 +440,9 @@ public:
 	* @param sVerifier underlying sigma verifier to use.
 	* @param random
 	*/
-	ZKPOKFromSigmaCmtPedersenVerifier(shared_ptr<CommParty> channel,
-		shared_ptr<SigmaVerifierComputation> sVerifier,
-		shared_ptr<CmtRCommitPhaseOutput> emptyTrap, shared_ptr<DlogGroup> dg, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) {
+	ZKPOKFromSigmaCmtPedersenVerifier(const shared_ptr<CommParty> channel,
+		const shared_ptr<SigmaVerifierComputation> & sVerifier,
+		const shared_ptr<CmtRCommitPhaseOutput> & emptyTrap, const shared_ptr<DlogGroup> & dg, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) {
 		this->channel = channel;
 		this->sVerifier = sVerifier; 
 		this->committer = make_shared<CmtPedersenTrapdoorCommitter>(channel, dg, random);
@@ -497,7 +497,7 @@ public:
 	* @param e challenge
 	* @param z second message
 	*/
-	ZKPOKFiatShamirProof(const shared_ptr<SigmaProtocolMsg> & a, vector<byte> & e, const shared_ptr<SigmaProtocolMsg> & z)
+	ZKPOKFiatShamirProof(const shared_ptr<SigmaProtocolMsg> & a, const vector<byte> & e, const shared_ptr<SigmaProtocolMsg> & z)
 		: a(a), e(e), z(z){}
 
 	/**
@@ -539,7 +539,7 @@ public:
 	* @param input for the underlying sigma protocol
 	* @param cont possible context information
 	*/
-	ZKPOKFiatShamirCommonInput(SigmaCommonInput* input, vector<byte> & cont)
+	ZKPOKFiatShamirCommonInput(SigmaCommonInput* input, const vector<byte> & cont)
 		: input(input), context(cont) {}
 
 	/**
@@ -572,7 +572,7 @@ public:
 	* @param input for the underlying sigma protocol.
 	* @param cont context information
 	*/
-	ZKPOKFiatShamirProverInput(const shared_ptr<SigmaProverInput> & input, vector<byte> & cont)
+	ZKPOKFiatShamirProverInput(const shared_ptr<SigmaProverInput> & input, const vector<byte> & cont)
 		: input(input), context(cont){}
 
 	/**
@@ -622,7 +622,7 @@ private:
 	* @param message to send to the verifier.
 	* @throws IOException if failed to send the message.
 	*/
-	void sendMsgToVerifier(ZKPOKFiatShamirProof msg);
+	void sendMsgToVerifier(ZKPOKFiatShamirProof & msg);
 
 public:
 	/**
@@ -644,7 +644,7 @@ public:
 	* @throws IOException if failed to send the message.
 	* @throws CheatAttemptException if the prover suspects the verifier is trying to cheat.
 	*/
-	void prove(shared_ptr<ZKProverInput> input) override;
+	void prove(const shared_ptr<ZKProverInput> & input) override;
 
 	/**
 	* Let (a,e,z) denote the prover1, verifier challenge and prover2 messages of the sigma protocol.<p>
@@ -710,7 +710,7 @@ private:
 	* @throws IOException if failed to send the message.
 	* @throws ClassNotFoundException
 	*/
-	bool proccessVerify(SigmaCommonInput* input, SigmaProtocolMsg* a, vector<byte> & challenge, SigmaProtocolMsg* z);
+	bool proccessVerify(SigmaCommonInput* input, SigmaProtocolMsg* a, const vector<byte> & challenge, SigmaProtocolMsg* z);
 
 public:
 

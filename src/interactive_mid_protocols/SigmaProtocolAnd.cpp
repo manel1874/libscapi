@@ -33,7 +33,7 @@
 /*   SigmaANDProverComputation         */
 /***************************************/
 
-SigmaANDProverComputation::SigmaANDProverComputation(vector<shared_ptr<SigmaProverComputation>> provers, int t, const shared_ptr<PrgFromOpenSSLAES> & prg) {
+SigmaANDProverComputation::SigmaANDProverComputation(const vector<shared_ptr<SigmaProverComputation>> & provers, int t, const shared_ptr<PrgFromOpenSSLAES> & prg) {
 	// if the given t is different from one of the underlying object's t values, throw exception.
 	for (auto prover : provers)
 		if(t != prover->getSoundnessParam())
@@ -45,7 +45,7 @@ SigmaANDProverComputation::SigmaANDProverComputation(vector<shared_ptr<SigmaProv
 	this->t = t;
 }
 
-shared_ptr<SigmaProtocolMsg> SigmaANDProverComputation::computeFirstMsg(shared_ptr<SigmaProverInput> in) {
+shared_ptr<SigmaProtocolMsg> SigmaANDProverComputation::computeFirstMsg(const shared_ptr<SigmaProverInput> & in) {
 	// checks that the input is as expected.
 	auto input = checkInput(in.get());
 	auto proversInput = input->getInputs();
@@ -61,8 +61,7 @@ shared_ptr<SigmaProtocolMsg> SigmaANDProverComputation::computeFirstMsg(shared_p
 	return make_shared<SigmaMultipleMsg>(firstMessages);
 }
 
-shared_ptr<SigmaProtocolMsg> SigmaANDProverComputation::computeSecondMsg(
-	vector<byte> challenge) {
+shared_ptr<SigmaProtocolMsg> SigmaANDProverComputation::computeSecondMsg(const vector<byte> & challenge) {
 	// create an array to hold all messages.
 	vector<shared_ptr<SigmaProtocolMsg>> secondMessages;
 	// compute all second messages and add them to the array list.
@@ -98,7 +97,7 @@ SigmaMultipleProverInput* SigmaANDProverComputation::checkInput(SigmaProverInput
 /*   SigmaANDSimulator                 */
 /***************************************/
 
-SigmaANDSimulator::SigmaANDSimulator(vector<shared_ptr<SigmaSimulator>> simulators, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
+SigmaANDSimulator::SigmaANDSimulator(const vector<shared_ptr<SigmaSimulator>> & simulators, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	// if the given t is different from one of the underlying object's t values, throw exception.
 	for(auto sigmaSimulator : simulators)
 		if(t!=sigmaSimulator->getSoundnessParam())
@@ -111,7 +110,7 @@ SigmaANDSimulator::SigmaANDSimulator(vector<shared_ptr<SigmaSimulator>> simulato
 }
 
 shared_ptr<SigmaSimulatorOutput> SigmaANDSimulator::simulate(SigmaCommonInput* input,
-	vector<byte> challenge) {
+	const vector<byte> & challenge) {
 	if (!checkChallengeLength(challenge.size())) 
 		throw CheatAttemptException("the length of the given challenge is different from the soundness parameter");
 	
@@ -159,7 +158,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaANDSimulator::simulate(SigmaCommonInput* i
 /***************************************/
 /*   SigmaANDVerifierComputation       */
 /***************************************/
-SigmaANDVerifierComputation::SigmaANDVerifierComputation(vector<shared_ptr<SigmaVerifierComputation>> verifiers, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
+SigmaANDVerifierComputation::SigmaANDVerifierComputation(const vector<shared_ptr<SigmaVerifierComputation>> & verifiers, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	// if the given t is different from one of the underlying object's t values, throw exception.
 	for(auto verifier : verifiers)
 		if(t != verifier->getSoundnessParam())
@@ -183,7 +182,7 @@ void SigmaANDVerifierComputation::sampleChallenge() {
 		verifier->setChallenge(e);
 }
 
-void SigmaANDVerifierComputation::setChallenge(vector<byte> challenge) {
+void SigmaANDVerifierComputation::setChallenge(const vector<byte> & challenge) {
 	e = challenge;
 	for (auto verifier : verifiers)
 		verifier->setChallenge(challenge);

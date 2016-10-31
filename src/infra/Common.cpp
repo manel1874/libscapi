@@ -145,7 +145,7 @@ const vector<string> explode(const string& s, const char& c)
 }
 
 
-biginteger decodeBigInteger(byte* input, size_t length)
+biginteger decodeBigInteger(const byte* input, size_t length)
 {
 	biginteger result(0);
 	int bits = -8;

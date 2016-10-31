@@ -99,7 +99,7 @@ public:
 	* @throws IOException
 	* @throws ClassNotFoundException
 	*/
-	CmtPedersenHashCommitter(shared_ptr<CommParty> channel, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) : CmtPedersenCommitterCore(channel, random) {
+	CmtPedersenHashCommitter(const shared_ptr<CommParty> & channel, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) : CmtPedersenCommitterCore(channel, random) {
 		hash = make_shared<OpenSSLSHA256>(); 	//This default hash suits the default DlogGroup of the underlying Committer.
 		if (hash->getHashedMsgSize() > (int) bytesCount(dlog->getOrder())) {
 			throw invalid_argument("The size in bytes of the resulting hash is bigger than the size in bytes of the order of the DlogGroup.");
@@ -123,7 +123,7 @@ public:
 	* @throws IOException if there was a problem during the communication
 	* @throws ClassNotFoundException if there was a problem with the serialization mechanism.
 	*/
-	CmtPedersenHashCommitter(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
+	CmtPedersenHashCommitter(const shared_ptr<CommParty> & channel, const shared_ptr<DlogGroup> & dlog, const shared_ptr<CryptographicHash> & hash, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/*
 	* Runs COMMIT_ElGamal to commit to value H(x).
@@ -139,7 +139,7 @@ public:
 	*/
 	shared_ptr<CmtCommitValue> sampleRandomCommitValue() override;
 
-	shared_ptr<CmtCommitValue> generateCommitValue(vector<byte> & x) override {
+	shared_ptr<CmtCommitValue> generateCommitValue(const vector<byte> & x) override {
 		return make_shared<CmtByteArrayCommitValue>(make_shared<vector<byte>>(x));
 	}
 
@@ -183,7 +183,7 @@ public:
 	* @param channel
 	* @throws IOException if there was a problem in the communication.
 	*/
-	CmtPedersenHashReceiver(shared_ptr<CommParty> channel, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) : CmtPedersenReceiverCore(channel, random) {
+	CmtPedersenHashReceiver(const shared_ptr<CommParty> & channel, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) : CmtPedersenReceiverCore(channel, random) {
 		hash = make_shared<OpenSSLSHA256>(); 		//This default hash suits the default DlogGroup of the underlying Committer.
 	}
 
@@ -202,7 +202,7 @@ public:
 	* @throws InvalidDlogGroupException if the parameters of the group do not conform the type the group is supposed to be
 	* @throws IOException if there was a problem during the communication
 	*/
-	CmtPedersenHashReceiver(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
+	CmtPedersenHashReceiver(const shared_ptr<CommParty> & channel, const shared_ptr<DlogGroup> & dlog, const shared_ptr<CryptographicHash> & hash, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	shared_ptr<CmtCommitValue> receiveDecommitment(long id) override;
 

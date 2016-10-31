@@ -50,7 +50,7 @@ void SigmaPedersenCmtKnowledgeMsg::initFromString(const string & s) {
 * @param random
 * @throws IllegalArgumentException if soundness parameter is invalid.
 */
-SigmaPedersenCmtKnowledgeSimulator::SigmaPedersenCmtKnowledgeSimulator(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
+SigmaPedersenCmtKnowledgeSimulator::SigmaPedersenCmtKnowledgeSimulator(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 
 	//Sets the parameters.
 	this->dlog = dlog;
@@ -71,7 +71,7 @@ bool SigmaPedersenCmtKnowledgeSimulator::checkSoundnessParam() {
 	return (soundness < q);
 }
 
-shared_ptr<SigmaSimulatorOutput> SigmaPedersenCmtKnowledgeSimulator::simulate(SigmaCommonInput* input, vector<byte> challenge) {
+shared_ptr<SigmaSimulatorOutput> SigmaPedersenCmtKnowledgeSimulator::simulate(SigmaCommonInput* input, const vector<byte> & challenge) {
 	//  SAMPLE random values u, v in Zq  
 	//	COMPUTE a = h^u*g^v*c^(-e) (where -e here means -e mod q)
 	//	OUTPUT (a,e,(u,v))
@@ -125,7 +125,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaPedersenCmtKnowledgeSimulator::simulate(Si
 * @param random
 * @throws IllegalArgumentException if soundness parameter is invalid.
 */
-SigmaPedersenCmtKnowledgeProverComputation::SigmaPedersenCmtKnowledgeProverComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
+SigmaPedersenCmtKnowledgeProverComputation::SigmaPedersenCmtKnowledgeProverComputation(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 
 	//Sets the parameters.
 	this->dlog = dlog;
@@ -145,7 +145,7 @@ SigmaPedersenCmtKnowledgeProverComputation::SigmaPedersenCmtKnowledgeProverCompu
 *  COMPUTE a = (h^alpha)*(g^beta)".
 * @return the computed message
 */
-shared_ptr<SigmaProtocolMsg> SigmaPedersenCmtKnowledgeProverComputation::computeFirstMsg(shared_ptr<SigmaProverInput> input) {
+shared_ptr<SigmaProtocolMsg> SigmaPedersenCmtKnowledgeProverComputation::computeFirstMsg(const shared_ptr<SigmaProverInput> & input) {
 	
 	this->input = dynamic_pointer_cast<SigmaPedersenCmtKnowledgeProverInput>(input);
 	if (this->input == NULL) {
@@ -185,7 +185,7 @@ bool SigmaPedersenCmtKnowledgeProverComputation::checkSoundnessParam() {
 * @return the computed message.
 * @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 */
-shared_ptr<SigmaProtocolMsg> SigmaPedersenCmtKnowledgeProverComputation::computeSecondMsg(vector<byte> challenge) {
+shared_ptr<SigmaProtocolMsg> SigmaPedersenCmtKnowledgeProverComputation::computeSecondMsg(const vector<byte> & challenge) {
 
 	//check the challenge validity.
 	if (!checkChallengeLength(challenge.size())) {
@@ -220,7 +220,7 @@ shared_ptr<SigmaProtocolMsg> SigmaPedersenCmtKnowledgeProverComputation::compute
 * @throws InvalidDlogGroupException if the given DlogGroup is not valid.
 * @throws IllegalArgumentException if soundness parameter is invalid.
 */
-SigmaPedersenCmtKnowledgeVerifierComputation::SigmaPedersenCmtKnowledgeVerifierComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
+SigmaPedersenCmtKnowledgeVerifierComputation::SigmaPedersenCmtKnowledgeVerifierComputation(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 
 	if (!dlog->validateGroup())
 		throw InvalidDlogGroupException("invalid dlog");

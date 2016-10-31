@@ -54,7 +54,7 @@ SigmaDJEncryptedZeroSimulator::SigmaDJEncryptedZeroSimulator(int t, int lengthPa
 * @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 * @throws IllegalArgumentException if the given input is not an instance of SigmaDJEncryptedZeroCommonInput.
 */
-shared_ptr<SigmaSimulatorOutput> SigmaDJEncryptedZeroSimulator::simulate(SigmaCommonInput* input, vector<byte> challenge) {
+shared_ptr<SigmaSimulatorOutput> SigmaDJEncryptedZeroSimulator::simulate(SigmaCommonInput* input, const vector<byte> & challenge) {
 	//check the challenge validity.
 	if (!checkChallengeLength(challenge)) {
 		throw CheatAttemptException("the length of the given challenge is differ from the soundness parameter");
@@ -112,7 +112,7 @@ shared_ptr<SigmaSimulatorOutput> SigmaDJEncryptedZeroSimulator::simulate(SigmaCo
 * t must be less than a third of the length of the public key n.
 * @return true if the soundness parameter is valid; false, otherwise.
 */
-bool SigmaDJEncryptedZeroSimulator::checkSoundnessParam(biginteger modulus) {
+bool SigmaDJEncryptedZeroSimulator::checkSoundnessParam(const biginteger & modulus) {
 	//If soundness parameter is not less than a third of the publicKey n, return false.
 	int third = NumberOfBits(modulus) / 3;
 	return (t < third);
@@ -122,7 +122,7 @@ bool SigmaDJEncryptedZeroSimulator::checkSoundnessParam(biginteger modulus) {
 * Checks if the given challenge length is equal to the soundness parameter.
 * @return true if the challenge length is t; false, otherwise.
 */
-bool SigmaDJEncryptedZeroSimulator::checkChallengeLength(vector<byte> challenge) {
+bool SigmaDJEncryptedZeroSimulator::checkChallengeLength(const vector<byte> & challenge) {
 	//If the challenge's length is equal to t, return true. else, return false.
 	return ((int) challenge.size() == (t / 8) ? true : false);
 }
@@ -144,7 +144,7 @@ SigmaDJEncryptedZeroProverComputation::SigmaDJEncryptedZeroProverComputation(int
 * t must be less than a third of the length of the public key n.
 * @return true if the soundness parameter is valid; false, otherwise.
 */
-bool SigmaDJEncryptedZeroProverComputation::checkSoundnessParam(biginteger modulus) {
+bool SigmaDJEncryptedZeroProverComputation::checkSoundnessParam(const biginteger & modulus) {
 	//If soundness parameter is not less than a third of the publicKey n, return false.
 	int third = NumberOfBits(modulus) / 3;
 	return (t < third);
@@ -158,7 +158,7 @@ bool SigmaDJEncryptedZeroProverComputation::checkSoundnessParam(biginteger modul
 * @return the computed message
 * @throws IllegalArgumentException if input is not an instance of SigmaDJEncryptedZeroProverInput.
 */
-shared_ptr<SigmaProtocolMsg> SigmaDJEncryptedZeroProverComputation::computeFirstMsg(shared_ptr<SigmaProverInput> input) {
+shared_ptr<SigmaProtocolMsg> SigmaDJEncryptedZeroProverComputation::computeFirstMsg(const shared_ptr<SigmaProverInput> & input) {
 	this->input = dynamic_pointer_cast<SigmaDJEncryptedZeroProverInput>(input);
 	if (this->input == NULL) {
 		throw invalid_argument("the given input must be an instance of SigmaDJEncryptedZeroProverInput");
@@ -191,7 +191,7 @@ shared_ptr<SigmaProtocolMsg> SigmaDJEncryptedZeroProverComputation::computeFirst
 * @return the computed message.
 * @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 */
-shared_ptr<SigmaProtocolMsg> SigmaDJEncryptedZeroProverComputation::computeSecondMsg(vector<byte> challenge) {
+shared_ptr<SigmaProtocolMsg> SigmaDJEncryptedZeroProverComputation::computeSecondMsg(const vector<byte> & challenge) {
 
 	//check the challenge validity.
 	if (!checkChallengeLength(challenge)) {
@@ -216,7 +216,7 @@ shared_ptr<SigmaProtocolMsg> SigmaDJEncryptedZeroProverComputation::computeSecon
 * t must be less than a third of the length of the public key n.
 * @return true if the soundness parameter is valid; false, otherwise.
 */
-bool SigmaDJEncryptedZeroVerifierComputation::checkSoundnessParam(biginteger modulus) {
+bool SigmaDJEncryptedZeroVerifierComputation::checkSoundnessParam(const biginteger & modulus) {
 	//If soundness parameter is not less than a third of the publicKey n, throw IllegalArgumentException.
 	int third = NumberOfBits(modulus) / 3;
 	return (t < third);

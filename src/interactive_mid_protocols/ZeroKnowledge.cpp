@@ -33,8 +33,8 @@
 /*   ZKFromSigmaProver                          */
 /************************************************/
 
-ZKFromSigmaProver::ZKFromSigmaProver(shared_ptr<CommParty> channel,
-	shared_ptr<SigmaProverComputation> sProver, shared_ptr<CmtReceiver> receiver) {
+ZKFromSigmaProver::ZKFromSigmaProver(const shared_ptr<CommParty> & channel,
+	const shared_ptr<SigmaProverComputation> & sProver, const shared_ptr<CmtReceiver> & receiver) {
 	// receiver must be an instance of PerfectlyHidingCT
 	auto perfectHidingReceiver = dynamic_pointer_cast<PerfectlyHidingCmt>(receiver);
 	if (!perfectHidingReceiver) 
@@ -50,7 +50,7 @@ ZKFromSigmaProver::ZKFromSigmaProver(shared_ptr<CommParty> channel,
 	this->channel = channel;
 }
 
-void ZKFromSigmaProver::prove(shared_ptr<ZKProverInput> input) {
+void ZKFromSigmaProver::prove(const shared_ptr<ZKProverInput> & input) {
 	// the given input must be an instance of SigmaProtocolInput.
 	auto sigmaProverInput = std::dynamic_pointer_cast<SigmaProverInput>(input);
 	if (!sigmaProverInput) 
@@ -73,7 +73,8 @@ void ZKFromSigmaProver::prove(shared_ptr<ZKProverInput> input) {
 /*   ZKFromSigmaVerifier                        */
 /************************************************/
 
-ZKFromSigmaVerifier::ZKFromSigmaVerifier(shared_ptr<CommParty> channel,	shared_ptr<SigmaVerifierComputation> sVerifier, shared_ptr<CmtCommitter> committer, 
+ZKFromSigmaVerifier::ZKFromSigmaVerifier(const shared_ptr<CommParty> & channel,
+    const shared_ptr<SigmaVerifierComputation> & sVerifier, const shared_ptr<CmtCommitter> & committer,
 	const shared_ptr<PrgFromOpenSSLAES> & random) {
 	// committer must be an instance of PerfectlyHidingCT
 	auto perfectHidingCommiter = std::dynamic_pointer_cast<PerfectlyHidingCmt>(committer);
@@ -123,7 +124,7 @@ void ZKFromSigmaVerifier::receiveMsgFromProver(SigmaProtocolMsg* concreteMsg) {
 /*   ZKPOKFromSigmaCmtPedersenProver            */
 /************************************************/
 
-void ZKPOKFromSigmaCmtPedersenProver::prove(shared_ptr<ZKProverInput> input) {
+void ZKPOKFromSigmaCmtPedersenProver::prove(const shared_ptr<ZKProverInput> & input) {
 	// the given input must be an instance of SigmaProverInput.
 	auto sigmaProverInput = dynamic_pointer_cast<SigmaProverInput>(input);
 	if (!sigmaProverInput)
@@ -144,7 +145,7 @@ void ZKPOKFromSigmaCmtPedersenProver::prove(shared_ptr<ZKProverInput> input) {
 
 }
 
-void ZKPOKFromSigmaCmtPedersenProver::processSecondMsg(vector<byte> e, shared_ptr<CmtRCommitPhaseOutput> trap) { 
+void ZKPOKFromSigmaCmtPedersenProver::processSecondMsg(const vector<byte> & e, const shared_ptr<CmtRCommitPhaseOutput> & trap) {
 	// compute the second message by the underlying proverComputation.
 	auto z = sProver->computeSecondMsg(e);
 
@@ -208,7 +209,7 @@ bool ZKPOKFromSigmaCmtPedersenVerifier::verify(ZKCommonInput* input,
 /**
 * Runs COMMIT.commit as the committer with input e.
 */
-long ZKPOKFromSigmaCmtPedersenVerifier::commit(vector<byte> e) {
+long ZKPOKFromSigmaCmtPedersenVerifier::commit(const vector<byte> & e) {
 	auto val = committer->generateCommitValue(e);
 	long id = random->getRandom64();
 	id = abs(id);
@@ -324,7 +325,7 @@ vector<byte> ZKPOKFiatShamirFromSigmaProver::computeChallenge(ZKPOKFiatShamirPro
 * @param message to send to the verifier.
 * @throws IOException if failed to send the message.
 */
-void ZKPOKFiatShamirFromSigmaProver::sendMsgToVerifier(ZKPOKFiatShamirProof msg) {
+void ZKPOKFiatShamirFromSigmaProver::sendMsgToVerifier(ZKPOKFiatShamirProof & msg) {
 	auto msgStr = msg.toString();
 	channel->writeWithSize(msgStr);
 }
@@ -338,7 +339,7 @@ void ZKPOKFiatShamirFromSigmaProver::sendMsgToVerifier(ZKPOKFiatShamirProof msg)
 * @throws IOException if failed to send the message.
 * @throws CheatAttemptException if the prover suspects the verifier is trying to cheat.
 */
-void ZKPOKFiatShamirFromSigmaProver::prove(shared_ptr<ZKProverInput> input) {
+void ZKPOKFiatShamirFromSigmaProver::prove(const shared_ptr<ZKProverInput> & input) {
 	ZKPOKFiatShamirProof msg = generateFiatShamirProof(input);
 	
 	//Send (a,e,z) to V and output nothing.
@@ -452,7 +453,7 @@ vector<byte> ZKPOKFiatShamirFromSigmaVerifier::computeChallenge(ZKPOKFiatShamirC
 * @throws IOException if failed to send the message.
 * @throws ClassNotFoundException
 */
-bool ZKPOKFiatShamirFromSigmaVerifier::proccessVerify(SigmaCommonInput* input, SigmaProtocolMsg* a, vector<byte> & challenge, SigmaProtocolMsg* z) {
+bool ZKPOKFiatShamirFromSigmaVerifier::proccessVerify(SigmaCommonInput* input, SigmaProtocolMsg* a, const vector<byte> & challenge, SigmaProtocolMsg* z) {
 	//If transcript (a, e, z) is accepting in sigma on input x, output ACC
 	//Else outupt REJ
 

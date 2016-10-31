@@ -86,7 +86,7 @@ public:
 	* @param cipher encryption on the given plaintext.
 	* @param r random value used to encrypt.
 	*/
-	SigmaDJEncryptedZeroProverInput(DamgardJurikPublicKey publicKey, BigIntegerCiphertext cipher, biginteger r) {
+	SigmaDJEncryptedZeroProverInput(DamgardJurikPublicKey publicKey, BigIntegerCiphertext cipher, const biginteger & r) {
 		input = make_shared<SigmaDJEncryptedZeroCommonInput>(publicKey, cipher);
 		this->r = r;
 	}
@@ -152,13 +152,13 @@ private:
 	* t must be less than a third of the length of the public key n.
 	* @return true if the soundness parameter is valid; false, otherwise.
 	*/
-	bool checkSoundnessParam(biginteger modulus);
+	bool checkSoundnessParam(const biginteger & modulus);
 
 	/**
 	* Checks if the given challenge length is equal to the soundness parameter.
 	* @return true if the challenge length is t; false, otherwise.
 	*/
-	bool checkChallengeLength(vector<byte> challenge);
+	bool checkChallengeLength(const vector<byte> & challenge);
 
 public:
 	/**
@@ -183,7 +183,7 @@ public:
 	* @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 	* @throws IllegalArgumentException if the given input is not an instance of SigmaDJEncryptedZeroCommonInput.
 	*/
-	shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input, vector<byte> challenge)  override; 
+	shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input, const vector<byte> & challenge)  override;
 
 	/**
 	* Computes the simulator computation with a randomly chosen challenge.
@@ -227,13 +227,13 @@ private:
 	* t must be less than a third of the length of the public key n.
 	* @return true if the soundness parameter is valid; false, otherwise.
 	*/
-	bool checkSoundnessParam(biginteger modulus);
+	bool checkSoundnessParam(const biginteger & modulus);
 
 	/**
 	* Checks if the given challenge length is equal to the soundness parameter.
 	* @return true if the challenge length is t; false, otherwise.
 	*/
-	bool checkChallengeLength(vector<byte> challenge) {
+	bool checkChallengeLength(const vector<byte> & challenge) {
 		//If the challenge's length is equal to t, return true. else, return false.
 		return ((int)challenge.size() == (t / 8) ? true : false);
 	}
@@ -261,7 +261,7 @@ public:
 	* @return the computed message
 	* @throws IllegalArgumentException if input is not an instance of SigmaDJEncryptedZeroProverInput.
 	*/
-	shared_ptr<SigmaProtocolMsg> computeFirstMsg(shared_ptr<SigmaProverInput> input) override;
+	shared_ptr<SigmaProtocolMsg> computeFirstMsg(const shared_ptr<SigmaProverInput> & input) override;
 
 	/**
 	* Computes the second message of the protocol.<p>
@@ -270,7 +270,7 @@ public:
 	* @return the computed message.
 	* @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 	*/
-	shared_ptr<SigmaProtocolMsg> computeSecondMsg(vector<byte> challenge) override;
+	shared_ptr<SigmaProtocolMsg> computeSecondMsg(const vector<byte> & challenge) override;
 
 	/**
 	* Returns the simulator that matches this sigma protocol prover.
@@ -313,7 +313,7 @@ private:
 	* t must be less than a third of the length of the public key n.
 	* @return true if the soundness parameter is valid; false, otherwise.
 	*/
-	bool checkSoundnessParam(biginteger modulus);
+	bool checkSoundnessParam(const biginteger & modulus);
 
 public:
 	/**
@@ -341,7 +341,7 @@ public:
 	* Sets the given challenge.
 	* @param challenge
 	*/
-	void setChallenge(vector<byte> challenge) override {
+	void setChallenge(const vector<byte> & challenge) override {
 		e = challenge;
 	}
 

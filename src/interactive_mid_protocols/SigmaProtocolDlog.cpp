@@ -28,14 +28,14 @@
 
 #include "../../include/interactive_mid_protocols/SigmaProtocolDlog.hpp"
 
-bool check_soundness(int t, shared_ptr<DlogGroup> dlog) {
+bool check_soundness(int t, const shared_ptr<DlogGroup> & dlog) {
 	// if soundness parameter does not satisfy 2^t<q, return false.
 	biginteger soundness = mp::pow(biginteger(2), t);
 	biginteger q = dlog->getOrder();
 	return (soundness < q);
 }
 
-bool checkChallengeLength(vector<byte> challenge, int t) {
+bool checkChallengeLength(const vector<byte> & challenge, int t) {
 	// if the challenge's length is equal to t, return true. else, return false.
 	biginteger e = abs(decodeBigInteger(challenge.data(), challenge.size()));
 	return (e >= 0) && (e < mp::pow(biginteger(2), t));
@@ -45,7 +45,7 @@ bool checkChallengeLength(vector<byte> challenge, int t) {
 /*   SigmaDlogSimulator                */
 /***************************************/
 
-SigmaDlogSimulator::SigmaDlogSimulator(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
+SigmaDlogSimulator::SigmaDlogSimulator(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	this->dlog = dlog;
 	this->t = t;
 	if (!checkSoundnessParam()) // check the soundness validity.
@@ -56,7 +56,7 @@ SigmaDlogSimulator::SigmaDlogSimulator(shared_ptr<DlogGroup> dlog, int t, const 
 }
 
 shared_ptr<SigmaSimulatorOutput> SigmaDlogSimulator::simulate(SigmaCommonInput* input,
-	vector<byte> challenge) {
+	const vector<byte> & challenge) {
 	//check the challenge validity.
 	if (!checkChallengeLength(challenge, t))
 		throw CheatAttemptException(
@@ -96,7 +96,7 @@ bool SigmaDlogSimulator::checkSoundnessParam() {
 /*   SigmaDlogProverComputation        */
 /***************************************/
 
-SigmaDlogProverComputation::SigmaDlogProverComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
+SigmaDlogProverComputation::SigmaDlogProverComputation(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	this->dlog = dlog;
 	this->t = t;
 	if (!checkSoundnessParam()) // check the soundness validity.
@@ -105,7 +105,7 @@ SigmaDlogProverComputation::SigmaDlogProverComputation(shared_ptr<DlogGroup> dlo
 	qMinusOne = dlog->getOrder() - 1;
 }
 
-shared_ptr<SigmaProtocolMsg> SigmaDlogProverComputation::computeFirstMsg(shared_ptr<SigmaProverInput> input) {
+shared_ptr<SigmaProtocolMsg> SigmaDlogProverComputation::computeFirstMsg(const shared_ptr<SigmaProverInput> & input) {
 	this->input = dynamic_pointer_cast<SigmaDlogProverInput>(input);
 	// sample random r in Zq
 	r = getRandomInRange(0, qMinusOne, random.get());
@@ -117,7 +117,7 @@ shared_ptr<SigmaProtocolMsg> SigmaDlogProverComputation::computeFirstMsg(shared_
 
 }
 
-shared_ptr<SigmaProtocolMsg> SigmaDlogProverComputation::computeSecondMsg(vector<byte> challenge) {
+shared_ptr<SigmaProtocolMsg> SigmaDlogProverComputation::computeSecondMsg(const vector<byte> & challenge) {
 	if (!checkChallengeLength(challenge, t)) // check the challenge validity.
 		throw CheatAttemptException(
 			"the length of the given challenge is different from the soundness parameter");
@@ -142,7 +142,7 @@ bool SigmaDlogProverComputation::checkSoundnessParam() {
 /*   SigmaDlogVerifierComputation      */
 /***************************************/
 
-SigmaDlogVerifierComputation::SigmaDlogVerifierComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
+SigmaDlogVerifierComputation::SigmaDlogVerifierComputation(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	if (!dlog->validateGroup())
 		throw InvalidDlogGroupException("invalid dlog");
 

@@ -34,7 +34,7 @@
 * @param publicKey used to encrypt.
 * @param x encrypted element.
 */
-SigmaCramerShoupEncryptedValueCommonInput::SigmaCramerShoupEncryptedValueCommonInput(CramerShoupOnGroupElementCiphertext cipher, CramerShoupPublicKey publicKey, shared_ptr<GroupElement> x)
+SigmaCramerShoupEncryptedValueCommonInput::SigmaCramerShoupEncryptedValueCommonInput(CramerShoupOnGroupElementCiphertext cipher, CramerShoupPublicKey publicKey, const shared_ptr<GroupElement> & x)
 	:publicKey(publicKey), cipher(cipher) {
 	this->x = x;
 }
@@ -56,7 +56,8 @@ string SigmaCramerShoupEncryptedValueCommonInput::toString() {
 * @param x encrypted element.
 * @param r random value used to encrypt x.
 */
-SigmaCramerShoupEncryptedValueProverInput::SigmaCramerShoupEncryptedValueProverInput(CramerShoupOnGroupElementCiphertext cipher, CramerShoupPublicKey pubKey, shared_ptr<GroupElement> x, biginteger r) {
+SigmaCramerShoupEncryptedValueProverInput::SigmaCramerShoupEncryptedValueProverInput(CramerShoupOnGroupElementCiphertext cipher,
+		 CramerShoupPublicKey pubKey, const shared_ptr<GroupElement> & x, const biginteger & r) {
 	input = make_shared<SigmaCramerShoupEncryptedValueCommonInput>(cipher, pubKey, x);
 	this->r = r;
 }
@@ -68,7 +69,7 @@ SigmaCramerShoupEncryptedValueProverInput::SigmaCramerShoupEncryptedValueProverI
 * @param t Soundness parameter in BITS.
 * @param random
 */
-SigmaCramerShoupEncryptedValueSimulator::SigmaCramerShoupEncryptedValueSimulator(shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, int t, 
+SigmaCramerShoupEncryptedValueSimulator::SigmaCramerShoupEncryptedValueSimulator(const shared_ptr<DlogGroup> & dlog, const shared_ptr<CryptographicHash> & hash, int t,
 	const shared_ptr<PrgFromOpenSSLAES> & prg) : dhSim(dlog, t, prg) {
 
 	this->dlog = dlog;
@@ -83,7 +84,7 @@ SigmaCramerShoupEncryptedValueSimulator::SigmaCramerShoupEncryptedValueSimulator
 * @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 * @throws IllegalArgumentException if input is not the expected.
 */
-shared_ptr<SigmaSimulatorOutput> SigmaCramerShoupEncryptedValueSimulator::simulate(SigmaCommonInput* input, vector<byte> challenge) {
+shared_ptr<SigmaSimulatorOutput> SigmaCramerShoupEncryptedValueSimulator::simulate(SigmaCommonInput* input, const vector<byte> & challenge) {
 
 	//Delegates the computation to the underlying Sigma DHExtended simulator.
 	return dhSim.simulate(checkAndCreateUnderlyingInput(input).get(), challenge);
@@ -152,7 +153,7 @@ shared_ptr<SigmaDHExtendedCommonInput> SigmaCramerShoupEncryptedValueSimulator::
 * @param eToByteArray
 * @return the result of hash(u1ToByteArray+u2ToByteArray+eToByteArray) as BigInteger.
 */
-biginteger SigmaCramerShoupEncryptedValueSimulator::calcW(shared_ptr<GroupElement> u1, shared_ptr<GroupElement> u2, shared_ptr<GroupElement> e) {
+biginteger SigmaCramerShoupEncryptedValueSimulator::calcW(const shared_ptr<GroupElement> & u1, const shared_ptr<GroupElement> & u2, const shared_ptr<GroupElement> & e) {
 
 	auto u1ToByteArray = dlog->mapAnyGroupElementToByteArray(u1.get());
 	auto u2ToByteArray = dlog->mapAnyGroupElementToByteArray(u2.get());
@@ -181,7 +182,7 @@ biginteger SigmaCramerShoupEncryptedValueSimulator::calcW(shared_ptr<GroupElemen
 * @param t Soundness parameter in BITS.
 * @param random
 */
-SigmaCramerShoupEncryptedValueProverComputation::SigmaCramerShoupEncryptedValueProverComputation(shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, 
+SigmaCramerShoupEncryptedValueProverComputation::SigmaCramerShoupEncryptedValueProverComputation(const shared_ptr<DlogGroup> & dlog, const shared_ptr<CryptographicHash> & hash,
 	int t, const shared_ptr<PrgFromOpenSSLAES> & random) : sigmaDH(dlog, t, random) {
 
 	this->dlog = dlog;
@@ -190,7 +191,8 @@ SigmaCramerShoupEncryptedValueProverComputation::SigmaCramerShoupEncryptedValueP
 	prg = random;
 }
 
-biginteger SigmaCramerShoupEncryptedValueProverComputation::calcW(shared_ptr<GroupElement> u1, shared_ptr<GroupElement> u2, shared_ptr<GroupElement> e) {
+biginteger SigmaCramerShoupEncryptedValueProverComputation::calcW(const shared_ptr<GroupElement> & u1,
+										  const shared_ptr<GroupElement> & u2, const shared_ptr<GroupElement> & e) {
 
 	auto u1ToByteArray = dlog->mapAnyGroupElementToByteArray(u1.get());
 	auto u2ToByteArray = dlog->mapAnyGroupElementToByteArray(u2.get());
@@ -218,7 +220,7 @@ biginteger SigmaCramerShoupEncryptedValueProverComputation::calcW(shared_ptr<Gro
 * @return the computed message
 * @throws IllegalArgumentException if input is not the expected.
 */
-shared_ptr<SigmaProtocolMsg> SigmaCramerShoupEncryptedValueProverComputation::computeFirstMsg(shared_ptr<SigmaProverInput> input) {
+shared_ptr<SigmaProtocolMsg> SigmaCramerShoupEncryptedValueProverComputation::computeFirstMsg(const shared_ptr<SigmaProverInput> & input) {
 	auto in = dynamic_pointer_cast<SigmaCramerShoupEncryptedValueProverInput>(input);
 	if (in == NULL) {
 		throw invalid_argument("the given input must be an instance of SigmaCramerShoupEncryptedValueProverInput");
@@ -269,7 +271,7 @@ shared_ptr<SigmaProtocolMsg> SigmaCramerShoupEncryptedValueProverComputation::co
 * @return the computed message.
 * @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 */
-shared_ptr<SigmaProtocolMsg> SigmaCramerShoupEncryptedValueProverComputation::computeSecondMsg(vector<byte> challenge) {
+shared_ptr<SigmaProtocolMsg> SigmaCramerShoupEncryptedValueProverComputation::computeSecondMsg(const vector<byte> & challenge) {
 	//Delegates the computation to the underlying Sigma DHExtended prover.
 	return sigmaDH.computeSecondMsg(challenge);
 }
@@ -282,14 +284,16 @@ shared_ptr<SigmaProtocolMsg> SigmaCramerShoupEncryptedValueProverComputation::co
 * @param random
 * @throws InvalidDlogGroupException if the given dlog is invalid.
 */
-SigmaCramerShoupEncryptedValueVerifierComputation::SigmaCramerShoupEncryptedValueVerifierComputation(shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, int t)
+SigmaCramerShoupEncryptedValueVerifierComputation::SigmaCramerShoupEncryptedValueVerifierComputation(const shared_ptr<DlogGroup> & dlog,
+												 const shared_ptr<CryptographicHash> & hash, int t)
 	: sigmaDH(dlog, t) {
 
 	this->dlog = dlog;
 	this->hash = hash;
 }
 
-biginteger SigmaCramerShoupEncryptedValueVerifierComputation::calcW(shared_ptr<GroupElement> u1, shared_ptr<GroupElement> u2, shared_ptr<GroupElement> e){
+biginteger SigmaCramerShoupEncryptedValueVerifierComputation::calcW(const shared_ptr<GroupElement> & u1,
+								const shared_ptr<GroupElement> & u2, const shared_ptr<GroupElement> & e){
 
 	auto u1ToByteArray = dlog->mapAnyGroupElementToByteArray(u1.get());
 	auto u2ToByteArray = dlog->mapAnyGroupElementToByteArray(u2.get());

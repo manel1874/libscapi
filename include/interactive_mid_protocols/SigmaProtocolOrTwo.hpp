@@ -54,7 +54,7 @@ public:
 	* @param simulatorInput
 	* @param b such that (xb,w) is in R.
 	*/
-	SigmaOrTwoProverInput(shared_ptr<SigmaProverInput> proverInput, shared_ptr<SigmaCommonInput> simulatorInput, byte b) {
+	SigmaOrTwoProverInput(const shared_ptr<SigmaProverInput> & proverInput, const shared_ptr<SigmaCommonInput> & simulatorInput, byte b) {
 		this->proverInput = proverInput;
 		this->simulatorInput = simulatorInput;
 		this->b = b;
@@ -96,7 +96,7 @@ private:
 	vector<byte> e1;
 
 public:
-	SigmaOrTwoSecondMsg(shared_ptr<SigmaProtocolMsg> z0, vector<byte> e0, shared_ptr<SigmaProtocolMsg> z1, vector<byte> e1) {
+	SigmaOrTwoSecondMsg(const shared_ptr<SigmaProtocolMsg> & z0, const vector<byte> & e0, const shared_ptr<SigmaProtocolMsg> & z1, const vector<byte> & e1) {
 		this->z0 = z0;
 		this->e0 = e0;
 		this->z1 = z1;
@@ -155,7 +155,7 @@ public:
 	* @throws IllegalArgumentException if the given t is not equal to both t values of the underlying simulators.
 	* @throws IllegalArgumentException if the given simulators array does not contains two objects.
 	*/
-	SigmaOrTwoSimulator(vector<shared_ptr<SigmaSimulator>> simulators, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
+	SigmaOrTwoSimulator(const vector<shared_ptr<SigmaSimulator>> & simulators, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -171,7 +171,7 @@ public:
 	* @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 	* @throws IllegalArgumentException if the given input is not an instance of SigmaORTwoCommonInput.
 	*/
-	shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input, vector<byte> challenge)  override; 
+	shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input, const vector<byte> & challenge)  override;
 
 	/**
 	* Computes the simulator computation with a randomly chosen challenge.
@@ -231,7 +231,7 @@ public:
 	* @throws IllegalArgumentException if the given t is not equal to both t values of the underlying provers.
 	* @throws IllegalArgumentException if the given provers array does not contains two objects.
 	*/
-	SigmaOrTwoProverComputation(shared_ptr<SigmaProverComputation> prover, shared_ptr<SigmaSimulator> simulator, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
+	SigmaOrTwoProverComputation(const shared_ptr<SigmaProverComputation> & prover, const shared_ptr<SigmaSimulator> & simulator, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -249,7 +249,7 @@ public:
 	* @return SigmaORFirstMsg contains a0, a1.
 	* @throws IllegalArgumentException if input is not an instance of SigmaORTwoProverInput.
 	*/
-	shared_ptr<SigmaProtocolMsg> computeFirstMsg(shared_ptr<SigmaProverInput> input) override;
+	shared_ptr<SigmaProtocolMsg> computeFirstMsg(const shared_ptr<SigmaProverInput> & input) override;
 
 	/**
 	* Computes the second message of the protocol.<p>
@@ -260,7 +260,7 @@ public:
 	* @return SigmaORTwoSecondMsg contains e0,z0,e1,z1.
 	* @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 	*/
-	shared_ptr<SigmaProtocolMsg> computeSecondMsg(vector<byte> challenge) override; 
+	shared_ptr<SigmaProtocolMsg> computeSecondMsg(const vector<byte> & challenge) override;
 
 	/**
 	* Returns the simulator that matches this sigma protocol prover.
@@ -304,7 +304,7 @@ public:
 	* @throws IllegalArgumentException if the given t is not equal to both t values of the underlying verifiers.
 	* @throws IllegalArgumentException if the given verifiers array does not contains two objects.
 	*/
-	SigmaOrTwoVerifierComputation(vector<shared_ptr<SigmaVerifierComputation>> verifiers, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
+	SigmaOrTwoVerifierComputation(const vector<shared_ptr<SigmaVerifierComputation>> & verifiers, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -326,7 +326,7 @@ public:
 	* Sets the given challenge.
 	* @param challenge
 	*/
-	void setChallenge(vector<byte> challenge) override { e = challenge;	}
+	void setChallenge(const vector<byte> & challenge) override { e = challenge;	}
 
 	/**
 	* Returns the sampled challenge.

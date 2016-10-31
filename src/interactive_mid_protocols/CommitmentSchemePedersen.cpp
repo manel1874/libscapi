@@ -34,7 +34,7 @@
 /*********************************/
 /*   CmtPedersenReceiverCore     */
 /*********************************/
-CmtPedersenReceiverCore::CmtPedersenReceiverCore(shared_ptr<CommParty> channel, const shared_ptr<PrgFromOpenSSLAES> & random, shared_ptr<DlogGroup> dlog) {
+CmtPedersenReceiverCore::CmtPedersenReceiverCore(const shared_ptr<CommParty> & channel, const shared_ptr<PrgFromOpenSSLAES> & random, const shared_ptr<DlogGroup> & dlog) {
 	// the underlying dlog group must be DDH secure.
 	auto ddh = dynamic_pointer_cast<DDH>(dlog);
 	if (!ddh)
@@ -133,8 +133,8 @@ shared_ptr<void> CmtPedersenReceiverCore::getCommitmentPhaseValues(long id) {
 /*********************************/
 /*   CmtPedersenCommitterCore    */
 /*********************************/
-CmtPedersenCommitterCore::CmtPedersenCommitterCore(shared_ptr<CommParty> channel, const shared_ptr<PrgFromOpenSSLAES> & random,
-	shared_ptr<DlogGroup> dlog) {
+CmtPedersenCommitterCore::CmtPedersenCommitterCore(const shared_ptr<CommParty> & channel, const shared_ptr<PrgFromOpenSSLAES> & random,
+	const shared_ptr<DlogGroup> & dlog) {
 	// the underlying dlog group must be DDH secure.
 	auto ddh = std::dynamic_pointer_cast<DDH>(dlog);
 	if (!ddh)

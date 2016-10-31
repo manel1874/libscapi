@@ -148,7 +148,7 @@ public:
 	 * @param x0Arr holds all the x1 for all the senders serially.
 	 * @param numOfOts Number of OTs in the OT extension.
 	 */
-	OTExtensionGeneralSInput(vector<byte> x0Arr, vector<byte> x1Arr,
+	OTExtensionGeneralSInput(const vector<byte> & x0Arr, const vector<byte> & x1Arr,
 			int numOfOts) {
 		this->x0Arr = x0Arr;
 		this->x1Arr = x1Arr;
@@ -295,7 +295,7 @@ public:
 	 * @param sigmaArr An array of sigma for each OT.
 	 * @param elementSize The size of each element in the OT extension, in bits.
 	 */
-	OTExtensionRInput(vector<byte> sigmaArr, int elementSize) {
+	OTExtensionRInput(const vector<byte> & sigmaArr, int elementSize) {
 		this->sigmaArr = sigmaArr;
 		this->elementSize = elementSize;
 	}
@@ -331,7 +331,7 @@ public:
 	 * @param sigmaArr An array of sigma for each OT.
 	 * @param elementSize The size of each element in the OT extension, in bits.
 	 */
-	OTExtensionGeneralRInput(vector<byte> sigmaArr, int elementSize) :
+	OTExtensionGeneralRInput(const vector<byte> & sigmaArr, int elementSize) :
 		OTExtensionRInput(sigmaArr, elementSize) {
 	}
 
@@ -355,7 +355,7 @@ public:
 	 * @param sigmaArr An array of sigma for each OT.
 	 * @param elementSize The size of each element in the OT extension, in bits.
 	 */
-	OTExtensionCorrelatedRInput(vector<byte> sigmaArr, int elementSize) :
+	OTExtensionCorrelatedRInput(const vector<byte> & sigmaArr, int elementSize) :
 		OTExtensionRInput(sigmaArr, elementSize) {
 	}
 
@@ -370,7 +370,7 @@ public:
 
 class OTExtensionRandomizedRInput: public OTExtensionRInput{
 public:
-	OTExtensionRandomizedRInput(vector<byte> sigmaArr, int elementSize) : OTExtensionRInput(sigmaArr,elementSize) {}
+	OTExtensionRandomizedRInput(const vector<byte> & sigmaArr, int elementSize) : OTExtensionRInput(sigmaArr,elementSize) {}
 	OTBatchRInputTypes getType() override {	return OTBatchRInputTypes::OTExtensionRandomizedRInput;}
 };
 

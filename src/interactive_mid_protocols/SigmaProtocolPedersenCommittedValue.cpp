@@ -44,14 +44,14 @@ string SigmaPedersenCommittedValueCommonInput::toString() {
 * @param t Soundness parameter in BITS.
 * @param random
 */
-SigmaPedersenCommittedValueSimulator::SigmaPedersenCommittedValueSimulator(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg) 
+SigmaPedersenCommittedValueSimulator::SigmaPedersenCommittedValueSimulator(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg)
 	: dlogSim(dlog, t, prg) {
 
 	//Creates the underlying SigmaDlogSimulator object with the given parameters.
 	this->dlog = dlog.get();
 }
 
-shared_ptr<SigmaSimulatorOutput> SigmaPedersenCommittedValueSimulator::simulate(SigmaCommonInput* input, vector<byte> challenge) {
+shared_ptr<SigmaSimulatorOutput> SigmaPedersenCommittedValueSimulator::simulate(SigmaCommonInput* input, const vector<byte> & challenge) {
 	
 	//Delegate the computation to the underlying Sigma Dlog simulator.
 	return dlogSim.simulate(convertInput(input).get(), challenge);
@@ -87,7 +87,7 @@ shared_ptr<SigmaDlogCommonInput> SigmaPedersenCommittedValueSimulator::convertIn
 * @param t Soundness parameter in BITS.
 * @param random
 */
-SigmaPedersenCommittedValueProverComputation::SigmaPedersenCommittedValueProverComputation(shared_ptr<DlogGroup> dlog, int t, 
+SigmaPedersenCommittedValueProverComputation::SigmaPedersenCommittedValueProverComputation(const shared_ptr<DlogGroup> & dlog, int t,
 	const shared_ptr<PrgFromOpenSSLAES> & prg) : sigmaDlog(dlog, t, prg) {
 	this->prg = prg;
 	this->dlog = dlog;
@@ -109,7 +109,7 @@ int SigmaPedersenCommittedValueProverComputation::getSoundnessParam() {
 * @return the computed message
 * @throws IllegalArgumentException if input is not an instance of SigmaPedersenCommittedValueProverInput.
 */
-shared_ptr<SigmaProtocolMsg> SigmaPedersenCommittedValueProverComputation::computeFirstMsg(shared_ptr<SigmaProverInput> input)  {
+shared_ptr<SigmaProtocolMsg> SigmaPedersenCommittedValueProverComputation::computeFirstMsg(const shared_ptr<SigmaProverInput> & input)  {
 	//Converts the input to the underlying prover.
 	//Delegates the computation to the underlying Sigma Dlog prover.
 	return sigmaDlog.computeFirstMsg(convertInput(input.get()));
@@ -121,7 +121,7 @@ shared_ptr<SigmaProtocolMsg> SigmaPedersenCommittedValueProverComputation::compu
 * @return the computed message.
 * @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 */
-shared_ptr<SigmaProtocolMsg> SigmaPedersenCommittedValueProverComputation::computeSecondMsg(vector<byte> challenge) {
+shared_ptr<SigmaProtocolMsg> SigmaPedersenCommittedValueProverComputation::computeSecondMsg(const vector<byte> & challenge) {
 	//Delegates the computation to the underlying Sigma Dlog prover.
 	return sigmaDlog.computeSecondMsg(challenge);
 

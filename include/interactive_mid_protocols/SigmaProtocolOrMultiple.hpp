@@ -51,7 +51,7 @@ public:
 	* @param input contains inputs for all the underlying sigma protocol.
 	* @param k number of statements that have a witness.
 	*/
-	SigmaOrMultipleCommonInput(vector<shared_ptr<SigmaCommonInput>> input, int k) {
+	SigmaOrMultipleCommonInput(const vector<shared_ptr<SigmaCommonInput>> & input, int k) {
 		sigmaInputs = input;
 		this->k = k;
 	};
@@ -91,7 +91,7 @@ public:
 	* @param proverInputs
 	* @param simulatorInputs
 	*/
-	SigmaOrMultipleProverInput(map<int, shared_ptr<SigmaProverInput>> proverInputs, map<int, shared_ptr<SigmaCommonInput>> simulatorInputs) {
+	SigmaOrMultipleProverInput(const map<int, shared_ptr<SigmaProverInput>> & proverInputs, const map<int, shared_ptr<SigmaCommonInput>> & simulatorInputs) {
 		this->proverInputs = proverInputs;
 		this->simulatorInputs = simulatorInputs;
 	}
@@ -124,7 +124,7 @@ private:
 	vector<vector<byte>> challenges;
 
 public:
-	SigmaOrMultipleSecondMsg(vector<vector<byte>> polynomBytes, vector<shared_ptr<SigmaProtocolMsg>> z, vector<vector<byte>> challenges) {
+	SigmaOrMultipleSecondMsg(const vector<vector<byte>> & polynomBytes, const vector<shared_ptr<SigmaProtocolMsg>> & z, const vector<vector<byte>> & challenges) {
 		this->polynomial = polynomBytes;
 		this->z = z;
 		this->challenges = challenges;
@@ -145,12 +145,12 @@ void initField(int t, int seed);
 //Samples random field elements to be the challenges.
 vector<vector<byte>> sampleRandomFieldElements(int numElements, int t, vector<shared_ptr<NTL::GF2E>> & elements, PrgFromOpenSSLAES*  random);
 vector<byte> convertElementToBytes(NTL::GF2E & element);
-NTL::GF2E convertBytesToGF2E(vector<byte> elementByts);
+NTL::GF2E convertBytesToGF2E(const vector<byte> & elementByts);
 NTL::GF2E generateIndexPolynomial(int i);
 //Interpolates the points to get a polynomial.
-NTL::GF2EX interpolate(vector<byte> challenge, vector<shared_ptr<NTL::GF2E>> & fieldElements, vector<int> sampledIndexes);
+NTL::GF2EX interpolate(const vector<byte> & challenge, vector<shared_ptr<NTL::GF2E>> & fieldElements, const vector<int> & sampledIndexes);
 //Calculates the challenges for the statements with the witnesses.
-vector<vector<byte>> getRestChallenges(NTL::GF2EX & polynomial, vector<int> indexesInI);
+vector<vector<byte>> getRestChallenges(NTL::GF2EX & polynomial, const vector<int> & indexesInI);
 //Returns the byteArray of the polynomial coefficients.
 vector<vector<byte>> getPolynomialBytes(NTL::GF2EX & polynomial);
 
@@ -194,7 +194,7 @@ public:
 	* @param t soundness parameter. t MUST be equal to both t values of the underlying simulators object.
 	* @param random
 	*/
-	SigmaOrMultipleSimulator(vector<shared_ptr<SigmaSimulator>> simulators, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
+	SigmaOrMultipleSimulator(const vector<shared_ptr<SigmaSimulator>> & simulators, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -210,7 +210,7 @@ public:
 	* @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 	* @throws IllegalArgumentException if the given input is not an instance of SigmaORMultipleCommonInput.
 	*/
-	shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input, vector<byte> challenge) override;
+	shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input, const vector<byte> & challenge) override;
 
 	/**
 	* Computes the simulator computation with a randomly chosen challenge.
@@ -277,7 +277,7 @@ public:
 	* @param t soundness parameter. t MUST be equal to all t values of the underlying provers object.
 	* @throws IllegalArgumentException if the given t is not equal to all t values of the underlying provers object.
 	*/
-	SigmaOrMultipleProverComputation(map<int, shared_ptr<SigmaProverComputation>> provers, map<int, shared_ptr<SigmaSimulator>> simulators, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
+	SigmaOrMultipleProverComputation(const map<int, shared_ptr<SigmaProverComputation>> & provers, const map<int, shared_ptr<SigmaSimulator>> & simulators, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -296,7 +296,7 @@ public:
 	* @throws IllegalArgumentException if input is not an instance of SigmaORMultipleInput.
 	* @throws IllegalArgumentException if the number of given inputs is different from the number of underlying provers.
 	*/
-	shared_ptr<SigmaProtocolMsg> computeFirstMsg(shared_ptr<SigmaProverInput> input) override; 
+	shared_ptr<SigmaProtocolMsg> computeFirstMsg(const shared_ptr<SigmaProverInput> & input) override;
 
 	/**
 	* Computes the second message of the protocol.<p>
@@ -308,7 +308,7 @@ public:
 	* @return SigmaMultipleMsg contains z1, ..., zm.
 	* @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 	*/
-	shared_ptr<SigmaProtocolMsg> computeSecondMsg(vector<byte> challenge) override; 
+	shared_ptr<SigmaProtocolMsg> computeSecondMsg(const vector<byte> & challenge) override;
 
 	/**
 	* Returns the simulator that matches this sigma protocol prover.
@@ -350,8 +350,8 @@ private:
 	int k;											// Number of true statements.
 	shared_ptr<PrgFromOpenSSLAES> random;
 
-	bool checkPolynomialValidity(vector<vector<byte>> polynomial, int k, NTL::GF2E challengeElement, vector<vector<byte>> challenges);
-	NTL::GF2EX createPolynomial(vector<vector<byte>> polynomialBytes);
+	bool checkPolynomialValidity(const vector<vector<byte>> & polynomial, int k, const NTL::GF2E & challengeElement, const vector<vector<byte>> & challenges);
+	NTL::GF2EX createPolynomial(const vector<vector<byte>> & polynomialBytes);
 
 public:
 	/**
@@ -362,7 +362,7 @@ public:
 	* @param random source of randomness
 	* @throws IllegalArgumentException if the given t is not equal to all t values of the underlying verifiers object.
 	*/
-	SigmaOrMultipleVerifierComputation(vector<shared_ptr<SigmaVerifierComputation>> verifiers, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
+	SigmaOrMultipleVerifierComputation(const vector<shared_ptr<SigmaVerifierComputation>> & verifiers, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -380,7 +380,7 @@ public:
 	* Sets the given challenge.
 	* @param challenge
 	*/
-	void setChallenge(vector<byte> challenge) override;
+	void setChallenge(const vector<byte> & challenge) override;
 
 	/**
 	* Returns the sampled challenge.

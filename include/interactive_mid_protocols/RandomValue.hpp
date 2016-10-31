@@ -44,7 +44,7 @@ class BigIntegerRandomValue : public RandomValue {
 private:
 	biginteger r;
 public:
-	BigIntegerRandomValue(biginteger r) { this->r = r; };
+	BigIntegerRandomValue(const biginteger & r) { this->r = r; };
 	biginteger getR() { return r; };
 };
 

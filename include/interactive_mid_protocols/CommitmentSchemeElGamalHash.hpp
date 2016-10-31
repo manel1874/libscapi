@@ -56,7 +56,7 @@ private:
 	* @param id
 	* @return the result of the hash function of the given input.
 	*/
-	vector<byte> getHashOfX(shared_ptr<CmtCommitValue> input, long id);
+	vector<byte> getHashOfX(const shared_ptr<CmtCommitValue> & input, long id);
 
 public:
 	/**
@@ -68,9 +68,9 @@ public:
 	* @param channel
 	* @throws IOException In case there is a problem in the pre-process phase.
 	*/
-	CmtElGamalHashCommitter(shared_ptr<CommParty> channel, 
-							shared_ptr<DlogGroup> dlog = make_shared<OpenSSLDlogECF2m>("K-283"),
-							shared_ptr<CryptographicHash> hash = make_shared<OpenSSLSHA256>(),
+	CmtElGamalHashCommitter(const shared_ptr<CommParty> & channel,
+							const shared_ptr<DlogGroup> & dlog = make_shared<OpenSSLDlogECF2m>("K-283"),
+							const shared_ptr<CryptographicHash> & hash = make_shared<OpenSSLSHA256>(),
 							const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
@@ -87,7 +87,7 @@ public:
 	*/
 	shared_ptr<CmtCommitValue> sampleRandomCommitValue() override;
 
-	shared_ptr<CmtCommitValue> generateCommitValue(vector<byte> & x) override {
+	shared_ptr<CmtCommitValue> generateCommitValue(const vector<byte> & x) override {
 		return make_shared<CmtByteArrayCommitValue>(make_shared<vector<byte>>(x));
 	}
 
@@ -133,9 +133,9 @@ public:
 	* @param dlog
 	* @param hash
 	*/
-	CmtElGamalHashReceiver(shared_ptr<CommParty> channel, 
-						   shared_ptr<DlogGroup> dlog = make_shared<OpenSSLDlogECF2m>("K-283"),
-						   shared_ptr<CryptographicHash> hash = make_shared<OpenSSLSHA256>());
+	CmtElGamalHashReceiver(const shared_ptr<CommParty> & channel,
+						   const shared_ptr<DlogGroup> & dlog = make_shared<OpenSSLDlogECF2m>("K-283"),
+						   const shared_ptr<CryptographicHash> & hash = make_shared<OpenSSLSHA256>());
 
 	/**
 	* Verifies that the commitment was to H(x).

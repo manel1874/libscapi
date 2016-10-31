@@ -2,7 +2,7 @@
 #include "../../include/interactive_mid_protocols/OTExtensionBristol.hpp"
 
 
-void OTExtensionBristolBase::init(const string& senderAddress, int port, int my_num, bool isSemiHonest, shared_ptr<CommParty> channel)
+void OTExtensionBristolBase::init(const string& senderAddress, int port, int my_num, bool isSemiHonest, const shared_ptr<CommParty> & channel)
 {
 
 	this->channel = channel;
@@ -73,7 +73,7 @@ void OTExtensionBristolBase::transfer(int nOTs, const BitVector& receiverInput) 
 
 }
 
-OTExtensionBristolSender::OTExtensionBristolSender(int port,bool isSemiHonest, shared_ptr<CommParty> channel) {
+OTExtensionBristolSender::OTExtensionBristolSender(int port,bool isSemiHonest, const shared_ptr<CommParty> & channel) {
 
 	//Call the init of the base class. The host name is hard coded to localhost since the sender is the  listener.
 	init("localhost", port, 0, isSemiHonest, channel);
@@ -199,7 +199,7 @@ shared_ptr<OTBatchSOutput> OTExtensionBristolSender::transfer(OTBatchSInput * in
 }
 
 
-OTExtensionBristolReciever::OTExtensionBristolReciever(const string& senderAddress, int port,bool isSemiHonest, shared_ptr<CommParty> channel) {
+OTExtensionBristolReciever::OTExtensionBristolReciever(const string& senderAddress, int port,bool isSemiHonest, const shared_ptr<CommParty> & channel) {
 
 	init(senderAddress, port, 1, isSemiHonest, channel);
 

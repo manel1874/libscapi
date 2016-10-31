@@ -105,7 +105,7 @@ private:
 	shared_ptr<SigmaProtocolMsg> z;
 
 public:
-	SigmaSimulatorOutput(shared_ptr<SigmaProtocolMsg> a, vector<byte> e, shared_ptr<SigmaProtocolMsg> z) {
+	SigmaSimulatorOutput(const shared_ptr<SigmaProtocolMsg> & a, const vector<byte> & e, const shared_ptr<SigmaProtocolMsg> & z) {
 		this->a = a;
 		this->e = e;
 		this->z = z;
@@ -145,7 +145,7 @@ public:
 	* Computes the simulator computation.
 	*/
 	virtual shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input,
-		vector<byte> challenge) = 0;
+		const vector<byte> & challenge) = 0;
 
 	/**
 	* Chooses random challenge and computes the simulator computation.
@@ -166,11 +166,11 @@ public:
 	/**
 	* Computes the first message of the sigma protocol.
 	*/
-	virtual shared_ptr<SigmaProtocolMsg> computeFirstMsg(shared_ptr<SigmaProverInput> input) =0;
+	virtual shared_ptr<SigmaProtocolMsg> computeFirstMsg(const shared_ptr<SigmaProverInput> & input) =0;
 	/**
 	* Computes the second message of the sigma protocol.
 	*/
-	virtual shared_ptr<SigmaProtocolMsg> computeSecondMsg(vector<byte> challenge) = 0;
+	virtual shared_ptr<SigmaProtocolMsg> computeSecondMsg(const vector<byte> & challenge) = 0;
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
 	* @return t soundness parameter
@@ -207,7 +207,7 @@ public:
 	* Sets the given challenge.
 	* @param challenge
 	*/
-	virtual void setChallenge(vector<byte> challenge) = 0;
+	virtual void setChallenge(const vector<byte> & challenge) = 0;
 	/**
 	* @return the challenge.
 	*/
@@ -244,8 +244,8 @@ public:
 	/**
 	* Constructor that sets the given channel and sigmaProverComputation.
 	*/
-	SigmaProtocolProver(shared_ptr<CommParty> channel,
-		shared_ptr<SigmaProverComputation> proverComputation) {
+	SigmaProtocolProver(const shared_ptr<CommParty> & channel,
+		const shared_ptr<SigmaProverComputation> & proverComputation) {
 		this->channel = channel;
 		this->proverComputation = proverComputation;
 	}
@@ -255,7 +255,7 @@ public:
 	* This function can be called when a user does not want to save time by
 	* doing operations in parallel. <p>
 	*/
-	void prove(shared_ptr<SigmaProverInput> input) {
+	void prove(const shared_ptr<SigmaProverInput> & input) {
 		processFirstMsg(input); // step one of the protocol.
 		processSecondMsg(); // step two of the protocol.
 	}
@@ -267,7 +267,7 @@ public:
 	* 	 SEND the computed message to the verifier".<p>
 	* It computes the first message and sends it to the verifier.
 	*/
-	void processFirstMsg(shared_ptr<SigmaProverInput> input);
+	void processFirstMsg(const shared_ptr<SigmaProverInput> & input);
 
 	/**
 	* Processes the second step of the sigma protocol.<p>
@@ -318,8 +318,8 @@ public:
 	/**
 	* Constructor that sets the given channel and random.
 	*/
-	SigmaProtocolVerifier(shared_ptr<CommParty> channel, shared_ptr<SigmaVerifierComputation> verifierComputation,
-		shared_ptr<SigmaProtocolMsg> emptyFirstMessage, shared_ptr<SigmaProtocolMsg> emptySecondMessage) {
+	SigmaProtocolVerifier(const shared_ptr<CommParty> & channel, const shared_ptr<SigmaVerifierComputation> & verifierComputation,
+		const shared_ptr<SigmaProtocolMsg> & emptyFirstMessage, const shared_ptr<SigmaProtocolMsg> & emptySecondMessage) {
 		this->channel = channel;
 		this->verifierComputation = verifierComputation;
 		this->a = emptyFirstMessage;
@@ -356,7 +356,7 @@ public:
 	/**
 	* Sets the given challenge
 	*/
-	void setChallenge(vector<byte> challenge) {
+	void setChallenge(const vector<byte> & challenge) {
 		// delegates to the underlying verifierComputation object.
 		verifierComputation->setChallenge(challenge);
 	}
@@ -383,7 +383,7 @@ private:
 	/**
 	* Sends the challenge to the prover.
 	*/
-	void sendChallengeToProver(vector<byte> challenge) {
+	void sendChallengeToProver(const vector<byte> & challenge) {
 		channel->writeWithSize(challenge.data(), challenge.size());
 		//channel->write(challenge.data(), challenge.size());
 	}
@@ -395,7 +395,7 @@ private:
 */
 class SigmaGroupElementMsg : public SigmaProtocolMsg {
 public:
-	SigmaGroupElementMsg(shared_ptr<GroupElementSendableData> el) { this->element = el; };
+	SigmaGroupElementMsg(const shared_ptr<GroupElementSendableData> & el) { this->element = el; };
 	shared_ptr<GroupElementSendableData> getElement() { return element; };
 	// SerializedNetwork implementation:
 	void initFromString(const string & s) override { element->initFromString(s); };
@@ -412,7 +412,7 @@ private:
 */
 class SigmaMultipleMsg : public SigmaProtocolMsg {
 public:
-	SigmaMultipleMsg(vector<shared_ptr<SigmaProtocolMsg>> messages) { this->messages = messages; };
+	SigmaMultipleMsg(const vector<shared_ptr<SigmaProtocolMsg>> & messages) { this->messages = messages; };
 	vector<shared_ptr<SigmaProtocolMsg>> getMessages() { return messages; };
 	void initFromString(const string & s) override;
 	string toString() override;
@@ -430,7 +430,7 @@ private:
 	biginteger z;
 public:
 	SigmaBIMsg() { this->z = -100; };
-	SigmaBIMsg(biginteger z) { this->z = z; };
+	SigmaBIMsg(const biginteger & z) { this->z = z; };
 	biginteger getMsg() { return z; };
 
 	// SerializedNetwork implementation:
@@ -449,7 +449,7 @@ public:
 	* We pass input by value to avoid unlegal reference and since it is just pointer inside the vector
 	* @param input contains inputs for all the underlying sigma protocol.
 	*/
-	SigmaMultipleCommonInput(vector<shared_ptr<SigmaCommonInput>> input) { sigmaInputs = input; };
+	SigmaMultipleCommonInput(const vector<shared_ptr<SigmaCommonInput>> & input) { sigmaInputs = input; };
 	/**
 	* Returns the input array contains inputs for all the underlying sigma protocol.
 	*/
@@ -471,7 +471,7 @@ public:
 	* Sets the input array.
 	* @param input contains inputs for all the underlying sigma protocol's provers.
 	*/
-	SigmaMultipleProverInput(vector<shared_ptr<SigmaProverInput>> input) { sigmaInputs = input; };
+	SigmaMultipleProverInput(const vector<shared_ptr<SigmaProverInput>> & input) { sigmaInputs = input; };
 	/**
 	* Returns the input array contains inputs for all the underlying sigma protocol's provers.
 	*/

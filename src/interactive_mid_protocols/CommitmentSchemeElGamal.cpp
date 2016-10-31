@@ -40,7 +40,7 @@
 * @throws InvalidDlogGroupException if the given dlog is not valid.
 * @throws IOException if there was a problem in the communication
 */
-CmtElGamalCommitterCore::CmtElGamalCommitterCore(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, shared_ptr<ElGamalEnc> elGamal, const shared_ptr<PrgFromOpenSSLAES> & random) {
+CmtElGamalCommitterCore::CmtElGamalCommitterCore(const shared_ptr<CommParty> & channel, const shared_ptr<DlogGroup> & dlog, const shared_ptr<ElGamalEnc> & elGamal, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	//The underlying dlog group must be DDH secure.
 	auto ddh = dynamic_pointer_cast<DDH>(dlog);
 	if (ddh == NULL) {
@@ -138,7 +138,7 @@ vector<byte> CmtElGamalOnGroupElementCommitter::generateBytesFromCommitValue(Cmt
 * @param dlog
 * @param elGamal
 */
-void CmtElGamalReceiverCore::doConstruct(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, shared_ptr<ElGamalEnc> elGamal) {
+void CmtElGamalReceiverCore::doConstruct(const shared_ptr<CommParty> & channel, const shared_ptr<DlogGroup> & dlog, const shared_ptr<ElGamalEnc> & elGamal) {
 	//The underlying dlog group must be DDH secure.
 	auto ddh = dynamic_pointer_cast<DDH>(dlog);
 	if (ddh == NULL) {
@@ -406,7 +406,7 @@ vector<byte> CmtElGamalOnByteArrayReceiver::generateBytesFromCommitValue(CmtComm
 * @param t statistical parameter
 * @throws IOException if there was a problem in the communication
 */
-CmtElGamalWithProofsCommitter::CmtElGamalWithProofsCommitter(shared_ptr<CommParty> channel, int t, shared_ptr<DlogGroup> dlog, const shared_ptr<PrgFromOpenSSLAES> & prg) : CmtElGamalOnGroupElementCommitter(channel, dlog, prg) {
+CmtElGamalWithProofsCommitter::CmtElGamalWithProofsCommitter(const shared_ptr<CommParty> & channel, int t, const shared_ptr<DlogGroup> & dlog, const shared_ptr<PrgFromOpenSSLAES> & prg) : CmtElGamalOnGroupElementCommitter(channel, dlog, prg) {
 	auto elGamalCommittedValProver = make_shared<SigmaElGamalCommittedValueProverComputation>(dlog, t, prg);
 	auto elGamalCTKnowledgeProver = make_shared<SigmaElGamalCmtKnowledgeProverComputation>(dlog, t, prg);
 	knowledgeProver = make_shared<ZKPOKFromSigmaCmtPedersenProver>(channel, elGamalCTKnowledgeProver, dlog, prg);
@@ -446,7 +446,7 @@ void CmtElGamalWithProofsCommitter::proveCommittedValue(long id)  {
 * @throws CheatAttemptException if the receiver h is not in the DlogGroup.
 * @throws ClassNotFoundException if there was a problem in the serialization
 */
-CmtElGamalWithProofsReceiver::CmtElGamalWithProofsReceiver(shared_ptr<CommParty> channel, int t, shared_ptr<DlogGroup> dlog, const shared_ptr<PrgFromOpenSSLAES> & prg) : CmtElGamalOnGroupElementReceiver(channel, dlog) {
+CmtElGamalWithProofsReceiver::CmtElGamalWithProofsReceiver(const shared_ptr<CommParty> & channel, int t, const shared_ptr<DlogGroup> & dlog, const shared_ptr<PrgFromOpenSSLAES> & prg) : CmtElGamalOnGroupElementReceiver(channel, dlog) {
 	auto elGamalCommittedValVerifier = make_shared<SigmaElGamalCommittedValueVerifierComputation>(dlog, t, prg);
 	auto elGamalCTKnowledgeVerifier = make_shared<SigmaElGamalCmtKnowledgeVerifierComputation>(dlog, t, prg);
 	auto output = make_shared<CmtRTrapdoorCommitPhaseOutput>();

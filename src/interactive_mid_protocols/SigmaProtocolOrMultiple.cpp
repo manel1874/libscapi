@@ -123,7 +123,7 @@ void SigmaOrMultipleSecondMsg::initFromString(const string & row) {
 * @param t soundness parameter. t MUST be equal to both t values of the underlying simulators object.
 * @param random
 */
-SigmaOrMultipleSimulator::SigmaOrMultipleSimulator(vector<shared_ptr<SigmaSimulator>> simulators, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
+SigmaOrMultipleSimulator::SigmaOrMultipleSimulator(const vector<shared_ptr<SigmaSimulator>> & simulators, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	len = simulators.size();
 
 	//If the given t is different from one of the underlying object's t values, throw exception.
@@ -161,7 +161,7 @@ void initField(int t, int s) {
 * @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 * @throws IllegalArgumentException if the given input is not an instance of SigmaORMultipleCommonInput.
 */
-shared_ptr<SigmaSimulatorOutput> SigmaOrMultipleSimulator::simulate(SigmaCommonInput* input, vector<byte> challenge)  {
+shared_ptr<SigmaSimulatorOutput> SigmaOrMultipleSimulator::simulate(SigmaCommonInput* input, const vector<byte> & challenge)  {
 	if (!checkChallengeLength(challenge.size())) {
 		throw CheatAttemptException("the length of the given challenge is differ from the soundness parameter");
 	}
@@ -232,7 +232,7 @@ vector<vector<byte>> getPolynomialBytes(NTL::GF2EX & polynomial) {
 	return polynomBytes;
 }
 
-vector<vector<byte>> getRestChallenges(NTL::GF2EX & polynomial, vector<int> indexesInI) {
+vector<vector<byte>> getRestChallenges(NTL::GF2EX & polynomial, const vector<int> & indexesInI) {
 
 	int size = indexesInI.size();
 	vector<vector<byte>> challenges;
@@ -251,7 +251,7 @@ vector<vector<byte>> getRestChallenges(NTL::GF2EX & polynomial, vector<int> inde
 	return challenges;
 }
 
-NTL::GF2EX interpolate(vector<byte> challenge, vector<shared_ptr<NTL::GF2E>> & fieldElements, vector<int> sampledIndexes) {
+NTL::GF2EX interpolate(const vector<byte> & challenge, vector<shared_ptr<NTL::GF2E>> & fieldElements, const vector<int> & sampledIndexes) {
 	//Create vectors of polynomials to the interpolate function.
 	NTL::vec_GF2E xVector; //the x coordinates
 	NTL::vec_GF2E yVector; //the y coordinates
@@ -331,7 +331,7 @@ vector<byte> convertElementToBytes(NTL::GF2E & element) {
 	return challenge;
 }
 
-NTL::GF2E convertBytesToGF2E(vector<byte> elementByts) {
+NTL::GF2E convertBytesToGF2E(const vector<byte> & elementByts) {
 	
 	//translate the bytes into a GF2X element.
 	NTL::GF2X e;
@@ -378,7 +378,7 @@ bool SigmaOrMultipleSimulator::checkChallengeLength(int size) {
 * @param t soundness parameter. t MUST be equal to all t values of the underlying provers object.
 * @throws IllegalArgumentException if the given t is not equal to all t values of the underlying provers object.
 */
-SigmaOrMultipleProverComputation::SigmaOrMultipleProverComputation(map<int, shared_ptr<SigmaProverComputation>> provers, map<int, shared_ptr<SigmaSimulator>> simulators, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
+SigmaOrMultipleProverComputation::SigmaOrMultipleProverComputation(const map<int, shared_ptr<SigmaProverComputation>> & provers, const map<int, shared_ptr<SigmaSimulator>> & simulators, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	//If the given t is different from one of the underlying object's t values, throw exception.
 
 	for (auto prover : provers) {
@@ -412,7 +412,7 @@ SET a=(a1,...,an)".
 * @throws IllegalArgumentException if input is not an instance of SigmaORMultipleInput.
 * @throws IllegalArgumentException if the number of given inputs is different from the number of underlying provers.
 */
-shared_ptr<SigmaProtocolMsg> SigmaOrMultipleProverComputation::computeFirstMsg(shared_ptr<SigmaProverInput> input) {
+shared_ptr<SigmaProtocolMsg> SigmaOrMultipleProverComputation::computeFirstMsg(const shared_ptr<SigmaProverInput> & input) {
 	//Check the given input.
 	auto in = dynamic_pointer_cast<SigmaOrMultipleProverInput>(input);
 	if (in == NULL) {
@@ -467,7 +467,7 @@ The message is Q,e1,z1,...,en,zn (where by Q we mean its coefficients)".<p>
 * @return SigmaMultipleMsg contains z1, ..., zm.
 * @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 */
-shared_ptr<SigmaProtocolMsg> SigmaOrMultipleProverComputation::computeSecondMsg(vector<byte> challenge) {
+shared_ptr<SigmaProtocolMsg> SigmaOrMultipleProverComputation::computeSecondMsg(const vector<byte> & challenge) {
 	//Create two arrays of indexes. These arrays used to calculate the interpolated polynomial.
 	vector<int> indexesNotInI;
 	vector<int> indexesInI;
@@ -534,7 +534,7 @@ shared_ptr<SigmaSimulator> SigmaOrMultipleProverComputation::getSimulator() {
 * @param random source of randomness
 * @throws IllegalArgumentException if the given t is not equal to all t values of the underlying verifiers object.
 */
-SigmaOrMultipleVerifierComputation::SigmaOrMultipleVerifierComputation(vector<shared_ptr<SigmaVerifierComputation>> verifiers, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
+SigmaOrMultipleVerifierComputation::SigmaOrMultipleVerifierComputation(const vector<shared_ptr<SigmaVerifierComputation>> & verifiers, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	//If the given t is different from one of the underlying object's t values, throw exception.
 	for (size_t i = 0; i < verifiers.size(); i++) {
 		if (t != verifiers[i]->getSoundnessParam()) {
@@ -567,7 +567,7 @@ void SigmaOrMultipleVerifierComputation::sampleChallenge() {
 * Sets the given challenge.
 * @param challenge
 */
-void SigmaOrMultipleVerifierComputation::setChallenge(vector<byte> challenge) {
+void SigmaOrMultipleVerifierComputation::setChallenge(const vector<byte> & challenge) {
 	challengeBytes = challenge;
 
 	challengeElement = convertBytesToGF2E(challenge);
@@ -631,7 +631,7 @@ bool SigmaOrMultipleVerifierComputation::verify(SigmaCommonInput* input, SigmaPr
 	return verified;
 }
 
-bool SigmaOrMultipleVerifierComputation::checkPolynomialValidity(vector<vector<byte>> polynomial, int k, NTL::GF2E challengeElement, vector<vector<byte>> challenges) {
+bool SigmaOrMultipleVerifierComputation::checkPolynomialValidity(const vector<vector<byte>> & polynomial, int k, const NTL::GF2E & challengeElement, const vector<vector<byte>> & challenges) {
 	bool valid = true;
 
 	//Create the polynomial out of the coefficeints array.
@@ -670,7 +670,7 @@ bool SigmaOrMultipleVerifierComputation::checkPolynomialValidity(vector<vector<b
 	return valid;
 }
 
-NTL::GF2EX SigmaOrMultipleVerifierComputation::createPolynomial(vector<vector<byte>> polynomialBytes) {
+NTL::GF2EX SigmaOrMultipleVerifierComputation::createPolynomial(const vector<vector<byte>> & polynomialBytes) {
 	int deg = polynomialBytes.size();
 	NTL::GF2EX polynom;
 

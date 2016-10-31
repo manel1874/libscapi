@@ -77,7 +77,7 @@ public:
 	* @param trapdoor the receiver's trapdoor for this commitment.
 	* @param commitmentId the id of the received commitment message.
 	*/
-	CmtRTrapdoorCommitPhaseOutput(biginteger trapdoor, long commitmentId) :
+	CmtRTrapdoorCommitPhaseOutput(const biginteger & trapdoor, long commitmentId) :
 		CmtRBasicCommitPhaseOutput(commitmentId) {
 		this->trap = trapdoor;
 	};
@@ -437,7 +437,7 @@ public:
 	* @param x array to convert into a commitValue.
 	* @return the created CommitValue.
 	*/
-	virtual shared_ptr<CmtCommitValue>  generateCommitValue(vector<byte> & x) =0;
+	virtual shared_ptr<CmtCommitValue> generateCommitValue(const vector<byte> & x) =0;
 
 	/**
 	* This function converts the given commit value to a byte array.

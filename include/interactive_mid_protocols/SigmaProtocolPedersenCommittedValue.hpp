@@ -55,7 +55,7 @@ public:
 	* @param commitment the actual commitment value.
 	* @param x the committed value.
 	*/
-	SigmaPedersenCommittedValueCommonInput(shared_ptr<GroupElement> h, shared_ptr<GroupElement> commitment, biginteger x) {
+	SigmaPedersenCommittedValueCommonInput(const shared_ptr<GroupElement> & h, const shared_ptr<GroupElement> & commitment, const biginteger & x) {
 		this->h = h;
 		this->commitment = commitment;
 		this->x = x;
@@ -103,7 +103,7 @@ public:
 	* @param x committed value
 	* @param r random value used to commit
 	*/
-	SigmaPedersenCommittedValueProverInput(shared_ptr<GroupElement> h, shared_ptr<GroupElement> commitment, biginteger x, biginteger r) {
+	SigmaPedersenCommittedValueProverInput(const shared_ptr<GroupElement> & h, const shared_ptr<GroupElement> & commitment, const biginteger & x, const biginteger & r) {
 		input = make_shared<SigmaPedersenCommittedValueCommonInput>(h, commitment, x);
 		this->r = r;
 	}
@@ -159,7 +159,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaPedersenCommittedValueSimulator(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg());
+	SigmaPedersenCommittedValueSimulator(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -175,7 +175,7 @@ public:
 	* @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 	* @throws IllegalArgumentException if the given input is not an instance of SigmaPedersenCommittedValueCommonInput.
 	*/
-	shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input, vector<byte> challenge)  override;
+	shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input, const vector<byte> & challenge)  override;
 	
 
 	/**
@@ -229,7 +229,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaPedersenCommittedValueProverComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg());
+	SigmaPedersenCommittedValueProverComputation(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -243,7 +243,7 @@ public:
 	* @return the computed message
 	* @throws IllegalArgumentException if input is not an instance of SigmaPedersenCommittedValueProverInput.
 	*/
-	shared_ptr<SigmaProtocolMsg> computeFirstMsg(shared_ptr<SigmaProverInput> input) override;
+	shared_ptr<SigmaProtocolMsg> computeFirstMsg(const shared_ptr<SigmaProverInput> & input) override;
 
 	/**
 	* Computes the second message of the protocol.
@@ -251,7 +251,7 @@ public:
 	* @return the computed message.
 	* @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 	*/
-	shared_ptr<SigmaProtocolMsg> computeSecondMsg(vector<byte> challenge) override; 
+	shared_ptr<SigmaProtocolMsg> computeSecondMsg(const vector<byte> & challenge) override;
 
 	/**
 	* Returns the simulator that matches this sigma protocol prover.
@@ -300,7 +300,7 @@ public:
 	* @param random
 	* @throws InvalidDlogGroupException if the given dlog is invalid.
 	*/
-	SigmaPedersenCommittedValueVerifierComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) : sigmaDlog(dlog, t, prg) {
+	SigmaPedersenCommittedValueVerifierComputation(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) : sigmaDlog(dlog, t, prg) {
 		this->dlog = dlog;
 	}
 
@@ -319,7 +319,7 @@ public:
 	* Sets the given challenge.
 	* @param challenge
 	*/
-	void setChallenge(vector<byte> challenge) override { sigmaDlog.setChallenge(challenge); }
+	void setChallenge(const vector<byte> & challenge) override { sigmaDlog.setChallenge(challenge); }
 
 	/**
 	* Returns the sampled challenge.

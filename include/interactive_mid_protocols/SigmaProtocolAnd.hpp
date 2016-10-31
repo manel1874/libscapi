@@ -52,7 +52,7 @@ public:
 	* 		  and the prover wants to prove to the verify that the AND of all statements are true.
 	* @param t soundness parameter. t MUST be equal to all t values of the underlying provers object.
 	*/
-	SigmaANDProverComputation(vector<shared_ptr<SigmaProverComputation>> provers, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg());
+	SigmaANDProverComputation(const vector<shared_ptr<SigmaProverComputation>> & provers, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg());
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
 	*/
@@ -63,14 +63,14 @@ public:
 	* @param input MUST be an instance of SigmaANDInput.
 	* @return SigmaMultipleMsg contains a1, ..., am.
 	*/
-	shared_ptr<SigmaProtocolMsg> computeFirstMsg(shared_ptr<SigmaProverInput> in) override;
+	shared_ptr<SigmaProtocolMsg> computeFirstMsg(const shared_ptr<SigmaProverInput> & in) override;
 	/**
 	* Computes the second message of the protocol.<p>
 	* "COMPUTE all second prover messages z1,...,zm".
 	* @param challenge
 	* @return SigmaMultipleMsg contains z1, ..., zm.
 	*/
-	shared_ptr<SigmaProtocolMsg> computeSecondMsg(vector<byte> challenge) override;
+	shared_ptr<SigmaProtocolMsg> computeSecondMsg(const vector<byte> & challenge) override;
 	/**
 	* Returns the simulator that matches this sigma protocol prover.
 	* @return SigmaANDSimulator
@@ -111,7 +111,7 @@ public:
 	* @param t soundness parameter. t MUST be equal to all t values of the underlying simulators object.
 	* @param random source of randomness
 	*/
-	SigmaANDSimulator(vector<shared_ptr<SigmaSimulator>> simulators, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
+	SigmaANDSimulator(const vector<shared_ptr<SigmaSimulator>> & simulators, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 	int getSoundnessParam() override { return t; };
 	/**
 	* Computes the simulator computation with the given challenge.
@@ -120,7 +120,7 @@ public:
 	* @return the output of the computation - (a, e, z).
 	*/
 	shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input, 
-		vector<byte> challenge) override;
+		const vector<byte> & challenge) override;
 	/**
 	* Computes the simulator computation with a randomly chosen challenge.
 	* @param input MUST be an instance of SigmaANDCommonInput.
@@ -164,7 +164,7 @@ public:
 	* @param t soundness parameter. t MUST be equal to all t values of the underlying verifiers object.
 	* @param random source of randomness
 	*/
-	SigmaANDVerifierComputation(vector<shared_ptr<SigmaVerifierComputation>> verifiers, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
+	SigmaANDVerifierComputation(const vector<shared_ptr<SigmaVerifierComputation>> & verifiers, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
 	*/
@@ -175,7 +175,7 @@ public:
 	*/
 	void sampleChallenge() override;
 
-	void setChallenge(vector<byte> challenge) override;
+	void setChallenge(const vector<byte> & challenge) override;
 
 	vector<byte> getChallenge() override { return e; };
 	/**

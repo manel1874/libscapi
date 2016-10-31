@@ -55,7 +55,7 @@ public:
 	* @param h public key used to commit.
 	* @param commitment the actual commitment value.
 	*/
-	 SigmaPedersenCmtKnowledgeCommonInput(shared_ptr<GroupElement> h, shared_ptr<GroupElement> commitment) {
+	 SigmaPedersenCmtKnowledgeCommonInput(const shared_ptr<GroupElement> & h, const shared_ptr<GroupElement> & commitment) {
 		this->h = h;
 		this->commitment = commitment;
 	}
@@ -99,7 +99,7 @@ public:
 	* @param x committed value
 	* @param r random value used to commit
 	*/
-	SigmaPedersenCmtKnowledgeProverInput(shared_ptr<GroupElement> h, shared_ptr<GroupElement> commitment, biginteger x, biginteger r) {
+	SigmaPedersenCmtKnowledgeProverInput(const shared_ptr<GroupElement> & h, const shared_ptr<GroupElement> & commitment, const biginteger & x, const biginteger & r) {
 		input = make_shared<SigmaPedersenCmtKnowledgeCommonInput>(h, commitment);
 		this->x = x;
 		this->r = r;
@@ -137,7 +137,7 @@ private:
 	biginteger v;
 
 public:
-	SigmaPedersenCmtKnowledgeMsg(biginteger u, biginteger v) {
+	SigmaPedersenCmtKnowledgeMsg(const biginteger & u, const biginteger & v) {
 		this->u = u;
 		this->v = v;
 	}
@@ -195,7 +195,7 @@ public:
 	* @param random
 	* @throws IllegalArgumentException if soundness parameter is invalid.
 	*/
-	SigmaPedersenCmtKnowledgeSimulator(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
+	SigmaPedersenCmtKnowledgeSimulator(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -211,7 +211,7 @@ public:
 	* @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 	* @throws IllegalArgumentException if the given input is not an instance of SigmaPedersenCTKnowledgeCommonInput.
 	*/
-	shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input, vector<byte> challenge)  override;
+	shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input, const vector<byte> & challenge)  override;
 
 	/**
 	* Computes the simulator computation with randomly chosen challenge.
@@ -272,7 +272,7 @@ public:
 	* @param random
 	* @throws IllegalArgumentException if soundness parameter is invalid.
 	*/
-	SigmaPedersenCmtKnowledgeProverComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
+	SigmaPedersenCmtKnowledgeProverComputation(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -285,7 +285,7 @@ public:
 	*  COMPUTE a = (h^alpha)*(g^beta)".
 	* @return the computed message
 	*/
-	shared_ptr<SigmaProtocolMsg> computeFirstMsg(shared_ptr<SigmaProverInput> input) override;
+	shared_ptr<SigmaProtocolMsg> computeFirstMsg(const shared_ptr<SigmaProverInput> & input) override;
 
 	/**
 	* Computes the second message of the protocol.<p>
@@ -294,7 +294,7 @@ public:
 	* @return the computed message.
 	* @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 	*/
-	shared_ptr<SigmaProtocolMsg> computeSecondMsg(vector<byte> challenge) override;
+	shared_ptr<SigmaProtocolMsg> computeSecondMsg(const vector<byte> & challenge) override;
 
 	/**
 	* Returns the simulator that matches this sigma protocol prover.
@@ -344,7 +344,7 @@ public:
 	* @throws InvalidDlogGroupException if the given DlogGroup is not valid.
 	* @throws IllegalArgumentException if soundness parameter is invalid.
 	*/
-	SigmaPedersenCmtKnowledgeVerifierComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
+	SigmaPedersenCmtKnowledgeVerifierComputation(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -362,7 +362,7 @@ public:
 	* Sets the given challenge.
 	* @param challenge
 	*/
-	void setChallenge(vector<byte> challenge) override { e = challenge; }
+	void setChallenge(const vector<byte> & challenge) override { e = challenge; }
 
 	/**
 	* Returns the sampled challenge.

@@ -52,7 +52,7 @@ public:
 	* The receiver needs to be instantiated with the default constructor too.
 	* @param channel
 	*/
-	CmtPedersenTrapdoorCommitter(shared_ptr<CommParty> channel, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) : CmtPedersenCommitter(channel, random) {};
+	CmtPedersenTrapdoorCommitter(const shared_ptr<CommParty> & channel, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) : CmtPedersenCommitter(channel, random) {};
 
 	/**
 	* Constructor that receives a connected channel (to the receiver), the DlogGroup agreed upon between them and a SecureRandom object.
@@ -61,7 +61,7 @@ public:
 	* @param dlog
 	* @param random
 	*/
-	CmtPedersenTrapdoorCommitter(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) :
+	CmtPedersenTrapdoorCommitter(const shared_ptr<CommParty> & channel, const shared_ptr<DlogGroup> & dlog, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) :
 		CmtPedersenCommitter(channel, dlog, random) {};
 
 	/**
@@ -69,7 +69,7 @@ public:
 	* @param trap the trapdoor outputed from the receiver's commit phase.
 	* @return true, if valid; false, otherwise.
 	*/
-	bool validate(shared_ptr<CmtRCommitPhaseOutput> trap) {
+	bool validate(const shared_ptr<CmtRCommitPhaseOutput> & trap) {
 		auto trapdoor = dynamic_pointer_cast<CmtRTrapdoorCommitPhaseOutput>(trap);
 		if (!trapdoor)
 			throw invalid_argument("the given trapdor should be an instance of CmtRTrapdoorCommitPhaseOutput");
@@ -103,7 +103,7 @@ public:
 	* @param dlog
 	* @param random
 	*/
-	CmtPedersenTrapdoorReceiver(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) :
+	CmtPedersenTrapdoorReceiver(const shared_ptr<CommParty> & channel, const shared_ptr<DlogGroup> & dlog, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) :
 		CmtPedersenReceiver(channel, dlog, prg) {};
 
 	/**

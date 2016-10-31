@@ -84,7 +84,7 @@ string CmtSimpleHashDecommitmentMessage::toString() {
 * values for the hash function, SecureRandom object and a security parameter n.
 *  @param channel
 */
-CmtSimpleHashCommitter::CmtSimpleHashCommitter(shared_ptr<CommParty> channel, shared_ptr<PrgFromOpenSSLAES> prg, shared_ptr<CryptographicHash> hash, int n) {
+CmtSimpleHashCommitter::CmtSimpleHashCommitter(const shared_ptr<CommParty> & channel, const shared_ptr<PrgFromOpenSSLAES> & prg, const shared_ptr<CryptographicHash> & hash, int n) {
 	this->channel = channel;
 	this->hash = hash;
 	this->n = n;
@@ -152,7 +152,7 @@ vector<byte> CmtSimpleHashCommitter::generateBytesFromCommitValue(CmtCommitValue
 	return *val->getXVector();
 }
 
-void CmtSimpleHashReceiver::doConstruct(shared_ptr<CommParty> channel, shared_ptr<CryptographicHash> hash, int n) {
+void CmtSimpleHashReceiver::doConstruct(const shared_ptr<CommParty> & channel, const shared_ptr<CryptographicHash> & hash, int n) {
 	this->channel = channel;
 	this->hash = hash;
 	this->n = n;

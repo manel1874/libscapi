@@ -138,7 +138,7 @@ void encodeBigInteger(const biginteger & value, byte* output, size_t length);
 /*
 * Decodoing big integer from byte array back to a biginteger object
 */
-biginteger decodeBigInteger(byte* input, size_t length);
+biginteger decodeBigInteger(const byte* input, size_t length);
 
 biginteger convert_hex_to_biginteger(const string & hex);
 

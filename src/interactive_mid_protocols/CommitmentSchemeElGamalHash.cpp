@@ -28,7 +28,7 @@
 
 #include "../../include/interactive_mid_protocols/CommitmentSchemeElGamalHash.hpp"
 
-CmtElGamalHashCommitter::CmtElGamalHashCommitter(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, const shared_ptr<PrgFromOpenSSLAES> & random)
+CmtElGamalHashCommitter::CmtElGamalHashCommitter(const shared_ptr<CommParty> & channel, const shared_ptr<DlogGroup> & dlog, const shared_ptr<CryptographicHash> & hash, const shared_ptr<PrgFromOpenSSLAES> & random)
 				: CmtElGamalCommitterCore(channel, dlog, make_shared<ElGamalOnByteArrayEnc>(dlog, make_shared<HKDF>(make_shared<OpenSSLHMAC>())), random) {
 	
 	//During the construction of this object, the Public Key with which we set the El Gamal object gets sent to the receiver.
@@ -60,7 +60,7 @@ shared_ptr<CmtCCommitmentMsg> CmtElGamalHashCommitter::generateCommitmentMsg(con
 * @param id
 * @return the result of the hash function of the given input.
 */
-vector<byte> CmtElGamalHashCommitter::getHashOfX(shared_ptr<CmtCommitValue> input, long id) {
+vector<byte> CmtElGamalHashCommitter::getHashOfX(const shared_ptr<CmtCommitValue> & input, long id) {
 	//Check that the input x is in the end a byte[]
 	auto in = dynamic_pointer_cast<CmtByteArrayCommitValue>(input);
 	if (in == NULL)
@@ -119,7 +119,7 @@ vector<byte> CmtElGamalHashCommitter::generateBytesFromCommitValue(CmtCommitValu
 * @param dlog
 * @param hash
 */
-CmtElGamalHashReceiver::CmtElGamalHashReceiver(shared_ptr<CommParty> channel, shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash) 
+CmtElGamalHashReceiver::CmtElGamalHashReceiver(const shared_ptr<CommParty> & channel, const shared_ptr<DlogGroup> & dlog, const shared_ptr<CryptographicHash> & hash)
 					: CmtElGamalReceiverCore(channel, dlog, make_shared<ElGamalOnByteArrayEnc>(dlog, make_shared<HKDF>(make_shared<OpenSSLHMAC>()))) {
 		
 	if (hash->getHashedMsgSize() > (int) bytesCount(dlog->getOrder())) {

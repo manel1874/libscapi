@@ -43,7 +43,7 @@ string SigmaDJEncryptedValueCommonInput::toString() {
 * @param plaintext that has been encrypted.
 * @param r random value used to encrypt.
 */
-SigmaDJEncryptedValueProverInput::SigmaDJEncryptedValueProverInput(DamgardJurikPublicKey publicKey, BigIntegerCiphertext cipher, BigIntegerPlainText plaintext, biginteger r) {
+SigmaDJEncryptedValueProverInput::SigmaDJEncryptedValueProverInput(DamgardJurikPublicKey publicKey, BigIntegerCiphertext cipher, BigIntegerPlainText plaintext, const biginteger & r) {
 	input = make_shared<SigmaDJEncryptedValueCommonInput>(publicKey, cipher, plaintext);
 	this->r = r;
 }
@@ -82,7 +82,7 @@ SigmaDJEncryptedValueProverInput::SigmaDJEncryptedValueProverInput(DamgardJurikP
 * @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 * @throws IllegalArgumentException if input is not the expected.
 */
-shared_ptr<SigmaSimulatorOutput> SigmaDJEncryptedValueSimulator::simulate(SigmaCommonInput* input, vector<byte> challenge) {
+shared_ptr<SigmaSimulatorOutput> SigmaDJEncryptedValueSimulator::simulate(SigmaCommonInput* input, const vector<byte> & challenge) {
 	
 	//Delegates the computation to the underlying SigmaDJEncryptedZeroSimulator.
 	return djSim.simulate(checkAndCreateUnderlyingInput(input).get(), challenge);
@@ -144,7 +144,7 @@ shared_ptr<SigmaDJEncryptedZeroCommonInput> SigmaDJEncryptedValueSimulator::chec
 * @return the computed message
 * @throws IllegalArgumentException if input is not an instance of SigmaDJEncryptedValueProverInput.
 */
-shared_ptr<SigmaProtocolMsg> SigmaDJEncryptedValueProverComputation::computeFirstMsg(shared_ptr<SigmaProverInput> input) {
+shared_ptr<SigmaProtocolMsg> SigmaDJEncryptedValueProverComputation::computeFirstMsg(const shared_ptr<SigmaProverInput> & input) {
 	/*
 	* Converts the input (n, c, x, r) to (n, c', r) where c' = c*(1+n)^(-x) mod N'.
 	*/
@@ -187,7 +187,7 @@ shared_ptr<SigmaProtocolMsg> SigmaDJEncryptedValueProverComputation::computeFirs
 * @return the computed message.
 * @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 */
-shared_ptr<SigmaProtocolMsg> SigmaDJEncryptedValueProverComputation::computeSecondMsg(vector<byte> challenge) {
+shared_ptr<SigmaProtocolMsg> SigmaDJEncryptedValueProverComputation::computeSecondMsg(const vector<byte> & challenge) {
 	//Delegates the computation to the underlying sigmaDamgardJurik prover.
 	return sigmaDamgardJurik.computeSecondMsg(challenge);
 }
@@ -212,7 +212,7 @@ void SigmaDJEncryptedValueVerifierComputation::sampleChallenge() {
 * Sets the given challenge.
 * @param challenge
 */
-void SigmaDJEncryptedValueVerifierComputation::setChallenge(vector<byte> challenge) {
+void SigmaDJEncryptedValueVerifierComputation::setChallenge(const vector<byte> & challenge) {
 
 	//Delegates to the underlying sigmaDamgardJurik verifier.
 	sigmaDamgardJurik.setChallenge(challenge);

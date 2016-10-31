@@ -112,7 +112,7 @@ public:
 	* @param x2 second plaintext
 	*/
 	SigmaDJProductProverInput(DamgardJurikPublicKey publicKey, BigIntegerCiphertext c1, BigIntegerCiphertext c2, BigIntegerCiphertext c3,
-		biginteger r1, biginteger r2, biginteger r3, BigIntegerPlainText x1, BigIntegerPlainText x2);
+		const biginteger & r1, const biginteger & r2, const biginteger & r3, BigIntegerPlainText x1, BigIntegerPlainText x2);
 
 	/**
 	* This protocol assumes that the prover knows the randomness used to encrypt.
@@ -173,7 +173,7 @@ private:
 	biginteger a2;
 
 public:
-	SigmaDJProductFirstMsg(biginteger a1, biginteger a2) {
+	SigmaDJProductFirstMsg(const biginteger & a1, const biginteger & a2) {
 		this->a1 = a1;
 		this->a2 = a2;
 	}
@@ -202,7 +202,7 @@ private:
 	biginteger z3;
 
 public:
-	SigmaDJProductSecondMsg(biginteger z1, biginteger z2, biginteger z3) {
+	SigmaDJProductSecondMsg(const biginteger & z1, const biginteger & z2, const biginteger & z3) {
 		this->z1 = z1;
 		this->z2 = z2;
 		this->z3 = z3;
@@ -249,13 +249,13 @@ private:
 	* t must be less than a third of the length of the public key n.
 	* @return true if the soundness parameter is valid; false, otherwise.
 	*/
-	bool checkSoundnessParam(biginteger modulus);
+	bool checkSoundnessParam(const biginteger & modulus);
 
 	/**
 	* Checks if the given challenge length is equal to the soundness parameter.
 	* @return true if the challenge length is t; false, otherwise.
 	*/
-	bool checkChallengeLength(vector<byte> challenge);
+	bool checkChallengeLength(const vector<byte> & challenge);
 
 public:
 
@@ -281,7 +281,7 @@ public:
 	* @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 	* @throws IllegalArgumentException if the given input is not an instance of SigmaDJProductCommonInput.
 	*/
-	shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input, vector<byte> challenge)  override;
+	shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input, const vector<byte> & challenge)  override;
 
 	/**
 	* Computes the simulator computation with a randomly chosen challenge.
@@ -324,13 +324,13 @@ private:
 	* t must be less than a third of the length of the public key n.
 	* @return true if the soundness parameter is valid; false, otherwise.
 	*/
-	bool checkSoundnessParam(biginteger modulus);
+	bool checkSoundnessParam(const biginteger & modulus);
 
 	/**
 	* Checks if the given challenge length is equal to the soundness parameter.
 	* @return true if the challenge length is t; false, otherwise.
 	*/
-	bool checkChallengeLength(vector<byte> challenge);
+	bool checkChallengeLength(const vector<byte> & challenge);
 
 public:
 	/**
@@ -356,7 +356,7 @@ public:
 	* @return the computed message
 	* @throws IllegalArgumentException if input is not an instance of SigmaDJProductProverInput.
 	*/
-	shared_ptr<SigmaProtocolMsg> computeFirstMsg(shared_ptr<SigmaProverInput> input) override; 
+	shared_ptr<SigmaProtocolMsg> computeFirstMsg(const shared_ptr<SigmaProverInput> & input) override;
 
 	/**
 	* Computes the second message of the protocol.<p>
@@ -365,7 +365,7 @@ public:
 	* @return the computed message.
 	* @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 	*/
-	shared_ptr<SigmaProtocolMsg> computeSecondMsg(vector<byte> challenge) override; 
+	shared_ptr<SigmaProtocolMsg> computeSecondMsg(const vector<byte> & challenge) override;
 
 	/**
 	* Returns the simulator that matches this sigma protocol prover.
@@ -408,14 +408,14 @@ private:
 	* t must be less than a third of the length of the public key n.
 	* @return true if the soundness parameter is valid; false, otherwise.
 	*/
-	bool checkSoundnessParam(biginteger modulus) {
+	bool checkSoundnessParam(const biginteger & modulus) {
 		//If soundness parameter is not less than a third of the publicKey n, return false.
 		int third = NumberOfBits(modulus) / 3;
 		return (t < third);
 	}
 
-	bool areRelativelyPrime(biginteger n, biginteger c1, biginteger c2, biginteger a1, biginteger a2, biginteger z1,
-		biginteger z2, biginteger z3);
+	bool areRelativelyPrime(const biginteger & n, const biginteger & c1, const biginteger & c2, const biginteger & a1, const biginteger & a2, const biginteger & z1,
+		const biginteger & z2, const biginteger & z3);
 
 	void checkInput(SigmaCommonInput* input, SigmaProtocolMsg* a, SigmaProtocolMsg* z);
 
@@ -444,7 +444,7 @@ public:
 	* Sets the given challenge.
 	* @param challenge
 	*/
-	void setChallenge(vector<byte> challenge) override { e = challenge;	}
+	void setChallenge(const vector<byte> & challenge) override { e = challenge;	}
 
 	/**
 	* Returns the sampled challenge.

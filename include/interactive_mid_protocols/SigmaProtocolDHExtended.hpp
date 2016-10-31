@@ -53,7 +53,7 @@ public:
 	* @param gArray
 	* @param hArray
 	*/
-	SigmaDHExtendedCommonInput(vector<shared_ptr<GroupElement>> gArray, vector<shared_ptr<GroupElement>> hArray) {
+	SigmaDHExtendedCommonInput(const vector<shared_ptr<GroupElement>> & gArray, const vector<shared_ptr<GroupElement>> & hArray) {
 		this->gArray = gArray;
 		this->hArray = hArray;
 	}
@@ -90,7 +90,7 @@ public:
 	* @param hArray
 	* @param w
 	*/
-	SigmaDHExtendedProverInput(vector<shared_ptr<GroupElement>> gArray, vector<shared_ptr<GroupElement>> hArray, biginteger w) {
+	SigmaDHExtendedProverInput(const vector<shared_ptr<GroupElement>> & gArray, const vector<shared_ptr<GroupElement>> & hArray, const biginteger & w) {
 		params = make_shared<SigmaDHExtendedCommonInput>(gArray, hArray);
 		this->w = w;
 	}
@@ -117,7 +117,7 @@ private:
 	vector<shared_ptr<GroupElementSendableData>> aArray;
 
 public:
-	SigmaDHExtendedMsg(vector<shared_ptr<GroupElementSendableData>> aArray) { this->aArray = aArray; }
+	SigmaDHExtendedMsg(const vector<shared_ptr<GroupElementSendableData>> & aArray) { this->aArray = aArray; }
 	vector<shared_ptr<GroupElementSendableData>> getArray() { return aArray; }
 	// SerializedNetwork implementation:
 	void initFromString(const string & s) override;
@@ -166,7 +166,7 @@ public:
 	* @param random
 	* @throws IllegalArgumentException if soundness parameter is invalid.
 	*/
-	SigmaDHExtendedSimulator(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
+	SigmaDHExtendedSimulator(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -181,7 +181,7 @@ public:
 	* @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 	* @throws IllegalArgumentException if the given input is not an instance of SigmaDHExtendedCommonInput.
 	*/
-	shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input, vector<byte> challenge)  override;
+	shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input, const vector<byte> & challenge)  override;
 
 	/**
 	* Computes the simulator computation with randomly chosen challenge.
@@ -238,7 +238,7 @@ public:
 	* @param random
 	* @throws IllegalArgumentException if soundness parameter is invalid.
 	*/
-	SigmaDHExtendedProverComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
+	SigmaDHExtendedProverComputation(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -254,7 +254,7 @@ public:
 	* @return the computed message
 	* @throws IllegalArgumentException if input is not an instance of SigmaDHExtendedProverInput.
 	*/
-	shared_ptr<SigmaProtocolMsg> computeFirstMsg(shared_ptr<SigmaProverInput> input) override;
+	shared_ptr<SigmaProtocolMsg> computeFirstMsg(const shared_ptr<SigmaProverInput> & input) override;
 
 	/**
 	* Computes the second message of the protocol.<p>
@@ -263,7 +263,7 @@ public:
 	* @return the computed message.
 	* @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 	*/
-	shared_ptr<SigmaProtocolMsg> computeSecondMsg(vector<byte> challenge) override; 
+	shared_ptr<SigmaProtocolMsg> computeSecondMsg(const vector<byte> & challenge) override;
 	
 	/**
 	* Returns the simulator that matches this sigma protocol prover.
@@ -316,7 +316,7 @@ public:
 	* @throws InvalidDlogGroupException if the given dlog is invalid.
 	* @throws IllegalArgumentException if soundness parameter is invalid.
 	*/
-	SigmaDHExtendedVerifierComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
+	SigmaDHExtendedVerifierComputation(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -334,7 +334,7 @@ public:
 	* Sets the given challenge.
 	* @param challenge
 	*/
-	void setChallenge(vector<byte> challenge) {	e = challenge; }
+	void setChallenge(const vector<byte> & challenge) {	e = challenge; }
 
 	/**
 	* Returns the sampled challenge.

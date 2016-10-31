@@ -63,7 +63,7 @@ void SigmaDHMsg::initFromString(const string & s) {
 * @param t Soundness parameter in BITS.
 * @param random
 */
-SigmaDHSimulator::SigmaDHSimulator(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
+SigmaDHSimulator::SigmaDHSimulator(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	//Sets the parameters.
 	this->dlog = dlog;
 	this->t = t;
@@ -85,7 +85,7 @@ SigmaDHSimulator::SigmaDHSimulator(shared_ptr<DlogGroup> dlog, int t, const shar
 * @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 * @throws IllegalArgumentException if the given input is not an instance of SigmaDHCommonInput.
 */
-shared_ptr<SigmaSimulatorOutput> SigmaDHSimulator::simulate(SigmaCommonInput* input, vector<byte> challenge) {
+shared_ptr<SigmaSimulatorOutput> SigmaDHSimulator::simulate(SigmaCommonInput* input, const vector<byte> & challenge) {
 	//check the challenge validity.
 	if (!checkChallengeLength(challenge.size())) {
 		throw CheatAttemptException("the length of the given challenge is differ from the soundness parameter");
@@ -153,7 +153,7 @@ bool SigmaDHSimulator::checkSoundnessParam() {
 * @param random
 * @throws IllegalArgumentException if soundness parameter is invalid.
 */
-SigmaDHProverComputation::SigmaDHProverComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
+SigmaDHProverComputation::SigmaDHProverComputation(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 
 	//Sets the parameters.
 	this->dlog = dlog;
@@ -176,7 +176,7 @@ SigmaDHProverComputation::SigmaDHProverComputation(shared_ptr<DlogGroup> dlog, i
 * @return the computed message
 * @throws IllegalArgumentException if input is not an instance of SigmaDHProverInput.
 */
-shared_ptr<SigmaProtocolMsg> SigmaDHProverComputation::computeFirstMsg(shared_ptr<SigmaProverInput> input) {
+shared_ptr<SigmaProtocolMsg> SigmaDHProverComputation::computeFirstMsg(const shared_ptr<SigmaProverInput> & input) {
 	this->input = dynamic_pointer_cast<SigmaDHProverInput>(input);
 	if (this->input == NULL) {
 		throw invalid_argument("the given input must be an instance of SigmaDHProverInput");
@@ -201,7 +201,7 @@ shared_ptr<SigmaProtocolMsg> SigmaDHProverComputation::computeFirstMsg(shared_pt
 * @return the computed message.
 * @throws CheatAttemptException if the length of the received challenge is not equal to the soundness parameter.
 */
-shared_ptr<SigmaProtocolMsg> SigmaDHProverComputation::computeSecondMsg(vector<byte> challenge) {
+shared_ptr<SigmaProtocolMsg> SigmaDHProverComputation::computeSecondMsg(const vector<byte> & challenge) {
 
 	//check the challenge validity.
 	if (!checkChallengeLength(challenge.size())) {
@@ -243,7 +243,7 @@ bool SigmaDHProverComputation::checkSoundnessParam() {
 * @throws InvalidDlogGroupException if the given dlog is invalid.
 * @throws IllegalArgumentException if soundness parameter is invalid.
 */
-SigmaDHVerifierComputation::SigmaDHVerifierComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
+SigmaDHVerifierComputation::SigmaDHVerifierComputation(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & random) {
 
 	if (!dlog->validateGroup())
 		throw InvalidDlogGroupException("invalid dlog");

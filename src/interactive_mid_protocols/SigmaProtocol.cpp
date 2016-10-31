@@ -32,7 +32,7 @@
 /*   SigmaProtocolProver   */
 /***************************/
 
-void SigmaProtocolProver::processFirstMsg(shared_ptr<SigmaProverInput> input) {
+void SigmaProtocolProver::processFirstMsg(const shared_ptr<SigmaProverInput> & input) {
 	// compute the first message by the underlying proverComputation.
 	auto a = proverComputation->computeFirstMsg(input);
 	// send the first message.

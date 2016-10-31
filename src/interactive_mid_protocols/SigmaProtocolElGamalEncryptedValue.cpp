@@ -36,7 +36,9 @@
 * @param publicKey used to encrypt.
 * @param x encrypted value
 */
-SigmaElGamalEncryptedValueCommonInput::SigmaElGamalEncryptedValueCommonInput(bool isRandom, ElGamalOnGroupElementCiphertext cipher, ElGamalPublicKey publicKey, shared_ptr<GroupElement> x) : publicKey(publicKey), cipher(cipher) {
+SigmaElGamalEncryptedValueCommonInput::SigmaElGamalEncryptedValueCommonInput(bool isRandom,
+		ElGamalOnGroupElementCiphertext cipher, ElGamalPublicKey publicKey, const shared_ptr<GroupElement> & x)
+		: publicKey(publicKey), cipher(cipher) {
 	this->isRandom = isRandom;
 	this->x = x;
 }
@@ -60,7 +62,9 @@ string SigmaElGamalEncryptedValueCommonInput::toString() {
 * @param x encrypted value
 * @param privateKey used to decrypt.
 */
-SigmaElGamalEncryptedValuePrivKeyProverInput::SigmaElGamalEncryptedValuePrivKeyProverInput(ElGamalOnGroupElementCiphertext cipher, ElGamalPublicKey pubKey, shared_ptr<GroupElement> x, ElGamalPrivateKey privateKey) : privateKey(privateKey){
+SigmaElGamalEncryptedValuePrivKeyProverInput::SigmaElGamalEncryptedValuePrivKeyProverInput(ElGamalOnGroupElementCiphertext cipher,
+			ElGamalPublicKey pubKey, const shared_ptr<GroupElement> & x, ElGamalPrivateKey privateKey)
+			: privateKey(privateKey){
 	input = make_shared<SigmaElGamalEncryptedValueCommonInput>(false, cipher, pubKey, x);
 }
 
@@ -72,7 +76,8 @@ SigmaElGamalEncryptedValuePrivKeyProverInput::SigmaElGamalEncryptedValuePrivKeyP
 * @param x encrypted value
 * @param r random value used to encrypt.
 */
-SigmaElGamalEncryptedValueRandomnessProverInput::SigmaElGamalEncryptedValueRandomnessProverInput(ElGamalOnGroupElementCiphertext cipher, ElGamalPublicKey pubKey, shared_ptr<GroupElement> x, biginteger r) {
+SigmaElGamalEncryptedValueRandomnessProverInput::SigmaElGamalEncryptedValueRandomnessProverInput(ElGamalOnGroupElementCiphertext cipher,
+					 ElGamalPublicKey pubKey, const shared_ptr<GroupElement> & x, const biginteger & r) {
 	input = make_shared<SigmaElGamalEncryptedValueCommonInput>(true, cipher, pubKey, x);
 	this->r = r;
 }
@@ -83,7 +88,7 @@ SigmaElGamalEncryptedValueRandomnessProverInput::SigmaElGamalEncryptedValueRando
 * @param t Soundness parameter in BITS.
 * @param random
 */
-SigmaElGamalEncryptedValueSimulator::SigmaElGamalEncryptedValueSimulator(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg) 
+SigmaElGamalEncryptedValueSimulator::SigmaElGamalEncryptedValueSimulator(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg)
 	: dhSim(dlog, t, prg) {
 	//Creates the underlying SigmaDHSimulator object with the given parameters.
 	this->dlog = dlog;
@@ -97,7 +102,7 @@ SigmaElGamalEncryptedValueSimulator::SigmaElGamalEncryptedValueSimulator(shared_
 * @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 * @throws IllegalArgumentException if input is not the expected.
 */
-shared_ptr<SigmaSimulatorOutput> SigmaElGamalEncryptedValueSimulator::simulate(SigmaCommonInput* input, vector<byte> challenge) {
+shared_ptr<SigmaSimulatorOutput> SigmaElGamalEncryptedValueSimulator::simulate(SigmaCommonInput* input, const vector<byte> & challenge) {
 	auto underlyingInput = checkAndCreateUnderlyingInput(input);
 
 	//Delegates the computation to the underlying Sigma DH simulator.
@@ -169,7 +174,7 @@ shared_ptr<SigmaDHCommonInput> SigmaElGamalEncryptedValueSimulator::checkAndCrea
 * @param t Soundness parameter in BITS.
 * @param random
 */
-SigmaElGamalEncryptedValueProverComputation::SigmaElGamalEncryptedValueProverComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg) 
+SigmaElGamalEncryptedValueProverComputation::SigmaElGamalEncryptedValueProverComputation(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg)
 	: sigmaDH(dlog, t, prg) {
 	this->dlog = dlog;
 	this->prg = prg;
@@ -225,7 +230,7 @@ shared_ptr<SigmaDHProverInput> SigmaElGamalEncryptedValueProverComputation::conv
 * Computes the first message of the protocol.
 * @return the computed message
 */
-shared_ptr<SigmaProtocolMsg> SigmaElGamalEncryptedValueProverComputation::computeFirstMsg(shared_ptr<SigmaProverInput> input) {
+shared_ptr<SigmaProtocolMsg> SigmaElGamalEncryptedValueProverComputation::computeFirstMsg(const shared_ptr<SigmaProverInput> & input) {
 		//Converts the input to the underlying prover.
 		//Delegates the computation to the underlying Sigma DH prover.
 		return sigmaDH.computeFirstMsg(convertInput(input.get()));
@@ -237,7 +242,7 @@ shared_ptr<SigmaProtocolMsg> SigmaElGamalEncryptedValueProverComputation::comput
 * @return the computed message.
 * @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 */
-shared_ptr<SigmaProtocolMsg> SigmaElGamalEncryptedValueProverComputation::computeSecondMsg(vector<byte> challenge) {
+shared_ptr<SigmaProtocolMsg> SigmaElGamalEncryptedValueProverComputation::computeSecondMsg(const vector<byte> & challenge) {
 	//Delegates the computation to the underlying Sigma DH prover.
 	return sigmaDH.computeSecondMsg(challenge);
 
@@ -250,7 +255,8 @@ shared_ptr<SigmaProtocolMsg> SigmaElGamalEncryptedValueProverComputation::comput
 * @param random
 * @throws InvalidDlogGroupException if the given dlog is invalid.
 */
-SigmaElGamalEncryptedValueVerifierComputation::SigmaElGamalEncryptedValueVerifierComputation(shared_ptr<DlogGroup> dlog, int t) : sigmaDH(dlog, t) {
+SigmaElGamalEncryptedValueVerifierComputation::SigmaElGamalEncryptedValueVerifierComputation(const shared_ptr<DlogGroup> & dlog,
+	int t) : sigmaDH(dlog, t) {
 	this->dlog = dlog;
 }
 

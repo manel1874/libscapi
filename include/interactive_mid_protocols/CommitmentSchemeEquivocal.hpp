@@ -54,7 +54,7 @@ class CmtEquivocalCommitter : public CmtCommitter, public EquivocalCmt {
 private:
 	shared_ptr<CmtWithProofsCommitter> committer;
 
-	void doConstruct(shared_ptr<CommParty> channel, shared_ptr<CmtWithProofsCommitter> committer) {
+	void doConstruct(const shared_ptr<CommParty> & channel, const shared_ptr<CmtWithProofsCommitter> & committer) {
 		this->committer = committer;
 		this->channel = channel;
 	}
@@ -64,7 +64,7 @@ public:
 	* Constructor that gets committer to use in the protocol execution.
 	* @param committer instance of committer that has proofs.
 	*/
-	CmtEquivocalCommitter(shared_ptr<CommParty> channel, shared_ptr<CmtWithProofsCommitter> committer) { doConstruct(channel, committer); }
+	CmtEquivocalCommitter(const shared_ptr<CommParty> & channel, const shared_ptr<CmtWithProofsCommitter> & committer) { doConstruct(channel, committer); }
 
 	/**
 	* Constructor that gets channel to use in the protocol execution and chooses default committer.
@@ -73,7 +73,7 @@ public:
 	* @throws IOException
 	* @throws ClassNotFoundException
 	*/
-	CmtEquivocalCommitter(shared_ptr<CommParty> channel, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) { 
+	CmtEquivocalCommitter(const shared_ptr<CommParty> & channel, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) {
 		doConstruct(channel, make_shared<CmtPedersenWithProofsCommitter>(channel, t, random));
 	}
 
@@ -109,7 +109,7 @@ public:
 	/**
 	* Generates CommitValue from the given byte array.
 	*/
-	shared_ptr<CmtCommitValue> generateCommitValue(vector<byte> & x) override	{
+	shared_ptr<CmtCommitValue> generateCommitValue(const vector<byte> & x) override	{
 		//Delegate to the underlying committer.
 		return committer->generateCommitValue(x);
 	}
@@ -165,7 +165,7 @@ public:
 	* Constructor that gets the receiver to use in the protocol execution.
 	* @param receiver
 	*/
-	CmtEquivocalReceiver(shared_ptr<CommParty> channel, shared_ptr<CmtWithProofsReceiver> receiver) {
+	CmtEquivocalReceiver(const shared_ptr<CommParty> & channel, const shared_ptr<CmtWithProofsReceiver> & receiver) {
 		this->receiver = receiver;
 	}
 
@@ -176,7 +176,7 @@ public:
 	* @throws IOException
 	* @throws ClassNotFoundException
 	*/
-	CmtEquivocalReceiver(shared_ptr<CommParty> channel, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) {
+	CmtEquivocalReceiver(const shared_ptr<CommParty> & channel, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) {
 		this->receiver = make_shared<CmtPedersenWithProofsReceiver>(channel, t, random);
 	}
 

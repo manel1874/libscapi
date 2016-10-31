@@ -54,7 +54,7 @@ public:
 	* @param publicKey used to encrypt.
 	* @param x encrypted element.
 	*/
-	SigmaCramerShoupEncryptedValueCommonInput(CramerShoupOnGroupElementCiphertext cipher, CramerShoupPublicKey publicKey, shared_ptr<GroupElement> x);
+	SigmaCramerShoupEncryptedValueCommonInput(CramerShoupOnGroupElementCiphertext cipher, CramerShoupPublicKey publicKey, const shared_ptr<GroupElement> & x);
 
 	/**
 	* Returns the encrypted element.
@@ -97,7 +97,7 @@ public:
 	* @param x encrypted element.
 	* @param r random value used to encrypt x.
 	*/
-	SigmaCramerShoupEncryptedValueProverInput(CramerShoupOnGroupElementCiphertext cipher, CramerShoupPublicKey pubKey, shared_ptr<GroupElement> x, biginteger r);
+	SigmaCramerShoupEncryptedValueProverInput(CramerShoupOnGroupElementCiphertext cipher, CramerShoupPublicKey pubKey, const shared_ptr<GroupElement> & x, const biginteger & r);
 
 	/**
 	* Returns the random value used to encrypt x.
@@ -146,7 +146,7 @@ private:
 	* @param eToByteArray
 	* @return the result of hash(u1ToByteArray+u2ToByteArray+eToByteArray) as BigInteger.
 	*/
-	biginteger calcW(shared_ptr<GroupElement> u1, shared_ptr<GroupElement> u2, shared_ptr<GroupElement> e);
+	biginteger calcW(const shared_ptr<GroupElement> & u1, const shared_ptr<GroupElement> & u2, const shared_ptr<GroupElement> & e);
 
 public:
 	/**
@@ -156,7 +156,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaCramerShoupEncryptedValueSimulator(shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, int t, const shared_ptr<PrgFromOpenSSLAES> & prg);
+	SigmaCramerShoupEncryptedValueSimulator(const shared_ptr<DlogGroup> & dlog, const shared_ptr<CryptographicHash> & hash, int t, const shared_ptr<PrgFromOpenSSLAES> & prg);
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -172,7 +172,7 @@ public:
 	* @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 	* @throws IllegalArgumentException if input is not the expected.
 	*/
-	shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input, vector<byte> challenge)  override; 
+	shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input, const vector<byte> & challenge)  override;
 
 	/**
 	* Computes the simulator computation with a randomly chosen challenge.
@@ -220,7 +220,7 @@ private:
 												* @param eToByteArray
 												* @return the result of hash(u1ToByteArray+u2ToByteArray+eToByteArray) as BigInteger.
 												*/
-	biginteger calcW(shared_ptr<GroupElement> u1, shared_ptr<GroupElement> u2, shared_ptr<GroupElement> e);
+	biginteger calcW(const shared_ptr<GroupElement> & u1, const shared_ptr<GroupElement> & u2, const shared_ptr<GroupElement> & e);
 
 public:
 	/**
@@ -230,7 +230,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaCramerShoupEncryptedValueProverComputation(shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
+	SigmaCramerShoupEncryptedValueProverComputation(const shared_ptr<DlogGroup> & dlog, const shared_ptr<CryptographicHash> & hash, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -245,7 +245,7 @@ public:
 	* @return the computed message
 	* @throws IllegalArgumentException if input is not the expected.
 	*/
-	shared_ptr<SigmaProtocolMsg> computeFirstMsg(shared_ptr<SigmaProverInput> input) override; 
+	shared_ptr<SigmaProtocolMsg> computeFirstMsg(const shared_ptr<SigmaProverInput> & input) override;
 
 	/**
 	* Computes the second message of the protocol.
@@ -253,7 +253,7 @@ public:
 	* @return the computed message.
 	* @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 	*/
-	shared_ptr<SigmaProtocolMsg> computeSecondMsg(vector<byte> challenge) override;
+	shared_ptr<SigmaProtocolMsg> computeSecondMsg(const vector<byte> & challenge) override;
 
 	/**
 	* Returns the simulator that matches this sigma protocol prover.
@@ -297,7 +297,7 @@ private:
 													* @param eToByteArray
 													* @return the result of hash(u1ToByteArray+u2ToByteArray+eToByteArray) as BigInteger.
 													*/
-	biginteger calcW(shared_ptr<GroupElement> u1, shared_ptr<GroupElement> u2, shared_ptr<GroupElement> e);
+	biginteger calcW(const shared_ptr<GroupElement> & u1, const shared_ptr<GroupElement> & u2, const shared_ptr<GroupElement> & e);
 
 public:
 	/**
@@ -308,7 +308,7 @@ public:
 	* @param random
 	* @throws InvalidDlogGroupException if the given dlog is invalid.
 	*/
-	SigmaCramerShoupEncryptedValueVerifierComputation(shared_ptr<DlogGroup> dlog, shared_ptr<CryptographicHash> hash, int t);
+	SigmaCramerShoupEncryptedValueVerifierComputation(const shared_ptr<DlogGroup> & dlog, const shared_ptr<CryptographicHash> & hash, int t);
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -324,7 +324,7 @@ public:
 	* Sets the given challenge.
 	* @param challenge
 	*/
-	void setChallenge(vector<byte> challenge) override { sigmaDH.setChallenge(challenge); }
+	void setChallenge(const vector<byte> & challenge) override { sigmaDH.setChallenge(challenge); }
 
 	/**
 	* Returns the sampled challenge.

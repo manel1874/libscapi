@@ -117,7 +117,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaElGamalPrivateKeySimulator(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) : dlogSim(dlog, t, prg) {}
+	SigmaElGamalPrivateKeySimulator(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) : dlogSim(dlog, t, prg) {}
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -133,7 +133,7 @@ public:
 	* @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 	* @throws IllegalArgumentException if the given input is not an instance of SigmaElGamalPrivateKeyCommonInput.
 	*/
-	shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input, vector<byte> challenge) override; 
+	shared_ptr<SigmaSimulatorOutput> simulate(SigmaCommonInput* input, const vector<byte> & challenge) override;
 
 	/**
 	* Computes the simulator computation with a randomly chosen challenge.
@@ -176,7 +176,7 @@ public:
 	* @param t Soundness parameter in BITS.
 	* @param random
 	*/
-	SigmaElGamalPrivateKeyProverComputation(shared_ptr<DlogGroup> dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg());
+	SigmaElGamalPrivateKeyProverComputation(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg());
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -190,7 +190,7 @@ public:
 	* @return the computed message
 	* @throws IllegalArgumentException if input is not an instance of SigmaElGamalPrivateKeyProverInput.
 	*/
-	shared_ptr<SigmaProtocolMsg> computeFirstMsg(shared_ptr<SigmaProverInput> input) override; 
+	shared_ptr<SigmaProtocolMsg> computeFirstMsg(const shared_ptr<SigmaProverInput> & input) override;
 
 	/**
 	* Computes the second message of the protocol.
@@ -198,7 +198,7 @@ public:
 	* @return the computed message.
 	* @throws CheatAttemptException if the received challenge's length is not equal to the soundness parameter.
 	*/
-	shared_ptr<SigmaProtocolMsg> computeSecondMsg(vector<byte> challenge) override; 
+	shared_ptr<SigmaProtocolMsg> computeSecondMsg(const vector<byte> & challenge) override;
 
 	/**
 	* Returns the simulator that matches this sigma protocol prover.
@@ -240,7 +240,7 @@ public:
 	* @param random
 	* @throws InvalidDlogGroupException if the given dlog is invalid.
 	*/
-	SigmaElGamalPrivateKeyVerifierComputation(shared_ptr<DlogGroup> dlog, int t) : sigmaDlog(dlog, t) {}
+	SigmaElGamalPrivateKeyVerifierComputation(const shared_ptr<DlogGroup> & dlog, int t) : sigmaDlog(dlog, t) {}
 
 	/**
 	* Returns the soundness parameter for this Sigma protocol.
@@ -257,7 +257,7 @@ public:
 	* Sets the given challenge.
 	* @param challenge
 	*/
-	void setChallenge(vector<byte> challenge) override { sigmaDlog.setChallenge(challenge); }
+	void setChallenge(const vector<byte> & challenge) override { sigmaDlog.setChallenge(challenge); }
 
 	/**
 	* Returns the sampled challenge.
