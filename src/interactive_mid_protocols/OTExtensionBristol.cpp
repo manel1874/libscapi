@@ -199,14 +199,14 @@ shared_ptr<OTBatchSOutput> OTExtensionBristolSender::transfer(OTBatchSInput * in
 }
 
 
-OTExtensionBristolReciever::OTExtensionBristolReciever(const string& senderAddress, int port,bool isSemiHonest, const shared_ptr<CommParty> & channel) {
+OTExtensionBristolReceiver::OTExtensionBristolReceiver(const string& senderAddress, int port,bool isSemiHonest, const shared_ptr<CommParty> & channel) {
 
 	init(senderAddress, port, 1, isSemiHonest, channel);
 
 }
 
 
-shared_ptr<OTBatchROutput> OTExtensionBristolReciever::transfer(OTBatchRInput * input){
+shared_ptr<OTBatchROutput> OTExtensionBristolReceiver::transfer(OTBatchRInput * input){
 
 
 	if (input->getType() != OTBatchRInputTypes::OTExtensionGeneralRInput &&

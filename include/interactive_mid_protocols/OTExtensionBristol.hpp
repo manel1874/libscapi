@@ -86,11 +86,11 @@ protected:
  * The receiver should provide the sender's address since that is the hostname it should connect to.
  *
  */
-class OTExtensionBristolReciever: public OTExtensionBristolBase,  public OTBatchReceiver{
+class OTExtensionBristolReceiver: public OTExtensionBristolBase,  public OTBatchReceiver{
 
 public:
 	//OTExtensionBristolReciever(const string& senderAddress, int port, bool isSemiHonest);
-	OTExtensionBristolReciever(const string& senderAddress, int port, bool isSemiHonest, const shared_ptr<CommParty> & channel = nullptr);
+	OTExtensionBristolReceiver(const string& senderAddress, int port, bool isSemiHonest, const shared_ptr<CommParty> & channel = nullptr);
 
 	shared_ptr<OTBatchROutput> transfer(OTBatchRInput * input);
 

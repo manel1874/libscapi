@@ -235,7 +235,7 @@ int mainBristol(string partyNum) {
     		// connect to party one
     		channel->join(500, 5000);
 
-    		OTExtensionBristolReciever reciever("localhost", 12001,true,channel);
+    		OTExtensionBristolReceiver receiver("localhost", 12001,true,channel);
 
     		vector<byte> sigma;
     		sigma.resize(nOTs);
@@ -252,7 +252,7 @@ int mainBristol(string partyNum) {
     		cout<<"before transfer"<<endl;
 
             auto start = scapi_now();
-    		auto output = reciever.transfer(input);
+    		auto output = receiver.transfer(input);
     		 print_elapsed_ms(start, "Transfer for correlated");
 
 
