@@ -31,7 +31,7 @@
 #include "Kdf.hpp"
 
 /**
-* This interface is the general interface of Random Oracle. Every class in this family should implement this interface.
+* This is an abstract class of Random Oracle. Every class in this family should iderive this class.
 * A random oracle is an oracle (a theoretical black box) that responds to every unique query with a (truly) random
 * response chosen uniformly from its output domain, except that for any specific query, it responds the same way
 * every time it receives that query.
@@ -63,6 +63,15 @@ private:
 public:
 	HashBasedRO(const shared_ptr<CryptographicHash> & hash = make_shared<OpenSSLSHA256>()) { this->hash = hash; };
 	HashBasedRO(string hashName) : HashBasedRO(CryptographicHash::get_new_cryptographic_hash(hashName)) {};
+	
+	/**
+	* Computes the random oracle function on the given input.
+	* @param input input to compute the random oracle function on.
+	* @param inOffset offset within the input to take the bytes from.
+	* @param inLen length of the input.
+	* @param outLen required output length IN BYTES.
+	* @return a string with the required length.
+	*/
 	void compute(const vector<byte> & input, int inOffset, int inLen, vector<byte> & output, int outLen) override;
 	string getAlgorithmName() override { return "HashBasedRO"; };
 };
@@ -76,6 +85,15 @@ private:
 
 public:	
 	HKDFBasedRO(const shared_ptr<HKDF> & hkdf = make_shared<HKDF>()) { this->hkdf = hkdf; };
+	
+	/**
+	* Computes the random oracle function on the given input.
+	* @param input input to compute the random oracle function on.
+	* @param inOffset offset within the input to take the bytes from.
+	* @param inLen length of the input.
+	* @param outLen required output length IN BYTES.
+	* @return a string with the required length.
+	*/
 	void compute(const vector<byte> & input, int inOffset, int inLen, vector<byte> & output, int outLen) override;
 	string getAlgorithmName() override { return "HKDFBasedRO"; };
 };

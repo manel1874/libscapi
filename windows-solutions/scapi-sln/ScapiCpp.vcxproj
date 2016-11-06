@@ -259,7 +259,6 @@
     <ClInclude Include="..\..\include\mid_layer\ElGamalEnc.hpp" />
     <ClInclude Include="..\..\include\mid_layer\Mac.hpp" />
     <ClInclude Include="..\..\include\mid_layer\OpenSSLSymmetricEnc.hpp" />
-    <ClInclude Include="..\..\include\mid_layer\Paillier.hpp" />
     <ClInclude Include="..\..\include\mid_layer\SymmetricEnc.hpp" />
     <ClInclude Include="..\..\include\primitives\Dlog.hpp" />
     <ClInclude Include="..\..\include\primitives\DlogOpenSSL.hpp" />

@@ -555,7 +555,7 @@ shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::add(AsymmetricCiphertext* ciph
 shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::multByConst(AsymmetricCiphertext* cipher, biginteger & constNumber) {
 	// If there is no public key can not operate the function, throws exception.
 	if (!isKeySet()) {
-		throw invalid_argument("in order to multiply a ciphertext this object must be initialized with public key");
+		throw IllegalStateException("in order to multiply a ciphertext this object must be initialized with public key");
 	}
 
 	//Ciphertext should be Damgard-Jurik ciphertext.
@@ -602,7 +602,7 @@ shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::multByConst(AsymmetricCipherte
 shared_ptr<AsymmetricCiphertext> DamgardJurikEnc::multByConst(AsymmetricCiphertext* cipher, biginteger & constNumber, biginteger & r) {
 	// If there is no public key can not operate the function, throws exception.
 	if (!isKeySet()) {
-		throw invalid_argument("in order to multiply a ciphertext this object must be initialized with public key");
+		throw IllegalStateException("in order to multiply a ciphertext this object must be initialized with public key");
 	}
 
 	//Ciphertext should be Damgard-Jurik ciphertext.

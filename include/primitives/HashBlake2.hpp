@@ -35,24 +35,41 @@
 #include <BLAKE2/sse/blake2.h>
 
 /**
-* A general adapter class of hash for Blake 2. <p>
+* An abstract class of hash for Blake 2.
 * This class implements all the functionality by passing requests to the adaptee library.
 *
 */
 class Blake2Hash : public virtual CryptographicHash {
 private:
-	blake2b_state S[1];
+	blake2b_state S[1]; // An underlying Blake2 object.
 	int hashSize;
-protected:
 public:
 	/**
-	* Constructs the native hash function using BLAKE2 library.
-	* @param hashName - the name of the hash. This will be passed to the jni dll function createHash so it will know which hash to create.
+	* Constructs the underlying hash function using BLAKE2 library.
+	* @param hashBytesSize the output size of the hash function, in bytes.
 	*/
 	Blake2Hash(int hashBytesSize);
+
+	/**
+	* @return the size of the hashed massage in bytes.
+	*/
 	int getHashedMsgSize() override { return hashSize; }
+
 	string getAlgorithmName() override { return "BLAKE2"; }
+
+	/**
+	* Adds the byte vector to the existing message to hash.
+	* @param in input byte vector.
+	* @param inOffset the offset within the byte array.
+	* @param inLen the length. The number of bytes to take after the offset.
+	*/
 	void update(const vector<byte> &in, int inOffset, int inLen) override;
+
+	/**
+	* Completes the hash computation and puts the result in the out vector.
+	* @param out the output in byte vector.
+	* @param outOffset the offset which to put the result bytes from.
+	*/
 	void hashFinal(vector<byte> &out, int outOffset) override;
 };
 

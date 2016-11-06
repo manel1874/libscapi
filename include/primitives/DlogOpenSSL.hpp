@@ -43,7 +43,7 @@ BIGNUM* biginteger_to_opensslbignum(biginteger bi);
 
 class OpenSSLDlogZpSafePrime;
 /**
-* This class is an adapter to ZpElement in OpenSSL library.<p>
+* This class is an adapter to ZpElement in OpenSSL library.
 * It holds a pointer to an OpenSSL's Zp element and implements all the functionality of a Zp element.
 */
 class OpenSSLZpSafePrimeElement : public ZpSafePrimeElement {
@@ -51,8 +51,17 @@ private:
 	shared_ptr<BIGNUM> openSSLElement;
 	void createOpenSSLElement() { openSSLElement = shared_ptr<BIGNUM>(biginteger_to_opensslbignum(element), BN_free); }
 
+	//These constructors are private beacause only the Dlog Group (whitch is a friend class) should create the element.
+
+	/**
+	 * Gets the element value and creates the underlying OpenSSL object.
+	 */
 	OpenSSLZpSafePrimeElement(const biginteger & x, const biginteger & p, bool bCheckMembership) :
 		ZpSafePrimeElement(x, p, bCheckMembership) { createOpenSSLElement(); };
+	
+	/**
+	* Creates a random element in the group.
+	*/
 	OpenSSLZpSafePrimeElement(const biginteger & p, PrgFromOpenSSLAES* prg) : ZpSafePrimeElement(p, prg) { createOpenSSLElement(); };
 	OpenSSLZpSafePrimeElement(const biginteger & elementValue) : ZpSafePrimeElement(elementValue) { createOpenSSLElement(); };
 public:
@@ -60,15 +69,16 @@ public:
 		return "OpenSSLZpSafePrimeElement  [element value=" + string(element) + "]";
 	};
 	shared_ptr<BIGNUM> getOpenSSLElement() { return openSSLElement; }
-	friend OpenSSLDlogZpSafePrime;
+
+	friend OpenSSLDlogZpSafePrime; //The corresponding Dlog group is a friend class in order to be able to create elements.
 };
 
 /**
-* This class implements a Dlog group over Zp* utilizing OpenSSL's implementation.<p>
+* This class implements a Dlog group over Zp* utilizing OpenSSL's implementation.
 */
 class OpenSSLDlogZpSafePrime : public DlogZpSafePrime, public DDH {
 private:
-	shared_ptr<DH> dlog;
+	shared_ptr<DH> dlog;		// Underlying OpenSSL group object.
 	shared_ptr<BN_CTX> ctx;
 	void createOpenSSLDlogZp(const biginteger & p, const biginteger & q, const biginteger & g);
 	void createRandomOpenSSLDlogZp(int numBits);
@@ -89,8 +99,7 @@ public:
 	*/
 	OpenSSLDlogZpSafePrime(int numBits = 1024, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 	OpenSSLDlogZpSafePrime(string numBits) : OpenSSLDlogZpSafePrime(stoi(numBits)) {};
-	OpenSSLDlogZpSafePrime(int numBits, string randNumGenAlg, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) { /* TODO: implement */ };
-
+	
 	string getGroupType() override { return "Zp*"; }
 	shared_ptr<GroupElement> getIdentity() override;
 	shared_ptr<GroupElement> createRandomElement() override;
@@ -112,10 +121,13 @@ public:
 	virtual const vector<byte>  mapAnyGroupElementToByteArray(GroupElement* groupElement) override;
 };
 
+/**
+ * This class is an abstract class that implements  common functionality of EC Dlog group using OpenSSL library.
+ */
 class OpenSSLDlogEC : public DlogEllipticCurve{
 	
 protected:
-	shared_ptr<EC_GROUP> curve;
+	shared_ptr<EC_GROUP> curve;	// The underlying OpenSSL group
 	shared_ptr<BN_CTX> ctx;
 	virtual shared_ptr<ECElement> createPoint(const shared_ptr<EC_POINT> &) = 0;
 	shared_ptr<EC_GROUP> getCurve() { return curve; }
@@ -150,6 +162,9 @@ public:
 
 class OpenSSLECFpPoint;
 
+/*
+ * Concrete class of elliptic curve over Fp field. This implementation uses OpenSSL library.
+ */
 class OpenSSLDlogECFp : public OpenSSLDlogEC, public DDH {
 private:
 	shared_ptr<PrgFromOpenSSLAES> random;
@@ -183,11 +198,14 @@ public:
 
 	shared_ptr<GroupElement> reconstructElement(bool bCheckMembership, GroupElementSendableData* data) override;
 	
-	friend class OpenSSLECFpPoint;
+	friend class OpenSSLECFpPoint; //The corresponding group element is a friend class in order to use the private methods.
 };
 
 class OpenSSLECF2mPoint;
 
+/*
+* Concrete class of elliptic curve over F2m field. This implementation uses OpenSSL library.
+*/
 class OpenSSLDlogECF2m : public OpenSSLDlogEC, public DDH {
 private:
 	void createGroupParams();
@@ -220,24 +238,35 @@ public:
 
 	shared_ptr<GroupElement> reconstructElement(bool bCheckMembership, GroupElementSendableData* data) override;
 
-	friend class OpenSSLECF2mPoint;
+	friend class OpenSSLECF2mPoint; //The corresponding group element is a friend class in order to use the private methods.
 };
 
+/*
+ * Abstract class for elliptic curve elements using OpenSSL library.
+ */
 class OpenSSLPoint :public ECElement {
 protected:
-	shared_ptr<EC_POINT> point;
+	shared_ptr<EC_POINT> point; // The underlying OpenSSL point.
 	shared_ptr<EC_POINT> getPoint() { return point; }
+
+	//We hols both the point and its values in order to be efficient.
 	biginteger x;
 	biginteger y;
 public:
 	bool isInfinity() override;
 	biginteger getX() override { return x; }
 	biginteger getY() override { return y; }
-	friend class OpenSSLDlogEC;
+	friend class OpenSSLDlogEC;  
 };
 
+/*
+ * Concrete class of Fp point using OpenSSL library.
+ */
 class OpenSSLECFpPoint : public OpenSSLPoint {
 private:
+
+	//The constructors are private because only the Dlog group should create instances of this class.
+	//Notice that OpenSSLDlogECFp class is a friend, in order to enable the creation from there.
 	OpenSSLECFpPoint(const biginteger & x, const biginteger & y, OpenSSLDlogECFp* curve, bool bCheckMembership);
 	OpenSSLECFpPoint(const shared_ptr<EC_POINT> & point, OpenSSLDlogECFp* curve);
 
@@ -246,8 +275,14 @@ public:
 	friend class OpenSSLDlogECFp;
 };
 
+/*
+* Concrete class of F2m point using OpenSSL library.
+*/
 class OpenSSLECF2mPoint : public OpenSSLPoint, public enable_shared_from_this<OpenSSLECF2mPoint> {
 private:
+
+	//The constructors are private because only the Dlog group should create instances of this class.
+	//Notice that OpenSSLDlogECF2m class is a friend, in order to enable the creation from there.
 	OpenSSLECF2mPoint(const biginteger & x, const biginteger & y, OpenSSLDlogECF2m* curve, bool bCheckMembership);
 	OpenSSLECF2mPoint(const shared_ptr<EC_POINT> & point, OpenSSLDlogECF2m* curve);
 public:

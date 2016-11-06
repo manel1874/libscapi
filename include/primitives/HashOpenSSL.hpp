@@ -32,34 +32,53 @@
 #include "Hash.hpp"
 #include <openssl/evp.h>
 #include <set>
+
 /**
 * A general adapter class of hash for OpenSSL. <p>
-* This class implements all the functionality by passing requests to the adaptee c++ functions,
+* This class implements all the functionality by passing requests to the adaptee OpenSSL functions,
 * like int SHA1_Update(SHA_CTX *c, const void *data, unsigned long len);.
 *
 * A concrete hash function such as SHA1 represented by the class OpenSSLSHA1 only passes the name of the hash in the constructor
 * to this base class.
-* Since the underlying library is written in a native language we use the JNI architecture.
 */
 class OpenSSLHash : public virtual CryptographicHash {
 private:
 	int hashSize;
 protected:
-	shared_ptr<EVP_MD_CTX> hash; //Pointer to the native hash object.
+	shared_ptr<EVP_MD_CTX> hash; //Pointer to the OpenSSL hash object.
 public:
 	/**
-	* Constructs the native hash function using OpenSSL library.
+	* Constructs the OpenSSL hash object.
 	* @param hashName - the name of the hash. This will be passed to the jni dll function createHash so it will know which hash to create.
 	*/
 	OpenSSLHash(string hashName);
+
+	/**
+	* @return the size of the hashed massage in bytes.
+	*/
 	int getHashedMsgSize() override { return hashSize;};
+
 	string getAlgorithmName() override;
+
+	/**
+	* Adds the byte vector to the existing message to hash.
+	* @param in input byte vector.
+	* @param inOffset the offset within the byte array.
+	* @param inLen the length. The number of bytes to take after the offset.
+	* */
 	void update(const vector<byte> &in, int inOffset, int inLen) override;
+
+	/**
+	* Completes the hash computation and puts the result in the out vector.
+	* @param out the output in byte vector.
+	* @param outOffset the offset which to put the result bytes from.
+	*/
 	void hashFinal(vector<byte> &out, int outOffset) override;
 };
 
 /************************************************************
-* Concrete classed of cryptographicHash for different SHA. These classes wraps OpenSSL implementation of SHA*.
+* Concrete classed of cryptographicHash for different SHA. 
+* These classes wraps OpenSSL implementation of SHA*.
 *************************************************************/
 
 class OpenSSLSHA1 : public OpenSSLHash , public SHA1 {

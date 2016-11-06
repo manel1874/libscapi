@@ -31,7 +31,7 @@
 #include "../comm/Comm.hpp"
 
 /**
-* General interface of the receiver's output of the commit phase.
+* Abstract class of the receiver's output of the commit phase.
 * All receivers have output from the commit phase, that at least includes the commitment id.
 */
 class CmtRCommitPhaseOutput: public NetworkSerialized {
@@ -99,8 +99,8 @@ public:
 };
 
 /**
-* General interface for commit value.
-* Each commit value type (like BigInteger, Byte[], etc) should implement this interface.
+* Abstract class for commit value.
+* Each commit value type (like BigInteger, Byte[], etc) should derive this class.
 */
 class CmtCommitValue {
 public:
@@ -155,8 +155,8 @@ public:
 };
 
 /**
-* General interface of the committer's commit phase values. <P>
-* Classes implementing this interface will hold the value to commit,
+* Abstract class of the committer's commit phase values.
+* Classes derived this class will hold the value to commit,
 * the computed commitment and the random values used for the computation.
 */
 class CmtCommitmentPhaseValues {
@@ -188,7 +188,7 @@ public:
 };
 
 /**
-* Concrete implementation of CommitValue where the committed value is a BigInteger.
+* Concrete implementation of CommitValue where the committed value is a biginteger.
 */
 class CmtBigIntegerCommitValue : public CmtCommitValue {
 private:
@@ -226,7 +226,7 @@ public:
 };
 
 /**
-* Concrete implementation of CommitValue where the committed value is a byte*.
+* Concrete implementation of CommitValue where the committed value is a vector<byte>.
 */
 class CmtByteArrayCommitValue : public CmtCommitValue {
 private:
@@ -237,7 +237,7 @@ public:
 	*/
 	CmtByteArrayCommitValue(const shared_ptr<vector<byte>> & x) { this->x = x; }
 	/**
-	* Returns the committed byte*. client need to cast to byte*
+	* Returns the committed byte vector. client need to cast to byte vector
 	*/
 	shared_ptr<void> getX() override{ return x; }
 	shared_ptr<vector<byte>> getXVector() { return x; }
@@ -265,7 +265,7 @@ public:
 };
 
 /**
-* This interface represents the commitment message sent from the committer to the receiver
+* This class represents the commitment message sent from the committer to the receiver
 * during the commitment phase.
 * Every commitment has an id needed to identify the specific commitment in the case that many
 * commitments are performed by the committer without decommiting in between the commitments.
@@ -288,7 +288,7 @@ public:
 };	
 
 /**
-* General interface for the decommitment message the committer sends to the receiver.
+* Abstract class for the decommitment message the committer sends to the receiver.
 */
 class CmtCDecommitmentMessage : public NetworkSerialized{
 public:
@@ -304,14 +304,14 @@ public:
 };
 
 /**
-* This the general interface of the Committer side of a Commitment Scheme.
+* This is the general class of the Committer side of a Commitment Scheme.
 * A commitment scheme has a commitment phase in which the committer send the commitment to the
 * Receiver; and a decommitment phase in which the the Committer sends the decommitment to the Receiver.
 */
 class CmtCommitter {
 protected:
 	shared_ptr<CommParty> channel;
-	// the key to the map is an ID and the value is a structure that has the Committer's
+	// The key to the map is an ID and the value is a structure that has the Committer's
 	// private input x in Zq,the random value used to commit x and the actual commitment.
 	// Each committed value is sent together with an ID so that the receiver can keep it in
 	// some data structure. This is necessary in the cases that the same instances of committer
@@ -321,15 +321,15 @@ protected:
 
 public:
 	/**
-	* Generate a commitment message using the given input and ID.<p>
-	* There are cases when the user wants to commit on the input but remain non-interactive,
+	* Generates a commitment message using the given input and ID.
+	* There are cases when the user wants to commit the input but remain non-interactive,
 	* meaning not to send the generate message yet.
 	* The reasons for doing that are vary, for example the user wants to prepare a lot
 	* of commitments and send together.
 	* In these cases the commit function is not useful since it sends the generates commit message
-	* to the other party. <p>
+	* to the other party. 
 	* This function generates the message without sending it and this allows the user to save it
-	* and send it later if he wants.<p>
+	* and send it later if he wants.
 	* In case the commit phase is interactive, the commit message cannot be generated and an
 	* IllegalStateException will be thrown.
 	* In this case one should use the commit function instead.
@@ -337,20 +337,15 @@ public:
 	* Code example: giving a committer object and an input,
 	*
 	* // create three commitment messages.
-	* CmtCCommitmentMsg* msg1 = generateCommitmentMsg(input, 1);
-	* CmtCCommitmentMsg* msg2 = generateCommitmentMsg(input, 2);
-	* CmtCCommitmentMsg* msg3 = generateCommitmentMsg(input, 3);
+	* auto msg1 = generateCommitmentMsg(input, 1);
+	* auto msg2 = generateCommitmentMsg(input, 2);
+	* auto msg3 = generateCommitmentMsg(input, 3);
 	* ...
 	*
-	* try {
-	*		// Send the messages by the channel.
-	*		channel.write(msg1);
-	*		channel.write(msg2);
-	*		channel.write(msg3);
-	*	} catch (const logic_error& e) {
-	*		// should remove the failed commitment from the commitmentMap!
-	*		cerr << failed to send the commitment. The error is: " <<  e.what();
-	*	}
+	* // Send the messages by the channel.
+	* channel.write(msg1);
+	* channel.write(msg2);
+	* channel.write(msg3);
 	*
 	* @param input The value that the committer commits about.
 	* @param id Unique value attached to the input to keep track of the commitments in the case
@@ -377,16 +372,16 @@ public:
 	}
 
 	/**
-	* Generate a decommitment message using the given id.<p>
+	* Generate a decommitment message using the given id.
 	*
 	* There are cases when the user wants to decommit but remain non-interactive, meaning not to
 	* send the generate message yet.
 	* The reasons for doing that are vary, for example the user wants to prepare a lot of 
 	* decommitments and send together.
 	* In these cases the decommit function is not useful since it sends the generates decommit
-	* message to the other party. <p>
+	* message to the other party. 
 	* This function generates the message without sending it and this allows the user to save it
-	* and send it later if he wants.<p>
+	* and send it later if he wants.
 	* In case the decommit phase is interactive, the decommit message cannot be generated and an 
 	* IllegalStateException will be thrown.
 	* In this case one should use the decommit function instead.
@@ -394,20 +389,16 @@ public:
 	* Code example: giving a committer object and an input,
 	*
 	* //Create three commitment messages.
-	* CmtCDecommitmentMessage* msg1 = generateDecommitmentMsg(1);
-	* CmtCDecommitmentMessage* msg2 = generateDecommitmentMsg(2);
-	* CmtCDecommitmentMessage* msg3 = generateDecommitmentMsg(3);
+	* auto msg1 = generateDecommitmentMsg(1);
+	* auto msg2 = generateDecommitmentMsg(2);
+	* auto msg3 = generateDecommitmentMsg(3);
 	* ...
 	*
-	* try {
-	*		// Send the messages by the channel.
-	*		channel.write(msg1);
-	*		channel.write(msg2);
-	*		channel.write(msg3);
-	*	} catch (const logic_error& e) {
-	*		cerr << "failed to send the decommitment. The error is: " <<  e.what();
-	*	}
-	*
+	* // Send the messages by the channel.
+	* channel.write(msg1);
+	* channel.write(msg2);
+	* channel.write(msg3);
+	*	
 	* @param id Unique value attached to the input to keep track of the commitments in the case
 	* that many commitments are performed one after the other without decommiting them yet.
 	* @return the generated decommitment object.
@@ -456,7 +447,7 @@ public:
 	virtual vector<shared_ptr<void>> getPreProcessValues() = 0;
 	
 	/**
-	* This function returns the values calculated during the commit phase for a specific commitment.<p>
+	* This function returns the values calculated during the commit phase for a specific commitment.
 	* This function is used for protocols that need values of the commitment,
 	* like ZK protocols during proofs on the commitment.
 	* We recommended not to call this function from somewhere else.
@@ -469,7 +460,7 @@ public:
 };
 
 /**
-* This the general interface of the Receiver side of a Commitment Scheme. 
+* This the general class of the Receiver side of a Commitment Scheme. 
 * A commitment scheme has a commitment phase in which the Receiver waits for the commitment
 * sent by the Committer; and a decommitment phase in which the Receiver waits for the decommitment
 * sent by the Committer and checks whether to accept or reject the decommitment.
@@ -499,7 +490,7 @@ public:
 	virtual shared_ptr<CmtCommitValue> receiveDecommitment(long id) = 0;
 
 	/**
-	* Verifies the given decommitment object according to the given commitment object.<p>
+	* Verifies the given decommitment object according to the given commitment object.
 	*
 	* There are cases when the committer sends the commitment and decommitments in the application,
 	* and the receiver does not use the receiveCommitment and receiveDecommitment function.
@@ -508,9 +499,9 @@ public:
 	* The reasons for doing that are vary, for example a protocol that prepare a lot of
 	* commitments and send together.
 	* In these cases the receiveCommitment and receiveDecommitment functions are not useful
-	* since it receives the generates messages separately. to the other party. <p>
+	* since it receives the generates messages separately to the other party. 
 	* This function generates the message without sending it and this allows the user to save
-	* it and send it later if he wants.<p>
+	* it and send it later if he wants.
 	* In case the decommit phase is interactive, the decommit message cannot be generated 
 	* and an IllegalStateException will be thrown.
 	* In this case one should use the decommit function instead.
@@ -518,16 +509,15 @@ public:
 	* Code example: giving a committer object and an input,
 	*
 	* //Create three commitment messages.
-	* CmtCDecommitmentMessage msg1 = generateDecommitmentMsg(1);
-	* CmtCDecommitmentMessage msg2 = generateDecommitmentMsg(2);
-	* CmtCDecommitmentMessage msg3 = generateDecommitmentMsg(3);
+	* auto msg1 = generateDecommitmentMsg(1);
+	* auto msg2 = generateDecommitmentMsg(2);
+	* auto msg3 = generateDecommitmentMsg(3);
 	* ...
 	*
-	*		//Send the messages by the channel.
-	*		channel->writeWithSize(msg1);
-	*		channel->writeWithSize(msg2);
-	*		channel->writeWithSize(msg3);
-	*
+	* //Send the messages by the channel.
+	* channel->writeWithSize(msg1);
+	* channel->writeWithSize(msg2);
+	* channel->writeWithSize(msg3);
 	*
 	* @param commitmentMsg the commitment object.
 	* @param decommitmentMsg the decommitment object
@@ -537,14 +527,14 @@ public:
 		CmtCDecommitmentMessage* decommitmentMsg) = 0;
 
 	/**
-	* Return the values used during the pre-process phase (usually upon construction). 
+	* Returns the values used during the pre-process phase (usually upon construction). 
 	* Since these values vary between the different implementations this function
 	* returns a general array of void pointers.
 	*/
 	virtual vector<shared_ptr<void>> getPreProcessedValues() = 0;
 
 	/**
-	* Return the intermediate values used during the commitment phase.
+	* Returns the intermediate values used during the commitment phase.
 	* @param id get the commitment values according to this id.
 	* @return a general void pointer.
 	*/
@@ -561,9 +551,9 @@ public:
 };
 
 /**
-* This interface is used by the committer to prove that:<p>
-* 1. The committer knows the committed value.<p>
-* 2. The committed value was x.<p>
+* This class is used by the committer to prove that:
+* 1. The committer knows the committed value.
+* 2. The committed value was x.
 *
 * All commitment scheme that have proofs should implement this interface.
 */
@@ -583,9 +573,9 @@ public:
 };
 
 /**
-* This interface is used by the verifier to verify that:<p>
-* 1. The committer knows the committed value.<p>
-* 2. The committed value was x.<p>
+* This class is used by the verifier to verify that:
+* 1. The committer knows the committed value.
+* 2. The committed value was x.
 * All commitment scheme that have proofs should implement this interface.
 */
 class CmtWithProofsReceiver : public virtual CmtReceiver {
@@ -604,21 +594,21 @@ public:
 };
 
 /**
-* Marker interface.
+* Marker class.
 * Each committer/receiver that implement this interface is marked as committer/receiver
 * that commit on a BigInteger.
 */
 class CmtOnBigInteger {};
 
 /**
-* Marker interface.
+* Marker class.
 * Each committer/receiver that implement this interface is marked as committer/receiver
 * that commit on a byte array.
 */
 class CmtOnByteArray {};
 
 /**
-* Marker interface.
+* Marker class.
 * Each committer/receiver that implement this interface is marked as committer/receiver
 * that commit on a GroupElement.
 */

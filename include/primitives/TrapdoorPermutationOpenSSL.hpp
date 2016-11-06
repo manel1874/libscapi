@@ -56,8 +56,8 @@ public:
 	shared_ptr<TPElement> invert(TPElement * tpEl) override;
 	TPElValidity isElement(TPElement* tpEl) override;
 	shared_ptr<TPElement> generateRandomTPElement() override;
-	shared_ptr<TPElement> generateTPElement(biginteger & x) override { return make_shared<RSAElement>(x); };
-	shared_ptr<TPElement> generateUncheckedTPElement(biginteger & x) override { return make_shared<RSAElement>(modulus, x, false); };
+	shared_ptr<TPElement> generateTPElement(const biginteger & x) override { return make_shared<RSAElement>(x); };
+	shared_ptr<TPElement> generateUncheckedTPElement(const biginteger & x) override { return make_shared<RSAElement>(modulus, x, false); };
 	biginteger getModulus() override {
 		if (!isKeySet())
 			throw IllegalStateException("keys aren't set");

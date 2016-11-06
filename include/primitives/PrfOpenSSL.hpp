@@ -37,49 +37,113 @@
 #include <openssl/hmac.h>
 #include <openssl/err.h>
 
-
+/**
+ * Abstract class that implements the PRPFixed using OpenSSL library.
+*/
 class OpenSSLPRP : public PrpFixed {
 	
 protected:
 	shared_ptr<PrgFromOpenSSLAES> prg;
-	EVP_CIPHER_CTX* computeP;	//Native object used to compute the prp.
-	EVP_CIPHER_CTX* invertP;		//Native object used to invert the prp.
+	EVP_CIPHER_CTX* computeP;		//OpenSSL's object used to compute the prp.
+	EVP_CIPHER_CTX* invertP;		//OpenSSL's object used to invert the prp.
 	bool _isKeySet;
 
 public:
 	bool isKeySet() override { return _isKeySet; }
+
+	/**
+	* This class does not need parameters to generate a key. Call the other generateKey function that accept the key size.
+	*/
 	SecretKey generateKey(AlgorithmParameterSpec & keyParams) override {
 		throw NotImplementedException("To generate a key for this prf object use the generateKey(int keySize) function");
 	};
+
 	SecretKey generateKey(int keySize) override;
-	void computeBlock(const vector<byte> & inBytes, int inOff, vector<byte> &outBytes, int outOff) override;
-	void computeBlock(const vector<byte> & inBytes, int inOff, int inLen, vector<byte> &outBytes, int outOff, int outLen) override;
-	void computeBlock(const vector<byte> & inBytes, int inOffset, int inLen, vector<byte> &outBytes, int outOffset) override;
+
 	/**
-	* Computes the permutation on the given array.
-	* The given array length does not have to be the size of the block but a MUST be aligned to the block size.
-	* The optimized compute block divide the given input into blocks and compute each one of them separately.
-	* The output array will contain a concatenation of all the results of computing the blocks.
+	* Computes the function using the secret key.
+	* The user supplies the input byte vector and the offset from which to take the data from.
+	* The user also supplies the output byte vector as well as the offset.
+	* The computeBlock function will put the output in the output vector starting at the offset. 
+	* This function is suitable for block ciphers where the input/output length is known in advance.
+	* @param inBytes input bytes to compute
+	* @param inOff input offset in the inBytes array
+	* @param outBytes output bytes. The resulted bytes of compute
+	* @param outOff output offset in the outBytes array to put the result from
+	*/
+	void computeBlock(const vector<byte> & inBytes, int inOff, vector<byte> &outBytes, int outOff) override;
+
+	/**
+	* Computes the function using the secret key.
+	* This function is provided in the interface especially for the sub-family PrfVaryingIOLength, which may have variable input and output length.
+	* If the implemented algorithm is a block cipher then the size of the input as well as the output is known in advance and
+	* the use may call the other computeBlock function where length is not require.
+	* @param inBytes input bytes to compute
+	* @param inOff input offset in the inBytes array
+	* @param inLen the length of the input array
+	* @param outBytes output bytes. The resulted bytes of compute
+	* @param outOff output offset in the outBytes array to put the result from
+	* @param outLen the length of the output array
+	*/
+	void computeBlock(const vector<byte> & inBytes, int inOff, int inLen, vector<byte> &outBytes, int outOff, int outLen) override;
+
+	/**
+	* Computes the function using the secret key. 
+	* This function is provided in this PseudorandomFunction interface for the sake of interfaces (or classes) for which
+	* the input length can be different for each computation. Hmac and Prf/Prp with variable input length are examples of
+	* such interfaces.
+	*
+	* @param inBytes input bytes to compute
+	* @param inOffset input offset in the inBytes vector
+	* @param inLen the length of the input vector
+	* @param outBytes output bytes. The resulted bytes of compute.
+	* @param outOffset output offset in the outBytes vector to put the result from
+	*/
+	void computeBlock(const vector<byte> & inBytes, int inOffset, int inLen, vector<byte> &outBytes, int outOffset) override;
+	
+	/**
+	* Computes the permutation on the given vector.
+	* The given vector length does not have to be the size of the block but a MUST be aligned to the block size.
+	* The optimized compute block divides the given input into blocks and compute each one of them separately.
+	* The output vector will contain a concatenation of all the results of computing the blocks.
 	*
 	* @param inBytes input bytes to compute.
 	* @param outBytes output bytes. The resulted bytes of compute.
-	* @throws IllegalArgumentException if the given input is not aligned to block size.
-	* @throws IllegalArgumentException if the given input and output are not in the same size.
 	*/
 	void optimizedCompute(const vector<byte> & inBytes, vector<byte> &outBytes);
-	void invertBlock(const vector<byte> & inBytes, int inOff, vector<byte>& outBytes, int outOff) override;
+
 	/**
-	* Inverts the permutation on the given array.
-	* The given array length does not have to be the size of the block but a MUST be aligned to the block size.
+	* Inverts the permutation using the given key. 
+	* This function is a part of the PseudorandomPermutation interface since any PseudorandomPermutation must be efficiently invertible (given the key).
+	* For block ciphers, for example, the length is known in advance and so there is no need to specify the length.
+	* @param inBytes input bytes to invert.
+	* @param inOff input offset in the inBytes array
+	* @param outBytes output bytes. The resulted bytes of invert
+	* @param outOff output offset in the outBytes array to put the result from
+	*/
+	void invertBlock(const vector<byte> & inBytes, int inOff, vector<byte>& outBytes, int outOff) override;
+	
+	/**
+	* Inverts the permutation on the given vector.
+	* The given vector length does not have to be the size of the block but a MUST be aligned to the block size.
 	* The optimized invert block divides the given input into blocks and inverts each one of them separately.
-	* The output array will contain a concatenation of all the results of inverting the blocks.
+	* The output vector will contain a concatenation of all the results of inverting the blocks.
 	*
 	* @param inBytes input bytes to invert.
 	* @param outBytes output bytes. The inverted bytes.
-	* @throws IllegalArgumentException if the given input is not aligned to block size.
-	* @throws IllegalArgumentException if the given input and output are not in the same size.
 	*/
 	void optimizedInvert(const vector<byte> & inBytes, vector<byte> &outBytes);
+
+	/**
+	* Inverts the permutation using the given key.
+	* Since PseudorandomPermutation can also have varying input and output length (although the input and the output should be the same length),
+	* the common parameter len of the input and the output is needed.
+	* @param inBytes input bytes to invert.
+	* @param inOff input offset in the inBytes array
+	* @param outBytes output bytes. The resulted bytes of invert
+	* @param outOff output offset in the outBytes array to put the result from
+	* @param len the length of the input and the output
+	*/
 	void invertBlock(const vector<byte> & inBytes, int inOff, vector<byte>& outBytes, int outOff, int len) override;
 	virtual ~OpenSSLPRP();
 };
@@ -88,14 +152,8 @@ public:
 */
 class OpenSSLAES : public OpenSSLPRP, public AES {
 private: 
-	void init(const shared_ptr<PrgFromOpenSSLAES> & setRandom);
 public:
-	/**
-	* Default constructor that creates the AES objects. Uses default implementation of SecureRandom.
-	*/
-	OpenSSLAES();
-
-	OpenSSLAES(const shared_ptr<PrgFromOpenSSLAES> & setRandom) { init(setRandom); }
+	OpenSSLAES(const shared_ptr<PrgFromOpenSSLAES> & setRandom = get_seeded_prg());
 
 	/**
 	* Initializes this AES objects with the given secret key.
@@ -103,29 +161,27 @@ public:
 	* @throws InvalidKeyException if the key is not 128/192/256 bits long.
 	*/
 	void setKey(SecretKey & secretKey) override;
+
 	string getAlgorithmName() override { return "AES"; };
+
 	int getBlockSize() override { return 16; };
+
 	virtual ~OpenSSLAES() {};
 };
 
 class OpenSSLHMAC : public Hmac {
 private:
-	HMAC_CTX * hmac; //Pointer to the native hmac.
-	bool _isKeySet; //until setKey is called set to false.
+	HMAC_CTX * hmac; // Pointer to the OpenSSL hmac object.
+	bool _isKeySet;  // Until setKey is called set to false.
 	shared_ptr<PrgFromOpenSSLAES> random; //source of randomness used in key generation
-	void construct(string hashName, const shared_ptr<PrgFromOpenSSLAES> & random);
 
 public: 
-	/**
-	* Default constructor that uses SHA1.
-	*/
-	OpenSSLHMAC() { construct("SHA-256", get_seeded_prg()); }
 	/**
 	* This constructor receives a hashName and builds the underlying hmac according to it. It can be called from the factory.
 	* @param hashName - the hash function to translate into OpenSSL's hash.
 	* @throws FactoriesException if there is no hash function with given name.
 	*/
-	OpenSSLHMAC(string hashName, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) { construct(hashName, random); };
+	OpenSSLHMAC(string hashName = "SHA-256", const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
 	/**
 	* This constructor gets a random and a SCAPI CryptographicHash to be the underlying hash and retrieves the name of the hash in
@@ -134,7 +190,7 @@ public:
 	* @param random the random object to use.
 	* @throws FactoriesException if there is no hash function with given name.
 	*/
-	OpenSSLHMAC(CryptographicHash *hash, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) { construct(hash->getAlgorithmName(), random); };
+	OpenSSLHMAC(CryptographicHash *hash, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) : OpenSSLHMAC(hash->getAlgorithmName(), random) {}
 	
 	/**
 	* Initializes this hmac with a secret key.
@@ -145,13 +201,54 @@ public:
 	bool isKeySet() override { return _isKeySet; };
 	string getAlgorithmName() override;
 	int getBlockSize() override { return EVP_MD_size(hmac->md); };
+	
+	/**
+	* Computes the function using the secret key.
+	* The user supplies the input byte vector and the offset from which to take the data from.
+	* The user also supplies the output byte vector as well as the offset.
+	* The computeBlock function will put the output in the output vector starting at the offset.
+	* This function is suitable for block ciphers where the input/output length is known in advance.
+	* @param inBytes input bytes to compute
+	* @param inOff input offset in the inBytes array
+	* @param outBytes output bytes. The resulted bytes of compute
+	* @param outOff output offset in the outBytes array to put the result from
+	*/
 	void computeBlock(const vector<byte> & inBytes, int inOff, vector<byte> &outBytes, int outOff) override;
+	
+	/**
+	* Computes the function using the secret key.
+	* This function is provided in the interface especially for the sub-family PrfVaryingIOLength, which may have variable input and output length.
+	* If the implemented algorithm is a block cipher then the size of the input as well as the output is known in advance and
+	* the use may call the other computeBlock function where length is not require.
+	* @param inBytes input bytes to compute
+	* @param inOff input offset in the inBytes array
+	* @param inLen the length of the input array
+	* @param outBytes output bytes. The resulted bytes of compute
+	* @param outOff output offset in the outBytes array to put the result from
+	* @param outLen the length of the output array
+	*/
 	void computeBlock(const vector<byte> & inBytes, int inOff, int inLen, vector<byte> &outBytes, int outOff, int outLen) override;
+	
+	/**
+	* Computes the function using the secret key.
+	* This function is provided in this PseudorandomFunction interface for the sake of interfaces (or classes) for which
+	* the input length can be different for each computation. Hmac and Prf/Prp with variable input length are examples of
+	* such interfaces.
+	*
+	* @param inBytes input bytes to compute
+	* @param inOffset input offset in the inBytes vector
+	* @param inLen the length of the input vector
+	* @param outBytes output bytes. The resulted bytes of compute.
+	* @param outOffset output offset in the outBytes vector to put the result from
+	*/
 	void computeBlock(const vector<byte> & inBytes, int inOffset, int inLen, vector<byte> &outBytes, int outOffset) override;
+	
 	SecretKey generateKey(AlgorithmParameterSpec & keyParams) override {
 		throw NotImplementedException("To generate a key for this HMAC object use the generateKey(int keySize) function");
 	};
+	
 	SecretKey generateKey(int keySize) override;
+	
 	int getMacSize() override { return getBlockSize(); };
 	virtual vector<byte> mac(const vector<byte> &msg, int offset, int msgLen) override;
 	virtual bool verify(const vector<byte> &msg, int offset, int msgLength, vector<byte>& tag) override;

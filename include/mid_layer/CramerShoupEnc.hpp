@@ -36,7 +36,7 @@
 #include "../primitives/Hash.hpp"
 #include "../primitives/HashOpenSSL.hpp"
 
-//Nested class that holds the sendable data of the outer class
+//Nested class that holds the sendable data of the outer class.
 class CramerShoupPublicKeySendableData : public KeySendableData {
 
 private:
@@ -67,8 +67,8 @@ public:
 };
 
 /**
-* This class represents a Public Key suitable for the Cramer Shoup Encryption Scheme. Although the constructor is public, it should only be instantiated by the
-* Encryption Scheme itself via the generateKey function.
+* This class represents a Public Key suitable for the Cramer Shoup Encryption Scheme. 
+* Although the constructor is public, it should only be instantiated by the Encryption Scheme itself via the generateKey function.
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
 *
 */
@@ -108,8 +108,8 @@ public:
 };
 
 /**
-* This class represents a Private Key suitable for the Cramer Shoup Encryption Scheme. Although the constructor is public, it should only be instantiated by the
-* Encryption Scheme itself via the generateKey function.
+* This class represents a Private Key suitable for the Cramer Shoup Encryption Scheme. 
+* Although the constructor is public, it should only be instantiated by the Encryption Scheme itself via the generateKey function.
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
 *
 */
@@ -230,20 +230,17 @@ public:
 class CramerShoupOnGroupElementEnc :public AsymmetricEnc, Cca2 {
 private:
 
-	shared_ptr<DlogGroup> dlogGroup;	// Underlying DlogGroup.
+	shared_ptr<DlogGroup> dlogGroup;				// Underlying DlogGroup.
 	shared_ptr<CryptographicHash> hash;				// Underlying hash function.
 	shared_ptr<CramerShoupPublicKey> publicKey;
 	shared_ptr<CramerShoupPrivateKey> privateKey;
 	shared_ptr<PrgFromOpenSSLAES> random;
-	biginteger qMinusOne; 				// Saved to avoid many calculations.
+	biginteger qMinusOne; 							// Saved to avoid many calculations.
 	bool keySet;
 
  
 	/**
 	* Recieves three byte arrays and calculates the hash function on their concatenation.
-	* @param u1ToByteArray
-	* @param u2ToByteArray
-	* @param eToByteArray
 	* @return the result of hash(u1ToByteArray+u2ToByteArray+eToByteArray)
 	*/
 	vector<byte> calcAlpha(vector<byte> & u1ToByteArray, vector<byte> & u2ToByteArray, vector<byte> & eToByteArray);
@@ -262,13 +259,13 @@ private:
 	* If the function find that the cipher is not valid, it throws a ScapiRuntimeException.
 	* @param cipher to validate.
 	* @param alpha parameter needs to validation.
-	* @throws ScapiRuntimeException if the given cipher is not valid.
+	* @throws runtime_error if the given cipher is not valid.
 	*/
 	void checkValidity(CramerShoupOnGroupElementCiphertext* cipher, vector<byte> & alpha);
  
 public:
 	/**
-	* Constructor that lets the user choose the underlying dlog, hash and source of randomness.<p>
+	* Constructor that lets the user choose the underlying dlog, hash and source of randomness.
 	* The underlying Dlog group has to have DDH security level.<p>
 	* The underlying Hash function has to have CollisionResistant security level.
 	* @param dlogGroup underlying DlogGroup to use.
@@ -281,8 +278,8 @@ public:
 
 	/**
 	* This function sets the Public\Private key.
-	* @param publicKey the public key has to be of type <link>CramerShoupPublicKey<link>.
-	* @param privateKey the private key has to be of type <link>CramerShoupPrivateKey<link>.
+	* @param publicKey the public key has to be of type CramerShoupPublicKey.
+	* @param privateKey the private key has to be of type CramerShoupPrivateKey.
 	* @throws InvalidKeyException if the keys are not instances of CramerShoup keys.
 	*/
 	void setKey(const shared_ptr<PublicKey> & publicKey, const shared_ptr<PrivateKey> & privateKey) override;
@@ -290,7 +287,7 @@ public:
 	/**
 	* This function sets only the Public key.
 	* Setting only the public key the user can encrypt messages but can not decrypt messages.
-	* @param publicKey the public key has to be of type <link>CramerShoupPublicKey<link>.
+	* @param publicKey the public key has to be of type CramerShoupPublicKey.
 	* @throws InvalidKeyException if the key is not instance of CramerShoup key.
 	*/
 	void setKey(const shared_ptr<PublicKey> & publicKey) override { setKey(publicKey, NULL); }
@@ -332,10 +329,13 @@ public:
 		throw UnsupportedOperationException("To generate Cramer-Shoup keys use the generateKey() function");
 	}
 
+	/**
+	* @data The KeySendableData object has to be of type CramerShoupPrivateKey
+	*/
 	shared_ptr<PrivateKey> reconstructPrivateKey(KeySendableData* data) override;
 
 	/**
-	* @data The KeySendableData object has to be of type ScCramerShoupPublicKeySendableData
+	* @data The KeySendableData object has to be of type CramerShoupPublicKeySendableData
 	*/
 	shared_ptr<PublicKey> reconstructPublicKey(KeySendableData* data) override;
 
@@ -344,22 +344,21 @@ public:
 	* @param plaintext message to encrypt. MUST be an instance of GroupElementPlaintext.
 	* @return Ciphertext the encrypted plaintext.
 	* @throws IllegalStateException if no public key was set.
-	* @throws IllegalArgumentException if the given Plaintext is not instance of GroupElementPlaintext.
+	* @throws invalid_argument if the given Plaintext is not instance of GroupElementPlaintext.
 	*/
 	shared_ptr<AsymmetricCiphertext> encrypt(const shared_ptr<Plaintext> & plaintext) override; 
 
 	/**
-	* Encrypts the given plaintext using this CramerShoup encryption scheme and using the given random value.<p>
+	* Encrypts the given plaintext using this CramerShoup encryption scheme and using the given random value.
 	* There are cases when the random value is used after the encryption, for example, in sigma protocol.
 	* In these cases the random value should be known to the user. We decided not to have function that return it to the user
 	* since this can cause problems when more than one value is being encrypt.
 	* Instead, we decided to have an additional encrypt value that gets the random value from the user.
-	* @param plainText message to encrypt
 	* @param r The random value to use in the encryption.
 	* @param plaintext message to encrypt. MUST be an instance of GroupElementPlaintext.
 	* @return Ciphertext the encrypted plaintext.
 	* @throws IllegalStateException if no public key was set.
-	* @throws IllegalArgumentException if the given Plaintext is not instance of GroupElementPlaintext.
+	* @throws invalid_argument if the given Plaintext is not instance of GroupElementPlaintext.
 	*/
 	shared_ptr<AsymmetricCiphertext> encrypt(const shared_ptr<Plaintext> & plaintext, const biginteger & r) override; 
 
@@ -378,7 +377,7 @@ public:
 	/**
 	* Generates a Plaintext suitable to CramerShoup encryption scheme from the given message.
 	* @param text byte array to convert to a Plaintext object.
-	* @throws IllegalArgumentException if the given message's length is greater than the maximum.
+	* @throws invalid_argument if the given message's length is greater than the maximum.
 	*/
 	shared_ptr<Plaintext> generatePlaintext(vector<byte> & text) override; 
 
@@ -387,7 +386,7 @@ public:
 	* @param ciphertext ciphertext to decrypt. MUST be an instance of CramerShoupCiphertext.
 	* @return Plaintext the decrypted cipher.
 	* @throws KeyException if no private key was set.
-	* @throws IllegalArgumentException if the given Ciphertext is not instance of CramerShoupCiphertext.
+	* @throws invalid_argument if the given Ciphertext is not instance of CramerShoupCiphertext.
 	*/
 	shared_ptr<Plaintext> decrypt(AsymmetricCiphertext* cipher) override; 
 
@@ -397,7 +396,7 @@ public:
 	* and therefore he is working on byte array.
 	* @param plaintext to generates byte array from. MUST be an instance of GroupElementPlaintext.
 	* @return the byte array generated from the given plaintext.
-	* @throws IllegalArgumentException if the given plaintext is not an instance of GroupElementPlaintext.
+	* @throws invalid_argument if the given plaintext is not an instance of GroupElementPlaintext.
 	*/
 	vector<byte> generateBytesFromPlaintext(Plaintext* plaintext) override;
 

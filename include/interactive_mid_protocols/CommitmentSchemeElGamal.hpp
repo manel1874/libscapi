@@ -68,7 +68,6 @@ public:
 
 /**
 * Concrete implementation of commitment message used by ElGamal commitment scheme.
-* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
 *
 */
 class CmtElGamalCommitmentMessage : public CmtCCommitmentMsg {
@@ -250,11 +249,8 @@ public:
 	/**
 	* This constructor lets the caller pass the channel and the dlog group to work with. The El Gamal option (ScElGamalOnGroupElement)is set by default by the constructor and cannot be changed.
 	* @param channel used for the communication
-	* @param dlog	Dlog group
-	* @throws IllegalArgumentException
 	* @throws SecurityLevelException
 	* @throws InvalidDlogGroupException
-	* @throws IOException
 	*/
 	CmtElGamalOnGroupElementCommitter(const shared_ptr<CommParty> & channel, const shared_ptr<DlogGroup> & dlog = make_shared<OpenSSLDlogECF2m>("K-233"), const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg())
 		: CmtElGamalCommitterCore(channel, dlog, make_shared<ElGamalOnGroupElementEnc>(dlog), random) {}
@@ -283,8 +279,7 @@ public:
 };
 
 /**
-* This abstract class performs all the core functionality of the receiver side of
-* ElGamal commitment.
+* This abstract class performs all the core functionality of the receiver side of ElGamal commitment.
 * Specific implementations can extend this class and add or override functions as necessary.
 *
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
@@ -314,9 +309,6 @@ class CmtElGamalReceiverCore : public virtual CmtReceiver {
 private:
 	/**
 	* Sets the given parameters and execute the preprocess phase of the scheme.
-	* @param channel
-	* @param dlog
-	* @param elGamal
 	*/
 	void doConstruct(const shared_ptr<CommParty> & channel, const shared_ptr<DlogGroup> & dlog, const shared_ptr<ElGamalEnc> & elGamal);
 
@@ -380,7 +372,7 @@ public:
 * It uses El Gamal encryption for  group elements, that is, the encryption class used is
 * ScElGamalOnGroupElement. This default cannot be changed.<p>
 *
-* The pseudo code of this protocol can be found in Protocol 3.4 of pseudo codes document at {@link http://cryptobiu.github.io/scapi/SDK_Pseudocode.pdf}.<p>
+* The pseudo code of this protocol can be found in Protocol 3.4 of pseudo codes document at https://github.com/cryptobiu/scapi/blob/master/doc/old/SDD_docs/SDK_Pseudocode.docx.
 *
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
 *
@@ -401,14 +393,14 @@ public:
 		: CmtElGamalReceiverCore(channel, dlog, make_shared<ElGamalOnGroupElementEnc>(dlog)) {}
 
 	/**
-	* Proccesses the decommitment phase.<p>
-	* "IF NOT<p>
-	*		u=g^r <p>
-	*		v = h^r * x<p>
+	* Proccesses the decommitment phase.
+	* "IF NOT
+	*		u=g^r 
+	*		v = h^r * x
 	*		x in G<p>
-	*		OUTPUT REJ<p>
+	*		OUTPUT REJ
 	*	ELSE<p>
-	*	    OUTPUT ACC and value x"<p>
+	*	    OUTPUT ACC and value x"
 	* @param id the id of the commitment.
 	* @param msg the receiver message from the committer
 	* @return the committed value if the decommit succeeded; null, otherwise.
@@ -426,12 +418,12 @@ public:
 };
 
 /**
-* This class implements the committer side of the ElGamal commitment. <p>
+* This class implements the committer side of the ElGamal commitment.
 *
 * It uses El Gamal encryption for byte arrays, that is, the encryption class used is
-* ScElGamalOnbyteArray. This default cannot be changed.<p>
+* ScElGamalOnbyteArray. This default cannot be changed.
 *
-* The pseudo code of this protocol can be found in Protocol 3.4 of pseudo codes document at {@link http://cryptobiu.github.io/scapi/SDK_Pseudocode.pdf}.<p>
+* The pseudo code of this protocol can be found in Protocol 3.4 of pseudo codes document at https://github.com/cryptobiu/scapi/blob/master/doc/old/SDD_docs/SDK_Pseudocode.docx.
 *
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
 *
@@ -476,14 +468,13 @@ public:
 };
 
 /**
-* This class implements the receiver side of the ElGamal commitment. <p>
+* This class implements the receiver side of the ElGamal commitment. 
 * It uses El Gamal encryption for byte arrays, that is, the encryption class used is
-* ScElGamalOnByteArray. This default cannot be changed.<p>
+* ScElGamalOnByteArray. This default cannot be changed.
 *
-* The pseudo code of this protocol can be found in Protocol 3.4 of pseudo codes document at {@link http://cryptobiu.github.io/scapi/SDK_Pseudocode.pdf}.<p>
+* The pseudo code of this protocol can be found in Protocol 3.4 of pseudo codes document at https://github.com/cryptobiu/scapi/blob/master/doc/old/SDD_docs/SDK_Pseudocode.docx.
 *
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
-*
 */
 class CmtElGamalOnByteArrayReceiver : public CmtElGamalReceiverCore , public PerfectlyBindingCmt, public CmtOnByteArray {
 private:
@@ -496,16 +487,11 @@ public:
 	/**
 	* This constructor lets the caller pass the channel, the dlog group and the
 	* KeyDerivation function to work with.
-	* The El Gamal option (ScElGamalOnByteArray)is set by default by the constructor
+	* The ElGamal option (ScElGamalOnByteArray)is set by default by the constructor
 	* and cannot be changed.
-	* @param channel used for the communication
-	* @param dlog	Dlog group
-	* @param kdf key derivation function
 	* @throws CheatAttemptException if the receiver suspects the committer trying to cheat.
-	* @throws ClassNotFoundException if there was a problem during serialization.
 	* @throws SecurityLevelException if the given dlog is not DDH - secure
 	* @throws InvalidDlogGroupException if the given dlog is not valid
-	* @throws IOException if there was a problem during communication
 	*/
 	CmtElGamalOnByteArrayReceiver(const shared_ptr<CommParty> & channel, const shared_ptr<DlogGroup> & dlog = make_shared<OpenSSLDlogECF2m>("K-233"),
 		const shared_ptr<KeyDerivationFunction> & kdf = make_shared<HKDF>(make_shared<OpenSSLHMAC>())) : CmtElGamalReceiverCore(channel, dlog, make_shared<ElGamalOnByteArrayEnc>(dlog, kdf)) {
@@ -513,14 +499,14 @@ public:
 	}
 
 	/**
-	* Proccesses the decommitment phase.<p>
+	* Proccesses the decommitment phase.
 	* "IF NOT<p>
 	*		u=g^r <p>
 	*		v = h^r * x<p>
 	*		x in G<p>
 	*		OUTPUT REJ<p>
 	*	ELSE<p>
-	*	    OUTPUT ACC and value x"<p>
+	*	    OUTPUT ACC and value x"
 	* @param id the id of the commitment.
 	* @param msg the receiver message from the committer
 	* @return the committed value if the decommit succeeded; null, otherwise.
@@ -551,18 +537,9 @@ private:
 	//Proves that the committed value is x.
 	shared_ptr<ZKFromSigmaProver> committedValProver;
 
-	/**
-	* Creates the ZK provers using sigma protocols that prove Pedersen's proofs.
-	* @param t statistical parameter
-	* @throws IOException if there was a problem in the communication
-	*/
-	void doConstruct(int t);
-
 public:
 	/**
 	* Default constructor that gets the channel and creates the ZK provers with default Dlog group.
-	* @param channel
-	* @throws IOException
 	*/
 	CmtElGamalWithProofsCommitter(const shared_ptr<CommParty> & channel, int t, const shared_ptr<DlogGroup> & dlog = make_shared<OpenSSLDlogECF2m>("K-233"), const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg());
 
@@ -586,21 +563,12 @@ private:
 	//Proves that the committed value is x.
 	shared_ptr<ZKFromSigmaVerifier> committedValVerifier;
 
-	/**
-	* Creates the ZK verifiers using sigma protocols that verifies ElGamal's proofs.
-	* @param t
-	*/
-	void doConstruct(int t);
-
 public:
 	
 	/**
 	* Constructor that gets the channel, dlog, statistical parameter and random and uses
 	* them to create the ZK verifiers.
-	* @param channel
-	* @param dlog
 	* @param t statistical parameter
-	* @param random
 	*/
 	CmtElGamalWithProofsReceiver(const shared_ptr<CommParty> & channel, int t, const shared_ptr<DlogGroup> & dlog = make_shared<OpenSSLDlogECF2m>("K-233"), const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg());
 

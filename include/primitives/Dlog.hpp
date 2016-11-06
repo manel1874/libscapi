@@ -33,13 +33,19 @@
 #include "../infra/MathAlgorithms.hpp"
 #include "../../include/infra/ConfigFile.hpp"
 
+
+/**
+ * This exception is thrown in case A given Dlog group cannot be acceptted by the protocol.
+ * For example, If a protocol needs a DDH Dlog group and it gets a non - DDH group.
+ */
 class InvalidDlogGroupException : public logic_error
 {
 public:
 	InvalidDlogGroupException(const string & msg) : logic_error(msg) {};
 };
 
-/** * This is a marker interface. It allows the generation of a GroupElement at an abstract level without knowing the actual type of Dlog Group.*
+/**
+ * This is a marker class. It allows the generation of a GroupElement at an abstract level without knowing the actual type of Dlog Group.
  */
 class GroupElementSendableData : public NetworkSerialized {
 public:
@@ -49,24 +55,21 @@ public:
 inline GroupElementSendableData::~GroupElementSendableData() {}; // must provide implemeantion to allow destruction of base classes
 
 /**
-* This is the main interface of the Group element hierarchy.<p>
+* This is the main aclass of the Group element hierarchy.
 * We can refer to a group element as a general term OR we can relate to the fact that an element of an elliptic curve
 * is a point and an element of a Zp group is a number between 0 and p-1.
-*
 */
-class GroupElement 
-{
+class GroupElement {
 
 public:
 	/**
-	* checks if this element is the identity of the group.
-	* @return <code>true</code> if this element is the identity of the group;<p>
-	* 		   <code>false</code> otherwise.
+	* Checks if this element is the identity of the group.
+	* @return true if this element is the identity of the group; false otherwise.
 	*/
 	virtual bool isIdentity() = 0;
 
 	/**
-	* This function is used when a group element needs to be sent via a {@link edu.biu.scapi.comm.Channel} or any other means of sending data (including serialization).
+	* This function is used when a group element needs to be sent via a channel or any other means of sending data (including serialization).
 	* It retrieves all the data needed to reconstruct this Group Element at a later time and/or in a different VM.
 	* It puts all the data in an instance of the relevant class that implements the GroupElementSendableData interface.
 	* @return the GroupElementSendableData object
@@ -77,13 +80,13 @@ public:
 };
 
 /*
-* The GroupParams family holds the necessary parameters for each possible concrete Dlog group. <p>
+* The GroupParams family holds the necessary parameters for each possible concrete Dlog group. 
 * Each DlogGroup has different parameters that constitute this group. GroupParams classes hold those parameters.
 */
 class GroupParams
 {
 protected:
-	biginteger q; // the group order
+	biginteger q; // The group order
 
 public:
 	/*
@@ -92,43 +95,43 @@ public:
 	*/
 	biginteger getQ() { return q; }
 	
-	// making this class and abstract one
+	// Making this class abstract.
 	virtual ~GroupParams() = 0;
 };
 
 inline GroupParams::~GroupParams() { };
 
 /**
-* This is the general interface for the discrete logarithm group. 
-* Every class in the DlogGroup family implements this interface.
+* This is the abstract class for the discrete logarithm group. 
+* Every class in the DlogGroup family derives this class.
 * The discrete logarithm problem is as follows: given a generator g of a finite group G and 
 * a random element h in G, find the (unique) integer x such that g^x = h.
-* In cryptography, we are interested in groups for which the discrete logarithm problem (Dlog for short) is assumed to be hard.<p>
-* The two most common classes are the group Zp* for a large p, and some Elliptic curve groups.<p>
+* In cryptography, we are interested in groups for which the discrete logarithm problem (Dlog for short) is assumed to be hard.
+* The two most common classes are the group Zp* for a large p, and some Elliptic curve groups.
 *
-* Another issue pertaining elliptic curves is the need to find a suitable mapping that will convert an arbitrary message (that is some binary string) to an element of the group and vice-versa.<p>
-* Only a subset of the messages can be effectively mapped to a group element in such a way that there is a one-to-one injection that converts the string to a group element and vice-versa.<p>
-* On the other hand, any group element can be mapped to some string.<p>
-* In this case, the operation is not invertible. This functionality is implemented by the functions:<p>
-*  - {@code encodeByteArrayToGroupElement(byte[] binaryString) : GroupElement}<p>
-*  - {@code decodeGroupElementToByteArray(GroupElement element) : byte[]}<p>
-*  - {@code mapAnyGroupElementToByteArray(GroupElement element) : byte[]}<p>
+* Another issue pertaining elliptic curves is the need to find a suitable mapping that will convert an arbitrary message (that is some binary string) to an element of the group and vice-versa.
+* Only a subset of the messages can be effectively mapped to a group element in such a way that there is a one-to-one injection that converts the string to a group element and vice-versa.
+* On the other hand, any group element can be mapped to some string
+* In this case, the operation is not invertible. This functionality is implemented by the functions:
+*  - encodeByteArrayToGroupElement
+*  - decodeGroupElementToByteArray
+*  - mapAnyGroupElementToByteArray
 *
 *  The first two work as a pair and decodeGroupElementToByteArray is the inverse of encodeByteArrayToGroupElement, whereas the last one works alone and does not have an inverse.
 */
 class DlogGroup
 {
 protected:
-	shared_ptr<GroupParams> groupParams;  // group parameters
-	shared_ptr<GroupElement> generator;	// generator of the group
+	shared_ptr<GroupParams> groupParams;	// group parameters
+	shared_ptr<GroupElement> generator;		// generator of the group
 	shared_ptr<PrgFromOpenSSLAES> random_element_gen;
 
 	int k; // k is the maximum length of a string to be converted to a Group Element of this group.
 		   // If a string exceeds the k length it cannot be converted.
 
-		   /*
-		   * Computes the simultaneousMultiplyExponentiate using a naive algorithm
-		   */
+	/*
+	* Computes the simultaneousMultiplyExponentiate using a naive algorithm
+	*/
 	std::shared_ptr<GroupElement> computeNaive(vector<std::shared_ptr<GroupElement>> & groupElements,
 		vector<biginteger> & exponentiations);
 
@@ -141,7 +144,7 @@ protected:
 
 private:
 	/**
-	* The class GroupElementExponentiations is a nested class of DlogGroupAbs.<p>
+	* The class GroupElementExponentiations is a nested class of DlogGroupAbs.
 	* It performs the actual work of pre-computation of the exponentiations for one base.
 	* It is composed of two main elements. The group element for which the optimized computations
 	* are built for, called the base and a vector of group elements that are the result of
@@ -152,10 +155,10 @@ private:
 		vector<shared_ptr<GroupElement>> exponentiations; //vector of group elements that are the result of exponentiations
 		shared_ptr<GroupElement> base;  //group element for which the optimized computations are built for
 		shared_ptr<DlogGroup> parent;
+		
 		/**
 		* Calculates the necessary additional exponentiations and fills the exponentiations vector with them.
 		* @param size - the required exponent
-		* @throws IllegalArgumentException
 		*/
 		void prepareExponentiations(const biginteger & size);
 
@@ -163,8 +166,6 @@ private:
 		/**
 		* The constructor creates a map structure in memory.
 		* Then calculates the exponentiations of order 1,2,4,8 for the given base and save them in the map.
-		* @param base
-		* @throws IllegalArgumentException
 		*/
 		GroupElementsExponentiations(const shared_ptr<DlogGroup> & parent_,	const shared_ptr<GroupElement> & base_);
 
@@ -207,7 +208,7 @@ private:
 
 public:
 	/**
-	* Each concrete class implementing this interface returns a string with a meaningful name for this type of Dlog group.
+	* Each concrete derived class returns a string with a meaningful name for this type of Dlog group.
 	* For example: "elliptic curve over F2m" or "Zp*"
 	* @return the name of the group type
 	*/
@@ -242,14 +243,13 @@ public:
 	/**
 	* Checks if the given element is a member of this Dlog group
 	* @param element possible group element for which to check that it is a member of this group
-	* @return <code>true</code> if the given element is a member of this group;<p>
-	* 		   <code>false</code> otherwise.
-	* @throws IllegalArgumentException
+	* @return true if the given element is a member of this group; false otherwise.
+	* @throws invalid_argument
 	*/
 	virtual bool isMember(GroupElement* element) = 0;
 
 	/**
-	* Checks if the order is a prime number.<p>
+	* Checks if the order is a prime number.
 	* Primality checking can be an expensive operation and it should be performed only when absolutely necessary.
 	* @return true if the order is a prime number. false, otherwise.
 	*/
@@ -264,15 +264,13 @@ public:
 	
 	/**
 	* Checks if the element set as the generator is indeed the generator of this group.
-	* @return <code>true</code> if the generator is valid;<p>
-	*         <code>false</code> otherwise.
+	* @return true if the generator is valid; false otherwise.
 	*/
 	virtual bool isGenerator() = 0;
 
 	/**
 	* Checks parameters of this group to see if they conform to the type this group is supposed to be.
-	* @return <code>true</code> if valid;<p>
-	*  	   <code>false</code> otherwise.
+	* @return true if valid; false otherwise.
 	*/
 	virtual bool validateGroup() = 0;
 
@@ -280,7 +278,7 @@ public:
 	* Calculates the inverse of the given GroupElement.
 	* @param groupElement to invert
 	* @return the inverse element of the given GroupElement
-	* @throws IllegalArgumentException
+	* @throws invalid_argument
 	**/
 	virtual shared_ptr<GroupElement> getInverse(GroupElement* groupElement) = 0;
 
@@ -289,7 +287,7 @@ public:
 	* @param exponent
 	* @param base
 	* @return the result of the exponentiation
-	* @throws IllegalArgumentException
+	* @throws invalid_argument
 	*/
 	virtual shared_ptr<GroupElement> exponentiate(GroupElement* base, const biginteger & exponent) = 0;
 
@@ -298,7 +296,7 @@ public:
 	* @param groupElement1
 	* @param groupElement2
 	* @return the multiplication result
-	* @throws IllegalArgumentException
+	* @throws invalid_argument
 	*/
 	virtual shared_ptr<GroupElement> multiplyGroupElements(GroupElement* groupElement1, 
 		GroupElement* groupElement2) = 0;
@@ -356,8 +354,6 @@ public:
 	* the result of h1, h2, h4,h8,... and using it in the calculation.<p>
 	* Note that if we want a one-time exponentiation of h it is preferable to use the basic exponentiation function
 	* since there is no point to keep anything in memory if we have no intention to use it.
-	* @param base
-	* @param exponent
 	* @return the exponentiation result
 	*/
 	virtual shared_ptr<GroupElement> exponentiateWithPreComputedValues(
@@ -367,7 +363,6 @@ public:
 	* This function cleans up any resources used by exponentiateWithPreComputedValues for the requested base.
 	* It is recommended to call it whenever an application does not need to continue calculating exponentiations for this specific base.
 	*
-	* @param base
 	*/
 	void endExponentiateWithPreComputedValues(const shared_ptr<GroupElement> & base) {
 		exponentiationsMap.erase(base);
@@ -420,7 +415,7 @@ public:
 };
 
 /**
-* Marker interface for Dlog groups that has a prime order sub-group.
+* Marker class for Dlog groups that has a prime order sub-group.
 */
 class primeOrderSubGroup : public virtual DlogGroup {};
 
@@ -428,7 +423,7 @@ class primeOrderSubGroup : public virtual DlogGroup {};
 /**********DlogZP hierarchy***********************/
 
 /**
-* Marker interface. Every class that implements it is signed as Zp*
+* Marker class. Every class that derives it is signed as Zp*
 */
 class DlogZp : public DlogGroup {};
 
@@ -455,27 +450,24 @@ public:
 
 	/**
 	* Returns the prime modulus of the group
-	* @return p
 	*/
 	biginteger getP() { return p; }
 
 	/**
 	* Returns the generator of the group
-	* @return xG - the generator value
 	*/
 	biginteger getXg() { return xG; }
 	
-	/* For Serlialization */
 	string toString() { return "ZpGroupParams [p=" + (string) p + ", g=" + (string) xG + ", q=" + (string) q + "]"; }
 };
 
 /**
-* Marker interface. Every class that implements it is signed as Zp* group were p is a safe prime.
+* Marker class. Every class that derives it is signed as Zp* group were p is a safe prime.
 */
 class DlogZpSafePrime : public DlogZp {};
 
 /**
-* This is a marker interface. Every class that implements it is signed as Zp* element.
+* This is a marker class. Every class that implements it is signed as Zp* element.
 */
 class ZpElement : public GroupElement {
 	/**
@@ -487,7 +479,7 @@ public:
 };
 
 /**
-* This is a marker interface. Every class that implements it is marked as an element of a sub-group of prime order of Zp* where p is a safe prime.
+* Concrete class for elements of a sub-group of prime order of Zp* where p is a safe prime.
 */
 class ZpSafePrimeElement : public ZpElement {
 	
@@ -499,6 +491,7 @@ protected:
 	* If x is valid, sets it; else, throws exception
 	*/
 	ZpSafePrimeElement(const biginteger & x, const biginteger & p, bool bCheckMembership);
+	
 	/**
 	* Constructor that gets DlogGroup and chooses random element with order q.
 	* The algorithm is:
@@ -507,6 +500,7 @@ protected:
 	* calculate element^2 mod p
 	*/
 	ZpSafePrimeElement(const biginteger & p, PrgFromOpenSSLAES* prg);
+	
 	/*
 	* Constructor that simply create element using the given value
 	*/
@@ -531,7 +525,7 @@ public:
 
 	biginteger getX() { return x; }
 	string toString() override { return (string) x; }
-	void initFromString(const string & raw) override { x = biginteger(raw); }
+	void initFromString(const string & row) override { x = biginteger(row); }
 	
 };
 
@@ -561,31 +555,26 @@ public:
 
 	/*
 	* Returns coefficient a of the elliptic curves equation
-	* @return coefficient a
 	*/
 	biginteger getA() {	return a; }
 
 	/*
 	* Returns coefficient b of the elliptic curves equation
-	* @return coefficient b
 	*/
 	biginteger getB() {	return b; }
 
 	/*
 	* Returns the x coordinate of the generator point
-	* @return the x value of the generator point
 	*/
 	biginteger getXg() { return xG; }
 
 	/*
 	* Returns the y coordinate of the generator point
-	* @return the y value of the generator point
 	*/
 	biginteger getYg() { return yG;	}
 
 	/*
 	* Returns the cofactor of the group
-	* @return the cofactor of the group
 	*/
 	biginteger getCofactor() { return h; }
 };
@@ -632,9 +621,9 @@ public:
 	* @param q  group order
 	* @param xG x coordinate of the generator point
 	* @param yG y coordinate of the generator point
-	* @param m the exponent <code>m</code> of <code>F<sub>2<sup>m</sup></sub></code>.
-	* @param k the integer <code>k</code> where <code>x<sup>m</sup> + x<sup>k</sup> + 1</code>
-	* represents the reduction polynomial <code>f(z)</code>.
+	* @param m the exponent m of F2m.
+	* @param k the integer k where x^m + x^k + 1
+	* represents the reduction polynomial f(z).
 	* @param a the a coefficient of the elliptic curve equation
 	* @param b the b coefficient of the elliptic curve equation
 	* @param h the group cofactor
@@ -645,7 +634,7 @@ public:
 	}
 
 	/*
-	* Returns the integer <code>k</code> where <code>x<sup>m</sup> + x<sup>k</sup> + 1</code>
+	* Returns the integer k where x^m + x^k + 1
 	* @return k
 	*/
 	int getK1() override { return k; }
@@ -687,19 +676,16 @@ public:
 
 	/*
 	* Returns the integer k1 where x^m + x^k3 + x^k2 + x^k1 + 1represents the reduction polynomial f(z).
-	* @return k1
 	*/
 	int getK1() override { return k1; }
 
 	/*
 	* Returns the integer k2 where x^m + x^k3 + x^k2 + x^k1 + 1represents the reduction polynomial f(z).
-	* @return k2
 	*/
 	int getK2() { return k2; }
 
 	/*
 	* Returns the integer k3 where x^m + x^k3 + x^k2 + x^k1 + 1represents the reduction polynomial f(z).
-	* @return k3
 	*/
 	int getK3() { return k3; }
 
@@ -733,33 +719,28 @@ public:
 	/*
 	* Returns the integer k1 of the underlying curve where x^m + x^k3 + x^k2 + x^k1 + 1
 	* represents the reduction polynomial f(z).
-	* @return k1 of the underlying curve
 	*/
 	int getK1() override { return curve->getK1(); }
 
 	/**
 	* Returns the integer <code>k2</code> of the underlying curve where x^m + x^k3 + x^k2 + x^k1 + 1
 	* represents the reduction polynomial f(z).
-	* @return k2 of the underlying curve
 	*/
 	int getK2(); 
 
 	/**
 	* Returns the integer <code>k3</code> where x^m + x^k3 + x^k2 + x^k1 + 1
 	* represents the reduction polynomial f(z).
-	* @return k3 of the underlying curve
 	*/
 	int getK3();
 
 	/**
 	* Returns the subgroup order of this group
-	* @return n the subgroup order
 	*/
 	biginteger getSubGroupOrder() {	return n; }
 
 	/**
 	* Returns the underlying curve
-	* @return the underlying curve
 	*/
 	shared_ptr<ECF2mGroupParams> getCurve() { return curve; }
 
@@ -846,7 +827,7 @@ public:
 	string getFileName() { return fileName; }
 
 	/*
-	* Checks parameters of this group to see if they conform to the type this group is supposed to be.<p>
+	* Checks parameters of this group to see if they conform to the type this group is supposed to be.
 	* Parameters are uploaded from a configuration file upon construction of concrete instance of an Elliptic Curve Dlog group.
 	* By default, SCAPI uploads a file with NIST recommended curves. In this case we assume the parameters are always correct.
 	* It is also possible to upload a user-defined configuration file (with format specified in the "Elliptic Curves Parameters File Format" section of the FirstLevelSDK_SDD.docx file). In this case,
@@ -859,13 +840,12 @@ public:
 
 	/*
 	* Checks if the element set as the generator is indeed the generator of this group.
-	* The generator is set upon construction of this group. <p>
+	* The generator is set upon construction of this group. 
 	* For Elliptic curves there are two ways to set the generator. One way is to load it from NIST file, so the generator is correct.
 	* The second way is to get the generator values from the user in the init function. In that way, it is the user's responsibility to check the validity of the parameters.
 	* In both ways, the generator we set must be correct. However, currently the function isGenerator does not operate the validity check and always returns true.
 	* Maybe in the future we will add the validity checks.
-	* @return <code>true</code> is the generator is valid;<p>
-	* 		   <code>false</code> otherwise.
+	* @return true is the generator is valid; false otherwise.
 	*
 	*/
 	bool isGenerator() override { return true; }
