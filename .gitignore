@@ -24,6 +24,7 @@ compile-otextension-bristol
 compile-otextension-malicious
 compile-ntl
 compile-otextension-malicious
+compile-blake
 test/config_for_test.txt
 .cproject
 .project
