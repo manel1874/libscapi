@@ -32,7 +32,7 @@
 #include "../CryptoInfra/Key.hpp"
 
 /**
-* General interface for Mac. Every class in this family must implement this interface. <p>
+* Abstract class for Mac. Every class in this family must derive this class.
 * In cryptography, a message authentication code (often MAC) is a short piece of information used to authenticate a message.
 * A MAC algorithm, accepts as input a secret key and an arbitrary-length message to be authenticated,
 * and outputs a tag. The tag value protects both a message's data integrity as well as its authenticity, by allowing verifiers
@@ -55,13 +55,11 @@ public:
 
 	/**
 	* Returns the name of this mac algorithm.
-	* @return the name of this mac algorithm.
 	*/
 	virtual string getAlgorithmName()=0;
 
 	/**
 	* Returns the input block size in bytes.
-	* @return the input block size.
 	*/
 	virtual int getMacSize()=0;
 
@@ -85,7 +83,7 @@ public:
 	* @param msg the message to operate the mac on.
 	* @param offset the offset within the message array to take the bytes from.
 	* @param msgLen the length of the message in bytes.
-	* @return byte[] the return tag from the mac operation.
+	* @return the return tag from the mac operation.
 	*/
 	virtual vector<byte> mac(const vector<byte> &msg, int offset, int msgLen) = 0;
 
@@ -118,7 +116,7 @@ public:
 };
 
 /**
-* Marker interface. Each class that implement this interface is marked as unique tag mac.
+* Marker class. Each class that implement this interface is marked as unique tag mac.
 */
 class UniqueTagMac : public Mac {};
 

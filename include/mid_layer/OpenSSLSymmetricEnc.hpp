@@ -45,16 +45,16 @@ private:
 	shared_ptr<PrgFromOpenSSLAES> random;
 
 protected:
-	EVP_CIPHER_CTX *enc;							// A pointer to the native object that implements the encryption.
-	EVP_CIPHER_CTX *dec;							// A pointer to the native object that implements the decryption.
+	EVP_CIPHER_CTX *enc;			// A pointer to the OpenSSL object that implements the encryption.
+	EVP_CIPHER_CTX *dec;			// A pointer to the OpenSSL object that implements the decryption.
 	string prpName;					// The name of the underlying prp to use.
 
 	void doConstruct();
 
-	//Check that the given name is valid for this encryption scheme.
+	//Checks the given name is valid for this encryption scheme.
 	virtual bool checkExistance(string prpName) = 0;
 
-	// Return the size of the Iv in the current encryption scheme.
+	//Returns the size of the Iv in the current encryption scheme.
 	int getIVSize() {	
 		return EVP_CIPHER_CTX_iv_length(enc);
 	}
@@ -65,14 +65,13 @@ protected:
 																		
 public:
 	/**
-	* Gets the name of the underlying prp that determines the type of encryption that will be performed.
-	* A default source of randomness is used.
+	* Gets the underlying prp that determines the type of encryption that will be performed and the source of randomness.
 	* @param prp the underlying pseudorandom permutation to get the name of.
 	*/
 	OpenSSLEncWithIVAbs(PseudorandomPermutation* prp, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) : OpenSSLEncWithIVAbs(prp->getAlgorithmName(), random) {}
 
 	/**
-	* Sets the name of a Pseudorandom permutation and the source of randomness.<p>
+	* Sets the name of a Pseudorandom permutation and the source of randomness.
 	* The given prpName should be a name of prp algorithm such that OpenSSL provides an encryption with.
 	* The following names are valid:
 	* For CBC mode of operations: AES and TripleDES.
@@ -91,7 +90,7 @@ public:
 	void setKey(SecretKey & secretKey) override;	
 
 	/**
-	* This function should not be used to generate a key for the encryption and it throws UnsupportedOperationException.
+	* This function should not be used to generate a key for the encryption so it throws UnsupportedOperationException.
 	* @throws UnsupportedOperationException
 	*/
 	SecretKey generateKey(AlgorithmParameterSpec & keyParams) override {
@@ -110,7 +109,7 @@ public:
 	* @param plaintext should be an instance of ByteArrayPlaintext.
 	* @return  an IVCiphertext, which contains the IV used and the encrypted data.
 	* @throws IllegalStateException if no secret key was set.
-	* @throws IllegalArgumentException if the given plaintext is not an instance of ByteArrayPlaintext.
+	* @throws invalid_argument if the given plaintext is not an instance of ByteArrayPlaintext.
 	*/
 	shared_ptr<SymmetricCiphertext> encrypt(Plaintext* plaintext) override;
 
@@ -140,10 +139,7 @@ public:
 */
 class OpenSSLCTREncRandomIV : public OpenSSLEncWithIVAbs, public CTREnc {
 
-	//Native function that sets the encryption and decryption objects with the underlying prpName and key.
-	//private native void setKey(long enc, long dec, String prpName, byte[] secretKey);
 protected:
-
 
 	/**
 	* Checks the validity of the given prp name.
@@ -161,13 +157,12 @@ public:
 	* A default source of randomness is used.
 	* @param prp the underlying pseudorandom permutation to get the name of.
 	*/
-	OpenSSLCTREncRandomIV(PseudorandomPermutation* prp) : OpenSSLEncWithIVAbs(prp) { doConstruct(); }
+	OpenSSLCTREncRandomIV(PseudorandomPermutation* prp, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) : OpenSSLEncWithIVAbs(prp, random) { doConstruct(); }
 
 	/**
 	* Sets the name of a Pseudorandom permutation and the name of a Random Number Generator Algorithm to use to generate the source of randomness.<p>
 	* @param prpName the name of a specific Pseudorandom permutation, for example "AES".
-	* @param randNumGenAlg  the name of the RNG algorithm, for example "SHA1PRNG".
-	* @throws NoSuchAlgorithmException  if the given randNumGenAlg is not a valid random number generator.
+	* @throws invalid_argument if the given randNumGenAlg is not a valid random number generator.
 	*/
 	OpenSSLCTREncRandomIV(string prpName) : OpenSSLEncWithIVAbs(prpName) { doConstruct(); }
 

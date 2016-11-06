@@ -40,9 +40,10 @@
 enum  TPElValidity { VALID, NOT_VALID, DONT_KNOW};
 
 /**
-* This class is an auxiliary class that allows to send the actual data of a TPElement using the Serialization mechanism.
-* This is NOT a TPElement, just the data to possibly create one if you hold the right TrapdoorPermutation. The creation of the TPElement will be performed by the TrapdoorPermutation
-* and will succeed only if the value is valid. The check will be performed by the permutation.
+* This class is an auxiliary class that allows to send the actual data of a TPElement through a channel.
+* This is NOT a TPElement, just the data to possibly create one if you hold the right TrapdoorPermutation. 
+* The creation of the TPElement will be performed by the TrapdoorPermutation, and will succeed only if 
+* the value is valid. The check will be performed by the permutation.
 * The getSendableData() function implemented by the different TPElements extracts the data from the element and puts it in a newly created object TPElementSendableData.
 * The corresponding TrapdoorPermuation can re-generate the serialized TPElement by calling the function generateElement(TPElementSendableData): TPElement.
 */
@@ -56,19 +57,19 @@ public:
 };
 
 /**
-* General interface for trapdoor permutation elements. Every concrete element class should implement this interface.
+* Abstract class for trapdoor permutation elements. Every concrete element class should derive this class.
 */
 class TPElement {
 public:
 	/**
-	* Returns the trapdoor element value as biginteger
+	* Returns the trapdoor element value as biginteger.
 	*/
 	virtual biginteger getElement() = 0;
 
 	/**
 	* This function extracts the actual value of the TPElement and wraps it in a TPElementSendableData that as it name indicates can be send using the serialization mechanism.
 	*/
-	virtual TPElementSendableData * generateSendableData() = 0;
+	virtual shared_ptr<TPElementSendableData> generateSendableData() = 0;
 };
 
 class RSAModulus {
@@ -76,7 +77,7 @@ public:
 	biginteger p;
 	biginteger q;
 	biginteger n;
-	RSAModulus(biginteger & p, biginteger & q, biginteger & n) {
+	RSAModulus(const biginteger & p,const  biginteger & q, const biginteger & n) {
 		this->p = p;
 		this->q = q;
 		this->n = n;
@@ -89,64 +90,36 @@ public:
 	* @param random a source of randomness
 	* @return an RSAModulus structure that holds N, p and q.
 	*/
-	RSAModulus(size_t length, int certainty, PrgFromOpenSSLAES* random) {
-
-		int pbitlength = (length + 1) / 2;
-		int qbitlength = length - pbitlength;
-		size_t mindiffbits = length / 3;
-
-
-		// generate p prime
-		p = getRandomPrime(pbitlength, certainty, random);
-		for (;;) {
-			do {
-				q = getRandomPrime(qbitlength, certainty, random);
-			} while ((bytesCount(mp::abs(q - p)) * 8) < mindiffbits);
-			
-			// calculate the modulus
-			n = p * q;
-
-			if ((bytesCount(n) * 8) == length)
-			{
-				break;
-			}
-
-			//
-			// if we get here our primes aren't big enough, make the largest
-			// of the two p and try again
-			//
-			p = (p > q) ? p : q;
-		}
-	}
+	RSAModulus(size_t length, int certainty, PrgFromOpenSSLAES* random);
 };
 
 /**
-* General interface for Rabin Keys
+* General interface for Rabin Keys.
 */
 class RabinKey : Key {
 public:
 	/**
-	* @return BigInteger - the modulus
+	* @return biginteger - the modulus
 	*/
 	virtual biginteger getModulus()=0;
 };
 
 /**
-* Concrete class of RabinKey
+* Concrete class of RabinKey.
 */
 class ScRabinKey : public RabinKey {
 protected:
 	biginteger modulus = NULL;
 public:
 	/**
-	* @return BigInteger - the modulus
+	* @return biginteger - the modulus
 	*/
 	biginteger getModulus() override { return modulus; };
 	virtual ~ScRabinKey() = 0; // enforcing abstract class
 };
 
 /**
-* Interface for RabinParameterSpec
+* Concrete class for RabinParameterSpec.
 */
 class RabinKeyGenParameterSpec : AlgorithmParameterSpec {
 public:
@@ -160,44 +133,42 @@ public:
 };
 
 /**
-* Interface for Rabin private key.
+* Abstract class for Rabin private key.
 */
 class RabinPrivateKey : public RabinKey, public PrivateKey {
 public:
 	/**
-	* Returns prime1 (p), such that p*q=n
-	* @return BigInteger - prime1 (p)
+	* Returns prime1 (p), such that p*q=n.
 	*/
 	virtual biginteger getPrime1()=0;
+	
 	/**
-	* Returns prime2 (q), such that p*q=n
-	* @return BigInteger - prime2 (q)
+	* Returns prime2 (q), such that p*q=n.
 	*/
 	virtual biginteger getPrime2()=0;
 	/**
-	* Returns the inverse of prime1 mod prime2
-	* @return BigInteger - inversePModQ (u)
+	* Returns the inverse of prime1 mod prime2 (u).
 	*/
 	virtual biginteger getInversePModQ()=0;
 };
 
 /**
-* Interface for Rabin public key.
+* Abstract class for Rabin public key.
 */
 class RabinPublicKey  : public RabinKey, public PublicKey {
 public:
 	/**
-	* @return BigInteger - QuadraticResidueModPrime1 (r)
+	* @return biginteger - QuadraticResidueModPrime1 (r)
 	*/
 	virtual biginteger getQuadraticResidueModPrime1()=0;
 	/**
-	* @return BigInteger - QuadraticResidueModPrime2 (s)
+	* @return biginteger - QuadraticResidueModPrime2 (s)
 	*/
 	virtual biginteger getQuadraticResidueModPrime2()=0;
 };
 
 /**
-* Concrete class of RabinPrivateKey
+* Concrete class of RabinPrivateKey.
 */
 class ScRabinPrivateKey : public ScRabinKey, public RabinPrivateKey {
 private:
@@ -213,7 +184,7 @@ public:
 	* @param q - prime2
 	* @param u - inverse of prime1 mod prime2
 	*/
-	ScRabinPrivateKey(biginteger & mod, biginteger & p, biginteger & q, biginteger & u) {
+	ScRabinPrivateKey(const biginteger & mod, const biginteger & p, const biginteger & q, const biginteger & u) {
 		modulus = mod;
 		prime1 = p;
 		prime2 = q;
@@ -241,7 +212,7 @@ public:
 	* @param q - prime2
 	* @param u - inverse of prime1 mod prime2
 	*/
-	ScRabinPrivateKeySpec(biginteger & mod, biginteger & p, biginteger & q, biginteger & u) {
+	ScRabinPrivateKeySpec(const biginteger & mod, const biginteger & p, const biginteger & q, const biginteger & u) {
 		modulus = mod;
 		prime1 = p;
 		prime2 = q;
@@ -270,7 +241,7 @@ private:
 	* @param r - quadratic residue mod prime1
 	* @param s - quadratic residue mod prime2
 	*/
-	ScRabinPublicKey(biginteger & mod, biginteger & r, biginteger & s) {
+	ScRabinPublicKey(const biginteger & mod, const biginteger & r, const biginteger & s) {
 		modulus = mod;
 		quadraticResidueModPrime1 = r;
 		quadraticResidueModPrime2 = s;
@@ -295,7 +266,7 @@ public:
 	* @param r - quadratic residue mod prime1
 	* @param s - quadratic residue mod prime2
 	*/
-	ScRabinPublicKeySpec(biginteger & mod, biginteger & r, biginteger & s) {
+	ScRabinPublicKeySpec(const biginteger & mod, const biginteger & r, const biginteger & s) {
 		modulus = mod;
 		quadraticResidueModPrime1 = r;
 		quadraticResidueModPrime2 = s;
@@ -317,23 +288,25 @@ public:
 	* Constructor that chooses a random element according to the given modulus.
 	* @param modN the modulus
 	*/
-	RSAElement(biginteger & modN, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
+	RSAElement(const biginteger & modN, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
+	
 	/**
 	* Constructor that gets a modulus and a value. If the value is a valid RSA element according to the modulus, sets it to be the element.
 	* @param modN - the modulus
 	* @param x - the element value
 	*/
-	RSAElement(biginteger & modN, biginteger & x, bool check);
+	RSAElement(const biginteger & modN, const biginteger & x, bool check);
+	
 	/**
 	* Returns the RSA element.
 	* @return the element
 	*/
 	biginteger getElement() { return element; };
-	TPElementSendableData * generateSendableData() override { return new TPElementSendableData(element); };
+	shared_ptr<TPElementSendableData> generateSendableData() override { return make_shared<TPElementSendableData>(element); };
 };
 
 /**
-* This interface is the general interface of trapdoor permutation. Every class in this family should implement this interface.
+* This class is the abstract class of trapdoor permutation. Every class in this family should derive this class.
 * A trapdoor permutation is a bijection (1-1 and onto function) that is easy to compute for everyone,
 * yet is hard to invert unless given special additional information, called the "trapdoor".
 * The public key is essentially the function description and the private key is the trapdoor.
@@ -344,45 +317,50 @@ public:
 	* Sets this trapdoor permutation with public key and private key.
 	*/
 	virtual void setKey(const shared_ptr<PublicKey> & publicKey, const shared_ptr<PrivateKey> & privateKey = nullptr)=0;
+	
 	/**
-	* Checks if this trapdoor permutation object has been previously initialized.<p>
+	* Checks if this trapdoor permutation object has been previously initialized.
 	* To initialize the object the setKey function has to be called with corresponding parameters after construction.
 	*
-	* @return <code>true</code> if the object was initialized;<p>
-	* 		   <code>false</code> otherwise.
+	* @return true if the object was initialized; false otherwise.
 	*/
 	virtual bool isKeySet()=0;
+	
 	/**
 	* @return the public key
 	*/
 	virtual shared_ptr<PublicKey> getPubKey()=0;
+	
 	/**
 	* @return the algorithm name. for example - RSA, Rabin.
 	*/
 	virtual string getAlgorithmName()=0;
+	
 	/**
 	* Generates public and private keys for this trapdoor permutation.
 	* @return KeyPair holding the public and private keys
 	* @throws InvalidParameterSpecException
 	*/
 	virtual KeyPair generateKey(int keySize)=0;
+	
 	/**
 	* Computes the operation of this trapdoor permutation on the given TPElement.
 	* @param tpEl - the input for the computation
 	* @return - the result TPElement from the computation
-	* @throws IllegalArgumentException if the given element is invalid for this permutation
+	* @throws invalid_argument if the given element is invalid for this permutation
 	*/
 	virtual  shared_ptr<TPElement> compute(TPElement * tpEl)=0;
 	/**
 	* Inverts the operation of this trapdoor permutation on the given TPElement.
 	* @param tpEl - the input to invert
 	* @return - the result TPElement from the invert operation
-	* @throws KeyException if there is no private key
-	* @throws IllegalArgumentException if the given element is invalid for this permutation
+	* @throws InvalidKeyException if there is no private key
+	* @throws invalid_argument if the given element is invalid for this permutation
 	*/
 	virtual shared_ptr<TPElement> invert(TPElement * tpEl) = 0;
+	
 	/**
-	* Computes the hard core predicate of the given tpElement. <p>
+	* Computes the hard core predicate of the given tpElement. 
 	* A hard-core predicate of a one-way function f is a predicate b (i.e., a function whose output is a single bit)
 	* which is easy to compute given x but is hard to compute given f(x).
 	* In formal terms, there is no probabilistic polynomial time algorithm that computes b(x) from f(x)
@@ -393,6 +371,7 @@ public:
 	* and it will be easier with a byte than with a boolean.
 	*/
 	virtual byte hardCorePredicate(TPElement* tpEl) = 0;
+	
 	/**
 	* Computes the hard core function of the given tpElement.
 	* A hard-core function of a one-way function f is a function g
@@ -403,6 +382,7 @@ public:
 	* @return byte* the result of the hard core function. The byte array is allocated inside the method
 	*/
 	virtual vector<byte> hardCoreFunction(TPElement* tpEl)=0;
+	
 	/**
 	* Checks if the given element is valid for this trapdoor permutation
 	* @param tpEl - the element to check
@@ -411,26 +391,30 @@ public:
 	* VALID (it is an element)
 	* NOT_VALID (it is not an element)
 	* DONT_KNOW (there is not enough information to check if it is an element or not)
-	* @throws IllegalArgumentException if the given element is invalid for this permutation
+	* @throws invalid_argument if the given element is invalid for this permutation
 	*/
 	virtual TPElValidity isElement(TPElement* tpEl) = 0;
+	
 	/**
 	* creates a random TPElement that is valid for this trapdoor permutation
 	* @return TPElement - the created random element
 	*/
 	virtual shared_ptr<TPElement> generateRandomTPElement() = 0;
+	
 	/**
 	* Creates a TPElement from a specific value x. It checks that the x value is valid for this trapdoor permutation.
 	* @return TPElement - If the x value is valid for this permutation return the created random element
-	* @throws  IllegalArgumentException if the given value x is invalid for this permutation
+	* @throws invalid_argument if the given value x is invalid for this permutation
 	*/
-	virtual shared_ptr<TPElement> generateTPElement(biginteger & x) = 0;
+	virtual shared_ptr<TPElement> generateTPElement(const biginteger & x) = 0;
+	
 	/**
 	* Creates a TPElement from a specific value x. This function does not guarantee that the the returned "TPElement" is valid.<p>
 	* It is the caller's responsibility to pass a legal x value.
 	* @return TPElement - Set the x value and return the created random element
 	*/
-	virtual shared_ptr<TPElement> generateUncheckedTPElement(biginteger & x) = 0;
+	virtual shared_ptr<TPElement> generateUncheckedTPElement(const biginteger & x) = 0;
+	
 	/**
 	* Creates a TPElement from data that was probably obtained via the serialization mechanism. See explanation in {@link TPElementSendableData}
 	* @param data necessary to reconstruct a given TPElement
@@ -471,7 +455,7 @@ public:
 };
 
 /**
-* Marker interface. Each RSA concrete class should implement this interface.
+* Marker class. Each RSA concrete class should derive this class.
 */
 class RSAPermutation : public virtual TrapdoorPermutation {
 public:
@@ -484,7 +468,7 @@ public:
 };
 
 /**
-* Marker interface. Each Rabin concrete class should implement this interface.
+* Marker class. Each Rabin concrete class should derive this class.
 */
 class RabinPermutation : public TrapdoorPermutation {
 public:

@@ -174,14 +174,14 @@ public:
 };
 
 /**
-* This is a marker interface. It allows the generation of an AsymmetricCiphertext at an abstract level.
+* This is a marker class. It allows the generation of an AsymmetricCiphertext at an abstract level.
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
 *
 */
 class AsymmetricCiphertextSendableData : public NetworkSerialized {};
 
 /**
-* This is a marker interface for all cipher-texts.
+* This is a marker class for all cipher-texts.
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
 *
 */

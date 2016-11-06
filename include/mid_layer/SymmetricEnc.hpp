@@ -32,12 +32,12 @@
 #include "../CryptoInfra/PlainText.hpp"
 
 /**
-* This is the main interface for the Symmetric Encryption family.<p>
+* This is the main interface for the Symmetric Encryption family.
 * The symmetric encryption family of classes implements three main functionalities that correspond to the cryptographer's language
 * in which an encryption scheme is composed of three algorithms:<p>
-* 	1.	Generation of the key.<p>
-*	2.	Encryption of the plaintext.<p>
-*	3.	Decryption of the ciphertext.<p>
+* 	1.	Generation of the key.
+*	2.	Encryption of the plaintext.
+*	3.	Decryption of the ciphertext.
 *
 * Any symmetric encryption scheme belongs by default at least to the Eavsdropper Security Level and to the Indistinguishable Security Level.
 *
@@ -72,7 +72,6 @@ public:
 	* Generates a secret key to initialize this symmetric encryption.
 	* @param keyParams algorithmParameterSpec contains  parameters for the key generation of this symmetric encryption.
 	* @return the generated secret key.
-	* @throws InvalidParameterSpecException if the given keyParams does not match this symmetric encryption.
 	*/
 	virtual SecretKey generateKey(AlgorithmParameterSpec& keyParams) = 0;
 
@@ -88,7 +87,7 @@ public:
 	* @param plaintext
 	* @return  an IVCiphertext, which contains the IV used and the encrypted data.
 	* @throws IllegalStateException if no secret key was set.
-	* @throws IllegalArgumentException if the given plaintext does not match this encryption scheme.
+	* @throws invalid_argument if the given plaintext does not match this encryption scheme.
 	*/
 	virtual shared_ptr<SymmetricCiphertext> encrypt(Plaintext* plaintext) = 0;
 
@@ -98,8 +97,7 @@ public:
 	* @param iv random bytes to use in the encryption pf the message.
 	* @return an IVCiphertext, which contains the IV used and the encrypted data.
 	* @throws IllegalStateException if no secret key was set.
-	* @throws IllegalArgumentException if the given plaintext does not match this encryption scheme.
-	* @throws IllegalBlockSizeException if the given IV length is not as the block size.
+	* @throws invalid_argument if the given plaintext does not match this encryption scheme.
 	*/
 	virtual shared_ptr<SymmetricCiphertext> encrypt(Plaintext* plaintext, vector<byte> & iv) = 0;
 
@@ -107,14 +105,14 @@ public:
 	* This function performs the decryption of a ciphertext returning the corresponding decrypted plaintext.
 	* @param ciphertext The Ciphertext to decrypt.
 	* @return the decrypted plaintext.
-	* @throws IllegalArgumentException if the given ciphertext does not match this encryption scheme.
+	* @throws invalid_argument if the given ciphertext does not match this encryption scheme.
 	* @throws IllegalStateException if no secret key was set.
 	*/
 	virtual shared_ptr<Plaintext> decrypt(SymmetricCiphertext* ciphertext) = 0;
 };
 
 /**
-* Any implementation of Symmetric encryption in Counter-Mode ash to implement this interface.
+* Any implementation of Symmetric encryption in Counter-Mode ash to implement this class.
 *
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
 *

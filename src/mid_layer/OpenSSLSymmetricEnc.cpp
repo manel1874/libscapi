@@ -93,7 +93,7 @@ SecretKey OpenSSLEncWithIVAbs::generateKey(int keySize) {
 * @param plaintext should be an instance of ByteArrayPlaintext.
 * @return  an IVCiphertext, which contains the IV used and the encrypted data.
 * @throws IllegalStateException if no secret key was set.
-* @throws IllegalArgumentException if the given plaintext is not an instance of ByteArrayPlaintext.
+* @throws invalid_argument if the given plaintext is not an instance of ByteArrayPlaintext.
 */
 shared_ptr<SymmetricCiphertext> OpenSSLEncWithIVAbs::encrypt(Plaintext* plaintext) {
 	//Allocate space for the IV.
@@ -118,7 +118,7 @@ shared_ptr<SymmetricCiphertext> OpenSSLEncWithIVAbs::encrypt(Plaintext* plaintex
 	}
 	//Check validity of IV's length:
 	if ((int) iv.size() != getIVSize()) {
-		throw out_of_range("The length of the IV passed is not equal to the block size of current PRP");
+		throw invalid_argument("The length of the IV passed is not equal to the block size of current PRP");
 	}
 
 	auto plain = dynamic_cast<ByteArrayPlaintext*>(plaintext);

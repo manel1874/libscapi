@@ -143,14 +143,14 @@ void CramerShoupOnGroupElementEnc::setKey(const shared_ptr<PublicKey> & publicKe
 	this->publicKey = dynamic_pointer_cast<CramerShoupPublicKey>(publicKey);
 	//Public key should be Cramer-Shoup public key.
 	if (this->publicKey == NULL) {
-		throw invalid_argument("The public key must be of type CramerShoupPublicKey");
+		throw InvalidKeyException("The public key must be of type CramerShoupPublicKey");
 	}
 	
 	//Private key should be Cramer Shoup private key.	
 	if (privateKey != NULL) {
 		auto key = dynamic_pointer_cast<CramerShoupPrivateKey>(privateKey);
 		if (key == NULL) {
-			throw invalid_argument("The private key must be of type CramerShoupPrivatKey");
+			throw InvalidKeyException("The private key must be of type CramerShoupPrivatKey");
 		}
 		//Gets the z value from the private key.
 		biginteger z = key->getPrivateExp5();

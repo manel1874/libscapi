@@ -59,7 +59,7 @@ public:
 	biginteger getModulus() { return modulus;	}
 
 	/**
-	* This function is used when an Damgard Jurik Public Key needs to be sent via a {@link edu.biu.scapi.comm.Channel} or any other means of sending data (including serialization).
+	* This function is used when an Damgard Jurik Public Key needs to be sent via a channel or any other means of sending data (including serialization).
 	* It retrieves all the data needed to reconstruct this Public Key at a later time and/or in a different VM.
 	* It puts all the data in an instance of the relevant class that implements the KeySendableData interface.
 	* In order to deserialize this into a DamgardJurikPublicKey all you need to do is cast the serialized object with (DamgardJurikPublicKey)
@@ -78,8 +78,8 @@ public:
 };
 
 /**
-* This class represents a Private Key suitable for the Damgard-Jurik Encryption Scheme. Although the constructor is  public, it should only be instantiated by the
-* Encryption Scheme itself via the generateKey function.
+* This class represents a Private Key suitable for the Damgard-Jurik Encryption Scheme. 
+* Although the constructor is  public, it should only be instantiated by the Encryption Scheme itself via the generateKey function.
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
 *
 */
@@ -118,7 +118,7 @@ public:
 };
 
 /**
-* Parameters for DamgardJurik key generation based on RSA modulus.<p>
+* Parameters for DamgardJurik key generation based on RSA modulus.
 * These parameters will be used to generate a Key Pair for Damgard Jurik based on RSA modulus n such that n = p*q of length k bits.
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
 *
@@ -129,9 +129,6 @@ private:
 	int modulusLength;
 	int certainty;
 
-	/**
-	* Default constructor. The values of the RSA modulus length and the certainty are chosen by SCAPI
-	*/
 public:
 	
 	/**
@@ -175,7 +172,7 @@ private:
 public:
 	/**
 	* Constructor that lets the user choose the source of randomness.
-	* @param rnd source of randomness.
+	* @param random source of randomness.
 	*/
 	DamgardJurikEnc(const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) : random(random) {}
 
@@ -220,7 +217,7 @@ public:
 
 	/**
 	* DamgardJurik encryption can get any plaintext length.
-	* @throws NoMaxException
+	* @throws runtime_error
 	*/
 	int getMaxLengthOfByteArrayForPlaintext() override {
 		throw runtime_error("DamgardJurik encryption can get any plaintext length");
@@ -238,7 +235,7 @@ public:
 	* Generate an DamgardJurik key pair using the given parameters.
 	* @param keyParams MUST be an instance of DJKeyGenParameterSpec.
 	* @return KeyPair contains keys for this DamgardJurik encryption object.
-	* @throws InvalidParameterSpecException if keyParams is not instance of DJKeyGenParameterSpec.
+	* @throws invalid_argument if keyParams is not instance of DJKeyGenParameterSpec.
 	*/
 	pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> generateKey(AlgorithmParameterSpec * keyParams) override;
 
@@ -261,14 +258,14 @@ public:
 	* @param plainText MUST be an instance of BigIntegerPlainText.
 	* @return an object of type BigIntegerCiphertext holding the encryption of the plaintext.
 	* @throws IllegalStateException if no public key was set.
-	* @throws IllegalArgumentException in the following cases:
+	* @throws invalid_argument in the following cases:
 	* 		1. If the given plaintext is not instance of BigIntegerPlainText.
 	* 		2. If the BigInteger value in the given plaintext is not in ZN.
 	*/
 	shared_ptr<AsymmetricCiphertext> encrypt(const shared_ptr<Plaintext> & plaintext) override;
 
 	/**
-	* Encrypts the given plaintext using this asymmetric encryption scheme and using the given random value.<p>
+	* Encrypts the given plaintext using this asymmetric encryption scheme and using the given random value.
 	* There are cases when the random value is used after the encryption, for example, in sigma protocol.
 	* In these cases the random value should be known to the user. We decided not to have function that return it to the user
 	* since this can cause problems when more than one value is being encrypt.
@@ -278,7 +275,7 @@ public:
 	* @param plainText MUST be an instance of BigIntegerPlainText.
 	* @return an object of type BigIntegerCiphertext holding the encryption of the plaintext.
 	* @throws IllegalStateException if no public key was set.
-	* @throws IllegalArgumentException in the following cases:
+	* @throws invalid_argument in the following cases:
 	* 		1. If the given plaintext is not instance of BigIntegerPlainText.
 	* 		2. If the BigInteger value in the given plaintext is not in ZN.
 	*/
@@ -288,7 +285,7 @@ public:
 	* Decrypts the given ciphertext using DamgardJurik encryption scheme.
 	* @param cipher has to be an instance of BigIntegerCiphertext.
 	* @throws KeyException if the Private Key has not been set for this object.
-	* @throws IllegalArgumentException if cipher is not an instance of BigIntegerCiphertext.
+	* @throws invalid_argument if cipher is not an instance of BigIntegerCiphertext.
 	*/
 	shared_ptr<Plaintext> decrypt(AsymmetricCiphertext* cipher) override;
 
@@ -298,16 +295,16 @@ public:
 	* and therefore he is working on byte array.
 	* @param plaintext to generates byte array from. MUST be an instance of BigIntegerPlainText.
 	* @return the byte array generated from the given plaintext.
-	* @throws IllegalArgumentException if the given plaintext is not an instance of BigIntegerPlainText.
+	* @throws invalid_argument if the given plaintext is not an instance of BigIntegerPlainText.
 	*/
 	vector<byte> generateBytesFromPlaintext(Plaintext* plaintext) override;
 
 	/**
 	* This function takes an encryption of some plaintext (let's call it originalPlaintext) and returns a cipher that "looks" different but
-	* it is also an encryption of originalPlaintext.<p>
+	* it is also an encryption of originalPlaintext.
 	* The given ciphertext have to has been generated with the same public key as this encryption's public key.
 	* @throws IllegalStateException if no public key was set.
-	* @throws IllegalArgumentException in the following cases:
+	* @throws invalid_argument in the following cases:
 	* 		1. If cipher is not an instance of BigIntegerCiphertext.
 	* 		2. If the BigInteger number in the given cipher is not in ZN'.
 	*/
@@ -315,10 +312,10 @@ public:
 
 	/**
 	* This function takes an encryption of some plaintext (let's call it originalPlaintext) and returns a cipher that "looks" different but
-	* it is also an encryption of originalPlaintext. It uses the given BigInteger random value.<p>
+	* it is also an encryption of originalPlaintext. It uses the given BigInteger random value.
 	* The given ciphertext have to has been generated with the same public key as this encryption's public key.
 	* @throws IllegalStateException if no public key was set.
-	* @throws IllegalArgumentException in the following cases:
+	* @throws invalid_argument in the following cases:
 	* 		1. If cipher is not an instance of BigIntegerCiphertext.
 	* 		2. If the BigInteger number in the given cipher is not in ZN'.
 	*/
@@ -328,7 +325,7 @@ public:
 	* Given two ciphers c1 = Enc(p1)  and c2 = Enc(p2) this function return c1 + c2 = Enc(p1 +p2).
 	* Both ciphertext have to have been generated with the same public key as this encryption's public key.
 	* @throws IllegalStateException if no public key was set.
-	* @throws IllegalArgumentException in the following cases:
+	* @throws invalid_argument in the following cases:
 	* 		1. If one or more of the given ciphertexts is not an instance of BigIntegerCiphertext.
 	* 		2. If the sizes of ciphertexts do not match.
 	* 		3. If one or more of the BigInteger numbers in the given ciphertexts is not in ZN'.
@@ -336,8 +333,8 @@ public:
 	shared_ptr<AsymmetricCiphertext> add(AsymmetricCiphertext* cipher1, AsymmetricCiphertext* cipher2) override;
 
 	/**
-	* Given two ciphers c1 = Enc(p1)  and c2 = Enc(p2) this function return c1 + c2 = Enc(p1 +p2).<p>
-	* Both ciphertext have to have been generated with the same public key as this encryption's public key.<p>
+	* Given two ciphers c1 = Enc(p1)  and c2 = Enc(p2) this function return c1 + c2 = Enc(p1 +p2).
+	* Both ciphertext have to have been generated with the same public key as this encryption's public key.
 	*
 	* There are cases when the random value is used after the function, for example, in sigma protocol.
 	* In these cases the random value should be known to the user. We decided not to have function that return it to the user
@@ -345,7 +342,7 @@ public:
 	* Instead, we decided to have an additional add function that gets the random value from the user.
 	*
 	* @throws IllegalStateException if no public key was set.
-	* @throws IllegalArgumentException in the following cases:
+	* @throws invalid_argument in the following cases:
 	* 		1. If one or more of the given ciphertexts is not an instance of BigIntegerCiphertext.
 	* 		2. If the sizes of ciphertexts do not match.
 	* 		3. If one or more of the BigInteger numbers in the given ciphertexts is not in ZN'.
@@ -353,12 +350,12 @@ public:
 	shared_ptr<AsymmetricCiphertext> add(AsymmetricCiphertext* cipher1, AsymmetricCiphertext* cipher2, biginteger & r) override;
 
 	/**
-	* This function calculates the homomorphic multiplication by a constant of a ciphertext<p>
+	* This function calculates the homomorphic multiplication by a constant of a ciphertext.
 	* in the Damgard Jurik encryption scheme.
 	* @param cipher the cipher to operate on.
 	* @param constNumber the constant number by which to multiply the cipher.
 	* @throws IllegalStateException if no public key was set.
-	* @throws IllegalArgumentException in the following cases:
+	* @throws invalid_argument in the following cases:
 	* 		1. If the given cipher is not an instance of BigIntegerCiphertext.
 	* 		2. If the BigInteger numbers in the given ciphertext is not in ZN'.
 	* 		3. If the constant number is not in ZN.
@@ -379,7 +376,7 @@ public:
 	* @param r The random value to use in the function.
 	*
 	* @throws IllegalStateException if no public key was set.
-	* @throws IllegalArgumentException in the following cases:
+	* @throws invalid_argument in the following cases:
 	* 		1. If the given cipher is not an instance of BigIntegerCiphertext.
 	* 		2. If the BigInteger numbers in the given ciphertext is not in ZN'.
 	* 		3. If the constant number is not in ZN.

@@ -34,7 +34,7 @@
 #include "math.h"
 
 /**
-* General interface for pseudorandom function. Every class in this family should implement this interface. <p>
+* Abstract class for pseudorandom function. Every class in this family should derive this class.
 * In cryptography, a pseudorandom function family, abbreviated PRF,
 * is a collection of efficiently-computable functions which emulate a random oracle in the following way:
 * no efficient algorithm can distinguish (with significant advantage) between a function chosen randomly from the PRF family and a random oracle
@@ -47,36 +47,40 @@ public:
 	* The key can be changed at any time.
 	*/
 	virtual void setKey(SecretKey & secretKey)=0;
+	
 	/**
 	* An object trying to use an instance of prf needs to check if it has already been initialized.
 	* @return true if the object was initialized by calling the function setKey.
 	*/
+	
 	virtual bool isKeySet()=0;
-	/**
-	* @return The algorithm name
-	*/
+	
 	virtual string getAlgorithmName()=0;
+	
 	/**
-	* @return the input block size in bytes
+	* @return the input block size in bytes.
 	*/
 	virtual int getBlockSize()=0;
+	
 	/**
 	* Generates a secret key to initialize this prf object.
 	* @param keyParams algorithmParameterSpec contains the required parameters for the key generation
 	* @return the generated secret key
 	*/
 	virtual SecretKey generateKey(AlgorithmParameterSpec & keyParams)=0;
+	
 	/**
 	* Generates a secret key to initialize this prf object.
 	* @param keySize is the required secret key size in bits
 	* @return the generated secret key
 	*/
 	virtual SecretKey generateKey(int keySize)=0;
+	
 	/**
-	* Computes the function using the secret key. <p>
-	* The user supplies the input byte array and the offset from which to take the data from.
-	* The user also supplies the output byte array as well as the offset.
-	* The computeBlock function will put the output in the output array starting at the offset. <p>
+	* Computes the function using the secret key.
+	* The user supplies the input byte vector and the offset from which to take the data from.
+	* The user also supplies the output byte vector as well as the offset.
+	* The computeBlock function will put the output in the output vector starting at the offset. 
 	* This function is suitable for block ciphers where the input/output length is known in advance.
 	* @param inBytes input bytes to compute
 	* @param inOff input offset in the inBytes array
@@ -84,8 +88,9 @@ public:
 	* @param outOff output offset in the outBytes array to put the result from
 	*/
 	virtual void computeBlock(const vector<byte> & inBytes, int inOff, vector<byte> &outBytes, int outOff)=0;
+	
 	/**
-	* Computes the function using the secret key. <p>
+	* Computes the function using the secret key.
 	* This function is provided in the interface especially for the sub-family PrfVaryingIOLength, which may have variable input and output length.
 	* If the implemented algorithm is a block cipher then the size of the input as well as the output is known in advance and
 	* the use may call the other computeBlock function where length is not require.
@@ -97,17 +102,18 @@ public:
 	* @param outLen the length of the output array
 	*/
 	virtual void computeBlock(const vector<byte> & inBytes, int inOff, int inLen, vector<byte> &outBytes, int outOff, int outLen)=0;
+	
 	/**
-	* Computes the function using the secret key. <p>
+	* Computes the function using the secret key.
 	* This function is provided in this PseudorandomFunction interface for the sake of interfaces (or classes) for which
 	* the input length can be different for each computation. Hmac and Prf/Prp with variable input length are examples of
 	* such interfaces.
 	*
 	* @param inBytes input bytes to compute
-	* @param inOffset input offset in the inBytes array
-	* @param inLen the length of the input array
+	* @param inOffset input offset in the inBytes vector
+	* @param inLen the length of the input vector
 	* @param outBytes output bytes. The resulted bytes of compute.
-	* @param outOffset output offset in the outBytes array to put the result from
+	* @param outOffset output offset in the outBytes vector to put the result from
 	*/
 	virtual void computeBlock(const vector<byte> & inBytes, int inOffset, int inLen, vector<byte> &outBytes, int outOffset)=0;
 
@@ -118,13 +124,13 @@ public:
 };
 
 /**
-* General interface for pseudorandom function with fixed input and output lengths.
+* Abstract class for pseudorandom function with fixed input and output lengths.
 * A pseudorandom function with fixed lengths predefined input and output lengths, and there is no need to specify it for each function call.
 */
 class PrfFixed : public virtual PseudorandomFunction {};
 
 /**
-* General interface for pseudorandom permutations which is sub-interface of pseudorandon function. Every prp class should implement this interface. <p>
+* Abstract class for pseudorandom permutations which is sub-interface of pseudorandon function. Every prp class should derive this class. 
 * Pseudorandom permutations are bijective pseudorandom functions that are efficiently invertible.
 * As such, they are of the pseudorandom function type and their input length always equals their output length.
 * In addition (and unlike general pseudorandom functions), they are efficiently invertible.
@@ -132,18 +138,18 @@ class PrfFixed : public virtual PseudorandomFunction {};
 class PseudorandomPermutation : public virtual PseudorandomFunction {
 public:
 	/**
-	* Inverts the permutation using the given key. <p>
+	* Inverts the permutation using the given key. 
 	* This function is a part of the PseudorandomPermutation interface since any PseudorandomPermutation must be efficiently invertible (given the key).
 	* For block ciphers, for example, the length is known in advance and so there is no need to specify the length.
 	* @param inBytes input bytes to invert.
 	* @param inOff input offset in the inBytes array
 	* @param outBytes output bytes. The resulted bytes of invert
 	* @param outOff output offset in the outBytes array to put the result from
-	* @throws IllegalBlockSizeException
 	*/
 	virtual void invertBlock(const vector<byte> & inBytes, int inOff, vector<byte>& outBytes, int outOff)=0;
+	
 	/**
-	* Inverts the permutation using the given key. <p>
+	* Inverts the permutation using the given key. 
 	* Since PseudorandomPermutation can also have varying input and output length (although the input and the output should be the same length),
 	* the common parameter <code>len</code> of the input and the output is needed.
 	* @param inBytes input bytes to invert.
@@ -151,20 +157,19 @@ public:
 	* @param outBytes output bytes. The resulted bytes of invert
 	* @param outOff output offset in the outBytes array to put the result from
 	* @param len the length of the input and the output
-	* @throws IllegalBlockSizeException
 	*/
 	virtual void invertBlock(const vector<byte> & inBytes, int inOff, vector<byte>& outBytes, int outOff, int len) = 0;
 };
 
 /**
-* General interface for pseudorandom permutation with fixed input and output lengths.
+* Abstract class for pseudorandom permutation with fixed input and output lengths.
 * A pseudorandom permutation with fixed lengths predefined input and output lengths, and there is no need to specify it for each function call.
 * Block ciphers, for example, have known lengths and so they implement this interface.
 */
 class PrpFixed : public virtual PseudorandomPermutation, public virtual PrfFixed {};
 
 /**
-* Marker interface. Every class that implements it is signed as AES.
+* Marker class. Every class that derives it is signed as AES.
 * AES is a blockCipher with fixed input and output lengths and thus implements the interface PrpFixed.
 */
 class AES : public PrpFixed {
@@ -173,7 +178,7 @@ public:
 };
 
 /**
-* Marker interface. Every class that implements it is signed as TripleDes.
+* Marker class. Every class that derives it is signed as TripleDes.
 * TripleDes is a blockCipher with fixed input and output lengths and thus implements the interface PrpFixed.
 */
 class TripleDES : public virtual PrpFixed {};
@@ -183,7 +188,7 @@ class TripleDES : public virtual PrpFixed {};
 */
 class PrpFromPrfFixed : public PrpFixed {
 protected:
-	shared_ptr<PrfFixed> prfFixed; //the underlying prf
+	shared_ptr<PrfFixed> prfFixed; //The underlying prf.
 	virtual ~PrpFromPrfFixed() = 0;
 public:
 	/**
@@ -192,8 +197,9 @@ public:
 	*/
 	void setKey(SecretKey & secretKey) override { prfFixed->setKey(secretKey); };
 	bool isKeySet() override { return prfFixed->isKeySet(); };
+	
 	/**
-	* Computes the function using the secret key. <p>
+	* Computes the function using the secret key. 
 	*
 	* This function is provided in the interface especially for the sub-family PrfVaryingIOLength, which may have variable input and output length.
 	* Since this is a prp fixed, both input and output variables are equal and fixed, so this function should not normally be called.
@@ -208,6 +214,7 @@ public:
 	* @param outLen output array length
 	*/
 	virtual void computeBlock(const vector<byte> & inBytes, int inOff, int inLen, vector<byte>& outBytes, int outOff, int outLen) override;
+	
 	/**
 	* Computes the function using the secret key. <p>
 	*
@@ -224,6 +231,7 @@ public:
 	* @param outOff output offset in the outBytes array to put the result from
 	*/
 	virtual void computeBlock(const vector<byte> & inBytes, int inOff, int inLen, vector<byte>& outBytes, int outOff) override;
+	
 	/**
 	* Inverts the permutation using the given key. <p>
 	*
@@ -244,7 +252,7 @@ public:
 };
 
 /**
-* General interface for pseudorandom function with varying input length.
+* Abstract class for pseudorandom function with varying input length.
 * A pseudorandom function with varying input length does not have predefined input length.
 * The input length may be different for each function call, and is determined upon user request.
 * The interface PrfVaryingInputLength, groups and provides type safety for every PRF with varying input length.
@@ -252,7 +260,7 @@ public:
 class PrfVaryingInputLength : public virtual PseudorandomFunction {};
 
 /**
-* General interface for pseudorandom function with varying input and output lengths.
+* Abstract class for pseudorandom function with varying input and output lengths.
 * A pseudorandom function with varying input/output lengths does not have predefined input and output lengths.
 * The input and output length may be different for each compute function call.
 * The length of the input as well as the output is determined upon user request.
@@ -261,7 +269,7 @@ class PrfVaryingInputLength : public virtual PseudorandomFunction {};
 class PrfVaryingIOLength : public virtual PseudorandomFunction {};
 
 /**
-* General interface for pseudorandom permutation with varying input and output lengths.
+* Abstract class for pseudorandom permutation with varying input and output lengths.
 * A pseudorandom permutation with varying input/output lengths does not have predefined input /output lengths.
 * The input and output length (that must be equal) may be different for each function call.
 * The length of the input and output is determined upon user request.
@@ -270,7 +278,7 @@ class PrfVaryingIOLength : public virtual PseudorandomFunction {};
 class PrpVaryingIOLength : public virtual PseudorandomPermutation, public virtual PrfVaryingIOLength {};
 
 /**
-* Marker interface. Every class that implements it is signed as Hmac.
+* Marker class. Every class that derives it is signed as Hmac.
 * Hmac has varying input length and thus implements the interface PrfVaryingInputLength.
 */
 class Hmac : public virtual PrfVaryingInputLength, public virtual UniqueTagMac, public virtual UnlimitedTimes {}; 
@@ -290,27 +298,29 @@ protected:
 public:
 	/**
 	* Initializes this PrfVaryingFromPrfVaryingInput with the secret key.
-	* @param secretKey secret key
 	*/
 	void setKey(SecretKey & secretKey) override { prfVaryingInputLength->setKey(secretKey); /*initializes the underlying prf */	};
+	
 	/**
 	* Check that the Secret Key for this instance has been set
-	* @return true if key had been set<p>
-	* 			false, otherwise.
+	* @return true if key had been set;	false, otherwise.
 	*/
 	bool isKeySet() { return prfVaryingInputLength->isKeySet(); }
+	
 	/**
 	* Since both input and output variables are varying this function should not be called.
 	*/
 	void computeBlock(const vector<byte> & inBytes, int inOff, vector<byte> & outBytes, int outOff) override{
 		throw runtime_error("Only compute that gets lengths of I/O should be called for Varying Prf");
 	}
+	
 	/**
 	* Since both input and output variables are varying this function should not be call.
 	*/
 	void computeBlock(const vector<byte> & inBytes, int inOff, int inLen, vector<byte> & outBytes, int outOff) override{
 		throw runtime_error("Only compute that gets lengths of I/O should be called for Varying Prf");
 	}
+	
 	/**
 	* Generate a SecretKey suitable for a Pseudo random permutation obtained from a Varying Prf.
 	* @param keyParams an instance of a class implementing the AlgorithmParameterSpec interface
@@ -318,6 +328,7 @@ public:
 	* @return the generated secret key
 	*/
 	SecretKey generateKey(AlgorithmParameterSpec & keyParams) override { return prfVaryingInputLength->generateKey(keyParams); };
+	
 	/**
 	* Generate a SecretKey suitable for a Pseudo random permutation obtained from a Varying Prf.
 	* @param keySize bit-length of required Secret Key
@@ -333,14 +344,13 @@ public:
 class IteratedPrfVarying : public PrfVaryingFromPrfVaryingInput {
 public:
 	IteratedPrfVarying() { /* TODO: implement */ };
-	/**
-	* Constructor that accepts the name of the underlying prfVaryingInputLength.
-	* @param prfVaryingInputName  the prf to use.
-	*/
-	IteratedPrfVarying(string prfVaryingInputName) { /* TODO: implement */ };
+	
 	IteratedPrfVarying(const shared_ptr<PrfVaryingInputLength> & prfVaryingInput) { prfVaryingInputLength = prfVaryingInput; };
+	
 	string getAlgorithmName() override { return "ITERATED_PRF_VARY_INOUT"; };
+	
 	int getBlockSize() override { throw runtime_error("prp varying has no fixed block size"); };
+	
 	/**
 	* Computes the iterated permutation. <p>
 	*
@@ -378,9 +388,34 @@ public:
 	*/
 	void setKey(SecretKey & secretKey) override { prfVaryingIOLength->setKey(secretKey); };
 	bool isKeySet() override { return prfVaryingIOLength->isKeySet(); };
+	
+	/**
+	* Computes the function using the secret key.
+	*
+	* This function is provided in the interface especially for the sub-family PrfFixed, which have fixed input and output length.
+	* Since this is a prp varying, this function should not normally be called.
+	* If the user still wants to use this function, throws an exception.
+	*/
 	void computeBlock(const vector<byte> & inBytes, int inOff, vector<byte>& outBytes, int outOff) override;
+	
+	/**
+	* Computes the function using the secret key.
+	*
+	* 
+	* @param inBytes input bytes to compute
+	* @param inOff input offset in the inBytes array
+	* @param inLen input array length
+	* @param outBytes output bytes. The resulted bytes of compute
+	* @param outOff output offset in the outBytes array to put the result from
+	* @param outLen output array length
+	*/
 	void computeBlock(const vector<byte> & inBytes, int inOff, int inLen, vector<byte>& outBytes, int outOff, int outLen) override;
+
+	/**
+	* Throws an exception. The other invert block function that gets length should be called.
+	*/
 	void invertBlock(const vector<byte> & inBytes, int inOff, vector<byte>& outBytes, int outOff) override;
+
 	SecretKey generateKey(AlgorithmParameterSpec & keyParams) override { return prfVaryingIOLength->generateKey(keyParams); };
 	SecretKey generateKey(int keySize) override { return prfVaryingIOLength->generateKey(keySize); };
 	using PseudorandomFunction::computeBlock;
@@ -393,6 +428,7 @@ public:
 * for every input/output length.
 */
 class LubyRackoffPrpFromPrfVarying : public virtual PrpFromPrfVarying {
+public:
 	LubyRackoffPrpFromPrfVarying();
 	/**
 	* Constructor that accepts a name of a prfVaryingIOLength to be the underlying PRF.
@@ -419,7 +455,6 @@ class LubyRackoffPrpFromPrfVarying : public virtual PrpFromPrfVarying {
 	* @param outBytes output bytes. The resulted bytes of invert
 	* @param outOff output offset in the outBytes array to put the result from
 	* @param len the length of the input and the output
-	* @throws IllegalBlockSizeException
 	*/
 	void invertBlock(const vector<byte> & inBytes, int inOff, vector<byte>& outBytes, int outOff, int len) override;
 	string getAlgorithmName() override { return "LUBY_RACKOFF_PRP_FROM_PRF_VARYING"; };

@@ -50,9 +50,8 @@ public:
 };
 
 /**
-* This class represents a Public Key suitable for the El Gamal Encryption Scheme. Although the constructor is public, it should only be instantiated by the
-* Encryption Scheme itself via the generateKey function.
-* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
+* This class represents a Public Key suitable for the El Gamal Encryption Scheme. 
+* Although the constructor is public, it should only be instantiated by the Encryption Scheme itself via the generateKey function.
 *
 */
 class ElGamalPublicKey : public PublicKey {
@@ -75,9 +74,8 @@ public:
 };
 
 /**
-* This class represents a Private Key suitable for the El Gamal Encryption Scheme. Although the constructor is public, it should only be instantiated by the
-* Encryption Scheme itself via the generateKey function.
-* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
+* This class represents a Private Key suitable for the El Gamal Encryption Scheme. 
+* Although the constructor is public, it should only be instantiated by the Encryption Scheme itself via the generateKey function.
 *
 */
 class ElGamalPrivateKey : public PrivateKey, KeySendableData {
@@ -96,7 +94,7 @@ public:
 	vector<byte> getEncoded() override { throw NotImplementedException(""); }
 };
 
-//Nested class that holds the sendable data of the outer class
+//Holds the sendable data of ElGamalOnGroupElementCiphertext class.
 class ElGamalOnGrElSendableData : public AsymmetricCiphertextSendableData {
 
 private:
@@ -117,7 +115,6 @@ public:
 
 /**
 * This class is a container that encapsulates the cipher data resulting from applying the ElGamalOnGroupElement encryption.
-* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
 *
 */
 class ElGamalOnGroupElementCiphertext : public AsymmetricCiphertext {
@@ -164,7 +161,7 @@ public:
 	}
 };
 
-//Nested class that holds the sendable data of the outer class
+//Holds the sendable data of ElGamalOnByteArrayCiphertext class.
 class ElGamalOnByteArraySendableData : public AsymmetricCiphertextSendableData {
 
 private:
@@ -189,7 +186,6 @@ public:
 
 /**
 * This class is a container that encapsulates the cipher data resulting from applying the ElGamalOnByteArray encryption.
-* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
 *
 */
 class ElGamalOnByteArrayCiphertext : public AsymmetricCiphertext {
@@ -213,13 +209,11 @@ public:
 	}
 
 	/**
-	*
 	* @return the first part of the ciphertext
 	*/
 	shared_ptr<GroupElement> getC1() { return cipher1; }
 
 	/**
-	*
 	* @return the second part of the ciphertext
 	*/
 	vector<byte> getC2() { return cipher2; }
@@ -266,7 +260,7 @@ protected:
 	
 public:
 	/**
-	* Default constructor. Uses the default implementations of DlogGroup, CryptographicHash and SecureRandom.
+	* Default constructor. Uses the default implementations of DlogGroup and SecureRandom.
 	*/
 	ElGamalEnc();
 
@@ -344,12 +338,12 @@ public:
 	* @param plaintext contains message to encrypt. The given plaintext must match this ElGamal type.
 	* @return Ciphertext containing the encrypted message.
 	* @throws IllegalStateException if no public key was set.
-	* @throws IllegalArgumentException if the given Plaintext does not match this ElGamal type.
+	* @throws invalid_argument if the given Plaintext does not match this ElGamal type.
 	*/
 	shared_ptr<AsymmetricCiphertext> encrypt(const shared_ptr<Plaintext> & plaintext) override;
 
 	/**
-	* Encrypts the given plaintext using this asymmetric encryption scheme and using the given random value.<p>
+	* Encrypts the given plaintext using this asymmetric encryption scheme and using the given random value.
 	* There are cases when the random value is used after the encryption, for example, in sigma protocol.
 	* In these cases the random value should be known to the user. We decided not to have function that return it to the user
 	* since this can cause problems when more than one value is being encrypt.
@@ -359,16 +353,16 @@ public:
 	* @param r The random value to use in the encryption.
 	* @return Ciphertext containing the encrypted message.
 	* @throws IllegalStateException if no public key was set.
-	* @throws IllegalArgumentException if the given Plaintext does not match this ElGamal type.
+	* @throws invalid_argument if the given Plaintext does not match this ElGamal type.
 	*/
 	shared_ptr<AsymmetricCiphertext> encrypt(const shared_ptr<Plaintext> & plaintext, const biginteger & r) override;
 };
 
 
 /**
-* This class performs the El Gamal encryption scheme that perform the encryption on a GroupElement. <P>
+* This class performs the El Gamal encryption scheme that perform the encryption on a GroupElement. 
 * In some cases there are protocols that do multiple calculations and might want to keep working on a close group.
-* For those cases we provide encryption on a group element. <P>
+* For those cases we provide encryption on a group element. 
 *
 * By definition, this encryption scheme is CPA-secure and Indistinguishable.
 *
@@ -388,9 +382,6 @@ protected:
 	shared_ptr<AsymmetricCiphertext> completeEncryption(const shared_ptr<GroupElement> & c1, GroupElement* hy, Plaintext* plaintext) override;
 
 public:
-	/**
-	* Default constructor. Uses the default implementations of DlogGroup, CryptographicHash and SecureRandom.
-	*/
 	ElGamalOnGroupElementEnc() {}
 
 	/**
@@ -399,7 +390,7 @@ public:
 	* @param dlogGroup underlying DlogGroup to use, it has to have DDH security level
 	* @throws SecurityLevelException if the Dlog Group is not DDH secure
 	*/
-	ElGamalOnGroupElementEnc(const shared_ptr<DlogGroup> & dlogGroup) : ElGamalEnc(dlogGroup) {}
+	ElGamalOnGroupElementEnc(const shared_ptr<DlogGroup> & dlogGroup, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) : ElGamalEnc(dlogGroup, random) {}
 
 	
 	/**
@@ -417,7 +408,7 @@ public:
 	/**
 	* Generates a Plaintext suitable to ElGamal encryption scheme from the given message.
 	* @param text byte array to convert to a Plaintext object.
-	* @throws IllegalArgumentException if the given message's length is greater than the maximum.
+	* @throws invalid_argument if the given message's length is greater than the maximum.
 	*/
 	shared_ptr<Plaintext> generatePlaintext(vector<byte> & text) override;
 
@@ -427,7 +418,7 @@ public:
 	* @param cipher MUST be of type ElGamalOnGroupElementCiphertext contains the cipher to decrypt.
 	* @return Plaintext of type GroupElementPlaintext which containing the decrypted message.
 	* @throws KeyException if no private key was set.
-	* @throws IllegalArgumentException if the given cipher is not instance of ElGamalOnGroupElementCiphertext.
+	* @throws invalid_argument if the given cipher is not instance of ElGamalOnGroupElementCiphertext.
 	*/
 	shared_ptr<Plaintext> decrypt(AsymmetricCiphertext* cipher) override;
 
@@ -437,7 +428,7 @@ public:
 	* and therefore he is working on byte array.
 	* @param plaintext to generates byte array from. MUST be an instance of GroupElementPlaintext.
 	* @return the byte array generated from the given plaintext.
-	* @throws IllegalArgumentException if the given plaintext is not an instance of GroupElementPlaintext.
+	* @throws invalid_argument if the given plaintext is not an instance of GroupElementPlaintext.
 	*/
 	vector<byte> generateBytesFromPlaintext(Plaintext* plaintext) override;
 
@@ -445,15 +436,15 @@ public:
 	* Calculates the ciphertext resulting of multiplying two given ciphertexts.
 	* Both ciphertexts have to have been generated with the same public key and DlogGroup as the underlying objects of this ElGamal object.
 	* @throws IllegalStateException if no public key was set.
-	* @throws IllegalArgumentException in the following cases:
+	* @throws invalid_argument in the following cases:
 	* 		1. If one or more of the given ciphertexts is not instance of ElGamalOnGroupElementCiphertext.
 	* 		2. If one or more of the GroupElements in the given ciphertexts is not a member of the underlying DlogGroup of this ElGamal encryption scheme.
 	*/
 	shared_ptr<AsymmetricCiphertext> multiply(AsymmetricCiphertext* cipher1, AsymmetricCiphertext* cipher2) override;
 
 	/**
-	* Calculates the ciphertext resulting of multiplying two given ciphertexts.<P>
-	* Both ciphertexts have to have been generated with the same public key and DlogGroup as the underlying objects of this ElGamal object.<p>
+	* Calculates the ciphertext resulting of multiplying two given ciphertexts.
+	* Both ciphertexts have to have been generated with the same public key and DlogGroup as the underlying objects of this ElGamal object.
 	*
 	* There are cases when the random value is used after the function, for example, in sigma protocol.
 	* In these cases the random value should be known to the user. We decided not to have function that return it to the user
@@ -461,7 +452,7 @@ public:
 	* Instead, we decided to have an additional multiply function that gets the random value from the user.
 	*
 	* @throws IllegalStateException if no public key was set.
-	* @throws IllegalArgumentException in the following cases:
+	* @throws invalid_argument in the following cases:
 	* 		1. If one or more of the given ciphertexts is not instance of ElGamalOnGroupElementCiphertext.
 	* 		2. If one or more of the GroupElements in the given ciphertexts is not a member of the underlying DlogGroup of this ElGamal encryption scheme.
 	*/
@@ -476,7 +467,7 @@ public:
 
 /**
 * This class performs the El Gamal encryption scheme that perform the encryption on a ByteArray.
-* The general encryption of a message usually uses this type of encryption. <p>
+* The general encryption of a message usually uses this type of encryption. 
 *
 * By definition, this encryption scheme is CPA-secure and Indistinguishable.
 *
@@ -491,7 +482,6 @@ private:
 protected:
 	/**
 	* Sets the private key.
-	* @param privateKey.
 	*/
 	void initPrivateKey(const shared_ptr<ElGamalPrivateKey> & privateKey) override	{
 		//Sets the given PrivateKey.
@@ -502,13 +492,13 @@ protected:
 	* Completes the encryption operation.
 	* @param plaintext contains message to encrypt. MUST be of type ByteArrayPlaintext.
 	* @return Ciphertext of type ElGamalOnByteArrayCiphertext containing the encrypted message.
-	* @throws IllegalArgumentException if the given Plaintext is not an instance of ByteArrayPlaintext.
+	* @throws invalid_argument if the given Plaintext is not an instance of ByteArrayPlaintext.
 	*/
 	shared_ptr<AsymmetricCiphertext> completeEncryption(const shared_ptr<GroupElement> & c1, GroupElement* hy, Plaintext* plaintext) override;
 									
 public:
 	/**
-	* Default constructor. Uses the default implementations of DlogGroup and SecureRandom.
+	* Default constructor. Uses the default implementations of DlogGroup, kdf and SecureRandom.
 	*/
 	ElGamalOnByteArrayEnc() : ElGamalEnc() {
 		//Creates a default implementation of KDF.
@@ -521,7 +511,8 @@ public:
 	* @param dlogGroup must be DDH secure.
 	* @throws SecurityLevelException if the given dlog group does not have DDH security level.
 	*/
-	ElGamalOnByteArrayEnc(const shared_ptr<DlogGroup> & dlogGroup, const shared_ptr<KeyDerivationFunction> & kdf) : ElGamalEnc(dlogGroup) {
+	ElGamalOnByteArrayEnc(const shared_ptr<DlogGroup> & dlogGroup, const shared_ptr<KeyDerivationFunction> & kdf, 
+						  const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) : ElGamalEnc(dlogGroup, random) {
 		this->kdf = kdf;
 	}
 	
@@ -533,7 +524,7 @@ public:
 
 	/**
 	* ElGamalOnByteArray encryption can get any plaintext length.
-	* @throws NoMaxException.
+	* @throws runtime_error.
 	*/
 	int getMaxLengthOfByteArrayForPlaintext() override {
 		throw runtime_error("ElGamalOnByteArray encryption can get any plaintext length");
@@ -553,7 +544,7 @@ public:
 	* @param cipher MUST be of type ElGamalOnByteArrayCiphertext contains the cipher to decrypt.
 	* @return Plaintext of type ByteArrayPlaintext which containing the decrypted message.
 	* @throws KeyException if no private key was set.
-	* @throws IllegalArgumentException if the given cipher is not instance of ElGamalOnByteArrayCiphertext.
+	* @throws invalid_argument if the given cipher is not instance of ElGamalOnByteArrayCiphertext.
 	*/
 	shared_ptr<Plaintext> decrypt(AsymmetricCiphertext* cipher) override; 
 
@@ -563,7 +554,7 @@ public:
 	* and therefore he is working on byte array.
 	* @param plaintext to generates byte array from. MUST be an instance of ByteArrayPlaintext.
 	* @return the byte array generated from the given plaintext.
-	* @throws IllegalArgumentException if the given plaintext is not an instance of ByteArrayPlaintext.
+	* @throws invalid_argument if the given plaintext is not an instance of ByteArrayPlaintext.
 	*/
 	vector<byte> generateBytesFromPlaintext(Plaintext* plaintext) override; 
 

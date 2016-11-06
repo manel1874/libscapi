@@ -163,14 +163,7 @@ OpenSSLPRP::~OpenSSLPRP() {
 /**** OpenSSLAES ***/
 /*************************************************/
 
-OpenSSLAES::OpenSSLAES() {
-	auto random = make_shared<PrgFromOpenSSLAES>();
-	auto key = random->generateKey(128);
-	random->setKey(key);
-	init(random);
-}
-
-void OpenSSLAES::init(const shared_ptr<PrgFromOpenSSLAES> & setRandom) {
+OpenSSLAES::OpenSSLAES(const shared_ptr<PrgFromOpenSSLAES> & setRandom) {
 	prg = setRandom;
 	computeP = EVP_CIPHER_CTX_new();
 	invertP = EVP_CIPHER_CTX_new();
@@ -213,7 +206,7 @@ void OpenSSLAES::setKey(SecretKey & secretKey) {
 /*************************************************/
 /**** OpenSSLHMAC ***/
 /*************************************************/
-void OpenSSLHMAC::construct(string hashName, const shared_ptr<PrgFromOpenSSLAES> & random) {
+OpenSSLHMAC::OpenSSLHMAC(string hashName, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	/*
 	* The way we call the hash is not the same as OpenSSL. For example: we call "SHA-1" while OpenSSL calls it "SHA1".
 	* So the hyphen should be deleted.
@@ -389,9 +382,7 @@ OpenSSLTripleDES::OpenSSLTripleDES() {
 	// create the native objects.
 	computeP = EVP_CIPHER_CTX_new();
 	invertP = EVP_CIPHER_CTX_new();
-	prg = make_shared<PrgFromOpenSSLAES>();
-	auto key = prg->generateKey(128);
-	prg->setKey(key);
+	prg = get_seeded_prg();
 }
 
 void OpenSSLTripleDES::setKey(SecretKey & secretKey) {

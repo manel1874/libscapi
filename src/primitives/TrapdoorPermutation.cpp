@@ -81,7 +81,7 @@ vector<byte> TrapdoorPermutationAbs::hardCoreFunction(TPElement * tpEl) {
 /*RSAElement                                     */
 /*************************************************/
 
-RSAElement::RSAElement(biginteger & modN, const shared_ptr<PrgFromOpenSSLAES> & generator){
+RSAElement::RSAElement(const biginteger & modN, const shared_ptr<PrgFromOpenSSLAES> & generator){
 	/*
 	* samples a number between 1 to n-1
 	*/
@@ -98,7 +98,7 @@ RSAElement::RSAElement(biginteger & modN, const shared_ptr<PrgFromOpenSSLAES> & 
 	element = randNumber;
 }
 
-RSAElement::RSAElement(biginteger & modN, biginteger & x, bool check) {
+RSAElement::RSAElement(const biginteger & modN, const biginteger & x, bool check) {
 	if (!check)
 		element = x;
 	else {
@@ -111,6 +111,36 @@ RSAElement::RSAElement(biginteger & modN, biginteger & x, bool check) {
 			element = x;
 		else 
 			throw invalid_argument("element out of range");
+	}
+}
+
+RSAModulus::RSAModulus(size_t length, int certainty, PrgFromOpenSSLAES* random) {
+
+	int pbitlength = (length + 1) / 2;
+	int qbitlength = length - pbitlength;
+	size_t mindiffbits = length / 3;
+
+
+	// generate p prime
+	p = getRandomPrime(pbitlength, certainty, random);
+	for (;;) {
+		do {
+			q = getRandomPrime(qbitlength, certainty, random);
+		} while ((bytesCount(mp::abs(q - p)) * 8) < mindiffbits);
+
+		// calculate the modulus
+		n = p * q;
+
+		if ((bytesCount(n) * 8) == length)
+		{
+			break;
+		}
+
+		//
+		// if we get here our primes aren't big enough, make the largest
+		// of the two p and try again
+		//
+		p = (p > q) ? p : q;
 	}
 }
 

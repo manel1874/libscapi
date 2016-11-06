@@ -47,35 +47,36 @@ class TargetCollisionResistant : HashSecLevel {};
 class CollisionResistant : TargetCollisionResistant {};
 
 /**
-* General interface for CryptographicHash. Every concrete class should implement this interface. <p>
+* Abstract class for CryptographicHash. Every concrete class should derive this class. <p>
 * A cryptographic hash function is a deterministic procedure that takes an arbitrary block of data and returns a fixed-size bit string,
 * the (cryptographic) hash value.
 */
 class CryptographicHash {
 public:
 	virtual ~CryptographicHash() {};
+
 	/**
-	* @return The algorithm name. For example - SHA1
+	* @return The algorithm name. For example - SHA1.
 	*/
 	virtual string getAlgorithmName()=0;
 
 	/**
-	* @return the size of the hashed massage in bytes
+	* @return the size of the hashed massage in bytes.
 	*/
 	virtual int getHashedMsgSize()=0;
 
 	/**
-	* Adds the byte array to the existing message to hash.
-	* @param in input byte array
-	* @param inOffset the offset within the byte array
-	* @param inLen the length. The number of bytes to take after the offset
+	* Adds the byte vector to the existing message to hash.
+	* @param in input byte vector.
+	* @param inOffset the offset within the byte array.
+	* @param inLen the length. The number of bytes to take after the offset.
 	* */
 	virtual void update(const vector<byte> &in, int inOffset, int inLen)=0;
 
 	/**
-	* Completes the hash computation and puts the result in the out array.
-	* @param out the output in byte array
-	* @param outOffset the offset which to put the result bytes from
+	* Completes the hash computation and puts the result in the out vector.
+	* @param out the output in byte vector.
+	* @param outOffset the offset which to put the result bytes from.
 	*/
 	virtual void hashFinal(vector<byte> &out, int outOffset)=0;
 
@@ -86,7 +87,7 @@ public:
 };
 
 /*****************************************************************
-* SHA Marker interfaces. Every class that implements them is signed as SHA:
+* SHA Abstract classes. Every class that implements them is signed as SHA:
 ******************************************************************/
 class SHA1   : public virtual CryptographicHash, public virtual CollisionResistant {};
 class SHA224 : public virtual CryptographicHash, public virtual CollisionResistant {};
