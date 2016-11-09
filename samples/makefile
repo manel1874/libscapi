@@ -3,7 +3,7 @@ CXX               = g++ -std=c++11 $(INC) -O3 -Wall -Wno-unused-function -Wno-un
 LIBS              =  -L../install/lib -L../../boost_1_60_0/stage/lib
 LINKER_OPTIONS    =  ../scapi.a ../install/lib/libOTExtensionBristol.a ../install/lib/libsimpleot.a $(LIBS) -lcrypto -ldl -lboost_log -lboost_system -lboost_thread -lpthread -lssl -lgmp -lOTExtension -lMaliciousOTExtension -lrt
 CPP_OPTIONS       = -std=c++11 $(INC) -O3 -Wall -Wno-unused-function 
-OBJS              = simple_dlog.o simple_sha1.o CommitmentExample.o OTExample.o SigmaProtocolExample.o comm_example.o YaoParties.o App1.o MaliciousOTExample.o OTExtensionBristolExample.o ospsi_main.o OSPSIParty.o OSPSIServer.o unity.o
+OBJS              = simple_dlog.o simple_sha1.o CommitmentExample.o OTExample.o SigmaProtocolExample.o comm_example.o YaoParties.o App1.o MaliciousOTExample.o SemiHonestOT.o OTExtensionBristolExample.o ospsi_main.o OSPSIParty.o OSPSIServer.o unity.o
 
 all: libscapi_example
 
@@ -23,6 +23,9 @@ libscapi_example: $(OBJS)
 	$(CXX) -c -maes -mpclmul $< -o $@
 
 %.o: MaliciousOT/%.cpp
+	$(CXX) -c -maes -mpclmul $< -o $@
+
+%.o: SemiHonestOT/%.cpp
 	$(CXX) -c -maes -mpclmul $< -o $@
 	
 %.o: OTExtensionBristol/%.cpp
