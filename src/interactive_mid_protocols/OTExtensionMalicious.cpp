@@ -205,7 +205,7 @@ shared_ptr<OTBatchSOutput> OTExtensionMaliciousSender::transfer(OTBatchSInput * 
 
 void OTExtensionMaliciousSender::runOtAsSender(vector<byte> & x0, vector<byte> & x1, vector<byte> & deltaArr, int numOfOts, int bitLength, maliciousot::BYTE version) {
 	maliciousot::CBitVector delta, X1, X2;
-	maliciousot::MaskingFunction * masking_function;
+	maliciousot::MaskingFunction * masking_function = nullptr;
 	//Create X1 and X2 as two arrays with "numOTs" entries of "bitlength" bit-values
 	X1.Create(numOfOts, bitLength);
 	X2.Create(numOfOts, bitLength);

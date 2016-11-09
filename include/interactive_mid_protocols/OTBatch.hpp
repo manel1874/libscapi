@@ -53,6 +53,7 @@ protected:
 	vector<byte> r1Arr;
 
 public:
+	OTExtensionRandomizedSOutput(){}
 	OTExtensionRandomizedSOutput(const vector<byte> & r0Arr, const vector<byte> & r1Arr) : r0Arr(r0Arr), r1Arr(r1Arr) {}
 
 	/**
