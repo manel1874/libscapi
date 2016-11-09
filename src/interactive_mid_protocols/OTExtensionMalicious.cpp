@@ -102,7 +102,7 @@ OTExtensionMaliciousSender::OTExtensionMaliciousSender(SocketPartyData bindAddre
 		m_connection_manager->get_sockets_data(),
 		m_receiver_key_seeds_matrix,
 		m_receiver_seed, m_num_base_ots, s2ots);
-	//m_receiver = unique_ptr<Mal_OTExtensionReceiver>(tempR);
+	
 	m_receiver->receive(s2ots, AES_KEY_BITS, U, seedcbitvec, maliciousot::R_OT, 1, masking_function);
 	delete masking_function;
 
@@ -114,8 +114,6 @@ OTExtensionMaliciousSender::OTExtensionMaliciousSender(SocketPartyData bindAddre
 		m_connection_manager->get_sockets_data(),
 		URev, m_sender_key_seeds, m_num_base_ots,
 		m_num_checks, s2ots, m_sender_seed);
-	//m_sender = unique_ptr<Mal_OTExtensionSender>(tempSnd);
-	
 }
 
 OTExtensionMaliciousSender::~OTExtensionMaliciousSender() {
@@ -145,13 +143,6 @@ BOOL OTExtensionMaliciousSender::precompute_base_ots_sender() {
 	return true;
 }
 
-/**
-* The overloaded function that runs the protocol.<p>
-* After the base OT was done by the constructor, call to this function will be optimized and fast, no matter how much OTs there are.
-* @param channel Disregarded. This is ignored since the connection is done in the c++ code.
-* @param input The input for the sender specifying the version of the OT extension to run.
-* Every call to the transfer function can run a different OT extension version.
-*/
 shared_ptr<OTBatchSOutput> OTExtensionMaliciousSender::transfer(OTBatchSInput * input) {
 
 	int numOfOts;
@@ -173,62 +164,48 @@ shared_ptr<OTBatchSOutput> OTExtensionMaliciousSender::transfer(OTBatchSInput * 
 		//This version has no output. Return null.
 		return NULL;
 
-		//In case the given input is correlated input.
-		/*
-		}
-		else if (input instanceof OTExtensionCorrelatedSInput) {
-
-		byte[] delta = ((OTExtensionCorrelatedSInput)input).getDelta();
+	//In case the given input is correlated input.
+	} else if (input->getType() == OTBatchSInputTypes::OTExtensionCorrelatedSInput) {
+		auto delta = ((OTExtensionCorrelatedSInput *)input)->getDeltaArr();
 
 		// Prepare empty x0 and x1 for the output.
-		byte[] x0 = new byte[delta.length];
-		byte[] x1 = new byte[delta.length];
+		vector<byte> x0(delta.size());
+		vector<byte> x1(delta.size());
 
-		numOfOts = ((OTExtensionCorrelatedSInput)input).getNumOfOts();
+		numOfOts = ((OTExtensionCorrelatedSInput *)input)->getNumOfOts();
 
 		//Call the native function. It will fill x0 and x1.
-		runOtAsSender(senderPtr, x0, x1, delta, numOfOts, delta.length / numOfOts * 8, OT_EXTENSION_TYPE_CORRELATED);
+		runOtAsSender(x0, x1, delta, numOfOts, delta.size() / numOfOts * 8, maliciousot::C_OT);
 
 		//Return output contains x0, x1.
-		return new OTExtensionSOutput(x0, x1);
+		return make_shared<OTExtensionCorrelatedSOutput>(x0, x1);
 
-		//In case the given input is random input.
-		}
-		else if (input instanceof OTExtensionRandomSInput) {
+	//In case the given input is random input.
+	} else if (input->getType() == OTBatchSInputTypes::OTExtensionRandomizedSInput) {
 
-		numOfOts = ((OTExtensionRandomSInput)input).getNumOfOts();
-		int bitLength = ((OTExtensionRandomSInput)input).getBitLength();
+		numOfOts = ((OTExtensionRandomizedSInput *)input)->getNumOfOts();
+		int bitLength = ((OTExtensionRandomizedSInput *)input)->getBitLength();
 
 		//Prepare empty x0 and x1 for the output.
-		byte[] x0 = new byte[numOfOts * bitLength / 8];
-		byte[] x1 = new byte[numOfOts * bitLength / 8];
+		vector<byte> x0(numOfOts * bitLength / 8);
+		vector<byte> x1(numOfOts * bitLength / 8);
 
 		//Call the native function. It will fill x0 and x1.
-		runOtAsSender(senderPtr, x0, x1, null, numOfOts, bitLength, OT_EXTENSION_TYPE_RANDOM);
+		vector<byte> empty;
+		runOtAsSender(x0, x1, empty, numOfOts, bitLength, maliciousot::R_OT);
 
 		//Return output contains x0, x1.
-		return new OTExtensionSOutput(x0, x1);
+		return make_shared<OTExtensionRandomizedSOutput>(x0, x1);
 
-		//If input is not instance of the above inputs, throw Exception.*/
-	}
-	else {
+	//If input is not instance of the above inputs, throw Exception.*/
+	} else {
 		throw invalid_argument("input should be an instance of OTExtensionGeneralSInput or OTExtensionCorrelatedSInput or OTExtensionRandomSInput.");
 	}
 }
 
-/*
-* runs the OT extension as the sender.
-* @param x0 An array that holds all the x0 values for each of the OT's serially (concatenated).
-* @param x1 An array that holds all the x1 values for each of the OT's serially (concatenated).
-* @param delta
-* @param numOfOts The number of OTs that the protocol runs (how many strings are inside x0?)
-* @param bitLength The length (in bits) of each item in the OT. can be derived from |x0|, |x1|, numOfOts
-* @param version the OT extension version the user wants to use.
-*/
-void OTExtensionMaliciousSender::runOtAsSender(vector<byte> & x0, vector<byte> & x1, vector<byte> & delta, int numOfOts, int bitLength, maliciousot::BYTE version) {
-	
-	maliciousot::CBitVector /*delta,*/ X1, X2;
-	maliciousot::MaskingFunction * masking_function = new maliciousot::XORMasking(bitLength);
+void OTExtensionMaliciousSender::runOtAsSender(vector<byte> & x0, vector<byte> & x1, vector<byte> & deltaArr, int numOfOts, int bitLength, maliciousot::BYTE version) {
+	maliciousot::CBitVector delta, X1, X2;
+	maliciousot::MaskingFunction * masking_function;
 	//Create X1 and X2 as two arrays with "numOTs" entries of "bitlength" bit-values
 	X1.Create(numOfOts, bitLength);
 	X2.Create(numOfOts, bitLength);
@@ -243,50 +220,38 @@ void OTExtensionMaliciousSender::runOtAsSender(vector<byte> & x0, vector<byte> &
 			X1.SetByte(i, x0.at(i));
 			X2.SetByte(i, x1.at(i));
 		}
+		masking_function = new maliciousot::XORMasking(bitLength);
 	}
 
-	/* correlated ot -------------------------------------------------------------
-	else if (version == C_OT) {
-		//get the delta from java
-		deltaArr = env->GetByteArrayElements(deltaFromJava, 0);
+	// correlated ot -------------------------------------------------------------
+	else if (version == maliciousot::C_OT) {
 		delta.Create(numOfOts, bitLength);
 
 		// set the delta values given from java
 		int deltaSizeInBytes = numOfOts * bitLength / 8;
-		for (int i = 0; i < deltaSizeInBytes; i++) {
-			delta.SetByte(i, deltaArr[i]);
-		}
+		memcpy(delta.GetArr(), deltaArr.data(), deltaSizeInBytes);
 
-		//creates delta as an array with "numOTs" entries of "bitlength" 
-		// bit-values and fills delta with random values
-		//delta.Create(numOfOts, bitLength, m_aSeed, m_nCounter);
+		masking_function = new maliciousot::XORMasking(bitLength, delta);
+		
 	}
-
-	// random ot -----------------------------------------------------------------
-	else if (version == R_OT) {
-		//no need to set any values. There is no input for x0 and x1 and no input for delta
-	}*/
+	else if (version == maliciousot::R_OT) {
+		masking_function = new maliciousot::XORMasking(bitLength);
+	}
 
 	m_sender->send(numOfOts, bitLength, X1, X2, version, m_connection_manager->get_num_of_threads(), masking_function);
 
-	/*if (version != G_OT) { //we need to copy x0 and x1 
+	if (version != maliciousot::G_OT) { //we need to copy x0 and x1 
 
-					   //get the values from the ot and copy them to x1Arr, x2Arr wich later on will be copied to the java values x1 and x2
-		for (int i = 0; i < numOfOts*bitLength / 8; i++) {
-			//copy each byte result to out
-			x1Arr[i] = X1.GetByte(i);
-			x2Arr[i] = X2.GetByte(i);
-		}
+		//get the values from the ot and copy them to x1Arr, x2Arr wich later on will be copied to the java values x1 and x2
+		memcpy(x0.data(), X1.GetArr(), numOfOts*bitLength / 8);
+		memcpy(x1.data(), X2.GetArr(), numOfOts*bitLength / 8);
 
-		if (ver == C_OT) {
-			env->ReleaseByteArrayElements(deltaFromJava, deltaArr, 0);
-		}
-	}*/
+	}
 	delete masking_function;
 
 	X1.delCBitVector();
 	X2.delCBitVector();
-	//delta.delCBitVector();
+	delta.delCBitVector();
 }
 
 /**
@@ -309,9 +274,7 @@ OTExtensionMaliciousReceiver::OTExtensionMaliciousReceiver(SocketPartyData serve
 	m_sender_key_seeds = new maliciousot::BYTE[AES_KEY_BYTES * m_num_base_ots];//m_security_level.symbits);
 	m_receiver_key_seeds_matrix = new maliciousot::BYTE[AES_KEY_BYTES * 2 * s2ots];
 
-	// client connect
-	// Create the receiver by passing the local host address.
-	
+	// client connect	
 	m_connection_manager->setup_connection();
 
 	// 1st step: pre-compute the PVW base OTs
@@ -333,12 +296,10 @@ OTExtensionMaliciousReceiver::OTExtensionMaliciousReceiver(SocketPartyData serve
 
 	for (int i = 0; i < s2ots; i++) {
 		memcpy(m_receiver_key_seeds_matrix + 2 * i * AES_KEY_BYTES,
-			seedA.GetArr() + i * AES_KEY_BYTES,
-			AES_KEY_BYTES);
+			seedA.GetArr() + i * AES_KEY_BYTES,	AES_KEY_BYTES);
 
 		memcpy(m_receiver_key_seeds_matrix + (2 * i + 1) * AES_KEY_BYTES,
-			seedB.GetArr() + i * AES_KEY_BYTES,
-			AES_KEY_BYTES);
+			seedB.GetArr() + i * AES_KEY_BYTES, AES_KEY_BYTES);
 	}
 
 	m_receiver = new maliciousot::Mal_OTExtensionReceiver(nSndVals, m_security_level.symbits,
@@ -378,7 +339,7 @@ BOOL OTExtensionMaliciousReceiver::precompute_base_ots_receiver() {
 }
 
 /**
-* The overloaded function that runs the protocol.<p>
+* The overloaded function that runs the protocol.
 * After the base OT was done by the constructor, call to this function will be optimized and fast, no matter how much OTs there are.
 * @param channel Disregarded. This is ignored since the connection is done in the c++ code.
 * @param input The input for the receiver specifying the version of the OT extension to run.
@@ -388,18 +349,21 @@ shared_ptr<OTBatchROutput> OTExtensionMaliciousReceiver::transfer(OTBatchRInput 
 
 	maliciousot::BYTE version = maliciousot::G_OT;
 	//Check if the input is valid. If input is not instance of OTRExtensionInput, throw Exception.
-	if (input->getType() != OTBatchRInputTypes::OTExtensionGeneralRInput)
-		throw invalid_argument("input should be instance of OTExtensionGeneralRInput");
+	auto in = dynamic_cast<OTExtensionRInput*>(input);
+	if (in == nullptr)
+		throw invalid_argument("input should be instance of OTExtensionRInput");
 
-	/*//If the user gave correlated input, change the version of the OT to correlated.
-	if (input instanceof OTExtensionCorrelatedRInput) {
-		version = OT_EXTENSION_TYPE_CORRELATED;
+	//If the user gave correlated input, change the version of the OT to correlated.
+	auto correlatedInput = dynamic_cast<OTExtensionCorrelatedRInput*>(input);
+	if (correlatedInput != nullptr) {
+		version = maliciousot::C_OT;
 	}
 
 	//If the user gave random input, change the version of the OT to random.
-	if (input instanceof OTExtensionRandomRInput) {
-		version = OT_EXTENSION_TYPE_RANDOM;
-	}*/
+	auto randomizedInput = dynamic_cast<OTExtensionRandomizedRInput*>(input);
+	if (randomizedInput != nullptr) {
+		version = maliciousot::R_OT;
+	}
 
 	auto sigmaArr = ((OTExtensionRInput *)input)->getSigmaArr();
 	int numOfOts = ((OTExtensionRInput *)input)->getSigmaArrSize();
@@ -433,10 +397,7 @@ vector<byte> OTExtensionMaliciousReceiver::runOtAsReceiver(vector<byte>& sigma, 
 	//prepare the out array
 	int sizeResponseInBytes = numOfOts*bitLength / 8;
 	vector<byte> output(sizeResponseInBytes);
-	for (int i = 0; i < sizeResponseInBytes; i++) {
-		//copy each byte result to out
-		output[i] = response.GetByte(i);
-	}
+	memcpy(output.data(), response.GetArr(), sizeResponseInBytes);
 
 	//free the pointer of choises and reponse
 	choices.delCBitVector();

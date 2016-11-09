@@ -1,39 +1,39 @@
 /**
 * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-* 
+*
 * Copyright (c) 2016 LIBSCAPI (http://crypto.biu.ac.il/SCAPI)
 * This file is part of the SCAPI project.
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
-* 
+*
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"),
-* to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+* to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
 * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-* 
+*
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-* 
+*
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-* 
+*
 * We request that any publication and/or code referring to and/or based on SCAPI contain an appropriate citation to SCAPI, including a reference to
 * http://crypto.biu.ac.il/SCAPI.
-* 
+*
 * Libscapi uses several open source libraries. Please see these projects for any further licensing issues.
 * For more information , See https://github.com/cryptobiu/libscapi/blob/master/LICENSE.MD
 *
 * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-* 
+*
 */
 
 
-#include "../include/interactive_mid_protocols/OTExtensionMalicious.hpp"
+#include "../include/interactive_mid_protocols/OTSemiHonestExtension.hpp"
 
-void mainR() {
+void mainReceiver() {
 	// init phase
 	int numOts = 1;
 	srand(time(NULL));
 	SocketPartyData senderParty(IpAdress::from_string("127.0.0.1"), 7766);
-	OTExtensionMaliciousReceiver* receiver_interface = new OTExtensionMaliciousReceiver(senderParty, numOts); // total ots
+	auto receiver_interface = new OTSemiHonestExtensionReceiver(senderParty, 163, 1);
 
 	vector<byte> choices, response;
 	
@@ -46,25 +46,26 @@ void mainR() {
 	//OTBatchRInput * input = new OTExtensionGeneralRInput(choices, 128);
 	//OTBatchRInput * input = new OTExtensionCorrelatedRInput(choices, 128);
 	OTBatchRInput * input = new OTExtensionRandomizedRInput(choices, 128);
+	
 	auto output = receiver_interface->transfer(input);
 	
 	//prepare the out array
 	auto arr = ((OTOnByteArrayROutput*)(output.get()))->getXSigma();
 	for (size_t i = 0; i < arr.size(); i++) {
-		cout << (int) arr.at(i) << " ";
+		cout << (int)arr.at(i) << " ";
 	}
 	cout << endl;
 
 	delete receiver_interface;
 }
 
-void mainS() {
+void mainSender() {
 	// init phase
 	int numOts = 1;
 	int bitLength = 128;
 	srand(time(NULL));
 	SocketPartyData senderParty(IpAdress::from_string("127.0.0.1"), 7766);
-	OTExtensionMaliciousSender * sender_interface = new OTExtensionMaliciousSender(senderParty, numOts); // total ots
+	auto sender_interface = new OTSemiHonestExtensionSender(senderParty, 163, 1);
 	
 	// run ot as sender phase
 	vector<byte> delta, X1, X2;
@@ -75,9 +76,9 @@ void mainS() {
 	}
 
 	//OTBatchSInput * input = new OTExtensionGeneralSInput(X1, X2, numOts);
-	//OTBatchSInput * input = new OTExtensionCorrelatedSInput(X1, numOts);
+	//OTBatchSInput * input = new OTExtensionCorrelatedSInput(X2, numOts);
 	OTBatchSInput * input = new OTExtensionRandomizedSInput(bitLength, numOts);
-	auto start = scapi_now();
+	
 	auto output = sender_interface->transfer(input); 
 	
 	cout << "x0 : " << endl;
@@ -98,13 +99,13 @@ void mainS() {
 }
 
 
-int mainOTMalicious(string party) {
+int mainOTSemiHonest(string party) {
 
 	if (party == "1") {
-		mainS();
+		mainSender();
 	}
 	else {
-		mainR();
+		mainReceiver();
 	}
 	return 1;
 }

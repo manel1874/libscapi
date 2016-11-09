@@ -38,6 +38,7 @@ example_name can one of the following:
 	* dlog
 	* sha1
 	* maliciousOT <party_number (1|2)>
+	* semiHonestOT <party_number (1|2)>
 	* comm		  <party_number (1|2)> <config_file_path>
 	* yao		  <party_number (1|2)> <config_file_path>
 	* sigma		  <party_number (1|2)> <config_file_path>
@@ -62,6 +63,8 @@ int main(int argc, char* argv[]) {
 		return exampleUsage();
 	if (exampleName == "maliciousOT")
 		return mainOTMalicious(argv[2]);
+	if (exampleName == "semiHonestOT")
+		return mainOTSemiHonest(argv[2]);
 #ifndef _WIN32
 	if (exampleName == "OTExtensionBristol")
 		return mainBristol(argv[2]);

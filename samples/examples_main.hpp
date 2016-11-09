@@ -34,7 +34,8 @@ int mainYao(string partyNum, string configPath);
 int mainDlog();
 int mainSha1();
 int mainSigma(string side, string configPath);
-int mainOTMalicious(string  party);
+int mainOTMalicious(string party);
+int mainOTSemiHonest(string party);
 //int mainOSPSI(string inputFilePath_0, string inputFilePath_1);
 #ifndef _WIN32
 int mainBristol(string party);

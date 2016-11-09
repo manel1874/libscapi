@@ -40,6 +40,9 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
+    <Filter Include="Source Files\SemiHonestOT">
+      <UniqueIdentifier>{6d52bb66-a10e-4ffc-9761-6a8b758b2849}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\samples\Yao\App1.cpp">
@@ -77,6 +80,9 @@
     </ClCompile>
     <ClCompile Include="..\..\samples\OT\OTExample.cpp">
       <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\samples\SemiHonestOT\SemiHonestOT.cpp">
+      <Filter>Source Files\SemiHonestOT</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

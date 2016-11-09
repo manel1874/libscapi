@@ -115,7 +115,7 @@ semihonestot::OTExtensionSender* OTSemiHonestExtensionSender::InitOTSender(const
 	int nSndVals = 2;
 	m_nPort = (semihonestot::USHORT)port;
 	m_nAddr = address;
-	vKeySeeds = (semihonestot::BYTE*)malloc(AES_KEY_BYTES*NUM_EXECS_NAOR_PINKAS);
+	vKeySeeds = new semihonestot::BYTE[AES_KEY_BYTES*NUM_EXECS_NAOR_PINKAS];
 	// initialize values
 	Init(numOfThreads);
 	// server listen
@@ -130,8 +130,8 @@ semihonestot::OTExtensionSender* OTSemiHonestExtensionSender::InitOTSender(const
 
 shared_ptr<OTBatchSOutput> OTSemiHonestExtensionSender::transfer(OTBatchSInput * input) {
 	int numOfOts;
-	
-	if (input->getType() == OTBatchSInputTypes::OTExtensionGeneralSInput ){ // in case the given input is general input.
+	// in case the given input is general input.
+	if (input->getType() == OTBatchSInputTypes::OTExtensionGeneralSInput ){ 
 		// retrieve the values from the input object.
 		auto x0 = ((OTExtensionGeneralSInput *)input)->getX0Arr();
 		auto x1 = ((OTExtensionGeneralSInput *)input)->getX1Arr();
@@ -142,44 +142,45 @@ shared_ptr<OTBatchSOutput> OTSemiHonestExtensionSender::transfer(OTBatchSInput *
 		// This version has no output. Return null.
 		return NULL;
 	}
-	//else if (OTExtensionCorrelatedSInput* general_input =
-	//	dynamic_cast<OTExtensionCorrelatedSInput*>(input) {//In case the given input is correlated input.
+	//In case the given input is correlated input.
+	else if (input->getType() == OTBatchSInputTypes::OTExtensionCorrelatedSInput) {
 
-	//	byte[] delta = ((OTExtensionCorrelatedSInput)input).getDelta();
+		auto delta = ((OTExtensionCorrelatedSInput *)input)->getDeltaArr();
 
-	//	// Prepare empty x0 and x1 for the output.
-	//	byte[] x0 = new byte[delta.length];
-	//	byte[] x1 = new byte[delta.length];
+		// Prepare empty x0 and x1 for the output.
+		vector<byte> x0(delta.size());
+		vector<byte> x1(delta.size());
 
-	//	numOfOts = ((OTExtensionCorrelatedSInput)input).getNumOfOts();
+		numOfOts = ((OTExtensionCorrelatedSInput *)input)->getNumOfOts();
 
-	//	//Call the native function. It will fill x0 and x1.
-	//	runOtAsSender(senderPtr, x0, x1, delta, numOfOts, delta.length / numOfOts * 8, "correlated");
+		//Call the native function. It will fill x0 and x1.
+		runOtAsSender(x0, x1, delta, numOfOts, delta.size() / numOfOts * 8, "correlated");
 
-	//	//Return output contains x0, x1.
-	//	return new OTExtensionSOutput(x0, x1);
+		//Return output contains x0, x1.
+		return make_shared<OTExtensionCorrelatedSOutput>(x0, x1);
+	
+	}
+	//In case the given input is random input.
+	else if (input->getType() == OTBatchSInputTypes::OTExtensionRandomizedSInput) {
 
-	//	//In case the given input is random input.
-	//}
-	//else if (input instanceof OTExtensionRandomSInput) {
+		numOfOts = ((OTExtensionRandomizedSInput *)input)->getNumOfOts();
+		int bitLength = ((OTExtensionRandomizedSInput *)input)->getBitLength();
 
-	//	numOfOts = ((OTExtensionRandomSInput)input).getNumOfOts();
-	//	int bitLength = ((OTExtensionRandomSInput)input).getBitLength();
+		//Prepare empty x0 and x1 for the output.
+		vector<byte> x0(numOfOts * bitLength / 8);
+		vector<byte> x1(numOfOts * bitLength / 8);
 
-	//	//Prepare empty x0 and x1 for the output.
-	//	byte[] x0 = new byte[numOfOts * bitLength / 8];
-	//	byte[] x1 = new byte[numOfOts * bitLength / 8];
+		//Call the native function. It will fill x0 and x1.
+		vector<byte> empty;
+		runOtAsSender(x0, x1, empty, numOfOts, bitLength, "random");
 
-	//	//Call the native function. It will fill x0 and x1.
-	//	runOtAsSender(senderPtr, x0, x1, null, numOfOts, bitLength, "random");
-
-	//	//Return output contains x0, x1.
-	//	return new OTExtensionSOutput(x0, x1);
-	//}
+		//Return output contains x0, x1.
+		return make_shared<OTExtensionRandomizedSOutput>(x0, x1);
+	}
 	else //If input is not instance of the above inputs, throw Exception.
-		throw invalid_argument("input should be an instance of OTExtensionGeneralSInput or OTExtensionCorrelatedSInput or OTExtensionRandomSInput.");
+		throw invalid_argument("input should be an instance of OTExtensionGeneralSInput or OTExtensionCorrelatedSInput or OTExtensionRandomizedSInput.");
 }
-void OTSemiHonestExtensionSender::runOtAsSender(vector<byte> x1, vector<byte> x2, vector<byte> deltaArr, int numOfOts, int bitLength, string version) {
+void OTSemiHonestExtensionSender::runOtAsSender(vector<byte> & x1, vector<byte> & x2, const vector<byte> & deltaArr, int numOfOts, int bitLength, string version) {
 	//The masking function with which the values that are sent in the last communication step are processed
 	//Choose OT extension version: G_OT, C_OT or R_OT
 	semihonestot::BYTE ver=0;
@@ -195,38 +196,27 @@ void OTSemiHonestExtensionSender::runOtAsSender(vector<byte> x1, vector<byte> x2
 	X1.Create(numOfOts, bitLength);
 	X2.Create(numOfOts, bitLength);
 	if (ver == semihonestot::G_OT) {
-		//copy the values given from java
-		for (int i = 0; i < numOfOts*bitLength / 8; i++)
-		{
-			X1.SetByte(i, x1.at(i));
-			X2.SetByte(i, x2.at(i));
-		}
+
+		memcpy(X1.GetArr(), x1.data(), numOfOts*bitLength / 8);
+		memcpy(X2.GetArr(), x2.data(), numOfOts*bitLength / 8);
+		
 	}
 	else if (ver == semihonestot::C_OT) {
 		m_fMaskFct = new semihonestot::XORMasking(bitLength);
 		delta.Create(numOfOts, bitLength);
+
 		//set the delta values given from java
-		for (int i = 0; i < numOfOts*bitLength / 8; i++)
-		{
-			delta.SetByte(i, deltaArr[i]);
-		}
-		//creates delta as an array with "numOTs" entries of "bitlength" bit-values and fills delta with random values
-		//delta.Create(numOfOts, bitLength, m_aSeed, m_nCounter);
+		memcpy(delta.GetArr(), deltaArr.data(), numOfOts*bitLength / 8);
 	}
-	//else if(ver==R_OT){} no need to set any values. There is no input for x0 and x1 and no input for delta
 	//run the ot extension as the sender
-	//auto start = scapi_now();
+	
 	ObliviouslySend(senderPtr, X1, X2, numOfOts, bitLength, ver, delta);
-//	print_elapsed_ms(start, "just transfer semi-honest general : the function ObliviouslySend ");
 	
 	if (ver != semihonestot::G_OT) {//we need to copy x0 and x1 
 		//get the values from the ot and copy them to x1Arr, x2Arr wich later on will be copied to the java values x1 and x2
-		for (int i = 0; i < numOfOts*bitLength / 8; i++)
-		{
-			//copy each byte result to out
-			x1[i] = X1.GetByte(i);
-			x2[i] = X2.GetByte(i);
-		}
+		memcpy(x1.data(), X1.GetArr(), numOfOts*bitLength / 8);
+		memcpy(x2.data(), X2.GetArr(), numOfOts*bitLength / 8);
+		
 		if (ver == semihonestot::C_OT) {
 			delete m_fMaskFct;
 		}
@@ -354,18 +344,21 @@ shared_ptr<OTBatchROutput> OTSemiHonestExtensionReceiver::transfer(OTBatchRInput
 	// we set the version to be the general case, if a different call was made we will change it later to the relevant version.
 	string version = "general";
 	
-	if (input->getType() != OTBatchRInputTypes::OTExtensionGeneralRInput)
-		throw invalid_argument("input should be instance of OTExtensionGeneralRInput");
+	auto in = dynamic_cast<OTExtensionRInput*>(input);
+	if (input == nullptr)
+		throw invalid_argument("input should be instance of OTExtensionRInput");
 
-	////If the user gave correlated input, change the version of the OT to correlated.
-	//if (input instanceof OTExtensionCorrelatedRInput) {
-	//	version = "correlated";
-	//}
+	//If the user gave correlated input, change the version of the OT to correlated.
+	auto correlatedIn = dynamic_cast<OTExtensionCorrelatedRInput*>(input);
+	if (correlatedIn != nullptr) {
+		version = "correlated";
+	}
 
-	////If the user gave random input, change the version of the OT to random.
-	//if (input instanceof OTExtensionRandomRInput) {
-	//	version = "random";
-	//}
+	//If the user gave random input, change the version of the OT to random.
+	auto randomizedIn = dynamic_cast<OTExtensionRandomizedRInput*>(input);
+	if (randomizedIn != nullptr) {
+		version = "random";
+	}
 
 	auto sigmaArr = ((OTExtensionRInput *)input)->getSigmaArr();
 	int numOfOts = ((OTExtensionRInput *)input)->getSigmaArrSize();
@@ -395,23 +388,17 @@ vector<byte> OTSemiHonestExtensionReceiver::runOtAsReceiver(vector<byte> sigma, 
 	// pre-generate the respose vector for the results
 	response.Create(numOfOts, bitLength);
 
-	// copy the sigma values received from java
+	// copy the received sigma values
 	for (int i = 0; i<numOfOts; i++) {
 		choices.SetBit((i / 8) * 8 + 7 - (i % 8), sigma.at(i));
-		//choices.SetBit(i, sigmaArr[i]);
 	}
 
 	//run the ot extension as the receiver
-	//auto start = scapi_now();
 	ObliviouslyReceive(choices, response, numOfOts, bitLength, ver);
-	//print_elapsed_ms(start, "Transfer for general semi-honest : ObliviouslyReceive");
-
-	vector<byte> output;
-	//prepare the out array
-	for (int i = 0; i < numOfOts*bitLength / 8; i++)
-		//copy each byte result to out
-		output.push_back(response.GetByte(i));
-
+	
+	vector<byte> output(numOfOts*bitLength / 8);
+	memcpy(output.data(), response.GetArr(), numOfOts*bitLength / 8);
+	
 	// free the pointer of choises and reponse
 	choices.delCBitVector();
 	response.delCBitVector();

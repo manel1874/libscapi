@@ -111,6 +111,7 @@
     <ClCompile Include="..\..\samples\OTExtensionBristol\OTExtensionBristolExample.cpp" />
     <ClCompile Include="..\..\samples\OT\OTExample.cpp" />
     <ClCompile Include="..\..\samples\Paillier\FdrPaillierParty.cpp" />
+    <ClCompile Include="..\..\samples\SemiHonestOT\SemiHonestOT.cpp" />
     <ClCompile Include="..\..\samples\SigmaProtocols\SigmaProtocolExample.cpp" />
     <ClCompile Include="..\..\samples\Simple\simple_dlog.cpp" />
     <ClCompile Include="..\..\samples\Simple\simple_sha1.cpp" />
