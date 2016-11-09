@@ -78,7 +78,7 @@ protected:
 /**
 * A concrete class for Semi-Honest OT extension sender. 
 *
-* The Semi-Honest OT extension implemented is a SCAPI wrapper of the native implementation by Michael Zohner from the paper:
+* The Semi-Honest OT extension implemented is a SCAPI wrapper of the Michael Zohner's implementation from the paper:
 * "G. Asharov, Y. Lindell, T. Schneier and M. Zohner. More Efficient Oblivious Transfer and Extensions for Faster Secure Computation. ACM CCS 2013." 
 * See http://eprint.iacr.org/2013/552.pdf for more information.
 *
@@ -127,7 +127,7 @@ public:
 	*/
 	shared_ptr<OTBatchSOutput> transfer(OTBatchSInput * input) override;
 	/**
-	* Deletes the native OT object.
+	* Deletes the library's OT object.
 	*/
 	~OTSemiHonestExtensionSender() { 
 		delete senderPtr;
@@ -138,8 +138,8 @@ public:
 /**
 * A concrete class for Semi-Honest OT extension receiver. 
 *
-* The Semi-Honest OT extension implemented is a SCAPI wrapper of the native implementation by Michael Zohner from the paper: <p>
-* "G. Asharov, Y. Lindell, T. Schneier and M. Zohner. More Efficient Oblivious Transfer and Extensions for Faster Secure Computation. ACM CCS 2013." <p>
+* The Semi-Honest OT extension implemented is a SCAPI wrapper of the Michael Zohner's implementation from the paper: 
+* "G. Asharov, Y. Lindell, T. Schneier and M. Zohner. More Efficient Oblivious Transfer and Extensions for Faster Secure Computation. ACM CCS 2013." 
 * See http://eprint.iacr.org/2013/552.pdf for more information.
 *
 * The base OT is done once in the construction time. After that, the transfer function will be always optimized and fast, no matter how much OT's there are.
@@ -176,7 +176,7 @@ public:
 	*/
 	shared_ptr<OTBatchROutput> transfer(OTBatchRInput * input) override;
 	/**
-	* Deletes the native OT object.
+	* Deletes the library's OT object.
 	*/
 	~OTSemiHonestExtensionReceiver() { delete receiverPtr; };
 private:
@@ -185,7 +185,7 @@ private:
 	bool PrecomputeNaorPinkasReceiver();
 	bool ObliviouslyReceive(semihonestot::CBitVector& choices, semihonestot::CBitVector& ret, int numOTs, int bitlength, semihonestot::BYTE version);
 	/*
-	* The native code that runs the OT extension as the receiver.
+	* Runs the underlying OT extension receiver.
 	* @param sigma An array holding the input of the receiver, that is, the 0 and 1 choices for each OT.
 	* @param numOfOts The number or OTs that the protocol runs.
 	* @param bitLength The length of each item in the OT. The size of each x0, x1 which must be the same for all x0, x1.

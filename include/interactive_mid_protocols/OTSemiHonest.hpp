@@ -8,53 +8,53 @@
 #include "../primitives/PrfOpenSSL.hpp"
 
 /**
-* Abstract class for Semi-Honest OT assuming DDH sender. <p>
+* Abstract class for Semi-Honest OT assuming DDH sender. 
 * Semi-Honest OT has two modes: one is on ByteArray and the second is on GroupElement.
-* The difference is in the input and output types and the way to process them. <p>
-* In spite that, there is a common behavior for both modes which this class implements.<p>
+* The difference is in the input and output types and the way to process them.
+* In spite that, there is a common behavior for both modes which this class implements.
 *
-* The pseudo code of this protocol can be found in Protocol 4.1 of pseudo codes document at {@link http://cryptobiu.github.io/scapi/SDK_Pseudocode.pdf}.<p>
+* The pseudo code of this protocol can be found in Protocol 4.1 of pseudo codes document at https://github.com/cryptobiu/scapi/blob/master/doc/old/SDD_docs/SDK_Pseudocode.docx
 *
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
 *
 */
 class OTSemiHonestDDHSenderAbs : public OTSender {
 	/*
-	This class runs the following protocol:
-	WAIT for message (h0,h1) from R
-	SAMPLE a random value r in  [0, . . . , q-1]
-	COMPUTE:
-	*	u = g^r
-	*	k0 = h0^r
-	*	v0 = x0 XOR KDF(|x0|,k0) - in byteArray scenario.
-	OR x0*k0			 - in GroupElement scenario.
-	*	k1 = h1^r
-	*	v1 = x1 XOR KDF(|x1|,k1) - in byteArray scenario.
-	OR x1*k1 			 - in GroupElement scenario.
-	SEND (u,v0,v1) to R
-	OUTPUT nothing
+		This class runs the following protocol:
+		WAIT for message (h0,h1) from R
+		SAMPLE a random value r in  [0, . . . , q-1]
+		COMPUTE:
+		*	u = g^r
+		*	k0 = h0^r
+		*	v0 = x0 XOR KDF(|x0|,k0) - in byteArray scenario.
+		OR x0*k0			 - in GroupElement scenario.
+		*	k1 = h1^r
+		*	v1 = x1 XOR KDF(|x1|,k1) - in byteArray scenario.
+		OR x1*k1 			 - in GroupElement scenario.
+		SEND (u,v0,v1) to R
+		OUTPUT nothing
 	*/
 
 public:
 
 	/**
-	* Runs the transfer phase of the OT protocol.<p>
-	* This is the phase where the input is necessary as follows:<p>
-	*	"WAIT for message (h0,h1) from R<p>
-	*	SAMPLE a random value r in  [0, . . . , q-1] <p>
-	*	COMPUTE:<p>
-	*		*	u = g^r<p>
-	*		*	k0 = h0^r<p>
-	*		*	k1 = h1^r<p>
-	*	COMPUTE:<p>
-	*			in the byte array scenario<p>
-	*				*	v0 = x0 XOR KDF(|x0|,k0)<p>
-	*				*	v1 = x1 XOR KDF(|x1|,k1)<p>
-	*			OR in the GroupElement scenario:<p>
-	*				*	v0 = x0 * k0<p>
-	*				*	v1 = x1 * k1"<p>
-	*		SEND (u,v0,v1) to R<p>
-	*		OUTPUT nothing"<p>
+	* Runs the transfer phase of the OT protocol.
+	* This is the phase where the input is necessary as follows:
+	*	"WAIT for message (h0,h1) from R
+	*	SAMPLE a random value r in  [0, . . . , q-1] 
+	*	COMPUTE:
+	*		*	u = g^r
+	*		*	k0 = h0^r
+	*		*	k1 = h1^r
+	*	COMPUTE:
+	*			in the byte array scenario
+	*				*	v0 = x0 XOR KDF(|x0|,k0)
+	*				*	v1 = x1 XOR KDF(|x1|,k1)
+	*			OR in the GroupElement scenario:
+	*				*	v0 = x0 * k0
+	*				*	v1 = x1 * k1"
+	*		SEND (u,v0,v1) to R
+	*		OUTPUT nothing"
 	*/
 	virtual void transfer(CommParty* channel, OTSInput* input) override;
 
@@ -77,10 +77,6 @@ protected:
 	* OR in the GroupElement scenario:
 	* 		*	v0 = x0 * k0
 	*		*	v1 = x1 * k1"
-	* @param input
-	* @param k1
-	* @param k0
-	* @param u
 	* @return tuple contains (u, v0, v1) to send to the receiver.
 	*/
 	virtual shared_ptr<OTSMsg> computeTuple(OTSInput* input, GroupElement* u, GroupElement* k0, GroupElement* k1) = 0;
@@ -95,8 +91,6 @@ private:
 	* "WAIT for message (h0,h1) from R"
 	* @param channel
 	* @return the received message.
-	* @throws ClassNotFoundException
-	* @throws IOException if failed to receive a message.
 	*/
 	shared_ptr<OTRGroupElementPairMsg> waitForMessageFromReceiver(CommParty* channel);
 
@@ -138,10 +132,8 @@ private:
 };
 
 /**
-* Concrete implementation of OT sender (on GroupElement) message.<p>
-* In the byteArray scenario, the sender sends three GroupElement - u, v0, v1.
-*
-* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
+* Concrete implementation of OT sender (on GroupElement) message.
+* In the byteArray scenario, the sender sends three GroupElement - u, v0, v1.)
 *
 */
 class OTSemiHonestDDHOnGroupElementSenderMsg : public OTSMsg {
@@ -155,9 +147,6 @@ public:
 	OTSemiHonestDDHOnGroupElementSenderMsg() {}
 	/**
 	* Sets the given values calculated by the protocol.
-	* @param u
-	* @param v0
-	* @param v1
 	*/
 	 OTSemiHonestDDHOnGroupElementSenderMsg(const shared_ptr<GroupElementSendableData> & u, const shared_ptr<GroupElementSendableData> & v0, const shared_ptr<GroupElementSendableData> & v1) 
 		 : u(u), v0(v0), v1(v1)	{}
@@ -173,10 +162,8 @@ public:
 };
 
 /**
-* Concrete implementation of OT sender (on byteArray) message.<p>
+* Concrete implementation of OT sender (on byte vector) message.
 * In the byteArray scenario, the sender sends GroupElement u and two binary strings v0, v1.
-*
-* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
 *
 */
 class OTSemiHonestDDHOnByteArraySenderMsg : public OTSMsg {
@@ -190,9 +177,6 @@ public:
 	OTSemiHonestDDHOnByteArraySenderMsg() {}
 	/**
 	* Constructor that sets the given values calculated by the protocol.
-	* @param u
-	* @param v0
-	* @param v1
 	*/
 	OTSemiHonestDDHOnByteArraySenderMsg(const shared_ptr<GroupElementSendableData> & u, vector<byte> & v0, vector<byte> & v1) 
 		: u(u), v0(v0), v1(v1)	{}
@@ -208,12 +192,10 @@ public:
 };
 
 /**
-* Concrete class for Semi-Honest OT assuming DDH sender ON GROUP ELEMENT.<p>
-* This class derived from OTSemiHonestDDHSenderAbs and implements the functionality related to the GroupElement inputs.<p>
+* Concrete class for Semi-Honest OT assuming DDH sender ON GROUP ELEMENT.
+* This class derived from OTSemiHonestDDHSenderAbs and implements the functionality related to the GroupElement inputs.
 *
-* The pseudo code of this protocol can be found in Protocol 4.1 of pseudo codes document at {@link http://cryptobiu.github.io/scapi/SDK_Pseudocode.pdf}.<p>
-*
-* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
+* The pseudo code of this protocol can be found in Protocol 4.1 of pseudo codes document at https://github.com/cryptobiu/scapi/blob/master/doc/old/SDD_docs/SDK_Pseudocode.docx
 *
 */
 class OTSemiHonestDDHOnGroupElementSender : public OTSemiHonestDDHSenderAbs, SemiHonest {
@@ -235,22 +217,16 @@ protected:
 	*			v0 = x0 * k0
 	*			v1 = x1 * k1"
 	* @param input MUST be an instance of OTSOnGroupElementInput
-	* @param k1
-	* @param k0
-	* @param u
 	* @return tuple contains (u, v0, v1) to send to the receiver.
 	*/
 	shared_ptr<OTSMsg> computeTuple(OTSInput* input, GroupElement* u, GroupElement* k0, GroupElement* k1) override;
 };
 
 /**
-* Concrete class for Semi-Honest OT assuming DDH sender ON BYTE ARRAY.<p>
-* This class derived from OTSemiHonestDDHSenderAbs and implements the functionality
-* related to the byte array inputs.<p>
+* Concrete class for Semi-Honest OT assuming DDH sender ON BYTE ARRAY.
+* This class derived from OTSemiHonestDDHSenderAbs and implements the functionality related to the byte array inputs.
 *
-* The pseudo code of this protocol can be found in Protocol 4.1 of pseudo codes document at {@link http://cryptobiu.github.io/scapi/SDK_Pseudocode.pdf}.<p>
-*
-* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
+* The pseudo code of this protocol can be found in Protocol 4.1 of pseudo codes document at https://github.com/cryptobiu/scapi/blob/master/doc/old/SDD_docs/SDK_Pseudocode.docx
 *
 */
 class OTSemiHonestDDHOnByteArraySender : public OTSemiHonestDDHSenderAbs, SemiHonest {
@@ -273,9 +249,6 @@ protected:
 	*			v0 = x0 XOR KDF(|x0|,k0)
 	*			v1 = x1 XOR KDF(|x1|,k1)"
 	* @param input MUST be an instance of OTSOnByteArrayInput
-	* @param k1
-	* @param k0
-	* @param u
 	* @return tuple contains (u, v0, v1) to send to the receiver.
 	*/
 	shared_ptr<OTSMsg> computeTuple(OTSInput* input, GroupElement* u, GroupElement* k0, GroupElement* k1) override;
@@ -286,46 +259,44 @@ private:
 };
 
 /**
-* Abstract class for Semi-Honest OT assuming DDH receiver. <p>
+* Abstract class for Semi-Honest OT assuming DDH receiver. 
 * Semi-Honest OT have two modes: one is on ByteArray and the second is on GroupElement.
-* The different is in the input and output types and the way to process them.  <p>
-* In spite that, there is a common behavior for both modes which this class is implementing.<p>
+* The different is in the input and output types and the way to process them.  
+* In spite that, there is a common behavior for both modes which this class is implementing.
 *
-* The pseudo code of this protocol can be found in Protocol 4.1 of pseudo codes document at {@link http://cryptobiu.github.io/scapi/SDK_Pseudocode.pdf}.<p>
-*
-* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
+* The pseudo code of this protocol can be found in Protocol 4.1 of pseudo codes document at https://github.com/cryptobiu/scapi/blob/master/doc/old/SDD_docs/SDK_Pseudocode.docx
 *
 */
 class OTSemiHonestDDHReceiverAbs : public OTReceiver {
 
 	/*
-	This class runs the following protocol:
-	SAMPLE random values alpha in Zq and h in the DlogGroup
-	COMPUTE h0,h1 as follows:
-	1.	If sigma = 0 then h0 = g^alpha  and h1 = h
-	2.	If sigma = 1 then h0 = h and h1 = g^alpha
-	SEND (h0,h1) to S
-	WAIT for the message (u, v0,v1) from S
-	COMPUTE kSigma = (u)^alpha							- in byte array scenario
-	OR (kSigma)^(-1) = u^(-alpha)					- in GroupElement scenario
-	OUTPUT  xSigma = vSigma XOR KDF(|cSigma|,kSigma)	- in byte array scenario
-	OR xSigma = vSigma * (kSigma)^(-1) 			- in GroupElement scenario
+		This class runs the following protocol:
+		SAMPLE random values alpha in Zq and h in the DlogGroup
+		COMPUTE h0,h1 as follows:
+		1.	If sigma = 0 then h0 = g^alpha  and h1 = h
+		2.	If sigma = 1 then h0 = h and h1 = g^alpha
+		SEND (h0,h1) to S
+		WAIT for the message (u, v0,v1) from S
+		COMPUTE kSigma = (u)^alpha							- in byte array scenario
+		OR (kSigma)^(-1) = u^(-alpha)					- in GroupElement scenario
+		OUTPUT  xSigma = vSigma XOR KDF(|cSigma|,kSigma)	- in byte array scenario
+		OR xSigma = vSigma * (kSigma)^(-1) 			- in GroupElement scenario
 	*/
 
 public:
 
 	/**
-	* Run the transfer phase of the protocol.<p>
-	* "SAMPLE random values alpha in Zq and h in the DlogGroup <p>
-	*		COMPUTE h0,h1 as follows:<p>
-	*			1.	If sigma = 0 then h0 = g^alpha  and h1 = h<p>
-	*			2.	If sigma = 1 then h0 = h and h1 = g^alpha <p>
-	*		SEND (h0,h1) to S<p>
-	*		WAIT for the message (u, v0,v1) from S<p>
-	*		COMPUTE kSigma = (u)^alpha							- in byte array scenario<p>
-	*			 OR (kSigma)^(-1) = u^(-alpha)					- in GroupElement scenario<p>
-	*		OUTPUT  xSigma = vSigma XOR KDF(|cSigma|,kSigma)	- in byte array scenario<p>
-	*			 OR xSigma = vSigma * (kSigma)^(-1)" 			- in GroupElement scenario<p>
+	* Run the transfer phase of the protocol.
+	* "SAMPLE random values alpha in Zq and h in the DlogGroup 
+	*		COMPUTE h0,h1 as follows:
+	*			1.	If sigma = 0 then h0 = g^alpha  and h1 = h
+	*			2.	If sigma = 1 then h0 = h and h1 = g^alpha
+	*		SEND (h0,h1) to S
+	*		WAIT for the message (u, v0,v1) from S
+	*		COMPUTE kSigma = (u)^alpha							- in byte array scenario
+	*			 OR (kSigma)^(-1) = u^(-alpha)					- in GroupElement scenario
+	*		OUTPUT  xSigma = vSigma XOR KDF(|cSigma|,kSigma)	- in byte array scenario
+	*			 OR xSigma = vSigma * (kSigma)^(-1)" 			- in GroupElement scenario
 	*/
 	shared_ptr<OTROutput> transfer(CommParty* channel, OTRInput* input) override;
 
@@ -343,9 +314,9 @@ protected:
 	/**
 	* Runs the following lines from the protocol:
 	* "COMPUTE kSigma = (u)^alpha							- in byte array scenario
-	OR (kSigma)^(-1) = u^(-alpha)					- in GroupElement scenario
-	OUTPUT  xSigma = vSigma XOR KDF(|cSigma|,kSigma)	- in byte array scenario
-	OR xSigma = vSigma * (kSigma)^(-1) 			- in GroupElement scenario
+	OR (kSigma)^(-1) = u^(-alpha)							- in GroupElement scenario
+	OUTPUT  xSigma = vSigma XOR KDF(|cSigma|,kSigma)		- in byte array scenario
+	OR xSigma = vSigma * (kSigma)^(-1) 						- in GroupElement scenario
 	* @param sigma input for the protocol
 	* @param alpha random value sampled by the protocol
 	* @param message received from the sender
@@ -380,12 +351,10 @@ private:
 
 
 /**
-* Concrete class for Semi-Honest OT assuming DDH receiver ON GROUP ELEMENT.<p>
-* This class derived from OTSemiHonestDDHReceiverAbs and implements the functionality related to the GroupElement inputs.<p>
+* Concrete class for Semi-Honest OT assuming DDH receiver ON GROUP ELEMENT.
+* This class derived from OTSemiHonestDDHReceiverAbs and implements the functionality related to the GroupElement inputs.
 *
-* The pseudo code of this protocol can be found in Protocol 4.1 of pseudo codes document at {@link http://cryptobiu.github.io/scapi/SDK_Pseudocode.pdf}.<p>
-*
-* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
+* The pseudo code of this protocol can be found in Protocol 4.1 of pseudo codes document at https://github.com/cryptobiu/scapi/blob/master/doc/old/SDD_docs/SDK_Pseudocode.docx
 *
 */
 class OTSemiHonestDDHOnGroupElementReceiver : public OTSemiHonestDDHReceiverAbs, SemiHonest {
@@ -416,12 +385,10 @@ protected:
 };
 
 /**
-* Concrete class for Semi-Honest OT assuming DDH receiver ON BYTE ARRAY.<p>
-* This class derived from OTSemiHonestDDHReceiverAbs and implements the functionality related to the byte array inputs.<p>
+* Concrete class for Semi-Honest OT assuming DDH receiver ON BYTE ARRAY.
+* This class derived from OTSemiHonestDDHReceiverAbs and implements the functionality related to the byte vector inputs.
 *
-* The pseudo code of this protocol can be found in Protocol 4.1 of pseudo codes document at {@link http://cryptobiu.github.io/scapi/SDK_Pseudocode.pdf}.<p>
-*
-* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
+* The pseudo code of this protocol can be found in Protocol 4.1 of pseudo codes document at https://github.com/cryptobiu/scapi/blob/master/doc/old/SDD_docs/SDK_Pseudocode.docx
 *
 */
 class OTSemiHonestDDHOnByteArrayReceiver : public OTSemiHonestDDHReceiverAbs, SemiHonest {

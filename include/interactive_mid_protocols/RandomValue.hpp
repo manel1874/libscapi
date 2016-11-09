@@ -30,7 +30,7 @@
 #include "../infra/Common.hpp"
 
 /**
-* General interface for random values.
+* General class for random values.
 */
 class RandomValue {
 public :
@@ -49,8 +49,7 @@ public:
 };
 
 /**
-* Concrete class for byte[] random value.
-* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
+* Concrete class for vector<byte> random value.
 *
 */
 class ByteArrayRandomValue : public RandomValue {

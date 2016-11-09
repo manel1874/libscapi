@@ -236,7 +236,7 @@ public:
 * It can be viewed as a random-oracle scheme, but its security can also be viewed as a standard assumption on modern hash functions.
 * Note that computational binding follows from the standard collision resistance assumption. 
 *
-* The pseudo code of this protocol can be found in Protocol 3.6 of pseudo codes document at  https://github.com/cryptobiu/scapi/blob/master/doc/old/SDD_docs/SDK_Pseudocode.docx
+* The pseudo code of this protocol can be found in Protocol 3.6 of pseudo codes document at https://github.com/cryptobiu/scapi/blob/master/doc/old/SDD_docs/SDK_Pseudocode.docx
 *
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
 *

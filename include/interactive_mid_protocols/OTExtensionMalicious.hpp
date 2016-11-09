@@ -84,7 +84,7 @@ public:
 
 };
 /**
-* A concrete class for Malicious OT extension sender. 
+* A concrete class for Malicious OT extension sender using Michael Zohner's implementation.. 
 *
 * The base OT is done once in the construction time. After that, the transfer function will be always optimized and fast, no matter how much OT's there are.
 *
@@ -106,7 +106,7 @@ private:
 	* Runs the OT extension as the sender.
 	* @param x0 An array that holds all the x0 values for each of the OT's serially (concatenated).
 	* @param x1 An array that holds all the x1 values for each of the OT's serially (concatenated).
-	* @param delta
+	* @param delta in case of correlated OT
 	* @param numOfOts The number of OTs that the protocol runs (how many strings are inside x0?)
 	* @param bitLength The length (in bits) of each item in the OT. can be derived from |x0|, |x1|, numOfOts
 	* @param version the OT extension version the user wants to use.
