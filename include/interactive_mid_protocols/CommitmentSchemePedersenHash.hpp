@@ -68,20 +68,20 @@ public:
 
 /**
 * Concrete implementation of committer that executes the Pedersen hash commitment
-* scheme in the committer's point of view.<p>
+* scheme in the committer's point of view.
 *
-* This is a perfectly-hiding commitment that can be used to commit to a value of any length. <p>
+* This is a perfectly-hiding commitment that can be used to commit to a value of any length. 
 *
-* For more information see Protocol 6.5.3, page 164 of <i>Efficient Secure Two-Party Protocols</i> by Hazay-Lindell.<p>
+* For more information see Protocol 6.5.3, page 164 of <i>Efficient Secure Two-Party Protocols</i> by Hazay-Lindell.
 *
-* The pseudo code of this protocol can be found in Protocol 3.2 of pseudo codes document at {@link http://cryptobiu.github.io/scapi/SDK_Pseudocode.pdf}.<p>
+* The pseudo code of this protocol can be found in Protocol 3.2 of pseudo codes document at https://github.com/cryptobiu/scapi/blob/master/doc/old/SDD_docs/SDK_Pseudocode.docx
 *
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
 *
 */
 class CmtPedersenHashCommitter : public CmtPedersenCommitterCore, public PerfectlyHidingCmt, public CmtOnByteArray {
 	/*
-	* runs the following protocol:
+	* Runs the following protocol:
 	* "Run COMMIT_PEDERSEN to commit to value H(x).
 	* For decommitment, send x and the receiver verifies that the commitment was to H(x). "
 	*/
@@ -94,10 +94,7 @@ public:
 	* This constructor uses a default Dlog Group and default Cryptographic Hash. They keep the condition that
 	* the size in bytes of the resulting hash is less than the size in bytes of the order of the DlogGroup.
 	* An established channel has to be provided by the user of the class.
-	* @param channel
-	* @throws CheatAttemptException
-	* @throws IOException
-	* @throws ClassNotFoundException
+	* @throws invalid_argument
 	*/
 	CmtPedersenHashCommitter(const shared_ptr<CommParty> & channel, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) : CmtPedersenCommitterCore(channel, random) {
 		hash = make_shared<OpenSSLSHA256>(); 	//This default hash suits the default DlogGroup of the underlying Committer.
@@ -110,18 +107,16 @@ public:
 	* This constructor receives as arguments an instance of a Dlog Group and an instance
 	* of a Cryptographic Hash such that they keep the condition that the size in bytes
 	* of the resulting hash is less than the size in bytes of the order of the DlogGroup.
-	* Otherwise, it throws IllegalArgumentException.
+	* Otherwise, it throws invalid_argument.
 	* An established channel has to be provided by the user of the class.
 	* @param channel an established channel obtained via the Communication Layer
 	* @param dlog
 	* @param hash
 	* @param random
-	* @throws IllegalArgumentException if the size in bytes of the resulting hash is bigger than the size in bytes of the order of the DlogGroup
+	* @throws invalid_argument if the size in bytes of the resulting hash is bigger than the size in bytes of the order of the DlogGroup
 	* @throws SecurityLevelException if the Dlog Group is not DDH
 	* @throws InvalidDlogGroupException if the parameters of the group do not conform the type the group is supposed to be
 	* @throws CheatAttemptException if the commetter suspects that the receiver is trying to cheat.
-	* @throws IOException if there was a problem during the communication
-	* @throws ClassNotFoundException if there was a problem with the serialization mechanism.
 	*/
 	CmtPedersenHashCommitter(const shared_ptr<CommParty> & channel, const shared_ptr<DlogGroup> & dlog, const shared_ptr<CryptographicHash> & hash, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 
@@ -154,12 +149,12 @@ public:
 
 /**
 * Concrete implementation of receiver that executes the Pedersen hash commitment
-* scheme in the receiver's point of view.<p>
+* scheme in the receiver's point of view.
 *
-* This is a perfectly-hiding commitment that can be used to commit to a value of any length. <p>
+* This is a perfectly-hiding commitment that can be used to commit to a value of any length. 
 *
-* For more information see Protocol 6.5.3, page 164 of <i>Efficient Secure Two-Party Protocols</i> by Hazay-Lindell.<p>
-* The pseudo code of this protocol can be found in Protocol 3.2 of pseudo codes document at {@link http://cryptobiu.github.io/scapi/SDK_Pseudocode.pdf}.<p>
+* For more information see Protocol 6.5.3, page 164 of <i>Efficient Secure Two-Party Protocols</i> by Hazay-Lindell.
+* The pseudo code of this protocol can be found in Protocol 3.2 of pseudo codes document at https://github.com/cryptobiu/scapi/blob/master/doc/old/SDD_docs/SDK_Pseudocode.docx
 *
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
 *
@@ -181,7 +176,6 @@ public:
 	* the size in bytes of the resulting hash is less than the size in bytes of the order of the DlogGroup.
 	* An established channel has to be provided by the user of the class.
 	* @param channel
-	* @throws IOException if there was a problem in the communication.
 	*/
 	CmtPedersenHashReceiver(const shared_ptr<CommParty> & channel, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) : CmtPedersenReceiverCore(channel, random) {
 		hash = make_shared<OpenSSLSHA256>(); 		//This default hash suits the default DlogGroup of the underlying Committer.
@@ -197,10 +191,9 @@ public:
 	* @param dlog
 	* @param hash
 	* @param random
-	* @throws IllegalArgumentException if the size in bytes of the resulting hash is bigger than the size in bytes of the order of the DlogGroup
+	* @throws invalid_argument if the size in bytes of the resulting hash is bigger than the size in bytes of the order of the DlogGroup
 	* @throws SecurityLevelException if the Dlog Group is not DDH
 	* @throws InvalidDlogGroupException if the parameters of the group do not conform the type the group is supposed to be
-	* @throws IOException if there was a problem during the communication
 	*/
 	CmtPedersenHashReceiver(const shared_ptr<CommParty> & channel, const shared_ptr<DlogGroup> & dlog, const shared_ptr<CryptographicHash> & hash, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg());
 

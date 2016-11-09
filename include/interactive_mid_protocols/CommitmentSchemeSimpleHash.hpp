@@ -76,13 +76,13 @@ private:
 public:
 	/**
 	* Constructor that sets the commitment and id.
-	* @param c the actual commitment object. In simple hash schemes the commitment object is a byte[].
+	* @param c the actual commitment object. In simple hash schemes the commitment object is a byte vector.
 	* @param id the commitment id.
 	*/
 	CmtSimpleHashCommitmentMessage(const shared_ptr<vector<byte>> & c = NULL, long id = 0) : c(c), id(id){}
 
 	/**
-	* Returns the commitment value
+	* Returns the commitment value.
 	*/
 	shared_ptr<void> getCommitment() override { return c; }
 	shared_ptr<vector<byte>> getCommitmentArray() { return c; }
@@ -147,14 +147,14 @@ public:
 };
 
 /**
-* This class implements the committer side of Simple Hash commitment.<p>
+* This class implements the committer side of Simple Hash commitment.
 *
-* This is a commitment scheme based on hash functions. <p>
+* This is a commitment scheme based on hash functions. 
 * It can be viewed as a random-oracle scheme, but its security can also be viewed as a
 * standard assumption on modern hash functions. Note that computational binding follows
-* from the standard collision resistance assumption. <p>
+* from the standard collision resistance assumption. 
 *
-* The pseudo code of this protocol can be found in Protocol 3.6 of pseudo codes document at {@link http://cryptobiu.github.io/scapi/SDK_Pseudocode.pdf}.<p>
+* The pseudo code of this protocol can be found in Protocol 3.6 of pseudo codes document at  https://github.com/cryptobiu/scapi/blob/master/doc/old/SDD_docs/SDK_Pseudocode.docx
 *
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
 *
@@ -230,13 +230,13 @@ public:
 };
 
 /**
-* This class implements the receiver side of Simple Hash commitment.<p>
+* This class implements the receiver side of Simple Hash commitment.
 *
-* This is a commitment scheme based on hash functions. <p>
+* This is a commitment scheme based on hash functions. 
 * It can be viewed as a random-oracle scheme, but its security can also be viewed as a standard assumption on modern hash functions.
-* Note that computational binding follows from the standard collision resistance assumption. <p>
+* Note that computational binding follows from the standard collision resistance assumption. 
 *
-* The pseudo code of this protocol can be found in Protocol 3.6 of pseudo codes document at {@link http://cryptobiu.github.io/scapi/SDK_Pseudocode.pdf}.<p>
+* The pseudo code of this protocol can be found in Protocol 3.6 of pseudo codes document at  https://github.com/cryptobiu/scapi/blob/master/doc/old/SDD_docs/SDK_Pseudocode.docx
 *
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Yael Ejgenberg)
 *
@@ -270,7 +270,6 @@ public:
 	/**
 	* Constructor that receives a connected channel (to the receiver) and chosses default
 	* values for the hash function, SecureRandom object and a security parameter n.
-	*  @param channel
 	*/
 	CmtSimpleHashReceiver(const shared_ptr<CommParty> & channel) {
 		doConstruct(channel, make_shared<OpenSSLSHA256>());

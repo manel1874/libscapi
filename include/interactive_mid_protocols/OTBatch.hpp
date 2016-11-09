@@ -34,14 +34,17 @@
 #include <OTExtensionBristol/OT/BitVector.h>
 #endif
 /**
- * This interface is a marker interface for OT sender output, where there is an implementing class for each OT protocol that has an output.<p>
+ * This is a marker class for OT sender output, where there is a derived class for each OT protocol that has an output.
  * Most OT senders output nothing. However in the batch scenario there may be cases where the protocol wishes to output x0 and x1 instead of inputting it.
  * Every concrete protocol outputs different data. But all must return an implemented class of this interface or null.
  */
 class OTBatchSOutput {
 };
 
-
+/**
+ * Output for OT extension in the random mode.
+ * In this mode the output are the random created X0 and X1 vectors.
+ */
 class OTExtensionRandomizedSOutput: public OTBatchSOutput {
 
 protected:
@@ -50,6 +53,7 @@ protected:
 	vector<byte> r1Arr;
 
 public:
+	OTExtensionRandomizedSOutput(const vector<byte> & r0Arr, const vector<byte> & r1Arr) : r0Arr(r0Arr), r1Arr(r1Arr) {}
 
 	/**
 	 * @return the array that holds all the x0 for all the senders serially.
@@ -57,7 +61,7 @@ public:
 	vector<byte> getR0Arr() {
 		return r0Arr;
 	}
-	;
+	
 	/**
 	 * @return the array that holds all the x1 for all the senders serially.
 	 */
@@ -66,7 +70,10 @@ public:
 	}
 };
 
-
+/**
+* Output for OT extension in the correlated mode.
+* In this mode the output are the random created X0 and X1 vectors.
+*/
 class OTExtensionCorrelatedSOutput: public OTBatchSOutput {
 
 protected:
@@ -112,15 +119,18 @@ public:
 
 #endif
 
+/**
+ * This enum class represents the options for OT extension. 
+ * THe options are - General, Random and Correlated.
+ */
 enum class OTBatchSInputTypes {
 	OTExtensionGeneralSInput, OTExtensionRandomizedSInput, OTExtensionCorrelatedSInput
 };
 
 /**
  * Every Batch OT sender needs inputs during the protocol execution, but every concrete protocol needs
- * different inputs.<p>
- * This interface is a marker interface for OT Batch sender input, where there is an implementing class
- * for each OT protocol.
+ * different inputs.
+ * This is a marker class for OT Batch sender input, where there is a derived class for each OT protocol.
  */
 class OTBatchSInput {
 public:
@@ -128,7 +138,7 @@ public:
 };
 
 /**
- * A concrete class for OT extension input for the sender. <p>
+ * A concrete class for OT extension input for the sender. 
  * In the general OT extension scenario the sender gets x0 and x1 for each OT.
  */
 class OTExtensionGeneralSInput: public OTBatchSInput {
@@ -154,45 +164,46 @@ public:
 		this->x1Arr = x1Arr;
 		this->numOfOts = numOfOts;
 	}
-	;
+	
 	/**
 	 * @return the array that holds all the x0 for all the senders serially.
 	 */
 	vector<byte> getX0Arr() {
 		return x0Arr;
 	}
-	;
+	
 	/**
 	 * @return the array that holds all the x1 for all the senders serially.
 	 */
 	vector<byte> getX1Arr() {
 		return x1Arr;
 	}
-	;
+	
 	/**
 	 * @return the number of OT elements.
 	 */
 	int getNumOfOts() {
 		return numOfOts;
 	}
-	;
+	
 	int getX0ArrSize() {
 		return x0Arr.size();
 	}
-	;
+	
 	int getX1ArrSize() {
 		return x1Arr.size();
 	}
-	;
+	
 };
 
 
 /**
- * A concrete class for randomized OT extension input for the sender. <p>
- * In the radomized OT extension scenario the sender gets has no x0 and x1 as input, rather this is an output from the protocol.
+ * A concrete class for randomized OT extension input for the sender. 
+ * In the radomized OT extension scenario the sender has no x0 and x1 as input, rather this is an output from the protocol.
  */
 class OTExtensionRandomizedSInput: public OTBatchSInput {
 private:
+	int bitLength;// Since there is no input we need to send the size of each OT so that the OT extension can generate x0 and x1 with the right size.
 	int numOfOts; // Number of OTs in the OT extension.
 
 public:
@@ -203,30 +214,34 @@ public:
 	 * @param x0Arr holds all the x1 for all the senders serially.
 	 * @param numOfOts Number of OTs in the OT extension.
 	 */
-	OTExtensionRandomizedSInput(int numOfOts) :
-		numOfOts(numOfOts) {
-	}
-	;
+	OTExtensionRandomizedSInput(int bitLength, int numOfOts) : bitLength(bitLength), numOfOts(numOfOts) {}
+	
 	int getNumOfOts() {
 		return numOfOts;
 	}
-	;
+
+	int getBitLength() {
+		return bitLength;
+	}
 
 };
 
-
-
+/**
+ * A concrete class for correlated OT extension input for the sender. 
+ * In the correlated OT extension scenario the sender gets the delta as input, and calculated x0 and x1 such as x0 = x1^delta.
+ */
 class OTExtensionCorrelatedSInput: public OTBatchSInput {
 private:
 	vector<byte> deltaArr; // An array that holds all the delta of xo and x1.
-		// For optimization reasons, all the delta inputs are held in one dimensional array one after the other
-		// rather than a two dimensional array.
-		// The size of each element can be calculated by the delta size divided by the numOfOts.
+	// For optimization reasons, all the delta inputs are held in one dimensional array one after the other
+	// rather than a two dimensional array.
+	// The size of each element can be calculated by the delta size divided by the numOfOts.
+	
 	int numOfOts; // Number of OTs in the OT extension.
 
 
 public:
-	OTBatchSInputTypes getType()override {return OTBatchSInputTypes::OTExtensionCorrelatedSInput;};
+	OTBatchSInputTypes getType() override {return OTBatchSInputTypes::OTExtensionCorrelatedSInput;};
 
 	OTExtensionCorrelatedSInput(const vector<byte>& deltaArr, int numOfOts): deltaArr(deltaArr), numOfOts(numOfOts){}
 
@@ -247,34 +262,35 @@ public:
 };
 
 /**
- * General interface for Batch OT Sender.
- * Every class that implements it is signed as Batch Oblivious Transfer sender.
+ * General class for Batch OT Sender.
+ * Every class that derives it is signed as Batch Oblivious Transfer sender.
  */
 class OTBatchSender {
 
 public:
 	/**
-	 * The transfer stage of OT Batch protocol which can be called several times in parallel.<p>
-	 * The OT implementation support usage of many calls to transfer, with single preprocess execution. <p>
-	 * This way, one can execute batch OT by creating the OT receiver once and call the transfer function for each input couple.<p>
-	 * In order to enable the parallel calls, each transfer call should use a different channel to send and receive messages.<p>
+	 * The transfer stage of OT Batch protocol which can be called several times in parallel.
+	 * The OT implementation support usage of many calls to transfer, with single preprocess execution. 
+	 * This way, one can execute batch OT by creating the OT receiver once and call the transfer function for each input couple.
+	 * In order to enable the parallel calls, each transfer call should use a different channel to send and receive messages.
 	 * This way the parallel executions of the function will not block each other.<p>
 	 */
 	virtual shared_ptr<OTBatchSOutput> transfer(OTBatchSInput * input) = 0;
 	virtual ~OTBatchSender(){};
 };
 
-
-
+/**
+* This enum class represents the options for OT extension receiver.
+* THe options are - General, Random and Correlated.
+*/
 enum class OTBatchRInputTypes {
 	OTExtensionGeneralRInput, OTExtensionRandomizedRInput, OTExtensionCorrelatedRInput
 };
 
 /**
  * Every Batch OT receiver needs inputs during the protocol execution, but every concrete protocol needs
- * different inputs.<p>
- * This interface is a marker interface for OT receiver input, where there is an implementing class
- * for each OT protocol.
+ * different inputs.
+ * This is a marker class for OT receiver input, where there is a derived class for each OT protocol.
  */
 class OTBatchRInput {
 public:
@@ -282,7 +298,7 @@ public:
 };
 
 /**
- * An abstract OT receiver input.<P>
+ * An abstract OT receiver input.
  * All the concrete classes are the same and differ only in the name.
  * The reason a class is created for each version is due to the fact that a respective class is created for the sender and we wish to be consistent.
  * The name of the class determines the version of the OT extension we wish to run.
@@ -299,19 +315,18 @@ public:
 		this->sigmaArr = sigmaArr;
 		this->elementSize = elementSize;
 	}
-	;
+	
 	vector<byte> getSigmaArr() {
 		return sigmaArr;
 	}
-	;
+
 	int getSigmaArrSize() {
 		return sigmaArr.size();
 	}
-	;
+	
 	int getElementSize() {
 		return elementSize;
 	}
-	;
 
 private:
 	vector<byte> sigmaArr; // Each byte holds a sigma bit for each OT in the OT extension protocol.
@@ -319,7 +334,7 @@ private:
 };
 
 /**
- * A concrete class for OT extension input for the receiver. <p>
+ * A concrete class for OT extension input for the receiver. 
  * All the classes are the same and differ only in the name.
  * The reason a class is created for each version is due to the fact that a respective class is created for the sender and we wish to be consistent.
  * The name of the class determines the version of the OT extension we wish to run and in this case the general case.
@@ -343,7 +358,7 @@ public:
 
 
 /**
- * A concrete class for correlated OT extension input for the receiver. <p>
+ * A concrete class for correlated OT extension input for the receiver.
  * All the classes are the same and differ only in the name.
  * The reason a class is created for each version is due to the fact that a respective class is created for the sender and we wish to be consistent.
  * The name of the class determines the version of the OT extension we wish to run and in this case the general case.
@@ -365,9 +380,12 @@ public:
 
 };
 
-
-
-
+/**
+* A concrete class for randomized OT extension input for the receiver.
+* All the classes are the same and differ only in the name.
+* The reason a class is created for each version is due to the fact that a respective class is created for the sender and we wish to be consistent.
+* The name of the class determines the version of the OT extension we wish to run and in this case the general case.
+*/
 class OTExtensionRandomizedRInput: public OTExtensionRInput{
 public:
 	OTExtensionRandomizedRInput(const vector<byte> & sigmaArr, int elementSize) : OTExtensionRInput(sigmaArr,elementSize) {}
@@ -393,17 +411,16 @@ public:
 #endif
 
 /**
- * General interface for Batch OT Receiver. <p>
- * Every class that implements it is signed as Batch Oblivious Transfer receiver.<p>
+ * General class for Batch OT Receiver.
+ * Every class that derives it is signed as Batch Oblivious Transfer receiver.
  */
 class OTBatchReceiver {
 	/**
-	 * The transfer stage of OT Batch protocol which can be called several times in parallel.<p>
-	 * The OT implementation support usage of many calls to transfer, with single preprocess execution. <p>
-	 * This way, one can execute batch OT by creating the OT receiver once and call the transfer function for each input couple.<p>
-	 * In order to enable the parallel calls, each transfer call should use a different channel to send and receive messages.<p>
-	 * This way the parallel executions of the function will not block each other.<p>
-	 * @param channel each call should get a different one.
+	 * The transfer stage of OT Batch protocol which can be called several times in parallel.
+	 * The OT implementation support usage of many calls to transfer, with single preprocess execution. 
+	 * This way, one can execute batch OT by creating the OT receiver once and call the transfer function for each input couple.
+	 * In order to enable the parallel calls, each transfer call should use a different channel to send and receive messages.
+	 * This way the parallel executions of the function will not block each other.
 	 * @param input The parameters given in the input must match the DlogGroup member of this class, which given in the constructor.
 	 * @return OTBatchROutput, the output of the protocol.
 	 */

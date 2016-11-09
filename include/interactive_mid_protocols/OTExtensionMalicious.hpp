@@ -40,37 +40,39 @@
 
 class ConnectionManager;
 
+/**
+ * Abstract class that implement some common functionality for both the sender and the receiver of this OT extension implementation.
+ */
 class OTExtensionMaliciousBase : public Malicious {
 protected:
-	// handles the networking stuff
+	// Handles the networking stuff.
 	ConnectionManager* m_connection_manager;
 
-	// handles the malicious ot protocol 
-	// (each party runs both a sender and a receiver since 
-	// there are 2 ots running: the base ot and the extension ot).
+	// Handles the malicious ot protocol.
+	// (each party runs both a sender and a receiver since there are 2 ots running: the base ot and the extension ot).
 	maliciousot::Mal_OTExtensionSender* m_sender;
 	maliciousot::Mal_OTExtensionReceiver*  m_receiver;
 
 	// Naor-Pinkas OT protocol
 	maliciousot::BaseOT * m_baseot_handler;
-
-	// settings of ot protocol
+	
+	// Settings of ot protocol
 	int m_num_base_ots;
 	int m_num_ots;
 	int m_counter;
 	int m_num_checks;
 	maliciousot::SECLVL m_security_level;
 
-	// seeds (SHA PRG)
+	// Seeds (SHA PRG)
 	maliciousot::BYTE m_receiver_seed[SHA1_BYTES];
 	maliciousot::BYTE m_sender_seed[AES_BYTES];
 
-	// implementation details
+	// Implementation details
 	maliciousot::CBitVector U;
 	maliciousot::BYTE *m_sender_key_seeds;
 	maliciousot::BYTE *m_receiver_key_seeds_matrix;
 
-	// logger stuff
+	// Logger stuff
 	double logger_random_gentime;
 
 	
@@ -82,28 +84,26 @@ public:
 
 };
 /**
-* A concrete class for Malicious OT extension sender. <P>
+* A concrete class for Malicious OT extension sender. 
 *
 * The base OT is done once in the construction time. After that, the transfer function will be always optimized and fast, no matter how much OT's there are.
 *
-* There are three versions of OT extension: General, Correlated and Random. The difference between them is the way of getting the inputs: <p>
-* In general OT extension both x0 and x1 are given by the user.<p>
-* In Correlated OT extension the user gives a delta array and x0, x1 arrays are chosen such that x0 = delta^x1.<p>
-* In random OT extension both x0 and x1 are chosen randomly.<p>
-* To allow the user decide which OT extension's version he wants, each option has a corresponding input class. <p>
+* There are three versions of OT extension: General, Correlated and Random. The difference between them is the way of getting the inputs:
+* In general OT extension both x0 and x1 are given by the user.
+* In Correlated OT extension the user gives a delta array and x0, x1 arrays are chosen such that x0 = delta^x1.
+* In random OT extension both x0 and x1 are chosen randomly.
+* To allow the user decide which OT extension's version he wants, each option has a corresponding input class. 
 * The particular OT extension version is executed according to the given input instance;
-* For example, if the user gave as input an instance of OTExtensionRandomSInput than the random OT Extension will be execute.<p>
+* For example, if the user gave as input an instance of OTExtensionRandomSInput than the random OT Extension will be execute.
 *
-* NOTE: Unlike a regular implementation the connection is done via the native code and thus the channel provided in the transfer function is ignored.
-*
-* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Meital Levy, Asaf Cohen)
+* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein, Asaf Cohen)
 *
 */
 class OTExtensionMaliciousSender  : public OTExtensionMaliciousBase, public OTBatchSender {
 private:
 	BOOL precompute_base_ots_sender();
 	/*
-	* runs the OT extension as the sender.
+	* Runs the OT extension as the sender.
 	* @param x0 An array that holds all the x0 values for each of the OT's serially (concatenated).
 	* @param x1 An array that holds all the x1 values for each of the OT's serially (concatenated).
 	* @param delta
@@ -115,18 +115,17 @@ private:
 	
 public:
 	/**
-	* A constructor that creates the native sender with communication abilities. It uses the ip address and port given in the party object.<p>
+	* A constructor that creates the sender with communication abilities. It uses the ip address and port given in the bindAddress.
 	* The construction runs the base OT phase. Further calls to transfer function will be optimized and fast, no matter how much OTs there are.
 	* THE SENDER ACTS AS THE SERVER!!!
-	* @param party An object that holds the ip address and port.
-	* @param koblitzOrZpSize An integer that determines whether the OT extension uses Zp or ECC koblitz. The optional parameters are the following.
-	* 		  163,233,283 for ECC koblitz and 1024, 2048, 3072 for Zp.
+	* @param bindAddress An object that holds the ip address and port.
+	* @param numOts The number of OTs that the protocol runs (how many strings are inside x0?)
 	* @param numOfThreads
 	*/
 	OTExtensionMaliciousSender(SocketPartyData bindAddress, int numOts, int numOfThreads = 1, int numBaseOts = 190);
 	~OTExtensionMaliciousSender();
 	/**
-	* The overloaded function that runs the protocol.<p>
+	* The overloaded function that runs the protocol.
 	* After the base OT was done by the constructor, call to this function will be optimized and fast, no matter how much OTs there are.
 	* @param channel Disregarded. This is ignored since the connection is done in the c++ code.
 	* @param input The input for the sender specifying the version of the OT extension to run.
@@ -136,21 +135,17 @@ public:
 };
 
 /**
-* A concrete class for Malicious OT extension receiver. <P>
+* A concrete class for Malicious OT extension receiver. 
 *
-* The base OT is done once in the construction time. After that, the transfer function will be always optimized and fast, no matter how much OT's there are.<p>
+* The base OT is done once in the construction time. After that, the transfer function will be always optimized and fast, no matter how much OT's there are.
 *
-* There are three versions of OT extension: General, Correlated and Random. The difference between them is the way of getting the inputs: <p>
-* In general OT extension both x0 and x1 are given by the user.<p>
-* In Correlated OT extension the user gives a delta array and x0, x1 arrays are chosen such that x0 = delta^x1.<p>
+* There are three versions of OT extension: General, Correlated and Random. The difference between them is the way of getting the inputs: 
+* In general OT extension both x0 and x1 are given by the user.
+* In Correlated OT extension the user gives a delta array and x0, x1 arrays are chosen such that x0 = delta^x1.
 * In random OT extension both x0 and x1 are chosen randomly.<p>
-* To allow the user decide which OT extension's version he wants, each option has a corresponding input class. <p>
+* To allow the user decide which OT extension's version he wants, each option has a corresponding input class. 
 * The particular OT extension version is executed according to the given input instance;
-* For example, if the user gave as input an instance of OTExtensionRandomRInput than the random OT Extension will be execute.<p>
-*
-* NOTE: Unlike a regular implementation, the connection is done via the native code and thus the channel provided in the transfer function is ignored.
-*
-* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Meital Levy, Asaf Cohen)
+* For example, if the user gave as input an instance of OTExtensionRandomRInput than the random OT Extension will be execute.
 *
 */
 class OTExtensionMaliciousReceiver : public OTExtensionMaliciousBase, public OTBatchReceiver {
@@ -173,19 +168,20 @@ private:
 public:
 
 	/**
-	* A constructor that creates the native receiver with communication abilities. <p>
-	* It uses the ip address and port given in the party object.<p>
+	* A constructor that creates the native receiver with communication abilities. 
+	* It uses the ip address and port given in the party object.
 	* The construction runs the base OT phase. Further calls to transfer function will be optimized and fast, no matter how much OTs there are.
-	* @param party An object that holds the ip address and port.
-	* @param koblitzOrZpSize An integer that determines whether the OT extension uses Zp or ECC koblitz. The optional parameters are the following.
-	* 		  163,233,283 for ECC koblitz and 1024, 2048, 3072 for Zp.
+	* @param serverAddress An object that holds the ip address and port of the sender.
+	* @param numOts The number or OTs that the protocol runs.
 	* @param numOfThreads
 	*
 	*/
 	OTExtensionMaliciousReceiver(SocketPartyData serverAddress, int numOts, int numOfThreads = 1, int numBaseOts = 190);
+	
 	~OTExtensionMaliciousReceiver();
+	
 	/**
-	* The overloaded function that runs the protocol.<p>
+	* The overloaded function that runs the protocol.
 	* After the base OT was done by the constructor, call to this function will be optimized and fast, no matter how much OTs there are.
 	* @param channel Disregarded. This is ignored since the connection is done in the c++ code.
 	* @param input The input for the receiver specifying the version of the OT extension to run.
@@ -195,10 +191,9 @@ public:
 };
 
 
-
-
-
-// abstract base class
+/**
+ * Abstract base class that manage common functionality of the communication between the sender and receiver.
+ */
 class ConnectionManager {
 
 public:
@@ -225,14 +220,18 @@ protected:
 	std::vector<maliciousot::CSocket> m_sockets;
 };
 
-// server class (used by sender)
+/**
+ * Server class (used by sender).
+ */
 class ConnectionManagerServer : public ConnectionManager {
 public:
 	ConnectionManagerServer(int role, int num_of_threads, SocketPartyData address);
 	virtual BOOL setup_connection();
 };
 
-// client class (used by receiver)
+/**
+ * Client class (used by receiver).
+ */
 class ConnectionManagerClient : public ConnectionManager {
 public:
 	ConnectionManagerClient(int role, int num_of_threads, SocketPartyData address);

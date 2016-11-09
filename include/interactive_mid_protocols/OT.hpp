@@ -5,9 +5,9 @@
 
 /**
 * Every OT sender needs inputs during the protocol execution, but every concrete protocol needs
-* different inputs.<p>
-* This interface is a marker interface for OT sender input, where there is an implementing class
-* for each OT protocol.<p>
+* different inputs.
+* This is a marker class for OT sender input, where there is a derived class
+* for each OT protocol.
 *
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
 *
@@ -33,26 +33,22 @@ private:
 public:
 	/**
 	* Constructor that sets two byte arrays - x0, x1.
-	* @param x0
-	* @param x1
 	*/
 	OTOnGroupElementSInput(const shared_ptr<GroupElement> & x0, const shared_ptr<GroupElement> & x1) : x0(x0), x1(x1) {}
 
 	/**
 	* Returns the first group element input.
-	* @return the first group element input.
 	*/
 	shared_ptr<GroupElement> getX0() { return x0; }
 
 	/**
 	* Returns the second group element input.
-	* @return the second group element input.
 	*/
 	shared_ptr<GroupElement> getX1() { return x1; }
 };
 
 /**
-* Concrete implementation of OT sender (on byteArray) input.<p>
+* Concrete implementation of OT sender (on byteArray) input.
 * In the byteArray scenario, the sender gets two binary strings x0, x1 of the same (arbitrary) length.
 *
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
@@ -83,9 +79,8 @@ public:
 
 /**
 * Every OT receiver needs inputs during the protocol execution, but every concrete protocol needs
-* different inputs. <p>
-* This interface is a marker interface for OT receiver input, where there is an implementing class
-* for each OT protocol.
+* different inputs. 
+* This is a marker class for OT receiver input, where there is a derived class for each OT protocol.
 *
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
 *
@@ -96,7 +91,7 @@ public:
 };
 
 /**
-* Concrete implementation of OT receiver input.<p>
+* Concrete implementation of OT receiver input.
 * In the basic scenario, the receiver gets a single bit representing 0/1.
 *
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
@@ -109,25 +104,19 @@ class OTRBasicInput : public OTRInput {
 private:
 	bool sigma;
 
-	/**
-	* Sets the given sigma.
-	* @param sigma
-	*/
 public:
 	OTRBasicInput(bool sigma) : sigma(sigma) {}
 
 	/**
 	* Returns the sigma input.
-	* @return
 	*/
 	bool getSigma() { return sigma;	}
 };
 
 /**
 * Every OT receiver outputs a result in the end of the protocol execution, but every concrete
-* protocol output different data.<p>
-* This interface is a marker interface for OT receiver output, where there is an implementing class
-* for each OT protocol.
+* protocol output different data.
+* This is a marker class for OT receiver output, where there is a derived class for each OT protocol.
 *
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
 *
@@ -138,7 +127,7 @@ public:
 };
 
 /**
-* Concrete implementation of OT receiver (on GroupElement) output.<p>
+* Concrete implementation of OT receiver (on GroupElement) output.
 * In the GroupElement scenario, the receiver outputs xSigma as a GroupElement.
 *
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
@@ -158,7 +147,6 @@ public:
 
 	/**
 	* Return the output of the protocol.
-	* @return the output of the protocol.
 	*/
 	shared_ptr<GroupElement> getXSigma() { return xSigma; }
 
@@ -166,9 +154,8 @@ public:
 
 /**
 * Every Batch OT receiver outputs a result in the end of the protocol execution, but every concrete
-* protocol output different data.<p>
-* This interface is a marker interface for OT receiver output, where there is an implementing class
-* for each OT protocol.
+* protocol output different data.
+* This is a marker class for OT receiver output, where there is a derived class for each OT protocol.
 */
 class OTBatchROutput {
 public:
@@ -176,7 +163,7 @@ public:
 };
 
 /**
-* Concrete implementation of OT receiver (on byteArray) output.<p>
+* Concrete implementation of OT receiver (on byteArray) output.
 * In the byteArray scenario, the receiver outputs xSigma as a byte array.
 *
 * This output class also can be viewed as the output of batch OT when xSigma is a concatenation of all xSigma byte array of all OTs.
@@ -199,7 +186,6 @@ public:
 
 	/**
 	* Return the output array of the protocol.
-	* @return the output array of the protocol.
 	*/
 	vector<byte> getXSigma() {	return xSigma;	}
 
@@ -207,7 +193,7 @@ public:
 };
 
 /**
-* General interface. Every class that implements it is signed as Oblivious Transfer sender.<p>
+* General interface. Every class that implements it is signed as Oblivious Transfer sender.
 *
 * Oblivious Transfer is the situation where a sender has n messages, and the receiver has an
 * index i. The receiver wishes to receive the i-th among the sender's messages,
@@ -234,8 +220,6 @@ public:
 	* This way the parallel executions of the function will not block each other.
 	* @param channel each call should get a different one.
 	* @param input The parameters given in the input must match the DlogGroup member of this class, which given in the constructor.
-	* @throws IOException if there was a problem during the communication.
-	* @throws ClassNotFoundException if there was a problem in the serialization mechanism.
 	* @throws CheatAttemptException if the sender suspects that the receiver is trying to cheat.
 	* @throws InvalidDlogGroupException if the given DlogGRoup is not valid.
 	*/
@@ -243,7 +227,7 @@ public:
 };
 
 /**
-* General interface. Every class that implements it is signed as Oblivious Transfer receiver.<p>
+* General class. Every derived class is signed as Oblivious Transfer receiver.
 *
 * Oblivious Transfer is is a type of protocol in which a sender has n messages, and the receiver has an
 * index i. The receiver wishes to receive the i-th among the sender's messages,
@@ -272,15 +256,14 @@ public:
 	* @param input The parameters given in the input must match the DlogGroup member of this class, which given in the constructor.
 	* @return OTROutput, the output of the protocol.
 	* @throws CheatAttemptException if there was a cheat attempt during the execution of the protocol.
-	* @throws IOException if the send or receive functions failed
-	* @throws ClassNotFoundException if there was a problem during the serialization mechanism
 	*/
 	virtual shared_ptr<OTROutput> transfer(CommParty* channel, OTRInput* input) = 0;
 };
 
 
 /**
-* Concrete implementation of OT receiver message. <p>This implementation is common for OT on byteArray and on GroupElement.<p>
+* Concrete implementation of OT receiver message. 
+* This implementation is common for OT on byteArray and on GroupElement.
 * The message contains tuple of two GroupElements - (h0, h1).
 *
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
@@ -305,8 +288,8 @@ public:
 };
 
 /**
-* Concrete implementation of OT receiver message used by some OT receivers implementations. <p>
-* This implementation is common for OT on byteArray and on GroupElement.<p>
+* Concrete implementation of OT receiver message used by some OT receivers implementations. 
+* This implementation is common for OT on byteArray and on GroupElement.
 * The message contains tuple of four GroupElements - (x, y, z0, z1).
 *
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
@@ -339,10 +322,8 @@ public:
 };
 
 /**
-* Every OT sender should send a message to the receiver, but every concrete protocol sends
-* different data.<p>
-* This interface is a marker interface for OT sender message, where there is an implementing class
-* for each OT protocol.
+* Every OT sender should send a message to the receiver, but every concrete protocol sends different data.
+* This is a marker class for OT sender message, where there is a derived class for each OT protocol.
 *
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
 *
@@ -350,11 +331,11 @@ public:
 class OTSMsg : public NetworkSerialized {};
 
 /**
-* Concrete implementation of OT Privacy sender (on GroupElement) message.<p>
-* In the GroupElement scenario, the sender sends four GroupElements - w0, w1, c0 and c1.<p>
-* This class is used by most of OT implementations. <p>
+* Concrete implementation of OT sender (on GroupElement) message.
+* In the GroupElement scenario, the sender sends four GroupElements - w0, w1, c0 and c1.
+* This class is used by most of OT implementations. 
 * An OT protocol that does not use this class (like OT SemiHonest) will create a separate
-* class that matches what it needs.<p>
+* class that matches what it needs.
 *
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
 *
@@ -373,10 +354,6 @@ public:
 
 	/**
 	* Constructor that sets the tuples (w0,c0), (w1, c1) calculated by the protocol.
-	* @param w0
-	* @param c0
-	* @param w1
-	* @param c1
 	*/
 	OTOnGroupElementSMsg(const shared_ptr<GroupElementSendableData> & w0,
 		const shared_ptr<GroupElementSendableData> & c0, const shared_ptr<GroupElementSendableData> & w1,
@@ -395,11 +372,11 @@ public:
 };
 
 /**
-* Concrete implementation of OT Privacy sender (on byte array) message.<p>
+* Concrete implementation of OT sender (on byte array) message.
 * In the byteArray scenario, the sender sends two GroupElement - w0 and w1 and two byte arrays - c0 and c1.
-* This class is used by most of OT implementations. <p>
+* This class is used by most of OT implementations. 
 * An OT protocol that does not use this class (like OT SemiHonest) will create a separate
-* class that matches what it needs.<p>
+* class that matches what it needs.
 *
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
 *
@@ -449,7 +426,6 @@ public:
 
 	/**
 	* Holds the output of the above RAND function.
-	* @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
 	*
 	*/
 	class RandOutput {
@@ -476,10 +452,6 @@ public:
 	*	2.	COMPUTE u = w^s * y^t<p>
 	*	3.	COMPUTE v = x^s * z^t<p>
 	*	4.	OUTPUT (u,v)
-	* @param w
-	* @param x
-	* @param y
-	* @param z
 	*/
 	static OTUtil::RandOutput rand(DlogGroup* dlog, GroupElement* w, GroupElement* x, GroupElement* y, GroupElement* z, PrgFromOpenSSLAES* random);
 };

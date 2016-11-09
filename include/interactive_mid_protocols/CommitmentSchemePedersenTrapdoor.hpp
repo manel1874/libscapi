@@ -32,34 +32,30 @@
 
 /**
 * Concrete implementation of committer that executes the Pedersen trapdoor commitment
-* scheme in the committer's point of view.<p>
+* scheme in the committer's point of view.
 * This commitment is also a trapdoor commitment in the sense that the receiver after
 * the commitment phase has a trapdoor value, that if known by the committer would enable
-* it to decommit to any value. <p>
+* it to decommit to any value. 
 * This trapdoor is output by the receiver and can be used by a higher-level application
-* (e.g., by the ZK transformation of a sigma protocol to a zero-knowledge proof of knowledge).<p>
+* (e.g., by the ZK transformation of a sigma protocol to a zero-knowledge proof of knowledge).
 *
-* For more information see Protocol 6.5.3, page 164 of <i>Efficient Secure Two-Party Protocols</i>
-* by Hazay-Lindell.<p>
+* For more information see Protocol 6.5.3, page 164 of Efficient Secure Two-Party Protocols
+* by Hazay-Lindell.
 *
 * The pseudo code of this protocol can be found in Protocol 3.3 of pseudo codes document
-* at {@link http://cryptobiu.github.io/scapi/SDK_Pseudocode.pdf}.<p>
+* at https://github.com/cryptobiu/scapi/blob/master/doc/old/SDD_docs/SDK_Pseudocode.docx
 */
 class CmtPedersenTrapdoorCommitter : public CmtPedersenCommitter {
 public:
 	/**
 	* Constructor that receives a connected channel (to the receiver) and chooses default dlog and random.
 	* The receiver needs to be instantiated with the default constructor too.
-	* @param channel
 	*/
 	CmtPedersenTrapdoorCommitter(const shared_ptr<CommParty> & channel, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) : CmtPedersenCommitter(channel, random) {};
 
 	/**
 	* Constructor that receives a connected channel (to the receiver), the DlogGroup agreed upon between them and a SecureRandom object.
 	* The Receiver needs to be instantiated with the same DlogGroup, otherwise nothing will work properly.
-	* @param channel
-	* @param dlog
-	* @param random
 	*/
 	CmtPedersenTrapdoorCommitter(const shared_ptr<CommParty> & channel, const shared_ptr<DlogGroup> & dlog, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) :
 		CmtPedersenCommitter(channel, dlog, random) {};
@@ -81,16 +77,16 @@ public:
 
 /**
 * Concrete implementation of receiver that executes the Pedersen trapdoor commitment
-* scheme in the receiver's point of view.<p>
+* scheme in the receiver's point of view.
 * This commitment is also a trapdoor commitment in the sense that the receiver after
 * the commitment phase has a trapdoor value, that if known by the committer would enable
-* it to decommit to any value. <p>
+* it to decommit to any value. 
 * This trapdoor is output by the receiver and can be used by a higher-level application
 * (e.g., by the ZK transformation of a sigma protocol to a zero-knowledge proof of knowledge).<p>
 * For more information see Protocol 6.5.3, page 164 of <i>Efficient Secure Two-Party Protocols</i>
-* by Hazay-Lindell.<p>
+* by Hazay-Lindell.
 * The pseudo code of this protocol can be found in Protocol 3.3 of pseudo codes
-* document at {@link http://cryptobiu.github.io/scapi/SDK_Pseudocode.pdf}.<p>
+* document at https://github.com/cryptobiu/scapi/blob/master/doc/old/SDD_docs/SDK_Pseudocode.docx
 */
 class CmtPedersenTrapdoorReceiver : public CmtPedersenReceiver {
 public:
@@ -99,9 +95,6 @@ public:
 	* the DlogGroup agreed upon between them and a SecureRandom object.
 	* The committer needs to be instantiated with the same DlogGroup,
 	* otherwise nothing will work properly.
-	* @param channel
-	* @param dlog
-	* @param random
 	*/
 	CmtPedersenTrapdoorReceiver(const shared_ptr<CommParty> & channel, const shared_ptr<DlogGroup> & dlog, const shared_ptr<PrgFromOpenSSLAES> & prg = get_seeded_prg()) :
 		CmtPedersenReceiver(channel, dlog, prg) {};

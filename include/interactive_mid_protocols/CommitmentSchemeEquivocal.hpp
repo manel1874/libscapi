@@ -31,11 +31,11 @@
 #include "CommitmentSchemePedersen.hpp"
 
 /**
-* Concrete implementation of Equivocal commitment scheme in the committer's point of view.<p>
-* This is a protocol to obtain an equivocal commitment from any commitment with a ZK-protocol of the commitment value.<p>
-* The equivocality property means that a simulator can decommit to any value it needs (needed for proofs of security).<p>
+* Concrete implementation of Equivocal commitment scheme in the committer's point of view.
+* This is a protocol to obtain an equivocal commitment from any commitment with a ZK-protocol of the commitment value.
+* The equivocality property means that a simulator can decommit to any value it needs (needed for proofs of security).
 *
-* The pseudo code of this protocol can be found in Protocol 3.7 of pseudo codes document at {@link http://cryptobiu.github.io/scapi/SDK_Pseudocode.pdf}.<p>
+* The pseudo code of this protocol can be found in Protocol 3.7 of pseudo codes document at https://github.com/cryptobiu/scapi/blob/master/doc/old/SDD_docs/SDK_Pseudocode.docx
 *
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
 *
@@ -43,12 +43,12 @@
 class CmtEquivocalCommitter : public CmtCommitter, public EquivocalCmt {
 
 	/*
-	Runs the following pseudo code:
-	Commit phase
-	RUN any COMMIT protocol for C to commit to x
-	Decommit phase, using ZK protocol of decommitment value
-	SEND x to R
-	Run ZK protocol as the prover, that x is the correct decommitment value
+		Runs the following pseudo code:
+		Commit phase
+		RUN any COMMIT protocol for C to commit to x
+		Decommit phase, using ZK protocol of decommitment value
+		SEND x to R
+		Run ZK protocol as the prover, that x is the correct decommitment value
 	*/
 
 private:
@@ -68,10 +68,6 @@ public:
 
 	/**
 	* Constructor that gets channel to use in the protocol execution and chooses default committer.
-	* @param channel
-	* @throws CheatAttemptException
-	* @throws IOException
-	* @throws ClassNotFoundException
 	*/
 	CmtEquivocalCommitter(const shared_ptr<CommParty> & channel, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) {
 		doConstruct(channel, make_shared<CmtPedersenWithProofsCommitter>(channel, t, random));
@@ -87,20 +83,20 @@ public:
 	}
 
 	/**
-	* Runs the decommit phase of the protocol.<p>
-	* Pseudo code:<p>
-	* "SEND x to R<p>
-	*	Run ZK protocol as the prover, that x is the correct decommitment value".<p>
+	* Runs the decommit phase of the protocol.
+	* Pseudo code:
+	* "SEND x to R
+	*	Run ZK protocol as the prover, that x is the correct decommitment value".
 	*/
 	void decommit(long id) override {
 		//During the execution of proveCommittedValue, the x is sent to the receiver.
 		committer->proveCommittedValue(id);
 	} 
 
-		/**
-		* This function samples random commit value and returns it.
-		* @return the sampled commit value
-		*/
+	/**
+	* This function samples random commit value and returns it.
+	* @return the sampled commit value
+	*/
 	shared_ptr<CmtCommitValue> sampleRandomCommitValue() override {
 		//Delegate to the underlying committer.
 		return committer->sampleRandomCommitValue();
@@ -132,11 +128,11 @@ public:
 };
 
 /**
-* Concrete implementation of Equivocal commitment scheme in the receiver's point of view.Pseudo code:<p>
-* This is a protocol to obtain an equivocal commitment from any commitment with a ZK-protocol of the commitment value.Pseudo code:<p>
-* The equivocality property means that a simulator can decommit to any value it needs (needed for proofs of security).<p>
+* Concrete implementation of Equivocal commitment scheme in the receiver's point of view.Pseudo code:
+* This is a protocol to obtain an equivocal commitment from any commitment with a ZK-protocol of the commitment value.Pseudo code:
+* The equivocality property means that a simulator can decommit to any value it needs (needed for proofs of security).
 *
-* The pseudo code of this protocol can be found in Protocol 3.7 of pseudo codes document at {@link http://cryptobiu.github.io/scapi/SDK_Pseudocode.pdf}.<p>
+* The pseudo code of this protocol can be found in Protocol 3.7 of pseudo codes document at https://github.com/cryptobiu/scapi/blob/master/doc/old/SDD_docs/SDK_Pseudocode.docx
 *
 *
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
@@ -145,15 +141,15 @@ public:
 class CmtEquivocalReceiver : public CmtReceiver, public EquivocalCmt {
 
 	/*
-	Runs the following pseudo code:
-	Commit phase
-	RUN any COMMIT protocol for C to commit to x
-	Decommit phase, using ZK protocol of decommitment value
-	Run ZK protocol as the verifier, that x is the correct decommitment value
-	IF verifier-output of ZK is ACC
-	OUTPUT ACC and x
-	ELSE
-	OUTPUT REJ
+		Runs the following pseudo code:
+		Commit phase
+		RUN any COMMIT protocol for C to commit to x
+		Decommit phase, using ZK protocol of decommitment value
+		Run ZK protocol as the verifier, that x is the correct decommitment value
+		IF verifier-output of ZK is ACC
+		OUTPUT ACC and x
+		ELSE
+		OUTPUT REJ
 
 	*/
 
@@ -163,7 +159,6 @@ private:
 public:
 	/**
 	* Constructor that gets the receiver to use in the protocol execution.
-	* @param receiver
 	*/
 	CmtEquivocalReceiver(const shared_ptr<CommParty> & channel, const shared_ptr<CmtWithProofsReceiver> & receiver) {
 		this->receiver = receiver;
@@ -171,17 +166,13 @@ public:
 
 	/**
 	* Constructor that gets channel to use in the protocol execution and chooses default receiver.
-	* @param channel
-	* @throws CheatAttemptException
-	* @throws IOException
-	* @throws ClassNotFoundException
 	*/
 	CmtEquivocalReceiver(const shared_ptr<CommParty> & channel, int t, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) {
 		this->receiver = make_shared<CmtPedersenWithProofsReceiver>(channel, t, random);
 	}
 
 	/**
-	* Runs the commit phase of the protocol:<P>
+	* Runs the commit phase of the protocol:
 	* "RUN any COMMIT protocol for C to commit to x".
 	*/
 	shared_ptr<CmtRCommitPhaseOutput> receiveCommitment() override {
@@ -190,11 +181,11 @@ public:
 	}
 
 	/**
-	* Runs the decommit phase of the protocol:<P>
-	* "Run ZK protocol as the verifier, that x is the correct decommitment value<P>
-	*		IF verifier-output of ZK is ACC<P>
-	*          OUTPUT ACC and x<P>
-	*    	ELSE<P>
+	* Runs the decommit phase of the protocol:
+	* "Run ZK protocol as the verifier, that x is the correct decommitment value
+	*		IF verifier-output of ZK is ACC
+	*          OUTPUT ACC and x>
+	*    	ELSE
 	*          OUTPUT REJ".
 	*/
 	shared_ptr<CmtCommitValue> receiveDecommitment(long id) override{
@@ -213,7 +204,6 @@ public:
 
 	/**
 	* This function converts the given commit value to a byte array.
-	* @param value
 	* @return the generated bytes.
 	*/
 	vector<byte> generateBytesFromCommitValue(CmtCommitValue* value) override {

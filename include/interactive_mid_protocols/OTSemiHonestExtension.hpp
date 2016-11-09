@@ -47,11 +47,14 @@
 #include <iomanip>
 #include <string>
 
+/**
+* Abstract class that implement some common functionality for both the sender and the receiver of this OT extension implementation.
+*/
 class OTSemiHonestExtensionBase : public SemiHonest {
 protected:
 	static const char* m_nSeed;
 	semihonestot::USHORT m_nPort = 7766;
-	const char* m_nAddr;// = "localhost";
+	const char* m_nAddr;
 	// Naor-Pinkas OT
 	semihonestot::BaseOT* bot;
 	// Network Communication
@@ -66,37 +69,29 @@ protected:
 	// SHA PRG
 	semihonestot::BYTE m_aSeed[SHA1_BYTES];
 	bool Init(int numOfThreads);
+
+	~OTSemiHonestExtensionBase() {
+		delete bot;
+	}
 };
 
-/*
-* The native code that runs the OT extension as the receiver.
-* @param sigma An array holding the input of the receiver, that is, the 0 and 1 choices for each OT.
-* @param numOfOts The number or OTs that the protocol runs.
-* @param bitLength The length of each item in the OT. The size of each x0, x1 which must be the same for all x0, x1.
-* @param output The output of all the OTs. This is provided as a one dimensional array that gets all the data serially one after the other. The
-* 				 array is given empty and the native code fills it with the result of the multiple OT results.
-* @param version The particular OT type to run.
-*/
-//void runOtAsReceiver(byte* sigma, int numOfOts, int bitLength, byte* output, std::string version);
-
 /**
-* A concrete class for Semi-Honest OT extension sender. <P>
+* A concrete class for Semi-Honest OT extension sender. 
 *
-* The Semi-Honest OT extension implemented is a SCAPI wrapper of the native implementation by Michael Zohner from the paper: <p>
-* "G. Asharov, Y. Lindell, T. Schneier and M. Zohner. More Efficient Oblivious Transfer and Extensions for Faster Secure Computation. ACM CCS 2013." <p>
+* The Semi-Honest OT extension implemented is a SCAPI wrapper of the native implementation by Michael Zohner from the paper:
+* "G. Asharov, Y. Lindell, T. Schneier and M. Zohner. More Efficient Oblivious Transfer and Extensions for Faster Secure Computation. ACM CCS 2013." 
 * See http://eprint.iacr.org/2013/552.pdf for more information.
 *
 * The base OT is done once in the construction time. After that, the transfer function will be always optimized and fast, no matter how much OT's there are.
 *
-* There are three versions of OT extension: General, Correlated and Random. The difference between them is the way of getting the inputs: <p>
-* In general OT extension both x0 and x1 are given by the user.<p>
-* In Correlated OT extension the user gives a delta array and x0, x1 arrays are chosen such that x0 = delta^x1.<p>
-* In random OT extension both x0 and x1 are chosen randomly.<p>
-* To allow the user decide which OT extension's version he wants, each option has a corresponding input class. <p>
+* There are three versions of OT extension: General, Correlated and Random. The difference between them is the way of getting the inputs:
+* In general OT extension both x0 and x1 are given by the user.
+* In Correlated OT extension the user gives a delta array and x0, x1 arrays are chosen such that x0 = delta^x1.
+* In random OT extension both x0 and x1 are chosen randomly.
+* To allow the user decide which OT extension's version he wants, each option has a corresponding input class. 
 * The particular OT extension version is executed according to the given input instance;
-* For example, if the user gave as input an instance of OTExtensionRandomSInput than the random OT Extension will be execute.<p>
+* For example, if the user gave as input an instance of OTExtensionRandomSInput than the random OT Extension will be execute.
 *
-* NOTE: Unlike a regular implementation the connection is done via the native code and thus the channel provided in the transfer function is ignored.
 */
 class OTSemiHonestExtensionSender : public OTSemiHonestExtensionBase, public OTBatchSender {
 private:
@@ -111,10 +106,10 @@ private:
 	bool ObliviouslySend(semihonestot::OTExtensionSender* sender, semihonestot::CBitVector& X1, semihonestot::CBitVector& X2, int numOTs, int bitlength, byte version, semihonestot::CBitVector& delta);
 	bool Listen();
 	bool PrecomputeNaorPinkasSender();
-	void runOtAsSender(vector<byte> x1, vector<byte> x2, vector<byte> deltaArr, int numOfOts, int bitLength, string version);
+	void runOtAsSender(vector<byte> & x1, vector<byte> & x2, const vector<byte> & deltaArr, int numOfOts, int bitLength, string version);
 public:
 	/**
-	* A constructor that creates the native sender with communication abilities. It uses the ip address and port given in the party object.<p>
+	* A constructor that creates the native sender with communication abilities. It uses the ip address and port given in the party object.
 	* The construction runs the base OT phase. Further calls to transfer function will be optimized and fast, no matter how much OTs there are.
 	* @param party An object that holds the ip address and port.
 	* @param koblitzOrZpSize An integer that determines whether the OT extension uses Zp or ECC koblitz. The optional parameters are the following.
@@ -124,7 +119,7 @@ public:
 	OTSemiHonestExtensionSender(SocketPartyData party, int koblitzOrZpSize = 163, int numOfThreads = 1);
 	
 	/**
-	* The overloaded function that runs the protocol.<p>
+	* The overloaded function that runs the protocol.
 	* After the base OT was done by the constructor, call to this function will be optimized and fast, no matter how much OTs there are.
 	* @param channel Disregarded. This is ignored since the connection is done in the c++ code.
 	* @param input The input for the sender specifying the version of the OT extension to run.
@@ -134,33 +129,35 @@ public:
 	/**
 	* Deletes the native OT object.
 	*/
-	~OTSemiHonestExtensionSender() { delete senderPtr; };
+	~OTSemiHonestExtensionSender() { 
+		delete senderPtr;
+		delete vKeySeeds;
+	};
 };
 
 /**
-* A concrete class for Semi-Honest OT extension receiver. <P>
+* A concrete class for Semi-Honest OT extension receiver. 
 *
 * The Semi-Honest OT extension implemented is a SCAPI wrapper of the native implementation by Michael Zohner from the paper: <p>
 * "G. Asharov, Y. Lindell, T. Schneier and M. Zohner. More Efficient Oblivious Transfer and Extensions for Faster Secure Computation. ACM CCS 2013." <p>
 * See http://eprint.iacr.org/2013/552.pdf for more information.
 *
-* The base OT is done once in the construction time. After that, the transfer function will be always optimized and fast, no matter how much OT's there are.<p>
+* The base OT is done once in the construction time. After that, the transfer function will be always optimized and fast, no matter how much OT's there are.
 *
-* There are three versions of OT extension: General, Correlated and Random. The difference between them is the way of getting the inputs: <p>
-* In general OT extension both x0 and x1 are given by the user.<p>
-* In Correlated OT extension the user gives a delta array and x0, x1 arrays are chosen such that x0 = delta^x1.<p>
-* In random OT extension both x0 and x1 are chosen randomly.<p>
-* To allow the user decide which OT extension's version he wants, each option has a corresponding input class. <p>
+* There are three versions of OT extension: General, Correlated and Random. The difference between them is the way of getting the inputs: 
+* In general OT extension both x0 and x1 are given by the user
+* In Correlated OT extension the user gives a delta array and x0, x1 arrays are chosen such that x0 = delta^x1.
+* In random OT extension both x0 and x1 are chosen randomly.
+* To allow the user decide which OT extension's version he wants, each option has a corresponding input class. 
 * The particular OT extension version is executed according to the given input instance;
-* For example, if the user gave as input an instance of OTExtensionRandomRInput than the random OT Extension will be execute.<p>
-*
-* NOTE: Unlike a regular implementation, the connection is done via the native code and thus the channel provided in the transfer function is ignored.
+* For example, if the user gave as input an instance of OTExtensionRandomRInput than the random OT Extension will be execute.
+
 */
 class OTSemiHonestExtensionReceiver : public OTSemiHonestExtensionBase, public OTBatchReceiver {
 public:
 	/**
-	* A constructor that creates the native receiver with communication abilities. <p>
-	* It uses the ip address and port given in the party object.<p>
+	* A constructor that creates the native receiver with communication abilities. 
+	* It uses the ip address and port given in the party object.
 	* The construction runs the base OT phase. Further calls to transfer function will be optimized and fast, no matter how much OTs there are.
 	* @param party An object that holds the ip address and port.
 	* @param koblitzOrZpSize An integer that determines whether the OT extension uses Zp or ECC koblitz. The optional parameters are the following.
@@ -171,7 +168,7 @@ public:
 	OTSemiHonestExtensionReceiver(SocketPartyData party, int koblitzOrZpSize = 163, int numOfThreads = 1);
 	
 	/**
-	* The overloaded function that runs the protocol.<p>
+	* The overloaded function that runs the protocol.
 	* After the base OT was done by the constructor, call to this function will be optimized and fast, no matter how much OTs there are.
 	* @param channel Disregarded. This is ignored since the connection is done in the c++ code.
 	* @param input The input for the receiver specifying the version of the OT extension to run.

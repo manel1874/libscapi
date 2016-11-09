@@ -193,9 +193,9 @@ public:
 	/**
 	* Wait for the committer to send the commitment. When the message is received and
 	* after reconstructing the group element, save it in the commitmentMap using the id
-	* also received in the message.<P>
+	* also received in the message.
 	* Pseudo code:<P>
-	* "WAIT for message c from C<P>
+	* "WAIT for message c from C
 	*  STORE values (h,c)".
 	*/
 	shared_ptr<CmtRCommitPhaseOutput> receiveCommitment() override;
@@ -208,14 +208,12 @@ public:
 	shared_ptr<CmtCommitValue> receiveDecommitment(long id) override;
 
 	/**
-	* Run the decommitment phase of the protocol:<P>
-	* "IF  c = g^r * h^x AND x <- Zq<P>
-	*	    OUTPUT ACC and value x<P>
-	*	ELSE<P>
-	*	    OUTPUT REJ".	<P>
+	* Run the decommitment phase of the protocol:
+	* "IF  c = g^r * h^x AND x <- Zq
+	*	    OUTPUT ACC and value x
+	*	ELSE
+	*	    OUTPUT REJ".	
 	* @param id of the commitment
-	* @param x
-	* @param r
 	* @return the committed value
 	*/
 	shared_ptr<CmtCommitValue> verifyDecommitment(CmtCCommitmentMsg* commitmentMsg,
@@ -228,7 +226,7 @@ public:
 
 /**
 * This abstract class performs all the core functionality of the committer side of
-* Pedersen commitment. <p>
+* Pedersen commitment. 
 * Specific implementations can extend this class and add or override functions as necessary.
 */
 class CmtPedersenCommitterCore : public virtual CmtCommitter {
@@ -282,9 +280,9 @@ private:
 
 public:
 	/**
-	* Runs the following lines of the commitment scheme: <P>
-	* "SAMPLE a random value r <- Zq<P>
-	* 	COMPUTE  c = g^r * h^x". <p>
+	* Runs the following lines of the commitment scheme: 
+	* "SAMPLE a random value r <- Zq
+	* 	COMPUTE  c = g^r * h^x". 
 	*/
 	shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(const shared_ptr<CmtCommitValue> & input, long id) override;
 	
@@ -295,11 +293,11 @@ public:
 
 /**
 * Concrete implementation of committer that executes the Pedersen commitment scheme 
-* in the committer's point of view.<p>
+* in the committer's point of view.
 * For more information see Protocol 6.5.3, page 164 of 
-* <i>Efficient Secure Two-Party Protocols</i> by Hazay-Lindell.<p>
+* <i>Efficient Secure Two-Party Protocols</i> by Hazay-Lindell.
 * The pseudo code of this protocol can be found in Protocol 3.1 of pseudo codes 
-* document at {@link http://cryptobiu.github.io/scapi/SDK_Pseudocode.pdf}.<p>
+* document at https://github.com/cryptobiu/scapi/blob/master/doc/old/SDD_docs/SDK_Pseudocode.docx
 */
 class CmtPedersenCommitter : public CmtPedersenCommitterCore, public PerfectlyHidingCmt, public CmtOnBigInteger {
 public:
@@ -317,9 +315,6 @@ public:
 	* the DlogGroup agreed upon between them and a SecureRandom object.
 	* The Receiver needs to be instantiated with the same DlogGroup, 
 	* otherwise nothing will work properly.
-	* @param channel
-	* @param dlog
-	* @param random
 	*/
 	CmtPedersenCommitter(const shared_ptr<CommParty> & channel,	const shared_ptr<DlogGroup> & dlog, const shared_ptr<PrgFromOpenSSLAES> & random = get_seeded_prg()) :
 		CmtPedersenCommitterCore(channel, random, dlog) {};
@@ -338,11 +333,11 @@ public:
 
 /**
 * Concrete implementation of receiver that executes the Pedersen commitment
-* scheme in the receiver's point of view.<p>
+* scheme in the receiver's point of view.
 * For more information see Protocol 6.5.3, page 164 of
 * <i>Efficient Secure Two-Party Protocols</i> by Hazay-Lindell.<p>
 * The pseudo code of this protocol can be found in Protocol 3.1 of pseudo codes 
-* document at {@link http://cryptobiu.github.io/scapi/SDK_Pseudocode.pdf} .<p>
+* document at https://github.com/cryptobiu/scapi/blob/master/doc/old/SDD_docs/SDK_Pseudocode.docx
 */
 class CmtPedersenReceiver : public CmtPedersenReceiverCore, public PerfectlyHidingCmt, public CmtOnBigInteger {
 public:
@@ -422,6 +417,7 @@ public:
 };
 
 class ZKPOKFromSigmaCmtPedersenVerifier;
+
 /**
 * Concrete implementation of receiver with proofs.
 * This implementation uses ZK based on SigmaPedersenKnowledge and SIgmaPedersenCommittedValue.
