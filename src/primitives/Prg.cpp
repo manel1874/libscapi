@@ -83,13 +83,13 @@ void ScPrgFromPrf::getPRGBytes(vector<byte> & outBytes, int outOffset, int outLe
 				}
 			}
 		}
-		// increases the counter.
+		// Increase the counter.
 		increaseCtr();
 	}
 }
 
 void ScPrgFromPrf::increaseCtr() {
-	//increase the counter by one.
+	//Increase the counter by one.
 	int carry = 1;
 	int len = ctr.size();
 	for (int i = len - 1; i >= 0; i--)

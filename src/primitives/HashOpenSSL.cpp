@@ -29,8 +29,7 @@
 #include "../../include/primitives/HashOpenSSL.hpp"
 
 OpenSSLHash::OpenSSLHash(string hashName) {
-	//Instantiates a hash object in OpenSSL. We keep a pointer to the created hash object in c++.
-	//Remember to delete it using the finalize method.
+	//Instantiates a hash object in OpenSSL. 
 	const EVP_MD *md;
 
 	OpenSSL_add_all_digests();
@@ -44,15 +43,15 @@ OpenSSLHash::OpenSSLHash(string hashName) {
 		throw runtime_error("failed to create hash");
 
 	// Create an OpenSSL EVP_MD_CTX struct and initialize it with the created hash.
-	auto mdctx = shared_ptr<EVP_MD_CTX>(EVP_MD_CTX_create(), EVP_MD_CTX_destroy);
-	if (0 == (EVP_DigestInit(mdctx.get(), md)))
+	hash = shared_ptr<EVP_MD_CTX>(EVP_MD_CTX_create(), EVP_MD_CTX_destroy);
+	if (0 == (EVP_DigestInit(hash.get(), md)))
 		throw runtime_error("failed to create hash");
 
-	hash = mdctx;
 	hashSize = EVP_MD_CTX_size(hash.get());
 }
 
 string OpenSSLHash::getAlgorithmName() {
+	//Return the name of the underlying hash function.
 	int type = EVP_MD_CTX_type(hash.get());
 	const char* name = OBJ_nid2sn(type);
 	return string(name);
@@ -82,13 +81,16 @@ void OpenSSLHash::hashFinal(vector<byte> &out, int outOffset) {
 	if ((int) out.size() < outOffset + length) {
 		out.resize(outOffset + length);
 	}
+	//Call the underlying hash's final method.
 	EVP_DigestFinal_ex(hash.get(), out.data() + outOffset, NULL);
+	
 	//Initialize the hash structure again to enable repeated calls.
 	EVP_DigestInit(hash.get(), EVP_MD_CTX_md(hash.get()));
 }
 
 shared_ptr<CryptographicHash> CryptographicHash::get_new_cryptographic_hash(string hashName)
 {
+	//Return a new hash function according to the given name.
 	set<string> algSet = { "SHA1", "SHA224", "SHA256", "SHA384", "SHA512" };
 	if (algSet.find(hashName) == algSet.end())
 		throw invalid_argument("unexpected hash_name");

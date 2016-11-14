@@ -38,13 +38,13 @@ byte TrapdoorPermutationAbs::hardCorePredicate(TPElement * tpEl) {
 	*  We use this implementation both in RSA permutation and in Rabin permutation.
 	* Thus, We implement it in TrapdoorPermutationAbs and let derived classes override it if needed.
 	*/
-	//gets the element value as byte array
+	//Get the element value as byte array
 	biginteger elementValue = tpEl->getElement();
 	size_t bytesSize = bytesCount(elementValue);
 	std::shared_ptr<byte> bytesValue(new byte[bytesSize], std::default_delete<byte[]>());
 	encodeBigInteger(elementValue, bytesValue.get(), bytesSize);
 
-	// returns the least significant bit (byte, as we said above)
+	// Return the least significant bit (byte, as we said above)
 	byte res = bytesValue.get()[bytesSize - 1];
 	return res;
 }
@@ -56,22 +56,22 @@ vector<byte> TrapdoorPermutationAbs::hardCoreFunction(TPElement * tpEl) {
 	* We use this implementation both in RSA permutation and in Rabin permutation.
 	* Thus, We implement it in TrapdoorPermutationAbs and let derived classes override it if needed.
 	*/
-	// gets the element value as byte array
+	// Get the element value as byte array
 	biginteger elementValue = tpEl->getElement();
 	int bytesSize = bytesCount(elementValue);
 	std::shared_ptr<byte> bytesValue(new byte[bytesSize], std::default_delete<byte[]>());
 	encodeBigInteger(elementValue, bytesValue.get(), bytesSize);
 	
-	// the number of bytes to get the log (N) least significant bits
+	// The number of bytes to get the log (N) least significant bits
 	
 	double logBits = NumberOfBits(modulus) / 2.0;  //log N bits
 	int logBytes = (int)ceil(logBits / 8); //log N bites in bytes
 
-	// if the element length is less than log(N), the return byte[] should be all the element bytes
+	// If the element length is less than log(N), the return byte[] should be all the element bytes
 	int size = min(logBytes, bytesSize);
 	vector<byte> leastSignificantBytes(size);
 	
-	// copies the bytes to the output array
+	// Copy the bytes to the output array
 	for (int i = 0; i < size; i++)
 		leastSignificantBytes[i] = bytesValue.get()[bytesSize - size + i];
 	return leastSignificantBytes;
@@ -83,18 +83,18 @@ vector<byte> TrapdoorPermutationAbs::hardCoreFunction(TPElement * tpEl) {
 
 RSAElement::RSAElement(const biginteger & modN, const shared_ptr<PrgFromOpenSSLAES> & generator){
 	/*
-	* samples a number between 1 to n-1
+	* Sample a number between 1 to n-1
 	*/
 	biginteger randNumber;
 	int numbit = NumberOfBits(modN);
 	biginteger expo = mp::pow(biginteger(2), numbit-1);
 	do {
-		// samples a random BigInteger with modN.bitLength()+1 bits
+		// Sample a random BigInteger with modN.bitLength()+1 bits
 		randNumber = getRandomInRange(0, expo, generator.get()); 
 	} while (randNumber > (modN - 2)); // drops the element if it's bigger than mod(N)-2
-	// gets a random biginteger between 1 to modN-1
+	// Get a random biginteger between 1 to modN-1
 	randNumber += 1;
-	// sets it to be the element
+	// Set it to be the element
 	element = randNumber;
 }
 
@@ -103,9 +103,9 @@ RSAElement::RSAElement(const biginteger & modN, const biginteger & x, bool check
 		element = x;
 	else {
 		/*
-		* checks if the value is valid (between 1 to (mod n) - 1).
+		* Check if the value is valid (between 1 to (mod n) - 1).
 		* if valid - sets it to be the element
-		* if not valid - throws exception
+		* if not valid - throw exception
 		*/
 		if (x > 0 && x < modN)
 			element = x;
@@ -121,14 +121,14 @@ RSAModulus::RSAModulus(size_t length, int certainty, PrgFromOpenSSLAES* random) 
 	size_t mindiffbits = length / 3;
 
 
-	// generate p prime
+	// Generate p prime
 	p = getRandomPrime(pbitlength, certainty, random);
 	for (;;) {
 		do {
 			q = getRandomPrime(qbitlength, certainty, random);
 		} while ((bytesCount(mp::abs(q - p)) * 8) < mindiffbits);
 
-		// calculate the modulus
+		// Calculate the modulus
 		n = p * q;
 
 		if ((bytesCount(n) * 8) == length)
@@ -137,7 +137,7 @@ RSAModulus::RSAModulus(size_t length, int certainty, PrgFromOpenSSLAES* random) 
 		}
 
 		//
-		// if we get here our primes aren't big enough, make the largest
+		// If we get here our primes aren't big enough, make the largest
 		// of the two p and try again
 		//
 		p = (p > q) ? p : q;

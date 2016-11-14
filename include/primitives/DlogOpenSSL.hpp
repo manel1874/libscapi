@@ -229,8 +229,8 @@ public:
 
 	shared_ptr<GroupElement> generateElement(bool bCheckMembership, vector<biginteger> & values) override;
 
-	shared_ptr<GroupElement> simultaneousMultipleExponentiations(
-		vector<shared_ptr<GroupElement>> & groupElements, vector<biginteger> & exponentiations) override;
+	//shared_ptr<GroupElement> simultaneousMultipleExponentiations(
+		//vector<shared_ptr<GroupElement>> & groupElements, vector<biginteger> & exponentiations) override;
 
 	shared_ptr<GroupElement> encodeByteArrayToGroupElement(const vector<unsigned char> & binaryString) override;
 
