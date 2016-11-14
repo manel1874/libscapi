@@ -77,7 +77,6 @@ void mainS() {
 	//OTBatchSInput * input = new OTExtensionGeneralSInput(X1, X2, numOts);
 	//OTBatchSInput * input = new OTExtensionCorrelatedSInput(X1, numOts);
 	OTBatchSInput * input = new OTExtensionRandomizedSInput(bitLength, numOts);
-	auto start = scapi_now();
 	auto output = sender_interface->transfer(input); 
 	
 	cout << "x0 : " << endl;
