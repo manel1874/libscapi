@@ -34,7 +34,7 @@
 ZpSafePrimeElement::ZpSafePrimeElement(const biginteger & x, const biginteger & p, bool bCheckMembership) {
 	if (bCheckMembership) {
 		biginteger q = (p - 1) / 2;
-		//if the element is in the expected range, set it. else, throw exception
+		//If the element is in the expected range, set it. else, throw exception
 		if (x > 0 && x <= (p - 1))
 		{
 			if (boost::multiprecision::powm(x, q, p) == 1) // x^q mod p == 1
@@ -51,9 +51,9 @@ ZpSafePrimeElement::ZpSafePrimeElement(const biginteger & x, const biginteger & 
 
 ZpSafePrimeElement::ZpSafePrimeElement(const biginteger & p, PrgFromOpenSSLAES* prg)
 {
-	// find a number in the range [1, ..., p-1]
+	// Find a number in the range [1, ..., p-1]
 	biginteger rand_in_range = getRandomInRange(1, p - 1, prg);
-	// calculate its power to get a number in the subgroup and set the power as the element. 
+	// Calculate its power to get a number in the subgroup and set the power as the element. 
 	element = boost::multiprecision::powm(rand_in_range, 2, p);
 }
 
@@ -305,10 +305,6 @@ shared_ptr<GroupElement> DlogGroup::computeLL(
 	//create pre computation table
 	auto preComp = createLLPreCompTable(groupElements, w, h);
 
-	/*for (int i=0; i<h; i++)
-	for (int j=0; j<Math.pow(2, w); j++)
-	System.out.println(((ECElement) preComp[i][j]).getX());
-	*/
 	auto result = getIdentity(); //holds the computation result
 
 	//computes the first loop of the algorithm. This loop returns in the next part of the algorithm with one single tiny change. 
@@ -342,11 +338,6 @@ string ECF2mPentanomialBasis::toString() {
 	return s;
 }
 
-/**
-* Returns the integer <code>k2</code> of the underlying curve where x^m + x^k3 + x^k2 + x^k1 + 1
-* represents the reduction polynomial f(z).
-* @return k2 of the underlying curve
-*/
 int ECF2mKoblitz::getK2() {
 	int k2 = 0;
 	shared_ptr<ECF2mPentanomialBasis> pentaCurve = dynamic_pointer_cast<ECF2mPentanomialBasis>(curve);
@@ -356,11 +347,6 @@ int ECF2mKoblitz::getK2() {
 	return k2;
 }
 
-/**
-* Returns the integer <code>k3</code> where x^m + x^k3 + x^k2 + x^k1 + 1
-* represents the reduction polynomial f(z).
-* @return k3 of the underlying curve
-*/
 int ECF2mKoblitz::getK3() {
 	int k3 = 0;
 	shared_ptr<ECF2mPentanomialBasis> pentaCurve = dynamic_pointer_cast<ECF2mPentanomialBasis>(curve);

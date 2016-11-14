@@ -290,14 +290,13 @@ shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::exponentiate(GroupElement* base
 	if (!zp_element)
 		throw invalid_argument("type doesn't match the group type");
 
-	// call to native exponentiate function.
-	DH* dh = dlog.get();
+	// Convert to OpenSSL objects.
 	auto expBN = biginteger_to_opensslbignum(exponent);
 	auto baseBN = zp_element->getOpenSSLElement();
 	BIGNUM* resultBN = BN_new(); 	//Prepare a result element.
 
-	//Raise the given element and put the result in result.
-	BN_mod_exp(resultBN, baseBN.get(), expBN, dh->p, ctx.get());
+	//Raise the given element and put the result in resultBN.
+	BN_mod_exp(resultBN, baseBN.get(), expBN, dlog->p, ctx.get());
 	biginteger bi_res = opensslbignum_to_biginteger(resultBN);
 
 	//Release the allocated memory.
@@ -315,12 +314,13 @@ shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::multiplyGroupElements(GroupElem
 	if (!zp1 || !zp2)
 		throw invalid_argument("element type doesn't match the group type");
 
-	// Call to native multiply function.
-	DH* dh = dlog.get();
+	// Convert to OpenSSL objects.
 	BIGNUM* result = BN_new();
 	BIGNUM* elem1 = zp1->getOpenSSLElement().get();
 	BIGNUM* elem2 = zp2->getOpenSSLElement().get();
-	BN_mod_mul(result, elem1, elem2, dh->p, ctx.get());
+
+	//Call the OpenSSL's multiply function
+	BN_mod_mul(result, elem1, elem2, dlog->p, ctx.get());
 
 	auto temp = new OpenSSLZpSafePrimeElement(opensslbignum_to_biginteger(result));
 	auto mulElement = shared_ptr<OpenSSLZpSafePrimeElement>(temp);
@@ -336,9 +336,9 @@ shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::simultaneousMultipleExponentiat
 		if (!zp_element)
 			throw invalid_argument("groupElement doesn't match the DlogGroup");
 	}
-
-	//currently, in cryptoPpDlogZpSafePrime the native algorithm is faster than the optimized one due to many calls to the JNI.
-	//Thus, we operate the native algorithm. In the future we may change this.
+	
+	//currently, in OpenSSLDlogZpSafePrime the native algorithm is faster than the optimized one.
+	//Thus, we operate the naive algorithm. In the future we may change this.
 	// TODO - THIS IS NOT TRUE ANYMORE. NEED TO FIX THIS.
 	return computeNaive(groupElements, exponentiations);
 }
@@ -359,11 +359,6 @@ shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::reconstructElement(bool bCheckM
 	vector<biginteger> values = { zp_data->getX() };		
 	return generateElement(bCheckMembership, values);		
 }
-
-//OpenSSLDlogZpSafePrime::~OpenSSLDlogZpSafePrime()
-//{
-//
-//}
 
 shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::encodeByteArrayToGroupElement(
 	const vector<unsigned char> & binaryString) {
@@ -597,7 +592,7 @@ shared_ptr<GroupElement> OpenSSLDlogEC::simultaneousMultipleExponentiations(
 		return NULL;
 	}
 
-	//Create the concrete OpenSSl point using the result value.
+	//Create the concrete OpenSSL point using the result value.
 	return createPoint(result);
 }
 
@@ -918,7 +913,6 @@ void OpenSSLDlogECF2m::init(string fileName, string curveName, const shared_ptr<
 
 	this->random_element_gen = random;
 
-	/*Initialize the native curve with the generator, order and cofactor.*/
 	//Convert the order and cofactor into BIGNUM objects.
 	BIGNUM *order, *cofactor;
 	order = biginteger_to_opensslbignum(groupParams->getQ());
@@ -926,7 +920,7 @@ void OpenSSLDlogECF2m::init(string fileName, string curveName, const shared_ptr<
 	if (order == NULL || cofactor == NULL)
 		throw runtime_error("failed to create OpenSSL Dlog group");
 
-	// Set the generator, cofactor and the order.
+	// Initialize the OpenSSL's curve with the generator, order and cofactor.
 	if (1 != EC_GROUP_set_generator(curve.get(), (dynamic_pointer_cast<OpenSSLECF2mPoint>(generator))->getPoint().get(), order, cofactor)) {
 		BN_free(order);
 		BN_free(cofactor);
@@ -955,7 +949,7 @@ void OpenSSLDlogECF2m::createCurve() {
 		BN_set_bit(p, dynamic_pointer_cast<ECF2mPentanomialBasis>(params)->getK2());
 		BN_set_bit(p, dynamic_pointer_cast<ECF2mPentanomialBasis>(params)->getK3());
 	}
-	//Create the native curve.
+	//Create the OpenSSL's curve.
 	ctx = shared_ptr<BN_CTX>(BN_CTX_new(), BN_CTX_free);
 	if (ctx == NULL)
 		throw runtime_error("failed to create OpenSSL Dlog group");
@@ -1135,13 +1129,6 @@ shared_ptr<GroupElement> OpenSSLDlogECF2m::generateElement(bool bCheckMembership
 	return shared_ptr<OpenSSLECF2mPoint>(point);
 }
 
-shared_ptr<GroupElement> OpenSSLDlogECF2m::simultaneousMultipleExponentiations(
-	vector<shared_ptr<GroupElement>> & groupElements, vector<biginteger> & exponentiations) {
-	//Our tests showed that for ECF2m the naive algorithm is faster than the simultaneousMultipleExponentiations algorithm.
-	//TODO check if that is still true in the c++ implementation.
-	return computeNaive(groupElements, exponentiations);
-}
-
 /*
  * Currently we don't support this conversion.</B> It will be implemented in the future. 
  * Meanwhile we return null.
@@ -1192,7 +1179,7 @@ OpenSSLECFpPoint::OpenSSLECFpPoint(const biginteger & x, const biginteger & y, O
 	//	if (valid == false) // if not valid, throws exception
 		//	throw invalid_argument("x, y values are not a point on this curve");
 //	}
-	//Create a point in the field with the given parameters, done by OpenSSL's native code.
+	//Create a point in the field with the given parameters, done by OpenSSL's code.
 	BIGNUM *xOssl = biginteger_to_opensslbignum(x);
 	BIGNUM *yOssl = biginteger_to_opensslbignum(y);
 	if (x == NULL || y == NULL) 
@@ -1280,7 +1267,7 @@ OpenSSLECFpPoint::OpenSSLECFpPoint(const shared_ptr<EC_POINT> & point, OpenSSLDl
 }
 
 OpenSSLECF2mPoint::OpenSSLECF2mPoint(const biginteger & x, const biginteger & y, OpenSSLDlogECF2m* curve, bool bCheckMembership) {
-	//Create a point in the field with the given parameters, done by OpenSSL's native code.
+	//Create a point in the field with the given parameters, done by OpenSSL's code.
 	BIGNUM *xOssl = biginteger_to_opensslbignum(x);
 	BIGNUM *yOssl = biginteger_to_opensslbignum(y);
 	if (x == NULL || y == NULL)

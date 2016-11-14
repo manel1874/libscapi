@@ -29,71 +29,67 @@
 #include "../../include/primitives/Kdf.hpp"
 
 void HKDF::nextRounds(int outLen, const vector<byte> & iv, int hmacLength, vector<byte> & outBytes, vector<byte> & intermediateOutBytes) {
-	int rounds = (int)ceil((float)outLen / (float)hmacLength); // the smallest number so that  hmacLength * rounds >= outLen
-	int currentInBytesSize;	// the size of the CTXInfo and also the round;
+	int rounds = (int)ceil((float)outLen / (float)hmacLength); // The smallest number so that  hmacLength * rounds >= outLen
+	int currentInBytesSize;	// The size of the CTXInfo and also the round.
 	if (iv.size() > 0)
-		currentInBytesSize = hmacLength + iv.size() + 1; // the size of the CTXInfo and also the round;
+		currentInBytesSize = hmacLength + iv.size() + 1; // The size of the CTXInfo and also the round.
 	else //no CTXInfo
-		currentInBytesSize = hmacLength + 1; // the size without the CTXInfo and also the round;
+		currentInBytesSize = hmacLength + 1; // The size without the CTXInfo and also the round;
 
-	//the result of the current computation
-	byte* currentInBytes = new byte[currentInBytesSize];
+	//The result of the current computation.
+	vector<byte> currentInBytes(currentInBytesSize);
 
-	//for rounds 2 to t 
+	//For rounds 2 to t.
 	if (iv.size() > 0)
-		//in case we have an iv. puts it (ctxInfo after the K from the previous round at position hmacLength).
-		copy_byte_vector_to_byte_array(iv, currentInBytes, hmacLength);
-
+		//In case we have an iv. puts it (ctxInfo after the K from the previous round at position hmacLength).
+		memcpy(currentInBytes.data() + hmacLength, iv.data(), iv.size());
+		
 	for (int i = 2; i <= rounds; i++) {
-		// copies the output of the last results
-		copy_byte_vector_to_byte_array(intermediateOutBytes, currentInBytes, 0);
-		// copies the round integer to the data array
+		// Copy the output of the last results.
+		memcpy(currentInBytes.data(), intermediateOutBytes.data(), intermediateOutBytes.size());
+		// Copy the round integer to the data array.
 		currentInBytes[currentInBytesSize - 1] = (byte)i;
 		
-		//operates the hmac to get the round output 
-		vector<byte> v_in;
-		copy_byte_array_to_byte_vector(currentInBytes, currentInBytesSize, v_in, 0);
-		this->hmac->computeBlock(v_in, 0, currentInBytesSize, intermediateOutBytes, 0);
+		//Operates the hmac to get the round output.
+		this->hmac->computeBlock(currentInBytes, 0, currentInBytesSize, intermediateOutBytes, 0);
 
-		if (i == rounds)  //we fill the rest of the array with a portion of the last result.
-			//copies the results to the output array
+		if (i == rounds)  //We fill the rest of the array with a portion of the last result.
+			//Copy the results to the output array
 			outBytes.insert(outBytes.begin() + hmacLength*(i - 1), &intermediateOutBytes[0], &intermediateOutBytes[outLen - hmacLength*(i - 1)]);
 		else 
-			//copies the results to the output array
+			//Copy the results to the output array
 			outBytes.insert(outBytes.begin() + hmacLength*(i - 1), &intermediateOutBytes[0], &intermediateOutBytes[hmacLength]);
 	}
 }
 
 void HKDF::firstRound(vector<byte>& outBytes, const vector<byte> & iv, vector<byte> & intermediateOutBytes, int outLength) {
-	// round 1
-	byte* firstRoundInput; //data for the creating K(1)
+	// Round 1.
+	vector<byte> firstRoundInput; //Data for the creating K(1).
 	int firstRoundSize;
-	if (iv.size() > 0)
+	if (iv.size() > 0) {
 		firstRoundSize = iv.size() + 1;
-	else
+		firstRoundInput.resize(firstRoundSize);
+		// Copy the CTXInfo - iv.
+		memcpy(firstRoundInput.data(), iv.data(), iv.size());
+	}
+	else {
 		firstRoundSize = 1;
+		firstRoundInput.resize(firstRoundSize);
+	}
 	
-	firstRoundInput = new  byte[firstRoundSize];
+	// Copy the integer with zero to the data array.
+	firstRoundInput[firstRoundSize - 1] = (byte)1;
 
-	// copies the CTXInfo - iv
-	if (iv.size() > 0)
-		copy_byte_vector_to_byte_array(iv, firstRoundInput, 0);
-
-	// copies the integer with zero to the data array
-	firstRoundInput[firstRoundSize- 1] = (byte)1;
-
-	// first computes the new key. The new key is the result of computing the hmac function.
+	// First computes the new key. The new key is the result of computing the hmac function.
 	// calculate K(1) and put it in intermediateOutBytes.
-	vector<byte> v_in;
-	copy_byte_array_to_byte_vector(firstRoundInput, firstRoundSize, v_in, 0);
-	hmac->computeBlock(v_in, 0, firstRoundSize, intermediateOutBytes, 0);
+	hmac->computeBlock(firstRoundInput, 0, firstRoundSize, intermediateOutBytes, 0);
 	
 	// copies the results to the output array
 	outBytes.assign(intermediateOutBytes.begin(), intermediateOutBytes.begin() + outLength);
 }
 
 SecretKey HKDF::deriveKey(const vector<byte> & entropySource, int inOff, int inLen, int outLen, const vector<byte>& iv) {
-	//checks that the offset and length are correct
+	//Check that the offset and length are correct.
 	if ((inOff > (int)entropySource.size()) || (inOff + inLen >  (int) entropySource.size()))
 		throw out_of_range("wrong offset for the given input buffer");
 
@@ -117,26 +113,26 @@ SecretKey HKDF::deriveKey(const vector<byte> & entropySource, int inOff, int inL
 	char const *c_key = str_key.c_str();
 	SecretKey key((byte*) c_key, strlen(c_key), "");
 	hmac->setKey(key);
-	int hmacLength = hmac->getBlockSize(); //the size of the output of the hmac.
-	vector<byte> outBytes;// (outLen); //the output key
-	vector<byte> roundKey; //PRK from the pseudocode
-	vector<byte> intermediateOutBytes;// (hmacLength); //round result K(i) in the pseudocode
+	int hmacLength = hmac->getBlockSize(); // The size of the output of the hmac.
+	vector<byte> outBytes;				   // The output key.
+	vector<byte> roundKey;				   // PRK from the pseudocode.
+	vector<byte> intermediateOutBytes;	   // round result K(i) in the pseudocode
 
-	// first computes the new key. The new key is the result of computing the hmac function.
-	//roundKey is now K(0)
+	// First computes the new key. The new key is the result of computing the hmac function.
+	//RoundKey is now K(0)
 	hmac->computeBlock(entropySource, 0, entropySource.size(), roundKey, 0);
-	//init the hmac with the new key. From now on this is the key for all the rounds.
+	//Init the hmac with the new key. From now on this is the key for all the rounds.
 	SecretKey roundSecretKey(roundKey, "HKDF");
 	hmac->setKey(roundSecretKey);
 	
-	// cdalculates the first round
+	// Calculates the first round.
 	// K(1) = HMAC(PRK,(CTXinfo,1)) [key=PRK, data=(CTXinfo,1)]
 	if (outLen < hmacLength)
 		firstRound(outBytes, iv, intermediateOutBytes, outLen);
 	else
 		firstRound(outBytes, iv, intermediateOutBytes, hmacLength);
 
-	// calculates the next rounds
+	// Calculates the next rounds
 	// FOR i = 2 TO t
 	// K(i) = HMAC(PRK,(K(i-1),CTXinfo,i)) [key=PRK, data=(K(i-1),CTXinfo,i)]
 	nextRounds(outLen, iv, hmacLength, outBytes, intermediateOutBytes);
