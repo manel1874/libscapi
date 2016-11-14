@@ -54,7 +54,7 @@ void OpenSSLPRP::computeBlock(const vector<byte> & inBytes, int inOff, vector<by
 	int blockSize = getBlockSize();
 
 	//Make anough space in the output vector.
-	if (outBytes.size() - outOff < blockSize)
+	if ((int) outBytes.size() - outOff < blockSize)
 		outBytes.resize(outOff + blockSize);
 	
 	// Compute the prp on the given input array, put the result in ret.
@@ -70,7 +70,7 @@ void OpenSSLPRP::optimizedCompute(const vector<byte> & inBytes, vector<byte> &ou
 	int size = inBytes.size();
 
 	//Make anough space in the output vector.
-	if (outBytes.size() < size)
+	if ((int) outBytes.size() < size)
 		outBytes.resize(size);
 	
 	// Compute the prp on each block and put the result in the output array.
@@ -106,7 +106,7 @@ void OpenSSLPRP::invertBlock(const vector<byte> & inBytes, int inOff, vector<byt
 		throw out_of_range("wrong offset for the given input buffer");
 	
 	//Make anough space in the output vector.
-	if (outBytes.size() - outOff < getBlockSize())
+	if ((int) outBytes.size() - outOff < getBlockSize())
 		outBytes.resize(getBlockSize() + outOff);
 	int size;
 
@@ -122,7 +122,7 @@ void OpenSSLPRP::optimizedInvert(const vector<byte> & inBytes, vector<byte> &out
 	
 	int size = inBytes.size();
 	//Make anough space in the output vector.
-	if (outBytes.size()< size)
+	if ((int) outBytes.size()< size)
 		outBytes.resize(size);
 	
 	// compute the prp on each block and put the result in the output array.
@@ -261,7 +261,7 @@ void OpenSSLHMAC::computeBlock(const vector<byte> & inBytes, int inOffset, int i
 	HMAC_Update(hmac, &inBytes[inOffset], inLen);
 
 	int size = EVP_MD_size(hmac->md);	// Get the size of the hash output.
-	if (outBytes.size() < outOffset + size)
+	if ((int)outBytes.size() < outOffset + size)
 		outBytes.resize(outOffset + size);
 
 	//Compute the final function and copy the output the the given output array.
@@ -338,7 +338,7 @@ void OpenSSLHMAC::doFinal(vector<byte> & msg, int offset, int msgLength, vector<
 	// Update the last msg block.
 	update(msg, offset, msgLength);
 
-	if (tag_res.size() < getMacSize())
+	if ((int) tag_res.size() < getMacSize())
 		tag_res.resize(getMacSize());
 
 	// compute the final function and copy the output the the given output array
