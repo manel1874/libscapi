@@ -53,16 +53,18 @@ protected:
 	vector<byte> r1Arr;
 
 public:
-	OTExtensionRandomizedSOutput(){}
-	OTExtensionRandomizedSOutput(const vector<byte> & r0Arr, const vector<byte> & r1Arr) : r0Arr(r0Arr), r1Arr(r1Arr) {}
 
-	/**
+    OTExtensionRandomizedSOutput(){}
+    OTExtensionRandomizedSOutput(const vector<byte> & r0Arr, const vector<byte> & r1Arr) : r0Arr(r0Arr), r1Arr(r1Arr) {}
+
+
+    /**
 	 * @return the array that holds all the x0 for all the senders serially.
 	 */
 	vector<byte> getR0Arr() {
 		return r0Arr;
 	}
-	
+	;
 	/**
 	 * @return the array that holds all the x1 for all the senders serially.
 	 */
@@ -73,7 +75,7 @@ public:
 
 /**
 * Output for OT extension in the correlated mode.
-* In this mode the output are the random created X0 and X1 vectors.
+* In this mode the output are the created X0 and X1 vectors.
 */
 class OTExtensionCorrelatedSOutput: public OTBatchSOutput {
 
@@ -101,27 +103,23 @@ public:
 	}
 };
 
-
-
-
 #ifndef _WIN32
 class OTExtensionBristolRandomizedSOutput: public OTExtensionRandomizedSOutput {
 
 public:
 
-	OTExtensionBristolRandomizedSOutput(const vector<BitMatrix>& senderOutputMatrices) {
+	OTExtensionBristolRandomizedSOutput(const vector<byte> & r0Arr, const vector<byte> & r1Arr) {
 
-		copy_byte_array_to_byte_vector((byte*)senderOutputMatrices[0].squares.data(), senderOutputMatrices[0].squares.size()*128*16, r0Arr, 0);
-		copy_byte_array_to_byte_vector((byte*)senderOutputMatrices[1].squares.data(), senderOutputMatrices[1].squares.size()*128*16, r1Arr, 0);
+		this->r0Arr = move(r0Arr);
+		this->r1Arr = move(r1Arr);
 
 	};
 
 };
 
 #endif
-
 /**
- * This enum class represents the options for OT extension. 
+ * This enum class represents the options for OT extension.
  * THe options are - General, Random and Correlated.
  */
 enum class OTBatchSInputTypes {
@@ -139,7 +137,7 @@ public:
 };
 
 /**
- * A concrete class for OT extension input for the sender. 
+ * A concrete class for OT extension input for the sender.
  * In the general OT extension scenario the sender gets x0 and x1 for each OT.
  */
 class OTExtensionGeneralSInput: public OTBatchSInput {
@@ -159,53 +157,53 @@ public:
 	 * @param x0Arr holds all the x1 for all the senders serially.
 	 * @param numOfOts Number of OTs in the OT extension.
 	 */
-	OTExtensionGeneralSInput(const vector<byte> & x0Arr, const vector<byte> & x1Arr,
+    OTExtensionGeneralSInput(const vector<byte> & x0Arr, const vector<byte> & x1Arr,
 			int numOfOts) {
 		this->x0Arr = x0Arr;
 		this->x1Arr = x1Arr;
 		this->numOfOts = numOfOts;
 	}
-	
+	;
 	/**
 	 * @return the array that holds all the x0 for all the senders serially.
 	 */
 	vector<byte> getX0Arr() {
 		return x0Arr;
 	}
-	
+	;
 	/**
 	 * @return the array that holds all the x1 for all the senders serially.
 	 */
 	vector<byte> getX1Arr() {
 		return x1Arr;
 	}
-	
+	;
 	/**
 	 * @return the number of OT elements.
 	 */
 	int getNumOfOts() {
 		return numOfOts;
 	}
-	
+	;
 	int getX0ArrSize() {
 		return x0Arr.size();
 	}
-	
+	;
 	int getX1ArrSize() {
 		return x1Arr.size();
 	}
-	
+	;
 };
 
 
 /**
- * A concrete class for randomized OT extension input for the sender. 
+ * A concrete class for randomized OT extension input for the sender.
  * In the radomized OT extension scenario the sender has no x0 and x1 as input, rather this is an output from the protocol.
  */
 class OTExtensionRandomizedSInput: public OTBatchSInput {
 private:
-	int bitLength;// Since there is no input we need to send the size of each OT so that the OT extension can generate x0 and x1 with the right size.
 	int numOfOts; // Number of OTs in the OT extension.
+	int elementSize; // The size of each element in the ot extension. All elements must be of the same size.
 
 public:
 	OTBatchSInputTypes getType() override {return OTBatchSInputTypes::OTExtensionRandomizedSInput;};
@@ -215,29 +213,32 @@ public:
 	 * @param x0Arr holds all the x1 for all the senders serially.
 	 * @param numOfOts Number of OTs in the OT extension.
 	 */
-	OTExtensionRandomizedSInput(int bitLength, int numOfOts) : bitLength(bitLength), numOfOts(numOfOts) {}
-	
+	OTExtensionRandomizedSInput(int numOfOts, int elementSize) :
+		numOfOts(numOfOts), elementSize(elementSize) {
+	}
+
 	int getNumOfOts() {
 		return numOfOts;
 	}
 
-	int getBitLength() {
-		return bitLength;
+
+	int getElementSize() {
+        return elementSize;
 	}
+
 
 };
 
 /**
- * A concrete class for correlated OT extension input for the sender. 
+ * A concrete class for correlated OT extension input for the sender.
  * In the correlated OT extension scenario the sender gets the delta as input, and calculated x0 and x1 such as x0 = x1^delta.
  */
 class OTExtensionCorrelatedSInput: public OTBatchSInput {
 private:
 	vector<byte> deltaArr; // An array that holds all the delta of xo and x1.
-	// For optimization reasons, all the delta inputs are held in one dimensional array one after the other
-	// rather than a two dimensional array.
-	// The size of each element can be calculated by the delta size divided by the numOfOts.
-	
+    // For optimization reasons, all the delta inputs are held in one dimensional array one after the other
+    // rather than a two dimensional array.
+    // The size of each element can be calculated by the delta size divided by the numOfOts.
 	int numOfOts; // Number of OTs in the OT extension.
 
 
@@ -271,7 +272,7 @@ class OTBatchSender {
 public:
 	/**
 	 * The transfer stage of OT Batch protocol which can be called several times in parallel.
-	 * The OT implementation support usage of many calls to transfer, with single preprocess execution. 
+	 * The OT implementation support usage of many calls to transfer, with single preprocess execution.
 	 * This way, one can execute batch OT by creating the OT receiver once and call the transfer function for each input couple.
 	 * In order to enable the parallel calls, each transfer call should use a different channel to send and receive messages.
 	 * This way the parallel executions of the function will not block each other.<p>
@@ -279,6 +280,7 @@ public:
 	virtual shared_ptr<OTBatchSOutput> transfer(OTBatchSInput * input) = 0;
 	virtual ~OTBatchSender(){};
 };
+
 
 /**
 * This enum class represents the options for OT extension receiver.
@@ -316,18 +318,19 @@ public:
 		this->sigmaArr = sigmaArr;
 		this->elementSize = elementSize;
 	}
-	
+	;
 	vector<byte> getSigmaArr() {
 		return sigmaArr;
 	}
-
+	;
 	int getSigmaArrSize() {
 		return sigmaArr.size();
 	}
-	
+	;
 	int getElementSize() {
 		return elementSize;
 	}
+	;
 
 private:
 	vector<byte> sigmaArr; // Each byte holds a sigma bit for each OT in the OT extension protocol.
@@ -335,7 +338,7 @@ private:
 };
 
 /**
- * A concrete class for OT extension input for the receiver. 
+ * A concrete class for OT extension input for the receiver.
  * All the classes are the same and differ only in the name.
  * The reason a class is created for each version is due to the fact that a respective class is created for the sender and we wish to be consistent.
  * The name of the class determines the version of the OT extension we wish to run and in this case the general case.
@@ -395,7 +398,7 @@ public:
 
 #ifndef _WIN32
 /**
- * Concrete implementation of OT receiver of bristol output.<p>
+ * Concrete implementation of OT receiver of bristol output.
  * In the bristol scenario, the receiver outputs xSigma as a bitvector.
  * This output class also can be viewed as the output of batch OT when xSigma is a concatenation of all xSigma byte array of all OTs.
  */
@@ -418,7 +421,7 @@ public:
 class OTBatchReceiver {
 	/**
 	 * The transfer stage of OT Batch protocol which can be called several times in parallel.
-	 * The OT implementation support usage of many calls to transfer, with single preprocess execution. 
+	 * The OT implementation support usage of many calls to transfer, with single preprocess execution.
 	 * This way, one can execute batch OT by creating the OT receiver once and call the transfer function for each input couple.
 	 * In order to enable the parallel calls, each transfer call should use a different channel to send and receive messages.
 	 * This way the parallel executions of the function will not block each other.

@@ -164,7 +164,7 @@ shared_ptr<OTBatchSOutput> OTSemiHonestExtensionSender::transfer(OTBatchSInput *
 	else if (input->getType() == OTBatchSInputTypes::OTExtensionRandomizedSInput) {
 
 		numOfOts = ((OTExtensionRandomizedSInput *)input)->getNumOfOts();
-		int bitLength = ((OTExtensionRandomizedSInput *)input)->getBitLength();
+		int bitLength = ((OTExtensionRandomizedSInput *)input)->getElementSize();
 
 		//Prepare empty x0 and x1 for the output.
 		vector<byte> x0(numOfOts * bitLength / 8);

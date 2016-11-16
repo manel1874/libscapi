@@ -10,45 +10,49 @@ int mainBristol(string partyNum) {
     int my_num = stoi(partyNum);
 
 
-    int nOTs = 200;
+    int nOTs = 12;
 
-
-    BitVector receiverInput(256);
-    receiverInput.assign_zero();
-
-    receiverInput.set_bit(0,1);
-    receiverInput.set_bit(1,1);
+    int elementSize = 128;
 
 
 
-  /*if (my_num == 0) {
-        OTExtensionBristolSender sender(12000,true);
+/*  if (my_num == 0) {
+      OTExtensionBristolSender sender(12000, true);
 
-        OTBatchSInput * input = new OTExtensionRandomizedSInput(nOTs);
+      OTBatchSInput *input = new OTExtensionRandomizedSInput(nOTs, elementSize);
 
-        auto output = sender.transfer(input);
+      auto start = scapi_now();
+      auto output = sender.transfer(input);
+      print_elapsed_ms(start, "Transfer for random");
 
-        vector<byte> outputbytes = ((OTExtensionRandomizedSOutput *)output.get())->getR0Arr();
+      vector<byte> outputbytes = ((OTExtensionRandomizedSOutput *) output.get())->getR0Arr();
 
-		cout<<"the size is :" <<outputbytes.size() <<" r0Arr " <<endl;
-		for(int i=0; i<100; i++){
+      cout << "the size is :" << outputbytes.size() << " r0Arr " << endl;
+      for (int i = 0; i < nOTs * elementSize / 8; i++) {
 
-			cout<< (int)outputbytes[i];
-		}
+          if (i % (elementSize / 8) == 0) {
+              cout << endl;
+          }
+          cout << (int) outputbytes[i] << "--";
 
-		outputbytes = ((OTExtensionRandomizedSOutput *)output.get())->getR1Arr();
+      }
 
-		cout<<"the size is :" <<outputbytes.size() <<" r1Arr " <<endl;
-		for(int i=0; i<100; i++){
+      outputbytes = ((OTExtensionRandomizedSOutput *) output.get())->getR1Arr();
 
-			cout<< (int)outputbytes[i];
-		}
+      cout << "the size is :" << outputbytes.size() << " r1Arr " << endl;
+      for (int i = 0; i < nOTs * elementSize / 8; i++) {
+
+          if (i % (elementSize / 8) == 0) {
+              cout << endl;
+          }
+          cout << (int) outputbytes[i] << "--";
+
+      }
 
 
-    }
-    else {
+  } else {
         cout<<"nOTS: "<< nOTs<<endl;
-        OTExtensionBristolReciever reciever("localhost", 12000,true);
+        OTExtensionBristolReceiver receiver("localhost", 12000,true);
 
         vector<byte> sigma;
 		sigma.resize(nOTs);
@@ -56,19 +60,23 @@ int mainBristol(string partyNum) {
 		sigma[1] = 1;
 
 
-		int elementSize = 128;
-
         OTBatchRInput * input = new OTExtensionRandomizedRInput(sigma, elementSize);
 
-        auto output = reciever.transfer(input);
+        auto start = scapi_now();
+        auto output = receiver.transfer(input);
+        print_elapsed_ms(start, "Transfer for random");
 
-        vector<byte> outputbytes = ((OTOnByteArrayROutput *)output.get())->getXSigma();
+		vector<byte> outputbytes = ((OTOnByteArrayROutput *)output.get())->getXSigma();
 
-        		cout<<"the size is :" <<outputbytes.size();
-        		for(int i=0; i<100; i++){
+		cout<<"the size is :" <<outputbytes.size()<<endl;
+		for(int i=0; i<nOTs*(elementSize/8); i++){
 
-        			cout<< (int)outputbytes[i];
-        		}
+			if (i%(elementSize/8)==0){
+								cout<<endl;
+							}
+			cout<< (int)outputbytes[i]<<"--";
+
+		}
 
     }
 
@@ -77,7 +85,7 @@ int mainBristol(string partyNum) {
 
 */
 
-   /* if (my_num == 0) {
+   /*if (my_num == 0) {
     	boost::asio::io_service io_service;
 		SocketPartyData me(IpAdress::from_string("127.0.0.1"), 1212);
 		SocketPartyData other(IpAdress::from_string("127.0.0.1"), 1213);
@@ -98,10 +106,10 @@ int mainBristol(string partyNum) {
 		//}
 
 		vector<byte> x0Arr;
-		x0Arr.resize(nOTs * 16);
+		x0Arr.resize(nOTs * elementSize/8);
 
 		vector<byte> x1Arr;
-		x1Arr.resize(nOTs*16);
+		x1Arr.resize(nOTs*elementSize/8);
 		for(size_t i=0; i<x1Arr.size();i++)
 			x1Arr[i] = 1;
 
@@ -112,7 +120,33 @@ int mainBristol(string partyNum) {
 		 print_elapsed_ms(start, "Transfer for general");
 
 
-        }
+
+		cout<<"the size is :" <<x0Arr.size() <<" x0Arr " <<endl;
+		for(int i=0; i<nOTs*elementSize/8; i++){
+
+            if (i%(elementSize/8)==0){
+                cout<<endl;
+            }
+            cout<< (int)x0Arr[i]<<"--";
+
+
+		}
+
+
+
+		cout<<"\n" <<"the size is :" <<x1Arr.size() <<" x1Arr " <<endl;
+		for(int i=0; i<nOTs*elementSize/8; i++){
+
+            if (i%(elementSize/8)==0){
+                cout<<endl;
+            }
+            cout<< (int)x1Arr[i]<<"--";
+
+
+		}
+
+
+   }
 	else {
 		boost::asio::io_service io_service;
 		SocketPartyData me(IpAdress::from_string("127.0.0.1"), 1213);
@@ -125,37 +159,41 @@ int mainBristol(string partyNum) {
 		// connect to party one
 		channel->join(500, 5000);
 
-		OTExtensionBristolReciever reciever("localhost", 12001,true,channel);
+		OTExtensionBristolReceiver receiver("localhost", 12001,true,channel);
 
 		vector<byte> sigma;
 		sigma.resize(nOTs);
 		sigma[0] = 1;
 		sigma[1] = 1;
 
-
-		int elementSize = 128;
 		OTBatchRInput * input = new OTExtensionGeneralRInput(sigma, elementSize);
 
 
         auto start = scapi_now();
-		auto output = reciever.transfer(input);
+		auto output = receiver.transfer(input);
 		 print_elapsed_ms(start, "Transfer for general");
 
 
 		vector<byte> outputbytes = ((OTOnByteArrayROutput *)output.get())->getXSigma();
 
-		cout<<"the size is :" <<outputbytes.size();
-		for(int i=0; i<100; i++){
+		cout<<"the size is :" <<outputbytes.size()<<endl;
+		for(int i=0; i<nOTs*elementSize/8; i++){
 
-			cout<< (int)outputbytes[i];
+            if (i%(elementSize/8)==0){
+                cout<<endl;
+            }
+            cout<< (int)outputbytes[i]<<"--";
+
 		}
+
 
 		cout<<endl;
 
 
 
-	}
-    */
+	}*/
+
+
 
     if (my_num == 0) {
         	boost::asio::io_service io_service;
@@ -179,7 +217,7 @@ int mainBristol(string partyNum) {
 
 
     		vector<byte> delta;
-    		delta.resize(nOTs*16);
+    		delta.resize(nOTs*elementSize/8);
     		for(size_t i=0; i<delta.size();i++)
     			delta[i] = 1;
 
@@ -197,11 +235,11 @@ int mainBristol(string partyNum) {
     		 vector<byte> outputbytes = ((OTExtensionCorrelatedSOutput *)output.get())->getx0Arr();
 
 			cout<<"the size is :" <<outputbytes.size() <<" x0Arr " <<endl;
-			for(int i=0; i<100; i++){
+			for(int i=0; i<nOTs*elementSize/8; i++){
 
-				if ((i%16)==0){
-									cout<<endl;
-								}
+                if (i%(elementSize/8)==0){
+                    cout<<endl;
+                }
 				cout<< (int)outputbytes[i]<<"--";
 
 
@@ -210,11 +248,11 @@ int mainBristol(string partyNum) {
 			outputbytes = ((OTExtensionCorrelatedSOutput *)output.get())->getx1Arr();
 
 			cout<<"\n" <<"the size is :" <<outputbytes.size() <<" x1Arr " <<endl;
-			for(int i=0; i<100; i++){
+			for(int i=0; i<nOTs*elementSize/8; i++){
 
-				if (i%16==0){
-								 	cout<<endl;
-								}
+                if (i%(elementSize/8)==0){
+                    cout<<endl;
+                }
 				cout<< (int)outputbytes[i]<<"--";
 
 
@@ -241,12 +279,8 @@ int mainBristol(string partyNum) {
     		sigma.resize(nOTs);
     		sigma[0] = 1;
     		sigma[1] = 1;
-    		sigma[2] = 0;
+    		//sigma[5] = 1;
 
-
-
-
-    		int elementSize = 128;
     		OTBatchRInput * input = new OTExtensionCorrelatedRInput(sigma, elementSize);
 
     		cout<<"before transfer"<<endl;
@@ -259,11 +293,11 @@ int mainBristol(string partyNum) {
     		vector<byte> outputbytes = ((OTOnByteArrayROutput *)output.get())->getXSigma();
 
     		cout<<"the size is :" <<outputbytes.size()<<endl;
-    		for(int i=0; i<100; i++){
+    		for(int i=0; i<nOTs*elementSize/8; i++){
 
-    			if (i%16==0){
-    			    				cout<<endl;
-    			    			}
+                if (i%(elementSize/8)==0){
+                    cout<<endl;
+                }
     			cout<< (int)outputbytes[i]<<"--";
 
     		}
