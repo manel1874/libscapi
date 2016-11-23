@@ -49,7 +49,7 @@ FourToTwoGarbledBoleanCircuitNoAssumptions::FourToTwoGarbledBoleanCircuitNoAssum
 FourToTwoGarbledBoleanCircuitNoAssumptions::~FourToTwoGarbledBoleanCircuitNoAssumptions(void)
 {
 
-	if (garbledWires == nullptr){
+	if (garbledWires != nullptr){
 		garbledWires--;
 		garbledWires--;
 		_aligned_free(garbledWires);

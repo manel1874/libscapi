@@ -126,7 +126,7 @@ FreeXorGarbledBooleanCircuit::~FreeXorGarbledBooleanCircuit(void)
 	if (encryptedChunkKeys!=nullptr)
 		_aligned_free(encryptedChunkKeys);
 
-	if (garbledWires == nullptr){
+	if (garbledWires != nullptr){
 		garbledWires--;
 		_aligned_free(garbledWires);
 	}

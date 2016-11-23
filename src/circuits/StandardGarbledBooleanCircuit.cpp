@@ -51,7 +51,7 @@ StandardGarbledBooleanCircuit::StandardGarbledBooleanCircuit()
 
 StandardGarbledBooleanCircuit::~StandardGarbledBooleanCircuit()
 {
-	if (garbledWires == nullptr){
+	if (garbledWires != nullptr){
 		garbledWires--;
 		garbledWires--;
 		_aligned_free(garbledWires);

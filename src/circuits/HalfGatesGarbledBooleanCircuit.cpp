@@ -66,7 +66,7 @@ void HalfGatesGarbledBooleanCircuit::createCircuitMemory(const char* fileName, b
 		}
 		memset(garbledTables, 0, (sizeof(block) * ((numberOfGates - numOfXorGates - numOfNotGates) * 2 + 2 * numberOfOutputs)));
 
-		garbledWires = (block *)_aligned_malloc(sizeof(block) * ((lastWireIndex + 1) + 1 + 2 * numberOfOutputs), 16);
+        garbledWires = (block *)_aligned_malloc(sizeof(block) * ((lastWireIndex + 1) + 1 + 2 * numberOfOutputs), 16);
 
 		if (garbledWires == nullptr) {
 			cout << "garbledWires could not be allocated";
@@ -127,7 +127,7 @@ HalfGatesGarbledBooleanCircuit::~HalfGatesGarbledBooleanCircuit(void)
 	if (encryptedChunkKeys!=nullptr)
 		_aligned_free(encryptedChunkKeys);
 		
-	if (garbledWires == nullptr){
+	if (garbledWires != nullptr){
 		garbledWires--;
 		_aligned_free(garbledWires);
 	}
@@ -366,7 +366,6 @@ void  HalfGatesGarbledBooleanCircuit::compute(block * singleWiresInputKeys, bloc
 		}
 
 	}
-
 
 	if (isNonXorOutputsRequired){//check if the user requires that the output keys will not have a fixed delta xor between pair of keys of a wire.
 

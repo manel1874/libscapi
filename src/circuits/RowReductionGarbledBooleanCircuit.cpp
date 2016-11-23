@@ -50,7 +50,7 @@ RowReductionGarbledBooleanCircuit::RowReductionGarbledBooleanCircuit(void)
 RowReductionGarbledBooleanCircuit::~RowReductionGarbledBooleanCircuit(void)
 {
 
-	if (garbledWires == nullptr){
+	if (garbledWires != nullptr){
 		garbledWires--;
 		_aligned_free(garbledWires);
 	}
