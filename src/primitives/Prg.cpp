@@ -159,8 +159,10 @@ PrgFromOpenSSLAES::~PrgFromOpenSSLAES() {
 	_mm_free(indexPlaintext);
 
 	//free aes
-	if(aes != nullptr)
-		EVP_CIPHER_CTX_cleanup(aes);
+	if(aes != nullptr) {
+        EVP_CIPHER_CTX_cleanup(aes);
+        delete aes;
+    }
 }
 
 SecretKey PrgFromOpenSSLAES::generateKey(int keySize) {
@@ -174,7 +176,7 @@ SecretKey PrgFromOpenSSLAES::generateKey(int keySize) {
 	copy_byte_array_to_byte_vector(buf, keySize / 8, vec, 0);
 	SecretKey sk(vec, getAlgorithmName());
 	//free the dynamic buffer
-	delete buf;
+	delete[] buf;
 	return sk;
 }
 
@@ -199,7 +201,6 @@ void PrgFromOpenSSLAES::setKey(SecretKey & secretKey) {
 	else {
 		//create a new aes and init it with the new secret key
 		EVP_CIPHER_CTX_cleanup(aes);
-		aes = new EVP_CIPHER_CTX();
 		EVP_CIPHER_CTX_init(aes);
 		EVP_EncryptInit(aes, EVP_aes_128_ecb(), &(secretKey.getEncoded()).at(0), (byte *)&iv);
 		idxForBytes = 0; //makes sure the indices are starting from 0

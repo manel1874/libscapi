@@ -354,6 +354,7 @@ OpenSSLHMAC::~OpenSSLHMAC()
 {
 	//Delete the underlying openssl's object.
 	HMAC_CTX_cleanup(hmac);
+	delete hmac;
 }
 
 /*************************************************/

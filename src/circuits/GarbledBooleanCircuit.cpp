@@ -54,7 +54,7 @@ GarbledBooleanCircuit::GarbledBooleanCircuit(void)
 
 GarbledBooleanCircuit::~GarbledBooleanCircuit(void)
 {
-
+    delete[] numOfInputsForEachParty;
 	if (garbledGates != nullptr) {
 		delete[] garbledGates;
 	}

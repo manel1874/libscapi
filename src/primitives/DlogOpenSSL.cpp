@@ -31,7 +31,9 @@
 biginteger opensslbignum_to_biginteger(BIGNUM* bint)
 {
 	char * s = BN_bn2dec(bint);
-	return biginteger(s);
+	auto temp = biginteger(s);
+	free(s);
+	return temp;
 }
 
 BIGNUM* biginteger_to_opensslbignum(biginteger bi)
@@ -497,7 +499,7 @@ shared_ptr<GroupElement> OpenSSLDlogEC::exponentiate(GroupElement* base, const b
 		return NULL;
 	}
 
-
+	BN_free(exp);
 	//Create the concrete OpenSSl point using the result value.
 	return createPoint(result); 
 }
@@ -812,7 +814,7 @@ shared_ptr<GroupElement> OpenSSLDlogECFp::encodeByteArrayToGroupElement(const ve
 
 	Let L be the length in bytes of p
 
-	Choose a random byte array r of length L – k – 2 bytes
+	Choose a random byte array r of length L ï¿½ k ï¿½ 2 bytes
 
 	Prepare a string newString of the following form: r || binaryString || binaryString.length (where || denotes concatenation) (i.e., the least significant byte of newString is the length of binaryString in bytes)
 
@@ -1300,7 +1302,7 @@ OpenSSLECF2mPoint::OpenSSLECF2mPoint(const biginteger & x, const biginteger & y,
 		// checks validity
 		if (valid == false) {// if not valid, throws exception
 
-			throw new invalid_argument("x, y values are not a point on this curve");
+			throw invalid_argument("x, y values are not a point on this curve");
 		}
 	}
 }
@@ -1324,5 +1326,8 @@ OpenSSLECF2mPoint::OpenSSLECF2mPoint(const shared_ptr<EC_POINT> & point, OpenSSL
 
 		x = opensslbignum_to_biginteger(xBN);
 		y = opensslbignum_to_biginteger(yBN);
+
+		BN_free(xBN);
+		BN_free(yBN);
 	}
 }
