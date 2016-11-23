@@ -33,50 +33,53 @@
 /*********** Commitment message *********/
 /****************************************/
 void CmtSimpleHashCommitmentMessage::initFromString(const string & s) {
-	auto vec = explode(s, ':');
-	id = stol(vec[0]);
-	for (int i = 2; i < (int) vec.size(); i++) {
-		vec[1] += ":" + vec[i];
-	}
-	c = make_shared<vector<byte>>(vec[1].begin(), vec[1].end());
+
+    std::stringstream is(s, std::ios::binary | ios::out | ios::in);
+    //read file and set obj
+    boost::archive::binary_iarchive ia(is);
+    ia >> boost::serialization::base_object<CmtCCommitmentMsg>(*this);
+    ia >> c;
+    ia >> id;
+
 }
 
 string CmtSimpleHashCommitmentMessage::toString() {
-	string output = to_string(id);
-	output += ":";
-	const byte * uc = &((*c)[0]);
-	output += string(reinterpret_cast<char const*>(uc), c->size());
-	return output;
+    //new scop - serialize need to flush
+    std::stringstream os(std::ios::binary | ios::out | ios::in);
+    {
+        boost::archive::binary_oarchive oa(os);
+        oa << boost::serialization::base_object<CmtCCommitmentMsg>(*this);
+        oa << c;
+        oa << id;
+    }
+    return os.str();
 };
 
 /****************************************/
 /*********** Decommitment message *********/
 /****************************************/
 void CmtSimpleHashDecommitmentMessage::initFromString(const string & s) {
-	auto vec = explode(s, ':');
-	auto size = stoull(vec[0]);
-	int counter = 2;
-	while (vec[1].size() != size)
-		vec[1] += ":" + vec[counter++];
-	vector<byte> random(vec[1].begin(), vec[1].end());
-	r = make_shared<ByteArrayRandomValue>(random);
-	for (int i = counter + 1; i < (int) vec.size(); i++)
-		vec[counter] += ":" + vec[i];
-	vector<byte> tmp(vec[counter].begin(), vec[counter].end());
-	x = make_shared<vector<byte>>(tmp);
+
+    std::stringstream is(s, std::ios::binary | ios::out | ios::in);
+    //read file and set obj
+    boost::archive::binary_iarchive ia(is);
+    ia >> boost::serialization::base_object<CmtCDecommitmentMessage>(*this);
+    ia >> x;
+    ia >> r;
 }
 
 string CmtSimpleHashDecommitmentMessage::toString() {
-	auto random = r->getR();
-	auto size = random.size();
-	string output = to_string(size);
-	output += ":";
-	const byte * uc = &(random[0]);
-	output += string(reinterpret_cast<char const*>(uc), random.size());
-	const byte * xBytes = &((*x)[0]);
-	output += ":";
-	output += string(reinterpret_cast<char const*>(xBytes), x->size());
-	return output;
+
+    //new scop - serialize need to flush
+    std::stringstream os(std::ios::binary | ios::out | ios::in);
+    {
+        boost::archive::binary_oarchive oa(os);
+        oa << boost::serialization::base_object<CmtCDecommitmentMessage>(*this);
+        oa << x;
+        oa << r;
+    }
+
+    return os.str();
 };
 
 /**
@@ -195,9 +198,11 @@ shared_ptr<CmtCommitValue> CmtSimpleHashReceiver::receiveDecommitment(long id) {
 	vector<byte> raw_msg;
 	channel->readWithSizeIntoVector(raw_msg);
 	auto msg = make_shared<CmtSimpleHashDecommitmentMessage>();
-	msg->initFromByteVector(raw_msg);
+    msg->initFromByteVector(raw_msg);
+
 	auto receivedCommitment = commitmentMap[id];
 	auto cmtCommitMsg = static_pointer_cast<CmtCCommitmentMsg>(receivedCommitment);
+
 	return verifyDecommitment(cmtCommitMsg.get(), msg.get());
 }
 
@@ -211,7 +216,7 @@ shared_ptr<CmtCommitValue> CmtSimpleHashReceiver::verifyDecommitment(CmtCCommitm
 	if (comMsg == NULL) {
 		throw invalid_argument("the received message is not an instance of CmtSimpleHashCommitmentMessage");
 	}
-	
+
 	//Compute c = H(r,x)
 	auto x = decomMsg->getXValue();
 	auto r = decomMsg->getRArray();
@@ -223,10 +228,11 @@ shared_ptr<CmtCommitValue> CmtSimpleHashReceiver::verifyDecommitment(CmtCCommitm
 	hash->hashFinal(hashValArray, 0);
 
 	//Checks that c = H(r,x)
-	auto commitment = *comMsg->getCommitmentArray();
+    auto commitment = *comMsg->getCommitmentArray();
 	if (commitment == hashValArray)
 		return make_shared<CmtByteArrayCommitValue>(x);
-	//In the pseudocode it says to return X and ACCEPT if valid commitment else, REJECT.
+
+    //In the pseudocode it says to return X and ACCEPT if valid commitment else, REJECT.
 	//For now we return null as a mode of reject. If the returned value of this function is not null then it means ACCEPT
 	return NULL;
 }

@@ -273,6 +273,8 @@ public:
 */
 class CmtCCommitmentMsg : public NetworkSerialized {
 public:
+	virtual ~CmtCCommitmentMsg(){}
+
 	/**
 	* Returns the unique id of the commitment.
 	*/
@@ -292,6 +294,7 @@ public:
 */
 class CmtCDecommitmentMessage : public NetworkSerialized{
 public:
+	virtual ~CmtCDecommitmentMessage(){}
 	/**
 	* Returns the random value used to commit.
 	*/
