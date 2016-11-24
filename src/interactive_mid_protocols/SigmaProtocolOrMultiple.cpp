@@ -296,7 +296,7 @@ NTL::GF2E generateIndexPolynomial(int i) {
 	NTL::GF2X indexPoly;
 	GF2XFromBytes(indexPoly, (unsigned char*)indexBytes, 4);
 
-	delete (indexBytes);
+	delete [](indexBytes);
 
 	return to_GF2E(indexPoly);
 }

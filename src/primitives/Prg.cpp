@@ -161,7 +161,7 @@ PrgFromOpenSSLAES::~PrgFromOpenSSLAES() {
 	//free aes
 	if(aes != nullptr) {
         EVP_CIPHER_CTX_cleanup(aes);
-        delete aes;
+        //delete aes;
     }
 }
 
@@ -345,7 +345,7 @@ void OpenSSLRC4::getPRGBytes(vector<byte> & outBytes, int outOffset, int outLen)
 
 	// release the allocated memory.
 	free(in);
-	delete output;
+	delete[] output;
 }
 
 OpenSSLRC4::~OpenSSLRC4() {

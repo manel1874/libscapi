@@ -594,6 +594,10 @@ shared_ptr<GroupElement> OpenSSLDlogEC::simultaneousMultipleExponentiations(
 		return NULL;
 	}
 
+	for (int i = 0; i<size; i++) {
+
+		BN_free(exponentsArr[i]);
+	}
 	//Create the concrete OpenSSL point using the result value.
 	return createPoint(result);
 }
@@ -677,6 +681,7 @@ void OpenSSLDlogECFp::initCurve(const biginteger & q) {
 	if (1 != EC_GROUP_set_generator(curve.get(), (dynamic_pointer_cast<OpenSSLECFpPoint>(generator))->getPoint().get(), order, NULL)) {
 		throw runtime_error("failed to create OpenSSL Dlog group");
 	}
+	BN_free(order);
 }
 
 void OpenSSLDlogECFp::createCurve(const biginteger & p, const biginteger & a, const biginteger & b) {
@@ -693,6 +698,11 @@ void OpenSSLDlogECFp::createCurve(const biginteger & p, const biginteger & a, co
 	curve = shared_ptr<EC_GROUP>(EC_GROUP_new_curve_GFp(pOssl, aOssl, bOssl, ctx.get()), EC_GROUP_free);
 	if (curve == NULL)
 		throw runtime_error("failed to create OpenSSL Dlog group");
+
+	BN_free(pOssl);
+	BN_free(aOssl);
+	BN_free(bOssl);
+
 }
 
 int OpenSSLDlogECFp::calcK(biginteger & p){
@@ -884,7 +894,9 @@ const vector<unsigned char> OpenSSLDlogECFp::decodeGroupElementToByteArray(Group
 	
 	int size = bytesCount(point->getX());
 	shared_ptr<byte> xByteArray(new byte[size], default_delete<byte[]>());
-	BN_bn2bin(biginteger_to_opensslbignum(point->getX()), xByteArray.get());
+	auto tmp = biginteger_to_opensslbignum(point->getX());
+	BN_bn2bin(tmp, xByteArray.get());
+	BN_free(tmp);
 	
 	//The original size is placed in the last byte of x.
 	int bOriginalSize = (int)(xByteArray.get()[size - 1]);
@@ -1265,6 +1277,9 @@ OpenSSLECFpPoint::OpenSSLECFpPoint(const shared_ptr<EC_POINT> & point, OpenSSLDl
 
 		x = opensslbignum_to_biginteger(xBN);
 		y = opensslbignum_to_biginteger(yBN);
+
+        BN_free(xBN);
+        BN_free(yBN);
 	}
 }
 
