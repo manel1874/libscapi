@@ -64,3 +64,5 @@ samples/libscapi_examples
 samples/libscapi_example
 CMakeLists.txt
 windows-solutions/CodeExamples/code examples.vcxproj.user.orig
+protocols/MaliciousYao/lib/data/P1/*
+protocols/MaliciousYao/lib/data/P2/* 
