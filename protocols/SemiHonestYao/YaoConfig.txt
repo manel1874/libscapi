@@ -7,24 +7,24 @@ circuit_type = NoFixedKey
 
 # OS name is added automatically
 [AES-Linux]
-circuit_file = ./assets/circuits/AES/NigelAes.txt
-input_file_party_1 = ./assets/circuits/AES/AESPartyOneInputs.txt
-input_file_party_2 = ./assets/circuits/AES/AESPartyTwoInputs.txt
+circuit_file = ../../samples/assets/circuits/AES/NigelAes.txt
+input_file_party_1 = ../../samples/assets/circuits/AES/AESPartyOneInputs.txt
+input_file_party_2 = ../../samples/assets/circuits/AES/AESPartyTwoInputs.txt
 
 [SHA1-Linux]
-circuit_file = ./assets/circuits/SHA1/NigelSHA1.txt
-input_file_party_1 = ./assets/circuits/SHA1/SHA1PartyOneInputs.txt
-input_file_party_2 = ./assets/circuits/SHA1/SHA1PartyTwoInputs.txt
+circuit_file = ../../samples/assets/circuits/SHA1/NigelSHA1.txt
+input_file_party_1 = ../../samples/assets/circuits/SHA1/SHA1PartyOneInputs.txt
+input_file_party_2 = ../../samples/assets/circuits/SHA1/SHA1PartyTwoInputs.txt
 
 [SHA256-Linux]
-circuit_file = ./assets/circuits/SHA256/NigelSHA256.txt
-input_file_party_1 = ./assets/circuits/SHA256/SHA256PartyOneInputs.txt
-input_file_party_2 = ./assets/circuits/SHA256/SHA256PartyTwoInputs.txt
+circuit_file = ../../samples/assets/circuits/SHA256/NigelSHA256.txt
+input_file_party_1 = ../../samples/assets/circuits/SHA256/SHA256PartyOneInputs.txt
+input_file_party_2 = ../../samples/assets/circuits/SHA256/SHA256PartyTwoInputs.txt
 
 [ADD-Linux]
-circuit_file = ./assets/circuits/ADD/NigelAdd32.txt
-input_file_party_1 = ./assets/circuits/ADD/ADDPartyOneInputs.txt
-input_file_party_2 = ./assets/circuits/ADD/ADDPartyTwoInputs.txt
+circuit_file = ../../samples/assets/circuits/ADD/NigelAdd32.txt
+input_file_party_1 = ../../samples/assets/circuits/ADD/ADDPartyOneInputs.txt
+input_file_party_2 = ../../samples/assets/circuits/ADD/ADDPartyTwoInputs.txt
 
 [AES-Windows]
 circuit_file = ../../../../samples/assets/circuits/AES/NigelAes.txt
