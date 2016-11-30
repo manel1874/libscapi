@@ -1,5 +1,6 @@
 #pragma once
 
+#include <libscapi/include/CryptoInfra/Protocol.hpp>
 #include "../../../include/common/CommonMaliciousYao.hpp"
 #include "../../../include/primitives/CommunicationConfig.hpp"
 #include "../../../include/primitives/ExecutionParameters.hpp"
@@ -20,8 +21,8 @@ using namespace std;
  The full protocol specification is described in "Blazing Fast 2PC in the "Offline/Online Setting with Security for
  Malicious Adversaries" paper by Yehuda Lindell and Ben Riva, page 18 - section E, "The Full Protocol Specification".
 */
-class OfflineProtocolP1
-{
+class OfflineProtocolP1 : public Protocol, public Malicious {
+
 private:
 	shared_ptr<ExecutionParameters> mainExecution;						// Parameters of the main circuit.
 	shared_ptr<ExecutionParameters> crExecution;						// Parameters of the cheating recovery circuit.
@@ -47,7 +48,7 @@ public:
 	/**
 	* Runs the first party in the offline phase of the malicious Yao protocol.
 	*/
-	void run();
+	void run() override;
 
 	/**
 	* @return the buckets of the main circuit.

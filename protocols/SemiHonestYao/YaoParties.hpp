@@ -31,8 +31,10 @@
 #include <boost/thread/thread.hpp>
 #include "../../include/comm/Comm.hpp"
 #define AES_KEY BC_AES_KEY // AES_KEY is defined both in GarbledBooleanCircuit and in OTSemiHonestExtension
-//#include "../../include/circuits/FastGarbledBooleanCircuit.hpp"
 #include "../../include/circuits/GarbledBooleanCircuit.h"
+#include "../../include/CryptoInfra/Protocol.hpp"
+#include "../../include/CryptoInfra/SecurityLevel.hpp"
+
 #undef AES_KEY
 #define AES_KEY OT_AES_KEY
 
@@ -51,13 +53,14 @@
 /**
 * This is an implementation of party one of Yao protocol.
 */
-class PartyOne {
+class PartyOne : public Protocol, public SemiHonest{
 private:
 	OTBatchSender * otSender;			//The OT object that used in the protocol.	
 	GarbledBooleanCircuit * circuit;	//The garbled circuit used in the protocol.
 	CommParty * channel;				//The channel between both parties.
 	tuple<block*, block*, vector<byte> > values;//this tuple includes the input and output keys (block*) and the translation table (vector)
 														 //to be used after filled by garbling the circuit
+	byte* ungarbledInput;
 
 	/**
 	* Sends p1 input keys to p2.
@@ -65,6 +68,13 @@ private:
 	* @param bs The keys for each wire.
 	*/
 	void sendP1Inputs(byte* ungarbledInput);
+
+	/**
+	* Runs OT protocol in order to send p2 the necessary keys without revealing any other information.
+	* @param allInputWireValues The keys for each wire.
+	*/
+	void runOTProtocol();
+
 public:
 	/**
 	* Constructor that sets the parameters of the OT protocol and creates the garbled circuit.
@@ -79,28 +89,33 @@ public:
 		this->otSender = otSender;
 		this->circuit = circuit;
 	};
+
+	/**
+	 * @param ungarbledInput The input for the circuit, each p1's input wire gets 0 or 1.
+	 */
+	void setInput(byte* ungarbledInput){ this->ungarbledInput = ungarbledInput; }
+
 	/**
 	* Runs the protocol.
-	* @param ungarbledInput The input for the circuit, each p1's input wire gets 0 or 1.
 	*/
-	void run(byte* ungarbledInput);
-	/**
-	* Runs OT protocol in order to send p2 the necessary keys without revealing any other information.
-	* @param allInputWireValues The keys for each wire.
-	*/
-	void runOTProtocol();
+	void run() override;
 };
 
 /**
 * This is an implementation of party one of Yao protocol.
 */
-class PartyTwo {
+class PartyTwo : public Protocol, public SemiHonest{
 private:
 	OTBatchReceiver * otReceiver;			//The OT object that used in the protocol.	
 	GarbledBooleanCircuit * circuit;	//The garbled circuit used in the protocol.
 	CommParty * channel;				//The channel between both parties.
 	byte* p1Inputs;
 	int p1InputsSize;
+	bool print_output;					// Indicates if to print the output at the end of the execution or not
+
+	// The input for the protocol:
+	byte * ungarbledInput;
+	int inputSize;
 
 	/**
 	* Compute the garbled circuit.
@@ -108,26 +123,6 @@ private:
 	*/
 	byte* computeCircuit(OTBatchROutput * otOutput);
 
-public:
-	/**
-	* Constructor that sets the parameters of the OT protocol and creates the garbled circuit.
-	* @param channel The channel between both parties.
-	* @param bc The boolean circuit that should be garbled.
-	* @param mes The encryption scheme to use in the garbled circuit.
-	* @param otSender The OT object to use in the protocol.
-	* @param inputForTest
-	*/
-	PartyTwo(CommParty * channel, OTBatchReceiver * otReceiver, GarbledBooleanCircuit * circuit) {
-		this->channel = channel;
-		this->otReceiver = otReceiver;
-		this->circuit = circuit;
-	};
-
-	/**
-	* Runs the protocol.
-	* @param ungarbledInput The input for the circuit, each p1's input wire gets 0 or 1.
-	*/
-	void run(byte * ungarbledInput, int inputSize, bool print_output=false);
 	/**
 	* Receive the circuit's garbled tables and translation table.
 	*/
@@ -150,4 +145,28 @@ public:
 		//Run the Ot protocol.
 		return otReceiver->transfer(input);
 	};
+
+public:
+	/**
+	* Constructor that sets the parameters of the OT protocol and creates the garbled circuit.
+	* @param channel The channel between both parties.
+	* @param bc The boolean circuit that should be garbled.
+	* @param mes The encryption scheme to use in the garbled circuit.
+	* @param otSender The OT object to use in the protocol.
+	* @param inputForTest
+	*/
+	PartyTwo(CommParty * channel, OTBatchReceiver * otReceiver, GarbledBooleanCircuit * circuit, bool print_output=false) {
+		this->channel = channel;
+		this->otReceiver = otReceiver;
+		this->circuit = circuit;
+		this->print_output = print_output;
+	};
+
+	void setInput(byte * ungarbledInput, int inputSize);
+
+	/**
+	* Runs the protocol.
+	* @param ungarbledInput The input for the circuit, each p1's input wire gets 0 or 1.
+	*/
+	void run();
 };

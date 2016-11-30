@@ -1,4 +1,6 @@
 #pragma once
+
+#include <libscapi/include/CryptoInfra/Protocol.hpp>
 #include "../../primitives/KProbeResistantMatrix.hpp"
 #include "../../primitives/ExecutionParameters.hpp"
 #include "../../primitives/CryptoPrimitives.hpp"
@@ -20,7 +22,7 @@
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University
 *
 */
-class OnlineProtocolP2 {
+class OnlineProtocolP2 : public Protocol, public Malicious {
 
 private:
 
@@ -205,13 +207,13 @@ public:
 		const shared_ptr<BucketLimitedBundle> & mainBucket, const shared_ptr<BucketLimitedBundle> & crBucket,
 		KProbeResistantMatrix * mainMatrix, KProbeResistantMatrix * crMatrix);
 
+	void setInput(CircuitInput & protocolInput) { input = protocolInput; }
+
 	/**
 	* Executes the second party of the online protocol.<p>
 	* basically, it computes the main circuit and than the cheating recovery circuit.
 	*/
-	void run(CircuitInput & protocolInput);
-
-	
+	void run() override;
 
 	/**
 	* Get the output of the protocol.

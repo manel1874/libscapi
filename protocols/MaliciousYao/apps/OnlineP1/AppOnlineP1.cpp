@@ -141,7 +141,9 @@ int main(int argc, char* argv[]) {
 			auto crBucket = crBuckets[i];
 
 			protocol = new OnlineProtocolP1(*commConfig, *mainBucket, *crBucket);
-            protocol->run(input);
+            protocol->setInput(input);
+			protocol->run();
+
             auto end = chrono::high_resolution_clock::now();
 			auto time = chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 			//cout << "exe no. " << i << " took " << time << " millis." << endl;

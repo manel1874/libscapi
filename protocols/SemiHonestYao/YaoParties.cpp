@@ -54,7 +54,7 @@ void PartyOne::sendP1Inputs(byte* ungarbledInput) {
 	delete p1Inputs;
 }
 
-void PartyOne::run(byte* ungarbledInput) {
+void PartyOne::run() {
 
 	//byte * seed = new byte[16];
 	//if (!RAND_bytes(seed, 16))
@@ -141,7 +141,12 @@ byte* PartyTwo::computeCircuit(OTBatchROutput * otOutput) {
 	return circuitOutput;
 }
 
-void PartyTwo::run(byte * ungarbledInput, int inputSize, bool print_output) {
+void PartyTwo::setInput(byte * ungarbledInput, int inputSize) {
+	this->ungarbledInput = ungarbledInput;
+	this->inputSize = inputSize;
+}
+
+void PartyTwo::run() {
 	// receive tables and inputs
 	receiveCircuit();
 	receiveP1Inputs();

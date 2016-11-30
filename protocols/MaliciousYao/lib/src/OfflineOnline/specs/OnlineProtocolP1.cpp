@@ -382,9 +382,7 @@ OnlineProtocolP1::OnlineProtocolP1(CommunicationConfig & communication, BucketBu
 * Executes the first side of the online protocol.<p>
 * basically, it computes the main circuit and than the cheating recovery circuit.
 */
-void OnlineProtocolP1::run(shared_ptr<CircuitInput> protocolInput) {
-	input = protocolInput;
-
+void OnlineProtocolP1::run() {
 	//	LogTimer timer = new LogTimer("Evaluating Main circuit");
 
 	//Compute the main circuits part.

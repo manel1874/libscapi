@@ -232,7 +232,8 @@ int main(int argc, char* argv[]) {
 			auto start = chrono::high_resolution_clock::now();
 
 			protocol = new OnlineProtocolP2(mainExecution, crExecution, commConfig.getCommParty()[0], mainBucket, crBucket, &mainMatrix, &crMatrix);
-			protocol->run(*input);
+			protocol->setInput(*input);
+			protocol->run();
 
 			auto end = chrono::high_resolution_clock::now();
 			auto time = chrono::duration_cast<std::chrono::milliseconds>(end - start).count();

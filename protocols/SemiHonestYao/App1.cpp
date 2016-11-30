@@ -109,7 +109,8 @@ void execute_party_one(YaoConfig yao_config) {
 	p1 = new PartyOne(channel.get(), otSender, circuit);
 	for (int i = 0; i < yao_config.number_of_iterations ; i++) {
 		// run Party one
-		p1->run(ungarbledInput->data());
+		p1->setInput(ungarbledInput->data());
+		p1->run();
 	}
 	auto end = std::chrono::system_clock::now();
 	int elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - all).count();
@@ -169,10 +170,11 @@ void execute_party_two(YaoConfig yao_config) {
 
 	PartyTwo * p2;
 	auto all = scapi_now();
-	p2 = new PartyTwo(channel.get(), otReceiver, circuit);
+	p2 = new PartyTwo(channel.get(), otReceiver, circuit, yao_config.print_output);
 	for (int i = 0; i < yao_config.number_of_iterations ; i++) {
 		// init the P1 yao protocol and run party two of Yao protocol.
-		p2->run(&(ungarbledInput->at(0)), ungarbledInput->size(), yao_config.print_output);
+		p2->setInput(&(ungarbledInput->at(0)), ungarbledInput->size());
+		p2->run();
 	}
 	auto end = std::chrono::system_clock::now();
 	int elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - all).count();

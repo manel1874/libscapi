@@ -628,8 +628,7 @@ OnlineProtocolP2::OnlineProtocolP2(const ExecutionParameters & mainExecution, co
 * Executes the second party of the online protocol.<p>
 * basically, it computes the main circuit and than the cheating recovery circuit.
 */
-void OnlineProtocolP2::run(CircuitInput & protocolInput) {
-	input = protocolInput;
+void OnlineProtocolP2::run() {
 
 	//LogTimer timer = new LogTimer("Evaluating Main circuit");
     //Compute the main circuits part.

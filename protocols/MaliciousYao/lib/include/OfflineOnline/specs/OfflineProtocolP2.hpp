@@ -1,5 +1,6 @@
 #pragma once
 
+#include <libscapi/include/CryptoInfra/Protocol.hpp>
 #include "../../../include/primitives/KProbeResistantMatrix.hpp"
 #include "../../../include/primitives/CommunicationConfig.hpp"
 #include "../../../include/OfflineOnline/subroutines/CutAndChooseVerifier.hpp"
@@ -16,8 +17,8 @@
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar - Ilan University
 *
 */
-class OfflineProtocolP2
-{
+class OfflineProtocolP2 : public Protocol, public Malicious {
+
 private:
 	shared_ptr<ExecutionParameters> mainExecution;			// Parameters of the main circuit.
 	shared_ptr<ExecutionParameters> crExecution;			// Parameters of the cheating recovery circuit.
@@ -45,7 +46,7 @@ public:
 	/**
 	* Runs the second party in the offline phase of the malicious Yao protocol.
 	*/
-	void run(); 
+	void run() override;
 
 	/**
 	 * Returns the list of main circuit's buckets.
