@@ -19,8 +19,8 @@ Libscapi is developed by [Bar Ilan University Cryptography Research Group](http:
 - __Circuits__: To be elaborated
 - __Communication Channel__: To be elaborated
 
-## License information
-Libscapi is released under the MIT open source license. However, some of the libraries we use have different licenses. For further information pleare refer to [LICENSE.MD](LICENSE.MD)
+- ## License information
+Libscapi is released under the MIT open source license. However, some of the libraries we use have different licenses. For further information pleare refer to [LICENSE.MD](build_scripts/LICENSE.MD)
 
 ## Documentation
 
@@ -30,7 +30,7 @@ Go to http://scapi.readthedocs.org/ for a detailed explanations of our implement
 
 Libscapi has is tested on Ubuntu 14.04 and should run on all major versions of Linux. It also executes on Windows 8.1/10 but with performance limitations. Internally we use the Windows option for development only. All tests execute on Linux.
 Mac OSX has not been tested so far. 
-For detailed instructions, see [INSTALL.MD](INSTALL.MD)
+For detailed instructions, see [INSTALL.MD](build_scripts/INSTALL.MD)
 
 ## Libraries used by libscapi
 
