@@ -1,5 +1,10 @@
-# Libscapi
-libscapi is the C++ high performance version of scapi (Secure Multiparty Computation API).We are in beta,  release of first version is expected by 1 August 2016.  Libscapi is developed  by [Bar Ilan University Cryptography Research Group](http://crypto.biu.ac.il/). The goal of libscapi is to promote research by Academy and Industry practitioners in this field by providing:
+# LIBSCAPI - The Secure Computation API
+
+libscapi is the Open source C++ library for implementing high performance secure two-party and multiparty computation protocols (SCAPI stands for the "Secure Computation API"). It provides a reliable, efficient, and highly flexible cryptographic infrastructure.
+
+The latest release can be found here. Alternately you can simply clone the repository to get the latest and greatest.
+
+Libscapi is developed by [Bar Ilan University Cryptography Research Group](http://crypto.biu.ac.il/). The goal of libscapi is to promote research by Academy and Industry practitioners in this field by providing:
 
 - A consistent API over Primitives, Mid-Layer Protocols, Interactive Mid-Layer Protocols and Communictaion Channels, simplifying the development and evaluation fo new protocols. We focus on keeping libscapi easy to build and use.
 - Integrating best performance open-source implementations by other Academy Research Institutes.  
@@ -14,8 +19,12 @@ libscapi is the C++ high performance version of scapi (Secure Multiparty Computa
 - __Circuits__: To be elaborated
 - __Communication Channel__: To be elaborated
 
-- ## License information
+## License information
 Libscapi is released under the MIT open source license. However, some of the libraries we use have different licenses. For further information pleare refer to [LICENSE.MD](LICENSE.MD)
+
+## Documentation
+
+Go to http://scapi.readthedocs.org/ for a detailed explanations of our implementation.
 
 ##Installing libscapi
 
@@ -70,5 +79,3 @@ Implementation of the passive secure OT extension protocol of [1] and the active
 
 ##### Tung Chou and Claudio Orlandi: The Simplest Oblivious Transfer Protocol
 [http://users-cs.au.dk/orlandi/simpleOT/](http://users-cs.au.dk/orlandi/simpleOT/)
-
-
