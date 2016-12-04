@@ -195,7 +195,7 @@ int mainBristol(string partyNum) {
 
 
 
-    if (my_num == 0) {
+    if (my_num == 1) {
         	boost::asio::io_service io_service;
     		SocketPartyData me(IpAdress::from_string("127.0.0.1"), 1212);
     		SocketPartyData other(IpAdress::from_string("127.0.0.1"), 1213);
