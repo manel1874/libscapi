@@ -37,13 +37,13 @@
 #include "../../include/primitives/Prg.hpp"
 
 struct OTParams {
-	IpAdress senderIp;
-	IpAdress receiverIp;
+	IpAddress senderIp;
+	IpAddress receiverIp;
 	int senderPort;
 	int receiverPort;
 	string protocolName;
 
-	OTParams(IpAdress senderIp, IpAdress receiverIp, int senderPort, int receiverPort, string protocolName) {
+	OTParams(IpAddress senderIp, IpAddress receiverIp, int senderPort, int receiverPort, string protocolName) {
 		this->senderIp = senderIp;
 		this->receiverIp = receiverIp;
 		this->senderPort = senderPort;

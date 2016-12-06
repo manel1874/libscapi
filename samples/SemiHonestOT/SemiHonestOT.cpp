@@ -32,7 +32,7 @@ void mainReceiver() {
 	// init phase
 	int numOts = 1;
 	srand(time(NULL));
-	SocketPartyData senderParty(IpAdress::from_string("127.0.0.1"), 7766);
+	SocketPartyData senderParty(IpAddress::from_string("127.0.0.1"), 7766);
 	auto receiver_interface = new OTSemiHonestExtensionReceiver(senderParty, 163, 1);
 
 	vector<byte> choices, response;
@@ -64,7 +64,7 @@ void mainSender() {
 	int numOts = 1;
 	int bitLength = 128;
 	srand(time(NULL));
-	SocketPartyData senderParty(IpAdress::from_string("127.0.0.1"), 7766);
+	SocketPartyData senderParty(IpAddress::from_string("127.0.0.1"), 7766);
 	auto sender_interface = new OTSemiHonestExtensionSender(senderParty, 163, 1);
 	
 	// run ot as sender phase

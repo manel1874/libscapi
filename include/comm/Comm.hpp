@@ -39,7 +39,7 @@
 #include "../infra/Common.hpp"
 
 namespace boost_ip = boost::asio::ip; // reduce the typing a bit later...
-using IpAdress = boost_ip::address;
+using IpAddress = boost_ip::address;
 using tcp = boost_ip::tcp;
 
 
@@ -72,7 +72,7 @@ class PartyData{};
 */
 class SocketPartyData : public PartyData {
 private:
-	IpAdress ipAddress; // party's address.
+	IpAddress ipAddress; // party's address.
 	int port; // port number to listen on.
 	int compare(const SocketPartyData &other) const;
 public:
@@ -82,11 +82,11 @@ public:
 	* @param ip Party's address.
 	* @param port Port number to listen on.
 	*/
-	SocketPartyData(IpAdress ip, int port) {
+	SocketPartyData(IpAddress ip, int port) {
 		ipAddress = ip;
 		this->port = port;
 	};
-	IpAdress getIpAddress() { return ipAddress; };
+	IpAddress getIpAddress() { return ipAddress; };
 	int getPort() { return port; };
 	string to_log_string() {
 		return ipAddress.to_string() + "|" + to_string(port);

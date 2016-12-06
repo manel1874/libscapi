@@ -36,8 +36,8 @@ struct YaoConfig {
 	string circuit_file;
 	string input_file_1;
 	string input_file_2;
-	IpAdress sender_ip;
-	IpAdress receiver_ip;
+	IpAddress sender_ip;
+	IpAddress receiver_ip;
 	YaoConfig(int n_iterations, bool print, string c_file, string input_file_1,
 		string input_file_2, string sender_ip_str, string rec_ip_str, string circuit_type) {
 		number_of_iterations = n_iterations;
@@ -45,8 +45,8 @@ struct YaoConfig {
 		circuit_file = c_file;
 		this->input_file_1 = input_file_1;
 		this->input_file_2 = input_file_2;
-		sender_ip = IpAdress::from_string(sender_ip_str);
-		receiver_ip = IpAdress::from_string(rec_ip_str);
+		sender_ip = IpAddress::from_string(sender_ip_str);
+		receiver_ip = IpAddress::from_string(rec_ip_str);
 		this->circuit_type = circuit_type;
 	};
 };
