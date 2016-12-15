@@ -767,8 +767,8 @@ TEST_CASE("TrapdoorPermutation", "[OpenSSL]")
 
 TEST_CASE("Comm basics", "[Communication]") {
 	SECTION("Comparing SocketPartyData") {
-		auto spd1 = SocketPartyData(IpAdress::from_string("127.0.0.1"), 3000);
-		auto spd2 = SocketPartyData(IpAdress::from_string("127.0.0.1"), 3001);
+		auto spd1 = SocketPartyData(IpAddress::from_string("127.0.0.1"), 3000);
+		auto spd2 = SocketPartyData(IpAddress::from_string("127.0.0.1"), 3001);
 		REQUIRE(spd1 < spd2);
 		REQUIRE(spd2 > spd1);
 		REQUIRE(spd2 >= spd1);

@@ -32,7 +32,7 @@ void mainR() {
 	// init phase
 	int numOts = 1;
 	srand(time(NULL));
-	SocketPartyData senderParty(IpAdress::from_string("127.0.0.1"), 7766);
+	SocketPartyData senderParty(IpAddress::from_string("127.0.0.1"), 7766);
 	OTExtensionMaliciousReceiver* receiver_interface = new OTExtensionMaliciousReceiver(senderParty, numOts); // total ots
 
 	vector<byte> choices, response;
@@ -63,7 +63,7 @@ void mainS() {
 	int numOts = 1;
 	int bitLength = 128;
 	srand(time(NULL));
-	SocketPartyData senderParty(IpAdress::from_string("127.0.0.1"), 7766);
+	SocketPartyData senderParty(IpAddress::from_string("127.0.0.1"), 7766);
 	OTExtensionMaliciousSender * sender_interface = new OTExtensionMaliciousSender(senderParty, numOts); // total ots
 	
 	// run ot as sender phase

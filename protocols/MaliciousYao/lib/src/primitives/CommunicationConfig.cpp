@@ -30,12 +30,12 @@ CommunicationConfig::CommunicationConfig(string config_file, int thisPartyNum, b
 	//set partys IPs and ports to SockectPartyData
 	for (int i = 0; i < numOfThread; i++) {
 		if (this->partyNum == 1) {
-			me[i] = SocketPartyData(IpAdress::from_string(party_1_ip), party_1_port);
-			otherParty[i] = SocketPartyData(IpAdress::from_string(party_2_ip), party_2_port);
+			me[i] = SocketPartyData(IpAddress::from_string(party_1_ip), party_1_port);
+			otherParty[i] = SocketPartyData(IpAddress::from_string(party_2_ip), party_2_port);
 		}
 		else {
-			me[i] = SocketPartyData(IpAdress::from_string(party_2_ip), party_2_port);
-			otherParty[i] = SocketPartyData(IpAdress::from_string(party_1_ip), party_1_port);
+			me[i] = SocketPartyData(IpAddress::from_string(party_2_ip), party_2_port);
+			otherParty[i] = SocketPartyData(IpAddress::from_string(party_1_ip), party_1_port);
 		}
 		party_1_port += 2;
 		party_2_port += 2;
@@ -49,6 +49,6 @@ CommunicationConfig::CommunicationConfig(string config_file, int thisPartyNum, b
 	int malicious_OT_port = stoi(cf.Value("", "malicious_OT_port"));
 	string malicious_OT_address = cf.Value("", "malicious_OT_address");
 	//set to SockectPartyData
-	this->maliciousOTServer = make_shared<SocketPartyData>(IpAdress::from_string(malicious_OT_address), malicious_OT_port);
+	this->maliciousOTServer = make_shared<SocketPartyData>(IpAddress::from_string(malicious_OT_address), malicious_OT_port);
 }
 

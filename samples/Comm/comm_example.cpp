@@ -117,8 +117,8 @@ CommParty* getCommParty(CommConfig commConfig, string partyNumber, boost::asio::
 	string otherIp = (partyNumber == "1") ? commConfig.party_2_ip : commConfig.party_1_ip;
 	int myPort = (partyNumber == "1") ? commConfig.party_1_port : commConfig.party_2_port;
 	int otherPort = (partyNumber == "1") ? commConfig.party_2_port : commConfig.party_1_port;
-	SocketPartyData me(IpAdress::from_string(myIp), myPort);
-	SocketPartyData other(IpAdress::from_string(otherIp), otherPort);
+	SocketPartyData me(IpAddress::from_string(myIp), myPort);
+	SocketPartyData other(IpAddress::from_string(otherIp), otherPort);
 	cout << "tring to connect to: " << otherIp << " port: " << otherPort << endl;
 	if (commConfig.classType == "CommPartyTCPSynced")
 	{

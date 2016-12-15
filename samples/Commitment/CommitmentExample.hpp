@@ -42,13 +42,13 @@
 #include "../../include/infra/ConfigFile.hpp"
 
 struct CommitmentParams {
-	IpAdress committerIp;
-	IpAdress receiverIp;
+	IpAddress committerIp;
+	IpAddress receiverIp;
 	int committerPort;
 	int receiverPort;
 	string protocolName;
 
-	CommitmentParams(IpAdress committerIp, IpAdress receiverIp, int committerPort, int receiverPort, string protocolName) {
+	CommitmentParams(IpAddress committerIp, IpAddress receiverIp, int committerPort, int receiverPort, string protocolName) {
 		this->committerIp = committerIp;
 		this->receiverIp = receiverIp;
 		this->committerPort = committerPort;

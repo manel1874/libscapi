@@ -6,8 +6,8 @@ OTParams readOTConfig(string config_file) {
 	string receiverIpStr = cf.Value("", "receiverIp");
 	int senderPort = stoi(cf.Value("", "senderPort"));
 	int receiverPort = stoi(cf.Value("", "receiverPort"));
-	auto senderIp = IpAdress::from_string(senderIpStr);
-	auto receiverIp = IpAdress::from_string(receiverIpStr);
+	auto senderIp = IpAddress::from_string(senderIpStr);
+	auto receiverIp = IpAddress::from_string(receiverIpStr);
 	string protocolName = cf.Value("", "protocolName");
 	return OTParams(senderIp, receiverIp, senderPort, receiverPort, protocolName);
 }
