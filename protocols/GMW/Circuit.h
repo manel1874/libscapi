@@ -8,7 +8,8 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
-#include <libscapi/include/infra/Common.hpp>
+#include "../../include/infra/Common.hpp"
+
 using namespace std;
 
 /**

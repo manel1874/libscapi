@@ -23,26 +23,8 @@ int main(int argc, char* argv[]) {
         }
     }
     int numThreads = atoi(argv[5]);
-    GMWParty party(id, circuit, parties, numThreads);
-    auto start = chrono::high_resolution_clock::now();
-    party.GenerateTriples();
-    auto end = chrono::high_resolution_clock::now();
-    chrono::duration<double> generateTotalTime = end - start;
-    cout<<"Offline time: "<<generateTotalTime.count() <<endl;
-
-    start = chrono::high_resolution_clock::now();
-    party.inputSharing(argv[4]);
-    auto output = party.computeCircuit();
-
-    end = chrono::high_resolution_clock::now();
-    generateTotalTime = end - start;
-    cout<<"online time: "<<generateTotalTime.count() <<endl;
-
-    cout<<"circuit output:"<<endl;
-    for (int i=0; i<output.size(); i++){
-        cout<<(int)output[i]<< " ";
-    }
-    cout<<endl;
+    GMWParty party(id, circuit, parties, numThreads, argv[4]);
+    party.run();
 
     return 0;
 }

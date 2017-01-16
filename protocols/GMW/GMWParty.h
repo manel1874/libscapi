@@ -7,11 +7,13 @@
 
 #include "Circuit.h"
 #include "MPCCommunication.h"
-#include <libscapi/include/primitives/Prg.hpp>
+#include "../../include/primitives/Prg.hpp"
+#include "../../include/CryptoInfra/Protocol.hpp"
+#include "../../include/CryptoInfra/SecurityLevel.hpp"
 #include <thread>
 #include <mutex>
 
-class GMWParty{
+class GMWParty : public Protocol, public SemiHonest{
 
 private:
     int id, numThreads, numPartiesForEachThread;
@@ -19,8 +21,16 @@ private:
     vector<shared_ptr<ProtocolPartyData>> parties;
     vector<byte> aArray, bArray, cArray;
     vector<byte> wiresValues;
-    void readInputs(string inputsFile, vector<byte> & inputs) const;
     mutex mtx;
+    string inputFileName;
+
+    void generateTriples();
+
+    void inputSharing();
+
+    vector<byte> computeCircuit();
+
+    void readInputs(string inputsFile, vector<byte> & inputs) const;
 
     void generateTriplesForParty(PrgFromOpenSSLAES & prg, int first, int last);
 
@@ -45,12 +55,13 @@ private:
 
 public:
 
-    GMWParty(int id, const shared_ptr<Circuit> & circuit, const vector<shared_ptr<ProtocolPartyData>> & parties, int numThreads);
+    GMWParty(int id, const shared_ptr<Circuit> & circuit, const vector<shared_ptr<ProtocolPartyData>> & parties, int numThreads, string inputFileName);
 
-    void GenerateTriples();
+    /*
+     * Implement the function derived from the Protocol abstract class.
+     */
+    void run() override;
 
-    void inputSharing(string inputsFile);
 
-    vector<byte> computeCircuit();
 };
 #endif //GMW_GMWPARTY_H

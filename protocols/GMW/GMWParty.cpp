@@ -4,8 +4,8 @@
 
 #include "GMWParty.h"
 
-GMWParty::GMWParty(int id, const shared_ptr<Circuit> & circuit, const vector<shared_ptr<ProtocolPartyData>> & parties, int numThreads) :
-        id(id), circuit(circuit), parties(parties) {
+GMWParty::GMWParty(int id, const shared_ptr<Circuit> & circuit, const vector<shared_ptr<ProtocolPartyData>> & parties, int numThreads, string inputFileName) :
+        id(id), circuit(circuit), parties(parties), inputFileName(inputFileName) {
     if (parties.size() <= numThreads){
         this->numThreads = parties.size();
         numPartiesForEachThread = 1;
@@ -15,7 +15,29 @@ GMWParty::GMWParty(int id, const shared_ptr<Circuit> & circuit, const vector<sha
     }
 }
 
-void GMWParty::GenerateTriples(){
+void GMWParty::run(){
+    auto start = chrono::high_resolution_clock::now();
+    generateTriples();
+    auto end = chrono::high_resolution_clock::now();
+    chrono::duration<double> generateTotalTime = end - start;
+    cout<<"Offline time: "<<generateTotalTime.count() <<endl;
+
+    start = chrono::high_resolution_clock::now();
+    inputSharing();
+    auto output = computeCircuit();
+
+    end = chrono::high_resolution_clock::now();
+    generateTotalTime = end - start;
+    cout<<"online time: "<<generateTotalTime.count() <<endl;
+
+    cout<<"circuit output:"<<endl;
+    for (int i=0; i<output.size(); i++){
+        cout<<(int)output[i]<< " ";
+    }
+    cout<<endl;
+}
+
+void GMWParty::generateTriples(){
 
     /*
      * Generates a multiplication triple (a0 ^ a1)(b0 ^ b1) = (c0 ^ c1) for each and gate for each party.
@@ -181,7 +203,7 @@ void GMWParty::generateTriplesForParty(PrgFromOpenSSLAES & prg, int first, int l
         }
     }
 }
-void GMWParty::inputSharing(string inputsFile){
+void GMWParty::inputSharing(){
     vector<int> myInputWires = circuit->getPartyInputs(id); //indices of my input wires
     //vector<int> otherInputWires; //indeices of the other party's input wires
     int inputSize = myInputWires.size();
@@ -195,7 +217,7 @@ void GMWParty::inputSharing(string inputsFile){
     prg.setKey(key);
 
     //read my input from the input file
-    readInputs(inputsFile, myInputBits);
+    readInputs(inputFileName, myInputBits);
 
     vector<thread> threads(numThreads);
     for (int t=0; t<numThreads; t++) {
