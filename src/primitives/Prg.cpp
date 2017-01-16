@@ -161,7 +161,7 @@ PrgFromOpenSSLAES::~PrgFromOpenSSLAES() {
 	//free aes
 	if(aes != nullptr) {
         EVP_CIPHER_CTX_cleanup(aes);
-        //delete aes;
+        delete aes;
     }
 }
 
