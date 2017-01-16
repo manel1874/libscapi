@@ -23,7 +23,7 @@ void OTExtensionBristolBase::init(const string& senderAddress, int port, int my_
 	pParty.reset(new TwoPartyPlayer(Names(my_num, 0, names), 1 - my_num, port));
 
 	//init the base OT with 128 ot's with 128 bit length for the relevant role.
-	BaseOT baseOT = BaseOT(128, 128, 1 - my_num, pParty.get(), INV_ROLE(ot_role));
+	BaseOT baseOT(128, 128, 1 - my_num, pParty.get(), INV_ROLE(ot_role));
 
 	//run the base OT
 	baseOT.exec_base();
@@ -150,8 +150,9 @@ shared_ptr<OTBatchSOutput> OTExtensionBristolSender::transfer(OTBatchSInput * in
                 expandOutput(elementSize, (byte*) &pOtExt->senderOutputMatrices[1].squares[i/128].rows[i % 128],
                              aesX1, factor, counters, aes, output, i);
             }
-            delete counters;
-            delete output;
+            delete [] counters;
+            delete [] output;
+            delete aes;
         }
 
         //If this if the general case we need another round of communication using the channel member, since OT bristol only works on random case.
@@ -201,7 +202,7 @@ shared_ptr<OTBatchSOutput> OTExtensionBristolSender::transfer(OTBatchSInput * in
 
 			//send R1^R0^delta over the channel.
 			channel->write(newDelta, size);
-            delete newDelta;
+            delete [] newDelta;
 
 			//the output for the sender is x0 and x0^delta
 			return make_shared<OTExtensionCorrelatedSOutput>(aesX0, newX1);
@@ -312,8 +313,9 @@ shared_ptr<OTBatchROutput> OTExtensionBristolReceiver::transfer(OTBatchRInput * 
                 expandOutput(elementSize, (byte*) &pOtExt->receiverOutputMatrix.squares[i/128].rows[i % 128], aesOutput,
                              factor, counters, aes, outputArr, i);
             }
-            delete counters;
-            delete outputArr;
+            delete [] counters;
+            delete [] outputArr;
+            delete aes;
         }
 
         int size = elementSize/8 * nOTsReal;
@@ -342,8 +344,8 @@ shared_ptr<OTBatchROutput> OTExtensionBristolReceiver::transfer(OTBatchRInput * 
                  }
 			}
 
-            delete x0Arr;
-            delete x1Arr;
+            delete [] x0Arr;
+            delete [] x1Arr;
 
 			return make_shared<OTOnByteArrayROutput>(aesOutput);
 		}
@@ -361,15 +363,15 @@ shared_ptr<OTBatchROutput> OTExtensionBristolReceiver::transfer(OTBatchRInput * 
 
 			//xor each randomized output with the relevant xored sent from the sender
 			for(int i=0; i < size; i++){
-                if (sigmaArr[i/(elementSize/8)] == 0) {
-                    aesOutput[i] = aesOutput[i];
-                } else {
+                if (sigmaArr[i/(elementSize/8)] != 0) {
+                    //aesOutput[i] = aesOutput[i];
+               // } else {
                     //x1 = delta^x1 = x1^ x0^delta^x1 = xo^delta=x1
                     aesOutput[i] = delta[i] ^ aesOutput[i];
                 }
 			}
 
-			 delete delta;
+			 delete [] delta;
 
 			return make_shared<OTOnByteArrayROutput>(aesOutput);
 		} else{

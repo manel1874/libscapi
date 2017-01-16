@@ -158,23 +158,21 @@ public:
 	 * @param numOfOts Number of OTs in the OT extension.
 	 */
     OTExtensionGeneralSInput(const vector<byte> & x0Arr, const vector<byte> & x1Arr,
-			int numOfOts) {
-		this->x0Arr = x0Arr;
-		this->x1Arr = x1Arr;
+			int numOfOts) : x0Arr(x0Arr), x1Arr(x1Arr){
 		this->numOfOts = numOfOts;
 	}
 	;
 	/**
 	 * @return the array that holds all the x0 for all the senders serially.
 	 */
-	vector<byte> getX0Arr() {
+	vector<byte> & getX0Arr() {
 		return x0Arr;
 	}
 	;
 	/**
 	 * @return the array that holds all the x1 for all the senders serially.
 	 */
-	vector<byte> getX1Arr() {
+	vector<byte> & getX1Arr() {
 		return x1Arr;
 	}
 	;
