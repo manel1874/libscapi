@@ -30,11 +30,12 @@ void GMWParty::run(){
     generateTotalTime = end - start;
     cout<<"online time: "<<generateTotalTime.count() <<endl;
 
-    cout<<"circuit output:"<<endl;
-    for (int i=0; i<output.size(); i++){
-        cout<<(int)output[i]<< " ";
+    cout << "circuit output:" << endl;
+    for (int i = 0; i < output.size(); i++) {
+        cout << (int) output[i] << " ";
     }
-    cout<<endl;
+    cout << endl;
+
 }
 
 void GMWParty::generateTriples(){
@@ -194,8 +195,8 @@ void GMWParty::generateTriplesForParty(PrgFromOpenSSLAES & prg, int first, int l
             aArray[position + j] = sigma[j];    // a
             u = xSigma[j];                      // u
             cArray[position + j] = (aArray[position + j] * bArray[position + j]) ^ v ^ u; // c = (ab) ^ u ^ v.
-
-            /*cout << "b = " << (int) bArray[position + j] << endl;
+            /*cout<<"gate "<<j<<endl;
+            cout << "b = " << (int) bArray[position + j] << endl;
             cout << "v = " << (int) v << endl;
             cout << "a = " << (int) aArray[position + j] << endl;
             cout << "u = " << (int) u << endl;
@@ -217,7 +218,7 @@ void GMWParty::inputSharing(){
     prg.setKey(key);
 
     //read my input from the input file
-    readInputs(inputFileName, myInputBits);
+    readInputs(myInputBits);
 
     vector<thread> threads(numThreads);
     for (int t=0; t<numThreads; t++) {
@@ -264,7 +265,7 @@ void GMWParty::inputSharing(){
         wiresValues[myInputWires[j]] = myInputBits[j];
     }
 
-   /* cout<<"input shares: "<<endl;
+    /*cout<<"input shares: "<<endl;
     for (int i=0; i<circuit->getNrOfInput(); i++){
         cout<<(int)wiresValues[i]<<endl;
     }*/
@@ -296,11 +297,11 @@ void GMWParty::sendSharesToParties(PrgFromOpenSSLAES & prg, vector<byte> & myInp
             parties[i]->getChannel()->write(myShares.data(), myShares.size());
 
             //receive shares from the other party and set them in the shares array
-            receiveShares(otherInputWires, otherShares, wiresValues, i);
+            receiveShares(otherInputWires, otherShares, i);
 
         } else{
             //receive shares from the other party and set them in the shares array
-            receiveShares(otherInputWires, otherShares, wiresValues, i);
+            receiveShares(otherInputWires, otherShares, i);
 
             //send shares to my input bits
             parties[i]->getChannel()->write(myShares.data(), myShares.size());
@@ -308,8 +309,7 @@ void GMWParty::sendSharesToParties(PrgFromOpenSSLAES & prg, vector<byte> & myInp
         }
     }
 }
-void GMWParty::receiveShares(vector<int> & otherInputWires, vector<byte> & otherShares, vector<byte> & inputShares,
-                             int i) const {
+void GMWParty::receiveShares(vector<int> & otherInputWires, vector<byte> & otherShares, int i)  {
     //Receive shares from other party
     otherInputWires = circuit->getPartyInputs(parties[i]->getID());
     otherShares.resize(otherInputWires.size(), 0);
@@ -317,15 +317,16 @@ void GMWParty::receiveShares(vector<int> & otherInputWires, vector<byte> & other
 
     //Set the given shares in the big shares array.
     for (int j=0; j<otherShares.size(); j++){
-        inputShares[otherInputWires[j]] = otherShares[j];
+        wiresValues[otherInputWires[j]] = otherShares[j];
     }
 }
 
-void GMWParty::readInputs(string inputsFile, vector<byte> & inputs) const {
+void GMWParty::readInputs(vector<byte> & inputs) const {
     //Read the input from the given input file
     ifstream myfile;
     int input;
-    myfile.open(inputsFile);
+
+    myfile.open(inputFileName);
    for (int i = 0; i<inputs.size(); i++){
         myfile >> input;
         inputs[i] = (byte)input;
@@ -335,8 +336,9 @@ void GMWParty::readInputs(string inputsFile, vector<byte> & inputs) const {
 
 vector<byte> GMWParty::computeCircuit(){
     Gate gate;
-    wiresValues.resize(circuit->getNrOfInput() + circuit->getNrOfGates());
+    wiresValues.resize(circuit->getNrOfInput() + circuit->getNrOfGates(), 0);
     vector<bool> isWireReady(circuit->getNrOfInput() + circuit->getNrOfGates(), false);
+
     for (int i=0; i<circuit->getNrOfInput(); i++){
         isWireReady[i] = true;
     }
@@ -347,12 +349,15 @@ vector<byte> GMWParty::computeCircuit(){
     byte x, y, a, b;
 
     for (int i=0; i<circuit->getNrOfGates(); i++){
+        //cout<<i<<endl;
         gate = circuit->getGates()[i];
 
         //In case the gate is not ready, meaning that at least one of its input wires wasn't computed yet,
         //We should run the ot in order to compute all gates till here.
         //After the ot, the input wire will be ready.
-        if (!isWireReady[gate.inputIndex1] || !isWireReady[gate.inputIndex2]) {
+        if (!isWireReady[gate.inputIndex1] || ((gate.inFan != 1) && !isWireReady[gate.inputIndex2])) {
+            //cout<<"input 1 = "<<gate.inputIndex1<<endl;
+           // cout<<"input 2 = "<<gate.inputIndex2<<endl;
              //recomputeAndGates(recomputeGate, firstAndGateToRecompute, myD, myE, otherD, otherE, d, e, z, index, i,
              //                      isWireReady, numAndGatesComputed, 0, parties.size());
             recomputeAndGatesWithThreads(firstAndGateToRecompute, myD, myE, i, isWireReady, numAndGatesComputed, andGatesComputedCounter);
@@ -369,35 +374,48 @@ vector<byte> GMWParty::computeCircuit(){
         }
         //The gate is ready to be computed, so continue computing:
         // xor gate
-        if (gate.gateType == 1) {
-            //in case of xor gate the output share is the xor of the input shares
+        if (gate.gateType == 6) {
+             //in case of xor gate the output share is the xor of the input shares
             wiresValues[gate.outputIndex] = wiresValues[gate.inputIndex1] ^ wiresValues[gate.inputIndex2];
             isWireReady[gate.outputIndex] = true;
             //cout<<"wiresValues["<<gate.outputIndex<<"] = "<< (int)wiresValues[gate.outputIndex]<<endl;
+        //not gate
+        } else if (gate.gateType == 12){
+            if (id == 0) {
+                //in case of xor gate the output share is the xor of the input shares
+                wiresValues[gate.outputIndex] = 1 - wiresValues[gate.inputIndex1];
+            } else {
+                wiresValues[gate.outputIndex] = wiresValues[gate.inputIndex1];
+            }
+            isWireReady[gate.outputIndex] = true;
+            //cout<<"wiresValues["<<gate.outputIndex<<"] = "<< (int)wiresValues[gate.outputIndex]<<endl;
         //and/or gate
-        } else if (gate.gateType == 2 || gate.gateType == 3){
+        } else if (gate.gateType == 1 || gate.gateType == 7) {
             if (firstAndGateToRecompute == -1)
                 firstAndGateToRecompute = i;
 
             //In case of or gate, (a | b) = ~(~a^~b).
             //not gate can be computed by p0 change its bit.
             // So, in order to compute or p0 first change its input bit, than compute and gate and then p0 again change the output bit.
-            if (gate.gateType == 3 && id == 0){
-               // cout<<"in or gate. flip input values before and"<<endl;
+            if (gate.gateType == 7 && id == 0) {
+                // cout<<"in or gate. flip input values before and"<<endl;
                 wiresValues[gate.inputIndex1] = 1 - wiresValues[gate.inputIndex1];
                 wiresValues[gate.inputIndex2] = 1 - wiresValues[gate.inputIndex2];
             }
 
             //The output share of the and gate is calculated by x1^y1 + x1y2 + x1y3 + ...
-            //Compute x1^y1
-            wiresValues[gate.outputIndex] = wiresValues[gate.inputIndex1] * wiresValues[gate.inputIndex2];
-            //cout<<"wiresValues["<<gate.outputIndex<<"] = "<< (int)wiresValues[gate.outputIndex]<<endl;
+            //If the number of parties is odd, the calculation of x*y is done by the multiplication triples computation.
+            // If the number is even, the value of x*y is reset so it should be computed again:
+            if (parties.size() % 2 == 0) {
+                wiresValues[gate.outputIndex] = wiresValues[gate.inputIndex1] * wiresValues[gate.inputIndex2];
+                //cout << "wiresValues[" << gate.outputIndex << "] = " << (int) wiresValues[gate.outputIndex] << endl;
+            }
 
             //Compute other multiplication values
             //for all parties, prepare arrays to hold d, e, values.
             //These values will be sent to the other party
             for (int j=0; j<parties.size(); j++){
-
+//cout<<"party "<<parties[j]->getID()<<endl;
                 //Calculate d = x^a, e = y^b
                 x  = wiresValues[gate.inputIndex1];
                 a = aArray[j * circuit->getNrOfAndGates() + andGatesCounter];
@@ -409,7 +427,7 @@ vector<byte> GMWParty::computeCircuit(){
             andGatesCounter++;
 
             //Flip again the input bit in order to remain true for other gates.
-            if (gate.gateType == 3 && id == 0){
+            if (gate.gateType == 7 && id == 0){
                 //cout<<"in or gate. flip input values avter and"<<endl;
                 wiresValues[gate.inputIndex1] = 1 - wiresValues[gate.inputIndex1];
                 wiresValues[gate.inputIndex2] = 1 - wiresValues[gate.inputIndex2];
@@ -486,7 +504,7 @@ void GMWParty::recomputeAndGates(int firstAndGateToRecompute, const vector<vecto
 
             recomputeGate = circuit->getGates()[k];
 
-            if (recomputeGate.gateType == 2 || recomputeGate.gateType == 3) {
+            if (recomputeGate.gateType == 1 || recomputeGate.gateType == 7) {
 
                 //d = d1^d2
                 d = myD[j][recomputeAndGatesCounter] ^ otherD[recomputeAndGatesCounter];
@@ -500,7 +518,6 @@ void GMWParty::recomputeAndGates(int firstAndGateToRecompute, const vector<vecto
                 if (id < parties[j]->getID()) {
                     z = z ^ (d * e);
                 }
-
                 mtx.lock();
                 wiresValues[recomputeGate.outputIndex] ^= z;
                 isWireReady[recomputeGate.outputIndex] = true;
@@ -509,7 +526,7 @@ void GMWParty::recomputeAndGates(int firstAndGateToRecompute, const vector<vecto
                 //cout<<"wiresValues["<<recomputeGate.outputIndex<<"] = "<< (int)wiresValues[recomputeGate.outputIndex]<<endl;
             }
 
-            if (recomputeGate.gateType == 3 && id == 0 && j==(last - 1)){
+            if (recomputeGate.gateType == 7 && id == 0 && j==(last - 1)){
                 mtx.lock();
                 wiresValues[recomputeGate.outputIndex] = 1 - wiresValues[recomputeGate.outputIndex];
                 mtx.unlock();

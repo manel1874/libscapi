@@ -30,13 +30,13 @@ private:
 
     vector<byte> computeCircuit();
 
-    void readInputs(string inputsFile, vector<byte> & inputs) const;
+    void readInputs(vector<byte> & inputs) const;
 
     void generateTriplesForParty(PrgFromOpenSSLAES & prg, int first, int last);
 
     void sendSharesToParties(PrgFromOpenSSLAES & prg, vector<byte> & myInputBits, int first, int last);
 
-    void receiveShares(vector<int> &otherInputWires, vector<byte> &otherShares, vector<byte> &inputShares, int i) const;
+    void receiveShares(vector<int> &otherInputWires, vector<byte> &otherShares, int i);
 
     //void recomputeAndGates(Gate &recomputeGate, int firstAndGateToRecompute, vector<vector<byte>> &myD,
     //                       vector<vector<byte>> &myE, vector<byte> &otherD, vector<byte> &otherE, byte d, byte e,

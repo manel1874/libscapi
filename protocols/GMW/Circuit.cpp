@@ -7,7 +7,7 @@
 void Circuit::readCircuit(const char* fileName)
 {
 cout<<fileName<<endl;
-    int input1, input2, output, type, numOfinputsForParty, numOfoutputsForParty;
+    int type, numOfinputsForParty, numOfoutputsForParty;
     int numberOfGates, numberOfOutputs, currentPartyNumber;
     int gateIndex = 0;
     ifstream myfile;
@@ -16,7 +16,6 @@ cout<<fileName<<endl;
 
     if (myfile.is_open())
     {
-
         myfile >> numberOfGates;//get the gates
         myfile >> numberOfParties;
 
@@ -45,6 +44,7 @@ cout<<fileName<<endl;
             myfile >> currentPartyNumber;
 
             myfile >> numOfoutputsForParty;
+
             numOfOutputsForEachParty[currentPartyNumber - 1] = numOfoutputsForParty;
             partiesOutputs[currentPartyNumber - 1].resize(numOfOutputsForEachParty[currentPartyNumber - 1]);
 
@@ -85,22 +85,32 @@ cout<<fileName<<endl;
         //go over the file and create gate by gate
         for (int i = 0; i<numberOfGates; i++)
         {
-
             //get  each row that represents a gate
-            myfile >> input1;
-            myfile >> input2;
-            myfile >> output;
+            myfile >> gates[i].inFan;
+            myfile >> gates[i].outFan;
+            myfile >> gates[i].inputIndex1;
+
+            if (gates[i].inFan != 1)//a 2 input 1 output gate - regualr gate, else we have a not gate
+            {
+                myfile >> gates[i].inputIndex2;
+            }
+
+            myfile >> gates[i].outputIndex;
             myfile >> type;
 
-            gates[i].inputIndex1 = input1;
-            gates[i].inputIndex2 = input2;
-            gates[i].outputIndex = output;
-            gates[i].gateType = type;
+            if (gates[i].inFan == 1)//not gate
+            {
+                gates[i].gateType = 12;
 
-            if (type == 1) {
-                nrOfXorGates++;
+            } else {
+                gates[i].gateType = binaryTodecimal(type);
             }
-            else if (type = 2) {
+
+            //Xor / not gates
+            if (gates[i].gateType == 6 || gates[i].gateType == 12) {
+                nrOfXorGates++;
+            // and / or gates
+            } else if (gates[i].gateType == 1 || gates[i].gateType == 7) {
                 nrOfAndGates++;
             }
 
@@ -128,4 +138,24 @@ cout<<fileName<<endl;
 
     }
     myfile.close();
+}
+
+int Circuit::binaryTodecimal(int n){
+
+    int output = 0;
+    int pow = 1;
+
+    //turns the string of the truth table that was taken as a decimal number into a number between 0 and 15 which represents the truth table
+    //0 means the truth table of 0000 and 8 means 1000 and so on. The functions returns the decimal representation of the thruth table.
+    for(int i=0; n > 0; i++) {
+
+        if(n % 10 == 1) {
+
+            output += pow;
+        }
+        n /= 10;
+
+        pow = pow*2;
+    }
+    return output;
 }

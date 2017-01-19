@@ -27,7 +27,7 @@ cout<<"num parties = "<<numParties<<endl;
         ports[i] = stoi(cf.Value("", portString));
         ips[i] = cf.Value("", ipString);
     }
-cout<<"after read file"<<endl;
+
     SocketPartyData me, other;
 
     for (int i=0; i<numParties; i++){

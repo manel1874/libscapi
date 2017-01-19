@@ -20,6 +20,8 @@ using namespace std;
 */
 struct Gate
 {
+    int inFan;          //number of input wires
+    int outFan;         //number of output wires
     int inputIndex1;    //the 0-gate index, relevant for xor/and/output
     int inputIndex2;    //the 1-gate index, relevant for xor/and
     int outputIndex;    //the output index of this gate, relevant for input/xor/and
@@ -39,6 +41,7 @@ private:
     int nrOfInput = 0;
     int nrOfOutput = 0;
 
+    int binaryTodecimal(int n);
 public:
 
     /**
