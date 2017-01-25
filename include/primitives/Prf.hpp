@@ -120,7 +120,7 @@ public:
 	/**
 	* Factory method. Create concrete instance of the give algorithm name in the default implementation.
 	*/
-	static shared_ptr<PseudorandomFunction> get_new_prf(string algName = "AES");
+	static std::shared_ptr<PseudorandomFunction> get_new_prf(string algName = "AES");
 };
 
 /**
