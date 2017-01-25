@@ -54,7 +54,7 @@
 'NTL_DISABLE_LONGLONG'  => 'off',
 'NTL_MAXIMIZE_SP_NBITS'  => 'off',
 'NTL_LEGACY_SP_MULMOD'  => 'off',
-'NTL_THREADS'           => 'off',
+'NTL_THREADS'           => 'on',
 'NTL_EXCEPTIONS'        => 'off',
 'NTL_THREAD_BOOST'      => 'off',
 'NTL_GMP_LIP'           => 'on',
