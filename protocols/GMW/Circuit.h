@@ -40,8 +40,10 @@ private:
     int nrOfXorGates = 0;
     int nrOfInput = 0;
     int nrOfOutput = 0;
+    vector<int> depths;
 
     int binaryTodecimal(int n);
+    void reArrangeCircuit();
 public:
 
     /**
@@ -61,7 +63,8 @@ public:
     int getNrOfOutput() { return nrOfOutput; }
     int getNrOfGates() { return (nrOfAndGates + nrOfXorGates); }
 
-    vector<Gate> const & getGates() const {	return gates;};
+    vector<Gate> const & getGates() const {	return gates;}
+    vector<int>& getDepths(){ return depths; }
 
 };
 

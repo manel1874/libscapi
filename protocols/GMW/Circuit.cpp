@@ -119,6 +119,11 @@ cout<<fileName<<endl;
         cout<<"num of and gates = "<<nrOfAndGates<<endl;
         cout<<"num of xor gates = "<<nrOfXorGates<<endl;
 
+        //calcDepths();
+        reArrangeCircuit();
+
+        //calcDepths();
+
         //gateIndex = numberOfGates + nrOfInputGates;
         //create the output gates for each party
         /*for (int i = 0; i < numberOfParties; i++) {
@@ -139,6 +144,75 @@ cout<<fileName<<endl;
     }
     myfile.close();
 }
+
+void Circuit::reArrangeCircuit() {
+
+
+    int numOfGates = nrOfAndGates + nrOfXorGates;
+    vector<Gate> arrangedGates(numOfGates);
+    vector<long> newOrderedIndices(numOfGates);
+    vector<int> layersAndCount(numOfGates);
+    vector<bool> gateDoneArr(numOfGates, false);
+    vector<bool> isWireReady(nrOfInput + numOfGates, false);
+    for (int i=0; i<nrOfInput; i++){
+        isWireReady[i] = true;
+    }
+
+    int count = 0;
+    int loopCount=0;
+    int andCounter = 0;
+    Gate gate;
+
+    while(count<numOfGates){
+        loopCount=count;
+        for(int k=0; k < numOfGates; k++)
+        {
+            gate = gates[k];
+            //In case of not and xor gate, if the gate is ready to be computes, we can compute it and mark it as done.
+            if (gate.gateType == 12){
+                if (!gateDoneArr[k] && isWireReady[gate.inputIndex1]) {
+                    newOrderedIndices[count] = k;
+                    count++;
+                    gateDoneArr[k] = true;
+                    isWireReady[gate.outputIndex] = true;
+                }
+            }  if (gate.gateType == 6){
+                if (!gateDoneArr[k] && isWireReady[gate.inputIndex1] && isWireReady[gate.inputIndex2]) {
+                    newOrderedIndices[count] = k;
+                    count++;
+                    gateDoneArr[k] = true;
+                    isWireReady[gate.outputIndex] = true;
+                }
+            //In case of and and or gates, if the gate is ready to be compute, we can compute it but the output will be ready just in the next layer.
+            } else {
+                if (!gateDoneArr[k] && isWireReady[gate.inputIndex1] && isWireReady[gate.inputIndex2]) {
+                    newOrderedIndices[count] = k;
+                    count++;
+                }
+            }
+
+        }
+        for(int i=loopCount; i<count; i++){
+            gateDoneArr[newOrderedIndices[i]] = true;
+            gate = gates[newOrderedIndices[i]];
+            isWireReady[gate.outputIndex] = true;
+            if (gate.gateType == 1 || gate.gateType == 7){
+                andCounter++;
+            }
+        }
+        depths.push_back(andCounter);
+        andCounter = 0;
+    }
+    //copy the right gates
+    for(int k=0; k < getNrOfGates(); k++) {
+        arrangedGates[k] = gates[newOrderedIndices[k]];
+    }
+
+    gates = move(arrangedGates);
+}
+
+
+
 
 int Circuit::binaryTodecimal(int n){
 
