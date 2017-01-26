@@ -10,6 +10,7 @@
 #include "../../include/primitives/Prg.hpp"
 #include "../../include/CryptoInfra/Protocol.hpp"
 #include "../../include/CryptoInfra/SecurityLevel.hpp"
+#include "CBitVector.h"
 #include <thread>
 #include <mutex>
 
@@ -42,11 +43,11 @@ private:
     //                       vector<vector<byte>> &myE, vector<byte> &otherD, vector<byte> &otherE, byte d, byte e,
      //                   byte z, int index, int i, vector<bool> & isWireReady, int & numAndGatesComputed, int first, int last);
 
-    void recomputeAndGatesWithThreads(int & firstAndGateToRecompute, const vector<vector<byte>> & myD,
-                                      const vector<vector<byte>> & myE, int i, vector<bool> & isWireReady,
+    void recomputeAndGatesWithThreads(int & firstAndGateToRecompute, vector<CBitVector> & myD,
+                                      vector<CBitVector> & myE, int i, vector<bool> & isWireReady,
                                       int & numAndGatesComputed, int & andGatesComputedCounter);
 
-    void recomputeAndGates(int firstAndGateToRecompute, const vector<vector<byte>> & myD, const vector<vector<byte>> & myE, int i,
+    void recomputeAndGates(int firstAndGateToRecompute, vector<CBitVector> & myD, vector<CBitVector> & myE, int i,
                            vector<bool> & isWireReady, int numAndGatesComputed, int & andGatesComputedCounter, int first, int last);
 
     vector<byte> revealOutput();

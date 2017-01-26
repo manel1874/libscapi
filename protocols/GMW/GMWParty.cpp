@@ -19,16 +19,16 @@ void GMWParty::run(){
     auto start = chrono::high_resolution_clock::now();
     generateTriples();
     auto end = chrono::high_resolution_clock::now();
-    chrono::duration<double> generateTotalTime = end - start;
-    cout<<"Offline time: "<<generateTotalTime.count() <<endl;
+    int generateTotalTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    cout<<"Offline time: "<<generateTotalTime <<" milliseconds"<<endl;
 
     start = chrono::high_resolution_clock::now();
     inputSharing();
     auto output = computeCircuit();
 
     end = chrono::high_resolution_clock::now();
-    generateTotalTime = end - start;
-    cout<<"online time: "<<generateTotalTime.count() <<endl;
+    generateTotalTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    cout<<"online time: "<<generateTotalTime <<" milliseconds"<<endl;
 
     cout << "circuit output:" << endl;
     for (int i = 0; i < output.size(); i++) {
@@ -343,13 +343,22 @@ vector<byte> GMWParty::computeCircuit(){
         isWireReady[i] = true;
     }
 
+    auto depths = circuit->getDepths();
+    int layer=0;
     int andGatesCounter = 0, firstAndGateToRecompute = -1, numAndGatesComputed = 0, andGatesComputedCounter;
-    vector<vector<byte>> myD(parties.size()), myE(parties.size());
+    vector<CBitVector> myD(parties.size()), myE(parties.size());
+    for(int i=0; i<parties.size(); i++){
+        myD[i].Create(depths[layer]);
+        myE[i].Create(depths[layer]);
+    }
 
     byte x, y, a, b;
-
+int index = 0;
+    //auto gatesIterator = circuit->getGates().begin();
     for (int i=0; i<circuit->getNrOfGates(); i++){
         //cout<<i<<endl;
+        //gate = *gatesIterator;
+        //gatesIterator++;
         gate = circuit->getGates()[i];
 
         //In case the gate is not ready, meaning that at least one of its input wires wasn't computed yet,
@@ -362,11 +371,18 @@ vector<byte> GMWParty::computeCircuit(){
              //                      isWireReady, numAndGatesComputed, 0, parties.size());
             recomputeAndGatesWithThreads(firstAndGateToRecompute, myD, myE, i, isWireReady, numAndGatesComputed, andGatesComputedCounter);
 
-            for (int j=0; j<parties.size(); j++){
-                myD[j].clear();
-                myE[j].clear();
-            }
+            if (layer < depths.size()-1 ) {
+                layer++;
+                //cout << "depth = " << depths[layer] << endl;
+                for (int j = 0; j < parties.size(); j++) {
+                    // myD[j].Reset();
+                    //myE[j].Reset();
+                    myD[j].Create(depths[layer]);
+                    myE[j].Create(depths[layer]);
 
+                }
+            }
+            index = 0;
             numAndGatesComputed += andGatesComputedCounter;
             //cout<<"numAndGatesComputed = "<<numAndGatesComputed<<endl;
             //recomputeAndGates(recomputeGate, firstAndGateToRecompute, myD, myE, otherD, otherE, d, e, z, index, i, isWireReady, numAndGatesComputed);
@@ -421,9 +437,13 @@ vector<byte> GMWParty::computeCircuit(){
                 a = aArray[j * circuit->getNrOfAndGates() + andGatesCounter];
                 y = wiresValues[gate.inputIndex2];
                 b = bArray[j * circuit->getNrOfAndGates() + andGatesCounter];
-                myD[j].push_back(x ^ a);
-                myE[j].push_back(y ^ b);
+                myD[j].SetBit(index, x ^ a);
+                //cout<<"myD[" << j<<"] added "<<(int)(x ^ a)<<endl;
+                myE[j].SetBit(index, y ^ b);
+                //cout<<"myE[" << j<<"] added "<<(int)(y ^ b)<<endl;
+
             }
+            index++;
             andGatesCounter++;
 
             //Flip again the input bit in order to remain true for other gates.
@@ -446,7 +466,7 @@ vector<byte> GMWParty::computeCircuit(){
     return revealOutput();
 }
 
-void GMWParty::recomputeAndGatesWithThreads(int & firstAndGateToRecompute, const vector<vector<byte>> & myD, const vector<vector<byte>> & myE, int i,
+void GMWParty::recomputeAndGatesWithThreads(int & firstAndGateToRecompute, vector<CBitVector> & myD, vector<CBitVector> & myE, int i,
                                             vector<bool> & isWireReady, int & numAndGatesComputed, int & andGatesComputedCounter){
     vector<thread> threads(numThreads);
     for (int t=0; t<numThreads; t++) {
@@ -466,50 +486,69 @@ void GMWParty::recomputeAndGatesWithThreads(int & firstAndGateToRecompute, const
 }
 
 
-void GMWParty::recomputeAndGates(int firstAndGateToRecompute, const vector<vector<byte>> & myD, const vector<vector<byte>> & myE, int i,
+void GMWParty::recomputeAndGates(int firstAndGateToRecompute, vector<CBitVector> & myD, vector<CBitVector> & myE, int i,
                                  vector<bool> & isWireReady, int numAndGatesComputed, int & andGatesComputedCounter, int first, int last) {
     Gate recomputeGate;
     byte d, e, z;
     int index;
-    vector<byte> otherD, otherE;
+    CBitVector otherD, otherE;
 
     int recomputeAndGatesCounter;
     for (int j=first; j < last; j++){
-        otherD.resize(myD[j].size());
-        otherE.resize(myE[j].size());
+        /*
+        cout<<"my D:"<<endl;
+        for (int k=0; k<myD[j].GetSize(); k++){
+            cout<<(int)myD[j].GetByte(k)<<" ";
+        }
+        cout<<endl;
+        cout<<"my E:"<<endl;
+        for (int k=0; k<myE[j].GetSize(); k++){
+            cout<<(int)myE[j].GetByte(k)<<" ";
+        }
+        cout<<endl;*/
+        otherD.CreateinBytes(myD[j].GetSize());
+        otherE.CreateinBytes(myE[j].GetSize());
         //The party with the lower id will send its bytes first
         if (id < parties[j]->getID()) {
             //cout<<"sender. should send to party "<<parties[j]->getID()<<endl;
             //send my d ,e
-            parties[j]->getChannel()->write(myD[j].data(), myD[j].size());
-            parties[j]->getChannel()->write(myE[j].data(), myE[j].size());
+            parties[j]->getChannel()->write(myD[j].GetArr(), myD[j].GetSize());
+            parties[j]->getChannel()->write(myE[j].GetArr(), myE[j].GetSize());
             //cout<<"receiver. should receive from party "<<parties[j]->getID()<<endl;
             //receive other d, e
-            parties[j]->getChannel()->read(otherD.data(), otherD.size());
-            parties[j]->getChannel()->read(otherE.data(), otherE.size());
+            parties[j]->getChannel()->read(otherD.GetArr(), otherD.GetSize());
+            parties[j]->getChannel()->read(otherE.GetArr(), otherE.GetSize());
         } else {
             //cout<<"receiver. should receive from party "<<parties[j]->getID()<<endl;
             //receive other d, e
-            parties[j]->getChannel()->read(otherD.data(), otherD.size());
-            parties[j]->getChannel()->read(otherE.data(), otherE.size());
+            parties[j]->getChannel()->read(otherD.GetArr(), otherD.GetSize());
+            parties[j]->getChannel()->read(otherE.GetArr(), otherE.GetSize());
             //cout<<"sender. should send to party "<<parties[j]->getID()<<endl;
             //send my d ,e
-            parties[j]->getChannel()->write(myD[j].data(), myD[j].size());
-            parties[j]->getChannel()->write(myE[j].data(), myE[j].size());
+            parties[j]->getChannel()->write(myD[j].GetArr(), myD[j].GetSize());
+            parties[j]->getChannel()->write(myE[j].GetArr(), myE[j].GetSize());
         }
-
+        /*cout<<"other D:"<<endl;
+        for (int k=0; k<otherD.GetSize(); k++){
+            cout<<(int)otherD.GetByte(k)<<" ";
+        }
+        cout<<endl;
+        cout<<"other E:"<<endl;
+        for (int k=0; k<otherE.GetSize(); k++){
+            cout<<(int)otherE.GetByte(k)<<" ";
+        }
+        cout<<endl;*/
         //Go on each and gate in the ot and compute its output share.
         recomputeAndGatesCounter = 0;
         for (int k=firstAndGateToRecompute; k < i; k++){
-
             recomputeGate = circuit->getGates()[k];
 
             if (recomputeGate.gateType == 1 || recomputeGate.gateType == 7) {
 
                 //d = d1^d2
-                d = myD[j][recomputeAndGatesCounter] ^ otherD[recomputeAndGatesCounter];
+                d = myD[j].GetBit(recomputeAndGatesCounter) ^ otherD.GetBit(recomputeAndGatesCounter);
                 //e = e1^e2
-                e = myE[j][recomputeAndGatesCounter] ^ otherE[recomputeAndGatesCounter];
+                e = myE[j].GetBit(recomputeAndGatesCounter) ^ otherE.GetBit(recomputeAndGatesCounter);
                 //z = db ^ ea ^c ^ de
                 index = j * circuit->getNrOfAndGates() + numAndGatesComputed + recomputeAndGatesCounter;
                 z = d * bArray[index];
