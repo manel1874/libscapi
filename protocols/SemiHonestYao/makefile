@@ -10,7 +10,7 @@ SLib           = SemiHonestYao.a
 all: Yao.out $(SLib)
 
 $(SLib): $(OBJS)
-	ar ru $@ $^
+	ar r $@ $^
 
 Yao.out: $(OBJS)
 	$(CXX) App1.cpp -o $@ $(OBJS) $(LINKER_OPTIONS)
