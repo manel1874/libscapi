@@ -1,5 +1,5 @@
 
-CPP_OPTIONS   := -Wall -O3 -std=c99
+CPP_OPTIONS   := -Wall -O3 -std=c99 -fPIC
 
 all:: 
 	gcc  blake2b.c -c $(CPP_OPTIONS) -o blake2b.o
