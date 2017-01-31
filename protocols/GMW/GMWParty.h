@@ -17,6 +17,7 @@
 class GMWParty : public Protocol, public SemiHonest{
 
 private:
+    boost::asio::io_service io_service;
     int id, numThreads, numPartiesForEachThread;
     shared_ptr<Circuit> circuit;
     vector<shared_ptr<ProtocolPartyData>> parties;
@@ -24,12 +25,13 @@ private:
     vector<byte> wiresValues;
     mutex mtx;
     string inputFileName;
+    vector<byte> output;
 
     void generateTriples();
 
     void inputSharing();
 
-    vector<byte> computeCircuit();
+    vector<byte>& computeCircuit();
 
     void readInputs(vector<byte> & inputs) const;
 
@@ -50,18 +52,23 @@ private:
     void recomputeAndGates(int firstAndGateToRecompute, vector<CBitVector> & myD, vector<CBitVector> & myE, int i,
                            vector<bool> & isWireReady, int numAndGatesComputed, int & andGatesComputedCounter, int first, int last);
 
-    vector<byte> revealOutput();
+    vector<byte>& revealOutput();
 
     void revealOutputFromParty(vector<byte> & output, int first, int last);
 
 public:
 
-    GMWParty(int id, const shared_ptr<Circuit> & circuit, const vector<shared_ptr<ProtocolPartyData>> & parties, int numThreads, string inputFileName);
+    GMWParty(int id, const shared_ptr<Circuit> & circuit, string partiesFileName, int numThreads, string inputFileName);
 
     /*
      * Implement the function derived from the Protocol abstract class.
      */
     void run() override;
+
+    void runOffline();
+    vector<byte>& runOnline();
+
+    vector<shared_ptr<ProtocolPartyData>> & getParties(){ return parties; }
 
 
 };
