@@ -8,7 +8,7 @@ void Circuit::readCircuit(const char* fileName)
 {
 cout<<fileName<<endl;
     int type, numOfinputsForParty, numOfoutputsForParty;
-    int numberOfGates, numberOfOutputs, currentPartyNumber;
+    int numberOfGates, currentPartyNumber;
     int gateIndex = 0;
     ifstream myfile;
 
