@@ -28,7 +28,12 @@ struct Gate
     int gateType;       //the type of the gate, can be logical, that is, xor or and or an input/output gate.
 };
 
-
+/**
+ * The circuit class represents the circuit file given by the user.
+ * It contains an array of gates, the inputs and outputs of the parties, along with other general parameters.
+ * The depths of the circuit are the amounts of gates that can be computed in parallel in each level.
+ * The circuit also contains some function related to the circuit, for example a function that read the circuit file and build the circuit.
+*/
 class Circuit {
 
 private:
@@ -42,7 +47,15 @@ private:
     int nrOfOutput = 0;
     vector<int> depths;
 
-    int binaryTodecimal(int n);
+	/*
+	 * Gets a binary representation of a number and return the decimal representation of it.
+	 * This function is used on the gates truth table.
+	 */
+    int binaryTodecimal(int n); 
+
+	/*
+	 * This function rearrange the circuit to the optimal structure, making the depth of the circuit smallest.
+	 */
     void reArrangeCircuit();
 public:
 
@@ -62,7 +75,6 @@ public:
     int getNrOfInput() { return nrOfInput; }
     int getNrOfOutput() { return nrOfOutput; }
     int getNrOfGates() { return (nrOfAndGates + nrOfXorGates); }
-
     vector<Gate> const & getGates() const {	return gates;}
     vector<int>& getDepths(){ return depths; }
 

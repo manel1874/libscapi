@@ -7,6 +7,7 @@
 GMWParty::GMWParty(int id, const shared_ptr<Circuit> & circuit, string partiesFileName, int numThreads, string inputFileName) :
         id(id), circuit(circuit), inputFileName(inputFileName) {
 
+	//Create the communication between this party and the other parties.
     parties = MPCCommunication::setCommunication(io_service, id, circuit->getNrOfParties(), partiesFileName);
     cout << "----------end communication--------------" << endl;
 
@@ -20,12 +21,14 @@ GMWParty::GMWParty(int id, const shared_ptr<Circuit> & circuit, string partiesFi
 }
 
 void GMWParty::run(){
+	//Run the offline phase of the protocol
     auto start = chrono::high_resolution_clock::now();
     generateTriples();
     auto end = chrono::high_resolution_clock::now();
     int generateTotalTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     cout<<"Offline time: "<<generateTotalTime <<" milliseconds"<<endl;
 
+	//Run te online phase of the protocol
     start = chrono::high_resolution_clock::now();
     inputSharing();
     auto output = computeCircuit();
@@ -34,6 +37,7 @@ void GMWParty::run(){
     generateTotalTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     cout<<"online time: "<<generateTotalTime <<" milliseconds"<<endl;
 
+	//Print the output
     cout << "circuit output:" << endl;
     for (int i = 0; i < output.size(); i++) {
         cout << (int) output[i] << " ";
@@ -76,6 +80,8 @@ void GMWParty::generateTriples(){
     prg.setKey(key);
 
     vector<thread> threads(numThreads);
+
+	//Split the work to threads. Each thread gets some parties to work on.
     for (int t=0; t<numThreads; t++) {
         if ((t + 1) * numPartiesForEachThread <= parties.size()) {
             threads[t] = thread(&GMWParty::generateTriplesForParty, this, ref(prg), t * numPartiesForEachThread,
@@ -87,78 +93,19 @@ void GMWParty::generateTriples(){
     for (int t=0; t<numThreads; t++){
         threads[t].join();
     }
-    /*for (int i=0; i < parties.size(); i++) {
-        //cout<<"triple with party number "<<parties[i]->getID()<<":"<<endl;
-
-        prg.getPRGBytes(sigma, 0, sigma.size());
-        for (int i = 0; i < sigma.size(); i++) {
-            sigma[i] = sigma[i] % 2; //sigma should be 0/1
-        }
-
-        //If this id is lower than the other id, run the sender role in the OT,
-        //else, run the receiver role.
-        if (id < parties[i]->getID()) {
-
-            //Play the sender role of the OT and then the receiver role.
-            OTExtensionRandomizedSInput sInput(circuit->getNrOfAndGates(), 8);
-            sOutput = parties[i]->getSender()->transfer(&sInput);
-
-            OTExtensionRandomizedRInput rInput(sigma, 8);
-            rOutput = parties[i]->getReceiver()->transfer(&rInput);
-
-        } else {
-            //Play the receiver role in the OT and then the sender role.
-            OTExtensionRandomizedRInput input(sigma, 8);
-            rOutput = parties[i]->getReceiver()->transfer(&input);
-
-            OTExtensionRandomizedSInput sInput(circuit->getNrOfAndGates(), 8);
-            sOutput = parties[i]->getSender()->transfer(&sInput);
-        }
-
-        /* The sender output of the random ot are x0, x1.
-         * Set b = x0 ^ x1
-         *     v = x0
-         * The receiver output of the random ot is u = Xa.
-         *
-         *//*
-        x0 = ((OTExtensionBristolRandomizedSOutput *) sOutput.get())->getR0Arr();
-        x1 = ((OTExtensionBristolRandomizedSOutput *) sOutput.get())->getR1Arr();
-        xSigma = ((OTExtensionBristolROutput *) rOutput.get())->getXSigma();
-
-        position = i * circuit->getNrOfAndGates();
-        for (int j = 0; j < circuit->getNrOfAndGates(); j++) {
-            //convert the output of the random ot to 0/1.
-            x0[j] %= 2;
-            x1[j] %= 2;
-            xSigma[j] %= 2;
-
-            v = x0[j];                          // v
-            bArray[position + j] = v ^ x1[j];   // b
-            aArray[position + j] = sigma[j];    // a
-            u = xSigma[j];                      // u
-            cArray[position + j] = (aArray[position + j] * bArray[position + j]) ^ v ^ u; // c = (ab) ^ u ^ v.
-
-            /*cout << "b = " << (int) bArray[position + j] << endl;
-            cout << "v = " << (int) v << endl;
-            cout << "a = " << (int) aArray[position + j] << endl;
-            cout << "u = " << (int) u << endl;
-            cout << "c = " << (int) cArray[position + j] << endl;*/
-     /*   }
-    }*/
 }
 
 void GMWParty::generateTriplesForParty(PrgFromOpenSSLAES & prg, int first, int last){
 
     vector<byte> sigma(circuit->getNrOfAndGates());
     vector<byte> x0, x1, xSigma;
-    //int position;
     byte v, u;
 
     shared_ptr<OTBatchSOutput> sOutput;
     shared_ptr<OTBatchROutput> rOutput;
 
     for (int i=first; i < last; i++) {
-        //cout<<"triple with party number "<<parties[i]->getID()<<":"<<endl;
+		//sample random value for each and gate
         mtx.lock();
         prg.getPRGBytes(sigma, 0, sigma.size());
         mtx.unlock();
@@ -202,7 +149,6 @@ void GMWParty::generateTriplesForParty(PrgFromOpenSSLAES & prg, int first, int l
 		xSigma = ((OTOnByteArrayROutput *)rOutput.get())->getXSigma();
 #endif
 
-        //position = i * circuit->getNrOfAndGates();
         for (int j = 0; j < circuit->getNrOfAndGates(); j++) {
             //convert the output of the random ot to 0/1.
             x0[j] %= 2;
@@ -225,11 +171,8 @@ void GMWParty::generateTriplesForParty(PrgFromOpenSSLAES & prg, int first, int l
 }
 void GMWParty::inputSharing(){
     vector<int> myInputWires = circuit->getPartyInputs(id); //indices of my input wires
-    //vector<int> otherInputWires; //indeices of the other party's input wires
     int inputSize = myInputWires.size();
     vector<byte> myInputBits(inputSize, 0); //input bits, will be adjusted to my input shares
-   // vector<byte> myShares(inputSize, 0); //the shares to send to the other parties
-    //vector<byte> otherShares(inputSize, 0); //the shares to receive from the other parties
     wiresValues.resize(circuit->getNrOfInput(), 0); //all shares of input wires
 
     PrgFromOpenSSLAES prg;
@@ -239,6 +182,7 @@ void GMWParty::inputSharing(){
     //read my input from the input file
     readInputs(myInputBits);
 
+	//Split the work to threads. Each thread gets some parties to work on.
     vector<thread> threads(numThreads);
     for (int t=0; t<numThreads; t++) {
         if ((t + 1) * numPartiesForEachThread <= parties.size()) {
@@ -251,33 +195,6 @@ void GMWParty::inputSharing(){
     for (int t=0; t<numThreads; t++){
         threads[t].join();
     }
-    /*for (int i=0; i < parties.size(); i++) {
-        //sample random values to be the shares of the other party.
-        prg.getPRGBytes(myShares, 0, inputSize);
-        //convert each value to 0/1 and adjust my shares with the sampled values.
-        for (int j=0; j<inputSize; j++){
-            myShares[j] %= 2;
-            myInputBits[j] ^= myShares[j];
-            //myInputBits[j] %= 2;
-        }
-
-
-        if (id < parties[i]->getID()) {
-            //send shares to my input bits
-            parties[i]->getChannel()->write(myShares.data(), myShares.size());
-
-            //receive shares from the other party and set them in the shares array
-            receiveShares(otherInputWires, otherShares, wiresValues, i);
-
-        } else{
-            //receive shares from the other party and set them in the shares array
-            receiveShares(otherInputWires, otherShares, wiresValues, i);
-
-            //send shares to my input bits
-            parties[i]->getChannel()->write(myShares.data(), myShares.size());
-
-        }
-    }*/
 
     //Set my input shares in the big shares array
     for (int j=0; j<myInputBits.size(); j++){
@@ -356,7 +273,7 @@ void GMWParty::readInputs(vector<byte> & inputs) const {
 vector<byte>& GMWParty::computeCircuit(){
     Gate gate;
     wiresValues.resize(circuit->getNrOfInput() + circuit->getNrOfGates(), 0);
-    vector<bool> isWireReady(circuit->getNrOfInput() + circuit->getNrOfGates(), false);
+    vector<bool> isWireReady(circuit->getNrOfInput() + circuit->getNrOfGates(), false); //indicates for each wire if it has value or not yet.
 
     for (int i=0; i<circuit->getNrOfInput(); i++){
         isWireReady[i] = true;
@@ -372,42 +289,31 @@ vector<byte>& GMWParty::computeCircuit(){
     }
 
     byte x, y, a, b;
-int index = 0;
+	int index = 0;
 
     byte* aArrayPosition = aArray.data();
     byte* bArrayPosition = bArray.data();
     auto gatesIterator = circuit->getGates().begin();
     for (int i=0; i<circuit->getNrOfGates(); i++){
-        //cout<<i<<endl;
         gate = *gatesIterator;
         gatesIterator++;
-        //gate = circuit->getGates()[i];
-
+        
         //In case the gate is not ready, meaning that at least one of its input wires wasn't computed yet,
-        //We should run the ot in order to compute all gates till here.
-        //After the ot, the input wire will be ready.
+        //We should run the recompute function in order to compute all gates till here.
+        //After that, the input wire will be ready.
         if (!isWireReady[gate.inputIndex1] || ((gate.inFan != 1) && !isWireReady[gate.inputIndex2])) {
-            //cout<<"input 1 = "<<gate.inputIndex1<<endl;
-           // cout<<"input 2 = "<<gate.inputIndex2<<endl;
-             //recomputeAndGates(recomputeGate, firstAndGateToRecompute, myD, myE, otherD, otherE, d, e, z, index, i,
-             //                      isWireReady, numAndGatesComputed, 0, parties.size());
+            
             recomputeAndGatesWithThreads(firstAndGateToRecompute, myD, myE, i, isWireReady, numAndGatesComputed, andGatesComputedCounter);
 
             if (layer < depths.size()-1 ) {
                 layer++;
-                //cout << "depth = " << depths[layer] << endl;
                 for (int j = 0; j < parties.size(); j++) {
-                    // myD[j].Reset();
-                    //myE[j].Reset();
                     myD[j].Create(depths[layer]);
                     myE[j].Create(depths[layer]);
-
                 }
             }
             index = 0;
             numAndGatesComputed += andGatesComputedCounter;
-            //cout<<"numAndGatesComputed = "<<numAndGatesComputed<<endl;
-            //recomputeAndGates(recomputeGate, firstAndGateToRecompute, myD, myE, otherD, otherE, d, e, z, index, i, isWireReady, numAndGatesComputed);
             firstAndGateToRecompute = -1;
         }
         //The gate is ready to be computed, so continue computing:
@@ -436,7 +342,6 @@ int index = 0;
             //not gate can be computed by p0 change its bit.
             // So, in order to compute or p0 first change its input bit, than compute and gate and then p0 again change the output bit.
             if (gate.gateType == 7 && id == 0) {
-                // cout<<"in or gate. flip input values before and"<<endl;
                 wiresValues[gate.inputIndex1] = 1 - wiresValues[gate.inputIndex1];
                 wiresValues[gate.inputIndex2] = 1 - wiresValues[gate.inputIndex2];
             }
@@ -453,20 +358,13 @@ int index = 0;
             //for all parties, prepare arrays to hold d, e, values.
             //These values will be sent to the other party
             for (int j=0; j<parties.size(); j++){
-//cout<<"party "<<parties[j]->getID()<<endl;
                 //Calculate d = x^a, e = y^b
                 x  = wiresValues[gate.inputIndex1];
                 a = *aArrayPosition;
-               // a = aArray[andGatesCounter*parties.size() + j];
-                //a = aArray[j * circuit->getNrOfAndGates() + andGatesCounter];
                 y = wiresValues[gate.inputIndex2];
                 b = *bArrayPosition;
-                //b = bArray[andGatesCounter*parties.size() + j];
-                //b = bArray[j * circuit->getNrOfAndGates() + andGatesCounter];
                 myD[j].SetBit(index, x ^ a);
-                //cout<<"myD[" << j<<"] added "<<(int)(x ^ a)<<endl;
                 myE[j].SetBit(index, y ^ b);
-                //cout<<"myE[" << j<<"] added "<<(int)(y ^ b)<<endl;
                 aArrayPosition++;
                 bArrayPosition++;
             }
@@ -475,7 +373,6 @@ int index = 0;
 
             //Flip again the input bit in order to remain true for other gates.
             if (gate.gateType == 7 && id == 0){
-                //cout<<"in or gate. flip input values avter and"<<endl;
                 wiresValues[gate.inputIndex1] = 1 - wiresValues[gate.inputIndex1];
                 wiresValues[gate.inputIndex2] = 1 - wiresValues[gate.inputIndex2];
             }
@@ -485,7 +382,6 @@ int index = 0;
 
     //Recompute the last and gates
     if (firstAndGateToRecompute != -1){
-        //recomputeAndGates(recomputeGate, firstAndGateToRecompute, myD, myE, otherD, otherE, d, e, z, index, circuit->getNrOfGates(), isWireReady, numAndGatesComputed, 0, parties.size());
         recomputeAndGatesWithThreads(firstAndGateToRecompute, myD, myE, circuit->getNrOfGates(), isWireReady, numAndGatesComputed, numAndGatesComputed);
     }
 
@@ -496,6 +392,7 @@ int index = 0;
 void GMWParty::recomputeAndGatesWithThreads(int & firstAndGateToRecompute, vector<CBitVector> & myD, vector<CBitVector> & myE, int i,
                                             vector<bool> & isWireReady, int & numAndGatesComputed, int & andGatesComputedCounter){
     vector<thread> threads(numThreads);
+	//Split the work to threads. Each thread gets some parties to work on.
     for (int t=0; t<numThreads; t++) {
         if ((t + 1) * numPartiesForEachThread <= parties.size()) {
             threads[t] = thread(&GMWParty::recomputeAndGates, this, ref(firstAndGateToRecompute), ref(myD),
@@ -522,49 +419,26 @@ void GMWParty::recomputeAndGates(int firstAndGateToRecompute, vector<CBitVector>
 
     int recomputeAndGatesCounter;
     for (int j=first; j < last; j++){
-        /*
-        cout<<"my D:"<<endl;
-        for (int k=0; k<myD[j].GetSize(); k++){
-            cout<<(int)myD[j].GetByte(k)<<" ";
-        }
-        cout<<endl;
-        cout<<"my E:"<<endl;
-        for (int k=0; k<myE[j].GetSize(); k++){
-            cout<<(int)myE[j].GetByte(k)<<" ";
-        }
-        cout<<endl;*/
+        
         otherD.CreateinBytes(myD[j].GetSize());
         otherE.CreateinBytes(myE[j].GetSize());
         //The party with the lower id will send its bytes first
         if (id < parties[j]->getID()) {
-            //cout<<"sender. should send to party "<<parties[j]->getID()<<endl;
             //send my d ,e
             parties[j]->getChannel()->write(myD[j].GetArr(), myD[j].GetSize());
             parties[j]->getChannel()->write(myE[j].GetArr(), myE[j].GetSize());
-            //cout<<"receiver. should receive from party "<<parties[j]->getID()<<endl;
             //receive other d, e
             parties[j]->getChannel()->read(otherD.GetArr(), otherD.GetSize());
             parties[j]->getChannel()->read(otherE.GetArr(), otherE.GetSize());
         } else {
-            //cout<<"receiver. should receive from party "<<parties[j]->getID()<<endl;
             //receive other d, e
             parties[j]->getChannel()->read(otherD.GetArr(), otherD.GetSize());
             parties[j]->getChannel()->read(otherE.GetArr(), otherE.GetSize());
-            //cout<<"sender. should send to party "<<parties[j]->getID()<<endl;
             //send my d ,e
             parties[j]->getChannel()->write(myD[j].GetArr(), myD[j].GetSize());
             parties[j]->getChannel()->write(myE[j].GetArr(), myE[j].GetSize());
         }
-        /*cout<<"other D:"<<endl;
-        for (int k=0; k<otherD.GetSize(); k++){
-            cout<<(int)otherD.GetByte(k)<<" ";
-        }
-        cout<<endl;
-        cout<<"other E:"<<endl;
-        for (int k=0; k<otherE.GetSize(); k++){
-            cout<<(int)otherE.GetByte(k)<<" ";
-        }
-        cout<<endl;*/
+        
         //Go on each and gate in the ot and compute its output share.
         recomputeAndGatesCounter = 0;
         for (int k=firstAndGateToRecompute; k < i; k++){
@@ -577,7 +451,6 @@ void GMWParty::recomputeAndGates(int firstAndGateToRecompute, vector<CBitVector>
                 //e = e1^e2
                 e = myE[j].GetBit(recomputeAndGatesCounter) ^ otherE.GetBit(recomputeAndGatesCounter);
                 //z = db ^ ea ^c ^ de
-                //index = j * circuit->getNrOfAndGates() + numAndGatesComputed + recomputeAndGatesCounter;
                 index = (numAndGatesComputed + recomputeAndGatesCounter) * parties.size() + j;
                 z = d * bArray[index];
                 z = z ^ (e * aArray[index]);
@@ -590,7 +463,7 @@ void GMWParty::recomputeAndGates(int firstAndGateToRecompute, vector<CBitVector>
                 isWireReady[recomputeGate.outputIndex] = true;
                 mtx.unlock();
                 recomputeAndGatesCounter++;
-                //cout<<"wiresValues["<<recomputeGate.outputIndex<<"] = "<< (int)wiresValues[recomputeGate.outputIndex]<<endl;
+       
             }
 
             if (recomputeGate.gateType == 7 && id == 0 && j==(last - 1)){
@@ -604,70 +477,6 @@ void GMWParty::recomputeAndGates(int firstAndGateToRecompute, vector<CBitVector>
     andGatesComputedCounter = recomputeAndGatesCounter;
     mtx.unlock();
 }
-/*
-void GMWParty::recomputeAndGates(Gate &recomputeGate, int firstAndGateToRecompute, vector<vector<byte>> &myD,
-                                 vector<vector<byte>> &myE, vector<byte> &otherD, vector<byte> &otherE, byte d,
-                                 byte e, byte z, int index, int i, vector<bool> & isWireReady, int & numAndGatesComputed, int first, int last) {
-    int recomputeAndGatesCounter;
-    for (int j=first; j < last; j++){
-            otherD.resize(myD[j].size());
-            otherE.resize(myE[j].size());
-            //The party with the lower id will send its bytes first
-            if (id < parties[j]->getID()) {
-                //send my d ,e
-                parties[j]->getChannel()->write(myD[j].data(), myD[j].size());
-                parties[j]->getChannel()->write(myE[j].data(), myE[j].size());
-
-                //receive other d, e
-                parties[j]->getChannel()->read(otherD.data(), otherD.size());
-                parties[j]->getChannel()->read(otherE.data(), otherE.size());
-            } else {
-                //receive other d, e
-                parties[j]->getChannel()->read(otherD.data(), otherD.size());
-                parties[j]->getChannel()->read(otherE.data(), otherE.size());
-
-                //send my d ,e
-                parties[j]->getChannel()->write(myD[j].data(), myD[j].size());
-                parties[j]->getChannel()->write(myE[j].data(), myE[j].size());
-            }
-
-            //Go on each and gate in the ot and compute its output share.
-            recomputeAndGatesCounter = 0;
-            for (int k=firstAndGateToRecompute; k < i; k++){
-                recomputeGate = circuit->getGates()[k];
-
-                if (recomputeGate.gateType == 2 || recomputeGate.gateType == 3) {
-
-                    //d = d1^d2
-                    d = myD[j][recomputeAndGatesCounter] ^ otherD[recomputeAndGatesCounter];
-                    //e = e1^e2
-                    e = myE[j][recomputeAndGatesCounter] ^ otherE[recomputeAndGatesCounter];
-                    //z = db ^ ea ^c ^ de
-                    index = j * circuit->getNrOfAndGates() + numAndGatesComputed + recomputeAndGatesCounter;
-                    z = d * bArray[index];
-                    z = z ^ (e * aArray[index]);
-                    z = z ^ cArray[index];
-                    if (id < parties[j]->getID()) {
-                        z = z ^ (d * e);
-                    }
-                    wiresValues[recomputeGate.outputIndex] ^= z;
-                    //wiresValues[recomputeGate.outputIndex] %= 2;
-                    isWireReady[recomputeGate.outputIndex] = true;
-                    recomputeAndGatesCounter++;
-
-                    //cout<<"wiresValues["<<recomputeGate.outputIndex<<"] = "<< (int)wiresValues[recomputeGate.outputIndex]<<endl;
-                }
-
-                if (recomputeGate.gateType == 3 && id == 0 && j==(last - 1)){
-                    cout<<"in or gate. flip output value after and"<<endl;
-                    wiresValues[recomputeGate.outputIndex] = 1 - wiresValues[recomputeGate.outputIndex];
-                }
-            }
-            myD[j].clear();
-            myE[j].clear();
-        }
-    numAndGatesComputed += recomputeAndGatesCounter;
-}*/
 
 vector<byte>& GMWParty::revealOutput() {
     vector<int> myOutputIndices = circuit->getPartyOutputs(id);
@@ -677,7 +486,7 @@ vector<byte>& GMWParty::revealOutput() {
         output[i] = wiresValues[myOutputIndices[i]];
     }
     vector<thread> threads(numThreads);
-    //send output shares to each party that needs it
+	//Split the work to threads. Each thread gets some parties to work on.
     for (int t=0; t<numThreads; t++) {
         if ((t + 1) * numPartiesForEachThread <= parties.size()) {
             threads[t] = thread(&GMWParty::revealOutputFromParty, this, ref(output), t * numPartiesForEachThread,
@@ -697,24 +506,28 @@ void GMWParty::revealOutputFromParty(vector<byte> & output, int first, int last)
     vector<int> otherOutputsIndices;
     vector<byte> otherOutputstoSend;
     vector<byte> otherOutputstoReceive(output.size());
-
+	//send output shares to each party that needs it
     for (int i=first; i < last; i++){
+		//get the output wires of the party
         otherOutputsIndices = circuit->getPartyOutputs(parties[i]->getID());
         otherOutputstoSend.resize(otherOutputsIndices.size());
-
+		//fill the array with the shares of the output wires.
         for (int j=0; j<otherOutputsIndices.size(); j++){
             otherOutputstoSend[j] = wiresValues[otherOutputsIndices[j]];
         }
         if (id < parties[i]->getID()) {
+			//send my shares to the other party
             parties[i]->getChannel()->write(otherOutputstoSend.data(), otherOutputstoSend.size());
-
+			//receive shares from the pther party
             parties[i]->getChannel()->read(otherOutputstoReceive.data(), otherOutputstoReceive.size());
         } else{
+			//receive shares from the pther party
             parties[i]->getChannel()->read(otherOutputstoReceive.data(), otherOutputstoReceive.size());
-
+			//send my shares to the other party
             parties[i]->getChannel()->write(otherOutputstoSend.data(), otherOutputstoSend.size());
 
         }
+		//xor the output shares
         mtx.lock();
         for (int j=0; j<output.size() ; j++){
             output[j] ^= otherOutputstoReceive[j];
