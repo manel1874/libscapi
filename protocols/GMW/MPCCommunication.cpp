@@ -43,10 +43,19 @@ cout<<"num parties = "<<numParties<<endl;
             channel->join(500, 5000);
             cout<<"channel established"<<endl;
 
+#ifndef _WIN32
             cout<<"receiver port = "<<ports[i]+ numParties -2 + id<<endl;
-            OTExtensionBristolReceiver* receiver = new OTExtensionBristolReceiver(ips[i], ports[i]+ numParties -2 + id, true, nullptr);
+			OTBatchReceiver* receiver = new OTExtensionBristolReceiver(ips[i], ports[i]+ numParties -2 + id, true, nullptr);
             cout<<"sender port = "<<ports[id] + numParties - 2 + i<<endl;
-            OTExtensionBristolSender* sender = new OTExtensionBristolSender(ports[id] + numParties - 1 + i, true, nullptr);
+			OTBatchSender* sender = new OTExtensionBristolSender(ports[id] + numParties - 1 + i, true, nullptr);
+#else
+			other = SocketPartyData(boost_ip::address::from_string(ips[i]), ports[i] + numParties - 2 + id);
+			OTBatchReceiver* receiver = new OTSemiHonestExtensionReceiver(other);
+			me = SocketPartyData(boost_ip::address::from_string(ips[id]), ports[id] + numParties - 1 + i);
+			OTBatchSender* sender = new OTSemiHonestExtensionSender(me);
+			cout << "receiver port = " << ports[i] + numParties - 1 + id << endl;
+			
+#endif
 
             parties[counter++] = make_shared<ProtocolPartyData>(i, channel, sender, receiver);
         } else if (i>id) {// This party will be the sender in the protocol
@@ -60,9 +69,17 @@ cout<<"num parties = "<<numParties<<endl;
             channel->join(500, 5000);
             cout<<"channel established"<<endl;
             cout<<"sender port = "<<ports[id] + numParties - 2 + i<<endl;
-            OTExtensionBristolSender* sender = new OTExtensionBristolSender(ports[id] + numParties - 2 + i, true, nullptr);
+#ifndef _WIN32
+			OTBatchSender* sender = new OTExtensionBristolSender(ports[id] + numParties - 2 + i, true, nullptr);
             cout<<"receiver port = "<<ports[i]+ numParties -1 + id<<endl;
-            OTExtensionBristolReceiver* receiver = new OTExtensionBristolReceiver(ips[i], ports[i]+ numParties -1 + id, true, nullptr);
+			OTBatchReceiver* receiver = new OTExtensionBristolReceiver(ips[i], ports[i]+ numParties -1 + id, true, nullptr);
+#else
+			me = SocketPartyData(boost_ip::address::from_string(ips[id]), ports[id] + numParties - 2 + i);
+			OTBatchSender* sender = new OTSemiHonestExtensionSender(me);
+			cout << "receiver port = " << ports[i] + numParties - 1 + id << endl;
+			other = SocketPartyData(boost_ip::address::from_string(ips[i]), ports[i] + numParties - 1 + id);
+			OTBatchReceiver* receiver = new OTSemiHonestExtensionReceiver(other);
+#endif
 
 
             parties[counter++] = make_shared<ProtocolPartyData>(i, channel, sender, receiver);

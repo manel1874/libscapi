@@ -192,9 +192,15 @@ void GMWParty::generateTriplesForParty(PrgFromOpenSSLAES & prg, int first, int l
          * The receiver output of the random ot is u = Xa.
          *
          */
+#ifndef _WIN32
         x0 = ((OTExtensionBristolRandomizedSOutput *) sOutput.get())->getR0Arr();
         x1 = ((OTExtensionBristolRandomizedSOutput *) sOutput.get())->getR1Arr();
         xSigma = ((OTExtensionBristolROutput *) rOutput.get())->getXSigma();
+#else
+		x0 = ((OTExtensionRandomizedSOutput *)sOutput.get())->getR0Arr();
+		x1 = ((OTExtensionRandomizedSOutput *)sOutput.get())->getR1Arr();
+		xSigma = ((OTOnByteArrayROutput *)rOutput.get())->getXSigma();
+#endif
 
         //position = i * circuit->getNrOfAndGates();
         for (int j = 0; j < circuit->getNrOfAndGates(); j++) {
