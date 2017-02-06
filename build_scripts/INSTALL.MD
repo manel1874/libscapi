@@ -12,7 +12,7 @@
 - tar --bzip2 -xf boost_1_60_0.tar.bz2
 -  ./bootstrap.sh
 -  ./b2 
-- sudo ldconfig ~/boost_1_60_0/stage/lib/
+- sudo ldconfig ~/boost_1_60_0/stage/lib/ ~/libscapi/install/lib/
 
 #### Installing OpenSSL
 - sudo apt-get install libssl-ocaml-dev libssl-dev
