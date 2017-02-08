@@ -31,6 +31,7 @@ private:
     mutex mtx;
     string inputFileName;
     vector<byte> output;
+	vector<byte> myInputBits;
 
 	/*
 	 * Generates Beaver's multiplication triples to use in the protocol.
@@ -97,6 +98,10 @@ private:
 public:
 
     GMWParty(int id, const shared_ptr<Circuit> & circuit, string partiesFileName, int numThreads, string inputFileName);
+
+	~GMWParty() {
+		io_service.stop();
+	}
 
     /*
      * Implement the function derived from the Protocol abstract class.

@@ -21,9 +21,14 @@ GMWParty::GMWParty(int id, const shared_ptr<Circuit> & circuit, string partiesFi
 }
 
 void GMWParty::run(){
+
 	//Run the offline phase of the protocol
     auto start = chrono::high_resolution_clock::now();
     generateTriples();
+	auto inputSize = circuit->getPartyInputs(id).size(); //indices of my input wires
+	myInputBits.resize(inputSize, 0); //input bits, will be adjusted to my input shares
+									  //read my input from the input file
+	readInputs(myInputBits);
     auto end = chrono::high_resolution_clock::now();
     int generateTotalTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     cout<<"Offline time: "<<generateTotalTime <<" milliseconds"<<endl;
@@ -48,6 +53,10 @@ void GMWParty::run(){
 
 void GMWParty::runOffline(){
     generateTriples();
+	auto inputSize = circuit->getPartyInputs(id).size(); //indices of my input wires
+	myInputBits.resize(inputSize, 0); //input bits, will be adjusted to my input shares
+									  //read my input from the input file
+	readInputs(myInputBits);
 }
 
 vector<byte>& GMWParty::runOnline(){
@@ -170,17 +179,12 @@ void GMWParty::generateTriplesForParty(PrgFromOpenSSLAES & prg, int first, int l
     }
 }
 void GMWParty::inputSharing(){
-    vector<int> myInputWires = circuit->getPartyInputs(id); //indices of my input wires
-    int inputSize = myInputWires.size();
-    vector<byte> myInputBits(inputSize, 0); //input bits, will be adjusted to my input shares
+	auto myInputWires = circuit->getPartyInputs(id); //indices of my input wires
     wiresValues.resize(circuit->getNrOfInput(), 0); //all shares of input wires
 
     PrgFromOpenSSLAES prg;
     auto key =prg.generateKey(128);
     prg.setKey(key);
-
-    //read my input from the input file
-    readInputs(myInputBits);
 
 	//Split the work to threads. Each thread gets some parties to work on.
     vector<thread> threads(numThreads);

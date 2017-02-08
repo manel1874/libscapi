@@ -77,13 +77,8 @@ struct YaoConfig {
 #else
 		string os = "Linux";
 #endif
-		cout << "in config constructor" << endl;
-		std::ifstream file(config_file.c_str());
-		if (file.fail()) cout << "null" << endl;
 		ConfigFile cf(config_file);
-		cout << "after create ConfigFile" << endl;
 		number_of_iterations = stoi(cf.Value("", "number_of_iterations"));
-		cout << "number_of_iterations = " << number_of_iterations << endl;
 		string str_print_output = cf.Value("", "print_output");
 		istringstream(str_print_output) >> std::boolalpha >> print_output;
 		string input_section = cf.Value("", "input_section") + "-" + os;
@@ -109,6 +104,7 @@ private:
 	shared_ptr<CommParty> channel;				//The channel between both parties.
 	tuple<block*, block*, vector<byte> > values;//this tuple includes the input and output keys (block*) and the translation table (vector)
 														 //to be used after filled by garbling the circuit
+	vector<byte> ungarbledInput;				//Inputs for the protocol
 	YaoConfig yaoConfig;
 	
 	//boost::thread t;
@@ -144,10 +140,14 @@ public:
 		io_service.stop();
 	}
 
+	void setInputs(string inputFileName);
+
 	/**
 	* Runs the protocol.
 	*/
 	void run() override;
+
+	YaoConfig& getConfig() { return yaoConfig; }
 };
 
 /**
@@ -164,7 +164,7 @@ private:
 	bool print_output;					// Indicates if to print the output at the end of the execution or not
 
 	vector<byte> circuitOutput;
-
+	vector<byte> ungarbledInput;
 	YaoConfig yaoConfig;
 	
 	/**
@@ -213,6 +213,8 @@ public:
 		io_service.stop();
 	}
 
+	void setInputs(string inputFileName);
+
 	/**
 	* Runs the protocol.
 	* @param ungarbledInput The input for the circuit, each p1's input wire gets 0 or 1.
@@ -220,5 +222,7 @@ public:
 	void run();
 
 	vector<byte> getOutput() {	return circuitOutput; }
+
+	YaoConfig& getConfig() { return yaoConfig; }
 
 };

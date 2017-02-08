@@ -46,7 +46,6 @@ vector<byte> readInputAsVector(string input_file) {
 /*********************************/
 
 PartyOne::PartyOne(YaoConfig & yao_config) {
-	cout << "in party one constructor" << endl;
 	//t = boost::thread(boost::bind(&boost::asio::io_service::run, &io_service));
 	this->yaoConfig = yao_config;
 
@@ -68,8 +67,11 @@ PartyOne::PartyOne(YaoConfig & yao_config) {
 
 	// connect to party two
 	channel->join(500, 5000);
-
 };
+
+void PartyOne::setInputs(string inputFileName) {
+	ungarbledInput = readInputAsVector(inputFileName);
+}
 
 void PartyOne::sendP1Inputs(byte* ungarbledInput) {
 	byte* allInputs = (byte*)std::get<0>(values);
@@ -91,7 +93,7 @@ void PartyOne::sendP1Inputs(byte* ungarbledInput) {
 }
 
 void PartyOne::run() {
-	auto ungarbledInput = readInputAsVector(yaoConfig.input_file_1);
+	
 	values = circuit->garble();
 
 	// send garbled tables and the translation table to p2.
@@ -160,9 +162,13 @@ PartyTwo::PartyTwo(YaoConfig & yao_config, bool print_output) {
 	channel->join(500, 5000);
 }
 
+void PartyTwo::setInputs(string inputFileName) {
+	ungarbledInput = readInputAsVector(inputFileName);
+}
+
 byte* PartyTwo::computeCircuit(OTBatchROutput * otOutput) {
 
-	// Get the output of the protocol.
+	// Get the input of the protocol.
 	vector<byte> p2Inputs = ((OTOnByteArrayROutput *)otOutput)->getXSigma();
 	int p2InputsSize = ((OTOnByteArrayROutput *)otOutput)->getLength();
 	// Get party two input wires' indices.
@@ -182,8 +188,6 @@ byte* PartyTwo::computeCircuit(OTBatchROutput * otOutput) {
 }
 
 void PartyTwo::run() {
-	auto ungarbledInput = readInputAsVector(yaoConfig.input_file_2);
-
 	// receive tables and inputs
 	receiveCircuit();
 	receiveP1Inputs();
