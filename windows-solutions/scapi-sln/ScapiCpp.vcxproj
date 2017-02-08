@@ -225,7 +225,6 @@
     <ClInclude Include="..\..\include\interactive_mid_protocols\CommitmentSchemeSimpleHash.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\OT.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\OTBatch.hpp" />
-    <ClInclude Include="..\..\include\interactive_mid_protocols\OTExtensionBristol.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\OTExtensionMalicious.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\OTFullSimulation.hpp" />
     <ClInclude Include="..\..\include\interactive_mid_protocols\OTFullSimulationROM.hpp" />
