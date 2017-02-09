@@ -5,7 +5,12 @@ LINKER_OPTIONS    =  ../../scapi.a ../../install/lib/libOTExtensionBristol.a ../
 CPP_OPTIONS       = -std=c++11 $(INC) -O3 -Wall -Wno-unused-function
 OBJS              = YaoParties.o
 
-all: Yao.out
+SLib           = SemiHonestYao.a
+
+all: Yao.out $(SLib)
+
+$(SLib): $(OBJS)
+	ar ru $@ $^
 
 Yao.out: $(OBJS)
 	$(CXX) App1.cpp -o $@ $(OBJS) $(LINKER_OPTIONS)
