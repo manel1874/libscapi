@@ -1,0 +1,27 @@
+
+############################################################
+# Dockerfile to build LibScapi Container Image
+# Builds only libscapi itself
+# Based on scapicryptobiu/libscapi_libs
+# Tagged: scapicryptobiu/libscapi
+############################################################
+
+# set the base image to libscapi base
+FROM libscapi
+
+#build GMW
+WORKDIR /root/libscapi/protocols/GMW
+RUN CMakeLists.txt 
+RUN make
+
+#build YaoSingleExecution
+WORKDIR /root/libscapi/protocols/YaoSingleExecution
+RUN CMakeLists.txt 
+RUN make
+
+#build SemiHonestYao/
+WORKDIR /root/libscapi/protocols/SemiHonestYao
+RUN make
+
+# done
+RUN echo DONE!
