@@ -33,7 +33,7 @@ LIBRARIES_DIR  = -L$(HOME)/boost_1_60_0/stage/lib -Linstall/lib
 LD_FLAGS = 
 
 all:: libs libscapi
-libs:: compile-ntl compile-blake compile-miracl compile-otextension compile-otextension-malicious compile-otextension-bristol
+libs:: compile-emp compile-ntl compile-blake compile-miracl compile-otextension compile-otextension-malicious compile-otextension-bristol
 libscapi:: directories $(SLib)
 directories: $(OUT_DIR)
 
@@ -62,6 +62,13 @@ obj/mid_layer/%.o: src/mid_layer/%.cpp
 
 tests:: all
 	$(Program)
+
+compile-emp:
+	mkdir -p $(builddir)/EMP
+	@cp -r lib/EMP/. $(builddir)/EMP
+	@chmod 777 $(builddir)/EMP/emp-readme/scripts/setup_new_machine.sh
+	@cd $(builddir)/EMP/ && bash emp-readme/scripts/setup_new_machine.sh
+	@touch compile-emp
 
 compile-blake:
 	@echo "Compiling the BLAKE2 library"
