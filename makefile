@@ -63,7 +63,7 @@ obj/mid_layer/%.o: src/mid_layer/%.cpp
 tests:: all
 	$(Program)
 
-compile-emp:prepare-emp compile-emp-tool compile-emp-ot compile-emp-m2pc compile-emp-sh2pc
+compile-emp:prepare-emp compile-emp-tool compile-emp-ot compile-emp-m2pc 
 
 prepare-emp:
 	@mkdir -p $(builddir)/EMP
@@ -73,21 +73,19 @@ compile-emp-tool:
 	@cd $(builddir)/EMP/emp-tool
 	@cmake CMakeLists.txt 
 	@make -f Makefile
+	@touch compile-emp-tool
 
 compile-emp-ot:
 	@cd $(builddir)/EMP/emp-ot
 	@cmake CMakeLists.txt  
 	@make -f Makefile
+	@touch compile-emp-ot
 
 compile-emp-m2pc:
 	@cd $(builddir)/EMP/emp-m2pc
 	@cmake  CMakeLists.txt
 	@make -f Makefile
-
-compile-emp-sh2pc:
-	@cd $(builddir)/EMP/emp-sh2pc
-	@cmake CMakeLists.txt 
-	@make -f Makefile
+	@touch compile-emp-m2pc
 
 compile-blake:
 	@echo "Compiling the BLAKE2 library"
@@ -187,6 +185,11 @@ clean-blake:
 	@echo "Cleaning blake library"
 	@rm -rf $(builddir)/BLAKE2
 	@rm -f compile-blake
+
+clean-blake:
+	@echo "Cleaning EMP library"
+	@rm -rf $(builddir)/EMP
+	@rm -f compile-emp-tool compile-emp-ot compile-emp-m2pc
 
 clean-cpp:
 	@echo "cleaning .obj files"
