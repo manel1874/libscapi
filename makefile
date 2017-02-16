@@ -71,20 +71,22 @@ prepare-emp:
 
 compile-emp-tool:
 	@cd $(builddir)/EMP/emp-tool
-	@cmake CMakeLists.txt 
-	@make -f Makefile
+	@cmake $(builddir)/EMP/emp-tool/CMakeLists.txt 
+	@cd $(builddir)/EMP/emp-tool/ && $(MAKE)
+	@cd $(builddir)/EMP/emp-tool/ && $(MAKE) install
 	@touch compile-emp-tool
 
 compile-emp-ot:
 	@cd $(builddir)/EMP/emp-ot
-	@cmake CMakeLists.txt  
-	@make -f Makefile
+	@cmake $(builddir)/EMP/emp-ot/CMakeLists.txt 
+	@cd $(builddir)/EMP/emp-ot/ && $(MAKE)
+	@cd $(builddir)/EMP/emp-ot/ && $(MAKE) install
 	@touch compile-emp-ot
 
 compile-emp-m2pc:
 	@cd $(builddir)/EMP/emp-m2pc
-	@cmake  CMakeLists.txt
-	@make -f Makefile
+	@cmake $(builddir)/EMP/emp-m2pc/CMakeLists.txt 
+	@cd $(builddir)/EMP/emp-m2pc/ && $(MAKE)
 	@touch compile-emp-m2pc
 
 compile-blake:
