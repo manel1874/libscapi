@@ -25,6 +25,9 @@ compile-otextension-malicious
 compile-ntl
 compile-otextension-malicious
 compile-blake
+compile-emp-m2pc
+compile-emp-ot
+compile-emp-tool
 test/config_for_test.txt
 .cproject
 .project
