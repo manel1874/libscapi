@@ -38,9 +38,6 @@ This implementation is more efficient since we use Beaver's multiplication tripl
 INSTALLATION AND EXECUTION
 --------------------------
 
-In order to run this application, one should compile the malicious Yao lib first.
-See README at MaliciousYao/lib.
-
 In order to compile and run The GMW application:
 1. Go in the GMW directory.
 2. Run the make command.
@@ -51,7 +48,7 @@ In order to compile and run The GMW application:
  ./GMW 0 NigelAes3Parties.txt Parties AesInputs0.txt 2
  This executes party number 0 of GMW protocol with 3 parties. The circuit is aes and two threads will be created (one for each other party)
 
-There is a script that runs all the paraties at once called run_protocol.sh. It should get four parameters:
+There is a script that runs all the parties at once called run_protocol.sh. It should get four parameters:
 1. The first party to run
 2. The last party to run
 3. The name of the circuit file
