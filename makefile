@@ -186,7 +186,7 @@ clean-blake:
 	@rm -rf $(builddir)/BLAKE2
 	@rm -f compile-blake
 
-clean-blake:
+clean-emp:
 	@echo "Cleaning EMP library"
 	@rm -rf $(builddir)/EMP
 	@rm -f compile-emp-tool compile-emp-ot compile-emp-m2pc
