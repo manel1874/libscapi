@@ -11,7 +11,7 @@ find_package(Boost COMPONENTS system thread REQUIRED)
 
 INCLUDE_DIRECTORIES($ENV{HOME} ${BOOST_INCLUDEDIR}
         $ENV{HOME}/libscapi/lib/OTExtensionBristol $ENV{HOME}/libscapi/lib/
-        $ENV{HOME}/emp
+        $ENV{HOME}/libscapi/build/EMP
         /usr/local/include/emp-tool/
         /usr/local/include/emp-ot/)
 

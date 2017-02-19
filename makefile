@@ -33,7 +33,7 @@ LIBRARIES_DIR  = -L$(HOME)/boost_1_60_0/stage/lib -Linstall/lib
 LD_FLAGS = 
 
 all:: libs libscapi
-libs:: compile-ntl compile-blake compile-miracl compile-otextension compile-otextension-malicious compile-otextension-bristol
+libs:: compile-emp compile-ntl compile-blake compile-miracl compile-otextension compile-otextension-malicious compile-otextension-bristol
 libscapi:: directories $(SLib)
 directories: $(OUT_DIR)
 
@@ -62,6 +62,35 @@ obj/mid_layer/%.o: src/mid_layer/%.cpp
 
 tests:: all
 	$(Program)
+
+compile-emp:prepare-emp compile-emp-tool compile-emp-ot compile-emp-m2pc 
+
+prepare-emp:
+	@mkdir -p $(builddir)/EMP
+	@cp -r lib/EMP/. $(builddir)/EMP
+	@cmake -DALIGN=16 -DARCH=X64 -DARITH=curve2251-sse -DCHECK=off -DFB_POLYN=251 -DFB_METHD="INTEG;INTEG;QUICK;QUICK;QUICK;QUICK;LOWER;SLIDE;QUICK" -DFB_PRECO=on -DFB_SQRTF=off -DEB_METHD="PROJC;LODAH;COMBD;INTER" -DEC_METHD="CHAR2" -DCOMP="-O3 -funroll-loops -fomit-frame-pointer -march=native -msse4.2 -mpclmul" -DTIMER=CYCLE -DWITH="MD;DV;BN;FB;EB;EC" -DWORD=64 $(builddir)/EMP/relic/CMakeLists.txt
+	@cd $(builddir)/EMP/relic && $(MAKE)
+	@cd $(builddir)/EMP/relic && $(MAKE) install
+
+compile-emp-tool:prepare-emp
+	@cd $(builddir)/EMP/emp-tool
+	@cmake $(builddir)/EMP/emp-tool/CMakeLists.txt 
+	@cd $(builddir)/EMP/emp-tool/ && $(MAKE)
+	@cd $(builddir)/EMP/emp-tool/ && $(MAKE) install
+	@touch compile-emp-tool
+
+compile-emp-ot:prepare-emp
+	@cd $(builddir)/EMP/emp-ot
+	@cmake $(builddir)/EMP/emp-ot/CMakeLists.txt 
+	@cd $(builddir)/EMP/emp-ot/ && $(MAKE)
+	@cd $(builddir)/EMP/emp-ot/ && $(MAKE) install
+	@touch compile-emp-ot
+
+compile-emp-m2pc:prepare-emp
+	@cd $(builddir)/EMP/emp-m2pc
+	@cmake $(builddir)/EMP/emp-m2pc/CMakeLists.txt 
+	@cd $(builddir)/EMP/emp-m2pc/ && $(MAKE)
+	@touch compile-emp-m2pc
 
 compile-blake:
 	@echo "Compiling the BLAKE2 library"
@@ -161,6 +190,11 @@ clean-blake:
 	@echo "Cleaning blake library"
 	@rm -rf $(builddir)/BLAKE2
 	@rm -f compile-blake
+
+clean-emp:
+	@echo "Cleaning EMP library"
+	@rm -rf $(builddir)/EMP
+	@rm -f compile-emp-tool compile-emp-ot compile-emp-m2pc
 
 clean-cpp:
 	@echo "cleaning .obj files"
