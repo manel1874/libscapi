@@ -5,23 +5,23 @@
 #include "YaoSEParty.h"
 
 YaoSEParty::YaoSEParty(int id, string circuitFile, string ip, int port, string inputFile)
-        : id(id), inputFile(inputFile){
+        : id(id){
     io = new NetIO(id==1 ? nullptr:ip.c_str(), port);
     cf = new CircuitFile(circuitFile.c_str());
 
     if(id == 1) {
         input = new bool[cf->n1];
-        readInputs(input, cf->n1);
+        readInputs(inputFile, input, cf->n1);
     } else {
         input = new bool[cf->n2];
-        readInputs(input, cf->n2);
+        readInputs(inputFile, input, cf->n2);
     }
 
     out = new bool[cf->n3];
     mal = new Malicious2PC <>(io, id, cf->n1, cf->n2, cf->n3);
 }
 
-void YaoSEParty::readInputs(bool * inputs, int size){
+void YaoSEParty::readInputs(string inputFile, bool * inputs, int size){
     //Read the input from the given input file
     ifstream myfile;
     int input;
@@ -39,8 +39,6 @@ void YaoSEParty::readInputs(bool * inputs, int size){
  */
 void YaoSEParty::run() {
     void * f = (void *)&compute;
-    io->sync();
-
 
     if(id == 1) {
         mal->alice_run(f, input);
@@ -49,36 +47,35 @@ void YaoSEParty::run() {
     }
 }
 
-int YaoSEParty::runOffline(){
+void YaoSEParty::runOffline(){
     void * f = (void *)&compute;
-    io->sync();
 
-    auto start = chrono::high_resolution_clock::now();
     if (id == 1) {
         mal->alice_offline(f);
 
     } else {
         mal->bob_offline(f);
     }
-    auto end = chrono::high_resolution_clock::now();
-    return std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 }
 
-int YaoSEParty::runOnline(){
-    if (id == 2)
-        mal->bob_preload();
-
-    void * f = (void *)&compute;
+void YaoSEParty::sync(){
     io->sync();
+}
 
-    auto start = chrono::high_resolution_clock::now();
+void YaoSEParty::preOnline() {
+    if (id == 2) {
+        mal->bob_preload();
+    }
+}
+
+void YaoSEParty::runOnline(){
+    void * f = (void *)&compute;
+
     if (id == 1) {
         mal->alice_online(f, input);
     } else {
         mal->bob_online(f, input, out);
     }
-    auto end = chrono::high_resolution_clock::now();
-    return std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 }
 
 int binaryTodecimal(int n){
@@ -174,7 +171,7 @@ void convertCircuit(string scapiCircuit, string newCircuit){
 
             if (inFan == 1)//NOT gate
             {
-                otherFile << "NOT" << endl;
+                otherFile << "INV" << endl;
             } else if (type == 6) {
                 otherFile << "XOR" << endl;
             } else if (typeBin == 1) {
@@ -198,13 +195,17 @@ int main(int argc, char* argv[]) {
     YaoSEParty party(id, newCircuit, argv[3], atoi(argv[4]), argv[5]);
 
     int runs = 20;
-    auto start = chrono::high_resolution_clock::now();
+    int time = 0;
+    chrono::high_resolution_clock::time_point start, end;
+
     for (int i=0; i<runs; i++){
+        party.sync();
+        start = chrono::high_resolution_clock::now();
         party.run();
+        end = chrono::high_resolution_clock::now();
+        time += std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     }
-    auto end = chrono::high_resolution_clock::now();
-    auto generateTotalTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    cout<<"running "<<runs<<" times took in average "<<generateTotalTime/runs << " millis"<<endl;
+    cout<<"running "<<runs<<" times took in average "<<time/runs << " millis"<<endl;
     if (id == 2) {
         auto out = party.getOutput();
         cout << "result: " << endl;
@@ -215,16 +216,31 @@ int main(int argc, char* argv[]) {
     }
 
 
-    int offlineTime = 0, onlineTime = 0;
+    int offlineTime = 0, onlineTime = 0, loadTime = 0;
 
     for (int i=0; i<runs; i++){
-        offlineTime += party.runOffline();
+        party.sync();
 
-        onlineTime += party.runOnline();
+        start = chrono::high_resolution_clock::now();
+        party.runOffline();
+        end = chrono::high_resolution_clock::now();
+        offlineTime += std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+
+        start = chrono::high_resolution_clock::now();
+        party.preOnline();
+        end = chrono::high_resolution_clock::now();
+        loadTime += std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        party.sync();
+
+        start = chrono::high_resolution_clock::now();
+        party.runOnline();
+        end = chrono::high_resolution_clock::now();
+        onlineTime += std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
     }
-    cout<<"running offline "<<runs<<" times took "<<offlineTime/runs << " millis"<<endl;
-    cout<<"running online "<<runs<<" times took "<<onlineTime/runs << " millis"<<endl;
+    cout<<"running offline "<<runs<<" times took in average "<<offlineTime/runs << " millis"<<endl;
+    cout<<" load "<<runs<<" times took in average "<<loadTime/runs << " millis"<<endl;
+    cout<<"running online "<<runs<<" times took in average "<<onlineTime/runs << " millis"<<endl;
     if (id == 2) {
         auto out = party.getOutput();
         cout << "result: " << endl;
