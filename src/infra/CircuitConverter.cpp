@@ -224,10 +224,8 @@
                     gates[j].output = temp;
                 }
                 if (gates[j].input0 == temp) {
-                    cout << "input 1 in gate no." << j << endl;
 
                     gates[j].input0 = i;
-                    cout << " after change. gates[" << j << "].input1 = " << gates[j].input1 << endl;
                 } else if (gates[j].input0 == i){
                     gates[j].input0 = temp;
                 }
@@ -238,20 +236,6 @@
                 }
             }
         }
-        cout<<"after output"<<endl;
-        for (int k=0; k<numberOfGates; k++){
-            cout << gates[k].in << " ";
-            cout << gates[k].out << " ";
-            cout << gates[k].input0 << " ";
-
-            if (gates[k].in != 1){
-                cout << gates[k].input1 << " ";
-            }
-
-            cout << gates[k].output << " ";
-            cout << gates[k].type << endl;
-        }
-        cout<<"*************************"<<endl;
 
         //Create an array that hold all input wires
         int numberOfInputs = numOfinputsForParty0 + numOfinputsForParty1;
@@ -269,24 +253,18 @@
         for (int i=0; i<numberOfInputs; i++){
             //input wire i should be replaced with i
             temp = allInputWires[i];
-            cout<< "temp = " <<temp<<endl;
             //If they are the same, nothing should be done
             if (temp == i)
                 continue;
             //they are not the same, replace every place where there is a "temp" with "i" and vice versa.
             for (int j=0; j<numberOfGates; j++){
                 if (gates[j].input0 == temp){
-                    cout<<"input 0 in gate no." <<j<<endl;
                     gates[j].input0 = i;
-                    cout<<" after change. gates["<<j<<"].input0 = "<<gates[j].input0<<endl;
                 } else if (gates[j].input0 == i){
                     gates[j].input0 = temp;
                 }
                 if (gates[j].input1 == temp){
-                    cout<<"input 1 in gate no." <<j<<endl;
-
                     gates[j].input1 = i;
-                    cout<<" after change. gates["<<j<<"].input1 = "<<gates[j].input1<<endl;
                 } else if (gates[j].input1 == i){
                     gates[j].input1 = temp;
                 }
@@ -300,21 +278,7 @@
                     allInputWires[j] = temp;
                 }
             }
-            for (int k=0; k<numberOfGates; k++){
-                cout << gates[k].in << " ";
-                cout << gates[k].out << " ";
-                cout << gates[k].input0 << " ";
-
-                if (gates[k].in != 1){
-                    cout << gates[k].input1 << " ";
-                }
-
-                cout << gates[k].output << " ";
-                cout << gates[k].type << endl;
-            }
         }
-
-
 
         for (int i=0; i<numberOfGates; i++){
             bristolFile << gates[i].in << " ";
