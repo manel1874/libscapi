@@ -76,21 +76,20 @@ compile-emp-tool:prepare-emp
 	@cmake $(builddir)/EMP/emp-tool/CMakeLists.txt 
 	@cd $(builddir)/EMP/emp-tool/ && $(MAKE)
 	@cd $(builddir)/EMP/emp-tool/ && $(MAKE) install
-	# @touch compile-emp-tool
+	@touch compile-emp-tool
 
 compile-emp-ot:prepare-emp
 	@cd $(builddir)/EMP/emp-ot
 	@cmake $(builddir)/EMP/emp-ot/CMakeLists.txt 
 	@cd $(builddir)/EMP/emp-ot/ && $(MAKE)
 	@cd $(builddir)/EMP/emp-ot/ && $(MAKE) install
-	# @touch compile-emp-ot
+	@touch compile-emp-ot
 
-compile-emp-m2pc:prepare-emp
+compile-emp-m2pc:compile-emp-ot compile-emp-tool
 	@cd $(builddir)/EMP/emp-m2pc
 	@cmake $(builddir)/EMP/emp-m2pc/CMakeLists.txt 
 	@cd $(builddir)/EMP/emp-m2pc/ && $(MAKE)
 	@touch compile-emp-m2pc
-	@touch compile-emp
 
 compile-blake:
 	@echo "Compiling the BLAKE2 library"
@@ -194,7 +193,7 @@ clean-blake:
 clean-emp:
 	@echo "Cleaning EMP library"
 	@rm -rf $(builddir)/EMP
-	@rm -f compile-emp compile-emp-tool compile-emp-ot compile-emp-m2pc
+	@rm -f prepare-emp compile-emp-tool compile-emp-ot compile-emp-m2pc
 
 clean-cpp:
 	@echo "cleaning .obj files"
