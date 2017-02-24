@@ -6,7 +6,7 @@ The latest release can be found here. Alternately you can simply clone the repos
 
 Libscapi is developed by [Bar Ilan University Cryptography Research Group](http://crypto.biu.ac.il/). The goal of libscapi is to promote research by Academy and Industry practitioners in this field by providing:
 
-- A consistent API over Primitives, Mid-Layer Protocols, Interactive Mid-Layer Protocols and Communictaion Channels, simplifying the development and evaluation fo new protocols. We focus on keeping libscapi easy to build and use.
+- A consistent API over Primitives, Mid-Layer Protocols, Interactive Mid-Layer Protocols and Communication Channels, simplifying the development and evaluation fo new protocols. We focus on keeping libscapi easy to build and use.
 - Integrating best performance open-source implementations by other Academy Research Institutes.  
 - High Performance implementation on standard Linux & Intelx64 Architecture. We use modern techniques like Intel Intrinsics Instructions, Pipelining and TCP optimizations. However, we avoid using techniques that are too advanced or not available on common platforms (such as Intel AVX-512 and DPDK, GPGPU exc).   
 - Provide a common platfrom for benchmarking different alogirthms and implementations
