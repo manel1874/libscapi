@@ -1,7 +1,7 @@
 //
 // Created by moriya on 15/2/17.
 //
-
+#ifndef _WIN32
 #include "YaoSEParty.h"
 
 YaoSEParty::YaoSEParty(int id, string circuitFile, string ip, int port, string inputFile)
@@ -235,4 +235,4 @@ int main(int argc, char* argv[]) {
     }
 
 }
-
+#endif
