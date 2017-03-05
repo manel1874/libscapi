@@ -8,8 +8,10 @@
 #include <libscapi/include/CryptoInfra/Protocol.hpp>
 #include <libscapi/include/CryptoInfra/SecurityLevel.hpp>
 #include <libscapi/include/infra/CircuitConverter.hpp>
-#include <emp-m2pc/malicious/malicious.h>
+#include <libscapi/lib/EMP/emp-m2pc/malicious/malicious.h>
 #include <fstream>
+
+typedef unsigned char byte;
 
 CircuitFile *cf;
 void compute(Bit * res, Bit * in, Bit * in2) {
@@ -87,8 +89,12 @@ public:
     /**
      * @return the output of the protocol.
      */
-    bool* getOutput(){
-        return out;
+    vector<byte> getOutput(){
+        vector<byte> output(cf->n3);
+        for (int i=0; i<cf->n3; i++){
+            output[i] = out[i];
+        }
+        return output;
     }
 
 };
