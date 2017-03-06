@@ -171,7 +171,7 @@ public:
 	virtual pair<shared_ptr<PublicKey>, shared_ptr<PrivateKey>> generateKey() = 0;
 
 	/**
-	* Reconstructs a suitable PublicKey from data that was probably obtained via a Channel or any other means of sending data (including serialization).
+	* Reconstructs a suitable PublicKey from data that was probably obtained via a Channel or any other means of sending data.
 	* We emphasize that this function does NOT in any way generate a key, it just receives data and recreates a PublicKey object.
 	* @param data a invalid_argument The actual type of KeySendableData has to be suitable to the actual encryption scheme used, otherwise it throws an invalid_argument
 	* @return a new PublicKey with the data obtained as argument
@@ -179,7 +179,7 @@ public:
 	virtual shared_ptr<PublicKey> reconstructPublicKey(KeySendableData* data) = 0;
 
 	/**
-	* Reconstructs a suitable PrivateKey from data that was probably obtained via a Channel or any other means of sending data (including serialization).<p>
+	* Reconstructs a suitable PrivateKey from data that was probably obtained via a Channel or any other means of sending data.
 	* We emphasize that this function does NOT in any way generate a key, it just receives data and recreates a PrivateKey object.
 	* @param data a invalid_argument The actual type of KeySendableData has to be suitable to the actual encryption scheme used, otherwise it throws an invalid_argument
 	* @return a new PrivateKey with the data obtained as argument
