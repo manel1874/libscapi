@@ -31,7 +31,7 @@
 /*************************************************/
 /*TrapdoorPermutationAbs                         */
 /*************************************************/
-byte TrapdoorPermutationAbs::hardCorePredicate(TPElement * tpEl) {
+byte TrapdoorPermutation::hardCorePredicate(TPElement * tpEl) {
 	if (!isKeySet())
 		throw IllegalStateException("keys aren't set");
 	/*
@@ -49,7 +49,7 @@ byte TrapdoorPermutationAbs::hardCorePredicate(TPElement * tpEl) {
 	return res;
 }
 
-vector<byte> TrapdoorPermutationAbs::hardCoreFunction(TPElement * tpEl) {
+vector<byte> TrapdoorPermutation::hardCoreFunction(TPElement * tpEl) {
 	if (!isKeySet())
 		throw IllegalStateException("keys aren't set");
 	/*

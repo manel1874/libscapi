@@ -40,24 +40,9 @@
 enum  TPElValidity { VALID, NOT_VALID, DONT_KNOW};
 
 /**
-* This class is an auxiliary class that allows to send the actual data of a TPElement through a channel.
-* This is NOT a TPElement, just the data to possibly create one if you hold the right TrapdoorPermutation. 
-* The creation of the TPElement will be performed by the TrapdoorPermutation, and will succeed only if 
-* the value is valid. The check will be performed by the permutation.
-* The getSendableData() function implemented by the different TPElements extracts the data from the element and puts it in a newly created object TPElementSendableData.
-* The corresponding TrapdoorPermuation can re-generate the serialized TPElement by calling the function generateElement(TPElementSendableData): TPElement.
-*/
-class TPElementSendableData {
-private:
-	// The actual value of the element. (This is NOT a TPElement).
-	biginteger x;
-public:
-	TPElementSendableData(biginteger & x) { this->x = x; };
-	biginteger getX() { return x; };
-};
-
-/**
 * Abstract class for trapdoor permutation elements. Every concrete element class should derive this class.
+ * In order to send this object over a channel, use the getElement() function to get the biginteger value of the element and send it directly.
+ * In the other side, use the TrapdoorPermutation::generateTPElement(biginteger x) to create the TPElement object.
 */
 class TPElement {
 public:
@@ -65,11 +50,6 @@ public:
 	* Returns the trapdoor element value as biginteger.
 	*/
 	virtual biginteger getElement() = 0;
-
-	/**
-	* This function extracts the actual value of the TPElement and wraps it in a TPElementSendableData that as it name indicates can be send using the serialization mechanism.
-	*/
-	virtual shared_ptr<TPElementSendableData> generateSendableData() = 0;
 };
 
 class RSAModulus {
@@ -302,7 +282,7 @@ public:
 	* @return the element
 	*/
 	biginteger getElement() { return element; };
-	shared_ptr<TPElementSendableData> generateSendableData() override { return make_shared<TPElementSendableData>(element); };
+
 };
 
 /**
@@ -312,11 +292,21 @@ public:
 * The public key is essentially the function description and the private key is the trapdoor.
 */
 class TrapdoorPermutation {
+protected:
+    shared_ptr<PrivateKey> privKey = nullptr;        //private key
+    shared_ptr<PublicKey> pubKey = nullptr;          //public key
+    biginteger modulus = NULL;		//the modulus of the permutation. It must be such that modulus = p*q and p = q = 3 mod 4
+    bool _isKeySet = false;		    // indicates if this object is initialized or not. Set to false until init is called
+
 public:
 	/**
 	* Sets this trapdoor permutation with public key and private key.
 	*/
-	virtual void setKey(const shared_ptr<PublicKey> & publicKey, const shared_ptr<PrivateKey> & privateKey = nullptr)=0;
+	virtual void setKey(const shared_ptr<PublicKey> & publicKey, const shared_ptr<PrivateKey> & privateKey = nullptr){
+        privKey = privateKey;
+        pubKey = publicKey;
+        _isKeySet = true;
+    }
 	
 	/**
 	* Checks if this trapdoor permutation object has been previously initialized.
@@ -324,12 +314,16 @@ public:
 	*
 	* @return true if the object was initialized; false otherwise.
 	*/
-	virtual bool isKeySet()=0;
+	virtual bool isKeySet() { return _isKeySet; }
 	
 	/**
 	* @return the public key
 	*/
-	virtual shared_ptr<PublicKey> getPubKey()=0;
+	virtual shared_ptr<PublicKey> getPubKey(){
+        if (!isKeySet())
+            throw IllegalStateException("public key isn't set");
+        return pubKey;
+    }
 	
 	/**
 	* @return the algorithm name. for example - RSA, Rabin.
@@ -370,7 +364,7 @@ public:
 	* We chose to return a byte since many times we need to concatenate the result of various predicates
 	* and it will be easier with a byte than with a boolean.
 	*/
-	virtual byte hardCorePredicate(TPElement* tpEl) = 0;
+	virtual byte hardCorePredicate(TPElement* tpEl);
 	
 	/**
 	* Computes the hard core function of the given tpElement.
@@ -381,7 +375,7 @@ public:
 	* @param tpEl the input to the hard core function
 	* @return byte* the result of the hard core function. The byte array is allocated inside the method
 	*/
-	virtual vector<byte> hardCoreFunction(TPElement* tpEl)=0;
+	virtual vector<byte> hardCoreFunction(TPElement* tpEl);
 	
 	/**
 	* Checks if the given element is valid for this trapdoor permutation
@@ -414,44 +408,8 @@ public:
 	* @return TPElement - Set the x value and return the created random element
 	*/
 	virtual shared_ptr<TPElement> generateUncheckedTPElement(const biginteger & x) = 0;
-	
-	/**
-	* Creates a TPElement from data that was probably obtained via the serialization mechanism. See explanation in {@link TPElementSendableData}
-	* @param data necessary to reconstruct a given TPElement
-	* @return the reconstructed TPElement
-	*/
-	virtual shared_ptr<TPElement> reconstructTPElement(TPElementSendableData & data)=0;
+
 	~TrapdoorPermutation() {};
-};
-
-/**
-* This class implements some common functionality of trapdoor permutation.
-*/
-class TrapdoorPermutationAbs : public virtual TrapdoorPermutation {
-protected:
-	shared_ptr<PrivateKey> privKey = nullptr;        //private key
-	shared_ptr<PublicKey> pubKey = nullptr;          //public key
-	biginteger modulus = NULL;		//the modulus of the permutation. It must be such that modulus = p*q and p = q = 3 mod 4
-	bool _isKeySet = false;		    // indicates if this object is initialized or not. Set to false until init is called
-
-public:
-	void setKey(const shared_ptr<PublicKey> & publicKey, const shared_ptr<PrivateKey> & privateKey) override {
-		privKey = privateKey;
-		pubKey = publicKey;
-		_isKeySet = true;
-	}
-	bool isKeySet() override{ return _isKeySet; };
-	shared_ptr<PublicKey> getPubKey() override{
-		if (!isKeySet())
-			throw IllegalStateException("public key isn't set");
-		return pubKey;
-	};
-	byte hardCorePredicate(TPElement * tpEl) override;
-	vector<byte> hardCoreFunction(TPElement * tpEl) override;
-	shared_ptr<TPElement> reconstructTPElement(TPElementSendableData & data) override {
-        auto x = data.getX();
-		return generateTPElement(x);
-	};
 };
 
 /**
