@@ -73,4 +73,35 @@ public:
 	void hashFinal(vector<byte> &out, int outOffset) override;
 };
 
+/************************************************************
+* Concrete classed of cryptographicHash for different SHA.
+* These classes wraps OpenSSL implementation of SHA*.
+*************************************************************/
+
+class Blake2SHA1 : public Blake2Hash , public SHA1 {
+public:
+	Blake2SHA1() : Blake2Hash(20) {};
+};
+
+class Blake2SHA224 : public Blake2Hash, public SHA224 {
+public:
+	Blake2SHA224() : Blake2Hash(28) {};
+};
+
+class Blake2SHA256 : public Blake2Hash, public SHA256{
+public:
+	Blake2SHA256() : Blake2Hash(32) {};
+};
+
+class Blake2SHA384 : public Blake2Hash, public SHA384 {
+public:
+	Blake2SHA384() : Blake2Hash(48) {};
+};
+
+class Blake2SHA512 : public Blake2Hash, public SHA512 {
+public:
+	Blake2SHA512() : Blake2Hash(64) {};
+};
+
+
 #endif
