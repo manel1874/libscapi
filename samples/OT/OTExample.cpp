@@ -9,7 +9,30 @@ OTParams readOTConfig(string config_file) {
 	auto senderIp = IpAddress::from_string(senderIpStr);
 	auto receiverIp = IpAddress::from_string(receiverIpStr);
 	string protocolName = cf.Value("", "protocolName");
-	return OTParams(senderIp, receiverIp, senderPort, receiverPort, protocolName);
+	OTParams params(senderIp, receiverIp, senderPort, receiverPort, protocolName);
+
+	if (protocolName.find("UC") != -1){
+        auto dlog = make_shared<OpenSSLDlogECF2m>();
+        vector<biginteger> point(2);
+        point[0] = biginteger("4373527398576640063579304354969275615843559206632");
+        point[1] = biginteger("3705292482178961271312284701371585420180764402649");
+        auto g0 = dlog->generateElement(false, point);
+        point[0] = biginteger("5358538915372747505940066348728070469076553372492");
+        point[1] = biginteger("9028382283996304130045455598981082528772297505697");
+        auto g1 = dlog->generateElement(false, point);
+        point[0] = biginteger("582941706599807092180704244329891555852679544026");
+        point[1] = biginteger("9405288600072608660829837034337429060956333420529");
+        auto h0 = dlog->generateElement(false, point);
+        point[0] = biginteger("5171406319926278015143700754389901479380894481649");
+        point[1] = biginteger("4324109033029607118050375077650365756171591181543");
+        auto h1 = dlog->generateElement(false, point);
+        params.g0 = g0;
+        params.g1 = g1;
+        params.h0 = h0;
+        params.h1 = h1;
+	}
+
+	return params;
 }
 
 void OTUsage() {
@@ -39,6 +62,10 @@ shared_ptr<OTSender> getSender(const shared_ptr<CommParty> & channel, const shar
 		sender = make_shared<OTFullSimROMDDHOnGroupElementSender>(channel, random, dlog);
 	} else if (sdp.protocolName == "FullSimulationROMOnByteArray") {
 		sender = make_shared<OTFullSimROMDDHOnByteArraySender>(channel, random, dlog);
+	} else if (sdp.protocolName == "UCOnGroupElement") {
+		sender = make_shared<OTUCDDHOnGroupElementSender>(dlog, sdp.g0, sdp.g1, sdp.h0, sdp.h1, random);
+	} else if (sdp.protocolName == "UCOnByteArray") {
+		sender = make_shared<OTUCDDHOnByteArraySender>(dlog, sdp.g0, sdp.g1, sdp.h0, sdp.h1);
 	}
 
 	return sender;
@@ -66,6 +93,10 @@ shared_ptr<OTReceiver> getReceiver(const shared_ptr<CommParty> & channel, const 
 		receiver = make_shared<OTFullSimROMDDHOnGroupElementReceiver>(channel, random, dlog);
 	} else if (sdp.protocolName == "FullSimulationROMOnByteArray") {
 		receiver = make_shared<OTFullSimROMDDHOnByteArrayReceiver>(channel, random, dlog);
+	} else if (sdp.protocolName == "UCOnGroupElement") {
+		receiver = make_shared<OTUCDDHOnGroupElementReceiver>(dlog, sdp.g0, sdp.g1, sdp.h0, sdp.h1, random);
+	} else if (sdp.protocolName == "UCOnByteArray") {
+		receiver = make_shared<OTUCDDHOnByteArrayReceiver>(dlog, sdp.g0, sdp.g1, sdp.h0, sdp.h1);
 	}
 
 	return receiver;
@@ -73,15 +104,17 @@ shared_ptr<OTReceiver> getReceiver(const shared_ptr<CommParty> & channel, const 
 
 shared_ptr<OTSInput> getInput(DlogGroup* dlog, OTParams params) {
 	
-	if (params.protocolName == "SemiHonestOnGroupElement" || params.protocolName == "PrivacyOnlyOnGroupElement" || params.protocolName == "OneSidedSimulationOnGroupElement" 
-		|| params.protocolName == "FullSimulationOnGroupElement" || params.protocolName == "FullSimulationROMOnGroupElement") {
+	if (params.protocolName == "SemiHonestOnGroupElement" || params.protocolName == "PrivacyOnlyOnGroupElement" ||
+		params.protocolName == "OneSidedSimulationOnGroupElement" || params.protocolName == "FullSimulationOnGroupElement"
+		|| params.protocolName == "FullSimulationROMOnGroupElement" || params.protocolName == "UCOnGroupElement") {
 		auto x0 = dlog->createRandomElement();
 		cout << "X0 = " << x0->generateSendableData()->toString() << endl;
 		auto x1 = dlog->createRandomElement();
 		cout << "X1 = " << x1->generateSendableData()->toString() << endl;
 		return make_shared<OTOnGroupElementSInput>(x0, x1);
-	} else if (params.protocolName == "SemiHonestOnByteArray" || params.protocolName == "PrivacyOnlyOnByteArray" || params.protocolName == "OneSidedSimulationOnByteArray"
-		|| params.protocolName == "FullSimulationOnByteArray" || params.protocolName == "FullSimulationROMOnByteArray") {
+	} else if (params.protocolName == "SemiHonestOnByteArray" || params.protocolName == "PrivacyOnlyOnByteArray" ||
+			params.protocolName == "OneSidedSimulationOnByteArray" || params.protocolName == "FullSimulationOnByteArray"
+			|| params.protocolName == "FullSimulationROMOnByteArray" || params.protocolName == "UCOnByteArray") {
 		vector<byte> x0(10, '0'), x1(10, '1');
 		cout << "x0 = " << endl;
 		for (int i = 0; i < (int) x0.size(); i++)
@@ -97,12 +130,14 @@ shared_ptr<OTSInput> getInput(DlogGroup* dlog, OTParams params) {
 }
 
 void printOutput(OTROutput* output, OTParams params) {
-	if (params.protocolName == "SemiHonestOnGroupElement" || params.protocolName == "PrivacyOnlyOnGroupElement" || params.protocolName == "OneSidedSimulationOnGroupElement"
-		|| params.protocolName == "FullSimulationOnGroupElement" || params.protocolName == "FullSimulationROMOnGroupElement") {
+	if (params.protocolName == "SemiHonestOnGroupElement" || params.protocolName == "PrivacyOnlyOnGroupElement" ||
+			params.protocolName == "OneSidedSimulationOnGroupElement" || params.protocolName == "FullSimulationOnGroupElement"
+			|| params.protocolName == "FullSimulationROMOnGroupElement" || params.protocolName == "UCOnGroupElement") {
 		auto out = (OTOnGroupElementROutput*)output;
 		cout << "output = " << out->getXSigma()->generateSendableData()->toString() << endl;
-	} else if (params.protocolName == "SemiHonestOnByteArray" || params.protocolName == "PrivacyOnlyOnByteArray" || params.protocolName == "OneSidedSimulationOnByteArray"
-		|| params.protocolName == "FullSimulationOnByteArray" || params.protocolName == "FullSimulationROMOnByteArray") {
+	} else if (params.protocolName == "SemiHonestOnByteArray" || params.protocolName == "PrivacyOnlyOnByteArray" ||
+			params.protocolName == "OneSidedSimulationOnByteArray" || params.protocolName == "FullSimulationOnByteArray"
+			|| params.protocolName == "FullSimulationROMOnByteArray" || params.protocolName == "UCOnByteArray") {
 		auto out = ((OTOnByteArrayROutput*)output)->getXSigma();
 		cout << "output = " << endl;
 		for (int i = 0; i < (int) out.size(); i++)
