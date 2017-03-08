@@ -79,5 +79,5 @@ Blake2SHA224       libscapi/include/primitives/hashBlake2.hpp
 Blake2SHA256       libscapi/include/primitives/hashBlake2.hpp
 Blake2SHA384       libscapi/include/primitives/hashBlake2.hpp
 Blake2SHA512       libscapi/include/primitives/hashBlake2.hpp
-================   ===========================================
+================   ============================================
 
