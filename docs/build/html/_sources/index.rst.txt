@@ -9,7 +9,6 @@ Libscapi is an open-source c++ library for implementing secure two-party and mul
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
    intro
    install
@@ -21,9 +20,7 @@ Libscapi is an open-source c++ library for implementing secure two-party and mul
    interactive_layer
    license
 
-Indices and tables
-==================
+If you can't find what you are looking for, have a look at the index or try to use the search:
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
