@@ -1,0 +1,338 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>The Communication Layer &#8212; libscapi 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Security Levels" href="security_levels.html" />
+    <link rel="prev" title="Quickstart" href="quickstart.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="the-communication-layer">
+<h1><a class="toc-backref" href="#id1">The Communication Layer</a><a class="headerlink" href="#the-communication-layer" title="Permalink to this headline">¶</a></h1>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#the-communication-layer" id="id1">The Communication Layer</a><ul>
+<li><a class="reference internal" href="#communication-design" id="id2">Communication Design</a><ul>
+<li><a class="reference internal" href="#classes-heirarchy" id="id3">classes heirarchy</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#setting-up-communication" id="id4">Setting up communication</a><ul>
+<li><a class="reference internal" href="#fetch-the-list-of-ips-and-ports" id="id5">Fetch the list of ips and ports</a></li>
+<li><a class="reference internal" href="#setting-up-the-actual-communication" id="id6">Setting up the actual communication</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#using-an-established-connection" id="id7">Using an established connection</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="communication-design">
+<h2><a class="toc-backref" href="#id2">Communication Design</a><a class="headerlink" href="#communication-design" title="Permalink to this headline">¶</a></h2>
+<p>The communication layer provides communication services for any interactive cryptographic protocol. We have two types of communication, plain (unauthenticated and unencrypted) communication and secure channels using ssl. This layer is heavily used by the interactive protocols in libscapi&#8217; third layer and by MPC protocols. It can also be used by any other cryptographic protocol that requires communication. Currently the communication layer is a two-party communication channel. MultiParty communication can be achieved by setting a communication between each pair of parties.</p>
+<div class="section" id="classes-heirarchy">
+<h3><a class="toc-backref" href="#id3">classes heirarchy</a><a class="headerlink" href="#classes-heirarchy" title="Permalink to this headline">¶</a></h3>
+<p>The main communication clas is <code class="docutils literal"><span class="pre">CommParty</span></code>. This is an abstract class that declares all communication functionalities.
+There are two concrete classes that derive the <code class="docutils literal"><span class="pre">CommParty</span></code> class:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">CommPartyTCPSynced</span></code> - establish a plain channel between the parties.</li>
+<li><code class="docutils literal"><span class="pre">CommPartyTcpSslSynced</span></code> - establish an ssl channel between the parties.</li>
+</ul>
+</div>
+</div>
+<div class="section" id="setting-up-communication">
+<h2><a class="toc-backref" href="#id4">Setting up communication</a><a class="headerlink" href="#setting-up-communication" title="Permalink to this headline">¶</a></h2>
+<p>There are several steps involved in setting up a communication channel between parties. Each one of them will be explained below:
+First, let&#8217;s take a look of an example for setting a cummunication between 3 parties:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;libscapi/include/comm/Comm.hpp&gt;</span><span class="cp"></span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
+
+
+    <span class="kt">int</span> <span class="n">numParties</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+
+    <span class="c1">//open file</span>
+    <span class="n">ConfigFile</span> <span class="n">cf</span><span class="p">(</span><span class="s">&quot;/home/moriya/libscapi/protocols/GMW/Parties&quot;</span><span class="p">);</span>
+
+    <span class="n">string</span> <span class="n">portString</span><span class="p">,</span> <span class="n">ipString</span><span class="p">;</span>
+    <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">ports</span><span class="p">(</span><span class="n">numParties</span><span class="p">);</span>
+    <span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">ips</span><span class="p">(</span><span class="n">numParties</span><span class="p">);</span>
+    <span class="kt">int</span> <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numParties</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">portString</span> <span class="o">=</span> <span class="s">&quot;party_&quot;</span> <span class="o">+</span> <span class="n">to_string</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;_port&quot;</span><span class="p">;</span>
+        <span class="n">ipString</span> <span class="o">=</span> <span class="s">&quot;party_&quot;</span> <span class="o">+</span> <span class="n">to_string</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;_ip&quot;</span><span class="p">;</span>
+        <span class="c1">//get partys IPs and ports data</span>
+        <span class="n">ports</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">stoi</span><span class="p">(</span><span class="n">cf</span><span class="p">.</span><span class="n">Value</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">portString</span><span class="p">));</span>
+        <span class="n">ips</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">cf</span><span class="p">.</span><span class="n">Value</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">ipString</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="n">SocketPartyData</span> <span class="n">me</span><span class="p">,</span> <span class="n">other</span><span class="p">;</span>
+    <span class="n">boost</span><span class="o">::</span><span class="n">asio</span><span class="o">::</span><span class="n">io_service</span> <span class="n">io_service</span><span class="p">;</span>
+
+    <span class="kt">int</span> <span class="n">id</span> <span class="o">=</span> <span class="n">atoi</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">numParties</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">id</span><span class="p">)</span> <span class="p">{</span><span class="c1">// This party will be the receiver in the protocol</span>
+
+            <span class="n">me</span> <span class="o">=</span> <span class="n">SocketPartyData</span><span class="p">(</span><span class="n">boost_ip</span><span class="o">::</span><span class="n">address</span><span class="o">::</span><span class="n">from_string</span><span class="p">(</span><span class="n">ips</span><span class="p">[</span><span class="n">id</span><span class="p">]),</span> <span class="n">ports</span><span class="p">[</span><span class="n">id</span><span class="p">]</span> <span class="o">+</span> <span class="n">i</span><span class="p">);</span>
+            <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;my port = &quot;</span><span class="o">&lt;&lt;</span><span class="n">ports</span><span class="p">[</span><span class="n">id</span><span class="p">]</span> <span class="o">+</span> <span class="n">i</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
+            <span class="n">other</span> <span class="o">=</span> <span class="n">SocketPartyData</span><span class="p">(</span><span class="n">boost_ip</span><span class="o">::</span><span class="n">address</span><span class="o">::</span><span class="n">from_string</span><span class="p">(</span><span class="n">ips</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="n">ports</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">id</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
+            <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;other port = &quot;</span><span class="o">&lt;&lt;</span><span class="n">ports</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">id</span> <span class="o">-</span> <span class="mi">1</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
+
+            <span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">CommParty</span><span class="o">&gt;</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">make_shared</span><span class="o">&lt;</span><span class="n">CommPartyTCPSynced</span><span class="o">&gt;</span><span class="p">(</span><span class="n">io_service</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">other</span><span class="p">);</span>
+            <span class="c1">// connect to party one</span>
+            <span class="n">channel</span><span class="o">-&gt;</span><span class="n">join</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">5000</span><span class="p">);</span>
+            <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;channel established&quot;</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
+
+        <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">i</span><span class="o">&gt;</span><span class="n">id</span><span class="p">)</span> <span class="p">{</span><span class="c1">// This party will be the sender in the protocol</span>
+            <span class="n">me</span> <span class="o">=</span> <span class="n">SocketPartyData</span><span class="p">(</span><span class="n">boost_ip</span><span class="o">::</span><span class="n">address</span><span class="o">::</span><span class="n">from_string</span><span class="p">(</span><span class="n">ips</span><span class="p">[</span><span class="n">id</span><span class="p">]),</span> <span class="n">ports</span><span class="p">[</span><span class="n">id</span><span class="p">]</span> <span class="o">+</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
+            <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;my port = &quot;</span><span class="o">&lt;&lt;</span><span class="n">ports</span><span class="p">[</span><span class="n">id</span><span class="p">]</span> <span class="o">+</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
+            <span class="n">other</span> <span class="o">=</span> <span class="n">SocketPartyData</span><span class="p">(</span><span class="n">boost_ip</span><span class="o">::</span><span class="n">address</span><span class="o">::</span><span class="n">from_string</span><span class="p">(</span><span class="n">ips</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="n">ports</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">id</span><span class="p">);</span>
+            <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;other port = &quot;</span><span class="o">&lt;&lt;</span> <span class="n">ports</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">id</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
+
+            <span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">CommParty</span><span class="o">&gt;</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">make_shared</span><span class="o">&lt;</span><span class="n">CommPartyTCPSynced</span><span class="o">&gt;</span><span class="p">(</span><span class="n">io_service</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">other</span><span class="p">);</span>
+            <span class="c1">// connect to party one</span>
+            <span class="n">channel</span><span class="o">-&gt;</span><span class="n">join</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">5000</span><span class="p">);</span>
+            <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;channel established&quot;</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="section" id="fetch-the-list-of-ips-and-ports">
+<h3><a class="toc-backref" href="#id5">Fetch the list of ips and ports</a><a class="headerlink" href="#fetch-the-list-of-ips-and-ports" title="Permalink to this headline">¶</a></h3>
+<p>The first step towards obtaining communication services is to setup the connections between the different parties. In order start obtaining the communication, party should first get a list of the parties&#8217; ips and ports. Each pair of ip and port represents a party in the protocol.
+The ips and ports can be obtaind from a file or any other way. In the example above the reading from the file is done via ConfigFile wich is a libscapi&#8217;s class that reads from a given file :</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="c1">//open file</span>
+<span class="n">ConfigFile</span> <span class="nf">cf</span><span class="p">(</span><span class="s">&quot;/home/moriya/libscapi/protocols/GMW/Parties&quot;</span><span class="p">);</span>
+
+<span class="n">string</span> <span class="n">portString</span><span class="p">,</span> <span class="n">ipString</span><span class="p">;</span>
+<span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">ports</span><span class="p">(</span><span class="n">numParties</span><span class="p">);</span>
+<span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">ips</span><span class="p">(</span><span class="n">numParties</span><span class="p">);</span>
+<span class="kt">int</span> <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numParties</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">portString</span> <span class="o">=</span> <span class="s">&quot;party_&quot;</span> <span class="o">+</span> <span class="n">to_string</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;_port&quot;</span><span class="p">;</span>
+    <span class="n">ipString</span> <span class="o">=</span> <span class="s">&quot;party_&quot;</span> <span class="o">+</span> <span class="n">to_string</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;_ip&quot;</span><span class="p">;</span>
+    <span class="c1">//get partys IPs and ports data</span>
+    <span class="n">ports</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">stoi</span><span class="p">(</span><span class="n">cf</span><span class="p">.</span><span class="n">Value</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">portString</span><span class="p">));</span>
+    <span class="n">ips</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">cf</span><span class="p">.</span><span class="n">Value</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">ipString</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>In the example, the parties file contains for each party in the protocol the ip and starting port number. The other port numbers are the next indices.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">party_0_ip</span> <span class="o">=</span> <span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span>
+<span class="n">party_1_ip</span> <span class="o">=</span> <span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span>
+<span class="n">party_2_ip</span> <span class="o">=</span> <span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span>
+<span class="n">party_0_port</span> <span class="o">=</span> <span class="mi">8000</span>
+<span class="n">party_1_port</span> <span class="o">=</span> <span class="mi">8020</span>
+<span class="n">party_2_port</span> <span class="o">=</span> <span class="mi">8040</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="setting-up-the-actual-communication">
+<h3><a class="toc-backref" href="#id6">Setting up the actual communication</a><a class="headerlink" href="#setting-up-the-actual-communication" title="Permalink to this headline">¶</a></h3>
+<p>The actual communication is done by creating the channels and activate them. Once a channel has been activated, it can be used to write and read messages.
+Each channel communicates between two parties and uses a <strong>single port</strong> for each one of them. In order to create the channel, one should give the ips and ports of the parties on both channel&#8217;s sides.</p>
+<p>As we said before, the abstract communication class is <code class="docutils literal"><span class="pre">CommParty</span></code> and there are two concrete classes <code class="docutils literal"><span class="pre">CommPartyTCPSynced</span></code> and <code class="docutils literal"><span class="pre">CommPartyTcpSslSynced</span></code>. The constructors of the concrete classes are follow:</p>
+<dl class="function">
+<dt id="_CPPv218CommPartyTCPSyncedRN5boost4asio10io_serviceE15SocketPartyData15SocketPartyData">
+<span id="CommPartyTCPSynced__boost::asio::io_serviceR.SocketPartyData.SocketPartyData"></span><code class="descclassname"></code><code class="descname">CommPartyTCPSynced</code><span class="sig-paren">(</span>boost::asio::io_service &amp;<em>ioService</em>, SocketPartyData <em>me</em>, SocketPartyData <em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv218CommPartyTCPSyncedRN5boost4asio10io_serviceE15SocketPartyData15SocketPartyData" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="_CPPv221CommPartyTcpSslSyncedRN5boost4asio10io_serviceE15SocketPartyData15SocketPartyData6string6string6string6string6string">
+<span id="CommPartyTcpSslSynced__boost::asio::io_serviceR.SocketPartyData.SocketPartyData.string.string.string.string.string"></span><code class="descclassname"></code><code class="descname">CommPartyTcpSslSynced</code><span class="sig-paren">(</span>boost::asio::io_service &amp;<em>ioService</em>, SocketPartyData <em>me</em>, SocketPartyData <em>other</em>, string <em>certificateChainFile</em>, string <em>password</em>, string <em>privateKeyFile</em>, string <em>tmpDHFile</em>, string <em>clientVerifyFile</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv221CommPartyTcpSslSyncedRN5boost4asio10io_serviceE15SocketPartyData15SocketPartyData6string6string6string6string6string" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>out</strong> &#8211; <code class="docutils literal"><span class="pre">boost::asio::io_service</span> <span class="pre">io_service</span></code> - Boost&#8217;s object that used in the communication.</li>
+<li><strong>out</strong> &#8211; <code class="docutils literal"><span class="pre">SocketPartyData</span> <span class="pre">me</span></code> - An object that contains the ip and the port of this party.</li>
+<li><strong>out</strong> &#8211; <p><code class="docutils literal"><span class="pre">SocketPartyData</span> <span class="pre">other</span></code> - An object that contains the ip and the port of the party that we want to communicate with.</p>
+<p><code class="docutils literal"><span class="pre">CommPartyTcpSslSynced</span></code> also accepts the parameters for the ssl protocol:</p>
+</li>
+<li><strong>out</strong> &#8211; string certificateChainFile</li>
+<li><strong>out</strong> &#8211; string password</li>
+<li><strong>out</strong> &#8211; string privateKeyFile</li>
+<li><strong>out</strong> &#8211; string tmpDHFile</li>
+<li><strong>out</strong> &#8211; string clientVerifyFile</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>After the channel has been creates, it needs to get activated. This is done by the <code class="docutils literal"><span class="pre">join</span></code> function of the channel:</p>
+<dl class="function">
+<dt id="_CPPv24joinii">
+<span id="join__i.i"></span>void <code class="descclassname"></code><code class="descname">join</code><span class="sig-paren">(</span>int <em>sleep_between_attempts</em>, int <em>timeout</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv24joinii" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This function setups a double edge connection with the the current party and the other party. The method blocks until both sides are connected to each other. In case of timeout, the communication fails and an error is thrown.</p>
+</dd></dl>
+
+<p>After the join function is complete, the channel is ready to send and receive messages.</p>
+<p>In the example above the code that creates a channel and activate it is:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">me</span> <span class="o">=</span> <span class="n">SocketPartyData</span><span class="p">(</span><span class="n">boost_ip</span><span class="p">::</span><span class="n">address</span><span class="p">::</span><span class="n">from_string</span><span class="p">(</span><span class="n">ips</span><span class="p">[</span><span class="nb">id</span><span class="p">]),</span> <span class="n">ports</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span> <span class="o">+</span> <span class="n">i</span><span class="p">);</span>
+<span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s2">&quot;my port = &quot;</span><span class="o">&lt;&lt;</span><span class="n">ports</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span> <span class="o">+</span> <span class="n">i</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
+<span class="n">other</span> <span class="o">=</span> <span class="n">SocketPartyData</span><span class="p">(</span><span class="n">boost_ip</span><span class="p">::</span><span class="n">address</span><span class="p">::</span><span class="n">from_string</span><span class="p">(</span><span class="n">ips</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="n">ports</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="nb">id</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
+<span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s2">&quot;other port = &quot;</span><span class="o">&lt;&lt;</span><span class="n">ports</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="nb">id</span> <span class="o">-</span> <span class="mi">1</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
+
+<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">CommParty</span><span class="o">&gt;</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">make_shared</span><span class="o">&lt;</span><span class="n">CommPartyTCPSynced</span><span class="o">&gt;</span><span class="p">(</span><span class="n">io_service</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">other</span><span class="p">);</span>
+<span class="o">//</span> <span class="n">connect</span> <span class="n">to</span> <span class="n">party</span> <span class="n">one</span>
+<span class="n">channel</span><span class="o">-&gt;</span><span class="n">join</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">5000</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>First, we create a SocketPartyData for the current application with the ip and port. Second, we create a SocketPartyData for the other application and then we create the channel and activate it.</p>
+</div>
+</div>
+<div class="section" id="using-an-established-connection">
+<h2><a class="toc-backref" href="#id7">Using an established connection</a><a class="headerlink" href="#using-an-established-connection" title="Permalink to this headline">¶</a></h2>
+<p>A connection is represented by the <code class="docutils literal"><span class="pre">CommParty</span></code> interface. Once a channel is established, we can <code class="docutils literal"><span class="pre">write()</span></code> and <code class="docutils literal"><span class="pre">read()</span></code> data between parties.
+There are multiple write and read functions:</p>
+<dl class="function">
+<dt id="_CPPv25writePK4bytei">
+<span id="write__byteCP.i"></span>void <code class="descclassname"></code><code class="descname">write</code><span class="sig-paren">(</span><em class="property">const</em> byte *<em>data</em>, int <em>size</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv25writePK4bytei" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Writes bytes from data to the other party. This function Will write exactly size bytes.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv213writeWithSizePK4bytei">
+<span id="writeWithSize__byteCP.i"></span>void <code class="descclassname"></code><code class="descname">writeWithSize</code><span class="sig-paren">(</span><em class="property">const</em> byte *<em>data</em>, int <em>size</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv213writeWithSizePK4bytei" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Writes the size of the data parameter, then writes the data itself.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv24readP4bytei">
+<span id="read__byteP.i"></span>size_t <code class="descclassname"></code><code class="descname">read</code><span class="sig-paren">(</span>byte *<em>buffer</em>, int <em>sizeToRead</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv24readP4bytei" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Reads exactly sizeToRead bytes and put them in buffer. This function Will block until all bytes are read.</p>
+</dd></dl>
+
+<p>There are also functions that working on strings and vectors:</p>
+<dl class="function">
+<dt id="_CPPv25write6string">
+<span id="write__string"></span>void <code class="descclassname"></code><code class="descname">write</code><span class="sig-paren">(</span>string <em>s</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv25write6string" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="_CPPv213writeWithSize6string">
+<span id="writeWithSize__string"></span>void <code class="descclassname"></code><code class="descname">writeWithSize</code><span class="sig-paren">(</span>string <em>s</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv213writeWithSize6string" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="_CPPv28readSizev">
+<span id="readSize"></span>int <code class="descclassname"></code><code class="descname">readSize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv28readSizev" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="_CPPv222readWithSizeIntoVectorR6vectorI4byteE">
+<span id="readWithSizeIntoVector__vector:byte:R"></span>size_t <code class="descclassname"></code><code class="descname">readWithSizeIntoVector</code><span class="sig-paren">(</span>vector&lt;byte&gt; &amp;<em>targetVector</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv222readWithSizeIntoVectorR6vectorI4byteE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">The Communication Layer</a><ul>
+<li><a class="reference internal" href="#communication-design">Communication Design</a><ul>
+<li><a class="reference internal" href="#classes-heirarchy">classes heirarchy</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#setting-up-communication">Setting up communication</a><ul>
+<li><a class="reference internal" href="#fetch-the-list-of-ips-and-ports">Fetch the list of ips and ports</a></li>
+<li><a class="reference internal" href="#setting-up-the-actual-communication">Setting up the actual communication</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#using-an-established-connection">Using an established connection</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="quickstart.html" title="previous chapter">Quickstart</a></li>
+      <li>Next: <a href="security_levels.html" title="next chapter">Security Levels</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/communication.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, libscapi team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/communication.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

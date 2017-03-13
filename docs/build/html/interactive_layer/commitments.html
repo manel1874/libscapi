@@ -1,0 +1,471 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Commitment Schemes &#8212; libscapi 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="License" href="../license.html" />
+    <link rel="prev" title="Zero Knowledge Proofs and Zero Knowledge Proofs of Knowledge" href="zk.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="commitment-schemes">
+<h1><a class="toc-backref" href="#id3">Commitment Schemes</a><a class="headerlink" href="#commitment-schemes" title="Permalink to this headline">¶</a></h1>
+<p>A commitment scheme allows one to commit to a chosen value (or a chosen statement) while keeping it hidden from others, with the ability to reveal the committed value later.
+There exist some commitment schemes that can be proven by ZK protocols.</p>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#commitment-schemes" id="id3">Commitment Schemes</a><ul>
+<li><a class="reference internal" href="#the-committer-class" id="id4">The Committer class</a><ul>
+<li><a class="reference internal" href="#commit-and-decommit" id="id5">Commit and Decommit</a></li>
+<li><a class="reference internal" href="#conversion-to-and-from-cmtcommitvalue" id="id6">Conversion to and from CmtCommitValue</a></li>
+<li><a class="reference internal" href="#inner-state-functions" id="id7">Inner state functions</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#the-receiver-class" id="id8">The Receiver class</a><ul>
+<li><a class="reference internal" href="#receive-commitment-and-decommitment" id="id9">Receive Commitment and Decommitment</a></li>
+<li><a class="reference internal" href="#id1" id="id10">Conversion to and from CmtCommitValue</a></li>
+<li><a class="reference internal" href="#id2" id="id11">Inner state functions</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#implemented-protocols" id="id12">Implemented Protocols</a></li>
+<li><a class="reference internal" href="#example-of-usage" id="id13">Example of Usage</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="the-committer-class">
+<h2><a class="toc-backref" href="#id4">The Committer class</a><a class="headerlink" href="#the-committer-class" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv212CmtCommitter">
+<span id="CmtCommitter"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">CmtCommitter</code><a class="headerlink" href="#_CPPv212CmtCommitter" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This the general class of the Committer side of a Commitment Scheme. A commitment scheme has a commitment phase in which the committer send the commitment to the Receiver, and a decommitment phase in which the the Committer sends the decommitment to the Receiver.</p>
+</dd></dl>
+
+<div class="section" id="commit-and-decommit">
+<h3><a class="toc-backref" href="#id5">Commit and Decommit</a><a class="headerlink" href="#commit-and-decommit" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N12CmtCommitter6commitERK10shared_ptrI14CmtCommitValueEl">
+<span id="CmtCommitter::commit__shared_ptr:CmtCommitValue:CR.l"></span>void <code class="descclassname">CmtCommitter::</code><code class="descname">commit</code><span class="sig-paren">(</span><em class="property">const</em> shared_ptr&lt;CmtCommitValue&gt; &amp;<em>input</em>, long <em>id</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N12CmtCommitter6commitERK10shared_ptrI14CmtCommitValueEl" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This function is the heart of the commitment phase from the Committer&#8217;s point of view.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>input</strong> &#8211; The value that the committer commits about.</li>
+<li><strong>id</strong> &#8211; Unique value attached to the input to keep track of the commitments in the case that many commitments are performed one after the other without decommiting them yet.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N12CmtCommitter8decommitEl">
+<span id="CmtCommitter::decommit__l"></span>void <code class="descclassname">CmtCommitter::</code><code class="descname">decommit</code><span class="sig-paren">(</span>long <em>id</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N12CmtCommitter8decommitEl" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This function is the heart of the decommitment phase from the Committer&#8217;s point of view.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>id</strong> &#8211; Unique value used to identify which previously committed value needs to be decommitted now.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>There are cases when the user wants to commit the input but remain non-interactive, meaning not to send the generate message yet.
+The reasons for doing that are vary, for example the user wants to prepare a lot of commitments and send together.
+In these cases the commit function is not useful since it sends the generates commit message to the other party.
+The following function provide the ability to generate the commitment and decommitment messages and get them without send to the other party:</p>
+<dl class="function">
+<dt id="_CPPv2N12CmtCommitter21generateCommitmentMsgERK10shared_ptrI14CmtCommitValueEl">
+<span id="CmtCommitter::generateCommitmentMsg__shared_ptr:CmtCommitValue:CR.l"></span>shared_ptr&lt;CmtCCommitmentMsg&gt; <code class="descclassname">CmtCommitter::</code><code class="descname">generateCommitmentMsg</code><span class="sig-paren">(</span><em class="property">const</em> shared_ptr&lt;CmtCommitValue&gt; &amp;<em>input</em>, long <em>id</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N12CmtCommitter21generateCommitmentMsgERK10shared_ptrI14CmtCommitValueEl" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This function generates a commitment message using the given input and ID.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N12CmtCommitter23generateDecommitmentMsgEl">
+<span id="CmtCommitter::generateDecommitmentMsg__l"></span>shared_ptr&lt;CmtCDecommitmentMessage&gt; <code class="descclassname">CmtCommitter::</code><code class="descname">generateDecommitmentMsg</code><span class="sig-paren">(</span>long <em>id</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N12CmtCommitter23generateDecommitmentMsgEl" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This function generate a decommitment message using the given id.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="conversion-to-and-from-cmtcommitvalue">
+<h3><a class="toc-backref" href="#id6">Conversion to and from CmtCommitValue</a><a class="headerlink" href="#conversion-to-and-from-cmtcommitvalue" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N12CmtCommitter28generateBytesFromCommitValueEP14CmtCommitValue">
+<span id="CmtCommitter::generateBytesFromCommitValue__CmtCommitValueP"></span>vector&lt;byte&gt; <code class="descclassname">CmtCommitter::</code><code class="descname">generateBytesFromCommitValue</code><span class="sig-paren">(</span>CmtCommitValue *<em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N12CmtCommitter28generateBytesFromCommitValueEP14CmtCommitValue" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This function converts the given commit value to a byte array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> &#8211; to get its bytes.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the generated bytes.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N12CmtCommitter19generateCommitValueERK6vectorI4byteE">
+<span id="CmtCommitter::generateCommitValue__vector:byte:CR"></span>shared_ptr&lt;CmtCommitValue&gt; <code class="descclassname">CmtCommitter::</code><code class="descname">generateCommitValue</code><span class="sig-paren">(</span><em class="property">const</em> vector&lt;byte&gt; &amp;<em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N12CmtCommitter19generateCommitValueERK6vectorI4byteE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This function wraps the raw data x with a suitable CommitValue instance according to the actual implementaion.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> &#8211; array to convert into a commitValue.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the created CommitValue.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="inner-state-functions">
+<h3><a class="toc-backref" href="#id7">Inner state functions</a><a class="headerlink" href="#inner-state-functions" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N12CmtCommitter24getCommitmentPhaseValuesEl">
+<span id="CmtCommitter::getCommitmentPhaseValues__l"></span>CmtCommitmentPhaseValues *<code class="descclassname">CmtCommitter::</code><code class="descname">getCommitmentPhaseValues</code><span class="sig-paren">(</span>long <em>id</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N12CmtCommitter24getCommitmentPhaseValuesEl" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This function returns the values calculated during the commit phase for a specific commitment.
+This function is used for protocols that need values of the commitment, like ZK protocols during proofs on the commitment.
+We recommended not to call this function from somewhere else.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>id</strong> &#8211; of the specific commitment</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">values calculated during the commit phase</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N12CmtCommitter19getPreProcessValuesEv">
+<span id="CmtCommitter::getPreProcessValues"></span>vector&lt;shared_ptr&lt;void&gt;&gt; <code class="descclassname">CmtCommitter::</code><code class="descname">getPreProcessValues</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N12CmtCommitter19getPreProcessValuesEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This function returns the values calculated during the preprocess phase.
+This function is used for protocols that need values of the commitment, like ZK protocols during proofs on the commitment.
+We recommended not to call this function from somewhere else.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">values calculated during the preprocess phase</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N12CmtCommitter23sampleRandomCommitValueEv">
+<span id="CmtCommitter::sampleRandomCommitValue"></span>shared_ptr&lt;CmtCommitValue&gt; <code class="descclassname">CmtCommitter::</code><code class="descname">sampleRandomCommitValue</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N12CmtCommitter23sampleRandomCommitValueEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This function samples random commit value to commit on.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the sampled commit value.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="the-receiver-class">
+<h2><a class="toc-backref" href="#id8">The Receiver class</a><a class="headerlink" href="#the-receiver-class" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv211CmtReceiver">
+<span id="CmtReceiver"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">CmtReceiver</code><a class="headerlink" href="#_CPPv211CmtReceiver" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This the general class of the Receiver side of a Commitment Scheme. A commitment scheme has a commitment phase in which the Receiver waits for the commitment sent by the Committer; and a decommitment phase in which the Receiver waits for the decommitment sent by the Committer and checks whether to accept or reject the decommitment.</p>
+</dd></dl>
+
+<div class="section" id="receive-commitment-and-decommitment">
+<h3><a class="toc-backref" href="#id9">Receive Commitment and Decommitment</a><a class="headerlink" href="#receive-commitment-and-decommitment" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N11CmtReceiver17receiveCommitmentEv">
+<span id="CmtReceiver::receiveCommitment"></span>shared_ptr&lt;CmtRCommitPhaseOutput&gt; <code class="descclassname">CmtReceiver::</code><code class="descname">receiveCommitment</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N11CmtReceiver17receiveCommitmentEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This function is the heart of the commitment phase from the Receiver&#8217;s point of view.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the id of the commitment and some other information if necessary according to the implementing class.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N11CmtReceiver19receiveDecommitmentEl">
+<span id="CmtReceiver::receiveDecommitment__l"></span>shared_ptr&lt;CmtCommitValue&gt; <code class="descclassname">CmtReceiver::</code><code class="descname">receiveDecommitment</code><span class="sig-paren">(</span>long <em>id</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N11CmtReceiver19receiveDecommitmentEl" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This function is the heart of the decommitment phase from the Receiver&#8217;s point of view.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>id</strong> &#8211; wait for a specific message according to this id</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the commitment</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N11CmtReceiver18verifyDecommitmentEP17CmtCCommitmentMsgP23CmtCDecommitmentMessage">
+<span id="CmtReceiver::verifyDecommitment__CmtCCommitmentMsgP.CmtCDecommitmentMessageP"></span>shared_ptr&lt;CmtCommitValue&gt; <code class="descclassname">CmtReceiver::</code><code class="descname">verifyDecommitment</code><span class="sig-paren">(</span>CmtCCommitmentMsg *<em>commitmentMsg</em>, CmtCDecommitmentMessage *<em>decommitmentMsg</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N11CmtReceiver18verifyDecommitmentEP17CmtCCommitmentMsgP23CmtCDecommitmentMessage" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>There are cases when the receiver gets the commitment and decommitments in the application (not by the channel), and the receiver does not use the receiveCommitment and receiveDecommitment function.
+In these cases this function should be called for each pair of commitment and decommitment messages.
+The reasons for doing that are vary, for example a protocol that prepare a lot of commitments and send together.
+In these cases the receiveCommitment and receiveDecommitment functions are not useful since they receive the generates messages separately to the other party.
+This function generates the message without sending it and this allows the user to save it and send it later if he wants.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="id1">
+<h3><a class="toc-backref" href="#id10">Conversion to and from CmtCommitValue</a><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N11CmtReceiver28generateBytesFromCommitValueEP14CmtCommitValue">
+<span id="CmtReceiver::generateBytesFromCommitValue__CmtCommitValueP"></span>vector&lt;byte&gt; <code class="descclassname">CmtReceiver::</code><code class="descname">generateBytesFromCommitValue</code><span class="sig-paren">(</span>CmtCommitValue *<em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N11CmtReceiver28generateBytesFromCommitValueEP14CmtCommitValue" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This function converts the given commit value to a byte array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> &#8211; to get its bytes.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the generated bytes.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id2">
+<h3><a class="toc-backref" href="#id11">Inner state functions</a><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N11CmtReceiver24getCommitmentPhaseValuesEl">
+<span id="CmtReceiver::getCommitmentPhaseValues__l"></span>shared_ptr&lt;void&gt; <code class="descclassname">CmtReceiver::</code><code class="descname">getCommitmentPhaseValues</code><span class="sig-paren">(</span>long <em>id</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N11CmtReceiver24getCommitmentPhaseValuesEl" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Return the intermediate values used during the commitment phase.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>id</strong> &#8211; get the commitment values according to this id.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a general array of Objects.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N11CmtReceiver21getPreProcessedValuesEv">
+<span id="CmtReceiver::getPreProcessedValues"></span>vector&lt;shared_ptr&lt;void&gt;&gt; <code class="descclassname">CmtReceiver::</code><code class="descname">getPreProcessedValues</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N11CmtReceiver21getPreProcessedValuesEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Return the values used during the pre-process phase (usually upon construction). Since these values vary between the different implementations this function returns a general array of Objects.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a general array of Objects</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="implemented-protocols">
+<h2><a class="toc-backref" href="#id12">Implemented Protocols</a><a class="headerlink" href="#implemented-protocols" title="Permalink to this headline">¶</a></h2>
+<p>Each concrete commitment protocol should have committer and receiver classes that extends the <code class="docutils literal"><span class="pre">CmtCommitter</span></code> and <code class="docutils literal"><span class="pre">CmtReceiver</span></code> abstract classes mentioned above or the <code class="docutils literal"><span class="pre">CmtCommitterWithProofs</span></code> and <code class="docutils literal"><span class="pre">CmtReceiverWithProofs</span></code>, in case the scheme can be proven.</p>
+<p>Concrete Commitments protocols implemented so far are:
+* Pedersen commitment
+* Pedersen Hash commitment
+* Pedersen Trapdoor commitment
+* El Gamal commitment
+* El Gamal Hash commitment
+* Simple Hash commitment
+* Equivoqal commitments</p>
+</div>
+<div class="section" id="example-of-usage">
+<h2><a class="toc-backref" href="#id13">Example of Usage</a><a class="headerlink" href="#example-of-usage" title="Permalink to this headline">¶</a></h2>
+<p>Commitment protocol has two sides: committer and receiver. In order to execute the commitment protocol,
+both committer and receiver should be created as separate programs (Usually not on the same machine).</p>
+<p>Steps in committer creation:</p>
+<ul class="simple">
+<li>Given a <code class="docutils literal"><span class="pre">Channel</span></code> object ch do:<ul>
+<li>Create a <code class="docutils literal"><span class="pre">CmtCommitter</span></code> (for example, <code class="docutils literal"><span class="pre">CmtPedersenCommitter</span></code>).</li>
+<li>Create an instance of the concrete <code class="docutils literal"><span class="pre">CommitValue</span></code> that suits the commitment scheme (This can be done by calling the function <code class="docutils literal"><span class="pre">generateCommitValue(byte[])</span></code>.</li>
+<li>Call the <code class="docutils literal"><span class="pre">commit()</span></code> function of the committer with the committed value and id.</li>
+<li>Call the <code class="docutils literal"><span class="pre">decommit()</span></code> function of the committer with the same id sent to the <code class="docutils literal"><span class="pre">commit()</span></code> function.</li>
+</ul>
+</li>
+</ul>
+<p>Code example:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="c1">//create the committer</span>
+<span class="k">auto</span> <span class="n">dlog</span> <span class="o">=</span> <span class="n">make_shared</span><span class="o">&lt;</span><span class="n">OpenSSLDlogECF2m</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;K-233&quot;</span><span class="p">);</span>
+<span class="n">CmtPedersenCommitter</span> <span class="nf">committer</span><span class="p">(</span><span class="n">ch</span><span class="p">,</span> <span class="n">dlog</span><span class="p">,</span> <span class="n">get_seeded_prg</span><span class="p">());</span>
+
+<span class="c1">//generate CommitValue from string</span>
+<span class="n">vector</span><span class="o">&lt;</span><span class="n">byte</span><span class="o">&gt;</span> <span class="n">msg</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+<span class="k">auto</span> <span class="n">val</span> <span class="o">=</span> <span class="n">committer</span><span class="p">.</span><span class="n">generateCommitValue</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
+
+<span class="c1">//Commit on the commit value with id 2</span>
+<span class="n">committer</span><span class="p">.</span><span class="n">commit</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+
+<span class="c1">//decommit id 2</span>
+<span class="n">committer</span><span class="p">.</span><span class="n">decommit</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Steps in receiver creation:</p>
+<ul class="simple">
+<li>Given a <code class="docutils literal"><span class="pre">Channel</span></code> object ch do:<ul>
+<li>Create a <code class="docutils literal"><span class="pre">CmtReceiver</span></code> (for example, <code class="docutils literal"><span class="pre">CmtPedersenReceiver</span></code>).</li>
+<li>Call the <code class="docutils literal"><span class="pre">receiverCommitment()</span></code> function of the receiver.</li>
+<li>Call the <code class="docutils literal"><span class="pre">receiveDecommitment()</span></code> function of the receiver with the id given in the output of the <code class="docutils literal"><span class="pre">receiverCommitment()</span></code> function.</li>
+<li>The <code class="docutils literal"><span class="pre">CommitValue</span></code> returned from the <code class="docutils literal"><span class="pre">receiveDecommitment()</span></code> can be converted to bytes using the <code class="docutils literal"><span class="pre">generateBytesFromCommitValue()</span></code> function of the receiver.</li>
+</ul>
+</li>
+</ul>
+<p>Code example:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="c1">//create the receiver</span>
+<span class="k">auto</span> <span class="n">dlog</span> <span class="o">=</span> <span class="n">make_shared</span><span class="o">&lt;</span><span class="n">OpenSSLDlogECF2m</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;K-233&quot;</span><span class="p">);</span>
+<span class="n">CmtPedersenReceiver</span> <span class="nf">receiver</span><span class="p">(</span><span class="n">ch</span><span class="p">,</span> <span class="n">dlog</span><span class="p">,</span> <span class="n">get_seeded_prg</span><span class="p">());</span>
+
+<span class="c1">//Receive the commitment on the commit value</span>
+<span class="k">auto</span> <span class="n">output</span> <span class="o">=</span> <span class="n">receiver</span><span class="p">.</span><span class="n">receiveCommitment</span><span class="p">();</span>
+
+<span class="c1">//Receive the decommit</span>
+<span class="k">auto</span> <span class="n">val</span> <span class="o">=</span> <span class="n">receiver</span><span class="p">.</span><span class="n">receiveDecommitment</span><span class="p">(</span><span class="n">output</span><span class="p">.</span><span class="n">getCommitmentId</span><span class="p">());</span>
+
+<span class="c1">//Convert the commitValue to bytes.</span>
+<span class="n">vector</span><span class="o">&lt;</span><span class="n">byte</span><span class="o">&gt;</span> <span class="n">committedVector</span> <span class="o">=</span> <span class="n">receiver</span><span class="p">.</span><span class="n">generateBytesFromCommitValue</span><span class="p">(</span><span class="n">val</span><span class="p">.</span><span class="n">get</span><span class="p">());</span>
+
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">committedVector</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">committedVector</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="p">}</span>
+<span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Commitment Schemes</a><ul>
+<li><a class="reference internal" href="#the-committer-class">The Committer class</a><ul>
+<li><a class="reference internal" href="#commit-and-decommit">Commit and Decommit</a></li>
+<li><a class="reference internal" href="#conversion-to-and-from-cmtcommitvalue">Conversion to and from CmtCommitValue</a></li>
+<li><a class="reference internal" href="#inner-state-functions">Inner state functions</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#the-receiver-class">The Receiver class</a><ul>
+<li><a class="reference internal" href="#receive-commitment-and-decommitment">Receive Commitment and Decommitment</a></li>
+<li><a class="reference internal" href="#id1">Conversion to and from CmtCommitValue</a></li>
+<li><a class="reference internal" href="#id2">Inner state functions</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#implemented-protocols">Implemented Protocols</a></li>
+<li><a class="reference internal" href="#example-of-usage">Example of Usage</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../interactive_layer.html">Layer 3: Interactive Protocols</a><ul>
+      <li>Previous: <a href="zk.html" title="previous chapter">Zero Knowledge Proofs and Zero Knowledge Proofs of Knowledge</a></li>
+      <li>Next: <a href="../license.html" title="next chapter">License</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/interactive_layer/commitments.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, libscapi team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/interactive_layer/commitments.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,478 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Sigma Protocols &#8212; libscapi 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Zero Knowledge Proofs and Zero Knowledge Proofs of Knowledge" href="zk.html" />
+    <link rel="prev" title="Oblivious Transfer Protocols" href="ot.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="sigma-protocols">
+<h1><a class="toc-backref" href="#id1">Sigma Protocols</a><a class="headerlink" href="#sigma-protocols" title="Permalink to this headline">¶</a></h1>
+<p><strong>Sigma Protocols</strong> are a basic building block for Zero-knowledge proofs, Zero-Knowledge Proofs Of Knowledge and more. A sigma protocol is a 3-round proof, comprised of:</p>
+<ol class="arabic simple">
+<li>A first message from the prover to the verifier</li>
+<li>A random challenge from the verifier</li>
+<li>A second message from the prover.</li>
+</ol>
+<p>Sigma Protocol can be executed as a standalone protocol or as a building block for another protocol, like Zero Knowledge proofs.
+As a standalone protocol, Sigma protocol should execute the protocol as is, including the communication between the prover and the verifier.
+As a building block for other protocols, Sigma protocol should only compute the prover&#8217;s first and second messages and the verifier&#8217;s challenge and verification. This is, in other words, the protocol functions without communication between the parties.</p>
+<p>To enable both options, there is a separation between the communication part and the actual protocol computations.
+The general structure of Sigma Protocol contains the following components:</p>
+<ul class="simple">
+<li>Prover, Verifier and Simulator generic classes.</li>
+<li>ProverComputation and VerifierComputation abstract classes.</li>
+<li>ProverComputation and VerifierComputation concrete classes (Specific to each protocol).</li>
+</ul>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#sigma-protocols" id="id1">Sigma Protocols</a><ul>
+<li><a class="reference internal" href="#the-prover-class" id="id2">The Prover class</a></li>
+<li><a class="reference internal" href="#the-verifier-class" id="id3">The Verifier class</a></li>
+<li><a class="reference internal" href="#the-simulator-class" id="id4">The Simulator class</a></li>
+<li><a class="reference internal" href="#computation-classes" id="id5">Computation classes</a><ul>
+<li><a class="reference internal" href="#sigmaprovercomputation" id="id6">SigmaProverComputation</a></li>
+<li><a class="reference internal" href="#sigmaverifiercomputation" id="id7">SigmaVerifierComputation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#supported-protocols" id="id8">Supported Protocols</a></li>
+<li><a class="reference internal" href="#example-of-usage" id="id9">Example of Usage</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="the-prover-class">
+<h2><a class="toc-backref" href="#id2">The Prover class</a><a class="headerlink" href="#the-prover-class" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal"><span class="pre">SigmaProtocolProver</span></code> class has two modes of operation:</p>
+<ol class="arabic simple">
+<li>Explicit mode - call processFirstMessage() to process the first message and afterwards call processSecondMessage() to process the second message.</li>
+<li>Implicit mode - Call prove() function that calls the above two functions. This way is more easy to use since the user should not be aware of the order in which the functions must be called.</li>
+</ol>
+<dl class="class">
+<dt id="_CPPv219SigmaProtocolProver">
+<span id="SigmaProtocolProver"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">SigmaProtocolProver</code><a class="headerlink" href="#_CPPv219SigmaProtocolProver" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>General class for Sigma Protocol prover.
+This class manages the communication functionality of all the sigma protocol provers.
+It sends the first message, receives the challenge from the prover and sends the second message.
+It uses SigmaProverComputation instance of a concrete sigma protocol to compute the actual messages.</p>
+<p>Sigma protocols are a basic building block for zero-knowledge, zero-knowledge proofs of knowledge and more.</p>
+<p>A sigma protocol is a 3-round proof, comprised of a first message from the prover to the verifier, a random challenge from the verifier and a second message from the prover.
+See Hazay-Lindell (chapter 6) for more information.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19SigmaProtocolProver16processSecondMsgEv">
+<span id="SigmaProtocolProver::processSecondMsg"></span>void <code class="descclassname">SigmaProtocolProver::</code><code class="descname">processSecondMsg</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19SigmaProtocolProver16processSecondMsgEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Processes the second step of the sigma protocol.
+It receives the challenge from the verifier, computes the second message and then sends it to the verifier.</p>
+<p><strong>This is a blocking function!</strong></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19SigmaProtocolProver5proveERK10shared_ptrI16SigmaProverInputE">
+<span id="SigmaProtocolProver::prove__shared_ptr:SigmaProverInput:CR"></span>void <code class="descclassname">SigmaProtocolProver::</code><code class="descname">prove</code><span class="sig-paren">(</span><em class="property">const</em> shared_ptr&lt;SigmaProverInput&gt; &amp;<em>input</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19SigmaProtocolProver5proveERK10shared_ptrI16SigmaProverInputE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Runs the proof of this protocol.</p>
+<p>This function executes the proof at once by calling the above functions one by one.
+This function can be called when a user does not want to save time by doing operations in parallel.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="the-verifier-class">
+<h2><a class="toc-backref" href="#id3">The Verifier class</a><a class="headerlink" href="#the-verifier-class" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal"><span class="pre">SigmaProtocolVerifier</span></code> also has two modes of operation:</p>
+<ol class="arabic simple">
+<li>Explicit mode – call sampleChallenge() to sample the challenge, then sendChallenge() to receive the prover&#8217;s first message and then call processVerify() to receive the prover&#8217;s second message and verify the proof.</li>
+<li>Implicit mode - Call verify() function that calls the above three functions. Same as the prove function of the prover, this way is much simpler, since the user should not know the order of the functions.</li>
+</ol>
+<dl class="class">
+<dt id="_CPPv221SigmaProtocolVerifier">
+<span id="SigmaProtocolVerifier"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">SigmaProtocolVerifier</code><a class="headerlink" href="#_CPPv221SigmaProtocolVerifier" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>General class for Sigma Protocol verifier.
+This class manages the communication functionality of all the sigma protocol verifiers, such as send the challenge to the prover and receive the prover messages.
+It uses SigmaVerifierComputation instance of a concrete sigma protocol to compute the actual calculations.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N21SigmaProtocolVerifier12getChallengeEv">
+<span id="SigmaProtocolVerifier::getChallenge"></span>vector&lt;byte&gt; <code class="descclassname">SigmaProtocolVerifier::</code><code class="descname">getChallenge</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N21SigmaProtocolVerifier12getChallengeEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns the sampled challenge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the challenge.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N21SigmaProtocolVerifier13processVerifyEP16SigmaCommonInput">
+<span id="SigmaProtocolVerifier::processVerify__SigmaCommonInputP"></span>bool <code class="descclassname">SigmaProtocolVerifier::</code><code class="descname">processVerify</code><span class="sig-paren">(</span>SigmaCommonInput *<em>input</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N21SigmaProtocolVerifier13processVerifyEP16SigmaCommonInput" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Waits to the prover&#8217;s second message and then verifies the proof.
+<strong>This is a blocking function!</strong></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">true if the proof has been verified; false, otherwise.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N21SigmaProtocolVerifier15sampleChallengeEv">
+<span id="SigmaProtocolVerifier::sampleChallenge"></span>void <code class="descclassname">SigmaProtocolVerifier::</code><code class="descname">sampleChallenge</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N21SigmaProtocolVerifier15sampleChallengeEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Samples the challenge for this protocol.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N21SigmaProtocolVerifier13sendChallengeEv">
+<span id="SigmaProtocolVerifier::sendChallenge"></span>void <code class="descclassname">SigmaProtocolVerifier::</code><code class="descname">sendChallenge</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N21SigmaProtocolVerifier13sendChallengeEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Waits for the prover&#8217;s first message and then sends the chosen challenge to the prover.
+<strong>This is a blocking function!</strong></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N21SigmaProtocolVerifier12setChallengeERK6vectorI4byteE">
+<span id="SigmaProtocolVerifier::setChallenge__vector:byte:CR"></span>void <code class="descclassname">SigmaProtocolVerifier::</code><code class="descname">setChallenge</code><span class="sig-paren">(</span><em class="property">const</em> vector&lt;byte&gt; &amp;<em>challenge</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N21SigmaProtocolVerifier12setChallengeERK6vectorI4byteE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Sets the given challenge.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N21SigmaProtocolVerifier6verifyEP16SigmaCommonInput">
+<span id="SigmaProtocolVerifier::verify__SigmaCommonInputP"></span>bool <code class="descclassname">SigmaProtocolVerifier::</code><code class="descname">verify</code><span class="sig-paren">(</span>SigmaCommonInput *<em>input</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N21SigmaProtocolVerifier6verifyEP16SigmaCommonInput" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Runs the verification of this protocol.</p>
+<p>This function executes the verification protocol at once by calling the following functions one by one.
+This function can be called when a user does not want to save time by doing operations in parallel.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">true if the proof has been verified; false, otherwise.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="the-simulator-class">
+<h2><a class="toc-backref" href="#id4">The Simulator class</a><a class="headerlink" href="#the-simulator-class" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal"><span class="pre">SigmaSimulator</span></code> has two simulate() functions. Both functions simulate the sigma protocol. The difference between them is the source of the challenge; one function receives the challenge as an input argument, while the other samples a random challenge. Both simulate functions return <code class="docutils literal"><span class="pre">SigmaSimulatorOutput</span></code> object that holds the simulated a, e, z.</p>
+<dl class="class">
+<dt id="_CPPv214SigmaSimulator">
+<span id="SigmaSimulator"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">SigmaSimulator</code><a class="headerlink" href="#_CPPv214SigmaSimulator" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>General class for Sigma Protocol Simulator. The simulator is a probabilistic polynomial-time function, that on input x and challenge e outputs a transcript of the form (a, e, z) with the same probability distribution as transcripts between the honest prover and verifier on common input x.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N14SigmaSimulator17getSoundnessParamEv">
+<span id="SigmaSimulator::getSoundnessParam"></span>int <code class="descclassname">SigmaSimulator::</code><code class="descname">getSoundnessParam</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N14SigmaSimulator17getSoundnessParamEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns the soundness parameter for this Sigma simulator.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">t soundness parameter</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N14SigmaSimulator8simulateEP16SigmaCommonInputRK6vectorI4byteE">
+<span id="SigmaSimulator::simulate__SigmaCommonInputP.vector:byte:CR"></span>shared_ptr&lt;SigmaSimulatorOutput&gt; <code class="descclassname">SigmaSimulator::</code><code class="descname">simulate</code><span class="sig-paren">(</span>SigmaCommonInput *<em>input</em>, <em class="property">const</em> vector&lt;byte&gt; &amp;<em>challenge</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N14SigmaSimulator8simulateEP16SigmaCommonInputRK6vectorI4byteE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Computes the simulator computation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the output of the computation - (a, e, z).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N14SigmaSimulator8simulateEP16SigmaCommonInput">
+<span id="SigmaSimulator::simulate__SigmaCommonInputP"></span>shared_ptr&lt;SigmaSimulatorOutput&gt; <code class="descclassname">SigmaSimulator::</code><code class="descname">simulate</code><span class="sig-paren">(</span>SigmaCommonInput *<em>input</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N14SigmaSimulator8simulateEP16SigmaCommonInput" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Chooses random challenge and computes the simulator computation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the output of the computation - (a, e, z).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="computation-classes">
+<h2><a class="toc-backref" href="#id5">Computation classes</a><a class="headerlink" href="#computation-classes" title="Permalink to this headline">¶</a></h2>
+<p>The classes that operate the <strong>actual</strong> protocol phases derive the <code class="docutils literal"><span class="pre">SigmaProverComputation</span></code> and <code class="docutils literal"><span class="pre">SigmaVerifierComputation</span></code> abstract classes. SigmaProverComputation computes the prover&#8217;s messages and SigmaVerifierComputation computes the verifier&#8217;s challenge and verification. Each operation is done in a dedicated function.</p>
+<p>In case that Sigma Protocol is used as a building block, the protocol which uses it will hold an instance of SigmaProverComputation or SigmaVerifierComputation and will call the required function. Each concrete sigma protocol should implement the computation classes.</p>
+<div class="section" id="sigmaprovercomputation">
+<h3><a class="toc-backref" href="#id6">SigmaProverComputation</a><a class="headerlink" href="#sigmaprovercomputation" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="_CPPv222SigmaProverComputation">
+<span id="SigmaProverComputation"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">SigmaProverComputation</code><a class="headerlink" href="#_CPPv222SigmaProverComputation" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This abstract class manages the mathematical calculations of the prover side in the sigma protocol.
+It samples random values and computes the messages.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N22SigmaProverComputation15computeFirstMsgERK10shared_ptrI16SigmaProverInputE">
+<span id="SigmaProverComputation::computeFirstMsg__shared_ptr:SigmaProverInput:CR"></span>shared_ptr&lt;SigmaProtocolMsg&gt; <code class="descclassname">SigmaProverComputation::</code><code class="descname">computeFirstMsg</code><span class="sig-paren">(</span><em class="property">const</em> shared_ptr&lt;SigmaProverInput&gt; &amp;<em>input</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N22SigmaProverComputation15computeFirstMsgERK10shared_ptrI16SigmaProverInputE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Computes the first message of the sigma protocol.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N22SigmaProverComputation16computeSecondMsgERK6vectorI4byteE">
+<span id="SigmaProverComputation::computeSecondMsg__vector:byte:CR"></span>shared_ptr&lt;SigmaProtocolMsg&gt; <code class="descclassname">SigmaProverComputation::</code><code class="descname">computeSecondMsg</code><span class="sig-paren">(</span><em class="property">const</em> vector&lt;byte&gt; &amp;<em>challenge</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N22SigmaProverComputation16computeSecondMsgERK6vectorI4byteE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Computes the second message of the sigma protocol.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="sigmaverifiercomputation">
+<h3><a class="toc-backref" href="#id7">SigmaVerifierComputation</a><a class="headerlink" href="#sigmaverifiercomputation" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="_CPPv224SigmaVerifierComputation">
+<span id="SigmaVerifierComputation"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">SigmaVerifierComputation</code><a class="headerlink" href="#_CPPv224SigmaVerifierComputation" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This abstract class manages the mathematical calculations of the verifier side in the sigma protocol.
+It samples random challenge and verifies the proof.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N24SigmaVerifierComputation15sampleChallengeEv">
+<span id="SigmaVerifierComputation::sampleChallenge"></span>void <code class="descclassname">SigmaVerifierComputation::</code><code class="descname">sampleChallenge</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N24SigmaVerifierComputation15sampleChallengeEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Samples the challenge for this protocol.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N24SigmaVerifierComputation12setChallengeERK6vectorI4byteE">
+<span id="SigmaVerifierComputation::setChallenge__vector:byte:CR"></span>void <code class="descclassname">SigmaVerifierComputation::</code><code class="descname">setChallenge</code><span class="sig-paren">(</span><em class="property">const</em> vector&lt;byte&gt; &amp;<em>challenge</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N24SigmaVerifierComputation12setChallengeERK6vectorI4byteE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Sets the given challenge.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N24SigmaVerifierComputation12getChallengeEv">
+<span id="SigmaVerifierComputation::getChallenge"></span>vector&lt;byte&gt; <code class="descclassname">SigmaVerifierComputation::</code><code class="descname">getChallenge</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N24SigmaVerifierComputation12getChallengeEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns the sampled challenge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the challenge.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N24SigmaVerifierComputation6verifyEP16SigmaCommonInputP16SigmaProtocolMsgP16SigmaProtocolMsg">
+<span id="SigmaVerifierComputation::verify__SigmaCommonInputP.SigmaProtocolMsgP.SigmaProtocolMsgP"></span>bool <code class="descclassname">SigmaVerifierComputation::</code><code class="descname">verify</code><span class="sig-paren">(</span>SigmaCommonInput *<em>input</em>, SigmaProtocolMsg *<em>a</em>, SigmaProtocolMsg *<em>z</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N24SigmaVerifierComputation6verifyEP16SigmaCommonInputP16SigmaProtocolMsgP16SigmaProtocolMsg" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Verifies the proof.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">true if the proof has been verified; false, otherwise.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="supported-protocols">
+<h2><a class="toc-backref" href="#id8">Supported Protocols</a><a class="headerlink" href="#supported-protocols" title="Permalink to this headline">¶</a></h2>
+<p>Concrete Sigma protocols implemented so far are:</p>
+<ul class="simple">
+<li>Dlog</li>
+<li>DH</li>
+<li>Extended DH</li>
+<li>Pedersen commitment knowledge</li>
+<li>Pedersen committed value</li>
+<li>El Gamal commitment knowledge</li>
+<li>El Gamal committed value</li>
+<li>El Gamal private key</li>
+<li>El Gamal encrypted value</li>
+<li>Cramer-Shoup encrypted value</li>
+<li>Damgard-Jurik encrypted zero</li>
+<li>Damgard-Jurik encrypted value</li>
+<li>Damgard-Jurik product</li>
+<li>AND (of multiple statements)</li>
+<li>OR of two statements</li>
+<li>OR of multiple statements</li>
+</ul>
+</div>
+<div class="section" id="example-of-usage">
+<h2><a class="toc-backref" href="#id9">Example of Usage</a><a class="headerlink" href="#example-of-usage" title="Permalink to this headline">¶</a></h2>
+<p>Steps in prover creation:</p>
+<ul class="simple">
+<li>Given a <code class="docutils literal"><span class="pre">Channel</span></code> object channel and input for the concrete Sigma protocol prover (In the example below, x and h) do:<ul>
+<li>Create a <code class="docutils literal"><span class="pre">SigmaProverComputation</span></code> (for example, <code class="docutils literal"><span class="pre">SigmaDlogProverComputation</span></code>).</li>
+<li>Create a <code class="docutils literal"><span class="pre">SigmaProtocolProver</span></code> with channel and the proverComputation.</li>
+<li>Create input object for the prover.</li>
+<li>Call the <code class="docutils literal"><span class="pre">prove()</span></code> function of the prover with the input.</li>
+</ul>
+</li>
+</ul>
+<p>Prover code example:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="c1">//Creates the dlog group, use the koblitz curve.</span>
+<span class="k">auto</span> <span class="n">dlog</span> <span class="o">=</span> <span class="n">make_shared</span><span class="o">&lt;</span><span class="n">OpenSSLDlogECF2m</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;K-233&quot;</span><span class="p">);</span>
+
+<span class="c1">//Creates sigma prover computation.</span>
+<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">SigmaProverComputation</span><span class="o">&gt;</span> <span class="n">proverComputation</span> <span class="o">=</span> <span class="n">make_shared</span><span class="o">&lt;</span><span class="n">SigmaDlogProverComputation</span><span class="o">&gt;</span><span class="p">(</span><span class="n">dlog</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">get_seeded_prg</span><span class="p">());</span>
+
+<span class="c1">//Create Sigma Prover with the given SigmaProverComputation.</span>
+<span class="n">SigmaProver</span> <span class="nf">prover</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="n">proverComputation</span><span class="p">);</span>
+
+<span class="c1">//Creates input for the prover.</span>
+<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">SigmaProverInput</span><span class="o">&gt;</span> <span class="n">input</span> <span class="o">=</span> <span class="n">make_shared</span><span class="o">&lt;</span><span class="n">SigmaDlogProverInput</span><span class="o">&gt;</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">w</span><span class="p">);</span>
+
+<span class="c1">//Calls the prove function of the prover.</span>
+<span class="n">prover</span><span class="p">.</span><span class="n">prove</span><span class="p">(</span><span class="n">input</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Steps in verifier creation:</p>
+<ul class="simple">
+<li>Given a <code class="docutils literal"><span class="pre">Channel</span></code> object channel and input for the concrete Sigma protocol verifier (In the example below, h) do:<ul>
+<li>Create a <code class="docutils literal"><span class="pre">SigmaVerifierComputation</span></code> (for example, <code class="docutils literal"><span class="pre">SigmaDlogVerifierComputation</span></code>).</li>
+<li>Create a <code class="docutils literal"><span class="pre">SigmaProtocolVerifier</span></code> with channel and verifierComputation.</li>
+<li>Create input object for the verifier.</li>
+<li>Call the <code class="docutils literal"><span class="pre">verify()</span></code> function of the verifier with the input.</li>
+</ul>
+</li>
+</ul>
+<p>Verifier code example:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="c1">//Creates the dlog group, use the koblitz curve.</span>
+<span class="k">auto</span> <span class="n">dlog</span> <span class="o">=</span> <span class="n">make_shared</span><span class="o">&lt;</span><span class="n">OpenSSLDlogECF2m</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;K-233&quot;</span><span class="p">);</span>
+
+<span class="c1">//Creates sigma verifier computation.</span>
+<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">SigmaVerifierComputation</span><span class="o">&gt;</span> <span class="n">verifierComputation</span> <span class="o">=</span> <span class="n">make_shared</span><span class="o">&lt;</span><span class="n">SigmaDlogVerifierComputation</span><span class="o">&gt;</span><span class="p">(</span><span class="n">dlog</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">get_seeded_prg</span><span class="p">());</span>
+
+<span class="c1">//Creates Sigma verifier with the given SigmaVerifierComputation.</span>
+<span class="n">SigmaVerifier</span> <span class="nf">verifier</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="n">verifierComputation</span><span class="p">);</span>
+
+<span class="c1">// Creates input for the verifier.</span>
+<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">SigmaCommonInput</span><span class="o">&gt;</span> <span class="n">input</span> <span class="o">=</span> <span class="n">make_shared</span><span class="o">&lt;</span><span class="n">SigmaDlogCommonInput</span><span class="o">&gt;</span><span class="p">(</span><span class="n">h</span><span class="p">);</span>
+
+<span class="c1">//Calls the verify function of the verifier.</span>
+<span class="n">verifier</span><span class="p">.</span><span class="n">verify</span><span class="p">(</span><span class="n">input</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Sigma Protocols</a><ul>
+<li><a class="reference internal" href="#the-prover-class">The Prover class</a></li>
+<li><a class="reference internal" href="#the-verifier-class">The Verifier class</a></li>
+<li><a class="reference internal" href="#the-simulator-class">The Simulator class</a></li>
+<li><a class="reference internal" href="#computation-classes">Computation classes</a><ul>
+<li><a class="reference internal" href="#sigmaprovercomputation">SigmaProverComputation</a></li>
+<li><a class="reference internal" href="#sigmaverifiercomputation">SigmaVerifierComputation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#supported-protocols">Supported Protocols</a></li>
+<li><a class="reference internal" href="#example-of-usage">Example of Usage</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../interactive_layer.html">Layer 3: Interactive Protocols</a><ul>
+      <li>Previous: <a href="ot.html" title="previous chapter">Oblivious Transfer Protocols</a></li>
+      <li>Next: <a href="zk.html" title="next chapter">Zero Knowledge Proofs and Zero Knowledge Proofs of Knowledge</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/interactive_layer/sigma_protocols.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, libscapi team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/interactive_layer/sigma_protocols.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,372 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Pseudorandom Function (PRF) &#8212; libscapi 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Pseudorandom Permutation (PRP)" href="pseudorandom_permutation.html" />
+    <link rel="prev" title="Cryptographic Hash" href="cryptographic_hash.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="pseudorandom-function-prf">
+<h1><a class="toc-backref" href="#id1">Pseudorandom Function (PRF)</a><a class="headerlink" href="#pseudorandom-function-prf" title="Permalink to this headline">¶</a></h1>
+<p>In cryptography, a <strong>pseudorandom function family</strong>, abbreviated <strong>PRF</strong>, is a collection of efficiently-computable functions which emulate a random function in the following way: no efficient algorithm can distinguish (with significant advantage) between a function chosen randomly from the PRF family and a random oracle (a function whose outputs are fixed completely at random).</p>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#pseudorandom-function-prf" id="id1">Pseudorandom Function (PRF)</a><ul>
+<li><a class="reference internal" href="#the-pseudorandomfunction-abstract-class" id="id2">The <code class="docutils literal"><span class="pre">PseudorandomFunction</span></code> abstract class</a><ul>
+<li><a class="reference internal" href="#block-manipulation" id="id3">Block Manipulation</a></li>
+<li><a class="reference internal" href="#setting-the-secret-key" id="id4">Setting the Secret Key</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#basic-usage" id="id5">Basic Usage</a></li>
+<li><a class="reference internal" href="#pseudorandom-function-with-varying-input-output-lengths" id="id6">Pseudorandom Function with Varying Input-Output Lengths</a><ul>
+<li><a class="reference internal" href="#how-to-use-the-varying-input-output-length-prf" id="id7">How to use the Varying Input-Output Length PRF</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#supported-prf-types" id="id8">Supported Prf Types</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="the-pseudorandomfunction-abstract-class">
+<h2><a class="toc-backref" href="#id2">The <code class="docutils literal"><span class="pre">PseudorandomFunction</span></code> abstract class</a><a class="headerlink" href="#the-pseudorandomfunction-abstract-class" title="Permalink to this headline">¶</a></h2>
+<p>The main function of this class is <code class="docutils literal"><span class="pre">computeBlock()</span></code>. We supply several versions for compute, with and without length. Since both PRP&#8217;s and PRF&#8217;s may have varying input/output length, for such algorithms the length should be supplied. We provide the version without the lengths and not just the versions with length of input and output, although it suffices, to avoid confusion and misuse from a basic user that only knows how to use block ciphers. A user that uses the block cipher TripleDES, may be confused by the “compute with length” functions since TripleDES has a pre-defined length and it cannot be changed.</p>
+<div class="section" id="block-manipulation">
+<h3><a class="toc-backref" href="#id3">Block Manipulation</a><a class="headerlink" href="#block-manipulation" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N20PseudorandomFunction12computeBlockERK6vectorI4byteEiR6vectorI4byteEi">
+<span id="PseudorandomFunction::computeBlock__vector:byte:CR.i.vector:byte:R.i"></span>void <code class="descclassname">PseudorandomFunction::</code><code class="descname">computeBlock</code><span class="sig-paren">(</span><em class="property">const</em> vector&lt;byte&gt; &amp;<em>inBytes</em>, int <em>inOff</em>, vector&lt;byte&gt; &amp;<em>outBytes</em>, int <em>outOff</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N20PseudorandomFunction12computeBlockERK6vectorI4byteEiR6vectorI4byteEi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Computes the function using the secret key.
+The user supplies the input vector and the offset from which to take the data from.
+The user also supplies the output vector as well as the offset.
+The computeBlock function will put the output in the output vector starting at the offset.
+This function is suitable for block ciphers where the input/output length is known in advance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>inBytes</strong> &#8211; input bytes to compute</li>
+<li><strong>inOff</strong> &#8211; input offset in the inBytes array</li>
+<li><strong>outBytes</strong> &#8211; output bytes. The resulted bytes of compute</li>
+<li><strong>outOff</strong> &#8211; output offset in the outBytes array to put the result from</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N20PseudorandomFunction12computeBlockERK6vectorI4byteEiiR6vectorI4byteEii">
+<span id="PseudorandomFunction::computeBlock__vector:byte:CR.i.i.vector:byte:R.i.i"></span>void <code class="descclassname">PseudorandomFunction::</code><code class="descname">computeBlock</code><span class="sig-paren">(</span><em class="property">const</em> vector&lt;byte&gt; &amp;<em>inBytes</em>, int <em>inOff</em>, int <em>inLen</em>, vector&lt;byte&gt; &amp;<em>outBytes</em>, int <em>outOff</em>, int <em>outLen</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N20PseudorandomFunction12computeBlockERK6vectorI4byteEiiR6vectorI4byteEii" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Computes the function using the secret key.
+This function is provided in the abstract class especially for the sub-family PrfVaryingIOLength,
+which may have variable input and output length.
+If the implemented algorithm is a block cipher then the size of the input as well as the output is known in advance and
+the use may call the other computeBlock function where length is not require.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>inBytes</strong> &#8211; input bytes to compute</li>
+<li><strong>inOff</strong> &#8211; input offset in the inBytes vector</li>
+<li><strong>inLen</strong> &#8211; the length of the input vector</li>
+<li><strong>outBytes</strong> &#8211; output bytes. The resulted bytes of compute</li>
+<li><strong>outOff</strong> &#8211; output offset in the outBytes vector to put the result from</li>
+<li><strong>outLen</strong> &#8211; the length of the output vector</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N20PseudorandomFunction12computeBlockERK6vectorI4byteEiiR6vectorI4byteEi">
+<span id="PseudorandomFunction::computeBlock__vector:byte:CR.i.i.vector:byte:R.i"></span>void <code class="descclassname">PseudorandomFunction::</code><code class="descname">computeBlock</code><span class="sig-paren">(</span><em class="property">const</em> vector&lt;byte&gt; &amp;<em>inBytes</em>, int <em>inOffset</em>, int <em>inLen</em>, vector&lt;byte&gt; &amp;<em>outBytes</em>, int <em>outOffset</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N20PseudorandomFunction12computeBlockERK6vectorI4byteEiiR6vectorI4byteEi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Computes the function using the secret key.</p>
+<p>This function is provided in this PseudorandomFunction abstract class for the sake of classes for which the input length can be different for each computation. Hmac and Prf/Prp with variable input length are examples of such classes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>inBytes</strong> &#8211; input bytes to compute</li>
+<li><strong>inOffset</strong> &#8211; input offset in the inBytes vector</li>
+<li><strong>inLen</strong> &#8211; the length of the input vector</li>
+<li><strong>outBytes</strong> &#8211; output bytes. The resulted bytes of compute.</li>
+<li><strong>outOffset</strong> &#8211; output offset in the outBytes vector to put the result from</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N20PseudorandomFunction12getBlockSizeEv">
+<span id="PseudorandomFunction::getBlockSize"></span>int <code class="descclassname">PseudorandomFunction::</code><code class="descname">getBlockSize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N20PseudorandomFunction12getBlockSizeEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the input block size in bytes</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="setting-the-secret-key">
+<h3><a class="toc-backref" href="#id4">Setting the Secret Key</a><a class="headerlink" href="#setting-the-secret-key" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N20PseudorandomFunction11generateKeyER22AlgorithmParameterSpec">
+<span id="PseudorandomFunction::generateKey__AlgorithmParameterSpecR"></span>SecretKey <code class="descclassname">PseudorandomFunction::</code><code class="descname">generateKey</code><span class="sig-paren">(</span>AlgorithmParameterSpec &amp;<em>keyParams</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N20PseudorandomFunction11generateKeyER22AlgorithmParameterSpec" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Generates a secret key to initialize this prf object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>keyParams</strong> &#8211; algorithmParameterSpec contains the required parameters for the key generation</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the generated secret key</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N20PseudorandomFunction11generateKeyEi">
+<span id="PseudorandomFunction::generateKey__i"></span>SecretKey <code class="descclassname">PseudorandomFunction::</code><code class="descname">generateKey</code><span class="sig-paren">(</span>int <em>keySize</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N20PseudorandomFunction11generateKeyEi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Generates a secret key to initialize this prf object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>keySize</strong> &#8211; is the required secret key size in bits</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the generated secret key</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N20PseudorandomFunction8isKeySetEv">
+<span id="PseudorandomFunction::isKeySet"></span>bool <code class="descclassname">PseudorandomFunction::</code><code class="descname">isKeySet</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N20PseudorandomFunction8isKeySetEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>An object trying to use an instance of prf needs to check if it has already been initialized.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">true if the object was initialized by calling the function setKey.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N20PseudorandomFunction6setKeyER9SecretKey">
+<span id="PseudorandomFunction::setKey__SecretKeyR"></span>void <code class="descclassname">PseudorandomFunction::</code><code class="descname">setKey</code><span class="sig-paren">(</span>SecretKey &amp;<em>secretKey</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N20PseudorandomFunction6setKeyER9SecretKey" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Sets the secret key for this prf. The key can be changed at any time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>secretKey</strong> &#8211; secret key</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="basic-usage">
+<h2><a class="toc-backref" href="#id5">Basic Usage</a><a class="headerlink" href="#basic-usage" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="c1">//Create secretKey and in, in2, out vectors</span>
+<span class="p">...</span>
+
+<span class="c1">// create a PRF of type TripleDES using openssl library</span>
+<span class="n">PseudorandomFunction</span><span class="o">*</span> <span class="n">prf</span> <span class="o">=</span> <span class="k">new</span> <span class="n">OpenSSLTripleDES</span><span class="p">();</span>
+
+<span class="c1">//set the key</span>
+<span class="n">prf</span><span class="o">-&gt;</span><span class="n">setKey</span><span class="p">(</span><span class="n">secretKey</span><span class="p">);</span>
+
+<span class="c1">//compute the function with input in and output out.</span>
+<span class="n">prf</span><span class="o">-&gt;</span><span class="n">computeBlock</span><span class="p">(</span><span class="n">in</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="pseudorandom-function-with-varying-input-output-lengths">
+<h2><a class="toc-backref" href="#id6">Pseudorandom Function with Varying Input-Output Lengths</a><a class="headerlink" href="#pseudorandom-function-with-varying-input-output-lengths" title="Permalink to this headline">¶</a></h2>
+<p>A pseudorandom function with varying input/output lengths does not have pre-defined input and output lengths. The input and output length may be different for each compute function call. The length of the input as well as the output is determined upon user request. The class <code class="docutils literal"><span class="pre">IteratedPrfVarying</span></code> implements this functionality using an inner PRF that must implement the <code class="docutils literal"><span class="pre">PrfVaryingInputLength</span></code> abstract class. An example for such PRF is <code class="docutils literal"><span class="pre">Hmac</span></code>.</p>
+<div class="section" id="how-to-use-the-varying-input-output-length-prf">
+<h3><a class="toc-backref" href="#id7">How to use the Varying Input-Output Length PRF</a><a class="headerlink" href="#how-to-use-the-varying-input-output-length-prf" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="c1">//Create secret key and in, out byte vectors</span>
+<span class="p">...</span>
+
+<span class="c1">//create the Prf varying.</span>
+<span class="n">PseudorandomFunction</span><span class="o">*</span> <span class="n">prf</span> <span class="o">=</span> <span class="k">new</span> <span class="n">IteratedPrfVarying</span><span class="p">(</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">OpenSSLHMAC</span><span class="o">&gt;</span><span class="p">());</span>
+
+<span class="c1">//set the key</span>
+<span class="n">prf</span><span class="o">-&gt;</span><span class="n">setKey</span><span class="p">(</span><span class="n">secretKey</span><span class="p">);</span>
+
+<span class="c1">//compute the function with input in of size 10 and output out of size 20.</span>
+<span class="n">prf</span><span class="o">-&gt;</span><span class="n">computeBlock</span><span class="p">(</span><span class="n">in</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="supported-prf-types">
+<h2><a class="toc-backref" href="#id8">Supported Prf Types</a><a class="headerlink" href="#supported-prf-types" title="Permalink to this headline">¶</a></h2>
+<p>In this section we present the prf functions provided by libscapi.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="44%" />
+<col width="56%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Class Name</th>
+<th class="head">Class Location</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>IteratedPrfVarying</td>
+<td>libscapi/include/primitives/Prf.hpp</td>
+</tr>
+<tr class="row-odd"><td>LubyRackoffPrpFromPrfVarying</td>
+<td>libscapi/include/primitives/Prf.hpp</td>
+</tr>
+</tbody>
+</table>
+<p>The OpenSSL implementation:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="27%" />
+<col width="73%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Class Name</th>
+<th class="head">Class Location</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>OpenSSLHMAC</td>
+<td>libscapi/include/primitives/PrfOpenSSL.hpp</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Pseudorandom Function (PRF)</a><ul>
+<li><a class="reference internal" href="#the-pseudorandomfunction-abstract-class">The <code class="docutils literal"><span class="pre">PseudorandomFunction</span></code> abstract class</a><ul>
+<li><a class="reference internal" href="#block-manipulation">Block Manipulation</a></li>
+<li><a class="reference internal" href="#setting-the-secret-key">Setting the Secret Key</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
+<li><a class="reference internal" href="#pseudorandom-function-with-varying-input-output-lengths">Pseudorandom Function with Varying Input-Output Lengths</a><ul>
+<li><a class="reference internal" href="#how-to-use-the-varying-input-output-length-prf">How to use the Varying Input-Output Length PRF</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#supported-prf-types">Supported Prf Types</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../primitives.html">Layer 1: Basic Primitives</a><ul>
+      <li>Previous: <a href="cryptographic_hash.html" title="previous chapter">Cryptographic Hash</a></li>
+      <li>Next: <a href="pseudorandom_permutation.html" title="next chapter">Pseudorandom Permutation (PRP)</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/primitives/pseudorandom_function.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, libscapi team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/primitives/pseudorandom_function.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

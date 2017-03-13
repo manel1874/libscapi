@@ -24,7 +24,7 @@ Libscapi is released under the MIT open source license. However, some of the lib
 
 ## Documentation
 
-Go to http://scapi.readthedocs.org/ for a detailed explanations of our implementation.
+Go to http://biulibscapi.readthedocs.org/ for a detailed explanations of our implementation.
 
 ##Installing libscapi
 

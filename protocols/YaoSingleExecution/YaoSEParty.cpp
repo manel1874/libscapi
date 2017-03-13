@@ -1,8 +1,14 @@
 //
 // Created by moriya on 15/2/17.
 //
+#ifndef _WIN32
 
 #include "YaoSEParty.h"
+
+CircuitFile *cf;
+void compute(Bit * res, Bit * in, Bit * in2) {
+    cf->compute((block*)res, (block*)in, (block*)in2);
+}
 
 YaoSEParty::YaoSEParty(int id, string circuitFile, string ip, int port, string inputFile)
         : id(id){
@@ -121,7 +127,7 @@ int main(int argc, char* argv[]) {
         auto out = party.getOutput();
         cout << "result: " << endl;
         for (int i = 0; i < cf->n3; i++) {
-            cout << out[i] << " ";
+            cout << (int)out[i] << " ";
         }
         cout << endl;
     }
@@ -156,9 +162,9 @@ int main(int argc, char* argv[]) {
         auto out = party.getOutput();
         cout << "result: " << endl;
         for (int i = 0; i < cf->n3; i++) {
-            cout << out[i] << " ";
+            cout << (int)out[i] << " ";
         }
         cout << endl;
     }
 }
-
+#endif

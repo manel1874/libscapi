@@ -1,0 +1,288 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Zero Knowledge Proofs and Zero Knowledge Proofs of Knowledge &#8212; libscapi 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Commitment Schemes" href="commitments.html" />
+    <link rel="prev" title="Sigma Protocols" href="sigma_protocols.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="zero-knowledge-proofs-and-zero-knowledge-proofs-of-knowledge">
+<h1><a class="toc-backref" href="#id1">Zero Knowledge Proofs and Zero Knowledge Proofs of Knowledge</a><a class="headerlink" href="#zero-knowledge-proofs-and-zero-knowledge-proofs-of-knowledge" title="Permalink to this headline">¶</a></h1>
+<p>A <strong>zero-knowledge proof</strong> or a zero-knowledge protocol is a method by which one party (the prover) can prove to another party (the verifier) that a given statement is true, without conveying any additional information apart from the fact that the statement is indeed true. A <strong>zero-knowledge proof of knowledge (ZKPOK)</strong> is a sub case of zero knowledge proofs, in which the prover proves to the verifier that he knows how to prove a statement, without actually proving it.</p>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#zero-knowledge-proofs-and-zero-knowledge-proofs-of-knowledge" id="id1">Zero Knowledge Proofs and Zero Knowledge Proofs of Knowledge</a><ul>
+<li><a class="reference internal" href="#zero-knowledge-abstract-classes" id="id2">Zero Knowledge abstract classes</a><ul>
+<li><a class="reference internal" href="#zkprover" id="id3">ZKProver</a></li>
+<li><a class="reference internal" href="#zkverifier" id="id4">ZKVerifier</a></li>
+<li><a class="reference internal" href="#zkproverinput" id="id5">ZKProverInput</a></li>
+<li><a class="reference internal" href="#zkcommoninput" id="id6">ZKCommonInput</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#zero-knowledge-proof-of-knowledge-classes" id="id7">Zero Knowledge Proof of Knowledge classes</a></li>
+<li><a class="reference internal" href="#implemented-protocols" id="id8">Implemented Protocols</a></li>
+<li><a class="reference internal" href="#example-of-usage" id="id9">Example of Usage</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="zero-knowledge-abstract-classes">
+<h2><a class="toc-backref" href="#id2">Zero Knowledge abstract classes</a><a class="headerlink" href="#zero-knowledge-abstract-classes" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="zkprover">
+<h3><a class="toc-backref" href="#id3">ZKProver</a><a class="headerlink" href="#zkprover" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal"><span class="pre">ZKProver</span></code> abstract class declares the <code class="docutils literal"><span class="pre">prove()</span></code> function that accepts an input and runs the ZK proof. The input type is <code class="docutils literal"><span class="pre">ZKProverInput</span></code>, which is a marker class. Every concrete protocol should have a dedicated input class that extends it.</p>
+<dl class="class">
+<dt id="_CPPv28ZKProver">
+<span id="ZKProver"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">ZKProver</code><a class="headerlink" href="#_CPPv28ZKProver" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>A zero-knowledge proof or zero-knowledge protocol is a method by which one party (the prover) can prove to another party (the verifier) that a given statement is true,
+without conveying any additional information apart from the fact that the statement is indeed true.</p>
+<p>This is a general class that simulates the prover side of the Zero Knowledge proof. Every class that derive this class is signed as Zero Knowledge prover.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N8ZKProver5proveERK10shared_ptrI13ZKProverInputE">
+<span id="ZKProver::prove__shared_ptr:ZKProverInput:CR"></span>void <code class="descclassname">ZKProver::</code><code class="descname">prove</code><span class="sig-paren">(</span><em class="property">const</em> shared_ptr&lt;<a class="reference internal" href="#_CPPv213ZKProverInput" title="ZKProverInput">ZKProverInput</a>&gt; &amp;<em>input</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N8ZKProver5proveERK10shared_ptrI13ZKProverInputE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Runs the prover side of the Zero Knowledge proof.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>input</strong> &#8211; holds necessary values to the proof calculations.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="zkverifier">
+<h3><a class="toc-backref" href="#id4">ZKVerifier</a><a class="headerlink" href="#zkverifier" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal"><span class="pre">ZKVerifier</span></code> abstract class declares the <code class="docutils literal"><span class="pre">verify()</span></code> function that accepts an input and runs the ZK proof verification. The input type is <code class="docutils literal"><span class="pre">ZKCommonInput</span></code>, which is a marker class of inputs that are common for the prover and the verifier. Every concrete protocol should have a dedicated input class that extends it.</p>
+<dl class="class">
+<dt id="_CPPv210ZKVerifier">
+<span id="ZKVerifier"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">ZKVerifier</code><a class="headerlink" href="#_CPPv210ZKVerifier" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>A zero-knowledge proof or zero-knowledge protocol is a method by which one party (the prover) can prove to another party (the verifier) that a given statement is true,
+without conveying any additional information apart from the fact that the statement is indeed true.</p>
+<p>This is a general class that simulates the verifier side of the Zero Knowledge proof. Every class that derive this class is signed as Zero Knowledge verifier.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N10ZKVerifier6verifyEP13ZKCommonInputRK10shared_ptrI16SigmaProtocolMsgERK10shared_ptrI16SigmaProtocolMsgE">
+<span id="ZKVerifier::verify__ZKCommonInputP.shared_ptr:SigmaProtocolMsg:CR.shared_ptr:SigmaProtocolMsg:CR"></span>bool <code class="descclassname">ZKVerifier::</code><code class="descname">verify</code><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv213ZKCommonInput" title="ZKCommonInput">ZKCommonInput</a> *<em>input</em>, <em class="property">const</em> shared_ptr&lt;SigmaProtocolMsg&gt; &amp;<em>emptyA</em>, <em class="property">const</em> shared_ptr&lt;SigmaProtocolMsg&gt; &amp;<em>emptyZ</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N10ZKVerifier6verifyEP13ZKCommonInputRK10shared_ptrI16SigmaProtocolMsgERK10shared_ptrI16SigmaProtocolMsgE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Runs the verifier side of the Zero Knowledge proof.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>input</strong> &#8211; holds necessary values to the varification calculations.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">true if the proof was verified; false, otherwise.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="zkproverinput">
+<h3><a class="toc-backref" href="#id5">ZKProverInput</a><a class="headerlink" href="#zkproverinput" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="_CPPv213ZKProverInput">
+<span id="ZKProverInput"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">ZKProverInput</code><a class="headerlink" href="#_CPPv213ZKProverInput" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Marker class. Each concrete ZK prover&#8217;s input class should derive this class.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="zkcommoninput">
+<h3><a class="toc-backref" href="#id6">ZKCommonInput</a><a class="headerlink" href="#zkcommoninput" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="_CPPv213ZKCommonInput">
+<span id="ZKCommonInput"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">ZKCommonInput</code><a class="headerlink" href="#_CPPv213ZKCommonInput" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This is a marker class for Zero Knowledge input, where there is an implementing class for each concrete Zero Knowledge protocol.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="zero-knowledge-proof-of-knowledge-classes">
+<h2><a class="toc-backref" href="#id7">Zero Knowledge Proof of Knowledge classes</a><a class="headerlink" href="#zero-knowledge-proof-of-knowledge-classes" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal"><span class="pre">ZKPOKProver</span></code> and <code class="docutils literal"><span class="pre">ZKPOKVerifier</span></code> are marker classes that extend the <code class="docutils literal"><span class="pre">ZKProver</span></code> and <code class="docutils literal"><span class="pre">ZKVerifier</span></code> classes. ZKPOK concrete protocol should extend these marker classes instead of the general ZK classes.</p>
+<dl class="class">
+<dt id="_CPPv211ZKPOKProver">
+<span id="ZKPOKProver"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">ZKPOKProver</code> : <em class="property">public</em> <a class="reference internal" href="#_CPPv28ZKProver" title="ZKProver">ZKProver</a><a class="headerlink" href="#_CPPv211ZKPOKProver" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This is a general class that simulates the prover side of the Zero Knowledge proof of knowledge.
+Every class that derive it is signed as ZKPOK prover.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="_CPPv213ZKPOKVerifier">
+<span id="ZKPOKVerifier"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">ZKPOKVerifier</code> : <em class="property">public</em> <em class="property">virtual</em> <a class="reference internal" href="#_CPPv210ZKVerifier" title="ZKVerifier">ZKVerifier</a><a class="headerlink" href="#_CPPv213ZKPOKVerifier" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This is a general class that simulates the verifier side of the Zero Knowledge proof of knowledge.
+Every class that derive it is signed as ZKPOK verifier.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="implemented-protocols">
+<h2><a class="toc-backref" href="#id8">Implemented Protocols</a><a class="headerlink" href="#implemented-protocols" title="Permalink to this headline">¶</a></h2>
+<p>Concrete Zero Knowledge protocols implemented so far are:</p>
+<ul class="simple">
+<li>Zero Knowledge from any sigma protocol</li>
+<li>Zero Knowledge Proof of Knowledge from any sigma protocol (currently implemented using Pedersen Commitment scheme)</li>
+<li>Zero Knowledge Proof of Knowledge from any sigma protocol Fiat Shamir (Random Oracle Model)</li>
+</ul>
+</div>
+<div class="section" id="example-of-usage">
+<h2><a class="toc-backref" href="#id9">Example of Usage</a><a class="headerlink" href="#example-of-usage" title="Permalink to this headline">¶</a></h2>
+<p>Steps in prover creation:</p>
+<ul class="simple">
+<li>Given a Channel object channel and input for the underlying SigmaProverComputation (in the following case, h and x) do:<ul>
+<li>Create a SigmaProverComputation (for example, SigmaDlogProverComputation).</li>
+<li>Create a ZKProver with channel and the proverComputation (ForExample, ZKFromSigmaProver).</li>
+<li>Create input object for the prover.</li>
+<li>Call the prove function of the prover with the input.</li>
+</ul>
+</li>
+</ul>
+<p>Prover code example:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="c1">//create the ZK prover</span>
+<span class="k">auto</span> <span class="n">dlog</span> <span class="o">=</span> <span class="n">make_shared</span><span class="o">&lt;</span><span class="n">OpenSSLDlogECF2m</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;K-233&quot;</span><span class="p">);</span>
+<span class="n">ZKFromSigmaProver</span> <span class="nf">prover</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="n">make_shared</span><span class="o">&lt;</span><span class="n">SigmaDlogProverComputation</span><span class="o">&gt;</span><span class="p">(</span><span class="n">dlog</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="n">get_seeded_prg</span><span class="p">()));</span>
+
+<span class="c1">//create the input for the prover</span>
+<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">SigmaDlogProverInput</span><span class="o">&gt;</span> <span class="n">input</span> <span class="o">=</span> <span class="n">make_shared</span><span class="o">&lt;</span><span class="n">SigmaDlogProverInput</span><span class="o">&gt;</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">x</span><span class="p">);</span>
+
+<span class="c1">//Call prove function</span>
+<span class="n">prover</span><span class="p">.</span><span class="n">prove</span><span class="p">(</span><span class="n">input</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Steps in verifier creation:</p>
+<ul class="simple">
+<li>Given a Channel object channel and input for the underlying SigmaVerifierComputation (In the example below, h) do:<ul>
+<li>Create a SigmaVerifierComputation (for example, SigmaDlogVerifierComputation).</li>
+<li>Create a ZKVerifier with channel and verifierComputation (For example, ZKFromSigmaVerifier).</li>
+<li>Create input object for the verifier.</li>
+<li>Call the verify function of the verifier with the input.</li>
+</ul>
+</li>
+</ul>
+<p>Verifier code example:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span> <span class="c1">//create the ZK prover</span>
+<span class="k">auto</span> <span class="n">dlog</span> <span class="o">=</span> <span class="n">make_shared</span><span class="o">&lt;</span><span class="n">OpenSSLDlogECF2m</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;K-233&quot;</span><span class="p">);</span>
+ <span class="n">ZKFromSigmaVerifier</span> <span class="nf">verifier</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="n">make_shared</span><span class="o">&lt;</span><span class="n">SigmaDlogVerifierComputation</span><span class="o">&gt;</span><span class="p">(</span><span class="n">dlog</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="n">get_seeded_prg</span><span class="p">()),</span> <span class="n">get_seeded_prg</span><span class="p">());</span>
+
+ <span class="c1">//create the input for the verifier</span>
+ <span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">SigmaDlogCommonInput</span><span class="o">&gt;</span> <span class="n">input</span> <span class="o">=</span> <span class="n">make_shared</span><span class="o">&lt;</span><span class="n">SigmaDlogCommonInput</span><span class="o">&gt;</span><span class="p">(</span><span class="n">h</span><span class="p">);</span>
+
+ <span class="c1">//Call verify function</span>
+ <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">verifier</span><span class="p">.</span><span class="n">verify</span><span class="p">(</span><span class="n">input</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Zero Knowledge Proofs and Zero Knowledge Proofs of Knowledge</a><ul>
+<li><a class="reference internal" href="#zero-knowledge-abstract-classes">Zero Knowledge abstract classes</a><ul>
+<li><a class="reference internal" href="#zkprover">ZKProver</a></li>
+<li><a class="reference internal" href="#zkverifier">ZKVerifier</a></li>
+<li><a class="reference internal" href="#zkproverinput">ZKProverInput</a></li>
+<li><a class="reference internal" href="#zkcommoninput">ZKCommonInput</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#zero-knowledge-proof-of-knowledge-classes">Zero Knowledge Proof of Knowledge classes</a></li>
+<li><a class="reference internal" href="#implemented-protocols">Implemented Protocols</a></li>
+<li><a class="reference internal" href="#example-of-usage">Example of Usage</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../interactive_layer.html">Layer 3: Interactive Protocols</a><ul>
+      <li>Previous: <a href="sigma_protocols.html" title="previous chapter">Sigma Protocols</a></li>
+      <li>Next: <a href="commitments.html" title="next chapter">Commitment Schemes</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/interactive_layer/zk.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, libscapi team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/interactive_layer/zk.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

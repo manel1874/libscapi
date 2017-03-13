@@ -65,7 +65,7 @@ void OpenSSLRSAPermutation::setKey(const shared_ptr<PublicKey> & publicKey, cons
 		rsa = initRSAPublic(pubExponent);
 	}
 	// Call the parent's set key function that sets the keys.
-	TrapdoorPermutationAbs::setKey(publicKey, privateKey);
+	TrapdoorPermutation::setKey(publicKey, privateKey);
 }
 
 shared_ptr<RSA> OpenSSLRSAPermutation::initRSAPublicPrivateCrt(biginteger & pubExp, biginteger & privExp, biginteger & p,

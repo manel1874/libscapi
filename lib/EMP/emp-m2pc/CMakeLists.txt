@@ -8,7 +8,7 @@ set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin )
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} cmake/)
 
 FIND_PACKAGE(emp-ot)
-INCLUDE_DIRECTORIES(${EMP-OT_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(/usr/local/include/emp-tool /usr/local/include/emp-ot ${EMP-OT_INCLUDE_DIRS})
 
 set (CMAKE_C_FLAGS "-pthread -Wall -march=native -O3 -maes")
 #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg -ggdb")

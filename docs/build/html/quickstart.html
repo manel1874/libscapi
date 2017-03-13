@@ -1,0 +1,234 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Quickstart &#8212; libscapi 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="The Communication Layer" href="communication.html" />
+    <link rel="prev" title="Installation" href="install.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="quickstart">
+<h1>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline">¶</a></h1>
+<p>Eager to get started? This page gives a good introduction to Libscapi. It assumes you already have libscapi installed. If you do not, head over to the <a class="reference internal" href="install.html#install"><span class="std std-ref">Installation</span></a> section.</p>
+<div class="section" id="your-first-libscapi-application">
+<h2>Your First libscapi Application<a class="headerlink" href="#your-first-libscapi-application" title="Permalink to this headline">¶</a></h2>
+<p>We begin with a minimal application and go through some basic examples.</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&quot;../../include/primitives/DlogOpenSSL.hpp&quot;</span><span class="cp"></span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[]){</span>
+    <span class="c1">// initiate a discrete log group</span>
+    <span class="c1">// (in this case the OpenSSL implementation of the elliptic curve group K-233)</span>
+    <span class="n">DlogGroup</span><span class="o">*</span> <span class="n">dlog</span> <span class="o">=</span> <span class="k">new</span> <span class="n">OpenSSLDlogECF2m</span><span class="p">(</span><span class="s">&quot;include/configFiles/NISTEC.txt&quot;</span><span class="p">,</span> <span class="s">&quot;K-233&quot;</span><span class="p">);</span>
+
+    <span class="c1">// get the group generator and order</span>
+    <span class="k">auto</span> <span class="n">g</span> <span class="o">=</span> <span class="n">dlog</span><span class="o">-&gt;</span><span class="n">getGenerator</span><span class="p">();</span>
+    <span class="n">biginteger</span> <span class="n">q</span> <span class="o">=</span> <span class="n">dlog</span><span class="o">-&gt;</span><span class="n">getOrder</span><span class="p">();</span>
+
+    <span class="c1">// create a random exponent r</span>
+    <span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">PrgFromOpenSSLAES</span><span class="o">&gt;</span> <span class="n">gen</span> <span class="o">=</span> <span class="n">get_seeded_prg</span><span class="p">();</span>
+    <span class="n">biginteger</span> <span class="n">r</span> <span class="o">=</span> <span class="n">getRandomInRange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">q</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">gen</span><span class="p">.</span><span class="n">get</span><span class="p">());</span>
+
+    <span class="c1">// exponentiate g in r to receive a new group element</span>
+    <span class="k">auto</span> <span class="n">g1</span> <span class="o">=</span> <span class="n">dlog</span><span class="o">-&gt;</span><span class="n">exponentiate</span><span class="p">(</span><span class="n">g</span><span class="p">.</span><span class="n">get</span><span class="p">(),</span> <span class="n">r</span><span class="p">);</span>
+    <span class="c1">// create a random group element</span>
+    <span class="k">auto</span> <span class="n">h</span> <span class="o">=</span> <span class="n">dlog</span><span class="o">-&gt;</span><span class="n">createRandomElement</span><span class="p">();</span>
+    <span class="c1">// multiply elements</span>
+    <span class="k">auto</span> <span class="n">gMult</span> <span class="o">=</span> <span class="n">dlog</span><span class="o">-&gt;</span><span class="n">multiplyGroupElements</span><span class="p">(</span><span class="n">g1</span><span class="p">.</span><span class="n">get</span><span class="p">(),</span> <span class="n">h</span><span class="p">.</span><span class="n">get</span><span class="p">());</span>
+<span class="hll"><span class="p">}</span>
+</span></pre></div>
+</div>
+<p>Pay attention to the definition of the discrete log group. In libscapi we will always use a generic data type
+such as <code class="docutils literal"><span class="pre">DlogGroup</span></code> instead of a more specified data type. This allows us to replace the group to a
+different implementation or a different group entirely, without changing our code.</p>
+<div class="section" id="let-s-break-it-down">
+<h3>Let&#8217;s break it down:<a class="headerlink" href="#let-s-break-it-down" title="Permalink to this headline">¶</a></h3>
+<p>We include the libscapi primitive <code class="docutils literal"><span class="pre">OpenSSLDlogECF2m</span></code> class that extends the <code class="docutils literal"><span class="pre">DlogGroup</span></code> abstract class (implements a discrete log group). This is a wrapper class to an implementation of an elliptic curve group in the OpenSSL library. Since <code class="docutils literal"><span class="pre">DlogGroup</span></code> is abstract class, we can easily choose a different group without changing a single line of code except the one in emphasis.</p>
+<p>We also use the get_seeded_prg() function implemented by libscapi, that returns an object of type PrgFromOpenSSlAES. This is a libscapi&#8217;s class that provides a cryptographically pseudo random generator.</p>
+<p>In order to handle big numbers we use the <code class="docutils literal"><span class="pre">biginteger</span></code> define that represents boost::multiprecision::mpz_int in linux systems and boost::multiprecision::cpp_int in windows.</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&quot;../../include/primitives/DlogOpenSSL.hpp&quot;</span><span class="cp"></span>
+</pre></div>
+</div>
+<p>Our main class defines a discrete log group, and then extract the group properties (generator and order).</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="c1">// initiate a discrete log group</span>
+<span class="c1">// (in this case the OpenSSL implementation of the elliptic curve group K-233</span>
+<span class="c1">// using the NISTEC.txt file that provided by libscapi that is a at libscapi/include/configFiles)</span>
+<span class="n">DlogGroup</span><span class="o">*</span> <span class="n">dlog</span> <span class="o">=</span> <span class="k">new</span> <span class="n">OpenSSLDlogECF2m</span><span class="p">(</span><span class="s">&quot;include/configFiles/NISTEC.txt&quot;</span><span class="p">,</span> <span class="s">&quot;K-233&quot;</span><span class="p">);</span>
+
+<span class="c1">// get the group generator and order</span>
+<span class="k">auto</span> <span class="n">g</span> <span class="o">=</span> <span class="n">dlog</span><span class="o">-&gt;</span><span class="n">getGenerator</span><span class="p">();</span>
+<span class="n">biginteger</span> <span class="n">q</span> <span class="o">=</span> <span class="n">dlog</span><span class="o">-&gt;</span><span class="n">getOrder</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>We then choose a random exponent, and exponentiate the generator in this exponent.</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="c1">// create a random exponent r</span>
+<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">PrgFromOpenSSLAES</span><span class="o">&gt;</span> <span class="n">gen</span> <span class="o">=</span> <span class="n">get_seeded_prg</span><span class="p">();</span>
+<span class="n">biginteger</span> <span class="n">r</span> <span class="o">=</span> <span class="n">getRandomInRange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">q</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">gen</span><span class="p">.</span><span class="n">get</span><span class="p">());</span>
+
+<span class="c1">// exponentiate g in r to receive a new group element</span>
+<span class="k">auto</span> <span class="n">g1</span> <span class="o">=</span> <span class="n">dlog</span><span class="o">-&gt;</span><span class="n">exponentiate</span><span class="p">(</span><span class="n">g</span><span class="p">.</span><span class="n">get</span><span class="p">(),</span> <span class="n">r</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>We then select another group element randomly.</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="c1">// create a random group element</span>
+<span class="k">auto</span> <span class="n">h</span> <span class="o">=</span> <span class="n">dlog</span><span class="o">-&gt;</span><span class="n">createRandomElement</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>Finally, we demonstrate how to multiply group elements.</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="c1">// multiply elements</span>
+<span class="k">auto</span> <span class="n">gMult</span> <span class="o">=</span> <span class="n">dlog</span><span class="o">-&gt;</span><span class="n">multiplyGroupElements</span><span class="p">(</span><span class="n">g1</span><span class="p">.</span><span class="n">get</span><span class="p">(),</span> <span class="n">h</span><span class="p">.</span><span class="n">get</span><span class="p">());</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="compiling-and-running-the-libscapi-code">
+<h2>Compiling and Running the libscapi Code<a class="headerlink" href="#compiling-and-running-the-libscapi-code" title="Permalink to this headline">¶</a></h2>
+<p>Save this example to a file called <em>DlogExample.cpp</em>. In order to compile this file, type in the terminal:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ g++ example.cpp -I/home/moriya -I/home/moriya/boost_1_60_0 -std=c++11 scapi.a -lboost_system -L/home/moriya/boost_1_60_0/stage/lib -lssl -lcrypto -lgmp
+</pre></div>
+</div>
+<p>Note that we use the scapi.a which is the libscapi lirary. The -I command sets the include files to use in the program and the -l command sets the libraries to link to the program.</p>
+<p>A file called <em>a.out</em> should be created as a result. In order to run this file, type in the terminal:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ ./a.out
+</pre></div>
+</div>
+</div>
+<div class="section" id="establishing-secure-communication">
+<h2>Establishing Secure Communication<a class="headerlink" href="#establishing-secure-communication" title="Permalink to this headline">¶</a></h2>
+<p>The first thing that needs to be done to obtain communication services is to setup the connections between the different parties. Libscapi provides two communication types - tcp communication and ssl tcp communication. The abstract communication class called <code class="docutils literal"><span class="pre">commParty</span></code> and the concrete classes are <code class="docutils literal"><span class="pre">CommPartyTCPSynced</span></code> and <code class="docutils literal"><span class="pre">CommPartyTcpSslSynced</span></code>. Both communication types use <code class="docutils literal"><span class="pre">boost::asio::io_service</span></code> in order to set communication between the parties.</p>
+<p>Let&#8217;s get a look at the following code:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;libscapi/include/comm/Comm.hpp&gt;</span><span class="cp"></span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
+
+    <span class="n">boost</span><span class="o">::</span><span class="n">asio</span><span class="o">::</span><span class="n">io_service</span> <span class="n">io_service</span><span class="p">;</span>
+    <span class="n">SocketPartyData</span> <span class="n">me</span><span class="p">,</span> <span class="n">other</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">atoi</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">){</span>
+            <span class="n">me</span> <span class="o">=</span> <span class="n">SocketPartyData</span><span class="p">(</span><span class="n">boost_ip</span><span class="o">::</span><span class="n">address</span><span class="o">::</span><span class="n">from_string</span><span class="p">(</span><span class="s">&quot;127.0.0.1&quot;</span><span class="p">),</span> <span class="mi">8000</span><span class="p">);</span>
+            <span class="n">other</span> <span class="o">=</span> <span class="n">SocketPartyData</span><span class="p">(</span><span class="n">boost_ip</span><span class="o">::</span><span class="n">address</span><span class="o">::</span><span class="n">from_string</span><span class="p">(</span><span class="s">&quot;127.0.0.1&quot;</span><span class="p">),</span> <span class="mi">8001</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="n">me</span> <span class="o">=</span> <span class="n">SocketPartyData</span><span class="p">(</span><span class="n">boost_ip</span><span class="o">::</span><span class="n">address</span><span class="o">::</span><span class="n">from_string</span><span class="p">(</span><span class="s">&quot;127.0.0.1&quot;</span><span class="p">),</span> <span class="mi">8001</span><span class="p">);</span>
+            <span class="n">other</span> <span class="o">=</span> <span class="n">SocketPartyData</span><span class="p">(</span><span class="n">boost_ip</span><span class="o">::</span><span class="n">address</span><span class="o">::</span><span class="n">from_string</span><span class="p">(</span><span class="s">&quot;127.0.0.1&quot;</span><span class="p">),</span> <span class="mi">8000</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">CommParty</span><span class="o">&gt;</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">make_shared</span><span class="o">&lt;</span><span class="n">CommPartyTCPSynced</span><span class="o">&gt;</span><span class="p">(</span><span class="n">io_service</span><span class="p">,</span> <span class="n">me</span><span class="p">,</span> <span class="n">other</span><span class="p">);</span>
+    <span class="c1">// connect to party one</span>
+    <span class="n">channel</span><span class="o">-&gt;</span><span class="n">join</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">5000</span><span class="p">);</span>
+    <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;channel established&quot;</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
+<span class="hll"><span class="p">}</span>
+</span></pre></div>
+</div>
+<p>In this example, we establish a communication between two parties in the same machine, using ports 8000 and 8001.</p>
+<p>A <code class="docutils literal"><span class="pre">CommParty</span></code> represents an established connection between two parties. It has two main functions:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">void</span> <span class="n">write</span><span class="p">(</span><span class="n">const</span> <span class="n">byte</span><span class="o">*</span> <span class="n">data</span><span class="p">,</span> <span class="nb">int</span> <span class="n">size</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Sends a message <em>data</em> to the other party, the number of bytes in <em>data</em> should be equal to <em>size</em>.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">size_t</span> <span class="n">read</span><span class="p">(</span><span class="n">byte</span><span class="o">*</span> <span class="n">buffer</span><span class="p">,</span> <span class="nb">int</span> <span class="n">sizeToRead</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Receives a message with <em>sizeToRead</em> bytes from the channel. The buffer should have at least sizeToRead bytes.</p>
+<p>This means that from the applications point of view, once it obtains the channels it can completely forget about it and just send and receive messages.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Quickstart</a><ul>
+<li><a class="reference internal" href="#your-first-libscapi-application">Your First libscapi Application</a><ul>
+<li><a class="reference internal" href="#let-s-break-it-down">Let&#8217;s break it down:</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#compiling-and-running-the-libscapi-code">Compiling and Running the libscapi Code</a></li>
+<li><a class="reference internal" href="#establishing-secure-communication">Establishing Secure Communication</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="install.html" title="previous chapter">Installation</a></li>
+      <li>Next: <a href="communication.html" title="next chapter">The Communication Layer</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/quickstart.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, libscapi team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/quickstart.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

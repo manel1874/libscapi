@@ -195,3 +195,5 @@ class OneSidedSimulation : public ProtocolSecLevel {};
 */
 class Malicious :public Covert, OneSidedSimulation {};
 
+class UC :public StandAlone {};
+

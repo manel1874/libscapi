@@ -460,19 +460,19 @@ TEST_CASE("HashBlake2", "")
 {
 	SECTION("Testing OpenSSL SHA1") {
 		string input_msg = "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq";
-		CryptographicHash * hash = new Blake2Hash(20);
+		CryptographicHash * hash = new Blake2SHA1();
 		test_hash(hash, input_msg, "4fc6d7704103fc8aca4690f70432c8d35acfb833");
 		delete hash;
-		hash = new Blake2Hash(28);
+		hash = new Blake2SHA224();
 		test_hash(hash, input_msg, "2634ceb48faf94cd6a424287aab968ce3fef39ee5d841760aa5b3164");
 		delete hash;
-		hash = new Blake2Hash(32);
+		hash = new Blake2SHA256();
 		test_hash(hash, input_msg, "5f7a93da9c5621583f22e49e8e91a40cbba37536622235a380f434b9f68e49c4");
 		delete hash;
-		hash = new Blake2Hash(48);
+		hash = new Blake2SHA384();
 		test_hash(hash, input_msg, "5643daabfc919190d373a3d58935804d731b58812f30184f98793f7321d0cb34bb41b217fabce6bdf28ca6be1c923b81");
 		delete hash;
-		hash = new Blake2Hash(64);
+		hash = new Blake2SHA512();
 		test_hash(hash, input_msg, "7285ff3e8bd768d69be62b3bf18765a325917fa9744ac2f582a20850bc2b1141ed1b3e4528595acc90772bdf2d37dc8a47130b44f33a02e8730e5ad8e166e888");
 		delete hash;
 	}

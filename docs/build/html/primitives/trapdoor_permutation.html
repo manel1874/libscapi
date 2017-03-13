@@ -1,0 +1,425 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Trapdoor Permutation &#8212; libscapi 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Discrete Log Group (DLOG)" href="dlog.html" />
+    <link rel="prev" title="Pseudorandom Generator (PRG)" href="pseudorandom_generator.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="trapdoor-permutation">
+<h1><a class="toc-backref" href="#id1">Trapdoor Permutation</a><a class="headerlink" href="#trapdoor-permutation" title="Permalink to this headline">¶</a></h1>
+<p>A trapdoor permutation is a bijection (1-1 and onto function) that is easy to compute for everyone, yet is hard to invert unless given special additional information, called the &#8220;trapdoor&#8221;. The public key is essentially the function description and the private key is the trapdoor.</p>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#trapdoor-permutation" id="id1">Trapdoor Permutation</a><ul>
+<li><a class="reference internal" href="#the-tpelement-abstract-class" id="id2">The <code class="docutils literal"><span class="pre">TPElement</span></code> abstract class</a></li>
+<li><a class="reference internal" href="#the-trapdoorpermutation-abstract-class" id="id3">The <code class="docutils literal"><span class="pre">TrapdoorPermutation</span></code> abstract class</a><ul>
+<li><a class="reference internal" href="#core-functionality" id="id4">Core Functionality</a></li>
+<li><a class="reference internal" href="#generating-tpelements" id="id5">Generating TPElements</a></li>
+<li><a class="reference internal" href="#checking-element-validity" id="id6">Checking Element Validity</a></li>
+<li><a class="reference internal" href="#encryption-keys-functionality" id="id7">Encryption Keys Functionality</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#basicusage" id="id8">BasicUsage</a></li>
+<li><a class="reference internal" href="#supported-trapdoor-permutations" id="id9">Supported Trapdoor Permutations</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="the-tpelement-abstract-class">
+<h2><a class="toc-backref" href="#id2">The <code class="docutils literal"><span class="pre">TPElement</span></code> abstract class</a><a class="headerlink" href="#the-tpelement-abstract-class" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal"><span class="pre">TPElement</span></code> class represents a trapdoor permutation element.</p>
+<dl class="function">
+<dt id="_CPPv2N9TPElement10getElementEv">
+<span id="TPElement::getElement"></span>biginteger <code class="descclassname">TPElement::</code><code class="descname">getElement</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9TPElement10getElementEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns the trapdoor element value as bigInteger.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the value of the element</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="the-trapdoorpermutation-abstract-class">
+<h2><a class="toc-backref" href="#id3">The <code class="docutils literal"><span class="pre">TrapdoorPermutation</span></code> abstract class</a><a class="headerlink" href="#the-trapdoorpermutation-abstract-class" title="Permalink to this headline">¶</a></h2>
+<p>This class is the general class of trapdoor permutation.</p>
+<div class="section" id="core-functionality">
+<h3><a class="toc-backref" href="#id4">Core Functionality</a><a class="headerlink" href="#core-functionality" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N19TrapdoorPermutation7computeEP9TPElement">
+<span id="TrapdoorPermutation::compute__TPElementP"></span>shared_ptr&lt;TPElement&gt; <code class="descclassname">TrapdoorPermutation::</code><code class="descname">compute</code><span class="sig-paren">(</span>TPElement *<em>tpEl</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19TrapdoorPermutation7computeEP9TPElement" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Computes the operation of this trapdoor permutation on the given TPElement.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tpEl</strong> &#8211; the input for the computation</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the result TPElement from the computation</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19TrapdoorPermutation6invertEP9TPElement">
+<span id="TrapdoorPermutation::invert__TPElementP"></span>shared_ptr&lt;TPElement&gt; <code class="descclassname">TrapdoorPermutation::</code><code class="descname">invert</code><span class="sig-paren">(</span>TPElement *<em>tpEl</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19TrapdoorPermutation6invertEP9TPElement" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Inverts the operation of this trapdoor permutation on the given TPElement.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tpEl</strong> &#8211; the input to invert</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the result TPElement from the invert operation</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19TrapdoorPermutation17hardCorePredicateEP9TPElement">
+<span id="TrapdoorPermutation::hardCorePredicate__TPElementP"></span>byte <code class="descclassname">TrapdoorPermutation::</code><code class="descname">hardCorePredicate</code><span class="sig-paren">(</span>TPElement *<em>tpEl</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19TrapdoorPermutation17hardCorePredicateEP9TPElement" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Computes the hard core predicate of the given tpElement.</p>
+<p>A hard-core predicate of a one-way function <span class="math">f</span> is a predicate <span class="math">b</span> (i.e., a function whose output is a single bit)
+which is easy to compute given <span class="math">x</span> but is hard to compute given <span class="math">f(x)</span>.
+In formal terms, there is no probabilistic polynomial time algorithm that computes <span class="math">b(x)</span> from <span class="math">f(x)</span>
+with probability significantly greater than one half over random choice of <span class="math">x</span>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tpEl</strong> &#8211; the input to the hard core predicate</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">(byte) the hard core predicate.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19TrapdoorPermutation16hardCoreFunctionEP9TPElement">
+<span id="TrapdoorPermutation::hardCoreFunction__TPElementP"></span>vector&lt;byte&gt; <code class="descclassname">TrapdoorPermutation::</code><code class="descname">hardCoreFunction</code><span class="sig-paren">(</span>TPElement *<em>tpEl</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19TrapdoorPermutation16hardCoreFunctionEP9TPElement" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Computes the hard core function of the given tpElement.</p>
+<p>A hard-core function of a one-way function <span class="math">f</span> is a function <span class="math">g</span>
+which is easy to compute given <span class="math">x</span> but is hard to compute given <span class="math">f(x)</span>.
+In formal terms, there is no probabilistic polynomial time algorithm that computes <span class="math">g(x)</span> from <span class="math">f(x)</span>
+with probability significantly greater than one half over random choice of <span class="math">x</span>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tpEl</strong> &#8211; the input to the hard core function</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">byte[] the result of the hard core function</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="generating-tpelements">
+<h3><a class="toc-backref" href="#id5">Generating TPElements</a><a class="headerlink" href="#generating-tpelements" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N19TrapdoorPermutation23generateRandomTPElementEv">
+<span id="TrapdoorPermutation::generateRandomTPElement"></span>shared_ptr&lt;TPElement&gt; <code class="descclassname">TrapdoorPermutation::</code><code class="descname">generateRandomTPElement</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19TrapdoorPermutation23generateRandomTPElementEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>creates a random TPElement that is valid for this trapdoor permutation</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the created random element</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19TrapdoorPermutation26generateUncheckedTPElementERK10biginteger">
+<span id="TrapdoorPermutation::generateUncheckedTPElement__bigintegerCR"></span>shared_ptr&lt;TPElement&gt; <code class="descclassname">TrapdoorPermutation::</code><code class="descname">generateUncheckedTPElement</code><span class="sig-paren">(</span><em class="property">const</em> biginteger &amp;<em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19TrapdoorPermutation26generateUncheckedTPElementERK10biginteger" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Creates a TPElement from a specific value <span class="math">x</span>.
+This function does not guarantee that the the returned <code class="docutils literal"><span class="pre">TPElement</span></code> object is valid.
+It is the caller&#8217;s responsibility to pass a legal <span class="math">x</span> value.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Set the <span class="math">x</span> value and return the created random element</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="checking-element-validity">
+<h3><a class="toc-backref" href="#id6">Checking Element Validity</a><a class="headerlink" href="#checking-element-validity" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N19TrapdoorPermutation9isElementEP9TPElement">
+<span id="TrapdoorPermutation::isElement__TPElementP"></span><a class="reference internal" href="#_CPPv212TPElValidity" title="TPElValidity">TPElValidity</a> <code class="descclassname">TrapdoorPermutation::</code><code class="descname">isElement</code><span class="sig-paren">(</span>TPElement *<em>tpEl</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19TrapdoorPermutation9isElementEP9TPElement" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Checks if the given element is valid for this trapdoor permutation</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tpEl</strong> &#8211; the element to check</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">(<a class="reference internal" href="#tpelvalidity">TPElValidity</a>) enum number that indicate the validation of the element</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Throws:</th><td class="field-body">IllegalArgumentException if the given element is invalid for this permutation</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<span class="target" id="tpelvalidity"></span><dl class="enum">
+<dt id="_CPPv212TPElValidity">
+<em class="property">enum </em><code class="descclassname"></code><code class="descname">TPElValidity</code><a class="headerlink" href="#_CPPv212TPElValidity" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Enum that represent the possible validity values of trapdoor element.
+There are three possible validity values:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>VALID</strong> &#8211; it is an element</li>
+<li><strong>NOT_VALID</strong> &#8211; it is not an element</li>
+<li><strong>DONT_KNOW</strong> &#8211; there is not enough information to check if it is an element or not</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="encryption-keys-functionality">
+<h3><a class="toc-backref" href="#id7">Encryption Keys Functionality</a><a class="headerlink" href="#encryption-keys-functionality" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv26setKeyRK10shared_ptrI9PublicKeyERK10shared_ptrI10PrivateKeyE">
+<span id="setKey__shared_ptr:PublicKey:CR.shared_ptr:PrivateKey:CR"></span>void <code class="descclassname"></code><code class="descname">setKey</code><span class="sig-paren">(</span><em class="property">const</em> shared_ptr&lt;PublicKey&gt; &amp;<em>publicKey</em>, <em class="property">const</em> shared_ptr&lt;PrivateKey&gt; &amp;<em>privateKey</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv26setKeyRK10shared_ptrI9PublicKeyERK10shared_ptrI10PrivateKeyE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Sets this trapdoor permutation with public key and private key.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>publicKey</strong> &#8211; the public key</li>
+<li><strong>privateKey</strong> &#8211; the private key that without it the permutation cannot be inverted efficiently.
+If the private key is not given, the object can compute but canot invert.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv28isKeySetv">
+<span id="isKeySet"></span>bool <code class="descclassname"></code><code class="descname">isKeySet</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv28isKeySetv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><blockquote>
+<div><p>Checks if this trapdoor permutation object has been previously initialized.
+To initialize the object the <code class="docutils literal"><span class="pre">setKey()</span></code> function has to be called with corresponding parameters after construction.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">return:</th><td class="field-body"><code class="docutils literal"><span class="pre">true</span></code> if the object was initialized, <code class="docutils literal"><span class="pre">false</span></code> otherwise.</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<dl class="function">
+<dt id="_CPPv2N8isKeySet9getPubKeyEv">
+<span id="isKeySet::getPubKey"></span>shared_ptr&lt;PublicKey&gt; <code class="descclassname"></code><code class="descname">getPubKey</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N8isKeySet9getPubKeyEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">returns the public key</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="basicusage">
+<h2><a class="toc-backref" href="#id8">BasicUsage</a><a class="headerlink" href="#basicusage" title="Permalink to this headline">¶</a></h2>
+<p>We demonstrate a basic usage scenario with a sender party that wish to hide a secret using the trapdoor permutation,
+and a receiver who is not able to invert the permutation on the secret.</p>
+<p>Here is the code of the sender:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="c1">//Create public key, private key and secret</span>
+<span class="p">...</span>
+
+<span class="c1">//instantiate the rsa permutation using the openssl library:</span>
+<span class="n">OpenSSLRSAPermutation</span> <span class="n">trapdoorPermutation</span><span class="p">;</span>
+<span class="c1">//set the keys for this trapdoor permutation</span>
+<span class="n">trapdoorPermutation</span><span class="p">.</span><span class="n">setKey</span><span class="p">(</span><span class="n">publicKey</span><span class="p">,</span> <span class="n">privateKey</span><span class="p">);</span>
+
+<span class="c1">// represent the secret (originally was of BigInteger type) using TPElement</span>
+<span class="n">TPElement</span> <span class="n">secretElement</span> <span class="o">=</span> <span class="n">trapdoorPermutation</span><span class="p">.</span><span class="n">generateTPElement</span><span class="p">(</span><span class="n">secret</span><span class="p">);</span>
+<span class="c1">//hide the secret using the trapdoor permutation</span>
+<span class="n">TPElement</span> <span class="n">maskedSecret</span> <span class="o">=</span> <span class="n">trapdoorPermutation</span><span class="p">.</span><span class="n">compute</span><span class="p">(</span><span class="n">secretElement</span><span class="p">);</span>
+
+<span class="c1">// this line will succeed, because the private key is known to the sender</span>
+<span class="n">TPElement</span> <span class="n">invertedElement</span> <span class="o">=</span> <span class="n">trapdoorPermutation</span><span class="p">.</span><span class="n">invert</span><span class="p">(</span><span class="n">maskedSecret</span><span class="p">);</span>
+
+<span class="c1">// send the public key and the secret to the other side</span>
+<span class="p">...</span>
+</pre></div>
+</div>
+<p>Here is the code of the receiver:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="c1">// receive public key and secretMsg</span>
+<span class="p">...</span>
+
+<span class="c1">//instantiate the rsa permutation using the openssl library:</span>
+<span class="n">OpenSSLRSAPermutation</span> <span class="n">trapdoorPermutation</span><span class="p">;</span>
+<span class="c1">//set the keys for this trapdoor permutation</span>
+<span class="n">trapdoorPermutation</span><span class="p">.</span><span class="n">setKey</span><span class="p">(</span><span class="n">publicKey</span><span class="p">);</span>
+
+<span class="c1">// reconstruct a TPElement from a biginteger</span>
+<span class="n">TPElement</span> <span class="n">maskedSecret</span> <span class="o">=</span> <span class="n">trapdoorPermutation</span><span class="p">.</span><span class="n">generateTPElement</span><span class="p">(</span><span class="n">secretMsg</span><span class="p">);</span>
+
+<span class="c1">// this line will fail, because the private key is not known to the receiver</span>
+<span class="n">TPElement</span> <span class="n">secretElement</span> <span class="o">=</span> <span class="n">trapdoorPermutation</span><span class="p">.</span><span class="n">invert</span><span class="p">(</span><span class="n">maskedSecret</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="supported-trapdoor-permutations">
+<h2><a class="toc-backref" href="#id9">Supported Trapdoor Permutations</a><a class="headerlink" href="#supported-trapdoor-permutations" title="Permalink to this headline">¶</a></h2>
+<p>In this section we present the trapddor permutations provided by libscapi.</p>
+<p>OpenSSL implementation of RSA trapdoor permutation:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="27%" />
+<col width="73%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Key</th>
+<th class="head">Class Location</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>OpenSSLRSAPermutation</td>
+<td>libscapi/include/primitives/TrapdoorPermutationOpenSSL.hpp</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Trapdoor Permutation</a><ul>
+<li><a class="reference internal" href="#the-tpelement-abstract-class">The <code class="docutils literal"><span class="pre">TPElement</span></code> abstract class</a></li>
+<li><a class="reference internal" href="#the-trapdoorpermutation-abstract-class">The <code class="docutils literal"><span class="pre">TrapdoorPermutation</span></code> abstract class</a><ul>
+<li><a class="reference internal" href="#core-functionality">Core Functionality</a></li>
+<li><a class="reference internal" href="#generating-tpelements">Generating TPElements</a></li>
+<li><a class="reference internal" href="#checking-element-validity">Checking Element Validity</a></li>
+<li><a class="reference internal" href="#encryption-keys-functionality">Encryption Keys Functionality</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#basicusage">BasicUsage</a></li>
+<li><a class="reference internal" href="#supported-trapdoor-permutations">Supported Trapdoor Permutations</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../primitives.html">Layer 1: Basic Primitives</a><ul>
+      <li>Previous: <a href="pseudorandom_generator.html" title="previous chapter">Pseudorandom Generator (PRG)</a></li>
+      <li>Next: <a href="dlog.html" title="next chapter">Discrete Log Group (DLOG)</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/primitives/trapdoor_permutation.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, libscapi team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/primitives/trapdoor_permutation.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

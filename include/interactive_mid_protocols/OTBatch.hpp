@@ -269,11 +269,7 @@ class OTBatchSender {
 
 public:
 	/**
-	 * The transfer stage of OT Batch protocol which can be called several times in parallel.
-	 * The OT implementation support usage of many calls to transfer, with single preprocess execution.
-	 * This way, one can execute batch OT by creating the OT receiver once and call the transfer function for each input couple.
-	 * In order to enable the parallel calls, each transfer call should use a different channel to send and receive messages.
-	 * This way the parallel executions of the function will not block each other.<p>
+	 * The transfer stage of OT Batch protocol which does multiple ots in parallel.
 	 */
 	virtual shared_ptr<OTBatchSOutput> transfer(OTBatchSInput * input) = 0;
 	virtual ~OTBatchSender(){};
@@ -418,11 +414,7 @@ public:
  */
 class OTBatchReceiver {
 	/**
-	 * The transfer stage of OT Batch protocol which can be called several times in parallel.
-	 * The OT implementation support usage of many calls to transfer, with single preprocess execution.
-	 * This way, one can execute batch OT by creating the OT receiver once and call the transfer function for each input couple.
-	 * In order to enable the parallel calls, each transfer call should use a different channel to send and receive messages.
-	 * This way the parallel executions of the function will not block each other.
+	 * The transfer stage of OT Batch protocol which does multiple ots in parallel.
 	 * @param input The parameters given in the input must match the DlogGroup member of this class, which given in the constructor.
 	 * @return OTBatchROutput, the output of the protocol.
 	 */

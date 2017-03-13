@@ -11,12 +11,7 @@ void cmp_swap(T*key, D*data, int i, int j, Bit acc) {
 		swap(to_swap, data[i], data[j]);
 }
 
-int greatestPowerOfTwoLessThan(int n) {
-	int k = 1;
-	while (k < n)
-		k = k << 1;
-	return k >> 1;
-}
+extern int greatestPowerOfTwoLessThan(int n);
 
 template<typename T, typename D>
 void bitonic_merge(T* key, D* data, int lo, int n, Bit acc) {

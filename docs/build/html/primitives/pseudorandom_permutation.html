@@ -1,0 +1,229 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Pseudorandom Permutation (PRP) &#8212; libscapi 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Pseudorandom Generator (PRG)" href="pseudorandom_generator.html" />
+    <link rel="prev" title="Pseudorandom Function (PRF)" href="pseudorandom_function.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="pseudorandom-permutation-prp">
+<h1>Pseudorandom Permutation (PRP)<a class="headerlink" href="#pseudorandom-permutation-prp" title="Permalink to this headline">¶</a></h1>
+<p><strong>Pseudorandom permutations</strong> are bijective pseudorandom functions that are <em>efficiently invertible</em>. As such, they are of the pseudorandom function type and their input length always equals their output length. In addition (and unlike general pseudorandom functions), they are efficiently invertible.</p>
+<div class="section" id="the-pseudorandompermutation-abstract-class">
+<h2>The <code class="docutils literal"><span class="pre">PseudorandomPermutation</span></code> abstract class<a class="headerlink" href="#the-pseudorandompermutation-abstract-class" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal"><span class="pre">PseudorandomPermutation</span></code> class derives the <code class="docutils literal"><span class="pre">PseudorandomFunction</span></code> abstract class, and adds the following functionality.</p>
+<dl class="function">
+<dt id="_CPPv2N23PseudorandomPermutation11invertBlockERK6vectorI4byteEiR6vectorI4byteEi">
+<span id="PseudorandomPermutation::invertBlock__vector:byte:CR.i.vector:byte:R.i"></span>void <code class="descclassname">PseudorandomPermutation::</code><code class="descname">invertBlock</code><span class="sig-paren">(</span><em class="property">const</em> vector&lt;byte&gt; &amp;<em>inBytes</em>, int <em>inOff</em>, vector&lt;byte&gt; &amp;<em>outBytes</em>, int <em>outOff</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N23PseudorandomPermutation11invertBlockERK6vectorI4byteEiR6vectorI4byteEi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Inverts the permutation using the given key.</p>
+<p>This function is a part of the PseudorandomPermutation class since any PseudorandomPermutation must be efficiently invertible (given the key). For block ciphers, for example, the length is known in advance and so there is no need to specify the length.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>inBytes</strong> &#8211; input bytes to invert.</li>
+<li><strong>inOff</strong> &#8211; input offset in the inBytes vector</li>
+<li><strong>outBytes</strong> &#8211; output bytes. The resulted bytes of invert</li>
+<li><strong>outOff</strong> &#8211; output offset in the outBytes vector to put the result from</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N23PseudorandomPermutation11invertBlockERK6vectorI4byteEiR6vectorI4byteEii">
+<span id="PseudorandomPermutation::invertBlock__vector:byte:CR.i.vector:byte:R.i.i"></span>void <code class="descclassname">PseudorandomPermutation::</code><code class="descname">invertBlock</code><span class="sig-paren">(</span><em class="property">const</em> vector&lt;byte&gt; &amp;<em>inBytes</em>, int <em>inOff</em>, vector&lt;byte&gt; &amp;<em>outBytes</em>, int <em>outOff</em>, int <em>len</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N23PseudorandomPermutation11invertBlockERK6vectorI4byteEiR6vectorI4byteEii" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Inverts the permutation using the given key.</p>
+<p>Since PseudorandomPermutation can also have varying input and output length (although the input and the output should be the same length), the common parameter <code class="docutils literal"><span class="pre">len</span></code> of the input and the output is needed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>inBytes</strong> &#8211; input bytes to invert.</li>
+<li><strong>inOff</strong> &#8211; input offset in the inBytes vector</li>
+<li><strong>outBytes</strong> &#8211; output bytes. The resulted bytes of invert</li>
+<li><strong>outOff</strong> &#8211; output offset in the outBytes vector to put the result from</li>
+<li><strong>len</strong> &#8211; the length of the input and the output</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="basic-usage">
+<h2>Basic Usage<a class="headerlink" href="#basic-usage" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="c1">//Create secretKey and in, out, inv vectors</span>
+<span class="p">...</span>
+
+<span class="c1">//create the prp object</span>
+<span class="n">PseudorandomPermutation</span><span class="o">*</span> <span class="n">prp</span> <span class="o">=</span> <span class="k">new</span> <span class="n">OpenSSLAES</span><span class="p">();</span>
+
+<span class="c1">//set the key</span>
+<span class="n">prp</span><span class="o">-&gt;</span><span class="n">setKey</span><span class="p">(</span><span class="n">secretKey</span><span class="p">);</span>
+
+<span class="c1">//run the permutation on a block-size prefix of in</span>
+<span class="n">prp</span><span class="o">-&gt;</span><span class="n">computeBlock</span><span class="p">(</span><span class="n">in</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+
+<span class="c1">//invert the permutation</span>
+<span class="n">prp</span><span class="o">-&gt;</span><span class="n">invertBlock</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">inv</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="pseudorandom-permutation-with-varying-input-output-lengths">
+<h2>Pseudorandom Permutation with Varying Input-Output Lengths<a class="headerlink" href="#pseudorandom-permutation-with-varying-input-output-lengths" title="Permalink to this headline">¶</a></h2>
+<p>A pseudorandom permutation with varying input/output lengths does not have pre-defined input/output lengths. The input and output length (that must be equal) may be different for each function call. The length of the input/output is determined upon user request.</p>
+<p>We implement the <a class="reference internal" href="#luby-rackoff-algorithm">Luby-Rackoff algorithm</a> as an example of PRP with varying I/O lengths. The class that implements the algorithm is <code class="docutils literal"><span class="pre">LubyRackoffPrpFromPrfVarying</span></code>.</p>
+<div class="section" id="how-to-use-the-varying-input-output-length-prp">
+<span id="luby-rackoff-algorithm"></span><h3>How to use the Varying Input-Output Length PRP<a class="headerlink" href="#how-to-use-the-varying-input-output-length-prp" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="c1">//Create secretKey and in, out vectors</span>
+<span class="p">...</span>
+
+<span class="c1">//create the prp object</span>
+<span class="n">PseudorandomPermutation</span><span class="o">*</span> <span class="n">prp</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LubyRackoffPrpFromPrfVarying</span><span class="p">();</span>
+
+<span class="c1">//set the key</span>
+<span class="n">prp</span><span class="o">-&gt;</span><span class="n">setKey</span><span class="p">(</span><span class="n">secretKey</span><span class="p">);</span>
+
+<span class="c1">//invert the permutation with input in and output out of common size 20.</span>
+<span class="n">prp</span><span class="o">-&gt;</span><span class="n">invertBlock</span><span class="p">(</span><span class="n">in</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="supported-prp-types">
+<h2>Supported Prp Types<a class="headerlink" href="#supported-prp-types" title="Permalink to this headline">¶</a></h2>
+<p>In this section we present the prp functions provided by libscapi.</p>
+<p>The OpenSSL implementation:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="26%" />
+<col width="74%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Class Name</th>
+<th class="head">Class Location</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>OpenSSLAES</td>
+<td>libscapi/include/primitives/PrfOpenSSL.hpp</td>
+</tr>
+<tr class="row-odd"><td>OpenSSLTripleDes</td>
+<td>libscapi/include/primitives/PrfOpenSSL.hpp</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Pseudorandom Permutation (PRP)</a><ul>
+<li><a class="reference internal" href="#the-pseudorandompermutation-abstract-class">The <code class="docutils literal"><span class="pre">PseudorandomPermutation</span></code> abstract class</a></li>
+<li><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
+<li><a class="reference internal" href="#pseudorandom-permutation-with-varying-input-output-lengths">Pseudorandom Permutation with Varying Input-Output Lengths</a><ul>
+<li><a class="reference internal" href="#how-to-use-the-varying-input-output-length-prp">How to use the Varying Input-Output Length PRP</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#supported-prp-types">Supported Prp Types</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../primitives.html">Layer 1: Basic Primitives</a><ul>
+      <li>Previous: <a href="pseudorandom_function.html" title="previous chapter">Pseudorandom Function (PRF)</a></li>
+      <li>Next: <a href="pseudorandom_generator.html" title="next chapter">Pseudorandom Generator (PRG)</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/primitives/pseudorandom_permutation.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, libscapi team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/primitives/pseudorandom_permutation.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

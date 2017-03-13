@@ -1,0 +1,153 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Layer 1: Basic Primitives &#8212; libscapi 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Cryptographic Hash" href="primitives/cryptographic_hash.html" />
+    <link rel="prev" title="Security Levels" href="security_levels.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="layer-1-basic-primitives">
+<h1>Layer 1: Basic Primitives<a class="headerlink" href="#layer-1-basic-primitives" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="primitives/cryptographic_hash.html">Cryptographic Hash</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="primitives/cryptographic_hash.html#the-cryptographichash-abstract-class">The <code class="docutils literal"><span class="pre">CryptographicHash</span></code> abstract class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="primitives/cryptographic_hash.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="primitives/cryptographic_hash.html#supported-hash-types">Supported Hash Types</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="primitives/pseudorandom_function.html">Pseudorandom Function (PRF)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="primitives/pseudorandom_function.html#the-pseudorandomfunction-abstract-class">The <code class="docutils literal"><span class="pre">PseudorandomFunction</span></code> abstract class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="primitives/pseudorandom_function.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="primitives/pseudorandom_function.html#pseudorandom-function-with-varying-input-output-lengths">Pseudorandom Function with Varying Input-Output Lengths</a></li>
+<li class="toctree-l2"><a class="reference internal" href="primitives/pseudorandom_function.html#supported-prf-types">Supported Prf Types</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="primitives/pseudorandom_permutation.html">Pseudorandom Permutation (PRP)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="primitives/pseudorandom_permutation.html#the-pseudorandompermutation-abstract-class">The <code class="docutils literal"><span class="pre">PseudorandomPermutation</span></code> abstract class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="primitives/pseudorandom_permutation.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="primitives/pseudorandom_permutation.html#pseudorandom-permutation-with-varying-input-output-lengths">Pseudorandom Permutation with Varying Input-Output Lengths</a></li>
+<li class="toctree-l2"><a class="reference internal" href="primitives/pseudorandom_permutation.html#supported-prp-types">Supported Prp Types</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="primitives/pseudorandom_generator.html">Pseudorandom Generator (PRG)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="primitives/pseudorandom_generator.html#the-pseudorandomgenerator-abstract-class">The <code class="docutils literal"><span class="pre">PseudorandomGenerator</span></code> abstract class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="primitives/pseudorandom_generator.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="primitives/pseudorandom_generator.html#supported-prg-types">Supported Prg Types</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="primitives/trapdoor_permutation.html">Trapdoor Permutation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="primitives/trapdoor_permutation.html#the-tpelement-abstract-class">The <code class="docutils literal"><span class="pre">TPElement</span></code> abstract class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="primitives/trapdoor_permutation.html#the-trapdoorpermutation-abstract-class">The <code class="docutils literal"><span class="pre">TrapdoorPermutation</span></code> abstract class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="primitives/trapdoor_permutation.html#basicusage">BasicUsage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="primitives/trapdoor_permutation.html#supported-trapdoor-permutations">Supported Trapdoor Permutations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="primitives/dlog.html">Discrete Log Group (DLOG)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="primitives/dlog.html#class-hierarchy">Class Hierarchy:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="primitives/dlog.html#the-dloggroup-abstract-class">The <code class="docutils literal"><span class="pre">DlogGroup</span></code> abstract class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="primitives/dlog.html#the-groupelement-abstract-class">The <code class="docutils literal"><span class="pre">GroupElement</span></code> abstract class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="primitives/dlog.html#the-groupparams-class">The <code class="docutils literal"><span class="pre">GroupParams</span></code> class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="primitives/dlog.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="primitives/dlog.html#supported-dlog-types">Supported Dlog Types</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="primitives/kdf.html">Key Derivation Function (KDF)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="primitives/kdf.html#the-key-derivation-function-abstract-class">The <code class="docutils literal"><span class="pre">Key</span> <span class="pre">Derivation</span> <span class="pre">Function</span></code> abstract class:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="primitives/kdf.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="primitives/kdf.html#supported-kdf-types">Supported KDF Types</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="security_levels.html" title="previous chapter">Security Levels</a></li>
+      <li>Next: <a href="primitives/cryptographic_hash.html" title="next chapter">Cryptographic Hash</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/primitives.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, libscapi team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/primitives.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

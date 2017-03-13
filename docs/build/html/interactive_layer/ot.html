@@ -1,0 +1,377 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Oblivious Transfer Protocols &#8212; libscapi 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Sigma Protocols" href="sigma_protocols.html" />
+    <link rel="prev" title="Layer 3: Interactive Protocols" href="../interactive_layer.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="oblivious-transfer-protocols">
+<h1><a class="toc-backref" href="#id1">Oblivious Transfer Protocols</a><a class="headerlink" href="#oblivious-transfer-protocols" title="Permalink to this headline">¶</a></h1>
+<p>In Oblivious Transfer, a party called <strong>the sender</strong> has <span class="math">n</span> messages, and a party called <strong>the receiver</strong> has an index <span class="math">i</span>.
+The receiver wishes to receive the <span class="math">i^{th}</span> message of the sender, without the sender learning <span class="math">i</span>,
+while the sender wants to ensure that the receiver receives only one of the <span class="math">n</span> messages.</p>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#oblivious-transfer-protocols" id="id1">Oblivious Transfer Protocols</a><ul>
+<li><a class="reference internal" href="#class-hierarchy" id="id2">Class Hierarchy</a><ul>
+<li><a class="reference internal" href="#abstract-classes" id="id3">abstract classes</a><ul>
+<li><a class="reference internal" href="#the-otsender-abstract-class" id="id4">The OTSender abstract class</a></li>
+<li><a class="reference internal" href="#the-otreciever-abstract-class" id="id5">The OTReciever abstract class</a></li>
+<li><a class="reference internal" href="#the-otbatchsender-abstract-class" id="id6">The OTBatchSender abstract class</a></li>
+<li><a class="reference internal" href="#the-otbatchreceiver-abstract-class" id="id7">The OTBatchReceiver abstract class</a></li>
+<li><a class="reference internal" href="#the-input-output-interfaces" id="id8">The Input/Output Interfaces</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#concrete-implementations" id="id9">Concrete implementations</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#basic-usage" id="id10">Basic Usage</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="class-hierarchy">
+<h2><a class="toc-backref" href="#id2">Class Hierarchy</a><a class="headerlink" href="#class-hierarchy" title="Permalink to this headline">¶</a></h2>
+<p>The general structure of OT protocols contains three components:</p>
+<ul class="simple">
+<li>Sender and receiver abstract classes</li>
+<li>Sender and receiver concrete classes</li>
+</ul>
+<div class="section" id="abstract-classes">
+<h3><a class="toc-backref" href="#id3">abstract classes</a><a class="headerlink" href="#abstract-classes" title="Permalink to this headline">¶</a></h3>
+<p>Both Sender and Receiver abstract classes declare the <code class="docutils literal"><span class="pre">transfer()</span></code> function, which executes the OT protocol. The <code class="docutils literal"><span class="pre">transfer()</span></code> function of the sender runs the protocol from the sender&#8217;s point of view, while the transfer function of the receiver runs the protocol from the receiver&#8217;s point of view.
+There are two types of abstract classes. One is for the regular OT case and the other for the batch OT case .</p>
+<p>In the regular OT case, both transfer functions accept two parameters:</p>
+<ul class="simple">
+<li>A channel that is used to send and receive messages during the protocol execution.</li>
+<li>An input object that holds the required parameter to the sender/receiver execution.</li>
+</ul>
+<p>In the batch OT case, the transfer functions accept just the input object, since all concrete implementations use their own communication rether than libscapi&#8217;s channel.</p>
+<p>The input types are <code class="docutils literal"><span class="pre">OTSInput</span></code> and <code class="docutils literal"><span class="pre">OTRInput</span></code> for the regular case, and <code class="docutils literal"><span class="pre">OTBatchSInput</span></code> and <code class="docutils literal"><span class="pre">OTBatchRInput</span></code> for the batch case. These are abstract classes for the sender&#8217;s and receiver&#8217;s input, respectively. Each concrete implementation may have some different parameters and should implement a dedicated input class that holds them.
+The transfer functions of the sender and the receiver differ in their return value. In the regular case, the sender&#8217;s transfer function returns void, and the receiver&#8217;s transfer function returns <code class="docutils literal"><span class="pre">OTROutput</span></code>. In the batch case, the sender&#8217;s transfer function returns <code class="docutils literal"><span class="pre">OTBatchSOutput</span></code>, and the receiver&#8217;s transfer function returns <code class="docutils literal"><span class="pre">OTBatchROutput</span></code>. All types of output are abstract classes and work as marker classes. Each concrete OT receiver should implement a dedicated output class that holds the necessary output objects.</p>
+<div class="section" id="the-otsender-abstract-class">
+<h4><a class="toc-backref" href="#id4">The OTSender abstract class</a><a class="headerlink" href="#the-otsender-abstract-class" title="Permalink to this headline">¶</a></h4>
+<dl class="class">
+<dt id="_CPPv28OTSender">
+<span id="OTSender"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">OTSender</code><a class="headerlink" href="#_CPPv28OTSender" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N8OTSender8transferEP9CommPartyP8OTSInput">
+<span id="OTSender::transfer__CommPartyP.OTSInputP"></span>void <code class="descclassname">OTSender::</code><code class="descname">transfer</code><span class="sig-paren">(</span>CommParty *<em>channel</em>, <a class="reference internal" href="#_CPPv28OTSInput" title="OTSInput">OTSInput</a> *<em>input</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N8OTSender8transferEP9CommPartyP8OTSInput" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>The transfer stage of OT protocol which can be called several times in parallel.
+The OT implementation support usage of many calls to transfer, with single preprocess execution.
+This way, one can execute multiple OTs by creating the OT sender once and call the transfer function for each input couple.
+In order to enable parallel calls, each transfer call should use a different channel to send and receive messages. This way the parallel executions of the function will not block each other.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>channel</strong> &#8211; each call should get a different one.</li>
+<li><strong>input</strong> &#8211; The parameters given in the input must match the DlogGroup member of this class, which given in the constructor.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="the-otreciever-abstract-class">
+<h4><a class="toc-backref" href="#id5">The OTReciever abstract class</a><a class="headerlink" href="#the-otreciever-abstract-class" title="Permalink to this headline">¶</a></h4>
+<dl class="class">
+<dt id="_CPPv210OTReceiver">
+<span id="OTReceiver"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">OTReceiver</code><a class="headerlink" href="#_CPPv210OTReceiver" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N10OTReceiver8transferEP9CommPartyP8OTRInput">
+<span id="OTReceiver::transfer__CommPartyP.OTRInputP"></span>shared_ptr&lt;<a class="reference internal" href="#_CPPv29OTROutput" title="OTROutput">OTROutput</a>&gt; <code class="descclassname">OTReceiver::</code><code class="descname">transfer</code><span class="sig-paren">(</span>CommParty *<em>channel</em>, <a class="reference internal" href="#_CPPv28OTRInput" title="OTRInput">OTRInput</a> *<em>input</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N10OTReceiver8transferEP9CommPartyP8OTRInput" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>The transfer stage of OT protocol which can be called several times in parallel.
+The OT implementation support usage of many calls to transfer, with single preprocess execution.
+This way, one can execute multiple OT by creating the OT receiver once and call the transfer function for each input couple.
+In order to enable parallel calls, each transfer call should use a different channel to send and receive messages. This way the parallel executions of the function will not block each other.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>channel</strong> &#8211; each call should get a different one.</li>
+<li><strong>input</strong> &#8211; The parameters given in the input must match the DlogGroup member of this class, which given in the constructor.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">OTROutput, the output of the protocol.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="the-otbatchsender-abstract-class">
+<h4><a class="toc-backref" href="#id6">The OTBatchSender abstract class</a><a class="headerlink" href="#the-otbatchsender-abstract-class" title="Permalink to this headline">¶</a></h4>
+<dl class="class">
+<dt id="_CPPv213OTBatchSender">
+<span id="OTBatchSender"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">OTBatchSender</code><a class="headerlink" href="#_CPPv213OTBatchSender" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N13OTBatchSender8transferEP13OTBatchSInput">
+<span id="OTBatchSender::transfer__OTBatchSInputP"></span>shared_ptr&lt;<a class="reference internal" href="#_CPPv214OTBatchSOutput" title="OTBatchSOutput">OTBatchSOutput</a>&gt; <code class="descclassname">OTBatchSender::</code><code class="descname">transfer</code><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv213OTBatchSInput" title="OTBatchSInput">OTBatchSInput</a> *<em>input</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N13OTBatchSender8transferEP13OTBatchSInput" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>The transfer stage of OT protocol which does mulptiple OTs in parallel.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>input</strong> &#8211; The parameters used in the</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="the-otbatchreceiver-abstract-class">
+<h4><a class="toc-backref" href="#id7">The OTBatchReceiver abstract class</a><a class="headerlink" href="#the-otbatchreceiver-abstract-class" title="Permalink to this headline">¶</a></h4>
+<dl class="class">
+<dt id="_CPPv215OTBatchReceiver">
+<span id="OTBatchReceiver"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">OTBatchReceiver</code><a class="headerlink" href="#_CPPv215OTBatchReceiver" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N15OTBatchReceiver8transferEP13OTBatchRInput">
+<span id="OTBatchReceiver::transfer__OTBatchRInputP"></span>shared_ptr&lt;<a class="reference internal" href="#_CPPv214OTBatchROutput" title="OTBatchROutput">OTBatchROutput</a>&gt; <code class="descclassname">OTBatchReceiver::</code><code class="descname">transfer</code><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv213OTBatchRInput" title="OTBatchRInput">OTBatchRInput</a> *<em>input</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N15OTBatchReceiver8transferEP13OTBatchRInput" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>The transfer stage of OT protocol which does mulptiple OTs in parallel.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>input</strong> &#8211; The parameters given in the input must match the DlogGroup member of this class, which given in the constructor.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">OTROutput, the output of the protocol.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="the-input-output-interfaces">
+<h4><a class="toc-backref" href="#id8">The Input/Output Interfaces</a><a class="headerlink" href="#the-input-output-interfaces" title="Permalink to this headline">¶</a></h4>
+<p>Every OT sender and receiver need inputs during the protocol execution, but every concrete protocol needs different inputs.
+The following classes are marker classes for regular and batch OT sender/receiver inputs, where there is an implementing class for each OT protocol.</p>
+<dl class="class">
+<dt id="_CPPv28OTSInput">
+<span id="OTSInput"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">OTSInput</code><a class="headerlink" href="#_CPPv28OTSInput" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="_CPPv28OTRInput">
+<span id="OTRInput"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">OTRInput</code><a class="headerlink" href="#_CPPv28OTRInput" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="_CPPv213OTBatchSInput">
+<span id="OTBatchSInput"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">OTBatchSInput</code><a class="headerlink" href="#_CPPv213OTBatchSInput" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="_CPPv213OTBatchRInput">
+<span id="OTBatchRInput"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">OTBatchRInput</code><a class="headerlink" href="#_CPPv213OTBatchRInput" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<p>Similar, every regular OT receiver and every batch sender and receiver outputs a result in the end of the protocol execution, but every concrete protocol output different data.
+The following classes are marker classes for OT output, where there is an implementing class for each OT protocol.</p>
+<dl class="class">
+<dt id="_CPPv29OTROutput">
+<span id="OTROutput"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">OTROutput</code><a class="headerlink" href="#_CPPv29OTROutput" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="_CPPv214OTBatchSOutput">
+<span id="OTBatchSOutput"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">OTBatchSOutput</code><a class="headerlink" href="#_CPPv214OTBatchSOutput" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="_CPPv214OTBatchROutput">
+<span id="OTBatchROutput"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">OTBatchROutput</code><a class="headerlink" href="#_CPPv214OTBatchROutput" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+<div class="section" id="concrete-implementations">
+<h3><a class="toc-backref" href="#id9">Concrete implementations</a><a class="headerlink" href="#concrete-implementations" title="Permalink to this headline">¶</a></h3>
+<p>As we have already said, each concrete OT implementation should implement dedicated sender and receiver classes. These classes implement the functionalities that are unique for the specific implementation. Most OT protocols can work on two different types of inputs: byte arrays and DlogGroup elements. Each input type should be treated differently, thus we decided to have concrete sender/receiver classes for each input option.</p>
+<p>Concrete <em>regular</em> OT implemented so far are:</p>
+<ul class="simple">
+<li>Semi Honest</li>
+<li>Privacy Only</li>
+<li>One Sided Simulation</li>
+<li>Full Simulation</li>
+<li>Full Simulation – ROM</li>
+<li>UC</li>
+</ul>
+<p>Concrete <em>batch</em> OT implemented so far are:</p>
+<ul class="simple">
+<li>Batch Semi Honest Extension. This is a wrapper of Michael Zohner&#8217;s implementation.</li>
+<li>Batch Malicious Extension. There are two wrappers: One wraps the Michael Zohner&#8217;s implementation and the other wraps the Bristol&#8217;s implementation.</li>
+</ul>
+</div>
+</div>
+<div class="section" id="basic-usage">
+<h2><a class="toc-backref" href="#id10">Basic Usage</a><a class="headerlink" href="#basic-usage" title="Permalink to this headline">¶</a></h2>
+<p>In order to execute the OT protocol, both sender and receiver should be created as separate programs (Usually not on the same machine).
+The main function in the sender and the receiver is the transfer function, that gets the communication channel between them and input.</p>
+<p>Steps in sender creation:</p>
+<ul class="simple">
+<li>Given a <code class="docutils literal"><span class="pre">Channel</span></code> object channel do:</li>
+<li>Create an <code class="docutils literal"><span class="pre">OTSender</span></code> (for example, <code class="docutils literal"><span class="pre">OTSemiHonestDDHOnGroupElementSender</span></code>).</li>
+<li>Create input for the sender. Usually, the input for the receiver contains x0 and x1.</li>
+<li>Call the transfer function of the sender with channel and the created input.</li>
+</ul>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="c1">//Creates the OT sender object.</span>
+<span class="n">OTSemiHonestDDHOnGroupElementSender</span> <span class="n">sender</span><span class="p">;</span>
+
+<span class="c1">//Creates input for the sender.</span>
+<span class="k">auto</span> <span class="n">x0</span> <span class="o">=</span> <span class="n">dlog</span><span class="p">.</span><span class="n">createRandomElement</span><span class="p">();</span>
+<span class="k">auto</span> <span class="n">x1</span> <span class="o">=</span> <span class="n">dlog</span><span class="p">.</span><span class="n">createRandomElement</span><span class="p">();</span>
+<span class="n">OTSOnGroupElementInput</span> <span class="nf">input</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">x1</span><span class="p">);</span>
+
+<span class="c1">//call the transfer part of the OT protocol</span>
+<span class="n">sender</span><span class="p">.</span><span class="n">transfer</span><span class="p">(</span><span class="o">&amp;</span><span class="n">channel</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">input</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Steps in receiver creation:</p>
+<ul class="simple">
+<li>Given a <code class="docutils literal"><span class="pre">Channel</span></code> object channel do:</li>
+<li>Create an <code class="docutils literal"><span class="pre">OTReceiver</span></code> (for example, <code class="docutils literal"><span class="pre">OTSemiHonestDDHOnGroupElementReceiver</span></code>).</li>
+<li>Create input for the receiver. Usually, the input for the receiver contains only sigma parameter.</li>
+<li>Call the transfer function of the receiver with channel and the created input.</li>
+</ul>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="c1">//Creates the OT receiver object.</span>
+<span class="n">OTSemiHonestDDHOnGroupElementReceiver</span> <span class="n">receiver</span><span class="p">;</span>
+
+<span class="c1">//Creates input for the receiver.</span>
+<span class="n">byte</span> <span class="n">sigma</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="n">OTRBasicInput</span> <span class="nf">input</span><span class="p">(</span><span class="n">sigma</span><span class="p">);</span>
+
+<span class="n">OTROutput</span> <span class="n">output</span> <span class="o">=</span> <span class="n">receiver</span><span class="p">.</span><span class="n">transfer</span><span class="p">(</span><span class="o">&amp;</span><span class="n">channel</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">input</span><span class="p">);</span>
+<span class="c1">//use output…</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Oblivious Transfer Protocols</a><ul>
+<li><a class="reference internal" href="#class-hierarchy">Class Hierarchy</a><ul>
+<li><a class="reference internal" href="#abstract-classes">abstract classes</a><ul>
+<li><a class="reference internal" href="#the-otsender-abstract-class">The OTSender abstract class</a></li>
+<li><a class="reference internal" href="#the-otreciever-abstract-class">The OTReciever abstract class</a></li>
+<li><a class="reference internal" href="#the-otbatchsender-abstract-class">The OTBatchSender abstract class</a></li>
+<li><a class="reference internal" href="#the-otbatchreceiver-abstract-class">The OTBatchReceiver abstract class</a></li>
+<li><a class="reference internal" href="#the-input-output-interfaces">The Input/Output Interfaces</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#concrete-implementations">Concrete implementations</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../interactive_layer.html">Layer 3: Interactive Protocols</a><ul>
+      <li>Previous: <a href="../interactive_layer.html" title="previous chapter">Layer 3: Interactive Protocols</a></li>
+      <li>Next: <a href="sigma_protocols.html" title="next chapter">Sigma Protocols</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/interactive_layer/ot.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, libscapi team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/interactive_layer/ot.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

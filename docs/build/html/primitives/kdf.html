@@ -1,0 +1,181 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Key Derivation Function (KDF) &#8212; libscapi 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Layer 2: Non Interactive Protocols" href="../mid_layer.html" />
+    <link rel="prev" title="Discrete Log Group (DLOG)" href="dlog.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="key-derivation-function-kdf">
+<h1><a class="toc-backref" href="#id1">Key Derivation Function (KDF)</a><a class="headerlink" href="#key-derivation-function-kdf" title="Permalink to this headline">¶</a></h1>
+<p>A key derivation function (or KDF) is used to derive (close to) uniformly distributed string/s from a secret value with high entropy (but no other guarantee regarding its distribution).</p>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#key-derivation-function-kdf" id="id1">Key Derivation Function (KDF)</a><ul>
+<li><a class="reference internal" href="#the-key-derivation-function-abstract-class" id="id2">The <code class="docutils literal"><span class="pre">Key</span> <span class="pre">Derivation</span> <span class="pre">Function</span></code> abstract class:</a></li>
+<li><a class="reference internal" href="#basic-usage" id="id3">Basic Usage</a></li>
+<li><a class="reference internal" href="#supported-kdf-types" id="id4">Supported KDF Types</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="the-key-derivation-function-abstract-class">
+<h2><a class="toc-backref" href="#id2">The <code class="docutils literal"><span class="pre">Key</span> <span class="pre">Derivation</span> <span class="pre">Function</span></code> abstract class:</a><a class="headerlink" href="#the-key-derivation-function-abstract-class" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="_CPPv2N21KeyDerivationFunction9deriveKeyERK6vectorI4byteEiiiRK6vectorI4byteE">
+<span id="KeyDerivationFunction::deriveKey__vector:byte:CR.i.i.i.vector:byte:CR"></span>SecretKey <code class="descclassname">KeyDerivationFunction::</code><code class="descname">deriveKey</code><span class="sig-paren">(</span><em class="property">const</em> vector&lt;byte&gt; &amp;<em>entropySource</em>, int <em>inOff</em>, int <em>inLen</em>, int <em>outLen</em>, <em class="property">const</em> vector&lt;byte&gt; &amp;<em>iv</em> = vector&lt;byte&gt;()<span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N21KeyDerivationFunction9deriveKeyERK6vectorI4byteEiiiRK6vectorI4byteE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Generates a new secret key from the given seed and iv (if given).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>entropySource</strong> &#8211; the secret key that is the seed for the key generation</li>
+<li><strong>inOff</strong> &#8211; the offset within the entropySource to take the bytes from</li>
+<li><strong>inLen</strong> &#8211; the length of the seed</li>
+<li><strong>outLen</strong> &#8211; the required output key length</li>
+<li><strong>iv</strong> &#8211; info for the key generation</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">SecretKey the derivated key.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="basic-usage">
+<h2><a class="toc-backref" href="#id3">Basic Usage</a><a class="headerlink" href="#basic-usage" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="n">KeyDerivationFunction</span><span class="o">*</span> <span class="n">kdf</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HKDF</span><span class="p">(</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">OpenSSLHMAC</span><span class="o">&gt;</span><span class="p">());</span>
+<span class="n">vector</span><span class="o">&lt;</span><span class="n">byte</span><span class="o">&gt;</span> <span class="n">source</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+<span class="kt">int</span> <span class="n">targetLen</span> <span class="o">=</span> <span class="mi">128</span><span class="p">;</span>
+<span class="n">vector</span><span class="o">&lt;</span><span class="n">byte</span><span class="o">&gt;</span> <span class="n">kdfed</span> <span class="o">=</span> <span class="n">kdf</span><span class="o">-&gt;</span><span class="n">deriveKey</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">source</span><span class="p">.</span><span class="n">size</span><span class="p">(),</span> <span class="n">targetLen</span><span class="p">).</span><span class="n">getEncoded</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="supported-kdf-types">
+<h2><a class="toc-backref" href="#id4">Supported KDF Types</a><a class="headerlink" href="#supported-kdf-types" title="Permalink to this headline">¶</a></h2>
+<p>In this section we present the key derivation functions provided by libscapi.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="28%" />
+<col width="72%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Class Name</th>
+<th class="head">Class Location</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>HKDF</td>
+<td>libscapi/include/primitives/Kdf.hpp</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Key Derivation Function (KDF)</a><ul>
+<li><a class="reference internal" href="#the-key-derivation-function-abstract-class">The <code class="docutils literal"><span class="pre">Key</span> <span class="pre">Derivation</span> <span class="pre">Function</span></code> abstract class:</a></li>
+<li><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
+<li><a class="reference internal" href="#supported-kdf-types">Supported KDF Types</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../primitives.html">Layer 1: Basic Primitives</a><ul>
+      <li>Previous: <a href="dlog.html" title="previous chapter">Discrete Log Group (DLOG)</a></li>
+      <li>Next: <a href="../mid_layer.html" title="next chapter">Layer 2: Non Interactive Protocols</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/primitives/kdf.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, libscapi team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/primitives/kdf.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

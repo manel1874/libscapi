@@ -1,0 +1,329 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Symmetric Encryption &#8212; libscapi 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Asymmetric Encryption" href="asymmetric_enc.html" />
+    <link rel="prev" title="Message Authentication Codes" href="mac.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="symmetric-encryption">
+<h1><a class="toc-backref" href="#id1">Symmetric Encryption</a><a class="headerlink" href="#symmetric-encryption" title="Permalink to this headline">¶</a></h1>
+<p>There are three main categories of symmetric encryption:</p>
+<ol class="arabic simple">
+<li>An encryption based on modes of operation using a pseudo-random permutation and a randomized IV. The randomized IV is crucial for security. <strong>CBCEnc</strong> and <strong>CTREnc</strong> belong to this category.</li>
+<li>An authenticated encryption where the message gets first encrypted and then mac-ed. <strong>EncryptThenMac</strong> belongs to this category.</li>
+<li>Homomorphic encryption.</li>
+</ol>
+<p>Libscapi currently implemented the CTR encryption only. In the future we may add more implementations.</p>
+<p>The symmetric encryption class implements three main functionalities that correspond to the cryptographer’s language in which an encryption scheme is composed of three algorithms:</p>
+<ol class="arabic simple">
+<li>Generation of the key.</li>
+<li>Encryption of the plaintext.</li>
+<li>Decryption of the ciphertext.</li>
+</ol>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#symmetric-encryption" id="id1">Symmetric Encryption</a><ul>
+<li><a class="reference internal" href="#the-symmetricenc-abstract-class" id="id2">The SymmetricEnc abstract class</a><ul>
+<li><a class="reference internal" href="#encryption-and-decryption" id="id3">Encryption and Decryption</a></li>
+<li><a class="reference internal" href="#key-generation" id="id4">Key Generation</a></li>
+<li><a class="reference internal" href="#key-handling" id="id5">Key Handling</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#the-ctrenc-abstract-class" id="id6">The CTREnc abstract class</a></li>
+<li><a class="reference internal" href="#basic-usage" id="id7">Basic Usage</a></li>
+<li><a class="reference internal" href="#supported-encryption-types" id="id8">Supported Encryption Types</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="the-symmetricenc-abstract-class">
+<h2><a class="toc-backref" href="#id2">The SymmetricEnc abstract class</a><a class="headerlink" href="#the-symmetricenc-abstract-class" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv212SymmetricEnc">
+<span id="SymmetricEnc"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">SymmetricEnc</code> : <em class="property">public</em> Eav, <em class="property">public</em> Indistinguishable<a class="headerlink" href="#_CPPv212SymmetricEnc" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This is the main class for the Symmetric Encryption family.
+Any symmetric encryption scheme belongs by default at least to the Eavsdropper Security Level and to the Indistinguishable Security Level.</p>
+</dd></dl>
+
+<div class="section" id="encryption-and-decryption">
+<h3><a class="toc-backref" href="#id3">Encryption and Decryption</a><a class="headerlink" href="#encryption-and-decryption" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N12SymmetricEnc7encryptEP9Plaintext">
+<span id="SymmetricEnc::encrypt__PlaintextP"></span>shared_ptr&lt;SymmetricCiphertext&gt; <code class="descclassname">SymmetricEnc::</code><code class="descname">encrypt</code><span class="sig-paren">(</span>Plaintext *<em>plaintext</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N12SymmetricEnc7encryptEP9Plaintext" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Encrypts a plaintext. It lets the system choose the random IV.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">an IVCiphertext, which contains the IV used and the encrypted data.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N12SymmetricEnc7encryptEP9PlaintextR6vectorI4byteE">
+<span id="SymmetricEnc::encrypt__PlaintextP.vector:byte:R"></span>shared_ptr&lt;SymmetricCiphertext&gt; <code class="descclassname">SymmetricEnc::</code><code class="descname">encrypt</code><span class="sig-paren">(</span>Plaintext *<em>plaintext</em>, vector&lt;byte&gt; &amp;<em>iv</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N12SymmetricEnc7encryptEP9PlaintextR6vectorI4byteE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This function encrypts a plaintext. It lets the user choose the random IV.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>iv</strong> &#8211; random bytes to use in the encryption pf the message.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">an IVCiphertext, which contains the IV used and the encrypted data.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N12SymmetricEnc7decryptEP19SymmetricCiphertext">
+<span id="SymmetricEnc::decrypt__SymmetricCiphertextP"></span>shared_ptr&lt;Plaintext&gt; <code class="descclassname">SymmetricEnc::</code><code class="descname">decrypt</code><span class="sig-paren">(</span>SymmetricCiphertext *<em>ciphertext</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N12SymmetricEnc7decryptEP19SymmetricCiphertext" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This function performs the decryption of a ciphertext returning the corresponding decrypted plaintext.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ciphertext</strong> &#8211; The Ciphertext to decrypt.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the decrypted plaintext.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="key-generation">
+<h3><a class="toc-backref" href="#id4">Key Generation</a><a class="headerlink" href="#key-generation" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N12SymmetricEnc11generateKeyER22AlgorithmParameterSpec">
+<span id="SymmetricEnc::generateKey__AlgorithmParameterSpecR"></span>SecretKey <code class="descclassname">SymmetricEnc::</code><code class="descname">generateKey</code><span class="sig-paren">(</span>AlgorithmParameterSpec &amp;<em>keyParams</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N12SymmetricEnc11generateKeyER22AlgorithmParameterSpec" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Generates a secret key to initialize this symmetric encryption.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>keyParams</strong> &#8211; algorithmParameterSpec contains parameters for the key generation of this symmetric encryption.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the generated secret key.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N12SymmetricEnc11generateKeyEi">
+<span id="SymmetricEnc::generateKey__i"></span>SecretKey <code class="descclassname">SymmetricEnc::</code><code class="descname">generateKey</code><span class="sig-paren">(</span>int <em>keySize</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N12SymmetricEnc11generateKeyEi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Generates a secret key to initialize this symmetric encryption.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>keySize</strong> &#8211; is the required secret key size in bits.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the generated secret key.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="key-handling">
+<h3><a class="toc-backref" href="#id5">Key Handling</a><a class="headerlink" href="#key-handling" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N12SymmetricEnc8isKeySetEv">
+<span id="SymmetricEnc::isKeySet"></span>bool <code class="descclassname">SymmetricEnc::</code><code class="descname">isKeySet</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N12SymmetricEnc8isKeySetEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>An object trying to use an instance of symmetric encryption needs to check if it has already been initialized.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">true if the object was initialized by calling the function setKey.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N12SymmetricEnc6setKeyER9SecretKey">
+<span id="SymmetricEnc::setKey__SecretKeyR"></span>void <code class="descclassname">SymmetricEnc::</code><code class="descname">setKey</code><span class="sig-paren">(</span>SecretKey &amp;<em>secretKey</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N12SymmetricEnc6setKeyER9SecretKey" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Sets the secret key for this symmetric encryption. The key can be changed at any time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>secretKey</strong> &#8211; secret key.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="the-ctrenc-abstract-class">
+<h2><a class="toc-backref" href="#id6">The CTREnc abstract class</a><a class="headerlink" href="#the-ctrenc-abstract-class" title="Permalink to this headline">¶</a></h2>
+<p>This is a marker class, for the CTR method:</p>
+<img alt="CTR mode" src="../_images/CTR.png" />
+<dl class="class">
+<dt id="_CPPv26CTREnc">
+<span id="CTREnc"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">CTREnc</code> : <em class="property">public</em> <em class="property">virtual</em> <a class="reference internal" href="#_CPPv212SymmetricEnc" title="SymmetricEnc">SymmetricEnc</a>, <em class="property">public</em> Cpa<a class="headerlink" href="#_CPPv26CTREnc" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="basic-usage">
+<h2><a class="toc-backref" href="#id7">Basic Usage</a><a class="headerlink" href="#basic-usage" title="Permalink to this headline">¶</a></h2>
+<p>Sender usage:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="n">OpenSSLCTREncRandomIV</span> <span class="nf">encryptor</span><span class="p">(</span><span class="s">&quot;AES&quot;</span><span class="p">);</span>
+
+<span class="c1">//Generate a SecretKey using the created object and set it.</span>
+<span class="n">SecretKey</span> <span class="n">key</span> <span class="o">=</span> <span class="n">encryptor</span><span class="p">.</span><span class="n">generateKey</span><span class="p">(</span><span class="mi">128</span><span class="p">);</span>
+<span class="n">encryptor</span><span class="p">.</span><span class="n">setKey</span><span class="p">(</span><span class="n">key</span><span class="p">);</span>
+
+<span class="c1">//Get a plaintext to encrypt, and encrypt the plaintext.</span>
+<span class="p">...</span>
+<span class="n">SymmetricCiphertext</span> <span class="n">cipher</span> <span class="o">=</span> <span class="n">encryptor</span><span class="p">.</span><span class="n">encrypt</span><span class="p">(</span><span class="n">plaintext</span><span class="p">);</span>
+
+<span class="c1">//Send the cipher to the decryptor.</span>
+<span class="p">...</span>
+</pre></div>
+</div>
+<p>Receiver usage:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="c1">//Create the same SymmetricEnc object as the sender’s encryption object, and set the key.</span>
+<span class="c1">//Get the ciphertext and decrypt it to get the plaintext.</span>
+<span class="n">Plaintext</span> <span class="n">plaintext</span> <span class="o">=</span> <span class="n">decryptor</span><span class="p">.</span><span class="n">decrypt</span><span class="p">(</span><span class="n">cipher</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="supported-encryption-types">
+<h2><a class="toc-backref" href="#id8">Supported Encryption Types</a><a class="headerlink" href="#supported-encryption-types" title="Permalink to this headline">¶</a></h2>
+<p>In this section we present the symmetric encryptions provided by libscapi.</p>
+<p>The OpenSSL implementation:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="29%" />
+<col width="71%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Class Name</th>
+<th class="head">Class Location</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>OpenSSLCTREncRandomIV</td>
+<td>libscapi/include/mid_layer/OpenSSLSymmetricEnc.hpp</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Symmetric Encryption</a><ul>
+<li><a class="reference internal" href="#the-symmetricenc-abstract-class">The SymmetricEnc abstract class</a><ul>
+<li><a class="reference internal" href="#encryption-and-decryption">Encryption and Decryption</a></li>
+<li><a class="reference internal" href="#key-generation">Key Generation</a></li>
+<li><a class="reference internal" href="#key-handling">Key Handling</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#the-ctrenc-abstract-class">The CTREnc abstract class</a></li>
+<li><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
+<li><a class="reference internal" href="#supported-encryption-types">Supported Encryption Types</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../mid_layer.html">Layer 2: Non Interactive Protocols</a><ul>
+      <li>Previous: <a href="mac.html" title="previous chapter">Message Authentication Codes</a></li>
+      <li>Next: <a href="asymmetric_enc.html" title="next chapter">Asymmetric Encryption</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/mid_layer/symmetric_enc.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, libscapi team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/mid_layer/symmetric_enc.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

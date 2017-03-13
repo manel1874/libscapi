@@ -37,7 +37,7 @@
 * Concrete class of trapdoor permutation of RSA algorithm.
 * This class wraps the OpenSSL implementation of RSA permutation.
 */
-class OpenSSLRSAPermutation : public virtual TrapdoorPermutationAbs , public virtual RSAPermutation {
+class OpenSSLRSAPermutation : public virtual TrapdoorPermutation, public virtual RSAPermutation {
 private:
 	shared_ptr<RSA> rsa; // Pointer to the SSL RSA object.
 	shared_ptr<PrgFromOpenSSLAES> random;
