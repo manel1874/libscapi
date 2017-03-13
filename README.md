@@ -6,7 +6,7 @@ The latest release can be found here. Alternately you can simply clone the repos
 
 Libscapi is developed by [Bar Ilan University Cryptography Research Group](http://crypto.biu.ac.il/). The goal of libscapi is to promote research by Academy and Industry practitioners in this field by providing:
 
-- A consistent API over Primitives, Mid-Layer Protocols, Interactive Mid-Layer Protocols and Communictaion Channels, simplifying the development and evaluation fo new protocols. We focus on keeping libscapi easy to build and use.
+- A consistent API over Primitives, Mid-Layer Protocols, Interactive Mid-Layer Protocols and Communication Channels, simplifying the development and evaluation fo new protocols. We focus on keeping libscapi easy to build and use.
 - Integrating best performance open-source implementations by other Academy Research Institutes.  
 - High Performance implementation on standard Linux & Intelx64 Architecture. We use modern techniques like Intel Intrinsics Instructions, Pipelining and TCP optimizations. However, we avoid using techniques that are too advanced or not available on common platforms (such as Intel AVX-512 and DPDK, GPGPU exc).   
 - Provide a common platfrom for benchmarking different alogirthms and implementations
@@ -19,8 +19,8 @@ Libscapi is developed by [Bar Ilan University Cryptography Research Group](http:
 - __Circuits__: To be elaborated
 - __Communication Channel__: To be elaborated
 
-## License information
-Libscapi is released under the MIT open source license. However, some of the libraries we use have different licenses. For further information pleare refer to [LICENSE.MD](LICENSE.MD)
+- ## License information
+Libscapi is released under the MIT open source license. However, some of the libraries we use have different licenses. For further information pleare refer to [LICENSE.MD](build_scripts/LICENSE.MD)
 
 ## Documentation
 
@@ -28,9 +28,9 @@ Go to http://biulibscapi.readthedocs.org/ for a detailed explanations of our imp
 
 ##Installing libscapi
 
-Libscapi has is tested on Ubuntu 14.04 and should run on all major versions of Linux. It also executes on Windows 8.1/10 but with performance limitations. Internally we use the Windows option for development only. All tests execute on Linux.
+Libscapi has is tested on Ubuntu 14.04/16.04LTS and should run on all major versions of Linux. It also executes on Windows 8.1/10 but with performance limitations. Internally we use the Windows option for development only. All tests execute on Linux.
 Mac OSX has not been tested so far. 
-For detailed instructions, see [INSTALL.MD](INSTALL.MD)
+For detailed instructions, see [INSTALL.MD](build_scripts/INSTALL.MD)
 
 ## Libraries used by libscapi
 
