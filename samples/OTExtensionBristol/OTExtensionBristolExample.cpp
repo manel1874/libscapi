@@ -87,8 +87,8 @@ int mainBristol(string partyNum) {
 
    /*if (my_num == 0) {
     	boost::asio::io_service io_service;
-		SocketPartyData me(IpAdress::from_string("127.0.0.1"), 1212);
-		SocketPartyData other(IpAdress::from_string("127.0.0.1"), 1213);
+		SocketPartyData me(IpAddress::from_string("127.0.0.1"), 1212);
+		SocketPartyData other(IpAddress::from_string("127.0.0.1"), 1213);
 		shared_ptr<CommParty> channel = make_shared<CommPartyTCPSynced>(io_service, me, other);
 
 		// connect to party one
@@ -149,8 +149,8 @@ int mainBristol(string partyNum) {
    }
 	else {
 		boost::asio::io_service io_service;
-		SocketPartyData me(IpAdress::from_string("127.0.0.1"), 1213);
-		SocketPartyData other(IpAdress::from_string("127.0.0.1"), 1212);
+		SocketPartyData me(IpAddress::from_string("127.0.0.1"), 1213);
+		SocketPartyData other(IpAddress::from_string("127.0.0.1"), 1212);
 		//SocketPartyData receiverParty(yao_config.receiver_ip, 7766);
 		//CommParty * channel = new CommPartyTCPSynced(io_service, me, other);
 
@@ -195,10 +195,10 @@ int mainBristol(string partyNum) {
 
 
 
-    if (my_num == 0) {
+    if (my_num == 1) {
         	boost::asio::io_service io_service;
-    		SocketPartyData me(IpAdress::from_string("127.0.0.1"), 1212);
-    		SocketPartyData other(IpAdress::from_string("127.0.0.1"), 1213);
+    		SocketPartyData me(IpAddress::from_string("127.0.0.1"), 1212);
+    		SocketPartyData other(IpAddress::from_string("127.0.0.1"), 1213);
     		shared_ptr<CommParty> channel = make_shared<CommPartyTCPSynced>(io_service, me, other);
 
     		// connect to party one
@@ -263,8 +263,8 @@ int mainBristol(string partyNum) {
             }
     	else {
     		boost::asio::io_service io_service;
-    		SocketPartyData me(IpAdress::from_string("127.0.0.1"), 1213);
-    		SocketPartyData other(IpAdress::from_string("127.0.0.1"), 1212);
+    		SocketPartyData me(IpAddress::from_string("127.0.0.1"), 1213);
+    		SocketPartyData other(IpAddress::from_string("127.0.0.1"), 1212);
     		//SocketPartyData receiverParty(yao_config.receiver_ip, 7766);
     		//CommParty * channel = new CommPartyTCPSynced(io_service, me, other);
 
@@ -312,7 +312,7 @@ int mainBristol(string partyNum) {
 
     /*
     int size = 1280000;
-    SocketPartyData senderParty(IpAdress::from_string("127.0.0.1"), 7766);
+    SocketPartyData senderParty(IpAddress::from_string("127.0.0.1"), 7766);
     if (my_num == 0) {
 
 

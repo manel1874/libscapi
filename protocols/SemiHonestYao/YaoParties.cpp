@@ -32,9 +32,47 @@
 #include "../../include/circuits/Compat.h"
 #endif
 
+vector<byte> readInputAsVector(string input_file) {
+	auto sc = scannerpp::Scanner(new scannerpp::File(input_file));
+	int inputsNumber = sc.nextInt();
+	vector<byte> inputVector(inputsNumber);
+	for (int i = 0; i < inputsNumber; i++)
+		inputVector[i] = (byte)sc.nextInt();
+	return inputVector;
+}
+
 /*********************************/
 /*          PartyOne             */
 /*********************************/
+
+PartyOne::PartyOne(YaoConfig & yao_config) {
+	//t = boost::thread(boost::bind(&boost::asio::io_service::run, &io_service));
+	this->yaoConfig = yao_config;
+
+	SocketPartyData me(yao_config.sender_ip, 1213);
+	SocketPartyData other(yao_config.receiver_ip, 1212);
+	channel = make_shared<CommPartyTCPSynced>(io_service, me, other);
+
+	// create the garbled circuit
+	circuit = GarbledCircuitFactory::createCircuit(yao_config.circuit_file,
+		GarbledCircuitFactory::CircuitType::FIXED_KEY_FREE_XOR_HALF_GATES, false);
+
+	// create the semi honest OT extension sender
+	SocketPartyData senderParty(yao_config.sender_ip, 7766);
+#ifdef _WIN32
+	otSender = new OTSemiHonestExtensionSender(senderParty, 163, 1);
+#else
+	otSender = new OTExtensionBristolSender(senderParty.getPort(), true, channel);
+#endif
+
+	// connect to party two
+	channel->join(500, 5000);
+};
+
+void PartyOne::setInputs(string inputFileName) {
+	ungarbledInput = readInputAsVector(inputFileName);
+}
+
 void PartyOne::sendP1Inputs(byte* ungarbledInput) {
 	byte* allInputs = (byte*)std::get<0>(values);
 	// get the size of party one inputs
@@ -55,33 +93,20 @@ void PartyOne::sendP1Inputs(byte* ungarbledInput) {
 }
 
 void PartyOne::run() {
-
-	//byte * seed = new byte[16];
-	//if (!RAND_bytes(seed, 16))
-	//	throw runtime_error("key generation failed");
-
+	
 	values = circuit->garble();
-
-
-
-	//write one byte
-	//byte test;
-	//channel->write(&test, 1);
-
-
 
 	// send garbled tables and the translation table to p2.
 	auto garbledTables = circuit->getGarbledTables();
+	
 	channel->write((byte *) garbledTables, circuit->getGarbledTableSize());
 	channel->write(circuit->getTranslationTable().data(), circuit->getNumberOfOutputs());
+	
 	// send p1 input keys to p2.
-	sendP1Inputs(ungarbledInput);
-
-	//cout << "PartyOne: after sending p1 inputs and circuit: " << endl;
+	sendP1Inputs(ungarbledInput.data());
+	
 	// run OT protocol in order to send p2 the necessary keys without revealing any information.
 	runOTProtocol();
-
-	//cout << "PartyOne: after ot: " << endl;
 }
 
 void PartyOne::runOTProtocol() {
@@ -93,8 +118,6 @@ void PartyOne::runOTProtocol() {
 	p2InputSize = circuit->getNumberOfInputs(2);
 	vector<byte> x0Arr;
 	x0Arr.reserve(p2InputSize * SIZE_OF_BLOCK);
-	//int arrSize = p2InputSize * SIZE_OF_BLOCK;
-	//byte * x0Arr = new byte[arrSize];
 	vector<byte> x1Arr;
 	x1Arr.reserve(p2InputSize * SIZE_OF_BLOCK);
 	int beginIndex0, beginIndex1;
@@ -102,33 +125,56 @@ void PartyOne::runOTProtocol() {
 		beginIndex0 = p1InputSize * 2 * SIZE_OF_BLOCK + 2 * i*SIZE_OF_BLOCK;
 		beginIndex1 = p1InputSize * 2 * SIZE_OF_BLOCK + (2 * i + 1)*SIZE_OF_BLOCK;
 		x0Arr.insert(x0Arr.end(), &allInputWireValues[beginIndex0], &allInputWireValues[beginIndex0 + SIZE_OF_BLOCK]);
-		//memcpy(x0Arr, &allInputWireValues[beginIndex0], SIZE_OF_BLOCK);
 		x1Arr.insert(x1Arr.end(), &allInputWireValues[beginIndex1], &allInputWireValues[beginIndex1 + SIZE_OF_BLOCK]);
 	}
 	// create an OT input object with the keys arrays.
 	OTBatchSInput * input = new OTExtensionGeneralSInput(x0Arr, x1Arr, p2InputSize);
 	// run the OT's transfer phase.
 	otSender->transfer(input);
-	//delete x0Arr, x1Arr;
 }
 
 /*********************************/
 /*          PartyTwo             */
 /*********************************/
 
+PartyTwo::PartyTwo(YaoConfig & yao_config, bool print_output) {
+	this->print_output = print_output;
+	this->yaoConfig = yao_config;
+	// init
+	SocketPartyData me(yao_config.receiver_ip, 1212);
+	SocketPartyData other(yao_config.sender_ip, 1213);
+	channel = make_shared<CommPartyTCPSynced>(io_service, me, other);
+
+	// create the garbled circuit
+	circuit = GarbledCircuitFactory::createCircuit(yao_config.circuit_file,
+		GarbledCircuitFactory::CircuitType::FIXED_KEY_FREE_XOR_HALF_GATES, false);
+
+	// create the OT receiver.
+	SocketPartyData senderParty(yao_config.sender_ip, 7766);
+#ifdef _WIN32
+	otReceiver = new OTSemiHonestExtensionReceiver(senderParty, 163, 1);
+#else
+	otReceiver = new OTExtensionBristolReceiver(senderParty.getIpAddress().to_string(), senderParty.getPort(), true, channel);
+#endif
+
+
+	// connect to party one
+	channel->join(500, 5000);
+}
+
+void PartyTwo::setInputs(string inputFileName) {
+	ungarbledInput = readInputAsVector(inputFileName);
+}
+
 byte* PartyTwo::computeCircuit(OTBatchROutput * otOutput) {
-	// Get the output of the protocol.
+
+	// Get the input of the protocol.
 	vector<byte> p2Inputs = ((OTOnByteArrayROutput *)otOutput)->getXSigma();
 	int p2InputsSize = ((OTOnByteArrayROutput *)otOutput)->getLength();
 	// Get party two input wires' indices.
-	//int* labels = NULL;
-	//labels = circuit->getInputWireIndices(2);
 	vector<byte> allInputs(p1InputsSize + p2InputsSize);
 	memcpy(&allInputs[0], p1Inputs, p1InputsSize);
 	memcpy(&allInputs[p1InputsSize], p2Inputs.data(), p2InputsSize);
-	
-	// set the input to the circuit.
-	//circuit->setInputs(allInputs);
 	
 	// compute the circuit.
 	block* garbledOutput = (block *)_aligned_malloc(sizeof(block) * 2 * circuit->getNumberOfOutputs(), SIZE_OF_BLOCK); ;
@@ -141,24 +187,18 @@ byte* PartyTwo::computeCircuit(OTBatchROutput * otOutput) {
 	return circuitOutput;
 }
 
-void PartyTwo::setInput(byte * ungarbledInput, int inputSize) {
-	this->ungarbledInput = ungarbledInput;
-	this->inputSize = inputSize;
-}
-
 void PartyTwo::run() {
 	// receive tables and inputs
 	receiveCircuit();
 	receiveP1Inputs();
 
-	//cout << "PartyTwo: after recieving p1 inputs and circuit: " << endl;
 	// run OT protocol in order to get the necessary keys without revealing any information.
-	auto output = runOTProtocol(ungarbledInput, inputSize);
+	auto output = runOTProtocol(ungarbledInput.data(), ungarbledInput.size());
 
-
-	//cout << "PartyTwo: after run ot: " << endl;
 	// Compute the circuit.
-	byte* circuitOutput = computeCircuit(output.get());
+	auto outputBytes = computeCircuit(output.get());
+	circuitOutput.resize(circuit->getNumberOfOutputs());
+	memcpy(circuitOutput.data(), outputBytes, circuitOutput.size());
 
 	// we're done print the output
 	if (print_output)
@@ -173,23 +213,16 @@ void PartyTwo::run() {
 
 void PartyTwo::receiveCircuit() {
 
-	//read one byte
-	//byte test;
-	//channel->read(&test, 1);
-
 	// receive garbled tables.
 	channel->read((byte*)circuit->getGarbledTables(), circuit->getGarbledTableSize());
-	//auto garbledTables = &(msg->at(0));
 	
-
 	byte * translationTable = new byte[circuit->getNumberOfOutputs()];
 
 	// receive translation table.
 	channel->read(translationTable, circuit->getNumberOfOutputs());
 
 	std::vector<byte> translationTableVec(translationTable, translationTable + circuit->getNumberOfOutputs());
-	//byte*  translationTable = &(msg->at(0));
-	//vector<byte> translationTable = *msg;
+	
 	// set garbled tables and translation table to the circuit.
 
 	//TODO MEITAL remove after the comm layer changes

@@ -34,16 +34,18 @@
 #include "../../include/interactive_mid_protocols/OTOneSidedSimulation.hpp"
 #include "../../include/interactive_mid_protocols/OTFullSimulation.hpp"
 #include "../../include/interactive_mid_protocols/OTFullSimulationROM.hpp"
+#include "../../include/interactive_mid_protocols/OTUC.hpp"
 #include "../../include/primitives/Prg.hpp"
 
 struct OTParams {
-	IpAdress senderIp;
-	IpAdress receiverIp;
+	IpAddress senderIp;
+	IpAddress receiverIp;
 	int senderPort;
 	int receiverPort;
 	string protocolName;
+	shared_ptr<GroupElement> g0, g1, h0, h1;
 
-	OTParams(IpAdress senderIp, IpAdress receiverIp, int senderPort, int receiverPort, string protocolName) {
+	OTParams(IpAddress senderIp, IpAddress receiverIp, int senderPort, int receiverPort, string protocolName) {
 		this->senderIp = senderIp;
 		this->receiverIp = receiverIp;
 		this->senderPort = senderPort;

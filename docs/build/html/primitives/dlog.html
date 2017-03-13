@@ -1,0 +1,680 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Discrete Log Group (DLOG) &#8212; libscapi 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Key Derivation Function (KDF)" href="kdf.html" />
+    <link rel="prev" title="Trapdoor Permutation" href="trapdoor_permutation.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="discrete-log-group-dlog">
+<h1><a class="toc-backref" href="#id1">Discrete Log Group (DLOG)</a><a class="headerlink" href="#discrete-log-group-dlog" title="Permalink to this headline">¶</a></h1>
+<p>The <strong>discrete logarithm problem</strong> is as follows: given a generator <span class="math">g</span> of a finite group <span class="math">G</span> and a random element <span class="math">h \in G</span>, find the (unique) integer <span class="math">x</span> such that <span class="math">g^x = h</span>. In cryptography, we are interested in groups for which the discrete logarithm problem (Dlog for short) is assumed to be hard (or other discrete-log type assumptions like <strong>CDH</strong> and <strong>DDH</strong>). The two most common classes are a prime subgroup of the group <span class="math">Z_p^*</span> for a large <span class="math">p</span>, and some Elliptic curve groups.</p>
+<p>We provide the implementation of the most important Dlog groups in cryptography (see diagram below):</p>
+<ul class="simple">
+<li><span class="math">Z_p^*</span></li>
+<li>Elliptic curve over the field <span class="math">GF[2^m]</span></li>
+<li>Elliptic curve over the field <span class="math">Z_p</span></li>
+</ul>
+<p>Although Elliptic curves groups look very different, the discrete log problem over them can be described as follows. Given an elliptic curve <span class="math">E</span> over a finite field <span class="math">F</span>, a base point on that curve <span class="math">P</span> (i.e., a generator of the group defined from the curve), and a random point <span class="math">Q</span> on the curve, the problem is to find the integer <span class="math">n</span> such that <span class="math">nP=Q</span>.</p>
+<p>We have currently incorporated the elliptic curves recommended by <a class="reference external" href="http://www.nist.gov/">NIST</a>.</p>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#discrete-log-group-dlog" id="id1">Discrete Log Group (DLOG)</a><ul>
+<li><a class="reference internal" href="#class-hierarchy" id="id2">Class Hierarchy:</a></li>
+<li><a class="reference internal" href="#the-dloggroup-abstract-class" id="id3">The <code class="docutils literal"><span class="pre">DlogGroup</span></code> abstract class</a><ul>
+<li><a class="reference internal" href="#group-parameters" id="id4">Group Parameters</a></li>
+<li><a class="reference internal" href="#exponentiation" id="id5">Exponentiation</a></li>
+<li><a class="reference internal" href="#multiplication-and-inverse" id="id6">Multiplication and Inverse</a></li>
+<li><a class="reference internal" href="#group-element-generation" id="id7">Group Element Generation</a></li>
+<li><a class="reference internal" href="#validation" id="id8">Validation</a></li>
+<li><a class="reference internal" href="#group-classification" id="id9">Group Classification</a></li>
+<li><a class="reference internal" href="#group-element-serialization" id="id10">Group Element Serialization</a></li>
+<li><a class="reference internal" href="#byte-array-encoding" id="id11">Byte Array Encoding</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#the-groupelement-abstract-class" id="id12">The <code class="docutils literal"><span class="pre">GroupElement</span></code> abstract class</a></li>
+<li><a class="reference internal" href="#the-groupparams-class" id="id13">The <code class="docutils literal"><span class="pre">GroupParams</span></code> class</a></li>
+<li><a class="reference internal" href="#basic-usage" id="id14">Basic Usage</a></li>
+<li><a class="reference internal" href="#supported-dlog-types" id="id15">Supported Dlog Types</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="class-hierarchy">
+<h2><a class="toc-backref" href="#id2">Class Hierarchy:</a><a class="headerlink" href="#class-hierarchy" title="Permalink to this headline">¶</a></h2>
+<p>The root of the family is a general Dlog Group that presents functionality that all Dlog Groups should implement.</p>
+<p>At the second level we encounter three interfaces:</p>
+<ol class="arabic simple">
+<li>PrimeOrderSubGroup: The order <span class="math">q</span> of the group must be a prime.</li>
+<li>DlogZp: Dlog Group over the <span class="math">Z_p^*</span> field.</li>
+<li>DlogEllipticCurve: Any elliptic curve.</li>
+</ol>
+<p>At the third level we have:</p>
+<ol class="arabic simple">
+<li>DlogZpSafePrime: The order <span class="math">q</span> is not only a prime but also is such that prime <span class="math">p = 2*q + 1</span>.</li>
+<li>DlogEcFp: Any elliptic curve over <span class="math">F_p</span>.</li>
+<li>DlogEcF2m: Any elliptic curve over <span class="math">F_2[m]</span>.</li>
+</ol>
+<p>All these are general interfaces. Specifically, we implement Dlog Groups that are of prime order; therefore all the concrete classes presented here implement this interface. Other implementations may choose to add Dlog Groups that are not of prime order, and they are at liberty of doing so. They just need not to declare that they implement the PrimeOrderSubGroup interface.</p>
+<p>We also see in the diagram two other interfaces that are <strong>used</strong> by DlogGroup:</p>
+<ol class="arabic simple">
+<li>GroupParams.</li>
+<li>GroupElement.</li>
+</ol>
+</div>
+<div class="section" id="the-dloggroup-abstract-class">
+<h2><a class="toc-backref" href="#id3">The <code class="docutils literal"><span class="pre">DlogGroup</span></code> abstract class</a><a class="headerlink" href="#the-dloggroup-abstract-class" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="group-parameters">
+<h3><a class="toc-backref" href="#id4">Group Parameters</a><a class="headerlink" href="#group-parameters" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N9DlogGroup12getGeneratorEv">
+<span id="DlogGroup::getGenerator"></span>shared_ptr&lt;GroupElement&gt; <code class="descclassname">DlogGroup::</code><code class="descname">getGenerator</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9DlogGroup12getGeneratorEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>The generator g of the group is an element of the group such that,
+when written multiplicatively, every element of the group is a power of g.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the generator of this Dlog group</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9DlogGroup21createRandomGeneratorEv">
+<span id="DlogGroup::createRandomGenerator"></span>shared_ptr&lt;GroupElement&gt; <code class="descclassname">DlogGroup::</code><code class="descname">createRandomGenerator</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9DlogGroup21createRandomGeneratorEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Creates a random generator of this Dlog group</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the random generator</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9DlogGroup8getOrderEv">
+<span id="DlogGroup::getOrder"></span>biginteger <code class="descclassname">DlogGroup::</code><code class="descname">getOrder</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9DlogGroup8getOrderEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the order of this Dlog group</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9DlogGroup14getGroupParamsEv">
+<span id="DlogGroup::getGroupParams"></span>shared_ptr&lt;GroupParams&gt; <code class="descclassname">DlogGroup::</code><code class="descname">getGroupParams</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9DlogGroup14getGroupParamsEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>GroupParams is a structure that holds the actual data that makes this group a specific Dlog group.
+For example, for a Dlog group over Zp* what defines the group is p.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the GroupParams of that Dlog group</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9DlogGroup12getGroupTypeEv">
+<span id="DlogGroup::getGroupType"></span>string <code class="descclassname">DlogGroup::</code><code class="descname">getGroupType</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9DlogGroup12getGroupTypeEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Each concrete class implementing this interface returns a string with a meaningful
+name for this type of Dlog group. For example: &#8220;elliptic curve over F2m&#8221; or &#8220;Zp*&#8221;</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the name of the group type</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9DlogGroup11getIdentityEv">
+<span id="DlogGroup::getIdentity"></span>shared_ptr&lt;GroupElement&gt; <code class="descclassname">DlogGroup::</code><code class="descname">getIdentity</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9DlogGroup11getIdentityEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the identity of this Dlog group</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="exponentiation">
+<h3><a class="toc-backref" href="#id5">Exponentiation</a><a class="headerlink" href="#exponentiation" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N9DlogGroup12exponentiateEP12GroupElementRK10biginteger">
+<span id="DlogGroup::exponentiate__GroupElementP.bigintegerCR"></span>shared_ptr&lt;GroupElement&gt; <code class="descclassname">DlogGroup::</code><code class="descname">exponentiate</code><span class="sig-paren">(</span>GroupElement *<em>base</em>, <em class="property">const</em> biginteger &amp;<em>exponent</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9DlogGroup12exponentiateEP12GroupElementRK10biginteger" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Raises the base GroupElement to the exponent. The result is another GroupElement.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the result of the exponentiation</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9DlogGroup33exponentiateWithPreComputedValuesERK10shared_ptrI12GroupElementERK10biginteger">
+<span id="DlogGroup::exponentiateWithPreComputedValues__shared_ptr:GroupElement:CR.bigintegerCR"></span>shared_ptr&lt;GroupElement&gt; <code class="descclassname">DlogGroup::</code><code class="descname">exponentiateWithPreComputedValues</code><span class="sig-paren">(</span><em class="property">const</em> shared_ptr&lt;GroupElement&gt; &amp;<em>base</em>, <em class="property">const</em> biginteger &amp;<em>exponent</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9DlogGroup33exponentiateWithPreComputedValuesERK10shared_ptrI12GroupElementERK10biginteger" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Computes the product of several exponentiations of the same base and distinct exponents.
+An optimization is used to compute it more quickly by keeping in memory the result of h1, h2, h4,h8,... and using it in the calculation.</p>
+<p>Note that if we want a one-time exponentiation of h it is preferable to use the basic exponentiation function
+since there is no point to keep anything in memory if we have no intention to use it.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the exponentiation result</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9DlogGroup36endExponentiateWithPreComputedValuesERK10shared_ptrI12GroupElementE">
+<span id="DlogGroup::endExponentiateWithPreComputedValues__shared_ptr:GroupElement:CR"></span>void <code class="descclassname">DlogGroup::</code><code class="descname">endExponentiateWithPreComputedValues</code><span class="sig-paren">(</span><em class="property">const</em> shared_ptr&lt;GroupElement&gt; &amp;<em>base</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9DlogGroup36endExponentiateWithPreComputedValuesERK10shared_ptrI12GroupElementE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This function cleans up any resources used by exponentiateWithPreComputedValues for the requested base. It is recommended to call it whenever an application does not need to continue calculating exponentiations for this specific base.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9DlogGroup35simultaneousMultipleExponentiationsER6vectorI10shared_ptrI12GroupElementEER6vectorI10bigintegerE">
+<span id="DlogGroup::simultaneousMultipleExponentiations__vector:shared_ptr:GroupElement::R.vector:biginteger:R"></span>shared_ptr&lt;GroupElement&gt; <code class="descclassname">DlogGroup::</code><code class="descname">simultaneousMultipleExponentiations</code><span class="sig-paren">(</span>vector&lt;shared_ptr&lt;GroupElement&gt;&gt; &amp;<em>groupElements</em>, vector&lt;biginteger&gt; &amp;<em>exponentiations</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9DlogGroup35simultaneousMultipleExponentiationsER6vectorI10shared_ptrI12GroupElementEER6vectorI10bigintegerE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Computes the product of several exponentiations with distinct bases and distinct exponents. Instead of computing each part separately, an optimization is used to compute it simultaneously.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>groupElements</strong> &#8211; vector of base elements to exponentiate</li>
+<li><strong>exponentiations</strong> &#8211; vector of exponents</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the exponentiation result</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="multiplication-and-inverse">
+<h3><a class="toc-backref" href="#id6">Multiplication and Inverse</a><a class="headerlink" href="#multiplication-and-inverse" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N9DlogGroup10getInverseEP12GroupElement">
+<span id="DlogGroup::getInverse__GroupElementP"></span>shared_ptr&lt;GroupElement&gt; <code class="descclassname">DlogGroup::</code><code class="descname">getInverse</code><span class="sig-paren">(</span>GroupElement *<em>groupElement</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9DlogGroup10getInverseEP12GroupElement" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Calculates the inverse of the given GroupElement.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>groupElement</strong> &#8211; to invert</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the inverse element of the given GroupElement</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9DlogGroup21multiplyGroupElementsEP12GroupElementP12GroupElement">
+<span id="DlogGroup::multiplyGroupElements__GroupElementP.GroupElementP"></span>shared_ptr&lt;GroupElement&gt; <code class="descclassname">DlogGroup::</code><code class="descname">multiplyGroupElements</code><span class="sig-paren">(</span>GroupElement *<em>groupElement1</em>, GroupElement *<em>groupElement2</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9DlogGroup21multiplyGroupElementsEP12GroupElementP12GroupElement" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Multiplies two GroupElements</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the multiplication result</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="group-element-generation">
+<h3><a class="toc-backref" href="#id7">Group Element Generation</a><a class="headerlink" href="#group-element-generation" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N9DlogGroup19createRandomElementEv">
+<span id="DlogGroup::createRandomElement"></span>shared_ptr&lt;GroupElement&gt; <code class="descclassname">DlogGroup::</code><code class="descname">createRandomElement</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9DlogGroup19createRandomElementEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Creates a random member of this Dlog group</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the random element</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9DlogGroup15generateElementEbR6vectorI10bigintegerE">
+<span id="DlogGroup::generateElement__b.vector:biginteger:R"></span>shared_ptr&lt;GroupElement&gt; <code class="descclassname">DlogGroup::</code><code class="descname">generateElement</code><span class="sig-paren">(</span>bool <em>bCheckMembership</em>, vector&lt;biginteger&gt; &amp;<em>values</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9DlogGroup15generateElementEbR6vectorI10bigintegerE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This function allows the generation of a group element by a protocol that holds a Dlog Group but does not know
+if it is a Zp Dlog Group or an Elliptic Curve Dlog Group. It receives the possible values of a group element
+and whether to check membership of the group element to the group or not.</p>
+<p>It may be not necessary to check membership if the source of values is a trusted source (it can be the group itself after some calculation).
+On the other hand, to work with a generated group element that is not really an element in the group is wrong.
+It is up to the caller of the function to decide if to check membership or not.
+If bCheckMembership is false always generate the element. Else, generate it only if the values are correct.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>bCheckMembership</strong> &#8211; </li>
+<li><strong>values</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the generated GroupElement</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="validation">
+<h3><a class="toc-backref" href="#id8">Validation</a><a class="headerlink" href="#validation" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N9DlogGroup11isGeneratorEv">
+<span id="DlogGroup::isGenerator"></span>bool <code class="descclassname">DlogGroup::</code><code class="descname">isGenerator</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9DlogGroup11isGeneratorEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Checks if the element set as the generator is indeed the generator of this group.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal"><span class="pre">true</span></code> if the generator is valid, <code class="docutils literal"><span class="pre">false</span></code> otherwise.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9DlogGroup8isMemberEP12GroupElement">
+<span id="DlogGroup::isMember__GroupElementP"></span>bool <code class="descclassname">DlogGroup::</code><code class="descname">isMember</code><span class="sig-paren">(</span>GroupElement *<em>element</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9DlogGroup8isMemberEP12GroupElement" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Checks if the given element is a member of this Dlog group</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>element</strong> &#8211; possible group element for which to check that it is a member of this group</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal"><span class="pre">true</span></code> if the given element is a member of this group, <code class="docutils literal"><span class="pre">false</span></code> otherwise.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9DlogGroup13validateGroupEv">
+<span id="DlogGroup::validateGroup"></span>bool <code class="descclassname">DlogGroup::</code><code class="descname">validateGroup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9DlogGroup13validateGroupEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Checks parameters of this group to see if they conform to the type this group is supposed to be.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal"><span class="pre">true</span></code> if valid, <code class="docutils literal"><span class="pre">false</span></code> otherwise.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="group-classification">
+<h3><a class="toc-backref" href="#id9">Group Classification</a><a class="headerlink" href="#group-classification" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N9DlogGroup18isOrderGreaterThanEi">
+<span id="DlogGroup::isOrderGreaterThan__i"></span>bool <code class="descclassname">DlogGroup::</code><code class="descname">isOrderGreaterThan</code><span class="sig-paren">(</span>int <em>numBits</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9DlogGroup18isOrderGreaterThanEi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Checks if the order of this group is greater than 2^numBits</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal"><span class="pre">true</span></code> if the order is greater than 2^numBits, <code class="docutils literal"><span class="pre">false</span></code> otherwise.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9DlogGroup12isPrimeOrderEv">
+<span id="DlogGroup::isPrimeOrder"></span>bool <code class="descclassname">DlogGroup::</code><code class="descname">isPrimeOrder</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9DlogGroup12isPrimeOrderEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Checks if the order is a prime number</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">true if the order is a prime number, false otherwise.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="group-element-serialization">
+<h3><a class="toc-backref" href="#id10">Group Element Serialization</a><a class="headerlink" href="#group-element-serialization" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N9DlogGroup18reconstructElementEbP24GroupElementSendableData">
+<span id="DlogGroup::reconstructElement__b.GroupElementSendableDataP"></span>shared_ptr&lt;GroupElement&gt; <code class="descclassname">DlogGroup::</code><code class="descname">reconstructElement</code><span class="sig-paren">(</span>bool <em>bCheckMembership</em>, GroupElementSendableData *<em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9DlogGroup18reconstructElementEbP24GroupElementSendableData" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Reconstructs a GroupElement given the GroupElementSendableData data, which might have been received through a Channel open between the party holding this DlogGroup and some other party.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>bCheckMembership</strong> &#8211; whether to check that the data provided can actually reconstruct an element of this DlogGroup. Since this action is expensive it should be used only if necessary.</li>
+<li><strong>data</strong> &#8211; the GroupElementSendableData from which we wish to &#8220;reconstruct&#8221; an element of this DlogGroup</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the reconstructed GroupElement</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="byte-array-encoding">
+<h3><a class="toc-backref" href="#id11">Byte Array Encoding</a><a class="headerlink" href="#byte-array-encoding" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N9DlogGroup29encodeByteArrayToGroupElementERK6vectorIhE">
+<span id="DlogGroup::encodeByteArrayToGroupElement__vector:unsigned-c:CR"></span>shared_ptr&lt;GroupElement&gt; <code class="descclassname">DlogGroup::</code><code class="descname">encodeByteArrayToGroupElement</code><span class="sig-paren">(</span><em class="property">const</em> vector&lt;unsigned char&gt; &amp;<em>binaryString</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9DlogGroup29encodeByteArrayToGroupElementERK6vectorIhE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This function takes any string of length up to k bytes and encodes it to a Group Element. k can be obtained by calling getMaxLengthOfByteArrayForEncoding() and it is calculated upon construction of this group; it depends on the length in bits of p.</p>
+<p>The encoding-decoding functionality is not a bijection, that is, it is a 1-1 function but <strong>is not onto</strong>. Therefore, any string of length in bytes up to k can be encoded to a group element but not every group element can be decoded to a binary string in the group of binary strings of length up to 2^k.</p>
+<p>Thus, the right way to use this functionality is first to encode a byte array and then to decode it, and not the opposite.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>binaryString</strong> &#8211; the byte array to encode</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the encoded group Element <strong>or null</strong> if the string could not be encoded</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9DlogGroup29decodeGroupElementToByteArrayEP12GroupElement">
+<span id="DlogGroup::decodeGroupElementToByteArray__GroupElementP"></span><em class="property">const</em> vector&lt;unsigned char&gt; <code class="descclassname">DlogGroup::</code><code class="descname">decodeGroupElementToByteArray</code><span class="sig-paren">(</span>GroupElement *<em>groupElement</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9DlogGroup29decodeGroupElementToByteArrayEP12GroupElement" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This function decodes a group element to a byte array. This function is guaranteed to work properly <strong>ONLY</strong> if the group element was obtained as a result of encoding a binary string of length in bytes up to k.</p>
+<p>This is because the encoding-decoding functionality is not a bijection, that is, it is a 1-1 function but <strong>is not onto</strong>. Therefore, any string of length in bytes up to k can be encoded to a group element but not any group element can be decoded to a binary sting in the group of binary strings of length up to 2^k.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>groupElement</strong> &#8211; the element to decode</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the decoded byte array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9DlogGroup34getMaxLengthOfByteArrayForEncodingEv">
+<span id="DlogGroup::getMaxLengthOfByteArrayForEncoding"></span>int <code class="descclassname">DlogGroup::</code><code class="descname">getMaxLengthOfByteArrayForEncoding</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9DlogGroup34getMaxLengthOfByteArrayForEncodingEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This function returns the value <em>k</em> which is the maximum length of a string to be encoded to a Group Element of this group.
+Any string of length <em>k</em> has a numeric value that is less than (p-1)/2.
+<em>k</em> is the maximum length a binary string is allowed to be in order to encode the said binary string to a group element and vice-versa.
+If a string exceeds the <em>k</em> length it cannot be encoded.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">k the maximum length of a string to be encoded to a Group Element of this group. k can be zero if there is no maximum.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9DlogGroup29mapAnyGroupElementToByteArrayEP12GroupElement">
+<span id="DlogGroup::mapAnyGroupElementToByteArray__GroupElementP"></span><em class="property">const</em> vector&lt;byte&gt; <code class="descclassname">DlogGroup::</code><code class="descname">mapAnyGroupElementToByteArray</code><span class="sig-paren">(</span>GroupElement *<em>groupElement</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9DlogGroup29mapAnyGroupElementToByteArrayEP12GroupElement" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This function maps a group element of this dlog group to a byte array.
+This function does not have an inverse function, that is, it is not possible to re-construct the original group element from the resulting byte array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a byte array representation of the given group element</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="the-groupelement-abstract-class">
+<h2><a class="toc-backref" href="#id12">The <code class="docutils literal"><span class="pre">GroupElement</span></code> abstract class</a><a class="headerlink" href="#the-groupelement-abstract-class" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="_CPPv2N12GroupElement20generateSendableDataEv">
+<span id="GroupElement::generateSendableData"></span>shared_ptr&lt;GroupElementSendableData&gt; <code class="descclassname">GroupElement::</code><code class="descname">generateSendableData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N12GroupElement20generateSendableDataEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This function is used when a group element needs to be sent via a channel or any other means of sending data.
+It retrieves all the data needed to reconstruct this Group Element at a later time and/or in a different VM.
+It puts all the data in an instance of the relevant class that implements the GroupElementSendableData interface.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the GroupElementSendableData object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N12GroupElement10isIdentityEv">
+<span id="GroupElement::isIdentity"></span>bool <code class="descclassname">GroupElement::</code><code class="descname">isIdentity</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N12GroupElement10isIdentityEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>checks if this element is the identity of the group.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal"><span class="pre">true</span></code> if this element is the identity of the group, <code class="docutils literal"><span class="pre">false</span></code> otherwise.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="the-groupparams-class">
+<h2><a class="toc-backref" href="#id13">The <code class="docutils literal"><span class="pre">GroupParams</span></code> class</a><a class="headerlink" href="#the-groupparams-class" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="_CPPv2N11GroupParams4getQEv">
+<span id="GroupParams::getQ"></span>biginteger <code class="descclassname">GroupParams::</code><code class="descname">getQ</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N11GroupParams4getQEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the group order q</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="basic-usage">
+<h2><a class="toc-backref" href="#id14">Basic Usage</a><a class="headerlink" href="#basic-usage" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="c1">// initiate a discrete log group (in this case the OpenSSL implementation of the elliptic curve group K-233)</span>
+<span class="n">DlogGroup</span><span class="o">*</span> <span class="n">dlog</span> <span class="o">=</span> <span class="k">new</span> <span class="n">OpenSSLDlogECF2m</span><span class="p">(</span><span class="s">&quot;include/configFiles/NISTEC.txt&quot;</span><span class="p">,</span> <span class="s">&quot;K-233&quot;</span><span class="p">);</span>
+
+<span class="c1">// get the group generator and order</span>
+<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">GroupElement</span><span class="o">&gt;</span> <span class="n">g</span> <span class="o">=</span> <span class="n">dlog</span><span class="o">-&gt;</span><span class="n">getGenerator</span><span class="p">();</span>
+<span class="n">biginteger</span> <span class="n">q</span> <span class="o">=</span> <span class="n">dlog</span><span class="o">-&gt;</span><span class="n">getOrder</span><span class="p">();</span>
+<span class="k">auto</span> <span class="n">random</span> <span class="o">=</span> <span class="n">get_seeded_prg</span><span class="p">();</span>
+
+<span class="c1">// create a random exponent r</span>
+<span class="n">biginteger</span> <span class="n">r</span> <span class="o">=</span> <span class="n">getRandomInRange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">q</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">random</span><span class="p">.</span><span class="n">get</span><span class="p">());</span>
+<span class="c1">// exponentiate g in r to receive a new group element</span>
+<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">GroupElement</span><span class="o">&gt;</span> <span class="n">g1</span> <span class="o">=</span> <span class="n">dlog</span><span class="o">-&gt;</span><span class="n">exponentiate</span><span class="p">(</span><span class="n">g</span><span class="p">.</span><span class="n">get</span><span class="p">(),</span> <span class="n">r</span><span class="p">);</span>
+<span class="c1">// create a random group element</span>
+
+<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">GroupElement</span><span class="o">&gt;</span> <span class="n">h</span> <span class="o">=</span> <span class="n">dlog</span><span class="o">-&gt;</span><span class="n">createRandomElement</span><span class="p">();</span>
+<span class="c1">// multiply elements</span>
+<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">GroupElement</span><span class="o">&gt;</span> <span class="n">gMult</span> <span class="o">=</span> <span class="n">dlog</span><span class="o">-&gt;</span><span class="n">multiplyGroupElements</span><span class="p">(</span><span class="n">g1</span><span class="p">.</span><span class="n">get</span><span class="p">(),</span> <span class="n">h</span><span class="p">.</span><span class="n">get</span><span class="p">());</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="supported-dlog-types">
+<h2><a class="toc-backref" href="#id15">Supported Dlog Types</a><a class="headerlink" href="#supported-dlog-types" title="Permalink to this headline">¶</a></h2>
+<p>In this section we present the Discrete log groups provided by libscapi.</p>
+<p>The OpenSSL implementation:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="67%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Class Name</th>
+<th class="head">Class Location</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>OpenSSLDlogZpSafePrime</td>
+<td>libscapi/include/primitives/DlogOpenSSL.hpp</td>
+</tr>
+<tr class="row-odd"><td>OpenSSLDlogECFp</td>
+<td>libscapi/include/primitives/DlogOpenSSL.hpp</td>
+</tr>
+<tr class="row-even"><td>OpenSSLDlogECF2m</td>
+<td>libscapi/include/primitives/DlogOpenSSL.hpp</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Discrete Log Group (DLOG)</a><ul>
+<li><a class="reference internal" href="#class-hierarchy">Class Hierarchy:</a></li>
+<li><a class="reference internal" href="#the-dloggroup-abstract-class">The <code class="docutils literal"><span class="pre">DlogGroup</span></code> abstract class</a><ul>
+<li><a class="reference internal" href="#group-parameters">Group Parameters</a></li>
+<li><a class="reference internal" href="#exponentiation">Exponentiation</a></li>
+<li><a class="reference internal" href="#multiplication-and-inverse">Multiplication and Inverse</a></li>
+<li><a class="reference internal" href="#group-element-generation">Group Element Generation</a></li>
+<li><a class="reference internal" href="#validation">Validation</a></li>
+<li><a class="reference internal" href="#group-classification">Group Classification</a></li>
+<li><a class="reference internal" href="#group-element-serialization">Group Element Serialization</a></li>
+<li><a class="reference internal" href="#byte-array-encoding">Byte Array Encoding</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#the-groupelement-abstract-class">The <code class="docutils literal"><span class="pre">GroupElement</span></code> abstract class</a></li>
+<li><a class="reference internal" href="#the-groupparams-class">The <code class="docutils literal"><span class="pre">GroupParams</span></code> class</a></li>
+<li><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
+<li><a class="reference internal" href="#supported-dlog-types">Supported Dlog Types</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../primitives.html">Layer 1: Basic Primitives</a><ul>
+      <li>Previous: <a href="trapdoor_permutation.html" title="previous chapter">Trapdoor Permutation</a></li>
+      <li>Next: <a href="kdf.html" title="next chapter">Key Derivation Function (KDF)</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/primitives/dlog.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, libscapi team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/primitives/dlog.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

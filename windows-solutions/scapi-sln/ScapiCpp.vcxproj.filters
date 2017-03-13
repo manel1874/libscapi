@@ -503,9 +503,6 @@
     <ClInclude Include="..\..\include\mid_layer\OpenSSLSymmetricEnc.hpp">
       <Filter>Header Files\MidLayer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\interactive_mid_protocols\OTExtensionBristol.hpp">
-      <Filter>Header Files\InteractiveMidProtocols</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\mid_layer\BiLinearMaps.hpp">
       <Filter>Header Files\MidLayer</Filter>
     </ClInclude>

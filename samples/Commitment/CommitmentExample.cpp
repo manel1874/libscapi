@@ -34,8 +34,8 @@ CommitmentParams readCommitmentConfig(string config_file) {
 	string verifierIpStr = cf.Value("", "verifierIp");
 	int proverPort = stoi(cf.Value("", "proverPort"));
 	int verifierPort = stoi(cf.Value("", "verifierPort"));
-	auto proverIp = IpAdress::from_string(proverIpStr);
-	auto verifierIp = IpAdress::from_string(verifierIpStr);
+	auto proverIp = IpAddress::from_string(proverIpStr);
+	auto verifierIp = IpAddress::from_string(verifierIpStr);
 	string protocolName = cf.Value("", "protocolName");
 	return CommitmentParams(proverIp, verifierIp, proverPort, verifierPort, protocolName);
 };

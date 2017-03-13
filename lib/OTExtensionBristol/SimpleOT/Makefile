@@ -1,4 +1,4 @@
-CC = /usr/bin/gcc
+CC = /usr/bin/gcc -fPIC
 CFLAGS = -fPIC -O3 -Wall -Wextra
 
 ######################################################

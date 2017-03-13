@@ -25,9 +25,18 @@ compile-otextension-malicious
 compile-ntl
 compile-otextension-malicious
 compile-blake
+prepare-emp
+compile-emp-m2pc
+compile-emp-ot
+compile-emp-tool
+compile-emp
 test/config_for_test.txt
 .cproject
 .project
+protocols/GMW/CMakeFiles/*
+lib/OTExtensionBristol/cmake-build-debug/
+cmake-build-debug/
+protocols/GMW/CMakeCache.txt
 
 # Fortran module files
 *.mod
@@ -62,9 +71,18 @@ config_for_test.txt
 *~
 samples/libscapi_examples
 samples/libscapi_example
-CMakeLists.txt
 windows-solutions/CodeExamples/code examples.vcxproj.user.orig
 protocols/MaliciousYao/lib/data/P1/*
 protocols/MaliciousYao/lib/data/P2/*
 callgrind.*
+lib/OTExtensionBristol/SimpleOT/ot_sender_test
+lib/OTExtensionBristol/SimpleOT/ot_receiver_test
+protocols/GMW/GMW
 
+#other
+protocols/MaliciousYao/OfflineP1_*
+protocols/MaliciousYao/OfflineP2_*
+protocols/MaliciousYao/OnlineP1_*
+protocols/MaliciousYao/OnlineP2_*
+protocols/GMW/NigelAes9Parties.txt
+protocols/GMW/AesInputs*.txt

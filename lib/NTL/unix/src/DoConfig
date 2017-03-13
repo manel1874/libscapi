@@ -15,7 +15,7 @@
 %MakeVal = (
 
 'CXX'	      => 'g++',
-'CXXFLAGS'    => '-g -O2 -fPIC',
+'CXXFLAGS'    => '-g -O3 -fPIC',
 'CXXAUTOFLAGS'=> '',
 'AR'	      => 'ar',
 'ARFLAGS'     => 'ruv',
@@ -56,7 +56,7 @@
 'NTL_LEGACY_SP_MULMOD'  => 'off',
 'NTL_THREADS'           => 'off',
 'NTL_EXCEPTIONS'        => 'off',
-'NTL_THREAD_BOOST'      => 'on',
+'NTL_THREAD_BOOST'      => 'off',
 'NTL_GMP_LIP'           => 'on',
 'NTL_GF2X_LIB'          => 'off',
 'NTL_X86_FIX'           => 'off',

@@ -389,7 +389,7 @@ void OpenSSLTripleDES::setKey(SecretKey & secretKey) {
 	_isKeySet= true;
 }
 
-shared_ptr<PseudorandomFunction> PseudorandomFunction::get_new_prf(string algName) {
+std::shared_ptr<PseudorandomFunction> PseudorandomFunction::get_new_prf(string algName) {
 	if (algName == "AES")
 		return make_shared<OpenSSLAES>();
 	if (algName == "TripleDES")

@@ -1,0 +1,370 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Message Authentication Codes &#8212; libscapi 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Symmetric Encryption" href="symmetric_enc.html" />
+    <link rel="prev" title="Layer 2: Non Interactive Protocols" href="../mid_layer.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="message-authentication-codes">
+<h1><a class="toc-backref" href="#id2">Message Authentication Codes</a><a class="headerlink" href="#message-authentication-codes" title="Permalink to this headline">¶</a></h1>
+<p>In cryptography, a Message Authentication Code (MAC) is a short piece of information used to authenticate a message and to provide integrity and authenticity assurances on the message. Integrity assurances detect accidental and intentional message changes, while authenticity assurances affirm the message&#8217;s origin. libscapi currently provides only one implementation of message authentication codes: <a class="reference internal" href="#hmac">HMAC</a>.</p>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#message-authentication-codes" id="id2">Message Authentication Codes</a><ul>
+<li><a class="reference internal" href="#the-mac-abstract-class" id="id3">The Mac abstract class</a><ul>
+<li><a class="reference internal" href="#basic-mac-and-verify-functionality" id="id4">Basic Mac and Verify Functionality</a></li>
+<li><a class="reference internal" href="#calulcating-the-mac-when-not-all-the-message-is-known-up-front" id="id5">Calulcating the Mac when not all the message is known up front</a></li>
+<li><a class="reference internal" href="#key-handling" id="id6">Key Handling</a></li>
+<li><a class="reference internal" href="#mac-properties" id="id7">Mac Properties</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#hmac" id="id8">HMAC</a><ul>
+<li><a class="reference internal" href="#the-hmac-class" id="id9">The Hmac class</a></li>
+<li><a class="reference internal" href="#basic-usage" id="id10">Basic Usage</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="the-mac-abstract-class">
+<h2><a class="toc-backref" href="#id3">The Mac abstract class</a><a class="headerlink" href="#the-mac-abstract-class" title="Permalink to this headline">¶</a></h2>
+<p>This is the general class for Mac. Every class in this family must derive this class.</p>
+<dl class="class">
+<dt id="_CPPv23Mac">
+<span id="Mac"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">Mac</code><a class="headerlink" href="#_CPPv23Mac" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<div class="section" id="basic-mac-and-verify-functionality">
+<h3><a class="toc-backref" href="#id4">Basic Mac and Verify Functionality</a><a class="headerlink" href="#basic-mac-and-verify-functionality" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N3Mac3macERK6vectorI4byteEii">
+<span id="Mac::mac__vector:byte:CR.i.i"></span>vector&lt;byte&gt; <code class="descclassname">Mac::</code><code class="descname">mac</code><span class="sig-paren">(</span><em class="property">const</em> vector&lt;byte&gt; &amp;<em>msg</em>, int <em>offset</em>, int <em>msgLen</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3Mac3macERK6vectorI4byteEii" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Computes the mac operation on the given msg and return the calculated tag.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>msg</strong> &#8211; the message to operate the mac on.</li>
+<li><strong>offset</strong> &#8211; the offset within the message vector to take the bytes from.</li>
+<li><strong>msgLen</strong> &#8211; the length of the message in bytes.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">vector&lt;byte&gt; the return tag from the mac operation.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3Mac6verifyERK6vectorI4byteEiiR6vectorI4byteE">
+<span id="Mac::verify__vector:byte:CR.i.i.vector:byte:R"></span>bool <code class="descclassname">Mac::</code><code class="descname">verify</code><span class="sig-paren">(</span><em class="property">const</em> vector&lt;byte&gt; &amp;<em>msg</em>, int <em>offset</em>, int <em>msgLength</em>, vector&lt;byte&gt; &amp;<em>tag</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3Mac6verifyERK6vectorI4byteEiiR6vectorI4byteE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Verifies that the given tag is valid for the given message.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>msg</strong> &#8211; the message to compute the mac on to verify the tag.</li>
+<li><strong>offset</strong> &#8211; the offset within the message array to take the bytes from.</li>
+<li><strong>msgLength</strong> &#8211; the length of the message in bytes.</li>
+<li><strong>tag</strong> &#8211; the tag to verify.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">true if the tag is the result of computing mac on the message. false, otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="calulcating-the-mac-when-not-all-the-message-is-known-up-front">
+<h3><a class="toc-backref" href="#id5">Calulcating the Mac when not all the message is known up front</a><a class="headerlink" href="#calulcating-the-mac-when-not-all-the-message-is-known-up-front" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N3Mac6updateER6vectorI4byteEii">
+<span id="Mac::update__vector:byte:R.i.i"></span>void <code class="descclassname">Mac::</code><code class="descname">update</code><span class="sig-paren">(</span>vector&lt;byte&gt; &amp;<em>msg</em>, int <em>offset</em>, int <em>msgLen</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3Mac6updateER6vectorI4byteEii" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Adds the byte array to the existing message to mac.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>msg</strong> &#8211; the message to add.</li>
+<li><strong>offset</strong> &#8211; the offset within the message array to take the bytes from.</li>
+<li><strong>msgLen</strong> &#8211; the length of the message in bytes.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3Mac7doFinalER6vectorI4byteEiiR6vectorI4byteE">
+<span id="Mac::doFinal__vector:byte:R.i.i.vector:byte:R"></span>void <code class="descclassname">Mac::</code><code class="descname">doFinal</code><span class="sig-paren">(</span>vector&lt;byte&gt; &amp;<em>msg</em>, int <em>offset</em>, int <em>msgLength</em>, vector&lt;byte&gt; &amp;<em>tag_res</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3Mac7doFinalER6vectorI4byteEiiR6vectorI4byteE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Completes the mac computation and puts the result tag in the tag array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>msg</strong> &#8211; the end of the message to mac.</li>
+<li><strong>offset</strong> &#8211; the offset within the message array to take the bytes from.</li>
+<li><strong>msgLength</strong> &#8211; the length of the message in bytes.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the result tag from the mac operation.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="key-handling">
+<h3><a class="toc-backref" href="#id6">Key Handling</a><a class="headerlink" href="#key-handling" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N3Mac11generateKeyEi">
+<span id="Mac::generateKey__i"></span>SecretKey <code class="descclassname">Mac::</code><code class="descname">generateKey</code><span class="sig-paren">(</span>int <em>keySize</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3Mac11generateKeyEi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Generates a secret key to initialize this mac object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>keySize</strong> &#8211; is the required secret key size in bits.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the generated secret key.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3Mac11generateKeyER22AlgorithmParameterSpec">
+<span id="Mac::generateKey__AlgorithmParameterSpecR"></span>SecretKey <code class="descclassname">Mac::</code><code class="descname">generateKey</code><span class="sig-paren">(</span>AlgorithmParameterSpec &amp;<em>keyParams</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3Mac11generateKeyER22AlgorithmParameterSpec" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Generates a secret key to initialize this mac object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>keyParams</strong> &#8211; algorithmParameterSpec contains parameters for the key generation of this mac algorithm.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the generated secret key.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3Mac8isKeySetEv">
+<span id="Mac::isKeySet"></span>bool <code class="descclassname">Mac::</code><code class="descname">isKeySet</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3Mac8isKeySetEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>An object trying to use an instance of mac needs to check if it has already been initialized.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">true if the object was initialized by calling the function setKey.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3Mac9setMacKeyER9SecretKey">
+<span id="Mac::setMacKey__SecretKeyR"></span>void <code class="descclassname">Mac::</code><code class="descname">setMacKey</code><span class="sig-paren">(</span>SecretKey &amp;<em>secretKey</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3Mac9setMacKeyER9SecretKey" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Sets the secret key for this mac. The key can be changed at any time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>secretKey</strong> &#8211; secret key</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="mac-properties">
+<h3><a class="toc-backref" href="#id7">Mac Properties</a><a class="headerlink" href="#mac-properties" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N3Mac10getMacSizeEv">
+<span id="Mac::getMacSize"></span>int <code class="descclassname">Mac::</code><code class="descname">getMacSize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3Mac10getMacSizeEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns the input block size in bytes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the input block size.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="hmac">
+<span id="id1"></span><h2><a class="toc-backref" href="#id8">HMAC</a><a class="headerlink" href="#hmac" title="Permalink to this headline">¶</a></h2>
+<p>We presented the same HMAC algorithm in the first layer of libscapi. However, there it was only presented as a PRF. In order to make HMAC become also a MAC and not just a PRF, all we have to do is to derive the Mac class. This means that now our HMAC needs to know how to mac and verify. HMAC is a mac that does not require knowing the length of the message in advance.</p>
+<div class="section" id="the-hmac-class">
+<h3><a class="toc-backref" href="#id9">The Hmac class</a><a class="headerlink" href="#the-hmac-class" title="Permalink to this headline">¶</a></h3>
+<p>Hmac is a Marker interface. Every class that implements it is signed as Hmac. Hmac has varying input length and thus implements the interface PrfVaryingInputLength. Currenty the <code class="docutils literal"><span class="pre">BcHMAC</span></code> class implements the <code class="docutils literal"><span class="pre">Hmac</span></code> interface.</p>
+<dl class="class">
+<dt id="_CPPv24Hmac">
+<span id="Hmac"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">Hmac</code> : <em class="property">public</em> <em class="property">virtual</em> PrfVaryingInputLength, <em class="property">public</em> <em class="property">virtual</em> UniqueTagMac, <em class="property">public</em> <em class="property">virtual</em> UnlimitedTime<a class="headerlink" href="#_CPPv24Hmac" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="basic-usage">
+<h3><a class="toc-backref" href="#id10">Basic Usage</a><a class="headerlink" href="#basic-usage" title="Permalink to this headline">¶</a></h3>
+<p>Sender usage:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="c1">//Create an hmac object.</span>
+<span class="n">OpenSSLHMAC</span> <span class="nf">hmac</span><span class="p">(</span><span class="s">&quot;SHA-1&quot;</span><span class="p">);</span>
+
+<span class="c1">//Generate a SecretKey</span>
+<span class="n">Hmac</span><span class="p">.</span><span class="n">generateKey</span><span class="p">(</span><span class="mi">128</span><span class="p">);</span>
+
+<span class="c1">//Set the secretKey.</span>
+<span class="n">hmac</span><span class="p">.</span><span class="n">setKey</span><span class="p">(</span><span class="n">secretKey</span><span class="p">);</span>
+
+<span class="c1">//Get the message to mac and calculate the mac tag.</span>
+<span class="k">auto</span> <span class="n">tag</span> <span class="o">=</span> <span class="n">hmac</span><span class="p">.</span><span class="n">mac</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">length</span><span class="p">);</span>
+
+<span class="c1">//Send the msg and tag to the receiver.</span>
+<span class="p">...</span>
+</pre></div>
+</div>
+<p>Receiver usage:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="c1">//Get secretKey, msg and tag byte arrays.</span>
+<span class="p">...</span>
+<span class="c1">//Create the same hmac object as the sender’s hmac object and set the key.</span>
+<span class="p">...</span>
+<span class="c1">// receive the message and the tag</span>
+<span class="p">...</span>
+<span class="c1">// Verify the tag with the given msg.</span>
+<span class="n">If</span> <span class="p">(</span><span class="n">hmac</span><span class="p">.</span><span class="n">verify</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">length</span><span class="p">))</span> <span class="p">{</span> <span class="c1">//Tag is valid.</span>
+    <span class="c1">//Continue working...</span>
+<span class="p">}</span> <span class="k">else</span> <span class="k">return</span> <span class="n">ERROR</span><span class="p">;</span> <span class="c1">//Tag is not valid.</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Message Authentication Codes</a><ul>
+<li><a class="reference internal" href="#the-mac-abstract-class">The Mac abstract class</a><ul>
+<li><a class="reference internal" href="#basic-mac-and-verify-functionality">Basic Mac and Verify Functionality</a></li>
+<li><a class="reference internal" href="#calulcating-the-mac-when-not-all-the-message-is-known-up-front">Calulcating the Mac when not all the message is known up front</a></li>
+<li><a class="reference internal" href="#key-handling">Key Handling</a></li>
+<li><a class="reference internal" href="#mac-properties">Mac Properties</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#hmac">HMAC</a><ul>
+<li><a class="reference internal" href="#the-hmac-class">The Hmac class</a></li>
+<li><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../mid_layer.html">Layer 2: Non Interactive Protocols</a><ul>
+      <li>Previous: <a href="../mid_layer.html" title="previous chapter">Layer 2: Non Interactive Protocols</a></li>
+      <li>Next: <a href="symmetric_enc.html" title="next chapter">Symmetric Encryption</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/mid_layer/mac.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, libscapi team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/mid_layer/mac.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

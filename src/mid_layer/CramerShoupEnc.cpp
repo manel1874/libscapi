@@ -241,13 +241,13 @@ shared_ptr<AsymmetricCiphertext> CramerShoupOnGroupElementEnc::encrypt(const sha
 		throw new IllegalStateException("in order to encrypt a message this object must be initialized with public key");
 	}
 	/*
-	* 	Choose a random  r in Zq<p>
-	*	Calculate 	u1 = g1^r<p>
-	*         		u2 = g2^r<p>
-	*         		e = (h^r)*msgEl<p>
-	*	Convert u1, u2, e to byte[] using the dlogGroup<P>
-	*	Compute alpha  - the result of computing the hash function on the concatenation u1+ u2+ e.<>
-	*	Calculate v = c^r * d^(r*alpha)<p>
+	* 	Choose a random  r in Zq
+	*	Calculate 	u1 = g1^r
+	*         		u2 = g2^r
+	*         		e = (h^r)*msgEl
+	*	Convert u1, u2, e to byte[] using the dlogGroup
+	*	Compute alpha  - the result of computing the hash function on the concatenation u1+ u2+ e.
+	*	Calculate v = c^r * d^(r*alpha)
 	*	Create and return an CramerShoupCiphertext object with u1, u2, e and v.
 	*/
 
@@ -257,28 +257,15 @@ shared_ptr<AsymmetricCiphertext> CramerShoupOnGroupElementEnc::encrypt(const sha
 	return encrypt(plaintext, r);
 }
 
-/**
-* Encrypts the given plaintext using this CramerShoup encryption scheme and using the given random value.<p>
-* There are cases when the random value is used after the encryption, for example, in sigma protocol.
-* In these cases the random value should be known to the user. We decided not to have function that return it to the user
-* since this can cause problems when more than one value is being encrypt.
-* Instead, we decided to have an additional encrypt value that gets the random value from the user.
-* @param plainText message to encrypt
-* @param r The random value to use in the encryption.
-* @param plaintext message to encrypt. MUST be an instance of GroupElementPlaintext.
-* @return Ciphertext the encrypted plaintext.
-* @throws IllegalStateException if no public key was set.
-* @throws IllegalArgumentException if the given Plaintext is not instance of GroupElementPlaintext.
-*/
 shared_ptr<AsymmetricCiphertext> CramerShoupOnGroupElementEnc::encrypt(const shared_ptr<Plaintext> & plaintext, const biginteger & r) {
 	/*
-	* 	Choose a random  r in Zq<p>
-	*	Calculate 	u1 = g1^r<p>
-	*         		u2 = g2^r<p>
-	*         		e = (h^r)*msgEl<p>
-	*	Convert u1, u2, e to byte[] using the dlogGroup<P>
-	*	Compute alpha  - the result of computing the hash function on the concatenation u1+ u2+ e.<>
-	*	Calculate v = c^r * d^(r*alpha)<p>
+	* 	Choose a random  r in Zq
+	*	Calculate 	u1 = g1^r
+	*         		u2 = g2^r
+	*         		e = (h^r)*msgEl
+	*	Convert u1, u2, e to byte[] using the dlogGroup
+	*	Compute alpha  - the result of computing the hash function on the concatenation u1+ u2+ e.
+	*	Calculate v = c^r * d^(r*alpha)
 	*	Create and return an CramerShoupCiphertext object with u1, u2, e and v.
 	*/
 	if (!isKeySet()) {

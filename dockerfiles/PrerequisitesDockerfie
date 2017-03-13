@@ -7,6 +7,9 @@
 FROM ubuntu:16.04
 
 # Update the repository sources list and Install all required packages
+RUN apt-get clean
+RUN rm -rf /var/cache/apt/*
+RUN rm -rf /var/lib/apt/lists/*
 RUN apt-get update
 RUN apt-get install -y
 RUN apt-get install wget -y
@@ -16,6 +19,7 @@ RUN apt-get install libssl-ocaml-dev -y
 RUN apt-get install libssl-dev -y
 RUN apt-get install libgmp3-dev -y 
 RUN apt-get install vim -y
+RUN apt-get install cmake -y
 RUN rm -rf /var/lib/apt/lists/*
 
 # Download and install boost

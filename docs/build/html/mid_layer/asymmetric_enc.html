@@ -1,0 +1,842 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Asymmetric Encryption &#8212; libscapi 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Layer 3: Interactive Protocols" href="../interactive_layer.html" />
+    <link rel="prev" title="Symmetric Encryption" href="symmetric_enc.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="asymmetric-encryption">
+<h1><a class="toc-backref" href="#id5">Asymmetric Encryption</a><a class="headerlink" href="#asymmetric-encryption" title="Permalink to this headline">¶</a></h1>
+<p>Asymmetric encryption refers to a cryptographic system requiring two separate keys, one to encrypt the plaintext, and one to decrypt the ciphertext. Neither key will do both functions. One of these keys is public and the other is kept private. If the encryption key is the one published then the system enables private communication from the public to the decryption key&#8217;s owner.</p>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#asymmetric-encryption" id="id5">Asymmetric Encryption</a><ul>
+<li><a class="reference internal" href="#the-asymmetricenc-abstract-class" id="id6">The AsymmetricEnc abstract class</a><ul>
+<li><a class="reference internal" href="#encryption-and-decryption" id="id7">Encryption and Decryption</a></li>
+<li><a class="reference internal" href="#plaintext-manipulation" id="id8">Plaintext Manipulation</a></li>
+<li><a class="reference internal" href="#key-generation" id="id9">Key Generation</a></li>
+<li><a class="reference internal" href="#key-handling" id="id10">Key Handling</a></li>
+<li><a class="reference internal" href="#reconstruction-from-communication-channel" id="id11">Reconstruction (from communication channel)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#using-the-generic-interface" id="id12">Using the Generic Interface</a></li>
+<li><a class="reference internal" href="#el-gamal-encryption-scheme" id="id13">El Gamal Encryption Scheme</a><ul>
+<li><a class="reference internal" href="#elgamalenc-abstract-class" id="id14">ElGamalEnc abstract class</a></li>
+<li><a class="reference internal" href="#elgamalonbytearrayenc-class" id="id15">ElGamalOnByteArrayEnc class</a><ul>
+<li><a class="reference internal" href="#constructors" id="id16">Constructors</a></li>
+<li><a class="reference internal" href="#complete-encryption" id="id17">Complete Encryption</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#elgamalongroupelementenc-class" id="id18">ElGamalOnGroupElementEnc class</a><ul>
+<li><a class="reference internal" href="#id1" id="id19">Constructors</a></li>
+<li><a class="reference internal" href="#id2" id="id20">Complete Encryption</a></li>
+<li><a class="reference internal" href="#multiply-ciphertexts-homomorphic-encryption-operation" id="id21">Multiply Ciphertexts (Homomorphic Encryption operation)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#basic-usage" id="id22">Basic Usage</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#cramer-shoup-ddh-encryption-scheme" id="id23">Cramer Shoup DDH Encryption Scheme</a><ul>
+<li><a class="reference internal" href="#the-cramershoupongroupelementenc-class" id="id24">The CramerShoupOnGroupElementEnc class</a></li>
+<li><a class="reference internal" href="#id3" id="id25">Basic Usage</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#damgard-jurik-encryption-scheme" id="id26">Damgard Jurik Encryption Scheme</a><ul>
+<li><a class="reference internal" href="#damgardjurikenc-class" id="id27">DamgardJurikEnc class</a></li>
+<li><a class="reference internal" href="#id4" id="id28">Basic Usage</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<p>Asymmetric encryption can be used by a protocol or a user in two different ways:</p>
+<p>1. The protocol works on an abstract level and does not know the concrete algorithm of the asymmetric encryption. This way the protocol cannot create a specific Plaintext to the encrypt function because it does not know which concrete Plaintext the encrypt function should get.
+Similarly, the protocol does not know how to treat the Plaintext returned from the decrypt function.
+In these cases the protocol has a byte array that needs to be encrypted.</p>
+<ol class="arabic simple" start="2">
+<li>The protocol knows the concrete algorithm of the asymmetric encryption. This way the protocol knows which Plaintext implementation the encrypt function gets and the decrypt function returns. Therefore, the protocol can be specific and cast the plaintext to the concrete implementation. For example, the protocol knows that it has a DamgardJurikEnc object, so the encrypt function gets a BigIntegerPlaintext and the decrypt function returns a BigIntegerPlaintext. The protocol can create such a plaintext in order to call the encrypt function or cast the returned plaintext from the decrypt function to get the BigInteger value that was encrypted.</li>
+</ol>
+<div class="section" id="the-asymmetricenc-abstract-class">
+<h2><a class="toc-backref" href="#id6">The AsymmetricEnc abstract class</a><a class="headerlink" href="#the-asymmetricenc-abstract-class" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv213AsymmetricEnc">
+<span id="AsymmetricEnc"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">AsymmetricEnc</code> : <em class="property">public</em> Cpa, Indistinguishable<a class="headerlink" href="#_CPPv213AsymmetricEnc" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>General class for asymmetric encryption. Each class of this family must derive this class.</p>
+</dd></dl>
+
+<div class="section" id="encryption-and-decryption">
+<h3><a class="toc-backref" href="#id7">Encryption and Decryption</a><a class="headerlink" href="#encryption-and-decryption" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N13AsymmetricEnc7encryptERK10shared_ptrI9PlaintextE">
+<span id="AsymmetricEnc::encrypt__shared_ptr:Plaintext:CR"></span>shared_ptr&lt;AsymmetricCiphertext&gt; <code class="descclassname">AsymmetricEnc::</code><code class="descname">encrypt</code><span class="sig-paren">(</span><em class="property">const</em> shared_ptr&lt;Plaintext&gt; &amp;<em>plainText</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N13AsymmetricEnc7encryptERK10shared_ptrI9PlaintextE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Encrypts the given plaintext using this asymmetric encryption scheme.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>plainText</strong> &#8211; message to encrypt</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Ciphertext the encrypted plaintext</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N13AsymmetricEnc7encryptERK10shared_ptrI9PlaintextERK10biginteger">
+<span id="AsymmetricEnc::encrypt__shared_ptr:Plaintext:CR.bigintegerCR"></span>shared_ptr&lt;AsymmetricCiphertext&gt; <code class="descclassname">AsymmetricEnc::</code><code class="descname">encrypt</code><span class="sig-paren">(</span><em class="property">const</em> shared_ptr&lt;Plaintext&gt; &amp;<em>plainText</em>, <em class="property">const</em> biginteger &amp;<em>r</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N13AsymmetricEnc7encryptERK10shared_ptrI9PlaintextERK10biginteger" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Decrypts the given ciphertext using this asymmetric encryption scheme.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cipher</strong> &#8211; ciphertext to decrypt</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Plaintext the decrypted cipher</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="plaintext-manipulation">
+<h3><a class="toc-backref" href="#id8">Plaintext Manipulation</a><a class="headerlink" href="#plaintext-manipulation" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N13AsymmetricEnc17generatePlaintextER6vectorI4byteE">
+<span id="AsymmetricEnc::generatePlaintext__vector:byte:R"></span>shared_ptr&lt;Plaintext&gt; <code class="descclassname">AsymmetricEnc::</code><code class="descname">generatePlaintext</code><span class="sig-paren">(</span>vector&lt;byte&gt; &amp;<em>text</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N13AsymmetricEnc17generatePlaintextER6vectorI4byteE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Generates a Plaintext suitable for this encryption scheme from the given message.</p>
+<p>A Plaintext object is needed in order to use the encrypt function. Each encryption scheme might generate a different type of Plaintext according to what it needs for encryption. The encryption function receives as argument an object of type Plaintext in order to allow a protocol holding the encryption scheme to be oblivious to the exact type of data that needs to be passed for encryption.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>text</strong> &#8211; byte array to convert to a Plaintext object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N13AsymmetricEnc26generateBytesFromPlaintextEP9Plaintext">
+<span id="AsymmetricEnc::generateBytesFromPlaintext__PlaintextP"></span>vector&lt;byte&gt; <code class="descclassname">AsymmetricEnc::</code><code class="descname">generateBytesFromPlaintext</code><span class="sig-paren">(</span>Plaintext *<em>plaintext</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N13AsymmetricEnc26generateBytesFromPlaintextEP9Plaintext" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Generates a byte array from the given plaintext. This function should be used when the user does not know the specific type of the Asymmetric encryption he has, and therefore he is working on byte array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>plaintext</strong> &#8211; to generates byte array from.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the byte array generated from the given plaintext.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N13AsymmetricEnc35getMaxLengthOfByteArrayForPlaintextEv">
+<span id="AsymmetricEnc::getMaxLengthOfByteArrayForPlaintext"></span>int <code class="descclassname">AsymmetricEnc::</code><code class="descname">getMaxLengthOfByteArrayForPlaintext</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N13AsymmetricEnc35getMaxLengthOfByteArrayForPlaintextEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns the maximum size of the byte array that can be passed to generatePlaintext function. This is the maximum size of a byte array that can be converted to a Plaintext object suitable to this encryption scheme.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the maximum size of the byte array that can be passed to generatePlaintext function.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N13AsymmetricEnc33hasMaxByteArrayLengthForPlaintextEv">
+<span id="AsymmetricEnc::hasMaxByteArrayLengthForPlaintext"></span>bool <code class="descclassname">AsymmetricEnc::</code><code class="descname">hasMaxByteArrayLengthForPlaintext</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N13AsymmetricEnc33hasMaxByteArrayLengthForPlaintextEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>There are some encryption schemes that have a limit of the byte array that can be passed to the generatePlaintext. This function indicates whether or not there is a limit. Its helps the user know if he needs to pass an array with specific length or not.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">true if this encryption scheme has a maximum byte array length to generate a plaintext from; false, otherwise.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="key-generation">
+<h3><a class="toc-backref" href="#id9">Key Generation</a><a class="headerlink" href="#key-generation" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N13AsymmetricEnc11generateKeyEP22AlgorithmParameterSpec">
+<span id="AsymmetricEnc::generateKey__AlgorithmParameterSpecP"></span>pair&lt;shared_ptr&lt;PublicKey&gt;, shared_ptr&lt;PrivateKey&gt;&gt; <code class="descclassname">AsymmetricEnc::</code><code class="descname">generateKey</code><span class="sig-paren">(</span>AlgorithmParameterSpec *<em>keyParams</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N13AsymmetricEnc11generateKeyEP22AlgorithmParameterSpec" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Generates public and private keys for this asymmetric encryption.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>keyParams</strong> &#8211; hold the required parameters to generate the encryption scheme&#8217;s keys</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">KeyPair holding the public and private keys relevant to the encryption scheme</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N13AsymmetricEnc11generateKeyEv">
+<span id="AsymmetricEnc::generateKey"></span>pair&lt;shared_ptr&lt;PublicKey&gt;, shared_ptr&lt;PrivateKey&gt;&gt; <code class="descclassname">AsymmetricEnc::</code><code class="descname">generateKey</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N13AsymmetricEnc11generateKeyEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Generates public and private keys for this asymmetric encryption.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">KeyPair holding the public and private keys</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="key-handling">
+<h3><a class="toc-backref" href="#id10">Key Handling</a><a class="headerlink" href="#key-handling" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N13AsymmetricEnc12getPublicKeyEv">
+<span id="AsymmetricEnc::getPublicKey"></span>shared_ptr&lt;PublicKey&gt; <code class="descclassname">AsymmetricEnc::</code><code class="descname">getPublicKey</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N13AsymmetricEnc12getPublicKeyEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns the PublicKey of this encryption scheme.</p>
+<p>This function should not be use to check if the key has been set. To check if the key has been set use isKeySet function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the PublicKey</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N13AsymmetricEnc8isKeySetEv">
+<span id="AsymmetricEnc::isKeySet"></span>bool <code class="descclassname">AsymmetricEnc::</code><code class="descname">isKeySet</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N13AsymmetricEnc8isKeySetEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Checks if this AsymmetricEnc object has been previously initialized with corresponding keys.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal"><span class="pre">true</span></code> if either the Public Key has been set or the key pair (Public Key, Private Key) has been set; <code class="docutils literal"><span class="pre">false</span></code> otherwise.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N13AsymmetricEnc6setKeyERK10shared_ptrI9PublicKeyERK10shared_ptrI10PrivateKeyE">
+<span id="AsymmetricEnc::setKey__shared_ptr:PublicKey:CR.shared_ptr:PrivateKey:CR"></span>void <code class="descclassname">AsymmetricEnc::</code><code class="descname">setKey</code><span class="sig-paren">(</span><em class="property">const</em> shared_ptr&lt;PublicKey&gt; &amp;<em>publicKey</em>, <em class="property">const</em> shared_ptr&lt;PrivateKey&gt; &amp;<em>privateKey</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N13AsymmetricEnc6setKeyERK10shared_ptrI9PublicKeyERK10shared_ptrI10PrivateKeyE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Sets this asymmetric encryption with public key and private key.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N13AsymmetricEnc6setKeyERK10shared_ptrI9PublicKeyE">
+<span id="AsymmetricEnc::setKey__shared_ptr:PublicKey:CR"></span>void <code class="descclassname">AsymmetricEnc::</code><code class="descname">setKey</code><span class="sig-paren">(</span><em class="property">const</em> shared_ptr&lt;PublicKey&gt; &amp;<em>publicKey</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N13AsymmetricEnc6setKeyERK10shared_ptrI9PublicKeyE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Sets this asymmetric encryption with a public key</p>
+<p>In this case the encryption object can be used only for encryption.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="reconstruction-from-communication-channel">
+<h3><a class="toc-backref" href="#id11">Reconstruction (from communication channel)</a><a class="headerlink" href="#reconstruction-from-communication-channel" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N13AsymmetricEnc21reconstructCiphertextEP32AsymmetricCiphertextSendableData">
+<span id="AsymmetricEnc::reconstructCiphertext__AsymmetricCiphertextSendableDataP"></span>shared_ptr&lt;AsymmetricCiphertext&gt; <code class="descclassname">AsymmetricEnc::</code><code class="descname">reconstructCiphertext</code><span class="sig-paren">(</span>AsymmetricCiphertextSendableData *<em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N13AsymmetricEnc21reconstructCiphertextEP32AsymmetricCiphertextSendableData" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Reconstructs a suitable AsymmetricCiphertext from data that was probably obtained via a Channel or any other means of sending data (including serialization).</p>
+<p>We emphasize that this is NOT in any way an encryption function, it just receives ENCRYPTED DATA and places it in a ciphertext object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; contains all the necessary information to construct a suitable ciphertext.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the AsymmetricCiphertext that corresponds to the implementing encryption scheme, for ex: CramerShoupCiphertext</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N13AsymmetricEnc21reconstructPrivateKeyEP15KeySendableData">
+<span id="AsymmetricEnc::reconstructPrivateKey__KeySendableDataP"></span>shared_ptr&lt;PrivateKey&gt; <code class="descclassname">AsymmetricEnc::</code><code class="descname">reconstructPrivateKey</code><span class="sig-paren">(</span>KeySendableData *<em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N13AsymmetricEnc21reconstructPrivateKeyEP15KeySendableData" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Reconstructs a suitable PrivateKey from data that was probably obtained via a Channel or any other means of sending data (including serialization).</p>
+<p>We emphasize that this function does NOT in any way generate a key, it just receives data and recreates a PrivateKey object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; a KeySendableData object needed to recreate the original key. The actual type of KeySendableData has to be suitable to the actual encryption scheme used, otherwise it throws an IllegalArgumentException</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a new PrivateKey with the data obtained as argument</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N13AsymmetricEnc20reconstructPublicKeyEP15KeySendableData">
+<span id="AsymmetricEnc::reconstructPublicKey__KeySendableDataP"></span>shared_ptr&lt;PublicKey&gt; <code class="descclassname">AsymmetricEnc::</code><code class="descname">reconstructPublicKey</code><span class="sig-paren">(</span>KeySendableData *<em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N13AsymmetricEnc20reconstructPublicKeyEP15KeySendableData" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Reconstructs a suitable PublicKey from data that was probably obtained via a Channel or any other means of sending data (including serialization).</p>
+<p>We emphasize that this function does NOT in any way generate a key, it just receives data and recreates a PublicKey object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; a KeySendableData object needed to recreate the original key. The actual type of KeySendableData has to be suitable to the actual encryption scheme used, otherwise it throws an IllegalArgumentException</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a new PublicKey with the data obtained as argument</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="using-the-generic-interface">
+<h2><a class="toc-backref" href="#id12">Using the Generic Interface</a><a class="headerlink" href="#using-the-generic-interface" title="Permalink to this headline">¶</a></h2>
+<p>Sender Usage:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="c1">//Get an abstract Asymmetric encryption object from somewhere.</span>
+<span class="c1">//Generate a key pair using the encryptor.</span>
+<span class="k">auto</span> <span class="n">pair</span> <span class="o">=</span> <span class="n">encryptor</span><span class="p">.</span><span class="n">generateKey</span><span class="p">();</span>
+
+<span class="c1">//Publish your public key.</span>
+<span class="n">Publish</span><span class="p">(</span><span class="n">pair</span><span class="p">.</span><span class="n">first</span><span class="p">);</span>
+
+<span class="c1">//Set private key and party2&#39;s public key:</span>
+<span class="n">encryptor</span><span class="p">.</span><span class="n">setKey</span><span class="p">(</span><span class="n">party2PublicKey</span><span class="p">,</span> <span class="n">pair</span><span class="p">.</span><span class="n">second</span><span class="p">);</span>
+
+<span class="c1">//Generate a plaintext suitable for this encryption object using the encryption object.</span>
+<span class="n">Plaintext</span> <span class="n">plaintext</span> <span class="o">=</span> <span class="n">encryptor</span><span class="p">.</span><span class="n">generatePlaintext</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
+
+<span class="c1">//Encrypt the plaintext</span>
+<span class="n">AsymmetricCiphertext</span> <span class="n">cipher</span> <span class="o">=</span> <span class="n">encryptor</span><span class="p">.</span><span class="n">encrypt</span><span class="p">(</span><span class="n">plaintext</span><span class="p">);</span>
+
+<span class="c1">//Send cipher and keys to the receiver.</span>
+<span class="p">...</span>
+</pre></div>
+</div>
+<p>Receiver Usage:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="c1">//Get the same asymmetric encryption object as the sender’s object. //Generate a keyPair using the encryption object.</span>
+<span class="k">auto</span> <span class="n">pair</span> <span class="o">=</span> <span class="n">encryptor</span><span class="p">.</span><span class="n">generateKey</span><span class="p">();</span>
+
+<span class="c1">//Publish your public key.</span>
+<span class="n">Publish</span><span class="p">(</span><span class="n">pair</span><span class="p">.</span><span class="n">getPublic</span><span class="p">());</span>
+
+<span class="c1">//Set private key and party1&#39;s public key:</span>
+<span class="n">encryptor</span><span class="p">.</span><span class="n">setKey</span><span class="p">(</span><span class="n">party1PublicKey</span><span class="p">,</span> <span class="n">pair</span><span class="p">.</span><span class="n">second</span><span class="p">);</span>
+
+<span class="c1">//Get the ciphertext and decrypt it to get the plaintext.</span>
+<span class="p">...</span>
+
+<span class="n">Plaintext</span> <span class="n">plaintext</span> <span class="o">=</span> <span class="n">encryptor</span><span class="p">.</span><span class="n">decrypt</span><span class="p">(</span><span class="n">cipher</span><span class="p">);</span>
+<span class="c1">//Get the plaintext bytes using the encryption object and use it as needed.</span>
+<span class="k">auto</span> <span class="n">text</span> <span class="o">=</span> <span class="n">encryptor</span><span class="p">.</span><span class="n">generatesBytesFromPlaintext</span><span class="p">(</span><span class="n">plaintext</span><span class="p">);</span>
+<span class="p">...</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="el-gamal-encryption-scheme">
+<h2><a class="toc-backref" href="#id13">El Gamal Encryption Scheme</a><a class="headerlink" href="#el-gamal-encryption-scheme" title="Permalink to this headline">¶</a></h2>
+<p>The El Gamal encryption scheme’s security is based on the hardness of the decisional Diffie-Hellman (DDH) problem. ElGamal encryption can be defined over any cyclic group <span class="math">G</span>. Its security depends upon the difficulty of a certain problem in <span class="math">G</span> related to computing discrete logarithms. We implement El Gamal over a Dlog Group <span class="math">(G, q, g)</span> where <span class="math">q</span> is the order of group <span class="math">G</span> and <span class="math">g</span> is the generator.</p>
+<p>ElGamal encryption scheme can encrypt a group element and a byte array. The general case that accepts a message that should be encrypted usually uses the encryption on a byte array, but in other cases there are protocols that do multiple calculations and might want to keep working on a close group. For those cases we provide encryption on a group element.</p>
+<p>In order to allow these two encryption types, we provide two ElGamal concrete classes. One implements the encrypt function on a group element and is called <cite>ElGamalOnGroupElementEnc</cite>, and the other one implements the encrypt function on a byte array and is called <cite>ElGamalOnByteArrayEnc</cite>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Note that ElGamal on a groupElement is an asymmetric multiplicative homomorphic encryption, while ElGamal on a ByteArray is not.</p>
+</div>
+<div class="section" id="elgamalenc-abstract-class">
+<h3><a class="toc-backref" href="#id14">ElGamalEnc abstract class</a><a class="headerlink" href="#elgamalenc-abstract-class" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="_CPPv210ElGamalEnc">
+<span id="ElGamalEnc"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">ElGamalEnc</code> : <em class="property">public</em> <a class="reference internal" href="#_CPPv213AsymmetricEnc" title="AsymmetricEnc">AsymmetricEnc</a><a class="headerlink" href="#_CPPv210ElGamalEnc" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>General class for El Gamal encryption scheme. Every concrete implementation of ElGamal should derive this class. By definition, this encryption scheme is CPA-secure and Indistinguishable.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="elgamalonbytearrayenc-class">
+<h3><a class="toc-backref" href="#id15">ElGamalOnByteArrayEnc class</a><a class="headerlink" href="#elgamalonbytearrayenc-class" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="_CPPv221ElGamalOnByteArrayEnc">
+<span id="ElGamalOnByteArrayEnc"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">ElGamalOnByteArrayEnc</code> : <em class="property">public</em> <a class="reference internal" href="#_CPPv210ElGamalEnc" title="ElGamalEnc">ElGamalEnc</a><a class="headerlink" href="#_CPPv221ElGamalOnByteArrayEnc" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This class performs the El Gamal encryption scheme that perform the encryption on a ByteArray. The general encryption of a message usually uses this type of encryption. By definition, this encryption scheme is CPA-secure and Indistinguishable.</p>
+</dd></dl>
+
+<div class="section" id="constructors">
+<h4><a class="toc-backref" href="#id16">Constructors</a><a class="headerlink" href="#constructors" title="Permalink to this headline">¶</a></h4>
+<dl class="function">
+<dt id="_CPPv2N21ElGamalOnByteArrayEnc21ElGamalOnByteArrayEncEv">
+<span id="ElGamalOnByteArrayEnc::ElGamalOnByteArrayEnc"></span><code class="descclassname">ElGamalOnByteArrayEnc::</code><code class="descname">ElGamalOnByteArrayEnc</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N21ElGamalOnByteArrayEnc21ElGamalOnByteArrayEncEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Default constructor. Uses the default implementations of DlogGroup and KDF.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N21ElGamalOnByteArrayEnc21ElGamalOnByteArrayEncERK10shared_ptrI9DlogGroupERK10shared_ptrI21KeyDerivationFunctionERK10shared_ptrI17PrgFromOpenSSLAESE">
+<span id="ElGamalOnByteArrayEnc::ElGamalOnByteArrayEnc__shared_ptr:DlogGroup:CR.shared_ptr:KeyDerivationFunction:CR.shared_ptr:PrgFromOpenSSLAES:CR"></span><code class="descclassname">ElGamalOnByteArrayEnc::</code><code class="descname">ElGamalOnByteArrayEnc</code><span class="sig-paren">(</span><em class="property">const</em> shared_ptr&lt;DlogGroup&gt; &amp;<em>dlogGroup</em>, <em class="property">const</em> shared_ptr&lt;KeyDerivationFunction&gt; &amp;<em>kdf</em>, <em class="property">const</em> shared_ptr&lt;PrgFromOpenSSLAES&gt; &amp;<em>random</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N21ElGamalOnByteArrayEnc21ElGamalOnByteArrayEncERK10shared_ptrI9DlogGroupERK10shared_ptrI21KeyDerivationFunctionERK10shared_ptrI17PrgFromOpenSSLAESE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Constructor that gets a DlogGroup and source of randomness.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>dlogGroup</strong> &#8211; must be DDH secure.</li>
+<li><strong>kdf</strong> &#8211; a key derivation function.</li>
+<li><strong>random</strong> &#8211; source of randomness</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="complete-encryption">
+<h4><a class="toc-backref" href="#id17">Complete Encryption</a><a class="headerlink" href="#complete-encryption" title="Permalink to this headline">¶</a></h4>
+<dl class="function">
+<dt id="_CPPv2N21ElGamalOnByteArrayEnc18completeEncryptionERK10shared_ptrI12GroupElementEP12GroupElementP9Plaintext">
+<span id="ElGamalOnByteArrayEnc::completeEncryption__shared_ptr:GroupElement:CR.GroupElementP.PlaintextP"></span>shared_ptr&lt;AsymmetricCiphertext&gt; <code class="descclassname">ElGamalOnByteArrayEnc::</code><code class="descname">completeEncryption</code><span class="sig-paren">(</span><em class="property">const</em> shared_ptr&lt;GroupElement&gt; &amp;<em>c1</em>, GroupElement *<em>hy</em>, Plaintext *<em>plaintext</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N21ElGamalOnByteArrayEnc18completeEncryptionERK10shared_ptrI12GroupElementEP12GroupElementP9Plaintext" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This is a protected function. It completes the encryption operation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>plaintext</strong> &#8211; contains message to encrypt. MUST be of type ByteArrayPlaintext.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Ciphertext of type ElGamalOnByteArrayCiphertext containing the encrypted message.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="elgamalongroupelementenc-class">
+<h3><a class="toc-backref" href="#id18">ElGamalOnGroupElementEnc class</a><a class="headerlink" href="#elgamalongroupelementenc-class" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="_CPPv224ElGamalOnGroupElementEnc">
+<span id="ElGamalOnGroupElementEnc"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">ElGamalOnGroupElementEnc</code> : <em class="property">public</em> <a class="reference internal" href="#_CPPv210ElGamalEnc" title="ElGamalEnc">ElGamalEnc</a>, <em class="property">public</em> AsymMultiplicativeHomomorphicEnc<a class="headerlink" href="#_CPPv224ElGamalOnGroupElementEnc" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This class performs the El Gamal encryption scheme that perform the encryption on a GroupElement.</p>
+<p>In some cases there are protocols that do multiple calculations and might want to keep working on a close group. For those cases we provide encryption on a group element. By definition, this encryption scheme is CPA-secure and Indistinguishable.</p>
+</dd></dl>
+
+<div class="section" id="id1">
+<h4><a class="toc-backref" href="#id19">Constructors</a><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
+<dl class="function">
+<dt id="_CPPv2N24ElGamalOnGroupElementEnc24ElGamalOnGroupElementEncEv">
+<span id="ElGamalOnGroupElementEnc::ElGamalOnGroupElementEnc"></span><code class="descclassname">ElGamalOnGroupElementEnc::</code><code class="descname">ElGamalOnGroupElementEnc</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N24ElGamalOnGroupElementEnc24ElGamalOnGroupElementEncEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Default constructor. Uses the default implementations of DlogGroup and random.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N24ElGamalOnGroupElementEnc24ElGamalOnGroupElementEncERK10shared_ptrI9DlogGroupERK10shared_ptrI17PrgFromOpenSSLAESE">
+<span id="ElGamalOnGroupElementEnc::ElGamalOnGroupElementEnc__shared_ptr:DlogGroup:CR.shared_ptr:PrgFromOpenSSLAES:CR"></span><code class="descclassname">ElGamalOnGroupElementEnc::</code><code class="descname">ElGamalOnGroupElementEnc</code><span class="sig-paren">(</span><em class="property">const</em> shared_ptr&lt;DlogGroup&gt; &amp;<em>dlogGroup</em>, <em class="property">const</em> shared_ptr&lt;PrgFromOpenSSLAES&gt; &amp;<em>random</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N24ElGamalOnGroupElementEnc24ElGamalOnGroupElementEncERK10shared_ptrI9DlogGroupERK10shared_ptrI17PrgFromOpenSSLAESE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Constructor that gets a DlogGroup and source of randomness.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>dlogGroup</strong> &#8211; must be DDH secure.</li>
+<li><strong>random</strong> &#8211; source of randomness.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id2">
+<h4><a class="toc-backref" href="#id20">Complete Encryption</a><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h4>
+<dl class="function">
+<dt id="_CPPv2N24ElGamalOnGroupElementEnc18completeEncryptionERK10shared_ptrI12GroupElementEP12GroupElementP9Plaintext">
+<span id="ElGamalOnGroupElementEnc::completeEncryption__shared_ptr:GroupElement:CR.GroupElementP.PlaintextP"></span>shared_ptr&lt;AsymmetricCiphertext&gt; <code class="descclassname">ElGamalOnGroupElementEnc::</code><code class="descname">completeEncryption</code><span class="sig-paren">(</span><em class="property">const</em> shared_ptr&lt;GroupElement&gt; &amp;<em>c1</em>, GroupElement *<em>hy</em>, Plaintext *<em>plaintext</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N24ElGamalOnGroupElementEnc18completeEncryptionERK10shared_ptrI12GroupElementEP12GroupElementP9Plaintext" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This is a protected function. It completes the encryption operation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>plaintext</strong> &#8211; contains message to encrypt. MUST be of type GroupElementPlaintext.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Ciphertext of type ElGamalOnGroupElementCiphertext containing the encrypted message.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="multiply-ciphertexts-homomorphic-encryption-operation">
+<h4><a class="toc-backref" href="#id21">Multiply Ciphertexts (Homomorphic Encryption operation)</a><a class="headerlink" href="#multiply-ciphertexts-homomorphic-encryption-operation" title="Permalink to this headline">¶</a></h4>
+<dl class="function">
+<dt id="_CPPv2N24ElGamalOnGroupElementEnc8multiplyEP20AsymmetricCiphertextP20AsymmetricCiphertext">
+<span id="ElGamalOnGroupElementEnc::multiply__AsymmetricCiphertextP.AsymmetricCiphertextP"></span>shared_ptr&lt;AsymmetricCiphertext&gt; <code class="descclassname">ElGamalOnGroupElementEnc::</code><code class="descname">multiply</code><span class="sig-paren">(</span>AsymmetricCiphertext *<em>cipher1</em>, AsymmetricCiphertext *<em>cipher2</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N24ElGamalOnGroupElementEnc8multiplyEP20AsymmetricCiphertextP20AsymmetricCiphertext" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Calculates the ciphertext resulting of multiplying two given ciphertexts. Both ciphertexts have to have been generated with the same public key and DlogGroup as the underlying objects of this ElGamal object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Ciphertext of the multiplication of the plaintexts p1 and p2 where alg.encrypt(p1)=cipher1 and alg.encrypt(p2)=cipher2</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N24ElGamalOnGroupElementEnc8multiplyEP20AsymmetricCiphertextP20AsymmetricCiphertextR10biginteger">
+<span id="ElGamalOnGroupElementEnc::multiply__AsymmetricCiphertextP.AsymmetricCiphertextP.bigintegerR"></span>shared_ptr&lt;AsymmetricCiphertext&gt; <code class="descclassname">ElGamalOnGroupElementEnc::</code><code class="descname">multiply</code><span class="sig-paren">(</span>AsymmetricCiphertext *<em>cipher1</em>, AsymmetricCiphertext *<em>cipher2</em>, biginteger &amp;<em>r</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N24ElGamalOnGroupElementEnc8multiplyEP20AsymmetricCiphertextP20AsymmetricCiphertextR10biginteger" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Calculates the ciphertext resulting of multiplying two given ciphertexts using the given random value r. Both ciphertexts have to have been generated with the same public key and DlogGroup as the underlying objects of this ElGamal object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Ciphertext of the multiplication of the plaintexts p1 and p2 where alg.encrypt(p1)=cipher1 and alg.encrypt(p2)=cipher2</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="basic-usage">
+<h3><a class="toc-backref" href="#id22">Basic Usage</a><a class="headerlink" href="#basic-usage" title="Permalink to this headline">¶</a></h3>
+<p>Sender usage:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DlogGroup</span><span class="o">&gt;</span> <span class="n">dlog</span> <span class="o">=</span> <span class="n">make_shared</span><span class="o">&lt;</span><span class="n">OpenSSLDlogECF2m</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="c1">//Create an ElGamalOnGroupElement encryption object.</span>
+<span class="n">ElGamalOnGroupElementEnc</span> <span class="nf">elGamal</span><span class="p">(</span><span class="n">dlog</span><span class="p">);</span>
+
+<span class="c1">//Generate a keyPair using the ElGamal object.</span>
+<span class="k">auto</span> <span class="n">pair</span> <span class="o">=</span> <span class="n">elGamal</span><span class="p">.</span><span class="n">generateKey</span><span class="p">();</span>
+
+<span class="c1">//Publish your public key.</span>
+<span class="n">Publish</span><span class="p">(</span><span class="n">pair</span><span class="p">.</span><span class="n">first</span><span class="p">);</span>
+
+<span class="c1">//Set private key and party2&#39;s public key:</span>
+<span class="n">elGamal</span><span class="p">.</span><span class="n">setKey</span><span class="p">(</span><span class="n">party2PublicKey</span><span class="p">,</span> <span class="n">pair</span><span class="p">.</span><span class="n">second</span><span class="p">);</span>
+
+<span class="c1">//Create a GroupElementPlaintext to encrypt and encrypt the plaintext.</span>
+<span class="n">GroupElementPlaintext</span> <span class="nf">plaintext</span><span class="p">(</span><span class="n">dlog</span><span class="o">-&gt;</span><span class="n">createRandomElement</span><span class="p">());</span>
+<span class="n">AsymmetricCiphertext</span> <span class="n">cipher</span> <span class="o">=</span> <span class="n">elGamal</span><span class="p">.</span><span class="n">encrypt</span><span class="p">(</span><span class="n">plaintext</span><span class="p">);</span>
+
+<span class="c1">//Sends cipher to the receiver.</span>
+</pre></div>
+</div>
+<p>Receiver usage:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="c1">//Create an ElGamal object with the same DlogGroup definition as party1.</span>
+<span class="c1">//Generate a keyPair using the ElGamal object.</span>
+<span class="k">auto</span> <span class="n">pair</span> <span class="o">=</span> <span class="n">elGamal</span><span class="p">.</span><span class="n">generateKey</span><span class="p">();</span>
+
+<span class="c1">//Publish your public key.</span>
+<span class="n">Publish</span><span class="p">(</span><span class="n">pair</span><span class="p">.</span><span class="n">first</span><span class="p">);</span>
+
+<span class="c1">//Set private key and party1&#39;s public key:</span>
+<span class="n">elGamal</span><span class="p">.</span><span class="n">setKey</span><span class="p">(</span><span class="n">party1PublicKey</span><span class="p">,</span> <span class="n">pair</span><span class="p">.</span><span class="n">second</span><span class="p">);</span>
+
+<span class="c1">//Get the ciphertext and decrypt it to get the plaintext.</span>
+<span class="p">...</span>
+<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Plaintext</span><span class="o">&gt;</span> <span class="n">plaintext</span> <span class="o">=</span> <span class="n">elGamal</span><span class="p">.</span><span class="n">decrypt</span><span class="p">(</span><span class="n">cipher</span><span class="p">);</span>
+
+<span class="c1">//Get the plaintext element and use it as needed.</span>
+<span class="n">GroupElement</span> <span class="n">element</span> <span class="o">=</span> <span class="p">((</span><span class="n">GroupElementPlaintext</span><span class="o">*</span><span class="p">)</span><span class="n">plaintext</span><span class="p">.</span><span class="n">get</span><span class="p">()).</span><span class="n">getElement</span><span class="p">();</span>
+<span class="p">...</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="cramer-shoup-ddh-encryption-scheme">
+<h2><a class="toc-backref" href="#id23">Cramer Shoup DDH Encryption Scheme</a><a class="headerlink" href="#cramer-shoup-ddh-encryption-scheme" title="Permalink to this headline">¶</a></h2>
+<p>The Cramer Shoup encryption scheme’s security is based on the hardness of the decisional Diffie-Hellman (DDH) problem,
+like El Gamal encryption scheme. Cramer Shoup encryption can be defined over any cyclic group <span class="math">G</span>.
+Its security depends upon the difficulty of a certain problem in <span class="math">G</span> related to computing discrete logarithms.</p>
+<p>We implement Cramer Shoup over a Dlog Group <span class="math">(G, q, g)</span> where <span class="math">q</span> is the order of group <span class="math">G</span> and <span class="math">g</span> is the generator.</p>
+<p>In contrast to El Gamal, which is extremely malleable, Cramer–Shoup adds other elements to ensure non-malleability even against a resourceful attacker. This non-malleability is achieved through the use of a hash function and additional computations, resulting in a ciphertext which is twice as large as in El Gamal.</p>
+<p>Similary to ElGamal, Cramer Shoup encryption scheme can encrypt a group element and a byte array. libscapi only provides the group element version.</p>
+<div class="section" id="the-cramershoupongroupelementenc-class">
+<h3><a class="toc-backref" href="#id24">The CramerShoupOnGroupElementEnc class</a><a class="headerlink" href="#the-cramershoupongroupelementenc-class" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="_CPPv228CramerShoupOnGroupElementEnc">
+<span id="CramerShoupOnGroupElementEnc"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">CramerShoupOnGroupElementEnc</code> : <em class="property">public</em> <a class="reference internal" href="#_CPPv213AsymmetricEnc" title="AsymmetricEnc">AsymmetricEnc</a>, Cca2<a class="headerlink" href="#_CPPv228CramerShoupOnGroupElementEnc" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Implementation of CramerShoup encryption scheme over group elements.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N28CramerShoupOnGroupElementEnc28CramerShoupOnGroupElementEncERK10shared_ptrI9DlogGroupERK10shared_ptrI17CryptographicHashERK10shared_ptrI17PrgFromOpenSSLAESE">
+<span id="CramerShoupOnGroupElementEnc::CramerShoupOnGroupElementEnc__shared_ptr:DlogGroup:CR.shared_ptr:CryptographicHash:CR.shared_ptr:PrgFromOpenSSLAES:CR"></span><code class="descclassname">::CramerShoupOnGroupElementEnc::</code><code class="descname">CramerShoupOnGroupElementEnc</code><span class="sig-paren">(</span><em class="property">const</em> shared_ptr&lt;DlogGroup&gt; &amp;<em>dlogGroup</em>, <em class="property">const</em> shared_ptr&lt;CryptographicHash&gt; &amp;<em>hash</em>, <em class="property">const</em> shared_ptr&lt;PrgFromOpenSSLAES&gt; &amp;<em>random</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N28CramerShoupOnGroupElementEnc28CramerShoupOnGroupElementEncERK10shared_ptrI9DlogGroupERK10shared_ptrI17CryptographicHashERK10shared_ptrI17PrgFromOpenSSLAESE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Constructor that lets the user choose the underlying dlog, hash and random.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>dlogGroup</strong> &#8211; underlying DlogGroup to use, it has to have DDH security level</li>
+<li><strong>hash</strong> &#8211; underlying hash to use, has to have CollisionResistant security level</li>
+<li><strong>random</strong> &#8211; source of randomness.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id3">
+<h3><a class="toc-backref" href="#id25">Basic Usage</a><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p>Sender usage:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span>//Create an underlying DlogGroup.
+shared_ptr&lt;DlogGroup&gt; dlog = make_shared&lt;OpenSSLDlogECF2m&gt;();
+
+//Create a CramerShoupOnByteArray encryption object.
+CramerShoupOnGroupElementEnc encryptor (dlog);
+
+//Generate a keyPair using the CramerShoup object.
+auto pair = encryptor.generateKey();
+
+//Publish your public key.
+Publish(pair.first);
+
+//Set private key and party2&#39;s public key:
+encryptor.setKey(party2PublicKey, pair.second);
+
+//Get a vector message to encrypt. Check if the length of the given msg is valid.
+if (encryptor.hasMaxByteArrayLengthForPlaintext()){
+    if (msg.size() &gt; encryptor.getMaxLengthOfByteArrayForPlaintext()) {
+        throw invalid_argument(“message too long”);
+    }
+}
+
+//Generate a plaintext suitable to this CramerShoup object.
+auto plaintext = encryptor.generatePlaintext(msg);
+
+//Encrypt the plaintext
+auto cipher = encrypor.encrypt(plaintext);
+
+//Send cipher and keys to the receiver.
+</pre></div>
+</div>
+<p>Receiver usage:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="c1">//Create a CramerShoup object with the same DlogGroup definition as party1.</span>
+<span class="c1">//Generate a keyPair using the CramerShoup object.</span>
+<span class="k">auto</span> <span class="n">pair</span> <span class="o">=</span> <span class="n">encryptor</span><span class="p">.</span><span class="n">generateKey</span><span class="p">();</span>
+
+<span class="c1">//Publish your public key.</span>
+<span class="n">Publish</span><span class="p">(</span><span class="n">pair</span><span class="p">.</span><span class="n">first</span><span class="p">);</span>
+
+<span class="c1">//Set private key and party1&#39;s public key:</span>
+<span class="n">encryptor</span><span class="p">.</span><span class="n">setKey</span><span class="p">(</span><span class="n">party1PublicKey</span><span class="p">,</span> <span class="n">pair</span><span class="p">.</span><span class="n">second</span><span class="p">);</span>
+
+<span class="c1">//Get the ciphertext and decrypt it to get the plaintext. ...</span>
+<span class="k">auto</span> <span class="n">plaintext</span> <span class="o">=</span> <span class="n">encryptor</span><span class="p">.</span><span class="n">decrypt</span><span class="p">(</span><span class="n">cipher</span><span class="p">);</span>
+
+<span class="c1">//Get the plaintext element and use it as needed.</span>
+<span class="n">GroupElement</span> <span class="n">element</span> <span class="o">=</span> <span class="p">((</span><span class="n">GroupElementPlaintext</span><span class="o">*</span><span class="p">)</span><span class="n">plaintext</span><span class="p">.</span><span class="n">get</span><span class="p">()).</span><span class="n">getElement</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="damgard-jurik-encryption-scheme">
+<h2><a class="toc-backref" href="#id26">Damgard Jurik Encryption Scheme</a><a class="headerlink" href="#damgard-jurik-encryption-scheme" title="Permalink to this headline">¶</a></h2>
+<p>Damgard Jurik is an asymmetric encryption scheme that is based on the Paillier encryption scheme. This encryption scheme is CPA-secure and Indistinguishable.</p>
+<div class="section" id="damgardjurikenc-class">
+<h3><a class="toc-backref" href="#id27">DamgardJurikEnc class</a><a class="headerlink" href="#damgardjurikenc-class" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="_CPPv215DamgardJurikEnc">
+<span id="DamgardJurikEnc"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">DamgardJurikEnc</code> : <em class="property">public</em> AsymAdditiveHomomorphicEnc<a class="headerlink" href="#_CPPv215DamgardJurikEnc" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Damgard Jurik is an asymmetric encryption scheme based on the Paillier encryption scheme. By definition, this encryption scheme is CPA-secure and Indistinguishable.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N15DamgardJurikEnc15DamgardJurikEncERK10shared_ptrI17PrgFromOpenSSLAESE">
+<span id="DamgardJurikEnc::DamgardJurikEnc__shared_ptr:PrgFromOpenSSLAES:CR"></span><code class="descclassname">DamgardJurikEnc::</code><code class="descname">DamgardJurikEnc</code><span class="sig-paren">(</span><em class="property">const</em> shared_ptr&lt;PrgFromOpenSSLAES&gt; &amp;<em>random</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N15DamgardJurikEnc15DamgardJurikEncERK10shared_ptrI17PrgFromOpenSSLAESE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Constructor that lets the user choose the source of randomness.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N15DamgardJurikEnc11reRandomizeEP20AsymmetricCiphertext">
+<span id="DamgardJurikEnc::reRandomize__AsymmetricCiphertextP"></span>shared_ptr&lt;AsymmetricCiphertext&gt; <code class="descclassname">DamgardJurikEnc::</code><code class="descname">reRandomize</code><span class="sig-paren">(</span>AsymmetricCiphertext *<em>cipher</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N15DamgardJurikEnc11reRandomizeEP20AsymmetricCiphertext" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This function takes an encryption of some plaintext (let&#8217;s call it originalPlaintext) and returns a cipher that &#8220;looks&#8221; different but it is also an encryption of originalPlaintext.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="id4">
+<h3><a class="toc-backref" href="#id28">Basic Usage</a><a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<p>The code example below is used when the sender and receiver know the specific type of asymmetric encryption object.</p>
+<p>Sender code:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="c1">//Create a DamgardJurik encryption object.</span>
+<span class="n">DamgardJurikEnc</span> <span class="n">encryptor</span><span class="p">;</span>
+
+<span class="c1">//Generate a keyPair using the DamgardJurik object.</span>
+<span class="n">DJKeyGenParameterSpec</span> <span class="nf">spec</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">40</span><span class="p">)</span>
+<span class="k">auto</span> <span class="n">pair</span> <span class="o">=</span> <span class="n">encryptor</span><span class="p">.</span><span class="n">generateKey</span><span class="p">(</span><span class="n">spec</span><span class="p">);</span>
+
+<span class="c1">//Publish your public key.</span>
+<span class="n">Publish</span><span class="p">(</span><span class="n">pair</span><span class="p">.</span><span class="n">first</span><span class="p">);</span>
+
+<span class="c1">//Set private key and party2&#39;s public key:</span>
+<span class="n">encryptor</span><span class="p">.</span><span class="n">setKey</span><span class="p">(</span><span class="n">party2PublicKey</span><span class="p">,</span> <span class="n">pair</span><span class="p">.</span><span class="n">second</span><span class="p">);</span>
+
+<span class="c1">//Get the biginteger value to encrypt, create a BigIntegerPlaintext with it and encrypt the plaintext.</span>
+<span class="p">...</span>
+<span class="n">BigIntegerPlainText</span> <span class="n">plaintext</span><span class="p">(</span><span class="n">num</span><span class="p">);</span>
+<span class="k">auto</span> <span class="n">cipher</span> <span class="o">=</span> <span class="n">encryptor</span><span class="p">.</span><span class="n">encrypt</span><span class="p">(</span><span class="n">plaintext</span><span class="p">);</span>
+
+<span class="c1">//Send cipher and keys to the receiver.</span>
+</pre></div>
+</div>
+<p>Receiver code:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="c1">//Create a DamgardJurik object with the same definition as party1.</span>
+<span class="c1">//Generate a keyPair using the DamgardJurik object.</span>
+<span class="k">auto</span> <span class="n">pair</span> <span class="o">=</span> <span class="n">encryptor</span><span class="p">.</span><span class="n">generateKey</span><span class="p">();</span>
+
+<span class="c1">//Publish your public key.</span>
+<span class="n">Publish</span><span class="p">(</span><span class="n">pair</span><span class="p">.</span><span class="n">first</span><span class="p">);</span>
+
+<span class="c1">//Set private key and party1&#39;s public key:</span>
+<span class="n">encryptor</span><span class="p">.</span><span class="n">setKey</span><span class="p">(</span><span class="n">party1PublicKey</span><span class="p">,</span> <span class="n">pair</span><span class="p">.</span><span class="n">second</span><span class="p">);</span>
+
+<span class="c1">//Get the ciphertext and decrypt it to get the plaintext. ...</span>
+<span class="k">auto</span> <span class="n">plaintext</span> <span class="o">=</span> <span class="n">elGamal</span><span class="p">.</span><span class="n">decrypt</span><span class="p">(</span><span class="n">cipher</span><span class="p">);</span>
+
+<span class="c1">//Get the plaintext element and use it as needed.</span>
+<span class="n">biginteger</span> <span class="n">element</span> <span class="o">=</span> <span class="p">((</span><span class="n">BigIntegerPlainText</span><span class="p">)</span><span class="n">plaintext</span><span class="p">.</span><span class="n">get</span><span class="p">()).</span><span class="n">getX</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Asymmetric Encryption</a><ul>
+<li><a class="reference internal" href="#the-asymmetricenc-abstract-class">The AsymmetricEnc abstract class</a><ul>
+<li><a class="reference internal" href="#encryption-and-decryption">Encryption and Decryption</a></li>
+<li><a class="reference internal" href="#plaintext-manipulation">Plaintext Manipulation</a></li>
+<li><a class="reference internal" href="#key-generation">Key Generation</a></li>
+<li><a class="reference internal" href="#key-handling">Key Handling</a></li>
+<li><a class="reference internal" href="#reconstruction-from-communication-channel">Reconstruction (from communication channel)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#using-the-generic-interface">Using the Generic Interface</a></li>
+<li><a class="reference internal" href="#el-gamal-encryption-scheme">El Gamal Encryption Scheme</a><ul>
+<li><a class="reference internal" href="#elgamalenc-abstract-class">ElGamalEnc abstract class</a></li>
+<li><a class="reference internal" href="#elgamalonbytearrayenc-class">ElGamalOnByteArrayEnc class</a><ul>
+<li><a class="reference internal" href="#constructors">Constructors</a></li>
+<li><a class="reference internal" href="#complete-encryption">Complete Encryption</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#elgamalongroupelementenc-class">ElGamalOnGroupElementEnc class</a><ul>
+<li><a class="reference internal" href="#id1">Constructors</a></li>
+<li><a class="reference internal" href="#id2">Complete Encryption</a></li>
+<li><a class="reference internal" href="#multiply-ciphertexts-homomorphic-encryption-operation">Multiply Ciphertexts (Homomorphic Encryption operation)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#cramer-shoup-ddh-encryption-scheme">Cramer Shoup DDH Encryption Scheme</a><ul>
+<li><a class="reference internal" href="#the-cramershoupongroupelementenc-class">The CramerShoupOnGroupElementEnc class</a></li>
+<li><a class="reference internal" href="#id3">Basic Usage</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#damgard-jurik-encryption-scheme">Damgard Jurik Encryption Scheme</a><ul>
+<li><a class="reference internal" href="#damgardjurikenc-class">DamgardJurikEnc class</a></li>
+<li><a class="reference internal" href="#id4">Basic Usage</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../mid_layer.html">Layer 2: Non Interactive Protocols</a><ul>
+      <li>Previous: <a href="symmetric_enc.html" title="previous chapter">Symmetric Encryption</a></li>
+      <li>Next: <a href="../interactive_layer.html" title="next chapter">Layer 3: Interactive Protocols</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/mid_layer/asymmetric_enc.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, libscapi team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/mid_layer/asymmetric_enc.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

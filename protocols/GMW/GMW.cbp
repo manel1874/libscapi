@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="GMW"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/home/moriya/GMW"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/moriya/GMW/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/moriya/GMW/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/moriya/GMW/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/moriya/GMW/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/home/moriya/GMW"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/moriya/GMW/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/moriya/GMW/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/moriya/GMW/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/moriya/GMW/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/home/moriya/GMW"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/moriya/GMW/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/moriya/GMW/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/moriya/GMW/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/moriya/GMW/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="GMW">
+				<Option output="/home/moriya/GMW/GMW" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/moriya/GMW"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/moriya"/>
+					<Add directory="/home/moriya/boost_1_60_0"/>
+					<Add directory="/home/moriya/libscapi/lib/OTExtensionBristol"/>
+					<Add directory="/home/moriya/libscapi/lib"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/usr/include/c++/5"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/5"/>
+					<Add directory="/usr/include/c++/5/backward"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/moriya/GMW/Makefile&quot;  VERBOSE=1 GMW"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/moriya/GMW/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/moriya/GMW/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/moriya/GMW/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="GMW/fast">
+				<Option output="/home/moriya/GMW/GMW" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/moriya/GMW"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/moriya"/>
+					<Add directory="/home/moriya/boost_1_60_0"/>
+					<Add directory="/home/moriya/libscapi/lib/OTExtensionBristol"/>
+					<Add directory="/home/moriya/libscapi/lib"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/usr/include/c++/5"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/5"/>
+					<Add directory="/usr/include/c++/5/backward"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/moriya/GMW/Makefile&quot;  VERBOSE=1 GMW/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/moriya/GMW/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/moriya/GMW/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/moriya/GMW/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/home/moriya/GMW/Circuit.cpp">
+			<Option target="GMW"/>
+		</Unit>
+		<Unit filename="/home/moriya/GMW/Circuit.h">
+			<Option target="GMW"/>
+		</Unit>
+		<Unit filename="/home/moriya/GMW/GMWParty.cpp">
+			<Option target="GMW"/>
+		</Unit>
+		<Unit filename="/home/moriya/GMW/GMWParty.h">
+			<Option target="GMW"/>
+		</Unit>
+		<Unit filename="/home/moriya/GMW/MPCCommunication.cpp">
+			<Option target="GMW"/>
+		</Unit>
+		<Unit filename="/home/moriya/GMW/MPCCommunication.h">
+			<Option target="GMW"/>
+		</Unit>
+		<Unit filename="/home/moriya/GMW/main.cpp">
+			<Option target="GMW"/>
+		</Unit>
+		<Unit filename="/home/moriya/GMW/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

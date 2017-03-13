@@ -1,0 +1,261 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Pseudorandom Generator (PRG) &#8212; libscapi 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Trapdoor Permutation" href="trapdoor_permutation.html" />
+    <link rel="prev" title="Pseudorandom Permutation (PRP)" href="pseudorandom_permutation.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="pseudorandom-generator-prg">
+<h1>Pseudorandom Generator (PRG)<a class="headerlink" href="#pseudorandom-generator-prg" title="Permalink to this headline">¶</a></h1>
+<p>A <strong>pseudorandom generator (PRG)</strong> is a deterministic algorithm that takes a “short” uniformly distributed string, known as <em>the seed</em>, and outputs a longer string that cannot be efficiently distinguished from a uniformly distributed string of that length.</p>
+<div class="section" id="the-pseudorandomgenerator-abstract-class">
+<h2>The <code class="docutils literal"><span class="pre">PseudorandomGenerator</span></code> abstract class<a class="headerlink" href="#the-pseudorandomgenerator-abstract-class" title="Permalink to this headline">¶</a></h2>
+<p>The main function of this class is <code class="docutils literal"><span class="pre">getPrgBytes()</span></code>. It streams the prg bytes and return the reauired amount of pseudo random bytes:</p>
+<dl class="function">
+<dt id="_CPPv2N21PseudorandomGenerator11getPRGBytesER6vectorI4byteEii">
+<span id="PseudorandomGenerator::getPRGBytes__vector:byte:R.i.i"></span>void <code class="descclassname">PseudorandomGenerator::</code><code class="descname">getPRGBytes</code><span class="sig-paren">(</span>vector&lt;byte&gt; &amp;<em>outBytes</em>, int <em>outOffset</em>, int <em>outlen</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N21PseudorandomGenerator11getPRGBytesER6vectorI4byteEii" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Streams the prg bytes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>outBytes</strong> &#8211; output bytes. The result of streaming the bytes.</li>
+<li><strong>outOffset</strong> &#8211; output offset</li>
+<li><strong>outlen</strong> &#8211; the required output length</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="section" id="setting-the-secret-key">
+<h3>Setting the Secret Key<a class="headerlink" href="#setting-the-secret-key" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N21PseudorandomGenerator11generateKeyER22AlgorithmParameterSpec">
+<span id="PseudorandomGenerator::generateKey__AlgorithmParameterSpecR"></span>SecretKey <code class="descclassname">PseudorandomGenerator::</code><code class="descname">generateKey</code><span class="sig-paren">(</span>AlgorithmParameterSpec &amp;<em>keyParams</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N21PseudorandomGenerator11generateKeyER22AlgorithmParameterSpec" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Generates a secret key to initialize this prg object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>keyParams</strong> &#8211; algorithmParameterSpec contains the required parameters for the key generation</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the generated secret key</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N21PseudorandomGenerator11generateKeyEi">
+<span id="PseudorandomGenerator::generateKey__i"></span>SecretKey <code class="descclassname">PseudorandomGenerator::</code><code class="descname">generateKey</code><span class="sig-paren">(</span>int <em>keySize</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N21PseudorandomGenerator11generateKeyEi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Generates a secret key to initialize this prg object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>keySize</strong> &#8211; is the required secret key size in bits</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the generated secret key</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N21PseudorandomGenerator8isKeySetEv">
+<span id="PseudorandomGenerator::isKeySet"></span>bool <code class="descclassname">PseudorandomGenerator::</code><code class="descname">isKeySet</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N21PseudorandomGenerator8isKeySetEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>An object trying to use an instance of prg needs to check if it has already been initialized.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">true if the object was initialized by calling the function setKey.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N21PseudorandomGenerator6setKeyER9SecretKey">
+<span id="PseudorandomGenerator::setKey__SecretKeyR"></span>void <code class="descclassname">PseudorandomGenerator::</code><code class="descname">setKey</code><span class="sig-paren">(</span>SecretKey &amp;<em>secretKey</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N21PseudorandomGenerator6setKeyER9SecretKey" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Sets the secret key for this prg. The key can be changed at any time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>secretKey</strong> &#8211; secret key</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="basic-usage">
+<h2>Basic Usage<a class="headerlink" href="#basic-usage" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="c1">//Create secret key and out byte vector</span>
+<span class="p">...</span>
+
+<span class="c1">//Create a prg</span>
+<span class="n">PseudorandomGenerator</span><span class="o">*</span> <span class="n">prg</span> <span class="o">=</span> <span class="k">new</span> <span class="n">PrgFromOpenSSLAES</span><span class="p">();</span>
+<span class="n">SecretKey</span> <span class="n">secretKey</span> <span class="o">=</span> <span class="n">prg</span><span class="o">-&gt;</span><span class="n">generateKey</span><span class="p">(</span><span class="mi">256</span><span class="p">);</span> <span class="c1">//256 is the key size in bits.</span>
+
+<span class="c1">//set the key</span>
+<span class="n">prg</span><span class="o">-&gt;</span><span class="n">setKey</span><span class="p">(</span><span class="n">secretKey</span><span class="p">);</span>
+
+<span class="c1">//get PRG bytes. The caller is responsible for allocating the out array.</span>
+<span class="c1">//The result will be put in the out array.</span>
+<span class="n">prg</span><span class="o">-&gt;</span><span class="n">getPRGBytes</span><span class="p">(</span><span class="n">out</span><span class="p">.</span><span class="n">length</span><span class="p">,</span> <span class="n">out</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="supported-prg-types">
+<h2>Supported Prg Types<a class="headerlink" href="#supported-prg-types" title="Permalink to this headline">¶</a></h2>
+<p>In this section we present the prg functions provided by libscapi.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="34%" />
+<col width="66%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Class Name</th>
+<th class="head">Class Location</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>ScPrgFromPrf</td>
+<td>libscapi/include/primitives/Prg.hpp</td>
+</tr>
+<tr class="row-odd"><td>PrgFromOpenSSLAES</td>
+<td>libscapi/include/primitives/Prf.hpp</td>
+</tr>
+</tbody>
+</table>
+<p>The OpenSSL implementation:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="29%" />
+<col width="71%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Class Name</th>
+<th class="head">Class Location</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>OpenSSLRC4</td>
+<td>libscapi/include/primitives/Prg.hpp</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Pseudorandom Generator (PRG)</a><ul>
+<li><a class="reference internal" href="#the-pseudorandomgenerator-abstract-class">The <code class="docutils literal"><span class="pre">PseudorandomGenerator</span></code> abstract class</a><ul>
+<li><a class="reference internal" href="#setting-the-secret-key">Setting the Secret Key</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
+<li><a class="reference internal" href="#supported-prg-types">Supported Prg Types</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../primitives.html">Layer 1: Basic Primitives</a><ul>
+      <li>Previous: <a href="pseudorandom_permutation.html" title="previous chapter">Pseudorandom Permutation (PRP)</a></li>
+      <li>Next: <a href="trapdoor_permutation.html" title="next chapter">Trapdoor Permutation</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/primitives/pseudorandom_generator.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, libscapi team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/primitives/pseudorandom_generator.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

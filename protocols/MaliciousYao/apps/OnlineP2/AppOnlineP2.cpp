@@ -269,7 +269,7 @@ int main(int argc, char* argv[]) {
 
 	cout << "\nP2 end communication\n";
 	//enter for out
-	cin.ignore();
+	//cin.ignore();
 
 	return 0;
 }

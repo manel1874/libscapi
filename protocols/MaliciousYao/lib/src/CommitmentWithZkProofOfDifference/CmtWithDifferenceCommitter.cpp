@@ -180,12 +180,13 @@ void CmtWithDifferenceCommitter::proveDifferencesBetweenMasks(vector<shared_ptr<
 	receiveW();
 
 	//Send the decommitments of the committed differences.
-	vector<byte> decommitmentsX((bucket.size() - 1)*s * 2 * KEY_SIZE);
+	int xSize = bucket[0]->getC()->getDecomX(0, w[0]).size();
+	vector<byte> decommitmentsX((bucket.size() - 1)*s * 2 * xSize);
 	vector<byte> decommitmentsR((bucket.size() - 1)*s * 2 * CryptoPrimitives::getHash()->getHashedMsgSize());
 	for (size_t j = 0; j < bucketSize - 1; j++)
 	{
 		proveDifference(*bucket[j], *bucket[j+1], decommitmentsX, decommitmentsR, j);
 	}
-	ProveDecommitments package(decommitmentsX, KEY_SIZE, decommitmentsR, CryptoPrimitives::getHash()->getHashedMsgSize());
+	ProveDecommitments package(decommitmentsX, xSize, decommitmentsR, CryptoPrimitives::getHash()->getHashedMsgSize());
 	sendSerialize(package, channel.get());
 }

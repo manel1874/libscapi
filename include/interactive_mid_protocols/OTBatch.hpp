@@ -158,23 +158,21 @@ public:
 	 * @param numOfOts Number of OTs in the OT extension.
 	 */
     OTExtensionGeneralSInput(const vector<byte> & x0Arr, const vector<byte> & x1Arr,
-			int numOfOts) {
-		this->x0Arr = x0Arr;
-		this->x1Arr = x1Arr;
+			int numOfOts) : x0Arr(x0Arr), x1Arr(x1Arr){
 		this->numOfOts = numOfOts;
 	}
 	;
 	/**
 	 * @return the array that holds all the x0 for all the senders serially.
 	 */
-	vector<byte> getX0Arr() {
+	vector<byte> & getX0Arr() {
 		return x0Arr;
 	}
 	;
 	/**
 	 * @return the array that holds all the x1 for all the senders serially.
 	 */
-	vector<byte> getX1Arr() {
+	vector<byte> & getX1Arr() {
 		return x1Arr;
 	}
 	;
@@ -271,11 +269,7 @@ class OTBatchSender {
 
 public:
 	/**
-	 * The transfer stage of OT Batch protocol which can be called several times in parallel.
-	 * The OT implementation support usage of many calls to transfer, with single preprocess execution.
-	 * This way, one can execute batch OT by creating the OT receiver once and call the transfer function for each input couple.
-	 * In order to enable the parallel calls, each transfer call should use a different channel to send and receive messages.
-	 * This way the parallel executions of the function will not block each other.<p>
+	 * The transfer stage of OT Batch protocol which does multiple ots in parallel.
 	 */
 	virtual shared_ptr<OTBatchSOutput> transfer(OTBatchSInput * input) = 0;
 	virtual ~OTBatchSender(){};
@@ -420,11 +414,7 @@ public:
  */
 class OTBatchReceiver {
 	/**
-	 * The transfer stage of OT Batch protocol which can be called several times in parallel.
-	 * The OT implementation support usage of many calls to transfer, with single preprocess execution.
-	 * This way, one can execute batch OT by creating the OT receiver once and call the transfer function for each input couple.
-	 * In order to enable the parallel calls, each transfer call should use a different channel to send and receive messages.
-	 * This way the parallel executions of the function will not block each other.
+	 * The transfer stage of OT Batch protocol which does multiple ots in parallel.
 	 * @param input The parameters given in the input must match the DlogGroup member of this class, which given in the constructor.
 	 * @return OTBatchROutput, the output of the protocol.
 	 */
