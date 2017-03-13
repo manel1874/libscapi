@@ -1,10 +1,10 @@
 //
 // Created by moriya on 15/2/17.
 //
-#pragma once
 
-//#ifndef LIBSCAPI_YAOSEPARTY_H
-//#define LIBSCAPI_YAOSEPARTY_H
+#ifndef LIBSCAPI_YAOSEPARTY_H
+#define LIBSCAPI_YAOSEPARTY_H
+
 #include <libscapi/include/CryptoInfra/Protocol.hpp>
 #include <libscapi/include/CryptoInfra/SecurityLevel.hpp>
 #include <libscapi/include/infra/CircuitConverter.hpp>
@@ -13,10 +13,8 @@
 
 typedef unsigned char byte;
 
-CircuitFile *cf;
-void compute(Bit * res, Bit * in, Bit * in2) {
-    cf->compute((block*)res, (block*)in, (block*)in2);
-}
+extern CircuitFile *cf;
+extern void compute(Bit * res, Bit * in, Bit * in2);
 
 /**
  * This class represents the Yao single execution protocol.
@@ -90,8 +88,12 @@ public:
      * @return the output of the protocol.
      */
     vector<byte> getOutput(){
-        vector<byte> output(cf->n3);
-        for (int i=0; i<cf->n3; i++){
+        int size = 0;
+        if (id == 2) size = cf->n3;
+
+        cout<<"output size = "<<cf->n3<<endl;
+        vector<byte> output(size);
+        for (int i=0; i<size; i++){
             output[i] = out[i];
         }
         return output;
@@ -100,4 +102,4 @@ public:
 };
 
 
-//#endif //LIBSCAPI_YAOSEPARTY_H
+#endif //LIBSCAPI_YAOSEPARTY_H

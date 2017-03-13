@@ -5,6 +5,11 @@
 
 #include "YaoSEParty.h"
 
+CircuitFile *cf;
+void compute(Bit * res, Bit * in, Bit * in2) {
+    cf->compute((block*)res, (block*)in, (block*)in2);
+}
+
 YaoSEParty::YaoSEParty(int id, string circuitFile, string ip, int port, string inputFile)
         : id(id){
     io = new NetIO(id==1 ? nullptr:ip.c_str(), port);

@@ -111,6 +111,19 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named yaoSingleExecution
+
+# Build rule for target.
+yaoSingleExecution: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 yaoSingleExecution
+.PHONY : yaoSingleExecution
+
+# fast build rule for target.
+yaoSingleExecution/fast:
+	$(MAKE) -f CMakeFiles/yaoSingleExecution.dir/build.make CMakeFiles/yaoSingleExecution.dir/build
+.PHONY : yaoSingleExecution/fast
+
+#=============================================================================
 # Target rules for targets named YaoSingleExecution
 
 # Build rule for target.
@@ -129,6 +142,7 @@ YaoSEParty.o: YaoSEParty.cpp.o
 
 # target to build an object file
 YaoSEParty.cpp.o:
+	$(MAKE) -f CMakeFiles/yaoSingleExecution.dir/build.make CMakeFiles/yaoSingleExecution.dir/YaoSEParty.cpp.o
 	$(MAKE) -f CMakeFiles/YaoSingleExecution.dir/build.make CMakeFiles/YaoSingleExecution.dir/YaoSEParty.cpp.o
 .PHONY : YaoSEParty.cpp.o
 
@@ -138,6 +152,7 @@ YaoSEParty.i: YaoSEParty.cpp.i
 
 # target to preprocess a source file
 YaoSEParty.cpp.i:
+	$(MAKE) -f CMakeFiles/yaoSingleExecution.dir/build.make CMakeFiles/yaoSingleExecution.dir/YaoSEParty.cpp.i
 	$(MAKE) -f CMakeFiles/YaoSingleExecution.dir/build.make CMakeFiles/YaoSingleExecution.dir/YaoSEParty.cpp.i
 .PHONY : YaoSEParty.cpp.i
 
@@ -147,6 +162,7 @@ YaoSEParty.s: YaoSEParty.cpp.s
 
 # target to generate assembly for a file
 YaoSEParty.cpp.s:
+	$(MAKE) -f CMakeFiles/yaoSingleExecution.dir/build.make CMakeFiles/yaoSingleExecution.dir/YaoSEParty.cpp.s
 	$(MAKE) -f CMakeFiles/YaoSingleExecution.dir/build.make CMakeFiles/YaoSingleExecution.dir/YaoSEParty.cpp.s
 .PHONY : YaoSEParty.cpp.s
 
@@ -157,6 +173,7 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
+	@echo "... yaoSingleExecution"
 	@echo "... rebuild_cache"
 	@echo "... YaoSingleExecution"
 	@echo "... YaoSEParty.o"
