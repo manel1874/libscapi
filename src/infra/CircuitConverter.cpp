@@ -119,7 +119,6 @@
     int temp;
     if (scapiFile.is_open() && bristolFile.is_open())
     {
-
         scapiFile >> numberOfGates;//get the gates
         bristolFile << numberOfGates << " "; //print number of gates
 
@@ -175,7 +174,7 @@
         //print the number of outputs
         bristolFile << numberOfOutputs << endl;
 
-        Gate gates[numberOfGates];
+        Gate* gates = new Gate[numberOfGates];
         for(int i=0; i<numberOfGates;i++) {
 
             //read from the file and print the exat values
@@ -292,9 +291,11 @@
             bristolFile << gates[i].output << " ";
             bristolFile << gates[i].type << endl;
         }
+        delete gates;
     }
     scapiFile.close();
     bristolFile.close();
+
 }
 
 int CircuitConverter::binaryTodecimal(int n){
