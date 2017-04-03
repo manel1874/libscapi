@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
 		return exampleUsage();
 
 	if (exampleName == "ospsi")
-		//return mainOSPSI(argv[2], argv[3]);
+		return mainOSPSI(argv[2], argv[3]);
 	if (exampleName == "comm") 
 		return mainComm(argv[2], argv[3]);
 	if (exampleName == "yao")
