@@ -40,7 +40,9 @@ INSTALLATION AND EXECUTION
 
 In order to compile and run The GMW application:
 1. Go in the GMW directory.
-2. Run the make command.
+2. Run:
+$ cmake -G "Unix Makefiles"
+$ make
 3. to execute run :
  ./GMW [party_id] [circuit_file_name] [parties_file_name] [input_file_name] [num_threads]
 
