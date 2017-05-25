@@ -16,7 +16,7 @@ CPP_OPTIONS   := -std=c++11 $(INC) -pthread  -maes -mpclmul -Wno-unused-function
 $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
 LINKER_OPTIONS = $(INCLUDE_ARCHIVES_START) ../../../../libscapi/scapi.a ../../../../libscapi/install/lib/libOTExtensionBristol.a ../../../../libscapi/install/lib/libsimpleot.a -lpthread -lgmp -lcrypto -lssl -lboost_system -lntl \
 -lboost_thread -lOTExtension -lMaliciousOTExtension -ldl $(INCLUDE_ARCHIVES_END)
-LIBRARIES_DIR  = -L $(HOME)/boost_1_60_0/stage/lib -L ../../../../install/lib
+LIBRARIES_DIR  = -L$(HOME)/boost_1_60_0/stage/lib -L ../../../../install/lib
 LD_FLAGS =
 
 all:: MaliciousYao
