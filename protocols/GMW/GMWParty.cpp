@@ -21,19 +21,18 @@ GMWParty::GMWParty(int id, const shared_ptr<Circuit> & circuit, string partiesFi
 }
 
 void GMWParty::run(){
-
 	//Run the offline phase of the protocol
     auto start = chrono::high_resolution_clock::now();
     generateTriples();
-	auto inputSize = circuit->getPartyInputs(id).size(); //indices of my input wires
-	myInputBits.resize(inputSize, 0); //input bits, will be adjusted to my input shares
-									  //read my input from the input file
-	readInputs(myInputBits);
     auto end = chrono::high_resolution_clock::now();
     int generateTotalTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     cout<<"Offline time: "<<generateTotalTime <<" milliseconds"<<endl;
 
-	//Run te online phase of the protocol
+    auto inputSize = circuit->getPartyInputs(id).size(); //indices of my input wires
+    myInputBits.resize(inputSize, 0); //input bits, will be adjusted to my input shares
+    //read my input from the input file
+    readInputs();
+    //Run te online phase of the protocol
     start = chrono::high_resolution_clock::now();
     inputSharing();
     auto output = computeCircuit();
@@ -56,7 +55,6 @@ void GMWParty::runOffline(){
 	auto inputSize = circuit->getPartyInputs(id).size(); //indices of my input wires
 	myInputBits.resize(inputSize, 0); //input bits, will be adjusted to my input shares
 									  //read my input from the input file
-	readInputs(myInputBits);
 }
 
 vector<byte>& GMWParty::runOnline(){
@@ -212,7 +210,6 @@ void GMWParty::inputSharing(){
 }
 
 void GMWParty::sendSharesToParties(PrgFromOpenSSLAES & prg, vector<byte> & myInputBits, int first, int last){
-
     int inputSize = myInputBits.size();
     vector<byte> myShares(inputSize, 0); //the shares to send to the other parties
     vector<byte> otherShares(inputSize, 0); //the shares to receive from the other parties
@@ -261,15 +258,17 @@ void GMWParty::receiveShares(vector<int> & otherInputWires, vector<byte> & other
     }
 }
 
-void GMWParty::readInputs(vector<byte> & inputs) const {
+void GMWParty::readInputs() {
     //Read the input from the given input file
     ifstream myfile;
     int input;
 
     myfile.open(inputFileName);
-   for (int i = 0; i<inputs.size(); i++){
+    int size = myInputBits.size();
+
+    for (int i = 0; i<size; i++){
         myfile >> input;
-        inputs[i] = (byte)input;
+        myInputBits[i] = (byte)input;
     }
     myfile.close();
 }
@@ -284,9 +283,11 @@ vector<byte>& GMWParty::computeCircuit(){
     }
 
     auto depths = circuit->getDepths();
+
     int layer=0;
     int andGatesCounter = 0, firstAndGateToRecompute = -1, numAndGatesComputed = 0, andGatesComputedCounter;
     vector<CBitVector> myD(parties.size()), myE(parties.size());
+
     for(int i=0; i<parties.size(); i++){
         myD[i].Create(depths[layer]);
         myE[i].Create(depths[layer]);
@@ -306,8 +307,8 @@ vector<byte>& GMWParty::computeCircuit(){
         //We should run the recompute function in order to compute all gates till here.
         //After that, the input wire will be ready.
         if (!isWireReady[gate.inputIndex1] || ((gate.inFan != 1) && !isWireReady[gate.inputIndex2])) {
-            
-            recomputeAndGatesWithThreads(firstAndGateToRecompute, myD, myE, i, isWireReady, numAndGatesComputed, andGatesComputedCounter);
+
+            recomputeAndGatesWithThreads(firstAndGateToRecompute, myD, myE, i, isWireReady, numAndGatesComputed, index);
 
             if (layer < depths.size()-1 ) {
                 layer++;
@@ -316,19 +317,21 @@ vector<byte>& GMWParty::computeCircuit(){
                     myE[j].Create(depths[layer]);
                 }
             }
+            numAndGatesComputed += index;
             index = 0;
-            numAndGatesComputed += andGatesComputedCounter;
             firstAndGateToRecompute = -1;
         }
         //The gate is ready to be computed, so continue computing:
         // xor gate
         if (gate.gateType == 6) {
+
              //in case of xor gate the output share is the xor of the input shares
             wiresValues[gate.outputIndex] = wiresValues[gate.inputIndex1] ^ wiresValues[gate.inputIndex2];
             isWireReady[gate.outputIndex] = true;
             //cout<<"wiresValues["<<gate.outputIndex<<"] = "<< (int)wiresValues[gate.outputIndex]<<endl;
         //not gate
         } else if (gate.gateType == 12){
+
             if (id == 0) {
                 //in case of xor gate the output share is the xor of the input shares
                 wiresValues[gate.outputIndex] = 1 - wiresValues[gate.inputIndex1];
@@ -339,6 +342,7 @@ vector<byte>& GMWParty::computeCircuit(){
             //cout<<"wiresValues["<<gate.outputIndex<<"] = "<< (int)wiresValues[gate.outputIndex]<<endl;
         //and/or gate
         } else if (gate.gateType == 1 || gate.gateType == 7) {
+
             if (firstAndGateToRecompute == -1)
                 firstAndGateToRecompute = i;
 
@@ -386,7 +390,7 @@ vector<byte>& GMWParty::computeCircuit(){
 
     //Recompute the last and gates
     if (firstAndGateToRecompute != -1){
-        recomputeAndGatesWithThreads(firstAndGateToRecompute, myD, myE, circuit->getNrOfGates(), isWireReady, numAndGatesComputed, numAndGatesComputed);
+        recomputeAndGatesWithThreads(firstAndGateToRecompute, myD, myE, circuit->getNrOfGates(), isWireReady, numAndGatesComputed, index);
     }
 
     //after computing the circuit, calculate the output values by receiving the shares;
@@ -394,17 +398,17 @@ vector<byte>& GMWParty::computeCircuit(){
 }
 
 void GMWParty::recomputeAndGatesWithThreads(int & firstAndGateToRecompute, vector<CBitVector> & myD, vector<CBitVector> & myE, int i,
-                                            vector<bool> & isWireReady, int & numAndGatesComputed, int & andGatesComputedCounter){
+                                            vector<bool> & isWireReady, int & numAndGatesComputed, int & numAndGatesInRound){
     vector<thread> threads(numThreads);
 	//Split the work to threads. Each thread gets some parties to work on.
     for (int t=0; t<numThreads; t++) {
         if ((t + 1) * numPartiesForEachThread <= parties.size()) {
             threads[t] = thread(&GMWParty::recomputeAndGates, this, ref(firstAndGateToRecompute), ref(myD),
-                                ref(myE), i, ref(isWireReady), numAndGatesComputed, ref(andGatesComputedCounter),
+                                ref(myE), i, ref(isWireReady), numAndGatesComputed, ref(numAndGatesInRound),
                                 t * numPartiesForEachThread, (t + 1) * numPartiesForEachThread);
         } else {
             threads[t] = thread(&GMWParty::recomputeAndGates, this, ref(firstAndGateToRecompute), ref(myD),
-                                ref(myE), i, ref(isWireReady), numAndGatesComputed, ref(andGatesComputedCounter),
+                                ref(myE), i, ref(isWireReady), numAndGatesComputed, ref(numAndGatesInRound),
                                 t * numPartiesForEachThread, parties.size());
         }
     }
@@ -415,12 +419,13 @@ void GMWParty::recomputeAndGatesWithThreads(int & firstAndGateToRecompute, vecto
 
 
 void GMWParty::recomputeAndGates(int firstAndGateToRecompute, vector<CBitVector> & myD, vector<CBitVector> & myE, int i,
-                                 vector<bool> & isWireReady, int numAndGatesComputed, int & andGatesComputedCounter, int first, int last) {
+                                 vector<bool> & isWireReady, int numAndGatesComputed, int & numAndGatesInRound, int first, int last) {
     Gate recomputeGate;
     byte d, e, z;
     int index;
     CBitVector otherD, otherE;
 
+    vector<byte> threadOutput(numAndGatesInRound, 0);
     int recomputeAndGatesCounter;
     for (int j=first; j < last; j++){
         
@@ -462,24 +467,30 @@ void GMWParty::recomputeAndGates(int firstAndGateToRecompute, vector<CBitVector>
                 if (id < parties[j]->getID()) {
                     z = z ^ (d * e);
                 }
-                mtx.lock();
-                wiresValues[recomputeGate.outputIndex] ^= z;
-                isWireReady[recomputeGate.outputIndex] = true;
-                mtx.unlock();
+                threadOutput[recomputeAndGatesCounter] ^= z;
                 recomputeAndGatesCounter++;
-       
             }
 
-            if (recomputeGate.gateType == 7 && id == 0 && j==(last - 1)){
-                mtx.lock();
-                wiresValues[recomputeGate.outputIndex] = 1 - wiresValues[recomputeGate.outputIndex];
-                mtx.unlock();
-            }
         }
     }
-    mtx.lock();
-    andGatesComputedCounter = recomputeAndGatesCounter;
-    mtx.unlock();
+
+    index = 0;
+    for (int k=firstAndGateToRecompute; k < i; k++) {
+
+        recomputeGate = circuit->getGates()[k];
+        if (recomputeGate.gateType == 1 || recomputeGate.gateType == 7) {
+            mtx.lock();
+            wiresValues[recomputeGate.outputIndex] ^= threadOutput[index++];
+            isWireReady[recomputeGate.outputIndex] = true;
+            mtx.unlock();
+
+        }
+        if (recomputeGate.gateType == 7 && id == 0 && last == parties.size()) {
+            mtx.lock();
+            wiresValues[recomputeGate.outputIndex] = 1 - wiresValues[recomputeGate.outputIndex];
+            mtx.unlock();
+        }
+    }
 }
 
 vector<byte>& GMWParty::revealOutput() {

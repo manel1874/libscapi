@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(GMW)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -maes -mpclmul -fPIC")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -maes -mpclmul -fPIC")
 
 SET (BOOST_ROOT $ENV{HOME}/boost_1_60_0/)
 SET (BOOST_INCLUDEDIR $ENV{HOME}/boost_1_60_0/)

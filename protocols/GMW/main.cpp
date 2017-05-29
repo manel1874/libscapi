@@ -21,6 +21,7 @@ int main(int argc, char* argv[]) {
     vector<byte> output;
     //cout << "num of threads : " << numThreads << endl;
     GMWParty party(id, circuit, argv[3], numThreads, argv[4]);
+
     auto parties = party.getParties();
     for (int i=0; i<10; i++) {
 
@@ -35,7 +36,6 @@ int main(int argc, char* argv[]) {
             }
         }
 
-
         //cout << "----------start protocl--------------" << endl;
         //party.run();
 
@@ -48,8 +48,7 @@ int main(int argc, char* argv[]) {
         generateTotalTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
         allOfflineTimes += generateTotalTime;
         //cout<<"Offline time: "<<generateTotalTime <<" milliseconds"<<endl;
-
-
+        party.readInputs();
         //Online phase
         start = chrono::high_resolution_clock::now();
         output = party.runOnline();

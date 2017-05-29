@@ -49,11 +49,6 @@ private:
     vector<byte>& computeCircuit();
 
 	/*
-	 * Reads the input from the given file.
-	 */
-    void readInputs(vector<byte> & inputs) const;
-
-	/*
 	 * This function generates the Beaver's triples for the parties listed by first and last parameters.
 	 * The splitting to parties is done in order to enable execution using threads.
 	 */
@@ -112,6 +107,11 @@ public:
 	 * Executes the offline phase of the protocol.
 	 */
     void runOffline();
+
+	/*
+	 * Reads the input from the given file.
+	 */
+	void readInputs();
 
 	/*
 	* Executes the online phase of the protocol.
