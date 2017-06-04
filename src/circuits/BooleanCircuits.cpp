@@ -250,3 +250,75 @@ string BooleanCircuit::read(scannerpp::Scanner s) {
 	}
 	return token;
 }
+
+void BooleanCircuit::write(string outputFileName){
+
+	ofstream outputFile;
+	outputFile.open(outputFileName);
+
+	if (outputFile.is_open()) {
+		//write the number of gates.
+		int numberOfGates = gates.size();
+		outputFile << numberOfGates << endl;
+		//write the number of parties.
+		outputFile << numberOfParties << endl;
+		outputFile << endl;
+
+		//For each party, read the party's number, number of input wires and their indices.
+		for (int i = 0; i < numberOfParties; i++) {
+			outputFile << i+1 << " ";//add 1 since parties are indexed from 1, not 0
+
+			int numberOfInputsForCurrentParty = eachPartysInputWires[i].size();
+			//Read the number of input wires.
+			outputFile << numberOfInputsForCurrentParty << endl;
+
+			//Read the input wires indices.
+			for (int j = 0; j < numberOfInputsForCurrentParty; j++) {
+				outputFile << eachPartysInputWires[i][j] << endl;
+			}
+			outputFile << endl;
+		}
+
+		//Write the outputs number
+		int numberOfOutputs = outputWireIndices.size();
+		outputFile << numberOfOutputs << endl;
+
+		//Write the output wires indices.
+		for (int i = 0; i < numberOfOutputs; i++) {
+			outputFile << outputWireIndices[i] <<endl;
+		}
+
+		outputFile << endl;
+
+		//For each gate, write the number of input and output wires, their indices and the truth table.
+		int numberOfGateInputs, numberOfGateOutputs;
+		for (int i = 0; i < numberOfGates; i++) {
+
+			numberOfGateInputs = gates[i].getInputWireIndices().size();
+			numberOfGateOutputs = gates[i].getOutputWireIndices().size();
+			outputFile << numberOfGateInputs << " ";
+			outputFile << numberOfGateOutputs << " ";
+
+			for (int j = 0; j < numberOfGateInputs; j++) {
+				outputFile << gates[i].getInputWireIndices()[j] << " ";
+			}
+			for (int j = 0; j < numberOfGateOutputs; j++) {
+				outputFile << gates[i].getOutputWireIndices()[j] << " ";
+			}
+
+			/*
+			* We create a BitSet representation of the truth table from the 01 String
+			* that we read from the file.
+			*/
+			auto tTable = gates[i].getTruthTable();
+			for (size_t j = 0; j < tTable.size(); j++) {
+				if (tTable[j])
+					outputFile << "1";
+				else
+					outputFile <<"0";
+			}
+			outputFile << endl;
+		}
+	}
+	outputFile.close();
+}

@@ -832,13 +832,20 @@ TEST_CASE("Gates and Wires", "") {
 	SECTION("Boolean Circuit From file") {
 #ifdef _WIN32
 		BooleanCircuit bc(new scannerpp::File("../../../../test/testCircuit.txt"));
+		bc.write("../../../../test/testCircuitOutput.txt");
 #else
+
 		BooleanCircuit bc(new scannerpp::File("../test/testCircuit.txt"));
+		bc.write("../test/testCircuitOutput.txt");
+
+		BooleanCircuit aesbc(new scannerpp::File("../test/NigelAes.txt"));
+		aesbc.write("../test/NigelAesOutput.txt");
 #endif
-		
 		REQUIRE(bc.getNumberOfInputs(1) == 4);
 		REQUIRE(bc.getNumberOfInputs(2) == 1);
 		REQUIRE(bc.getOutputWireIndices().size() == 1);
+
+
 	}
 }
 

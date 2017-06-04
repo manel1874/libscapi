@@ -125,6 +125,23 @@ public:
 	bool operator==(const Gate &other) const;
 	bool operator!=(const Gate &other) const { return !(*this == other);};
 
+	/**
+	* Returns an array containing the indices of the input {@code Wire}s to this {@code Gate}.
+	*/
+	vector<int> getInputWireIndices() const { return inputWireIndices; };
+
+	/**
+	* Returns the indices of the {@link Wire}s that are the output of this {@code Gate}. <p>
+	* In most circuit designs, this will contain a single wire.
+	* However, in the case of fan-out > 1, some circuit designers may treat each as separate wires.
+	*/
+	vector<int> getOutputWireIndices() const { return outputWireIndices; };
+
+	/**
+	* Returns the {@code Gate}'s truth table.
+	*/
+	vector<bool> getTruthTable() const { return truthTable; };
+
 private:
 	/**
 	* A BitSet representation of the final column of a truth table (i.e. the output of the function being computed).
@@ -165,23 +182,6 @@ private:
 	* @return the index of the Truth table output corresponding to the values of the input {@code Wire}s.
 	*/
 	int calculateIndexOfTruthTable(map<int, Wire> computedWires) const;
-
-	/**
-	* Returns an array containing the indices of the input {@code Wire}s to this {@code Gate}.
-	*/
-	vector<int> getInputWireIndices() const { return inputWireIndices; };
-
-	/**
-	* Returns the indices of the {@link Wire}s that are the output of this {@code Gate}. <p>
-	* In most circuit designs, this will contain a single wire.
-	* However, in the case of fan-out > 1, some circuit designers may treat each as separate wires.
-	*/
-	vector<int> getOutputWireIndices() const { return outputWireIndices; };
-
-	/**
-	* Returns the {@code Gate}'s truth table.
-	*/
-	vector<bool> getTruthTable() const { return truthTable; };
 
 	/**
 	* Returns the {@code Gate}'s number.
@@ -310,6 +310,8 @@ public:
 	*/
 	int getNumberOfParties() { return numberOfParties; };
 
+	void write(string outputFileName);
+
 private:
 	/**
 	* An array of boolean flags set to {@code true} if and only if the input has been set for the indexed party or the indexed party has no inputs.
@@ -343,6 +345,8 @@ private:
 	vector<vector<int>> eachPartysInputWires;
 
 	string read(scannerpp::Scanner s);
+
+
 };
 
 
