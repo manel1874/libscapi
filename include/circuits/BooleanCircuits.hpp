@@ -228,7 +228,9 @@ public:
 	* Constructs a {code BooleanCircuit} from an array of gates. <p>
 	* Each gate keeps an array of the indices of its input and output wires. The constructor is provided with a list of which
 	* {@link Wire}s are output {@link Wire}s of the {@code BooleanCircuit}.
-	*
+	* This constructor is used in case of two party circuit only. In order to create a multi-party circuit use the constructor that accept
+	* the output as vector of vectors.
+	 *
 	* @param gates An array of {@link Gate}s to create from which to construct the {@code BooleanCircuit}.
 	* @param outputWireIndices An array containing the indices of the wires that will be output of the {@code BooleanCircuit}.
 	* @param eachPartysInputWires An arrayList containing the indices of the input {@code Wire}s of this
@@ -238,10 +240,39 @@ public:
 		isInputSet(eachPartysInputWires.size())
 	{
 		this->gates = gates;
-		this->outputWireIndices = outputWireIndices;
-		this->eachPartysInputWires = eachPartysInputWires;
-		numberOfParties = eachPartysInputWires.size();
+        numberOfParties = eachPartysInputWires.size();
+        if (numberOfParties > 2) {
+            throw InvalidInputException("This constructor should be used in case of two-party only");
+        }
+
+        int outputSize = outputWireIndices.size();
+        vector<int> circuitOutput(outputSize);
+        //Read the input wires indices.
+        for (int j = 0; j < outputSize; j++) {
+            circuitOutput[j] = outputWireIndices[j];
+        }
+        eachPartysOutputWires.push_back(circuitOutput);
+        this->eachPartysInputWires = eachPartysInputWires;
 	}
+
+    /**
+	* Constructs a {code BooleanCircuit} from an array of gates. <p>
+	* Each gate keeps an array of the indices of its input and output wires. The constructor is provided with a list of which
+	* {@link Wire}s are output {@link Wire}s of the {@code BooleanCircuit}.
+	*
+	* @param gates An array of {@link Gate}s to create from which to construct the {@code BooleanCircuit}.
+	* @param outputWireIndices An array containing the indices of the wires that will be output of the {@code BooleanCircuit}.
+	* @param eachPartysInputWires An arrayList containing the indices of the input {@code Wire}s of this
+	* {@code BooleanCircuit} indexed by the party number.
+	*/
+    BooleanCircuit(const vector<Gate> & gates, const vector<vector<int>> & eachPartysOutputWires, const vector<vector<int>> & eachPartysInputWires) :
+            isInputSet(eachPartysInputWires.size())
+    {
+        this->gates = gates;
+        numberOfParties = eachPartysInputWires.size();
+        this->eachPartysOutputWires = eachPartysOutputWires;
+        this->eachPartysInputWires = eachPartysInputWires;
+    }
 
 	/**
 	* Sets the specified party's input to the circuit from a map containing constructed and set {@link Wire}s. <p>
@@ -289,7 +320,12 @@ public:
 	/**
 	* @return an array of the output{@link Wire} indices of this circuit.
 	*/
-	vector<int> getOutputWireIndices() { return outputWireIndices; };
+	vector<int> getOutputWireIndices(int partyNumber) const;
+
+    /**
+	* @return an array of the output{@link Wire} indices of this circuit.
+	*/
+    vector<int> getOutputWireIndices() const;
 
 	/**
 	* @param partyNumber The number of the party whose input wires will be returned.
@@ -332,7 +368,7 @@ private:
 	/**
 	* An array containing the indices of the output {@code Wire}s of this {@code BooleanCircuit}.
 	*/
-	vector<int> outputWireIndices;
+	vector<vector<int>> eachPartysOutputWires;
 
 	/**
 	* The number of parties that are interacting (i.e. receiving input and/or output) with this circuit.

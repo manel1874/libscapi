@@ -821,7 +821,8 @@ TEST_CASE("Gates and Wires", "") {
 		Gate g1(1, { 0, 1, 1, 1 }, { 0, 1 }, { 5 }); // x || y
 		Gate g2(2, { 0, 0, 0, 1 }, { 2, 3 }, { 6 }); // x && y
 		Gate g3(3, { 0, 0, 0, 1, 0, 1, 0, 1 }, { 5, 6, 4 }, { 7 }); // (x || y) && z
-		BooleanCircuit bc({ g1, g2, g3 }, { 7 }, { {1,2,3,4} });
+        vector<int> outputs = { 7 };
+		BooleanCircuit bc({ g1, g2, g3 }, outputs, { {1,2,3,4} });
 		map<int, Wire> presetInputWires = { { 0, Wire(1) }, { 1, Wire(0) }, { 2, Wire(1) },
 											{ 3, Wire(0) }, { 4, Wire(1) } };
 		bc.setInputs(presetInputWires, 1);

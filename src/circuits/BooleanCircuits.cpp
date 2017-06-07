@@ -131,13 +131,36 @@ BooleanCircuit::BooleanCircuit(scannerpp::Scanner s) {
 	* The ouputWireIndices are the outputs from this circuit. However, this circuit may actually be a single layer of a
 	* larger layered circuit. So this output can be part of the input to another layer of the circuit.
 	*/
-	int numberOfCircuitOutputs = atoi(read(s).c_str());
-	outputWireIndices.resize(numberOfCircuitOutputs);
-	//Read the output wires indices.
-	for (int i = 0; i < numberOfCircuitOutputs; i++) {
-		outputWireIndices[i] = atoi(read(s).c_str());
-	}
-	
+    if (numberOfParties == 2){
+        int numberOfCircuitOutputs = atoi(read(s).c_str());
+
+        vector<int> currentPartyOutput(numberOfCircuitOutputs);
+        //Read the input wires indices.
+        for (int j = 0; j < numberOfCircuitOutputs; j++) {
+            currentPartyOutput[j] = atoi(read(s).c_str());
+        }
+        eachPartysOutputWires.push_back(currentPartyOutput);
+    } else {
+        //For each party, read the party's number, number of output wires and their indices.
+        for (int i = 0; i < numberOfParties; i++) {
+            if (atoi(read(s).c_str()) != i + 1) {//add 1 since parties are indexed from 1, not 0
+                throw runtime_error("Circuit file format is wrong");
+            }
+            //Read the number of input wires.
+            int numberOfOutputForCurrentParty = atoi(read(s).c_str());
+            if (numberOfOutputForCurrentParty < 0) {
+                throw runtime_error("Circuit file format is wrong");
+            }
+
+            vector<int> currentPartyOutput(numberOfOutputForCurrentParty);
+            //Read the input wires indices.
+            for (int j = 0; j < numberOfOutputForCurrentParty; j++) {
+                currentPartyOutput[j] = atoi(read(s).c_str());
+            }
+            eachPartysOutputWires.push_back(currentPartyOutput);
+        }
+    }
+
 	int numberOfGateInputs, numberOfGateOutputs;
 	//For each gate, read the number of input and output wires, their indices and the truth table.
 	for (int i = 0; i < numberOfGates; i++) {
@@ -209,8 +232,11 @@ map<int, Wire> BooleanCircuit::compute() {
 	* We return outputMap.
 	*/
 	map<int, Wire> outputMap;
-	for (int w : outputWireIndices)
-		outputMap[w] = computedWires[w];
+    for (int i=0; i<numberOfParties; i++) {
+        auto outputWireIndices = eachPartysOutputWires[i];
+        for (int w : outputWireIndices)
+            outputMap[w] = computedWires[w];
+    }
 	return outputMap;
 }
 
@@ -233,6 +259,21 @@ vector<int> BooleanCircuit::getInputWireIndices(int partyNumber) const {
 		throw NoSuchPartyException("wrong number of party. got: " + to_string(partyNumber));
 	// we subtract one from the party number since the parties are indexed beginning from one, but the ArrayList is indexed from 0
 	return eachPartysInputWires[partyNumber - 1];
+}
+
+vector<int> BooleanCircuit::getOutputWireIndices(int partyNumber) const {
+    if (partyNumber < 1 || partyNumber > numberOfParties)
+        throw NoSuchPartyException("wrong number of party. got: " + to_string(partyNumber));
+    // we subtract one from the party number since the parties are indexed beginning from one, but the ArrayList is indexed from 0
+    return eachPartysOutputWires[partyNumber - 1];
+}
+
+vector<int> BooleanCircuit::getOutputWireIndices() const {
+   if (numberOfParties != 2){
+       throw IllegalStateException("This function should be called in case of two party only");
+   }
+    // we subtract one from the party number since the parties are indexed beginning from one, but the ArrayList is indexed from 0
+    return eachPartysOutputWires[0];
 }
 
 int BooleanCircuit::getNumberOfInputs(int partyNumber) const {
@@ -280,13 +321,30 @@ void BooleanCircuit::write(string outputFileName){
 		}
 
 		//Write the outputs number
-		int numberOfOutputs = outputWireIndices.size();
-		outputFile << numberOfOutputs << endl;
+        if (numberOfParties == 2) {
+            int numberOfOutputs = eachPartysOutputWires[0].size();
+            outputFile << numberOfOutputs << endl;
 
-		//Write the output wires indices.
-		for (int i = 0; i < numberOfOutputs; i++) {
-			outputFile << outputWireIndices[i] <<endl;
-		}
+            //Write the output wires indices.
+            for (int i = 0; i < numberOfOutputs; i++) {
+                outputFile << eachPartysOutputWires[0][i] << endl;
+            }
+        } else {
+            //For each party, read the party's number, number of input wires and their indices.
+            for (int i = 0; i < numberOfParties; i++) {
+                outputFile << i+1 << " ";//add 1 since parties are indexed from 1, not 0
+
+                int numberOfOutputForCurrentParty = eachPartysOutputWires[i].size();
+                //Read the number of input wires.
+                outputFile << numberOfOutputForCurrentParty << endl;
+
+                //Read the input wires indices.
+                for (int j = 0; j < numberOfOutputForCurrentParty; j++) {
+                    outputFile << eachPartysOutputWires[i][j] << endl;
+                }
+                outputFile << endl;
+            }
+        }
 
 		outputFile << endl;
 
