@@ -36,8 +36,9 @@ vector<byte> readInputAsVector(string input_file) {
 	auto sc = scannerpp::Scanner(new scannerpp::File(input_file));
 	int inputsNumber = sc.nextInt();
 	vector<byte> inputVector(inputsNumber);
-	for (int i = 0; i < inputsNumber; i++)
-		inputVector[i] = (byte)sc.nextInt();
+	for (int i = 0; i < inputsNumber; i++) {
+		inputVector[i] = (byte) sc.nextInt();
+	}
 	return inputVector;
 }
 
@@ -56,7 +57,7 @@ PartyOne::PartyOne(YaoConfig & yao_config) {
 	// create the garbled circuit
 	circuit = GarbledCircuitFactory::createCircuit(yao_config.circuit_file,
 		GarbledCircuitFactory::CircuitType::FIXED_KEY_FREE_XOR_HALF_GATES, false);
-
+	setInputs(yao_config.input_file_1);
 	// create the semi honest OT extension sender
 	SocketPartyData senderParty(yao_config.sender_ip, 7766);
 #ifdef _WIN32
@@ -93,18 +94,14 @@ void PartyOne::sendP1Inputs(byte* ungarbledInput) {
 }
 
 void PartyOne::run() {
-	
 	values = circuit->garble();
-
 	// send garbled tables and the translation table to p2.
 	auto garbledTables = circuit->getGarbledTables();
 	
 	channel->write((byte *) garbledTables, circuit->getGarbledTableSize());
 	channel->write(circuit->getTranslationTable().data(), circuit->getNumberOfOutputs());
-	
 	// send p1 input keys to p2.
 	sendP1Inputs(ungarbledInput.data());
-	
 	// run OT protocol in order to send p2 the necessary keys without revealing any information.
 	runOTProtocol();
 }
@@ -138,7 +135,7 @@ void PartyOne::runOTProtocol() {
 /*********************************/
 
 PartyTwo::PartyTwo(YaoConfig & yao_config, bool print_output) {
-	this->print_output = print_output;
+	this->print_output = yao_config.print_output;
 	this->yaoConfig = yao_config;
 	// init
 	SocketPartyData me(yao_config.receiver_ip, 1212);
@@ -148,7 +145,7 @@ PartyTwo::PartyTwo(YaoConfig & yao_config, bool print_output) {
 	// create the garbled circuit
 	circuit = GarbledCircuitFactory::createCircuit(yao_config.circuit_file,
 		GarbledCircuitFactory::CircuitType::FIXED_KEY_FREE_XOR_HALF_GATES, false);
-
+	setInputs(yao_config.input_file_2);
 	// create the OT receiver.
 	SocketPartyData senderParty(yao_config.sender_ip, 7766);
 #ifdef _WIN32
@@ -215,12 +212,10 @@ void PartyTwo::receiveCircuit() {
 
 	// receive garbled tables.
 	channel->read((byte*)circuit->getGarbledTables(), circuit->getGarbledTableSize());
-	
 	byte * translationTable = new byte[circuit->getNumberOfOutputs()];
 
 	// receive translation table.
 	channel->read(translationTable, circuit->getNumberOfOutputs());
-
 	std::vector<byte> translationTableVec(translationTable, translationTable + circuit->getNumberOfOutputs());
 	
 	// set garbled tables and translation table to the circuit.
@@ -237,7 +232,6 @@ void PartyTwo::receiveCircuit() {
 
 void PartyTwo::receiveP1Inputs() {
 	p1InputsSize = circuit->getNumberOfInputs(1)*SIZE_OF_BLOCK;
-
 	p1Inputs = new byte[p1InputsSize];
 
 	channel->read(p1Inputs, p1InputsSize);
