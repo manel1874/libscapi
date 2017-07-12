@@ -27,6 +27,7 @@
 
 
 #include "YaoParties.hpp"
+#include "../../include/infra/CircuitConverter.hpp"
 
 void execute_party_one(PartyOne* p1, YaoConfig yao_config) {
 	
@@ -76,12 +77,42 @@ YaoConfig read_yao_config(string config_file) {
 	string input_file_2 = cf.Value(input_section, "input_file_party_2");
 	string sender_ip_str = cf.Value("", "sender_ip");
 	string receiver_ip_str = cf.Value("", "receiver_ip");
+	int sender_port_str = stoi(cf.Value("", "sender_port"));
+	int receiver_port_str = stoi(cf.Value("", "receiver_port"));
 	string circuit_type = cf.Value("", "circuit_type");
 	return YaoConfig(number_of_iterations, print_output, circuit_file, input_file_1,
-		input_file_2, sender_ip_str, receiver_ip_str, circuit_type);
+		input_file_2, sender_ip_str, sender_port_str, receiver_ip_str, receiver_port_str, circuit_type);
 }
 
 int main(int argc, char* argv[]) {
+	/*CircuitConverter::convertBristolToScapi("AESExpanded_bristol.txt", "AESExpanded_scapi.txt", false);
+
+	ofstream inputFile1;
+
+	inputFile1.open("AESPartyOneInputs.txt");
+
+	if (inputFile1.is_open())
+	{
+		int size = 128;
+		inputFile1 << size<< endl; //print number of gates
+		for (int i=0; i<size; i++){
+			inputFile1<<"0"<<endl;
+		}
+	}
+
+	ofstream inputFile2;
+
+	inputFile2.open("AESPartyTwoInputs.txt");
+
+	if (inputFile2.is_open())
+	{
+		int size = 1408;
+		inputFile2 << size<< endl; //print number of gates
+		for (int i=0; i<size; i++){
+			inputFile2<<"0"<<endl;
+		}
+	}*/
+
 
 	int partyNum = atoi(argv[1]);
 	

@@ -59,8 +59,10 @@ struct YaoConfig {
 	string input_file_2;
 	IpAddress sender_ip;
 	IpAddress receiver_ip;
+	int sender_port;
+	int receiver_port;
 	YaoConfig(int n_iterations, bool print, string c_file, string input_file_1,
-		string input_file_2, string sender_ip_str, string rec_ip_str, string circuit_type) {
+		string input_file_2, string sender_ip_str, int sender_port, string rec_ip_str, int receiver_port, string circuit_type) {
 		number_of_iterations = n_iterations;
 		print_output = print;
 		circuit_file = c_file;
@@ -69,6 +71,8 @@ struct YaoConfig {
 		sender_ip = IpAddress::from_string(sender_ip_str);
 		receiver_ip = IpAddress::from_string(rec_ip_str);
 		this->circuit_type = circuit_type;
+		this->sender_port = sender_port;
+		this->receiver_port = receiver_port;
 	};
 
 	YaoConfig(string config_file) {
@@ -78,6 +82,7 @@ struct YaoConfig {
 		string os = "Linux";
 #endif
 		ConfigFile cf(config_file);
+		cout<<"after config file"<<endl;
 		number_of_iterations = stoi(cf.Value("", "number_of_iterations"));
 		string str_print_output = cf.Value("", "print_output");
 		istringstream(str_print_output) >> std::boolalpha >> print_output;
@@ -87,6 +92,9 @@ struct YaoConfig {
 		input_file_2 = cf.Value(input_section, "input_file_party_2");
 		sender_ip = IpAddress::from_string(cf.Value("", "sender_ip"));
 		receiver_ip = IpAddress::from_string(cf.Value("", "receiver_ip"));
+
+		sender_port = stoi(cf.Value("", "sender_port"));
+		receiver_port = stoi(cf.Value("", "receiver_port"));
 		circuit_type = cf.Value("", "circuit_type");
 	}
 
@@ -140,7 +148,7 @@ public:
 		io_service.stop();
 	}
 
-	void setInputs(string inputFileName);
+	void setInputs(string inputFileName, int numInputs);
 
 	/**
 	* Runs the protocol.
@@ -213,7 +221,7 @@ public:
 		io_service.stop();
 	}
 
-	void setInputs(string inputFileName);
+	void setInputs(string inputFileName, int numInputs);
 
 	/**
 	* Runs the protocol.

@@ -32,11 +32,10 @@
 #include "../../include/circuits/Compat.h"
 #endif
 
-vector<byte> readInputAsVector(string input_file) {
+vector<byte> readInputAsVector(string input_file, int numInputs) {
 	auto sc = scannerpp::Scanner(new scannerpp::File(input_file));
-	int inputsNumber = sc.nextInt();
-	vector<byte> inputVector(inputsNumber);
-	for (int i = 0; i < inputsNumber; i++) {
+	vector<byte> inputVector(numInputs);
+	for (int i = 0; i < numInputs; i++) {
 		inputVector[i] = (byte) sc.nextInt();
 	}
 	return inputVector;
@@ -50,16 +49,17 @@ PartyOne::PartyOne(YaoConfig & yao_config) {
 	//t = boost::thread(boost::bind(&boost::asio::io_service::run, &io_service));
 	this->yaoConfig = yao_config;
 
-	SocketPartyData me(yao_config.sender_ip, 1213);
-	SocketPartyData other(yao_config.receiver_ip, 1212);
+	SocketPartyData me(yao_config.sender_ip, yao_config.sender_port++);
+	SocketPartyData other(yao_config.receiver_ip, yao_config.receiver_port);
 	channel = make_shared<CommPartyTCPSynced>(io_service, me, other);
 
 	// create the garbled circuit
 	circuit = GarbledCircuitFactory::createCircuit(yao_config.circuit_file,
 		GarbledCircuitFactory::CircuitType::FIXED_KEY_FREE_XOR_HALF_GATES, false);
-	setInputs(yao_config.input_file_1);
+
+	setInputs(yao_config.input_file_1, circuit->getNumberOfInputs(1));
 	// create the semi honest OT extension sender
-	SocketPartyData senderParty(yao_config.sender_ip, 7766);
+	SocketPartyData senderParty(yao_config.sender_ip, yao_config.sender_port);
 #ifdef _WIN32
 	otSender = new OTSemiHonestExtensionSender(senderParty, 163, 1);
 #else
@@ -70,8 +70,8 @@ PartyOne::PartyOne(YaoConfig & yao_config) {
 	channel->join(500, 5000);
 };
 
-void PartyOne::setInputs(string inputFileName) {
-	ungarbledInput = readInputAsVector(inputFileName);
+void PartyOne::setInputs(string inputFileName, int numInputs) {
+	ungarbledInput = readInputAsVector(inputFileName, numInputs);
 }
 
 void PartyOne::sendP1Inputs(byte* ungarbledInput) {
@@ -107,16 +107,19 @@ void PartyOne::run() {
 }
 
 void PartyOne::runOTProtocol() {
+	cout<<"in run function"<<endl;
 	//Get the indices of p2 input wires.
 	int p1InputSize = 0;
 	int p2InputSize = 0;
 	byte* allInputWireValues = (byte*)std::get<0>(values);
 	p1InputSize = circuit->getNumberOfInputs(1);
 	p2InputSize = circuit->getNumberOfInputs(2);
+	cout<<"after get number of inputs"<<endl;
 	vector<byte> x0Arr;
 	x0Arr.reserve(p2InputSize * SIZE_OF_BLOCK);
 	vector<byte> x1Arr;
 	x1Arr.reserve(p2InputSize * SIZE_OF_BLOCK);
+	cout<<"after reserve"<<endl;
 	int beginIndex0, beginIndex1;
 	for (int i = 0; i<p2InputSize; i++) {
 		beginIndex0 = p1InputSize * 2 * SIZE_OF_BLOCK + 2 * i*SIZE_OF_BLOCK;
@@ -124,10 +127,13 @@ void PartyOne::runOTProtocol() {
 		x0Arr.insert(x0Arr.end(), &allInputWireValues[beginIndex0], &allInputWireValues[beginIndex0 + SIZE_OF_BLOCK]);
 		x1Arr.insert(x1Arr.end(), &allInputWireValues[beginIndex1], &allInputWireValues[beginIndex1 + SIZE_OF_BLOCK]);
 	}
+	cout<<"after loop"<<endl;
 	// create an OT input object with the keys arrays.
 	OTBatchSInput * input = new OTExtensionGeneralSInput(x0Arr, x1Arr, p2InputSize);
+	cout<<"after input"<<endl;
 	// run the OT's transfer phase.
 	otSender->transfer(input);
+	cout<<"end of p1 run function"<<endl;
 }
 
 /*********************************/
@@ -138,16 +144,16 @@ PartyTwo::PartyTwo(YaoConfig & yao_config, bool print_output) {
 	this->print_output = yao_config.print_output;
 	this->yaoConfig = yao_config;
 	// init
-	SocketPartyData me(yao_config.receiver_ip, 1212);
-	SocketPartyData other(yao_config.sender_ip, 1213);
+	SocketPartyData me(yao_config.receiver_ip, yao_config.receiver_port);
+	SocketPartyData other(yao_config.sender_ip, yaoConfig.sender_port++);
 	channel = make_shared<CommPartyTCPSynced>(io_service, me, other);
 
 	// create the garbled circuit
 	circuit = GarbledCircuitFactory::createCircuit(yao_config.circuit_file,
 		GarbledCircuitFactory::CircuitType::FIXED_KEY_FREE_XOR_HALF_GATES, false);
-	setInputs(yao_config.input_file_2);
+	setInputs(yao_config.input_file_2,  circuit->getNumberOfInputs(2));
 	// create the OT receiver.
-	SocketPartyData senderParty(yao_config.sender_ip, 7766);
+	SocketPartyData senderParty(yao_config.sender_ip, yaoConfig.sender_port);
 #ifdef _WIN32
 	otReceiver = new OTSemiHonestExtensionReceiver(senderParty, 163, 1);
 #else
@@ -159,8 +165,8 @@ PartyTwo::PartyTwo(YaoConfig & yao_config, bool print_output) {
 	channel->join(500, 5000);
 }
 
-void PartyTwo::setInputs(string inputFileName) {
-	ungarbledInput = readInputAsVector(inputFileName);
+void PartyTwo::setInputs(string inputFileName, int numInputs) {
+	ungarbledInput = readInputAsVector(inputFileName, numInputs);
 }
 
 byte* PartyTwo::computeCircuit(OTBatchROutput * otOutput) {
