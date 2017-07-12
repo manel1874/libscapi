@@ -39,5 +39,7 @@ RUN make
 WORKDIR ../OnlineP2
 RUN make
 RUN echo finish building MaliciousYao apps
+
 # done
+WORKDIR /root
 RUN echo DONE!
