@@ -23,10 +23,10 @@
 */
 
 const int PARTY = 2;
-const string HOME_DIR = "../../lib";
+const string HOME_DIR = "../..";
 //const string CIRCUIT_FILENAME = HOME_DIR + "/assets/circuits/AES/NigelAes.txt";
 //const string CIRCUIT_INPUT_FILENAME = HOME_DIR + "/assets/circuits/AES/AESPartyTwoInputs.txt";
-const string COMM_CONFIG_FILENAME = HOME_DIR + string("/assets/conf/PartiesConfig.txt");
+const string COMM_CONFIG_FILENAME = HOME_DIR + string("/lib/assets/conf/PartiesConfig.txt");
 	
 //const string CIRCUIT_CHEATING_RECOVERY = HOME_DIR + "/assets/circuits/CheatingRecovery/UnlockP1Input.txt";
 //const string BUCKETS_PREFIX_MAIN = HOME_DIR + "/data/P2/aes";

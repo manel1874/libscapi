@@ -58,8 +58,8 @@ In order to compile and run The OnlineP1 application:
                       {location_to_put_main_buckets}  {location_to_put_cr_buckets}
                       {N1} {B1} {S1} {P1} {N2} {B2} {S2} {P2}
  for example :
- ~ ./AppOnlineP1.out "/assets/circuits/AES/NigelAes.txt" "/assets/circuits/AES/AESPartyOneInputs.txt"
-                      "/assets/circuits/CheatingRecovery/UnlockP1Input.txt" "/data/P1/aes" "/data/P1/cr"
+ ~ ./AppOnlineP1.out "/lib/assets/circuits/AES/NigelAes.txt" "/lib/assets/circuits/AES/AESPartyOneInputs.txt"
+                      "/lib/assets/circuits/CheatingRecovery/UnlockP1Input.txt" "/lib/data/P1/aes" "/lib/data/P1/cr"
                       32 7 40 0.62 32 20 40 0.71
 
 

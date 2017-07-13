@@ -13,12 +13,12 @@ using namespace std;
 const int PARTY = 1;
 
 //home directory path for all files
-const  string HOME_DIR = "../../lib";
+const  string HOME_DIR = "../..";
 
 //files path
 //const string CIRCUIT_FILENAME = HOME_DIR + string("/assets/circuits/AES/NigelAes.txt");
 //const string CIRCUIT_INPUT_FILENAME = HOME_DIR + string("/assets/circuits/AES/AESPartyOneInputs.txt");
-const string COMM_CONFIG_FILENAME = HOME_DIR + string("/assets/conf/PartiesConfig.txt");
+const string COMM_CONFIG_FILENAME = HOME_DIR + string("/lib/assets/conf/PartiesConfig.txt");
 //const string CIRCUIT_CHEATING_RECOVERY = HOME_DIR + string("/assets/circuits/CheatingRecovery/UnlockP1Input.txt");
 //const string BUCKETS_PREFIX_MAIN = HOME_DIR + string("/data/P1/aes");
 //const string BUCKETS_PREFIX_CR = HOME_DIR + string("/data/P1/cr");
