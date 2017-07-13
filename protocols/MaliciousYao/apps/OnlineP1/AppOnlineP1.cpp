@@ -65,7 +65,6 @@ int main(int argc, char* argv[]) {
 	//set crypto primitives
 	CryptoPrimitives::setCryptoPrimitives(NISTEC_FILE_NAME);
 	CryptoPrimitives::setNumOfThreads(8);
-	auto input = CircuitInput::fromFile(CIRCUIT_INPUT_FILENAME);
 	//make circuit
 
 	
@@ -119,6 +118,7 @@ int main(int argc, char* argv[]) {
 		crBuckets[i] = BucketBundleList::loadBucketFromFile(BUCKETS_PREFIX_CR + "." + to_string(BUCKET_ID++) + ".cbundle");
 	}
 
+    auto input = CircuitInput::fromFile(CIRCUIT_INPUT_FILENAME, mainBuckets[0]->getBundleAt(0)->getNumberOfInputLabelsX());
 	// only now we start counting the running time
 	string tmp = "reset times";
 	cout << "tmp size = " << tmp.size() << endl;

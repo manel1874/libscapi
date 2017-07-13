@@ -120,7 +120,7 @@ int main(int argc, char* argv[]) {
 	//set crypto primitives
 	CryptoPrimitives::setCryptoPrimitives(NISTEC_FILE_NAME);
 	CryptoPrimitives::setNumOfThreads(8);
-	auto input = CircuitInput::fromFile(CIRCUIT_INPUT_FILENAME);
+
 	//make circuit
 
 	auto mainBC = make_shared<BooleanCircuit>(new scannerpp::File(CIRCUIT_FILENAME));
@@ -179,6 +179,7 @@ int main(int argc, char* argv[]) {
         crCircuit[i] = shared_ptr<GarbledBooleanCircuit>(CheatingRecoveryCircuitCreator(CIRCUIT_CHEATING_RECOVERY, mainCircuit[0]->getNumberOfGates()).create());
     }
 
+    auto input = CircuitInput::fromFile(CIRCUIT_INPUT_FILENAME, mainCircuit[0]->getNumberOfInputs(2));
     ExecutionParameters mainExecution(mainBC, mainCircuit, N1, s1, B1, p1);
     ExecutionParameters crExecution(crBC, crCircuit, N2, s2, B2, p2);
     //ExecutionParameters mainExecution(nullptr, mainCircuit, N1, s1, B1, p1);

@@ -43,7 +43,7 @@ public:
 	 return:
 		 the created CircuitInput object.
 	*/
-	static shared_ptr<CircuitInput> fromFile(string filename);
+	static shared_ptr<CircuitInput> fromFile(string filename, int inputsNumber);
 
 	/**
 	 Alternative constructor.
