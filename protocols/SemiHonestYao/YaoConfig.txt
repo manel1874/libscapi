@@ -1,8 +1,8 @@
 number_of_iterations = 1
 print_output = true
 sender_ip = 127.0.0.1
-sender_port = 1213
-receiver_port = 1212
+sender_port = 8000
+receiver_port = 8004
 receiver_ip = 127.0.0.1
 input_section = AES 
 circuit_type = NoFixedKey
