@@ -11,6 +11,7 @@ Libscapi is an open-source c++ library for implementing secure two-party and mul
    quickstart
    communication
    security_levels
+   circuits
    primitives
    mid_layer
    interactive_layer
