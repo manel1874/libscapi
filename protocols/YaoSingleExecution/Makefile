@@ -48,10 +48,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/moriya/libscapi/protocols/YaoSingleExecution
+CMAKE_SOURCE_DIR = /home/liork/libscapi/protocols/YaoSingleExecution
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/moriya/libscapi/protocols/YaoSingleExecution
+CMAKE_BINARY_DIR = /home/liork/libscapi/protocols/YaoSingleExecution
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -80,9 +80,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/moriya/libscapi/protocols/YaoSingleExecution/CMakeFiles /home/moriya/libscapi/protocols/YaoSingleExecution/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/liork/libscapi/protocols/YaoSingleExecution/CMakeFiles /home/liork/libscapi/protocols/YaoSingleExecution/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/moriya/libscapi/protocols/YaoSingleExecution/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/liork/libscapi/protocols/YaoSingleExecution/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
