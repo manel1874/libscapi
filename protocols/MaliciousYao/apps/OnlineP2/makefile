@@ -10,7 +10,7 @@ all: AppOnlineP1.out
 AppOnlineP1.out:
 	@echo "compiling!"
 #	$(CXX) AppOnlineP1.cpp -o $@ $(LINKER_OPTIONS)
-	g++ -std=c++11 $(INC) -maes AppOnlineP1.cpp -o $@ -L../../../../../libscapi/install/lib -L../../../../../boost_1_60_0/stage/lib -lcrypto -lssl -lgmp -ldl -lboost_thread -lboost_system ../../../../../libscapi/scapi.a ../../lib/MaliciousYao.a -lboost_serialization ../../../../../libscapi/scapi.a -lpthread -lboost_filesystem -lgmp -lntl -lMaliciousOTExtension -lblake2
+	g++ -std=c++11 $(INC) -maes AppOnlineP2.cpp -o $@ -L../../../../../libscapi/install/lib -L../../../../../boost_1_60_0/stage/lib -lcrypto -lssl -lgmp -ldl -lboost_thread -lboost_system ../../../../../libscapi/scapi.a ../../lib/MaliciousYao.a -lboost_serialization ../../../../../libscapi/scapi.a -lpthread -lboost_filesystem -lgmp -lntl -lMaliciousOTExtension -lblake2
 clean:
 	rm -f ./*.o
 	rm -f ./*.out
