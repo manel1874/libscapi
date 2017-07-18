@@ -16,7 +16,7 @@ using namespace std;
  * It contains a truth table that performs a function on the values of the input wires (input0 and input1)  and assigns
  * that value to the output wire.
  *
- * author: Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Meital Levy)
+ * author: Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Moriya Farbstein)
 */
 struct Gate
 {

@@ -26,7 +26,7 @@ Libscapi is released under the MIT open source license. However, some of the lib
 
 Go to http://biulibscapi.readthedocs.org/ for a detailed explanations of our implementation.
 
-##Installing libscapi
+## Installing libscapi
 
 Libscapi has is tested on Ubuntu 14.04/16.04LTS and should run on all major versions of Linux. It also executes on Windows 8.1/10 but with performance limitations. Internally we use the Windows option for development only. All tests execute on Linux.
 Mac OSX has not been tested so far. 

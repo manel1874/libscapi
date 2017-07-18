@@ -119,7 +119,6 @@
     int temp;
     if (scapiFile.is_open() && bristolFile.is_open())
     {
-
         scapiFile >> numberOfGates;//get the gates
         bristolFile << numberOfGates << " "; //print number of gates
 
@@ -287,9 +286,11 @@
             bristolFile << gates[i].output << " ";
             bristolFile << gates[i].type << endl;
         }
+        delete gates;
     }
     scapiFile.close();
     bristolFile.close();
+
 }
 
 int CircuitConverter::binaryTodecimal(int n){
