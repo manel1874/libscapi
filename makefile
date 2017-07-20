@@ -1,4 +1,5 @@
 export builddir=$(abspath ./build)
+export sourcedir=$(abspath .)
 export prefix=$(abspath ./install)
 CXX=g++
 uname_S := $(shell sh -c 'uname -s 2>/dev/null || echo not')
@@ -64,31 +65,29 @@ tests:: all
 	$(Program)
 
 prepare-emp:
-	@mkdir -p $(builddir)/EMP
-	@cp -r lib/EMP/. $(builddir)/EMP
-	@cmake -DALIGN=16 -DARCH=X64 -DARITH=curve2251-sse -DCHECK=off -DFB_POLYN=251 -DFB_METHD="INTEG;INTEG;QUICK;QUICK;QUICK;QUICK;LOWER;SLIDE;QUICK" -DFB_PRECO=on -DFB_SQRTF=off -DEB_METHD="PROJC;LODAH;COMBD;INTER" -DEC_METHD="CHAR2" -DCOMP="-O3 -funroll-loops -fomit-frame-pointer -march=native -msse4.2 -mpclmul" -DTIMER=CYCLE -DWITH="MD;DV;BN;FB;EB;EC" -DWORD=64 $(builddir)/EMP/relic/CMakeLists.txt
+	@mkdir -p $(builddir)/EMP/relic
+	@cd $(builddir)/EMP/relic && cmake -DCMAKE_INSTALL_PREFIX=$(prefix) -DALIGN=16 -DARCH=X64 -DARITH=curve2251-sse -DCHECK=off -DFB_POLYN=251 -DFB_METHD="INTEG;INTEG;QUICK;QUICK;QUICK;QUICK;LOWER;SLIDE;QUICK" -DFB_PRECO=on -DFB_SQRTF=off -DEB_METHD="PROJC;LODAH;COMBD;INTER" -DEC_METHD="CHAR2" -DCOMP="-O3 -funroll-loops -fomit-frame-pointer -march=native -msse4.2 -mpclmul" -DTIMER=CYCLE -DWITH="MD;DV;BN;FB;EB;EC" -DWORD=64 $(sourcedir)/lib/EMP/relic
 	@cd $(builddir)/EMP/relic && $(MAKE)
 	@cd $(builddir)/EMP/relic && $(MAKE) install
 	@touch prepare-emp
 
-compile-emp-tool:prepare-emp
-	@cd $(builddir)/EMP/emp-tool
-	@cmake $(builddir)/EMP/emp-tool/CMakeLists.txt 
-	@cd $(builddir)/EMP/emp-tool/ && $(MAKE)
-	@cd $(builddir)/EMP/emp-tool/ && $(MAKE) install
+compile-emp-tool: prepare-emp
+	@mkdir -p $(builddir)/EMP/emp-tool
+	@cd $(builddir)/EMP/emp-tool && cmake -DCMAKE_INSTALL_PREFIX=$(prefix) $(sourcedir)/lib/EMP/emp-tool
+	@cd $(builddir)/EMP/emp-tool && $(MAKE) install
 	@touch compile-emp-tool
 
-compile-emp-ot:prepare-emp
-	@cd $(builddir)/EMP/emp-ot
-	@cmake $(builddir)/EMP/emp-ot/CMakeLists.txt 
-	@cd $(builddir)/EMP/emp-ot/ && $(MAKE)
-	@cd $(builddir)/EMP/emp-ot/ && $(MAKE) install
+compile-emp-ot: compile-emp-tool
+	@mkdir -p $(builddir)/EMP/emp-ot
+	@cd $(builddir)/EMP/emp-ot && cmake -DCMAKE_INSTALL_PREFIX=$(prefix) $(sourcedir)/lib/EMP/emp-ot
+	@cd $(builddir)/EMP/emp-ot && $(MAKE)
+	@cd $(builddir)/EMP/emp-ot && $(MAKE) install
 	@touch compile-emp-ot
 
-compile-emp-m2pc:compile-emp-ot compile-emp-tool
-	@cd $(builddir)/EMP/emp-m2pc
-	@cmake $(builddir)/EMP/emp-m2pc/CMakeLists.txt 
-	@cd $(builddir)/EMP/emp-m2pc/ && $(MAKE)
+compile-emp-m2pc: compile-emp-tool compile-emp-ot
+	@mkdir -p $(builddir)/EMP/emp-m2pc
+	@cd $(builddir)/EMP/emp-m2pc && cmake -DCMAKE_INSTALL_PREFIX=$(prefix) $(sourcedir)/lib/EMP/emp-m2pc
+	@cd $(builddir)/EMP/emp-m2pc && $(MAKE)
 	@touch compile-emp-m2pc
 
 compile-blake:
@@ -97,7 +96,7 @@ compile-blake:
 	@cp -r lib/BLAKE2/sse/. $(builddir)/BLAKE2
 	@$(MAKE) -C $(builddir)/BLAKE2
 	@$(MAKE) -C $(builddir)/BLAKE2 BUILDDIR=$(builddir)  install
-	@ cp $(builddir)/BLAKE2/libblake2.a install/lib/
+	@cp $(builddir)/BLAKE2/libblake2.a install/lib/
 	@touch compile-blake
 
 compile-ntl:
