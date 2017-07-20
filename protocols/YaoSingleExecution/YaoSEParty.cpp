@@ -14,7 +14,6 @@ YaoSEParty::YaoSEParty(int id, string circuitFile, string ip, int port, string i
         : id(id){
     io = new NetIO(id==1 ? nullptr:ip.c_str(), port);
     cf = new CircuitFile(circuitFile.c_str());
-
     if(id == 1) {
         input = new bool[cf->n1];
         readInputs(inputFile, input, cf->n1);
@@ -83,7 +82,7 @@ void YaoSEParty::runOnline(){
         mal->bob_online(f, input, out);
     }
 }
-
+/*
 int binaryTodecimal(int n){
 
     int output = 0;
@@ -109,6 +108,7 @@ int main(int argc, char* argv[]) {
     CircuitConverter::convertScapiToBristol(argv[2], "emp_format_circuit.txt", false);
 
     int id = atoi(argv[1]);
+
     YaoSEParty party(id, "emp_format_circuit.txt", argv[3], atoi(argv[4]), argv[5]);
 
     int runs = 20;
@@ -166,5 +166,5 @@ int main(int argc, char* argv[]) {
         }
         cout << endl;
     }
-}
+}*/
 #endif

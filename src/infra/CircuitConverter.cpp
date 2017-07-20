@@ -148,7 +148,7 @@
         if (isMultiParty){
             //Each party can have different output wires. In order to get the number of all outputs, we insert each value to a set.
             //This way, if we have multiple output wires, they will be calculated once.
-            for (int i=0; i<numParties; i++) {
+            for (int i=0; i<numParties; i++){
 
                 //party number
                 scapiFile >> temp;
@@ -291,11 +291,10 @@
             bristolFile << gates[i].output << " ";
             bristolFile << gates[i].type << endl;
         }
-        delete gates;
+        delete [] gates;
     }
     scapiFile.close();
     bristolFile.close();
-
 }
 
 int CircuitConverter::binaryTodecimal(int n){
