@@ -19,7 +19,7 @@ Libscapi is developed by [Bar Ilan University Cryptography Research Group](http:
 - __Circuits__: To be elaborated
 - __Communication Channel__: To be elaborated
 
-- ## License information
+## License information
 Libscapi is released under the MIT open source license. However, some of the libraries we use have different licenses. For further information pleare refer to [LICENSE.MD](build_scripts/LICENSE.MD)
 
 ## Documentation
