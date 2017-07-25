@@ -31,9 +31,8 @@ const string NISTEC_FILE_NAME = "../../../../include/configFiles/NISTEC.txt";
 int BUCKET_ID = 0;
 
 int main(int argc, char* argv[]) {
-	//set io_service for peer to peer communication
-	boost::asio::io_service io_service;
-	boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
+
+//	boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 
     int counter = 1;
 
@@ -52,31 +51,10 @@ int main(int argc, char* argv[]) {
     int s2 = atoi(argv[counter++]);
     double p2 = stod(argv[counter++]);
 
-	//read config file data and set communication config to make sockets.
-	shared_ptr<CommunicationConfig> commConfig(new CommunicationConfig(COMM_CONFIG_FILENAME, PARTY, io_service));
-	auto commParty = commConfig->getCommParty();
-	
-	cout << "\nP1 start communication\n";
-
-	//make connection
-	for (int i = 0; i < commParty.size(); i++)
-		commParty[i]->join(500, 5000);
-
 	//set crypto primitives
 	CryptoPrimitives::setCryptoPrimitives(NISTEC_FILE_NAME);
 	CryptoPrimitives::setNumOfThreads(8);
-	//make circuit
 
-	
-			/*	int N1 = 10;
-				int B1 = 10;
-				int s1 = 40;
-				double p1 = 0.64;
-				
-				int N2 = 10; //32;
-				int B2 = 10; //31;
-				int s2 = 40;
-				double p2 = 0.64; //0.6;*/
 
 /*	int N1 = 32;
 	int B1 = 7;
@@ -124,26 +102,24 @@ int main(int argc, char* argv[]) {
 	cout << "tmp size = " << tmp.size() << endl;
 	byte tmpBuf[20];
 
-    OnlineProtocolP1* protocol = nullptr;
+    OnlineProtocolP1* protocol = new OnlineProtocolP1();
 	vector<long long> times(size);
     for (int j = 0; j < 10; j+=4) {
 		//cout << "num of threads = " << j << endl;
 		CryptoPrimitives::setNumOfThreads(j);
 
 		for (int i = 0; i < size; i++) {
-            if (protocol != nullptr)
-                delete protocol;
-			commParty[0]->write((const byte*)tmp.c_str(), tmp.size());
-			int readsize = commParty[0]->read(tmpBuf, tmp.size());
-			//cout << "read size = " << readsize << endl;
-			auto start = chrono::high_resolution_clock::now();
+			protocol->getChannel()->write((const byte*)tmp.c_str(), tmp.size());
+			int readsize = protocol->getChannel()->read(tmpBuf, tmp.size());
+
 			auto mainBucket = mainBuckets[i];
 			auto crBucket = crBuckets[i];
-
-			protocol = new OnlineProtocolP1(*commConfig, *mainBucket, *crBucket);
+			protocol->setBuckets(*mainBucket, *crBucket);
             protocol->setInput(input);
-			protocol->run();
 
+            auto start = chrono::high_resolution_clock::now();
+
+			protocol->run();
             auto end = chrono::high_resolution_clock::now();
 			auto time = chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 			//cout << "exe no. " << i << " took " << time << " millis." << endl;
@@ -166,12 +142,7 @@ int main(int argc, char* argv[]) {
 
     delete protocol;
 
-	//end commenication
-	io_service.stop();
-
 	cout << "\nP1 end communication\n";
-	//enter for out
-	//cin.ignore();
 
 	return 0;
 }

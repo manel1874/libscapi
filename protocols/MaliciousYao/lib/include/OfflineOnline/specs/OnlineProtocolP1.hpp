@@ -20,6 +20,8 @@
 class OnlineProtocolP1 : public Protocol, public Malicious{
 	
 private:
+    //set io_service for peer to peer communication
+    boost::asio::io_service io_service;
 	shared_ptr<CommParty> channel;				//Used to communicate between the parties.
 
 	/*
@@ -126,13 +128,20 @@ public:
 	* @param mainExecution Contains some parameters regarding the execution of the main circuits.
 	* @param crExecution Contains some parameters regarding the execution of the cheating recovery circuits.
 	* @param primitives Contains some primitives object to use during the protocol.
-	* @param communication Configuration of communication between parties.
 	* @param mainBucket Contain the main circuits (for ex. AES).
 	* @param crBucket Contain the cheating recovery circuits.
 	*/
-	OnlineProtocolP1(CommunicationConfig & communication, BucketBundle & mainBucket, BucketBundle & crBucket);
+	OnlineProtocolP1();
 
+    ~OnlineProtocolP1(){
+        //end communication
+        io_service.stop();
+    }
+
+    void setBuckets(BucketBundle & mainBucket, BucketBundle & crBucket);
 	void setInput(shared_ptr<CircuitInput> protocolInput) { input = protocolInput; }
+
+    shared_ptr<CommParty> getChannel(){ return channel; }
 
 	/**
 	* Executes the first side of the online protocol.<p>

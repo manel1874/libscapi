@@ -125,6 +125,7 @@ int main(int argc, char* argv[]) {
 	else if (partyNum == 2) {
 		PartyTwo p2(yao_config);
 		execute_party_two(&p2, yao_config);
+		auto output = p2.getOutput();
 	} else {
 		std::cerr << "Usage: libscapi_examples yao <party_number(1|2)> <config_path>" << std::endl;
 		return 1;

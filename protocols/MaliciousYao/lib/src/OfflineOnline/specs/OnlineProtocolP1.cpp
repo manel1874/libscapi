@@ -363,19 +363,37 @@ void OnlineProtocolP1::decommitOutputKeys(BucketBundle & bucket, EvaluationPacka
 * @param mainExecution Contains some parameters regarding the execution of the main circuits.
 * @param crExecution Contains some parameters regarding the execution of the cheating recovery circuits.
 * @param primitives Contains some primitives object to use during the protocol.
-* @param communication Configuration of communication between parties.
 * @param mainBucket Contain the main circuits (for ex. AES).
 * @param crBucket Contain the cheating recovery circuits.
 */
-OnlineProtocolP1::OnlineProtocolP1(CommunicationConfig & communication, BucketBundle & mainBucket, BucketBundle & crBucket) {
-	this->channel = communication.getCommParty()[0];
-	this->mainBucket = mainBucket;
-	this->crBucket = crBucket;
+OnlineProtocolP1::OnlineProtocolP1() {
+
+    string COMM_CONFIG_FILENAME = string("../../lib/assets/conf/PartiesConfig.txt");
+    shared_ptr<CommunicationConfig> commConfig(new CommunicationConfig(COMM_CONFIG_FILENAME, 1, io_service));
+    auto commParty = commConfig->getCommParty();
+
+    cout << "\nP1 start communication\n";
+
+    //make connection
+    for (int i = 0; i < commParty.size(); i++)
+        commParty[i]->join(500, 5000);
+
+    this->channel = commParty[0];
 	maskedX.resize(mainBucket.size() > crBucket.size() ? mainBucket.size() : crBucket.size());
 	vector<byte> proof;
 	CryptoPrimitives::getPrg()->getPRGBytes(proof, 0, SIZE_OF_BLOCK); // D
 	SecretKey tmp(proof, "");
 	proofOfCheating = tmp;
+}
+
+void OnlineProtocolP1::setBuckets(BucketBundle & mainBucket, BucketBundle & crBucket){
+    this->mainBucket = mainBucket;
+    this->crBucket = crBucket;
+    maskedX.resize(mainBucket.size() > crBucket.size() ? mainBucket.size() : crBucket.size());
+    vector<byte> proof;
+    CryptoPrimitives::getPrg()->getPRGBytes(proof, 0, SIZE_OF_BLOCK); // D
+    SecretKey tmp(proof, "");
+    proofOfCheating = tmp;
 }
 
 /**

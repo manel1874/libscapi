@@ -14,7 +14,7 @@ INCLUDE_DIRECTORIES($ENV{HOME} ${BOOST_INCLUDEDIR}
 
 link_directories(/usr/ssl/lib/ /usr/local/lib $ENV{HOME}/libscapi/install/lib ${BOOST_LIBRARYDIR})
 
-set(SOURCE_FILES YaoSEParty.cpp)
+set(SOURCE_FILES main.cpp YaoSEParty.cpp)
 add_executable(YaoSingleExecution ${SOURCE_FILES})
 add_library(yaoSingleExecution ${SOURCE_FILES})
 

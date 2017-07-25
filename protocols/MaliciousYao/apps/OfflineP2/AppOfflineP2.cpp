@@ -1,9 +1,9 @@
-#include <boost/thread/thread.hpp>
+//#include <boost/thread/thread.hpp>
 #include <boost/algorithm/string.hpp>
 #include <libscapi/include/circuits/GarbledCircuitFactory.hpp>
 #include <libscapi/include/circuits/GarbledBooleanCircuit.h>
-#include <libscapi/include/interactive_mid_protocols/OTExtensionBristol.hpp>
-#include <lib/include/primitives/CheatingRecoveryCircuitCreator.hpp>
+//#include <libscapi/include/interactive_mid_protocols/OTExtensionBristol.hpp>
+//#include <lib/include/primitives/CheatingRecoveryCircuitCreator.hpp>
 #include <lib/include/OfflineOnline/specs/OfflineProtocolP2.hpp>
 
 using namespace std;
@@ -13,16 +13,7 @@ const int PARTY = 2;
 
 //home directory path for all files
 const  string HOME_DIR = "../..";
-
-//files path
-//const string CIRCUIT_FILENAME = HOME_DIR + string("/assets/circuits/AES/NigelAes.txt");
-//const string CIRCUIT_INPUT_FILENAME = HOME_DIR + string("/assets/circuits/AES/AESPartyTwoInputs.txt");
 const string COMM_CONFIG_FILENAME = HOME_DIR + string("/lib/assets/conf/PartiesConfig.txt");
-//const string CIRCUIT_CHEATING_RECOVERY = HOME_DIR + string("/assets/circuits/CheatingRecovery/UnlockP1Input.txt");
-//const string BUCKETS_PREFIX_MAIN = HOME_DIR + string("/data/P2/aes");
-//onst string BUCKETS_PREFIX_CR = HOME_DIR + string("/data/P2/cr");
-//const string MAIN_MATRIX = HOME_DIR + "/data/P2/aes.matrix";
-//const string CR_MATRIX = HOME_DIR + "/data/P2/cr.matrix";
 
 //file for dlog
 const string NISTEC_FILE_NAME = "../../../../include/configFiles/NISTEC.txt";
@@ -33,9 +24,9 @@ const string NISTEC_FILE_NAME = "../../../../include/configFiles/NISTEC.txt";
 MAIN
 **************************************************************************/
 int main(int argc, char* argv[]) {
-	//set io_service for peer to peer communication
-	boost::asio::io_service io_service;
-	boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
+//	//set io_service for peer to peer communication
+//	boost::asio::io_service io_service;
+//	boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 
 	//set crypto primitives
 	CryptoPrimitives::setCryptoPrimitives(NISTEC_FILE_NAME);
@@ -66,68 +57,22 @@ int main(int argc, char* argv[]) {
 
 	CryptoPrimitives::setNumOfThreads(numOfThreads);
 
-	//read config file data and set communication config to make sockets.
-	shared_ptr<CommunicationConfig> commConfig(new CommunicationConfig(COMM_CONFIG_FILENAME, PARTY, io_service));
-	auto commParty = commConfig->getCommParty();
-
-	cout << "\nP2 start communication\n";
-
-	//make connection
-	for (int i = 0; i < commParty.size(); i++)
-		commParty[i]->join(500, 5000);
-	
-	
-	//make circuit
-
-	vector<shared_ptr<GarbledBooleanCircuit>> mainCircuit;
-	vector<shared_ptr<GarbledBooleanCircuit>> crCircuit;
-
-	if (numOfThreads == 0)
-		numOfThreads = 1;
-
-	mainCircuit.resize(numOfThreads);
-	crCircuit.resize(numOfThreads);
-	
-	for (int i = 0; i<numOfThreads; i++) {
-		mainCircuit[i] = shared_ptr<GarbledBooleanCircuit>(GarbledCircuitFactory::createCircuit(CIRCUIT_FILENAME,
-			GarbledCircuitFactory::CircuitType::FIXED_KEY_FREE_XOR_HALF_GATES, true));
-		crCircuit[i] = shared_ptr<GarbledBooleanCircuit>(CheatingRecoveryCircuitCreator(CIRCUIT_CHEATING_RECOVERY, mainCircuit[i]->getNumberOfGates()).create());
-	}
-
-	/*
-	shared_ptr<GarbledBooleanCircuit> mainCircuit (GarbledCircuitFactory::createCircuit(CIRCUIT_FILENAME,
-		GarbledCircuitFactory::CircuitType::FIXED_KEY_FREE_XOR_HALF_GATES, true));
-	//cheating recovery circuit
-	shared_ptr<GarbledBooleanCircuit> crCircuit ((CheatingRecoveryCircuitCreator(CIRCUIT_CHEATING_RECOVERY, mainCircuit->getNumberOfGates())).create());
-	*/
-	//TODO - OTExtensionMaliciousReceiver otReceiver = initMaliciousOtReceiver(mainCircuit.getNumberOfInputs(2), commConfig);
-	//Get the data of the OT server.
-	auto maliciousOtServer = commConfig->getMaliciousOTServer();
-	cout << "num ot = " << mainCircuit[0]->getNumberOfInputs(2) << endl;
-	shared_ptr<OTBatchReceiver> otReceiver = make_shared<OTExtensionBristolReceiver>(maliciousOtServer->getIpAddress().to_string(), maliciousOtServer->getPort(), false, commConfig->getCommParty()[0]);
-    //shared_ptr<OTBatchReceiver> otReceiver = make_shared<OTExtensionMaliciousReceiver>(*maliciousOtServer, mainCircuit[0]->getNumberOfInputs(2));
-
-	/*int N1 = 10;
-	int B1 = 10;
-	int s1 = 40;
-	double p1 = 0.64;
-
-	int N2 = 10; //32;
-	int B2 = 10; //31;
-	int s2 = 40;
-	double p2 = 0.64; //0.6;*/
-
-
-	//			int N1 = 8;
-	//			int B1 = 10;
-	//			int s1 = 40;
-	//			double p1 = 0.59;
-	//			
-	//			int N2 = 8;
-	//			int B2 = 74;
-	//			int s2 = 40;
-	//			double p2 = 0.85;
-
+//	//make circuit
+//
+//	vector<shared_ptr<GarbledBooleanCircuit>> mainCircuit;
+//	vector<shared_ptr<GarbledBooleanCircuit>> crCircuit;
+//
+//	if (numOfThreads == 0)
+//		numOfThreads = 1;
+//
+//	mainCircuit.resize(numOfThreads);
+//	crCircuit.resize(numOfThreads);
+//
+//	for (int i = 0; i<numOfThreads; i++) {
+//		mainCircuit[i] = shared_ptr<GarbledBooleanCircuit>(GarbledCircuitFactory::createCircuit(CIRCUIT_FILENAME,
+//			GarbledCircuitFactory::CircuitType::FIXED_KEY_FREE_XOR_HALF_GATES, true));
+//		crCircuit[i] = shared_ptr<GarbledBooleanCircuit>(CheatingRecoveryCircuitCreator(CIRCUIT_CHEATING_RECOVERY, mainCircuit[i]->getNumberOfGates()).create());
+//	}
 	
 	/*int N1 = 32;
 	int B1 = 7;
@@ -138,7 +83,6 @@ int main(int argc, char* argv[]) {
 	int B2 = 20;
 	int s2 = 40;
 	double p2 = 0.71;*/
-	
 
 	/*int N1 = 128;
 	int B1 = 6;
@@ -161,16 +105,14 @@ int main(int argc, char* argv[]) {
 	double p2 = 0.85;*/
 
 
-	auto mainExecution = make_shared<ExecutionParameters>(nullptr, mainCircuit, N1, s1, B1, p1);
-	auto crExecution = make_shared<ExecutionParameters>(nullptr, crCircuit, N2, s2, B2, p2);
+//	auto mainExecution = make_shared<ExecutionParameters>(nullptr, mainCircuit, N1, s1, B1, p1);
+//	auto crExecution = make_shared<ExecutionParameters>(nullptr, crCircuit, N2, s2, B2, p2);
 
     string tmp = "reset times";
     cout << "tmp size = " << tmp.size() << endl;
     byte tmpBuf[20];
 
-    OfflineProtocolP2* protocol = nullptr;
-
-
+    OfflineProtocolP2* protocol = new OfflineProtocolP2(CIRCUIT_FILENAME, CIRCUIT_CHEATING_RECOVERY, N1, s1, B1, p1,  N2, s2, B2, p2, false);
 
     int totalTimes = 0;
     for (int j = 0; j < 10; j += 4) {
@@ -179,16 +121,13 @@ int main(int argc, char* argv[]) {
 
         for (int i = 0; i < 5; i++) {
 
-                if (protocol != nullptr)
-                    delete protocol;
+                protocol->getChannel()[0]->write((const byte *) tmp.c_str(), tmp.size());
+                int readsize = protocol->getChannel()[0]->read(tmpBuf, tmp.size());
 
-                commParty[0]->write((const byte *) tmp.c_str(), tmp.size());
-                int readsize = commParty[0]->read(tmpBuf, tmp.size());
                 // we start counting the running time just before estalishing communication
                 auto start = chrono::high_resolution_clock::now();
 
                 // and run the protocol
-                protocol = new OfflineProtocolP2(mainExecution, crExecution, commConfig, otReceiver, false);
                 protocol->run();
 
                 // we measure how much time did the protocol take
@@ -207,25 +146,21 @@ int main(int argc, char* argv[]) {
 	cout << "\nSaving buckets to files...\n";
 	auto start = chrono::high_resolution_clock::now();
 	
-	auto mainBuckets = protocol->getMainBuckets();
-	auto crBuckets = protocol->getCheatingRecoveryBuckets();
-	mainBuckets->saveToFiles(BUCKETS_PREFIX_MAIN);
-	crBuckets->saveToFiles(BUCKETS_PREFIX_CR);
-	protocol->getMainProbeResistantMatrix()->saveToFile(MAIN_MATRIX);
-	protocol->getCheatingRecoveryProbeResistantMatrix()->saveToFile(CR_MATRIX);
+//	auto mainBuckets = protocol->getMainBuckets();
+//	auto crBuckets = protocol->getCheatingRecoveryBuckets();
+//	mainBuckets->saveToFiles(BUCKETS_PREFIX_MAIN);
+//	crBuckets->saveToFiles(BUCKETS_PREFIX_CR);
+//	protocol->getMainProbeResistantMatrix()->saveToFile(MAIN_MATRIX);
+//	protocol->getCheatingRecoveryProbeResistantMatrix()->saveToFile(CR_MATRIX);
+    protocol->saveOnDisk(BUCKETS_PREFIX_MAIN, BUCKETS_PREFIX_CR, MAIN_MATRIX, CR_MATRIX);
 
 	auto end = chrono::high_resolution_clock::now();
 	auto runtime = chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 	cout << "\nSaving buckets took " << runtime << " miliseconds.\n";
 
     delete protocol;
-	//end commenication
-	io_service.stop();
-	t.join();
 
 	cout << "\nP2 end communication\n";
-	//enter for out
-	//cin.ignore();
 
 
 	return 0;
