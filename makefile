@@ -97,7 +97,7 @@ compile-blake:
 	@cp -r lib/BLAKE2/sse/. $(builddir)/BLAKE2
 	@$(MAKE) -C $(builddir)/BLAKE2
 	@$(MAKE) -C $(builddir)/BLAKE2 BUILDDIR=$(builddir)  install
-	@ cp $(builddir)/BLAKE2/libblake2.a install/lib/
+#	@ cp $(builddir)/BLAKE2/libblake2.a install/lib/
 	@touch compile-blake
 
 compile-ntl:
