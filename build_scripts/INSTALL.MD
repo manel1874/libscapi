@@ -17,7 +17,7 @@
 #### Installing OpenSSL
 - sudo apt-get install libssl-ocaml-dev libssl-dev
 
-#### Clone andd build libscapi
+#### Clone and build libscapi
 - git clone https://github.com/cryptobiu/libscapi.git
 - cd libscapi
 - make
