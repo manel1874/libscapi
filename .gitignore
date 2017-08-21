@@ -23,18 +23,14 @@ compile-scgarbledcircuit
 compile-otextension-bristol
 compile-otextension-malicious
 compile-ntl
-compile-otextension-malicious
 compile-blake
 prepare-emp
 compile-emp-m2pc
 compile-emp-ot
 compile-emp-tool
-compile-emp
-test/config_for_test.txt
 .cproject
 .project
 protocols/GMW/CMakeFiles/*
-lib/OTExtensionBristol/cmake-build-debug/
 cmake-build-debug/
 protocols/GMW/CMakeCache.txt
 
