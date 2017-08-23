@@ -8,7 +8,7 @@
 - sudo apt-get install -y build-essential
 
 #### Installing boost
-- wget -O boost_1_64_0.tar.bz2 http://sourceforge.net/projects/boost/files/boost/1.64.0/boost_1_60_0.tar.bz2/download
+- wget -O boost_1_64_0.tar.bz2 http://sourceforge.net/projects/boost/files/boost/1.64.0/boost_1_64_0.tar.bz2/download
 - tar --bzip2 -xf boost_1_64_0.tar.bz2
 -  ./bootstrap.sh
 -  ./b2 -j8
