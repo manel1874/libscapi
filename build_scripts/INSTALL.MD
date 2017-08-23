@@ -21,6 +21,7 @@
 #### Clone and build libscapi
 - git clone https://github.com/cryptobiu/libscapi.git
 - cd libscapi
+- git checkout dev
 - sudo make
 
 #### Build and Run tests
