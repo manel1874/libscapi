@@ -11,12 +11,12 @@ C_FILES     := $(wildcard src/*/*.c)
 OBJ_FILES     := $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES))
 OBJ_FILES     += $(patsubst src/%.c,obj/%.o,$(C_FILES))
 OUT_DIR        = obj obj/CommitmentWithZkProofOfDifference obj/common obj/OfflineOnline/primitives obj/OfflineOnline/specs obj/OfflineOnline/subroutines obj/primitives
-INC            = -I$(HOME)/boost_1_60_0 -I../../../../ -I../../../../libscapi/lib/NTL/unix/include -I../../../../libscapi/lib/ -I../../../../libscapi/lib/OTExtensionBristol -I../../../../libscapi/install/include
+INC            = -I$(HOME)/boost_1_64_0 -I../../../../ -I../../../../libscapi/lib/NTL/unix/include -I../../../../libscapi/lib/ -I../../../../libscapi/lib/OTExtensionBristol -I../../../../libscapi/install/include
 CPP_OPTIONS   := -std=c++11 $(INC) -pthread  -maes -mpclmul -Wno-unused-function -fPIC -O3 -w -msse4
 $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
 LINKER_OPTIONS = $(INCLUDE_ARCHIVES_START) ../../../../libscapi/scapi.a ../../../../libscapi/install/lib/libOTExtensionBristol.a ../../../../libscapi/install/lib/libsimpleot.a -lpthread -lgmp -lcrypto -lssl -lboost_system -lntl \
 -lboost_thread -lOTExtension -lMaliciousOTExtension -ldl $(INCLUDE_ARCHIVES_END)
-LIBRARIES_DIR  = -L$(HOME)/boost_1_60_0/stage/lib -L ../../../../install/lib
+LIBRARIES_DIR  = -L$(HOME)/boost_1_64_0/stage/lib -L ../../../../install/lib
 LD_FLAGS =
 
 all:: MaliciousYao
