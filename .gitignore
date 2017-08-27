@@ -86,3 +86,6 @@ protocols/MaliciousYao/OnlineP1_*
 protocols/MaliciousYao/OnlineP2_*
 protocols/GMW/NigelAes9Parties.txt
 protocols/GMW/AesInputs*.txt
+
+# macOS specific
+.DS_Store

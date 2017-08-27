@@ -10,8 +10,8 @@ Communication Design
 
 The communication layer provides communication services for any interactive cryptographic protocol. We have two types of communication, plain (unauthenticated and unencrypted) communication and secure channels using ssl. This layer is heavily used by the interactive protocols in libscapi' third layer and by MPC protocols. It can also be used by any other cryptographic protocol that requires communication. Currently the communication layer is a two-party communication channel. MultiParty communication can be achieved by setting a communication between each pair of parties.
 
-classes heirarchy
-------------------
+Class hierarchy
+---------------
 
 The main communication clas is ``CommParty``. This is an abstract class that declares all communication functionalities.
 There are two concrete classes that derive the ``CommParty`` class:
