@@ -24,7 +24,7 @@ CPP_FILES     := $(wildcard src/*/*.cpp)
 C_FILES     := $(wildcard src/*/*.c)
 OBJ_FILES     := $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES))
 OBJ_FILES     += $(patsubst src/%.c,obj/%.o,$(C_FILES))
-OUT_DIR        = obj obj/mid_layer obj/circuits obj/comm obj/infra obj/interactive_mid_protocols obj/primitives obj/circuits_c
+OUT_DIR        = obj obj/mid_layer obj/CryptoInfra obj/circuits obj/comm obj/infra obj/interactive_mid_protocols obj/primitives obj/circuits_c
 INC            = -I$(HOME)/boost_1_64_0 -Ilib -Iinstall/include -Ilib/OTExtensionBristol
 CPP_OPTIONS   := -std=c++11 $(INC)  -maes -mpclmul -Wall -Wno-unused-function -Wno-unused-variable -fPIC -O3
 $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
@@ -57,6 +57,8 @@ obj/interactive_mid_protocols/%.o: src/interactive_mid_protocols/%.cpp
 obj/primitives/%.o: src/primitives/%.cpp
 	g++ -c $(CPP_OPTIONS) -o $@ $< 	 
 obj/mid_layer/%.o: src/mid_layer/%.cpp
+	g++ -c $(CPP_OPTIONS) -o $@ $<
+obj/CryptoInfra/%.o: src/CryptoInfra/%.cpp
 	g++ -c $(CPP_OPTIONS) -o $@ $<
  
 
