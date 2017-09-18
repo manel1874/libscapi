@@ -3,9 +3,9 @@ project(GMW)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -maes -mpclmul -fPIC")
 
-SET (BOOST_ROOT $ENV{HOME}/boost_1_60_0/)
-SET (BOOST_INCLUDEDIR $ENV{HOME}/boost_1_60_0/)
-SET (BOOST_LIBRARYDIR $ENV{HOME}/boost_1_60_0/stage/lib)
+SET (BOOST_ROOT $ENV{HOME}/boost_1_64_0/)
+SET (BOOST_INCLUDEDIR $ENV{HOME}/boost_1_64_0/)
+SET (BOOST_LIBRARYDIR $ENV{HOME}/boost_1_64_0/stage/lib)
 find_package(Boost COMPONENTS system thread REQUIRED)
 
 INCLUDE_DIRECTORIES($ENV{HOME} ${BOOST_INCLUDEDIR}
@@ -20,4 +20,4 @@ add_library(gmw ${SOURCE_FILES})
 TARGET_LINK_LIBRARIES(GMW $ENV{HOME}/libscapi/scapi.a gmp
         OTExtensionBristol
         $ENV{HOME}/libscapi/install/lib/libsimpleot.a
-        boost_system boost_thread pthread crypto dl ssl z)
+        boost_system boost_thread pthread crypto dl ssl z stdc++fs)

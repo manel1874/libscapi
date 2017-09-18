@@ -9,10 +9,12 @@
 #include "MPCCommunication.h"
 #include "../../include/primitives/Prg.hpp"
 #include "../../include/CryptoInfra/Protocol.hpp"
+#include "../../include/CryptoInfra/Measurement.hpp"
 #include "../../include/CryptoInfra/SecurityLevel.hpp"
 #include "CBitVector.h"
 #include <thread>
 #include <mutex>
+#include <experimental/filesystem>
 
 /**
  * This class represents the GMW protocol.
@@ -32,6 +34,7 @@ private:
     string inputFileName;
     vector<byte> output;
 	vector<byte> myInputBits;
+    Measurement * m_measure;
 
 	/*
 	 * Generates Beaver's multiplication triples to use in the protocol.
@@ -103,10 +106,12 @@ public:
      */
     void run() override;
 
+    bool hasOffline() override;
+
 	/*
 	 * Executes the offline phase of the protocol.
 	 */
-    void runOffline();
+    void runOffline() override;
 
 	/*
 	 * Reads the input from the given file.
@@ -116,7 +121,9 @@ public:
 	/*
 	* Executes the online phase of the protocol.
 	*/
-    vector<byte>& runOnline();
+    void runOnline() override;
+
+    vector<byte> getOutput();
 
     vector<shared_ptr<ProtocolPartyData>> & getParties(){ return parties; }
 

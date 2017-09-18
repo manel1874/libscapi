@@ -51,7 +51,8 @@ int main(int argc, char* argv[]) {
         party.readInputs();
         //Online phase
         start = chrono::high_resolution_clock::now();
-        output = party.runOnline();
+        party.runOnline();
+        output = party.getOutput();
         end = chrono::high_resolution_clock::now();
         generateTotalTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
         allOnlineTimes += generateTotalTime;
