@@ -39,7 +39,8 @@
 #include <fstream>
 #include <iostream>
 #include <exception>
-#include <json>
+#include <memory>
+#include <libscapi/lib/JsonCpp/include/json/json.h>
 
 using namespace std;
 using namespace std::chrono;
@@ -47,14 +48,12 @@ using namespace Json;
 
 class Measurement {
 public:
-    static Measurement *instance(string protocolName, int partyId, string pathToFile);
-    void startLog(string taskName);
-    void endLog();
+    Measurement(string protocolName, int partyId, string pathToFile, string taskName);
+    ~Measurement();
 
 
 private:
-    Measurement(string protocolName, int partyId, string pathToFile);
-    ~Measurement();
+
     string m_name;
     int m_partyId;
     int m_pid;
@@ -62,7 +61,6 @@ private:
     string m_path;
     high_resolution_clock::time_point m_start;
     high_resolution_clock::time_point m_end;
-    static Measurement *m_instance;
 
 };
 
