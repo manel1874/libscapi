@@ -28,6 +28,7 @@ prepare-emp
 compile-emp-m2pc
 compile-emp-ot
 compile-emp-tool
+compile-json
 .cproject
 .project
 protocols/GMW/CMakeFiles/*
