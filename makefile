@@ -25,15 +25,15 @@ C_FILES     := $(wildcard src/*/*.c)
 OBJ_FILES     := $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES))
 OBJ_FILES     += $(patsubst src/%.c,obj/%.o,$(C_FILES))
 OUT_DIR        = obj obj/mid_layer obj/CryptoInfra obj/circuits obj/comm obj/infra obj/interactive_mid_protocols obj/primitives obj/circuits_c
-INC            = -I$(HOME)/boost_1_64_0 -Ilib -Iinstall/include -Ilib/OTExtensionBristol
+INC            = -I$(HOME)/boost_1_64_0 -Ilib -Iinstall/include -Ilib/OTExtensionBristol -I$(HOME)/
 CPP_OPTIONS   := -std=c++11 $(INC)  -maes -mpclmul -Wall -Wno-unused-function -Wno-unused-variable -fPIC -O3
 $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
-LINKER_OPTIONS = $(INCLUDE_ARCHIVES_START) install/lib/libOTExtensionBristol.a install/lib/libsimpleot.a install/lib/libntl.a install/lib/libmiracl.a install/lib/libblake2.a -lpthread -lgmp -lcrypto -lssl -lboost_system -lboost_thread -lOTExtension -lMaliciousOTExtension -ldl $(INCLUDE_ARCHIVES_END)
+LINKER_OPTIONS = $(INCLUDE_ARCHIVES_START) install/lib/libOTExtensionBristol.a install/lib/libsimpleot.a install/lib/libntl.a install/lib/libmiracl.a install/lib/libblake2.a -lpthread -lgmp -lcrypto -lssl -lboost_system -lboost_thread -lOTExtension -lMaliciousOTExtension -ldl $(builddir)/JsonCpp/src/lib_json/libjsoncpp.a $(INCLUDE_ARCHIVES_END)
 LIBRARIES_DIR  = -L$(HOME)/boost_1_64_0/stage/lib -Linstall/lib
 LD_FLAGS = 
 
 all: libs libscapi
-libs: compile-emp-tool compile-emp-ot compile-emp-m2pc compile-ntl compile-blake compile-miracl compile-otextension compile-otextension-malicious compile-otextension-bristol
+libs: compile-emp-tool compile-emp-ot compile-emp-m2pc compile-ntl compile-blake compile-miracl compile-otextension compile-otextension-malicious compile-otextension-bristol compile-json
 libscapi: directories $(SLib)
 directories: $(OUT_DIR)
 
@@ -150,12 +150,19 @@ compile-otextension-malicious: compile-miracl-cpp
 	@$(MAKE) -C $(builddir)/MaliciousOTExtension CXX=$(CXX) SHARED_LIB_EXT=$(SHARED_LIB_EXT) install
 	@touch compile-otextension-malicious
 
-compile-otextension-bristol: 
+compile-otextension-bristol:
 	@echo "Compiling the OtExtension malicious Bristol library..."
 	@cp -r lib/OTExtensionBristol $(builddir)/OTExtensionBristol
 	@$(MAKE) -C $(builddir)/OTExtensionBristol CXX=$(CXX)
 	@$(MAKE) -C $(builddir)/OTExtensionBristol CXX=$(CXX) install
 	@touch compile-otextension-bristol
+
+compile-json:
+	@echo "Compiling JSON library..."
+	@cp -r lib/JsonCpp $(builddir)/JsonCpp
+	@cmake $(builddir)/JsonCpp/CMakeLists.txt
+	@$(MAKE) -C $(builddir)/JsonCpp/
+	@touch compile-json
 
 clean-miracl:
 	@echo "Cleaning the miracl build dir..."
@@ -191,6 +198,11 @@ clean-blake:
 	@echo "Cleaning blake library"
 	@rm -rf $(builddir)/BLAKE2
 	@rm -f compile-blake
+
+clean-json:
+	@echo "Cleaning JSON library"
+	@rm -rf $(builddir)/JsonCpp/
+	@rm -f compile-json
 
 clean-emp:
 	@echo "Cleaning EMP library"

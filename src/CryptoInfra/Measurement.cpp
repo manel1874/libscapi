@@ -32,54 +32,42 @@
 #include "../../include/CryptoInfra/Measurement.hpp"
 
 
+
 using namespace std;
 
-Measurement* Measurement::m_instance = NULL;
 
-
-Measurement * Measurement::instance(string protocolName, int partyId, string pathToFile)
-{
-    if (!m_instance)
-        m_instance = new Measurement(protocolName, partyId, pathToFile);
-
-    return m_instance;
-}
-
-Measurement::Measurement(string protocolName, int partyId, string pathToFile)
+Measurement::Measurement(string protocolName, int partyId, string pathToFile, string taskName)
 {
 
     m_name = protocolName;
     m_partyId = partyId;
     m_path = pathToFile + "/";
+    m_taskName = taskName;
+    m_start = chrono::high_resolution_clock::now();
 }
 
 Measurement::~Measurement()
-{}
-
-void Measurement::startLog(string taskName)
-{
-    m_start = chrono::high_resolution_clock::now();
-    m_taskName = taskName;
-}
-
-void Measurement::endLog()
 {
     m_end = chrono::high_resolution_clock::now();
-    Value value_obj;
-    auto duration = chrono::duration_cast<chrono::milliseconds>(m_end - m_start).count();
 
-    string filePath = m_path + m_name + "_" + to_string(m_partyId) + ".csv";
-    cout << filePath << endl;
+    auto duration = chrono::duration_cast<chrono::milliseconds>(m_end - m_start).count();
+    Value taskName;
+    StreamWriterBuilder builder;
+    taskName[m_taskName]["startTime"] = duration_cast<milliseconds>(m_start.time_since_epoch()).count();
+    taskName[m_taskName]["endTime"] = duration_cast<milliseconds>(m_end.time_since_epoch()).count();
+    taskName[m_taskName]["duration"] = to_string(duration);
+
+    //populate json object
+
+    string filePath = m_path + m_name + "_" + to_string(m_partyId) + "_" + m_taskName + ".json";
     try
     {
         ofstream myfile;
         myfile.open(filePath, ios::out | ios::app);
+        unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
         if (myfile.is_open())
         {
-            myfile << m_taskName << " ";
-            myfile << duration_cast<milliseconds>(m_start.time_since_epoch()).count() << " ";
-            myfile << duration_cast<milliseconds>(m_end.time_since_epoch()).count() << " ";
-            myfile << to_string(duration) + "\n";
+            writer->write(taskName, &myfile);
         }
         myfile.close();
     }
@@ -88,6 +76,7 @@ void Measurement::endLog()
         cout << "Exception thrown : " << e.what() << endl;
     }
 }
+
 
 
 
