@@ -10,7 +10,7 @@ all: AppOfflineP2.out
 AppOfflineP2.out:
 	@echo "compiling!"
 #	$(CXX) AppOfflineP1.cpp -o $@ $(LINKER_OPTIONS)
-	g++ -std=c++11 $(INC) -maes AppOfflineP2.cpp -o $@ -L../../../../../libscapi/install/lib -L$(HOME)/boost_1_60_0/stage/lib -lcrypto -lssl -lgmp -ldl -lboost_thread -lboost_system ../../../../../libscapi/scapi.a ../../lib/MaliciousYao.a -lboost_serialization ../../../../../libscapi/scapi.a -lpthread -lboost_filesystem -lgmp -lntl -lMaliciousOTExtension -lOTExtensionBristol -lsimpleot -lblake2
+	g++ -std=c++11 $(INC) -O3 -maes AppOfflineP2.cpp -o $@ -L../../../../../libscapi/install/lib -L$(HOME)/boost_1_60_0/stage/lib -lcrypto -lssl -lgmp -ldl -lboost_thread -lboost_system ../../../../../libscapi/scapi.a ../../lib/MaliciousYao.a -lboost_serialization ../../../../../libscapi/scapi.a -lpthread -lboost_filesystem -lgmp -lntl -lMaliciousOTExtension -lOTExtensionBristol -lsimpleot -lblake2
 clean:
 	rm -f ./*.o
 	rm -f ./*.out

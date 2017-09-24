@@ -67,18 +67,25 @@
             bristolfile >> outFan;
             scapiFile << outFan << " ";
 
-            bristolfile >> input0;
-            scapiFile << input0 << " ";
-
-            if (inFan != 1)//a 2 input 1 output gate - regualr gate, else we have a not gate
-            {
-                bristolfile >> input1;
-                scapiFile << input1 << " ";
+            for (int j=0; j<inFan; j++){
+                bristolfile >> input0;
+                scapiFile << input0 << " ";
             }
+//            bristolfile >> input0;
+//            scapiFile << input0 << " ";
+//
+//            if (inFan != 1)//a 2 input 1 output gate - regualr gate, else we have a not gate
+//            {
+//                bristolfile >> input1;
+//                scapiFile << input1 << " ";
+//            }
 
-
-            bristolfile >> output;
-            scapiFile << output << " ";
+            for (int j=0; j<outFan; j++){
+                bristolfile >> output;
+                scapiFile << output << " ";
+            }
+//            bristolfile >> output;
+//            scapiFile << output << " ";
 
             bristolfile >> type;
 
@@ -91,6 +98,8 @@
                 scapiFile << "0001" << endl;
             } else if (type == "OR") {
                 scapiFile << "0111" << endl;
+            }else if (type == "SPLIT") {
+                scapiFile << "0000" << endl;
             }
         }
     }

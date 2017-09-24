@@ -1,10 +1,4 @@
-#include <boost/thread/thread.hpp>
-#include <boost/algorithm/string.hpp>
-#include <libscapi/include/circuits/GarbledCircuitFactory.hpp>
-#include <libscapi/include/circuits/GarbledBooleanCircuit.h>
-//#include <libscapi/include/interactive_mid_protocols/OTExtensionBristol.hpp>
 #include <lib/include/OfflineOnline/specs/OfflineProtocolP1.hpp>
-#include <lib/include/primitives/CheatingRecoveryCircuitCreator.hpp>
 
 
 using namespace std;
@@ -59,23 +53,6 @@ int main(int argc, char* argv[]) {
     cout<<"N1 = " << N1<<" B1 = "<< B1 << " s1 = "<< s1 << " p1 = "<< p1 << " N2 = " << N2<< " B2 = "<< B2 <<
                        " s2 = " <<s2<< " p2 = "<< p2 <<endl;
 
-
-//	//make circuit
-//	vector<shared_ptr<GarbledBooleanCircuit>> mainCircuit;
-//	vector<shared_ptr<GarbledBooleanCircuit>> crCircuit;
-//
-//	if (numOfThreads == 0)
-//		numOfThreads = 1;
-//
-//	mainCircuit.resize(numOfThreads);
-//	crCircuit.resize(numOfThreads);
-//
-//	for (int i = 0; i<numOfThreads; i++) {
-//		mainCircuit[i] = shared_ptr<GarbledBooleanCircuit>(GarbledCircuitFactory::createCircuit(CIRCUIT_FILENAME,
-//			GarbledCircuitFactory::CircuitType::FIXED_KEY_FREE_XOR_HALF_GATES, true));
-//		crCircuit[i] = shared_ptr<GarbledBooleanCircuit>(CheatingRecoveryCircuitCreator(CIRCUIT_CHEATING_RECOVERY, mainCircuit[i]->getNumberOfGates()).create());
-//	}
-
 	/*int N1 = 32;
 	int B1 = 7;
 	int s1 = 40;
@@ -105,9 +82,6 @@ int main(int argc, char* argv[]) {
 	int B2 = 10;
 	int s2 = 40;
 	double p2 = 0.85;*/
-	
-//	auto mainExecution = make_shared<ExecutionParameters>(nullptr, mainCircuit, N1, s1, B1, p1);
-//	auto crExecution = make_shared<ExecutionParameters>(nullptr, crCircuit, N2, s2, B2, p2);
 
     string tmp = "reset times";
     cout << "tmp size = " << tmp.size() << endl;
@@ -158,8 +132,6 @@ int main(int argc, char* argv[]) {
     delete protocol;
 
 	cout << "\nP1 end communication\n";
-	//enter for out
-	//cin.ignore();
 	return 0;
 }
 

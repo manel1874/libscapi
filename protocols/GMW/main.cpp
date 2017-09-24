@@ -1,6 +1,5 @@
 #include <iostream>
 #include "Circuit.h"
-#include "MPCCommunication.h"
 #include "GMWParty.h"
 
 int main(int argc, char* argv[]) {
