@@ -57,7 +57,7 @@ The main target applications for GMP are cryptography applications and research,
 
 MIRACL Cryptographic SDK: Multiprecision Integer and Rational Arithmetic Cryptographic Library C software library
 
-##### Boost 1.60
+##### Boost 1.64
 [http://www.boost.org/](http://www.boost.org/)
 
 Boost provides free peer-reviewed portable C++ source libraries. We emphasize libraries that work well with the C++ Standard Library. Boost libraries are intended to be widely useful, and usable across a broad spectrum of applications

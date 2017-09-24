@@ -23,18 +23,14 @@ compile-scgarbledcircuit
 compile-otextension-bristol
 compile-otextension-malicious
 compile-ntl
-compile-otextension-malicious
 compile-blake
 prepare-emp
 compile-emp-m2pc
 compile-emp-ot
 compile-emp-tool
-compile-emp
-test/config_for_test.txt
 .cproject
 .project
 protocols/GMW/CMakeFiles/*
-lib/OTExtensionBristol/cmake-build-debug/
 cmake-build-debug/
 protocols/GMW/CMakeCache.txt
 
@@ -72,8 +68,6 @@ config_for_test.txt
 samples/libscapi_examples
 samples/libscapi_example
 windows-solutions/CodeExamples/code examples.vcxproj.user.orig
-protocols/MaliciousYao/lib/data/P1/*
-protocols/MaliciousYao/lib/data/P2/*
 callgrind.*
 lib/OTExtensionBristol/SimpleOT/ot_sender_test
 lib/OTExtensionBristol/SimpleOT/ot_receiver_test
