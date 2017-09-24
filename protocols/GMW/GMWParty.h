@@ -95,7 +95,8 @@ private:
 
 public:
 
-    GMWParty(int id, const shared_ptr<Circuit> & circuit, string partiesFileName, int numThreads, string inputFileName);
+//    GMWParty(int id, const shared_ptr<Circuit> & circuit, string partiesFileName, int numThreads, string inputFileName);
+	GMWParty(int argc, char* argv[]);
 
 	~GMWParty() {
 		io_service.stop();
@@ -126,6 +127,8 @@ public:
     vector<byte> getOutput();
 
     vector<shared_ptr<ProtocolPartyData>> & getParties(){ return parties; }
+
+	int getID() { return id;}
 
 
 };

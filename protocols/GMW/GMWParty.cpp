@@ -4,11 +4,22 @@
 
 #include "GMWParty.h"
 
-GMWParty::GMWParty(int id, const shared_ptr<Circuit> & circuit, string partiesFileName, int numThreads, string inputFileName) :
-        id(id), circuit(circuit), inputFileName(inputFileName) {
+//GMWParty::GMWParty(int id, const shared_ptr<Circuit> & circuit, string partiesFileName, int numThreads, string inputFileName) :
+//        id(id), circuit(circuit), inputFileName(inputFileName) {
+
+GMWParty::GMWParty(int argc, char* argv[]) : Protocol("GMW", argc, argv) {
+    circuit = make_shared<Circuit>();
+    circuit->readCircuit(arguments["circuitFileName"]);
+
+    id = stoi(arguments["partyID"]);
+
+    string tmp = "init times";
+    byte tmpBytes[20];
+    int numThreads = stoi(arguments["numThreads"]);
+    inputFileName = arguments["inputFileName"];
 
 	//Create the communication between this party and the other parties.
-    parties = MPCCommunication::setCommunication(io_service, id, circuit->getNrOfParties(), partiesFileName);
+    parties = MPCCommunication::setCommunication(io_service, id, circuit->getNrOfParties(), arguments["partiesFileName"]);
     cout << "----------end communication--------------" << endl;
     string path = std::experimental::filesystem::current_path();
     m_measure = Measurement::instance("GMW", id, path);

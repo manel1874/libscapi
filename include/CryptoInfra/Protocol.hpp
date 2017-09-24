@@ -28,6 +28,19 @@
 
 #pragma once
 
+#include <string>
+#include <map>
+#include <iostream>
+
+using namespace std;
+
+class CmdParser {
+private:
+    string getKey(string parameter);
+public:
+    map<string, string> parseArguments(string protocolName, int argc, char* argv[]);
+};
+
 /**
  * This class is an abstract class for all kinds of protocols.
  * Since the protocols are different from each other, the only function that common is the run function that executes
@@ -44,7 +57,13 @@
  */
 class Protocol {
 
+private:
+    CmdParser parser;
+protected:
+    map<string, string> arguments;
 public:
+
+    Protocol(string protocolName, int argc, char* argv[]);
 
     /**
      * Executes the protocol.

@@ -5,29 +5,23 @@
 
 int main(int argc, char* argv[]) {
 
-    shared_ptr<Circuit> circuit = make_shared<Circuit>();
-    circuit->readCircuit(argv[2]);
-
-    int id = atoi(argv[1]);
 
     string tmp = "init times";
     byte tmpBytes[20];
-    int numThreads = atoi(argv[5]);
 
     int allOnlineTimes = 0;
     int allOfflineTimes = 0;
     chrono::high_resolution_clock::time_point start, end;
     int generateTotalTime;
     vector<byte> output;
-    //cout << "num of threads : " << numThreads << endl;
-    GMWParty party(id, circuit, argv[3], numThreads, argv[4]);
+    GMWParty party(argc, argv);
 
     auto parties = party.getParties();
     for (int i=0; i<10; i++) {
 
         //cout << "parties size : " << parties.size() << endl;
         for (int i = 0; i < parties.size(); i++) {
-            if (parties[i]->getID() < id) {
+            if (parties[i]->getID() < party.getID()) {
                 parties[i]->getChannel()->write(tmp);
                 parties[i]->getChannel()->read(tmpBytes, tmp.size());
             } else {
