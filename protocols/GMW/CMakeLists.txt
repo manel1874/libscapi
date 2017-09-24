@@ -20,4 +20,5 @@ add_library(gmw ${SOURCE_FILES})
 TARGET_LINK_LIBRARIES(GMW $ENV{HOME}/libscapi/scapi.a gmp
         OTExtensionBristol
         $ENV{HOME}/libscapi/install/lib/libsimpleot.a
+        $ENV{HOME}/libscapi/build//JsonCpp/src/lib_json/libjsoncpp.a
         boost_system boost_thread pthread crypto dl ssl z stdc++fs)

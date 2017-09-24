@@ -21,8 +21,6 @@ GMWParty::GMWParty(int argc, char* argv[]) : Protocol("GMW", argc, argv) {
 	//Create the communication between this party and the other parties.
     parties = MPCCommunication::setCommunication(io_service, id, circuit->getNrOfParties(), arguments["partiesFileName"]);
     cout << "----------end communication--------------" << endl;
-    string path = std::experimental::filesystem::current_path();
-    m_measure = Measurement::instance("GMW", id, path);
 
 
     if (parties.size() <= numThreads){
@@ -73,10 +71,9 @@ bool GMWParty::hasOffline()
 void GMWParty::runOffline(){
     int pid = getpid();
     string path = std::experimental::filesystem::current_path();
+    Measurement offline("GMW", id, path, "offline");
     {
-        m_measure->startLog("offline");
         generateTriples();
-        m_measure->endLog();
     }
 	auto inputSize = circuit->getPartyInputs(id).size(); //indices of my input wires
 	myInputBits.resize(inputSize, 0); //input bits, will be adjusted to my input shares
@@ -84,12 +81,11 @@ void GMWParty::runOffline(){
 }
 
 void GMWParty::runOnline(){
-    int pid = getpid();
+    string path = std::experimental::filesystem::current_path();
+    Measurement offline("GMW", id, path, "online");
     {
-        m_measure->startLog("online");
         inputSharing();
         computeCircuit();
-        m_measure->endLog();
     }
 
 }
