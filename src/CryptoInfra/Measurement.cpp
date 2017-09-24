@@ -76,10 +76,3 @@ Measurement::~Measurement()
         cout << "Exception thrown : " << e.what() << endl;
     }
 }
-
-
-
-
-
-
-
