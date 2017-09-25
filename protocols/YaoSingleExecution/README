@@ -41,9 +41,9 @@ INSTALLATION AND EXECUTION
 1. Go in the YaoSingleExecution directory.
 2. Run the make command
 3. To run the program type
-~ ./YaoSingleExecution [party_id] [circuit_file_name] [ip_address] [port_number] [input_file_name]
+~ ./YaoSingleExecution -partyID [party_id] -circuitFileName [circuit_file_name] -ip [ip_address] -port [port_number] -inputFileName [input_file_name]
 for example, in order to run p1 with aes circuit on local host and port 12345 type:
-~ ./YaoSingleExecution 1 NigelAes.txt 127.0.0.1 12345 AesInputs2.txt
+~ ./YaoSingleExecution -partyID 1 -circuitFileName NigelAes.txt -ip 127.0.0.1 -port 12345 -inputFileName AesInputs2.txt
 
 The output is printed to the screen in p2 side.
 

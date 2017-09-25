@@ -10,10 +10,14 @@ void compute(Bit * res, Bit * in, Bit * in2) {
     cf->compute((block*)res, (block*)in, (block*)in2);
 }
 
-YaoSEParty::YaoSEParty(int id, string circuitFile, string ip, int port, string inputFile)
-        : id(id){
-    io = new NetIO(id==1 ? nullptr:ip.c_str(), port);
-    cf = new CircuitFile(circuitFile.c_str());
+YaoSEParty::YaoSEParty(int argc, char* argv[]) : Protocol("YaoSingleExecution", argc, argv){
+
+    id = stoi(arguments["partyID"]);
+    CircuitConverter::convertScapiToBristol(arguments["circuitFileName"], "emp_format_circuit.txt", false);
+
+    string inputFile = arguments["inputFileName"];
+    io = new NetIO(id==1 ? nullptr:arguments["ip"].c_str(), stoi(arguments["port"]));
+    cf = new CircuitFile("emp_format_circuit.txt");
     if(id == 1) {
         input = new bool[cf->n1];
         readInputs(inputFile, input, cf->n1);
