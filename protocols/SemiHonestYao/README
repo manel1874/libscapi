@@ -46,8 +46,8 @@ INSTALLATION AND EXECUTION
 
 1. Go in the SemiHonestYao directory.
 2. Run the make command
-3. In order to execute the sender run ~ ./Yao.out 1 "YaoConfig.txt"
-   In order to execute the receiver run ~ ./Yao.out 2 "YaoConfig.txt"
+3. In order to execute the sender run ~ ./Yao.out -partyID 1 -configFileName YaoConfig.txt -partiesFileName Parties
+   In order to execute the receiver run ~ ./Yao.out -partyID 2 -configFileName YaoConfig.txt -partiesFileName Parties
 
 
 

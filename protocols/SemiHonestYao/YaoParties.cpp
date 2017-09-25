@@ -45,12 +45,33 @@ vector<byte> readInputAsVector(string input_file, int numInputs) {
 /*          PartyOne             */
 /*********************************/
 
-PartyOne::PartyOne(YaoConfig & yao_config) {
+PartyOne::PartyOne(int argc, char* argv[]) : Protocol("SemiHonestYao", argc, argv) {
 	//t = boost::thread(boost::bind(&boost::asio::io_service::run, &io_service));
+
+	id = stoi(arguments["partyID"]);
+
+	YaoConfig yao_config(arguments["configFileName"]);
 	this->yaoConfig = yao_config;
 
-	SocketPartyData me(yao_config.sender_ip, yao_config.sender_port++);
-	SocketPartyData other(yao_config.receiver_ip, yao_config.receiver_port);
+	//open parties file
+	ConfigFile cf(arguments["partiesFileName"]);
+
+	string receiver_ip, sender_ip;
+	int receiver_port, sender_port;
+
+	//get partys IPs and ports data
+	sender_port = stoi(cf.Value("", "party_0_port"));
+	sender_ip = cf.Value("", "party_0_ip");
+	receiver_port = stoi(cf.Value("", "party_1_port"));
+	receiver_ip = cf.Value("", "party_1_ip");
+
+	cout<<"sender ip: "<<sender_ip <<"port:"<<sender_port<<endl;
+	cout<<"receiver ip: "<<receiver_ip<<"port:"<<receiver_port<<endl;
+	SocketPartyData other(IpAddress::from_string(sender_ip), sender_port++);
+
+	SocketPartyData me(IpAddress::from_string(receiver_ip), receiver_port);
+	cout<<"my ip: "<<me.getIpAddress() <<"port:"<<me.getPort()<<endl;
+	cout<<"other ip: "<<other.getIpAddress() <<"port:"<<other.getPort()<<endl;
 	channel = make_shared<CommPartyTCPSynced>(io_service, me, other);
 
 	// create the garbled circuit
@@ -59,7 +80,8 @@ PartyOne::PartyOne(YaoConfig & yao_config) {
 
 	setInputs(yao_config.input_file_1, circuit->getNumberOfInputs(1));
 	// create the semi honest OT extension sender
-	SocketPartyData senderParty(yao_config.sender_ip, yao_config.sender_port);
+	SocketPartyData senderParty(IpAddress::from_string(sender_ip), sender_port);
+	cout<<"sender ip: "<<senderParty.getIpAddress() <<"port:"<<senderParty.getPort()<<endl;
 #ifdef _WIN32
 	otSender = new OTSemiHonestExtensionSender(senderParty, 163, 1);
 #else
@@ -94,6 +116,10 @@ void PartyOne::sendP1Inputs(byte* ungarbledInput) {
 }
 
 void PartyOne::run() {
+	runOnline();
+}
+
+void PartyOne::runOnline() {
 	values = circuit->garble();
 	// send garbled tables and the translation table to p2.
 	auto garbledTables = circuit->getGarbledTables();
@@ -140,12 +166,34 @@ void PartyOne::runOTProtocol() {
 /*          PartyTwo             */
 /*********************************/
 
-PartyTwo::PartyTwo(YaoConfig & yao_config, bool print_output) {
-	this->print_output = yao_config.print_output;
+PartyTwo::PartyTwo(int argc, char* argv[]) : Protocol("SemiHonestYao", argc, argv){
+
+	id = stoi(arguments["partyID"]);
+
+	YaoConfig yao_config(arguments["configFileName"]);
 	this->yaoConfig = yao_config;
-	// init
-	SocketPartyData me(yao_config.receiver_ip, yao_config.receiver_port);
-	SocketPartyData other(yao_config.sender_ip, yaoConfig.sender_port++);
+
+	this->print_output = arguments["printOutput"] == "0" ? false : true;
+
+	//open parties file
+	ConfigFile cf(arguments["partiesFileName"]);
+
+	string receiver_ip, sender_ip;
+	int receiver_port, sender_port;
+
+	//get partys IPs and ports data
+	sender_port = stoi(cf.Value("", "party_0_port"));
+	sender_ip = cf.Value("", "party_0_ip");
+	receiver_port = stoi(cf.Value("", "party_1_port"));
+	receiver_ip = cf.Value("", "party_1_ip");
+	cout<<"sender ip: "<<sender_ip <<"port:"<<sender_port<<endl;
+	cout<<"receiver ip: "<<receiver_ip<<"port:"<<receiver_port<<endl;
+
+	SocketPartyData other(IpAddress::from_string(receiver_ip), receiver_port);
+
+	SocketPartyData me(IpAddress::from_string(sender_ip), sender_port++);
+	cout<<"my ip: "<<me.getIpAddress() <<"port:"<<me.getPort()<<endl;
+	cout<<"other ip: "<<other.getIpAddress() <<"port:"<<other.getPort()<<endl;
 	channel = make_shared<CommPartyTCPSynced>(io_service, me, other);
 
 	// create the garbled circuit
@@ -153,7 +201,8 @@ PartyTwo::PartyTwo(YaoConfig & yao_config, bool print_output) {
 		GarbledCircuitFactory::CircuitType::FIXED_KEY_FREE_XOR_HALF_GATES, false);
 	setInputs(yao_config.input_file_2,  circuit->getNumberOfInputs(2));
 	// create the OT receiver.
-	SocketPartyData senderParty(yao_config.sender_ip, yaoConfig.sender_port);
+	SocketPartyData senderParty(IpAddress::from_string(sender_ip), sender_port);
+	cout<<"sender ip: "<<senderParty.getIpAddress() <<"port:"<<senderParty.getPort()<<endl;
 #ifdef _WIN32
 	otReceiver = new OTSemiHonestExtensionReceiver(senderParty, 163, 1);
 #else
@@ -191,6 +240,10 @@ byte* PartyTwo::computeCircuit(OTBatchROutput * otOutput) {
 }
 
 void PartyTwo::run() {
+	runOnline();
+}
+
+void PartyTwo::runOnline() {
 	// receive tables and inputs
 	receiveCircuit();
 	receiveP1Inputs();

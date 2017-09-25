@@ -29,33 +29,38 @@
 #include "YaoParties.hpp"
 #include "../../include/infra/CircuitConverter.hpp"
 
-void execute_party_one(PartyOne* p1, YaoConfig yao_config) {
+void execute_party_one(PartyOne* p1) {
 	
 	auto all = scapi_now();
-	for (int i = 0; i < yao_config.number_of_iterations; i++) {
+
+    int numIterations = p1->getConfig().number_of_iterations;
+	for (int i = 0; i < numIterations; i++) {
 		// run Party one
 		p1->run();
 	}
 	auto end = std::chrono::system_clock::now();
 	int elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - all).count();
-	cout << "********************* PartyOne ********\nRunning " << yao_config.number_of_iterations <<
+	cout << "********************* PartyOne ********\nRunning " << numIterations <<
 		" iterations took: " << elapsed_ms << " milliseconds" << endl
-		<< "Average time per iteration: " << elapsed_ms / (float)yao_config.number_of_iterations << " milliseconds" << endl;
+		<< "Average time per iteration: " << elapsed_ms / (float)numIterations << " milliseconds" << endl;
 
 }
 
-void execute_party_two(PartyTwo* p2, YaoConfig yao_config) {
+void execute_party_two(PartyTwo* p2) {
 	
 	auto all = scapi_now();
-	for (int i = 0; i < yao_config.number_of_iterations; i++) {
+
+    int numIterations = p2->getConfig().number_of_iterations;
+
+	for (int i = 0; i < numIterations; i++) {
 		// run party two of Yao protocol.
 		p2->run();
 	}
 	auto end = std::chrono::system_clock::now();
 	int elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - all).count();
-	cout << "********************* PartyTwo ********\nRunning " << yao_config.number_of_iterations <<
+	cout << "********************* PartyTwo ********\nRunning " << numIterations <<
 		" iterations took: " << elapsed_ms << " milliseconds" << endl;
-	cout << "Average time per iteration: " << elapsed_ms / (float)yao_config.number_of_iterations
+	cout << "Average time per iteration: " << elapsed_ms / (float)numIterations
 		<< " milliseconds" << endl;
 
 }
@@ -85,46 +90,20 @@ YaoConfig read_yao_config(string config_file) {
 }
 
 int main(int argc, char* argv[]) {
-	/*CircuitConverter::convertBristolToScapi("AESExpanded_bristol.txt", "AESExpanded_scapi.txt", false);
 
-	ofstream inputFile1;
-
-	inputFile1.open("AESPartyOneInputs.txt");
-
-	if (inputFile1.is_open())
-	{
-		int size = 128;
-		inputFile1 << size<< endl; //print number of gates
-		for (int i=0; i<size; i++){
-			inputFile1<<"0"<<endl;
-		}
-	}
-
-	ofstream inputFile2;
-
-	inputFile2.open("AESPartyTwoInputs.txt");
-
-	if (inputFile2.is_open())
-	{
-		int size = 1408;
-		inputFile2 << size<< endl; //print number of gates
-		for (int i=0; i<size; i++){
-			inputFile2<<"0"<<endl;
-		}
-	}*/
+    CmdParser parser;
+    auto parameters = parser.parseArguments("",argc, argv);
+    int partyNum = stoi(parameters["partyID"]);
 
 
-	int partyNum = atoi(argv[1]);
-	
-	YaoConfig yao_config(argv[2]);
 	if (partyNum == 1) {
 		// create Party one with the previous created objects.
-		PartyOne p1(yao_config);
-		execute_party_one(&p1, yao_config);
+		PartyOne p1(argc, argv);
+		execute_party_one(&p1);
 	}
 	else if (partyNum == 2) {
-		PartyTwo p2(yao_config);
-		execute_party_two(&p2, yao_config);
+		PartyTwo p2(argc, argv);
+		execute_party_two(&p2);
 		auto output = p2.getOutput();
 	} else {
 		std::cerr << "Usage: libscapi_examples yao <party_number(1|2)> <config_path>" << std::endl;

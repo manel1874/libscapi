@@ -90,11 +90,6 @@ struct YaoConfig {
 		circuit_file = cf.Value(input_section, "circuit_file");
 		input_file_1 = cf.Value(input_section, "input_file_party_1");
 		input_file_2 = cf.Value(input_section, "input_file_party_2");
-		sender_ip = IpAddress::from_string(cf.Value("", "sender_ip"));
-		receiver_ip = IpAddress::from_string(cf.Value("", "receiver_ip"));
-
-		sender_port = stoi(cf.Value("", "sender_port"));
-		receiver_port = stoi(cf.Value("", "receiver_port"));
 		circuit_type = cf.Value("", "circuit_type");
 	}
 
@@ -106,6 +101,7 @@ struct YaoConfig {
 */
 class PartyOne : public Protocol, public SemiHonest{
 private:
+	int id;
 	boost::asio::io_service io_service;
 	OTBatchSender * otSender;			//The OT object that used in the protocol.	
 	GarbledBooleanCircuit * circuit;	//The garbled circuit used in the protocol.
@@ -139,7 +135,7 @@ public:
 	* @param otSender The OT object to use in the protocol.
 	* @param inputForTest
 	*/
-	PartyOne(YaoConfig & yao_config);
+	PartyOne(int argc, char* argv[]);
 
 	~PartyOne() {
 		delete circuit;
@@ -150,12 +146,18 @@ public:
 
 	void setInputs(string inputFileName, int numInputs);
 
+    bool hasOffline() override { return false; }
+
 	/**
 	* Runs the protocol.
 	*/
 	void run() override;
 
+    void runOnline() override;
+
 	YaoConfig& getConfig() { return yaoConfig; }
+
+	int getID() {return id;}
 };
 
 /**
@@ -163,6 +165,7 @@ public:
 */
 class PartyTwo : public Protocol, public SemiHonest{
 private:
+	int id;
 	boost::asio::io_service io_service;
 	OTBatchReceiver * otReceiver;			//The OT object that used in the protocol.	
 	GarbledBooleanCircuit * circuit;	//The garbled circuit used in the protocol.
@@ -213,7 +216,7 @@ public:
 	* @param otSender The OT object to use in the protocol.
 	* @param inputForTest
 	*/
-	PartyTwo(YaoConfig & yao_config, bool print_output = false);
+	PartyTwo(int argc, char* argv[]);
 
 	~PartyTwo() {
 		delete circuit;
@@ -223,14 +226,19 @@ public:
 
 	void setInputs(string inputFileName, int numInputs);
 
+	bool hasOffline() override { return false; }
+
 	/**
 	* Runs the protocol.
 	* @param ungarbledInput The input for the circuit, each p1's input wire gets 0 or 1.
 	*/
-	void run();
+	void run() override;
+
+    void runOnline() override;
 
 	vector<byte> getOutput() {	return circuitOutput; }
 
 	YaoConfig& getConfig() { return yaoConfig; }
 
+	int getID() {return id;}
 };
