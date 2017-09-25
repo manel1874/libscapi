@@ -34,33 +34,14 @@ GMWParty::GMWParty(int argc, char* argv[]) : Protocol("GMW", argc, argv) {
 
 void GMWParty::run(){
 	//Run the offline phase of the protocol
-
-//    auto start = chrono::high_resolution_clock::now();
-
-//    auto end = chrono::high_resolution_clock::now();
-//    int generateTotalTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-//    cout<<"Offline time: "<<generateTotalTime <<" milliseconds"<<endl;
+    runOffline();
 
     auto inputSize = circuit->getPartyInputs(id).size(); //indices of my input wires
     myInputBits.resize(inputSize, 0); //input bits, will be adjusted to my input shares
     //read my input from the input file
     readInputs();
     //Run te online phase of the protocol
-//    start = chrono::high_resolution_clock::now();
-    inputSharing();
-    auto output = computeCircuit();
-
-//    end = chrono::high_resolution_clock::now();
-//    generateTotalTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-//    cout<<"online time: "<<generateTotalTime <<" milliseconds"<<endl;
-
-	//Print the output
-    cout << "circuit output:" << endl;
-    for (int i = 0; i < output.size(); i++) {
-        cout << (int) output[i] << " ";
-    }
-    cout << endl;
-
+    runOnline();
 }
 
 bool GMWParty::hasOffline()
@@ -87,7 +68,6 @@ void GMWParty::runOnline(){
         inputSharing();
         computeCircuit();
     }
-
 }
 
 void GMWParty::generateTriples(){
