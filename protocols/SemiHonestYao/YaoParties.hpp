@@ -147,6 +147,7 @@ public:
 	void setInputs(string inputFileName, int numInputs);
 
     bool hasOffline() override { return false; }
+    bool hasOnline() override { return true; }
 
 	/**
 	* Runs the protocol.
@@ -227,6 +228,7 @@ public:
 	void setInputs(string inputFileName, int numInputs);
 
 	bool hasOffline() override { return false; }
+	bool hasOnline() override { return true; }
 
 	/**
 	* Runs the protocol.

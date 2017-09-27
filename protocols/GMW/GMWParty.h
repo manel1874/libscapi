@@ -107,7 +107,8 @@ public:
      */
     void run() override;
 
-    bool hasOffline() override;
+    bool hasOffline() override { return true; }
+    bool hasOnline() override { return true; }
 
 	/*
 	 * Executes the offline phase of the protocol.

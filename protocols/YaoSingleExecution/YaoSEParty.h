@@ -59,6 +59,7 @@ public:
     }
 
     bool hasOffline() override { return true; }
+    bool hasOnline() override { return true; }
 
     /*
      * Implement the function derived from the Protocol abstract class.

@@ -44,11 +44,6 @@ void GMWParty::run(){
     runOnline();
 }
 
-bool GMWParty::hasOffline()
-{
-    return true;
-}
-
 void GMWParty::runOffline(){
     int pid = getpid();
     string path = std::experimental::filesystem::current_path();
