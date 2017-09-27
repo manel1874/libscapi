@@ -71,7 +71,8 @@ public:
     virtual void run() = 0;
     virtual bool hasOffline() = 0;
     virtual void runOffline(){};
-    virtual void runOnline() = 0;
+    virtual bool hasOnline() = 0;
+    virtual void runOnline(){};
 
     virtual ~Protocol() {}
 };

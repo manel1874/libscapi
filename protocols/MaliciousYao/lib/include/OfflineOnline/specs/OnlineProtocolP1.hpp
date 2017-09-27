@@ -138,6 +138,10 @@ public:
         io_service.stop();
     }
 
+	bool hasOffline() override {return false; }
+	bool hasOnline() override {return true; }
+	void runOnline() override;
+
     void setBuckets(BucketBundle & mainBucket, BucketBundle & crBucket);
 	void setInput(shared_ptr<CircuitInput> protocolInput) { input = protocolInput; }
 
@@ -147,7 +151,9 @@ public:
 	* Executes the first side of the online protocol.<p>
 	* basically, it computes the main circuit and than the cheating recovery circuit.
 	*/
-	void run() override;
+	void run() override {
+		runOnline();
+	}
 	
 };
 

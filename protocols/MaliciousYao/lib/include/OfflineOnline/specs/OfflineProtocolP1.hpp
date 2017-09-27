@@ -49,8 +49,7 @@ public:
 	* @param primitives Contains the low level instances to use.
 	* @param communication Configuration of communication between parties.
 	*/
-	OfflineProtocolP1(const string CIRCUIT_FILENAME, const string CIRCUIT_CHEATING_RECOVERY,
-                      int N1, int s1, int B1, double p1, int N2, int s2, int B2, double p2);
+	OfflineProtocolP1(int argc, char* argv[]);
 
 	~OfflineProtocolP1(){
 		io_service.stop();
@@ -59,7 +58,13 @@ public:
 	/**
 	* Runs the first party in the offline phase of the malicious Yao protocol.
 	*/
-	void run() override;
+    void run() override {
+        runOffline();
+    }
+
+    bool hasOffline() override {return true; }
+    bool hasOnline() override {return false; }
+    void runOffline() override;
 
     /**
      * Save the buckets on the disk so the online protocol can read that.

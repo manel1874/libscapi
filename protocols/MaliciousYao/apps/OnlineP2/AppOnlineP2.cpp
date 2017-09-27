@@ -3,6 +3,7 @@
 #include <lib/include/primitives/CommunicationConfig.hpp>
 #include <lib/include/primitives/CryptoPrimitives.hpp>
 #include <libscapi/include/circuits/GarbledCircuitFactory.hpp>
+#include <libscapi/include/CryptoInfra/Protocol.hpp>
 #include <lib/include/primitives/CircuitInput.hpp>
 #include <lib/include/primitives/ExecutionParameters.hpp>
 #include <lib/include/primitives/KProbeResistantMatrix.hpp>
@@ -85,56 +86,22 @@ int main(int argc, char* argv[]) {
 
     int counter = 1;
 
-    auto CIRCUIT_FILENAME = HOME_DIR + argv[counter++];
-    auto CIRCUIT_INPUT_FILENAME = HOME_DIR + argv[counter++];
-    auto CIRCUIT_CHEATING_RECOVERY = HOME_DIR + argv[counter++];
-    auto BUCKETS_PREFIX_MAIN = HOME_DIR + argv[counter++];
-    auto BUCKETS_PREFIX_CR = HOME_DIR + argv[counter++];
-    auto MAIN_MATRIX = HOME_DIR + argv[counter++];
-    auto CR_MATRIX = HOME_DIR + argv[counter++];
+    CmdParser parser;
+    auto parameters = parser.parseArguments("", argc, argv);
+    auto CIRCUIT_INPUT_FILENAME = HOME_DIR + parameters["inputFileName"];
+    auto BUCKETS_PREFIX_MAIN = HOME_DIR + parameters["bucketsPrefixMain"];
+    auto BUCKETS_PREFIX_CR = HOME_DIR + parameters["bucketsPrefixCR"];
+    auto MAIN_MATRIX = HOME_DIR + parameters["mainMatrix"];
+    auto CR_MATRIX = HOME_DIR + parameters["crMatrix"];
 
-    int N1 = atoi(argv[counter++]);
-    int B1 = atoi(argv[counter++]);
-    int s1 = atoi(argv[counter++]);
-    double p1 = stod(argv[counter++]);
-    int N2 = atoi(argv[counter++]);
-    int B2 = atoi(argv[counter++]);
-    int s2 = atoi(argv[counter++]);
-    double p2 = stod(argv[counter++]);
+    int N1 = stoi(parameters["n1"]);
+    int B1 = stoi(parameters["b1"]);
+    int B2 = stoi(parameters["b2"]);
+
 
     //set crypto primitives
     CryptoPrimitives::setCryptoPrimitives(NISTEC_FILE_NAME);
     CryptoPrimitives::setNumOfThreads(8);
-
-    /*int N1 = 32;
-    int B1 = 7;
-    int s1 = 40;
-    double p1 = 0.62;
-
-    int N2 = 32;
-    int B2 = 20;
-    int s2 = 40;
-    double p2 = 0.71;*/
-
-    /*int N1 = 128;
-    int B1 = 6;
-    int s1 = 40;
-    double p1 = 0.77;
-
-    int N2 = 128;
-    int B2 = 14;
-    int s2 = 40;
-    double p2 = 0.76;*/
-
-    /*int N1 = 1024;
-    int B1 = 4;
-    int s1 = 40;
-    double p1 = 0.72;
-
-    int N2 = 1024;
-    int B2 = 10;
-    int s2 = 40;
-    double p2 = 0.85;*/
 
     int size = N1;
 
@@ -152,8 +119,7 @@ int main(int argc, char* argv[]) {
     byte tmpBuf[20];
 
     vector<long long> times(size);
-    OnlineProtocolP2* protocol = new OnlineProtocolP2(CIRCUIT_FILENAME, CIRCUIT_CHEATING_RECOVERY,
-                                                      MAIN_MATRIX, CR_MATRIX, N1, s1, B1, p1, N2, s2, B2, p2);
+    OnlineProtocolP2* protocol = new OnlineProtocolP2(argc, argv);
 
     auto input = CircuitInput::fromFile(CIRCUIT_INPUT_FILENAME, protocol->getMainCircuit()->getNumberOfInputs(2));
 
