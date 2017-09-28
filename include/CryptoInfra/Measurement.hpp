@@ -48,7 +48,8 @@ using namespace Json;
 
 class Measurement {
 public:
-    Measurement(string protocolName, int partyId, string pathToFile, string taskName);
+    Measurement(string protocolName, int partyId, string pathToFile, string taskName, int repetitionId,
+                int numberOfParties);
     ~Measurement();
 
 
@@ -61,6 +62,8 @@ private:
     string m_path;
     high_resolution_clock::time_point m_start;
     high_resolution_clock::time_point m_end;
+    int m_repetitionId;
+    int m_numberOfParties;
 
 };
 

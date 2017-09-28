@@ -36,7 +36,8 @@
 using namespace std;
 
 
-Measurement::Measurement(string protocolName, int partyId, string pathToFile, string taskName)
+Measurement::Measurement(string protocolName, int partyId, string pathToFile, string taskName, int repetitionId,
+                         int numberOfParties)
 {
 
     m_name = protocolName;
@@ -44,6 +45,8 @@ Measurement::Measurement(string protocolName, int partyId, string pathToFile, st
     m_path = pathToFile + "/";
     m_taskName = taskName;
     m_start = chrono::high_resolution_clock::now();
+    m_repetitionId = repetitionId;
+    m_numberOfParties = numberOfParties;
 }
 
 Measurement::~Measurement()
@@ -59,7 +62,8 @@ Measurement::~Measurement()
 
     //populate json object
 
-    string filePath = m_path + m_name + "_" + to_string(m_partyId) + "_" + m_taskName + ".json";
+    string filePath = m_path + m_name + "_" + to_string(m_partyId) + "_" + m_taskName + "_" + "repdId="
+                      +to_string(m_repetitionId) + "_" + "numberOfParties=" + to_string(m_numberOfParties) + ".json";
     try
     {
         ofstream myfile;

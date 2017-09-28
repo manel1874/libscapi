@@ -30,9 +30,7 @@ map<string, string> CmdParser::parseArguments(string protocolName, int argc, cha
 };
 
 
-Protocol::Protocol(string protocolName, int argc, char* argv[]){
+Protocol::Protocol(string protocolName, int argc, char* argv[])
+{
     arguments = parser.parseArguments(protocolName, argc, argv);
-
-//    for (map<char,int>::iterator it=arguments.begin(); it!=arguments.end(); ++it)
-//        std::cout << it->first << " => " << it->second << '\n';
 }
