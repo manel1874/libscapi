@@ -34,6 +34,11 @@ compile-json
 protocols/GMW/CMakeFiles/*
 cmake-build-debug/
 protocols/GMW/CMakeCache.txt
+protocols/GMW/GMW.cbp
+protocols/GMW/Makefile
+protocols/GMW/Parties
+protocols/GMW/cmake_install.cmake
+
 
 # Fortran module files
 *.mod
@@ -92,3 +97,4 @@ lib/JsonCpp/CMakeFiles/
 libscapi.cbp
 obj/
 protocols/GMW/CMakeFiles/
+*.json
