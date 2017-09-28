@@ -73,6 +73,7 @@ callgrind.*
 lib/OTExtensionBristol/SimpleOT/ot_sender_test
 lib/OTExtensionBristol/SimpleOT/ot_receiver_test
 protocols/GMW/GMW
+protocols/GMW/GMW.cbp
 
 #other
 protocols/MaliciousYao/OfflineP1_*
@@ -81,3 +82,13 @@ protocols/MaliciousYao/OnlineP1_*
 protocols/MaliciousYao/OnlineP2_*
 protocols/GMW/NigelAes9Parties.txt
 protocols/GMW/AesInputs*.txt
+CMakeCache.txt
+CMakeFiles/
+Makefile
+build/
+cmake_install.cmake
+install/
+lib/JsonCpp/CMakeFiles/
+libscapi.cbp
+obj/
+protocols/GMW/CMakeFiles/
