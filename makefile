@@ -31,8 +31,11 @@ $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
 LINKER_OPTIONS = $(INCLUDE_ARCHIVES_START) install/lib/libOTExtensionBristol.a install/lib/libsimpleot.a install/lib/libntl.a install/lib/libboost_sytem.a install/lib/libboost_thread.a install/lib/libmiracl.a install/lib/libblake2.a -lpthread -lgmp -lcrypto -lssl -lOTExtension -lMaliciousOTExtension -ldl $(INCLUDE_ARCHIVES_END)
 LIBRARIES_DIR  = -L$(HOME)/boost_1_64_0/stage/lib -Linstall/lib
 LD_FLAGS = 
+SUMO = no
+
 
 all: libs libscapi tests
+	echo $(WITH_EMP)
 libs: compile-boost compile-ntl compile-emp-tool compile-emp-ot compile-emp-m2pc compile-blake compile-miracl compile-otextension compile-otextension-malicious compile-otextension-bristol
 libscapi: directories $(SLib)
 directories: $(OUT_DIR)
@@ -69,32 +72,40 @@ compile-tests:
 	@cd ..
 	
 prepare-emp:
+ifeq ($(SUMO),yes)
 	@mkdir -p $(builddir)/EMP
 	@cp -r lib/EMP/. $(builddir)/EMP
 	@cmake -DALIGN=16 -DARCH=X64 -DARITH=curve2251-sse -DCHECK=off -DFB_POLYN=251 -DFB_METHD="INTEG;INTEG;QUICK;QUICK;QUICK;QUICK;LOWER;SLIDE;QUICK" -DFB_PRECO=on -DFB_SQRTF=off -DEB_METHD="PROJC;LODAH;COMBD;INTER" -DEC_METHD="CHAR2" -DCOMP="-O3 -funroll-loops -fomit-frame-pointer -march=native -msse4.2 -mpclmul -Wno-unused-function -Wno-unused-variable -Wno-return-type -Wno-discarded-qualifiers" -DTIMER=CYCLE -DWITH="MD;DV;BN;FB;EB;EC" -DWORD=64 $(builddir)/EMP/relic/CMakeLists.txt
 	@cd $(builddir)/EMP/relic && $(MAKE)
 	@cd $(builddir)/EMP/relic && $(MAKE) install
 	@touch prepare-emp
+endif
 
 compile-emp-tool:prepare-emp
+ifeq ($(SUMO),yes)
 	@cd $(builddir)/EMP/emp-tool
 	@cmake -D CMAKE_CXX_FLAGS="-Wno-unused-function -Wno-unused-variable -Wno-return-type" $(builddir)/EMP/emp-tool/CMakeLists.txt 
 	@cd $(builddir)/EMP/emp-tool/ && $(MAKE)
 	@cd $(builddir)/EMP/emp-tool/ && $(MAKE) install
 	@touch compile-emp-tool
+endif
 
 compile-emp-ot:prepare-emp
+ifeq ($(SUMO),yes)
 	@cd $(builddir)/EMP/emp-ot
 	@cmake -D CMAKE_CXX_FLAGS="-Wno-unused-function -Wno-unused-variable -Wno-return-type" $(builddir)/EMP/emp-ot/CMakeLists.txt 
 	@cd $(builddir)/EMP/emp-ot/ && $(MAKE)
 	@cd $(builddir)/EMP/emp-ot/ && $(MAKE) install
 	@touch compile-emp-ot
-
+endif
+	
 compile-emp-m2pc:compile-emp-ot compile-emp-tool
+ifeq ($(SUMO),yes)
 	@cd $(builddir)/EMP/emp-m2pc
 	@cmake -D CMAKE_CXX_FLAGS="-Wno-unused-function -Wno-unused-variable -Wno-return-type -Wno-unused-result" $(builddir)/EMP/emp-m2pc/CMakeLists.txt 
 	@cd $(builddir)/EMP/emp-m2pc/ && $(MAKE)
-	@touch compile-emp-m2pc 
+	@touch compile-emp-m2pc
+endif
 
 compile-blake:
 	@echo "Compiling the BLAKE2 library"
@@ -155,7 +166,7 @@ compile-otextension: compile-miracl-cpp
 	@$(MAKE) -C $(builddir)/OTExtension CXX=$(CXX)
 	@$(MAKE) -C $(builddir)/OTExtension CXX=$(CXX) SHARED_LIB_EXT=$(SHARED_LIB_EXT) install
 	@touch compile-otextension
-	
+
 compile-otextension-malicious: compile-miracl-cpp
 	@echo "Compiling the OtExtension malicious library..."
 	@cp -r lib/MaliciousOTExtension $(builddir)/MaliciousOTExtension
