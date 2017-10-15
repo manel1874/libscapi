@@ -25,15 +25,15 @@ C_FILES     := $(wildcard src/*/*.c)
 OBJ_FILES     := $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES))
 OBJ_FILES     += $(patsubst src/%.c,obj/%.o,$(C_FILES))
 OUT_DIR        = obj obj/mid_layer obj/circuits obj/comm obj/infra obj/interactive_mid_protocols obj/primitives obj/circuits_c
-INC            = -I$(HOME)/boost_1_64_0 -Ilib -Iinstall/include -Ilib/OTExtensionBristol
-CPP_OPTIONS   := -std=c++11 $(INC)  -maes -mpclmul -Wall -Wno-unused-function -Wno-unused-variable -fPIC -O3
+INC            = -Ilib -Iinstall/include -Ilib/OTExtensionBristol
+CPP_OPTIONS   := -std=c++11 $(INC)  -maes -mpclmul -Wall -Wno-unused-function -Wno-unused-variable -Wno-unused-result -Wno-sign-compare -Wno-parentheses -O3
 $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
-LINKER_OPTIONS = $(INCLUDE_ARCHIVES_START) install/lib/libOTExtensionBristol.a install/lib/libsimpleot.a install/lib/libntl.a install/lib/libmiracl.a install/lib/libblake2.a -lpthread -lgmp -lcrypto -lssl -lboost_system -lboost_thread -lOTExtension -lMaliciousOTExtension -ldl $(INCLUDE_ARCHIVES_END)
+LINKER_OPTIONS = $(INCLUDE_ARCHIVES_START) install/lib/libOTExtensionBristol.a install/lib/libsimpleot.a install/lib/libntl.a install/lib/libboost_sytem.a install/lib/libboost_thread.a install/lib/libmiracl.a install/lib/libblake2.a -lpthread -lgmp -lcrypto -lssl -lOTExtension -lMaliciousOTExtension -ldl $(INCLUDE_ARCHIVES_END)
 LIBRARIES_DIR  = -L$(HOME)/boost_1_64_0/stage/lib -Linstall/lib
 LD_FLAGS = 
 
-all: libs libscapi
-libs: compile-emp-tool compile-emp-ot compile-emp-m2pc compile-ntl compile-blake compile-miracl compile-otextension compile-otextension-malicious compile-otextension-bristol
+all: libs libscapi tests
+libs: compile-boost compile-ntl compile-emp-tool compile-emp-ot compile-emp-m2pc compile-blake compile-miracl compile-otextension compile-otextension-malicious compile-otextension-bristol
 libscapi: directories $(SLib)
 directories: $(OUT_DIR)
 
@@ -58,38 +58,43 @@ obj/primitives/%.o: src/primitives/%.cpp
 	g++ -c $(CPP_OPTIONS) -o $@ $< 	 
 obj/mid_layer/%.o: src/mid_layer/%.cpp
 	g++ -c $(CPP_OPTIONS) -o $@ $<
- 
 
-tests:: all
-	$(Program)
-
+tests: compile-tests
+	cd ./test; ./tests.exe
+	
+.PHONY: compile-tests
+compile-tests:
+	@cd ./test; \
+	g++ -std=c++11 -maes -mavx -I/usr/include/openssl  -I../install/include -o tests.exe tests.cpp interactiveMidProtocolsTests.cpp ../scapi.a -ldl -lpthread -L../install/lib ../install/lib/libboost_system.a ../install/lib/libboost_thread.a -lssl -lntl -lgmp -lblake2 -lcrypto;
+	@cd ..
+	
 prepare-emp:
 	@mkdir -p $(builddir)/EMP
 	@cp -r lib/EMP/. $(builddir)/EMP
-	@cmake -DALIGN=16 -DARCH=X64 -DARITH=curve2251-sse -DCHECK=off -DFB_POLYN=251 -DFB_METHD="INTEG;INTEG;QUICK;QUICK;QUICK;QUICK;LOWER;SLIDE;QUICK" -DFB_PRECO=on -DFB_SQRTF=off -DEB_METHD="PROJC;LODAH;COMBD;INTER" -DEC_METHD="CHAR2" -DCOMP="-O3 -funroll-loops -fomit-frame-pointer -march=native -msse4.2 -mpclmul" -DTIMER=CYCLE -DWITH="MD;DV;BN;FB;EB;EC" -DWORD=64 $(builddir)/EMP/relic/CMakeLists.txt
+	@cmake -DALIGN=16 -DARCH=X64 -DARITH=curve2251-sse -DCHECK=off -DFB_POLYN=251 -DFB_METHD="INTEG;INTEG;QUICK;QUICK;QUICK;QUICK;LOWER;SLIDE;QUICK" -DFB_PRECO=on -DFB_SQRTF=off -DEB_METHD="PROJC;LODAH;COMBD;INTER" -DEC_METHD="CHAR2" -DCOMP="-O3 -funroll-loops -fomit-frame-pointer -march=native -msse4.2 -mpclmul -Wno-unused-function -Wno-unused-variable -Wno-return-type -Wno-discarded-qualifiers" -DTIMER=CYCLE -DWITH="MD;DV;BN;FB;EB;EC" -DWORD=64 $(builddir)/EMP/relic/CMakeLists.txt
 	@cd $(builddir)/EMP/relic && $(MAKE)
 	@cd $(builddir)/EMP/relic && $(MAKE) install
 	@touch prepare-emp
 
 compile-emp-tool:prepare-emp
 	@cd $(builddir)/EMP/emp-tool
-	@cmake $(builddir)/EMP/emp-tool/CMakeLists.txt 
+	@cmake -D CMAKE_CXX_FLAGS="-Wno-unused-function -Wno-unused-variable -Wno-return-type" $(builddir)/EMP/emp-tool/CMakeLists.txt 
 	@cd $(builddir)/EMP/emp-tool/ && $(MAKE)
 	@cd $(builddir)/EMP/emp-tool/ && $(MAKE) install
 	@touch compile-emp-tool
 
 compile-emp-ot:prepare-emp
 	@cd $(builddir)/EMP/emp-ot
-	@cmake $(builddir)/EMP/emp-ot/CMakeLists.txt 
+	@cmake -D CMAKE_CXX_FLAGS="-Wno-unused-function -Wno-unused-variable -Wno-return-type" $(builddir)/EMP/emp-ot/CMakeLists.txt 
 	@cd $(builddir)/EMP/emp-ot/ && $(MAKE)
 	@cd $(builddir)/EMP/emp-ot/ && $(MAKE) install
 	@touch compile-emp-ot
 
 compile-emp-m2pc:compile-emp-ot compile-emp-tool
 	@cd $(builddir)/EMP/emp-m2pc
-	@cmake $(builddir)/EMP/emp-m2pc/CMakeLists.txt 
+	@cmake -D CMAKE_CXX_FLAGS="-Wno-unused-function -Wno-unused-variable -Wno-return-type -Wno-unused-result" $(builddir)/EMP/emp-m2pc/CMakeLists.txt 
 	@cd $(builddir)/EMP/emp-m2pc/ && $(MAKE)
-	@touch compile-emp-m2pc
+	@touch compile-emp-m2pc 
 
 compile-blake:
 	@echo "Compiling the BLAKE2 library"
@@ -100,15 +105,25 @@ compile-blake:
 #	@ cp $(builddir)/BLAKE2/libblake2.a install/lib/
 	@touch compile-blake
 
+compile-boost:
+	mkdir -p $(CURDIR)/install/lib
+	mkdir -p $(CURDIR)/install/include
+	echo "Compiling the boost library"
+	cp -r lib/boost_1_64_0/ $(builddir)/
+	cd $(builddir)/boost_1_64_0/; bash -c "BOOST_BUILD_PATH='./' ./bootstrap.sh --with-libraries=thread,system && ./b2"; 
+	cp $(builddir)/boost_1_64_0/stage/lib/*.a $(CURDIR)/install/lib/
+	cp -r $(builddir)/boost_1_64_0/boost/ $(CURDIR)/install/include/
+	touch compile-boost
+
 compile-ntl:
-	@echo "Compiling the NTL library..."
-	@mkdir -p $(builddir)/NTL
-	@cp -r lib/NTL/unix/. $(builddir)/NTL
-	@chmod 777 $(builddir)/NTL/src/configure
-	@cd $(builddir)/NTL/src/ && ./configure CXX=$(CXX)
-	@$(MAKE) -C $(builddir)/NTL/src/
-	@$(MAKE) -C $(builddir)/NTL/src/ PREFIX=$(prefix) install
-	@touch compile-ntl
+	echo "Compiling the NTL library..."
+	mkdir -p $(builddir)/NTL
+	cp -r lib/NTL/unix/. $(builddir)/NTL
+	chmod 777 $(builddir)/NTL/src/configure
+	cd $(builddir)/NTL/src/ && ./configure CXX=$(CXX) WIZARD=off
+	$(MAKE) -C $(builddir)/NTL/src/
+	$(MAKE) -C $(builddir)/NTL/src/ PREFIX=$(prefix) install
+	touch compile-ntl
 
 prepare-miracl:
 	@echo "Copying the miracl source files into the miracl build dir..."
@@ -181,9 +196,9 @@ clean-otextension-bristol:
 	@rm -f compile-otextension-bristol
 
 clean-ntl:
-	@echo "Cleaning the ntl build dir..."
-	@rm -rf $(builddir)/NTL
-	@rm -f compile-ntl	
+	echo "Cleaning the ntl build dir..."
+	rm -rf $(builddir)/NTL
+	rm -f compile-ntl	
 
 clean-blake:
 	@echo "Cleaning blake library"
@@ -204,4 +219,13 @@ clean-cpp:
 clean-install:
 	@rm -rf install/*
 
-clean: clean-emp clean-otextension-bristol clean-otextension-malicious clean-otextension clean-ntl clean-blake clean-miracl clean-miracl-cpp clean-cpp clean-install
+clean-tests:
+	@rm -f test/tests.exe
+
+clean-boost:
+	@echo "Cleaning boost library"
+	@rm -rf $(builddir)/boost_1_64_0
+	@rm -f compile-boost
+
+clean: clean-boost clean-emp clean-otextension-bristol clean-otextension-malicious clean-otextension clean-ntl clean-blake clean-miracl clean-miracl-cpp clean-cpp clean-install clean-tests
+

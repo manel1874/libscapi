@@ -5,7 +5,7 @@
 #include <immintrin.h>
 #include <iostream>
 
-
+/*
 #if (!defined(__GNUC__) || !defined(__x86_64__) || !defined(__AVX2__))
 #error "AVX2 with FMA not supported"
 #endif
@@ -61,5 +61,5 @@ int main()
       return -1;
 }
 
-
+*/
 

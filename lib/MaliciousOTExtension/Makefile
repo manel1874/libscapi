@@ -1,7 +1,7 @@
 # compiler options
 CXX=g++-4.9
 CFLAGS=-fPIC
-COMPILER_OPTIONS=-O3
+COMPILER_OPTIONS=-O3 -Wno-unused-function -Wno-unused-variable -Wno-return-type -Wno-unused-result -Wno-unused-but-set-variable
 DEBUG_OPTIONS=-g3
 BATCH=
 
