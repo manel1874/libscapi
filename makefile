@@ -31,7 +31,7 @@ $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
 LINKER_OPTIONS = $(INCLUDE_ARCHIVES_START) install/lib/libOTExtensionBristol.a install/lib/libsimpleot.a install/lib/libntl.a install/lib/libboost_sytem.a install/lib/libboost_thread.a install/lib/libmiracl.a install/lib/libblake2.a -lpthread -lgmp -lcrypto -lssl -lOTExtension -lMaliciousOTExtension -ldl $(INCLUDE_ARCHIVES_END)
 LIBRARIES_DIR  = -L$(HOME)/boost_1_64_0/stage/lib -Linstall/lib
 LD_FLAGS = 
-SUMO = no
+SUMO = yes
 
 
 all: libs libscapi tests
