@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(libscapi)
+project(scapi)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx -maes -mpclmul -DRDTSC -DTEST=AES128  -O3")
@@ -91,11 +91,11 @@ set(SOURCE_FILES
         src/CryptoInfra/Measurement.cpp
         src/CryptoInfra/Protocol.cpp)
 
-add_library(libscapi ${SOURCE_FILES})
+add_library(scapi ${SOURCE_FILES})
 
 add_custom_target(libscapi_build ALL
         COMMAND sudo make -f makefile_libs
         WORKING_DIRECTORY ${SCAPI_BASE_DIR}
         COMMENT "Original libscapi libs makefile target")
 
-TARGET_LINK_LIBRARIES(libscapi gmp boost_system boost_thread pthread crypto dl ssl z)
+TARGET_LINK_LIBRARIES(scapi gmp boost_system boost_thread pthread crypto dl ssl z)
