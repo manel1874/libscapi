@@ -31,7 +31,7 @@ INTRODUCTION
 This package contains an implementation of the Replicated Secret Sharing for three parties and arithmetic circuit protocol.
 
 A general explanation of the protocol can be found at
-http://crypto.biu.ac.il/sites/default/files/Winter%20School%2015%20-%20GMW%20and%20OT%20extension.pdf.
+
 
 
 INSTALLATION AND EXECUTION
