@@ -17,7 +17,7 @@ set(SOURCE_FILES main.cpp GMWParty.h Circuit.cpp Circuit.h MPCCommunication.cpp 
 add_executable(GMW ${SOURCE_FILES})
 add_library(gmw ${SOURCE_FILES})
 
-TARGET_LINK_LIBRARIES(GMW $ENV{HOME}/libscapi/scapi.a gmp
+TARGET_LINK_LIBRARIES(GMW $ENV{HOME}/libscapi/libscapi.a gmp
         OTExtensionBristol
         $ENV{HOME}/libscapi/install/lib/libsimpleot.a
         $ENV{HOME}/libscapi/build//JsonCpp/src/lib_json/libjsoncpp.a

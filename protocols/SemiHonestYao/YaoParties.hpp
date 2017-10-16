@@ -99,7 +99,7 @@ struct YaoConfig {
 /**
 * This is an implementation of party one of Yao protocol.
 */
-class PartyOne : public Protocol, public SemiHonest{
+class PartyOne : public Protocol, public SemiHonest, public TwoParty{
 private:
 	int id;
 	boost::asio::io_service io_service;
@@ -164,7 +164,7 @@ public:
 /**
 * This is an implementation of party one of Yao protocol.
 */
-class PartyTwo : public Protocol, public SemiHonest{
+class PartyTwo : public Protocol, public SemiHonest, public TwoParty{
 private:
 	int id;
 	boost::asio::io_service io_service;

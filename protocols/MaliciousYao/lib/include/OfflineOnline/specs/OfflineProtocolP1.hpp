@@ -23,7 +23,7 @@ using namespace std;
  The full protocol specification is described in "Blazing Fast 2PC in the "Offline/Online Setting with Security for
  Malicious Adversaries" paper by Yehuda Lindell and Ben Riva, page 18 - section E, "The Full Protocol Specification".
 */
-class OfflineProtocolP1 : public Protocol, public Malicious {
+class OfflineProtocolP1 : public Protocol, public Malicious, public TwoParty {
 
 private:
     boost::asio::io_service io_service;

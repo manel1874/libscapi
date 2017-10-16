@@ -21,7 +21,7 @@
  * A general explanation of the GMW protocol can be found at http://crypto.biu.ac.il/sites/default/files/Winter%20School%2015%20-%20GMW%20and%20OT%20extension.pdf.
  * This implementation is more efficient since we use Beaver's multiplication triples instead of 1 out of 4 OT.
  */
-class GMWParty : public Protocol, public SemiHonest{
+class GMWParty : public Protocol, public SemiHonest, public MultiParty{
 
 private:
     boost::asio::io_service io_service;

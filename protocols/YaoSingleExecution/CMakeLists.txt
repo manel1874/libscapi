@@ -18,6 +18,6 @@ set(SOURCE_FILES main.cpp YaoSEParty.cpp)
 add_executable(YaoSingleExecution ${SOURCE_FILES})
 add_library(yaoSingleExecution ${SOURCE_FILES})
 
-TARGET_LINK_LIBRARIES(YaoSingleExecution $ENV{HOME}/libscapi/scapi.a
+TARGET_LINK_LIBRARIES(YaoSingleExecution $ENV{HOME}/libscapi/libscapi.a
         boost_system boost_thread pthread crypto dl ssl z relic gmp emp-tool)
 

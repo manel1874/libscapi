@@ -17,7 +17,7 @@
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Asaf Cohen)
 *
 */
-class OnlineProtocolP1 : public Protocol, public Malicious{
+class OnlineProtocolP1 : public Protocol, public Malicious, public TwoParty{
 	
 private:
     //set io_service for peer to peer communication

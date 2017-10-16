@@ -21,7 +21,7 @@
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar - Ilan University
 *
 */
-class OfflineProtocolP2 : public Protocol, public Malicious {
+class OfflineProtocolP2 : public Protocol, public Malicious, public TwoParty {
 
 private:
     boost::asio::io_service io_service;

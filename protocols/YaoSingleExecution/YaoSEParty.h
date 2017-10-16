@@ -28,7 +28,7 @@ extern void compute(Bit * res, Bit * in, Bit * in2);
  * function.
  *
  */
-class YaoSEParty : public Protocol, public Malicious {
+class YaoSEParty : public Protocol, public Malicious, public TwoParty {
 private:
     int id;             // The party id
     bool * input;       // inputs for this party
