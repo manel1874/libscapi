@@ -12,6 +12,8 @@ GMWParty::GMWParty(int argc, char* argv[]) : Protocol("GMW", argc, argv) {
     circuit->readCircuit(arguments["circuitFileName"]);
 
     id = stoi(arguments["partyID"]);
+    m_repetitionId = stoi(arguments["repetitionId"]);
+    cout << "repetition id is : " << m_repetitionId << endl;
 
     string tmp = "init times";
     byte tmpBytes[20];
@@ -47,7 +49,8 @@ void GMWParty::run(){
 void GMWParty::runOffline(){
     int pid = getpid();
     string path = std::experimental::filesystem::current_path();
-    Measurement offline("GMW", id, path, "offline");
+    int numberOfParties = getParties().size() + 1;
+    Measurement offline("GMW", id, path, "offline", m_repetitionId, numberOfParties);
     {
         generateTriples();
     }
@@ -58,7 +61,8 @@ void GMWParty::runOffline(){
 
 void GMWParty::runOnline(){
     string path = std::experimental::filesystem::current_path();
-    Measurement offline("GMW", id, path, "online");
+    int numberOfParties = getParties().size() + 1;
+    Measurement offline("GMW", id, path, "online", m_repetitionId, numberOfParties);
     {
         inputSharing();
         computeCircuit();

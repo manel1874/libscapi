@@ -1,7 +1,7 @@
 #! /bin/bash
-for i in `seq 0 1 2`;
+for i in `seq 0 1 $((${1}-1))`;
 do
-        ./GMW $i $1 Parties $2 $3 &
+        ./GMW -partyID ${i} -circuitFileName ${2} -partiesFileName ${3} -inputfileName AesInputs${i}.txt -numThreads ${4} -repetitionId ${5} &
         echo "Running $i..."
 done
 

@@ -34,7 +34,7 @@ private:
     string inputFileName;
     vector<byte> output;
 	vector<byte> myInputBits;
-    Measurement * m_measure;
+    int m_repetitionId;
 
 	/*
 	 * Generates Beaver's multiplication triples to use in the protocol.

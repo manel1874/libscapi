@@ -17,46 +17,42 @@ int main(int argc, char* argv[]) {
     GMWParty party(argc, argv);
 
     auto parties = party.getParties();
-    for (int i=0; i<10; i++) {
 
-        //cout << "parties size : " << parties.size() << endl;
-        for (int i = 0; i < parties.size(); i++) {
-            if (parties[i]->getID() < party.getID()) {
-                parties[i]->getChannel()->write(tmp);
-                parties[i]->getChannel()->read(tmpBytes, tmp.size());
-            } else {
-                parties[i]->getChannel()->read(tmpBytes, tmp.size());
-                parties[i]->getChannel()->write(tmp);
-            }
+    for (int i = 0; i < parties.size(); i++) {
+        if (parties[i]->getID() < party.getID()) {
+            parties[i]->getChannel()->write(tmp);
+            parties[i]->getChannel()->read(tmpBytes, tmp.size());
+        } else {
+            parties[i]->getChannel()->read(tmpBytes, tmp.size());
+            parties[i]->getChannel()->write(tmp);
         }
-
-        //cout << "----------start protocl--------------" << endl;
-        //party.run();
-
-        //cout << "----------finish protocl--------------" << endl;
-
-        //offline phase
-        start = chrono::high_resolution_clock::now();
-        party.runOffline();
-        end = chrono::high_resolution_clock::now();
-        generateTotalTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-        allOfflineTimes += generateTotalTime;
-        //cout<<"Offline time: "<<generateTotalTime <<" milliseconds"<<endl;
-        party.readInputs();
-        //Online phase
-        start = chrono::high_resolution_clock::now();
-        party.runOnline();
-        output = party.getOutput();
-        end = chrono::high_resolution_clock::now();
-        generateTotalTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-        allOnlineTimes += generateTotalTime;
-        //cout<<"online time: "<<generateTotalTime <<" milliseconds"<<endl;
     }
+
+
+    //offline phase
+    start = chrono::high_resolution_clock::now();
+    party.runOffline();
+    end = chrono::high_resolution_clock::now();
+    generateTotalTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    allOfflineTimes += generateTotalTime;
+    party.readInputs();
+
+    //Online phase
+    start = chrono::high_resolution_clock::now();
+    party.runOnline();
+    output = party.getOutput();
+    end = chrono::high_resolution_clock::now();
+    generateTotalTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    allOnlineTimes += generateTotalTime;
+
     cout << "circuit output:" << endl;
-    for (int i = 0; i < output.size(); i++) {
+    for (int i = 0; i < output.size(); i++)
+    {
         cout << (int) output[i] << " ";
     }
+
     cout << endl;
+
     cout<<"average offline time = "<<allOfflineTimes/10<<endl;
     cout<<"average online time = "<<allOnlineTimes/10<<endl;
     return 0;
