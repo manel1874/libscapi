@@ -11,7 +11,6 @@
 #include "gmp.h"
 #include <libscapi/include/primitives/Prg.hpp>
 
-
 using namespace std;
 using namespace NTL;
 

@@ -2,13 +2,16 @@ cmake_minimum_required(VERSION 3.5)
 project(scapi)
 
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx -maes -mpclmul -DRDTSC -DTEST=AES128  -O3 -mbmi2")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx -maes -mpclmul -DRDTSC -DTEST=AES128  -O3 -mbmi2 -flto")
 
 SET (BOOST_ROOT $ENV{HOME}/boost_1_64_0/)
 SET (BOOST_INCLUDEDIR $ENV{HOME}/boost_1_64_0/)
 SET (BOOST_LIBRARYDIR $ENV{HOME}/boost_1_64_0/stage/lib)
 SET(SCAPI_BASE_DIR $ENV{HOME}/libscapi)
 find_package(Boost COMPONENTS system thread REQUIRED)
+SET(CMAKE_AR  "gcc-ar")
+SET(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> qcs <TARGET> <LINK_FLAGS> <OBJECTS>")
+SET(CMAKE_CXX_ARCHIVE_FINISH   true)
 
 INCLUDE_DIRECTORIES($ENV{HOME} ${BOOST_INCLUDEDIR} ${SCAPI_BASE_DIR}/lib ${SCAPI_BASE_DIR}/install/include
         ${SCAPI_BASE_DIR}/lib/OTExtensionBristol )
