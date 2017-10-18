@@ -31,12 +31,12 @@ $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
 LINKER_OPTIONS = $(INCLUDE_ARCHIVES_START) install/lib/libOTExtensionBristol.a install/lib/libsimpleot.a install/lib/libntl.a install/lib/libboost_sytem.a install/lib/libboost_thread.a install/lib/libmiracl.a install/lib/libblake2.a -lpthread -lgmp -lcrypto -lssl -lOTExtension -lMaliciousOTExtension -ldl $(INCLUDE_ARCHIVES_END)
 LIBRARIES_DIR  = -L$(HOME)/boost_1_64_0/stage/lib -Linstall/lib
 LD_FLAGS = 
-SUMO = yes
+SUMO = no
 
 
 all: libs libscapi tests
 	echo $(WITH_EMP)
-libs: compile-boost compile-ntl compile-emp-tool compile-emp-ot compile-emp-m2pc compile-blake compile-miracl compile-otextension compile-otextension-malicious compile-otextension-bristol
+libs: compile-boost compile-ntl compile-emp-tool compile-emp-ot compile-emp-m2pc compile-blake compile-FourQlib compile-miracl compile-otextension compile-otextension-malicious compile-otextension-bristol
 libscapi: directories $(SLib)
 directories: $(OUT_DIR)
 
@@ -116,15 +116,27 @@ compile-blake:
 #	@ cp $(builddir)/BLAKE2/libblake2.a install/lib/
 	@touch compile-blake
 
+compile-FourQlib:
+	@mkdir -p $(CURDIR)/install/lib
+	echo "Compiling the FourQlib library"
+	cp -r lib/FourQlib $(builddir)
+	cd $(builddir)/FourQlib/FourQ_64bit_and_portable/; $(MAKE) ARCH=x64	
+	cd $(builddir)/FourQlib/FourQ_64bit_and_portable/; ar cr libFourQlib.a crypto_tests.o eccp2_core.o eccp2.o fp2_1271_AVX2.o  kex.o schnorrq.o test_extras.o crypto_util.o eccp2_no_endo.o ecc_tests.o fp_tests.o random.o sha512.o
+	cd $(builddir)/FourQlib/FourQ_64bit_and_portable/; ranlib libFourQlib.a
+	cp $(builddir)/FourQlib/FourQ_64bit_and_portable/*.a $(CURDIR)/install/lib/
+	mkdir -p $(CURDIR)/install/include/FourQlib
+	cp $(builddir)/FourQlib/FourQ_64bit_and_portable/FourQ_api.h $(CURDIR)/install/include/FourQlib	
+	touch compile-FourQlib
+
 compile-boost:
-	mkdir -p $(CURDIR)/install/lib
-	mkdir -p $(CURDIR)/install/include
+	@mkdir -p $(CURDIR)/install/lib
+	@mkdir -p $(CURDIR)/install/include
 	echo "Compiling the boost library"
-	cp -r lib/boost_1_64_0/ $(builddir)/
+	@cp -r lib/boost_1_64_0/ $(builddir)/
 	cd $(builddir)/boost_1_64_0/; bash -c "BOOST_BUILD_PATH='./' ./bootstrap.sh --with-libraries=thread,system && ./b2"; 
-	cp $(builddir)/boost_1_64_0/stage/lib/*.a $(CURDIR)/install/lib/
-	cp -r $(builddir)/boost_1_64_0/boost/ $(CURDIR)/install/include/
-	touch compile-boost
+	@cp $(builddir)/boost_1_64_0/stage/lib/*.a $(CURDIR)/install/lib/
+	@cp -r $(builddir)/boost_1_64_0/boost/ $(CURDIR)/install/include/
+	@touch compile-boost
 
 compile-ntl:
 	echo "Compiling the NTL library..."
@@ -216,6 +228,11 @@ clean-blake:
 	@rm -rf $(builddir)/BLAKE2
 	@rm -f compile-blake
 
+clean-FourQlib:
+	@echo "Cleaning FourQlib library"
+	@rm -rf $(builddir)/FourQlib
+	@rm -f compile-FourQlib
+
 clean-emp:
 	@echo "Cleaning EMP library"
 	@rm -rf $(builddir)/EMP
@@ -238,5 +255,5 @@ clean-boost:
 	@rm -rf $(builddir)/boost_1_64_0
 	@rm -f compile-boost
 
-clean: clean-boost clean-emp clean-otextension-bristol clean-otextension-malicious clean-otextension clean-ntl clean-blake clean-miracl clean-miracl-cpp clean-cpp clean-install clean-tests
+clean: clean-boost clean-emp clean-otextension-bristol clean-otextension-malicious clean-otextension clean-ntl clean-blake clean-FourQlib clean-miracl clean-miracl-cpp clean-cpp clean-install clean-tests
 
