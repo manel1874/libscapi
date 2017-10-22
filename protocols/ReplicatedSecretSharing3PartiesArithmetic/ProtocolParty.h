@@ -77,7 +77,12 @@ public:
     ProtocolParty(int argc, char* argv[]);
 
     /**
-     * Executes the protocol.
+     * This method runs the protocol:
+     * 2. Generate Randomness
+     * 3. Input Preparation
+     * 4. Computation Phase
+     * 5. Verification Phase
+     * 6. Output Phase
      */
     void run() override;
 
@@ -90,8 +95,20 @@ public:
         return true;
     }
 
+    /**
+     * This method runs the protocol:
+     * Generate Randomness
+     *
+     */
     virtual void runOffline() override;
 
+    /**
+     * This method runs the protocol:
+     * Input Preparation
+     * Computation Phase
+     * Verification Phase
+     * Output Phase
+     */
     virtual void runOnline() override;
 
     void roundFunctionSync(vector<vector<byte>> &sendBufs, vector<vector<byte>> &recBufs, int round);
@@ -102,17 +119,6 @@ public:
      * This method reads text file and inits a vector of Inputs according to the file.
      */
     void readMyInputs();
-
-    /**
-     * This method runs the protocol:
-     * 1. Initialization Phase
-     * 2. Generate Randomness
-     * 3. Input Preparation
-     * 4. Computation Phase
-     * 5. Verification Phase
-     * 6. Output Phase
-     */
-    void run(int iteration);
 
     /**
      * In case the user use the protocol with the offline/online mode, he should also update the iteration number.
@@ -379,98 +385,6 @@ void ProtocolParty<FieldType>::runOnline() {
     }
 
     protocolTimer->outputPhaseArr[iteration] =duration;
-}
-
-template <class FieldType>
-void ProtocolParty<FieldType>::run(int iteration) {
-
-    auto t1start = high_resolution_clock::now();
-
-    auto t1 = high_resolution_clock::now();
-
-    if(fieldByteSize > 4) {
-        generateRandomness61Bits();
-    } else {
-        generateRandomness31Bits();
-    }
-
-    auto t2 = high_resolution_clock::now();
-
-    auto duration = duration_cast<milliseconds>(t2-t1).count();
-    if(flag_print_timings) {
-        cout << "time in milliseconds  generateRandomness: " << duration << endl;
-    }
-
-    protocolTimer->preparationPhaseArr[iteration] =duration;
-
-    t1 = high_resolution_clock::now();
-    inputPreparation();
-
-    t2 = high_resolution_clock::now();
-
-    duration = duration_cast<milliseconds>(t2-t1).count();
-    if(flag_print_timings) {
-        cout << "time in milliseconds   inputPreparation: " << duration << endl;
-    }
-
-    protocolTimer->inputPreparationArr[iteration] =duration;
-
-
-    t1 = high_resolution_clock::now();
-    computationPhase();
-
-
-    t2 = high_resolution_clock::now();
-
-    duration = duration_cast<milliseconds>(t2-t1).count();
-    if(flag_print_timings) {
-        cout << "time in milliseconds   computationPhase: " << duration << endl;
-    }
-
-    protocolTimer->computationPhaseArr[iteration] =duration;
-
-
-    t1 = high_resolution_clock::now();
-
-
-    if(circuit.getNrOfMultiplicationGates() > 0) {
-
-        if(fieldByteSize <= 4) {
-            verification(x_triple, y_triple, z_triple, a_triple, b_triple, c_triple, 2 * circuit.getNrOfMultiplicationGates());
-        } else {
-            verification(x_triple, y_triple, z_triple, a_triple, b_triple, c_triple, circuit.getNrOfMultiplicationGates());
-        }
-    }
-
-
-
-    t2 = high_resolution_clock::now();
-
-    duration = duration_cast<milliseconds>(t2-t1).count();
-    if(flag_print_timings) {
-        cout << "time in milliseconds   verification: " << duration << endl;
-    }
-
-    protocolTimer->verificationPhaseArr[iteration] =duration;
-
-    t1 = high_resolution_clock::now();
-    outputPhase();
-
-
-    t2 = high_resolution_clock::now();
-
-    duration = duration_cast<milliseconds>(t2-t1).count();
-    if(flag_print_timings) {
-        cout << "time in milliseconds   outputPhase: " << duration << endl;
-    }
-
-    protocolTimer->outputPhaseArr[iteration] =duration;
-
-    auto t2end = high_resolution_clock::now();
-
-    duration = duration_cast<milliseconds>(t2end-t1start).count();
-    protocolTimer->totalTimeArr[iteration] = duration;
-
 }
 
 template <class FieldType>

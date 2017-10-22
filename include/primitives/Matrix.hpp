@@ -13,7 +13,6 @@
 #include <iostream>
 #include <vector>
 #include <array>
-#include <libscapi/include/circuits/arithmeticCircuit/TGate.hpp>
 #include <libscapi/include/primitives/Mersenne.hpp>
 
 
