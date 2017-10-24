@@ -28,9 +28,9 @@
 
 #include "YaoParties.hpp"
 #include <tuple>
-#ifndef _WIN32
+//#ifndef _WIN32
 #include "../../include/circuits/Compat.h"
-#endif
+//#endif
 
 vector<byte> readInputAsVector(string input_file, int numInputs) {
 	auto sc = scannerpp::Scanner(new scannerpp::File(input_file));
