@@ -72,7 +72,7 @@ OTExtensionBristolSender::OTExtensionBristolSender(const string &senderAddress, 
                                                    const shared_ptr<CommParty> &channel) {
 
 	//Call the init of the base class. The host name is hard coded to localhost since the sender is the  listener.
-	init("ec2-54-165-19-113.compute-1.amazonaws.com", port, 0, isSemiHonest, channel);
+	init(senderAddress, port, 0, isSemiHonest, channel);
 }
 
 
