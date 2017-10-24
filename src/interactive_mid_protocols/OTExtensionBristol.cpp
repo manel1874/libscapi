@@ -2,7 +2,7 @@
 #include "../../include/interactive_mid_protocols/OTExtensionBristol.hpp"
 
 
-void OTExtensionBristolBase::init(const string& receiverAddress, const string& senderAddress, int port, int my_num, bool isSemiHonest, const shared_ptr<CommParty> & channel)
+void OTExtensionBristolBase::init(const string& senderAddress, int port, int my_num, bool isSemiHonest, const shared_ptr<CommParty> & channel)
 {
 
 	this->channel = channel;
@@ -17,8 +17,8 @@ void OTExtensionBristolBase::init(const string& receiverAddress, const string& s
 
 	//Set the host names. The sender is the listener.
 	vector<string> names(2);
-	names[my_num] = senderAddress;
-	names[1-my_num] = receiverAddress;
+	names[my_num] = "localhost";
+	names[1-my_num] = senderAddress;
 	pParty.reset(new TwoPartyPlayer(Names(my_num, 0, names), 1 - my_num, port));
 
 	//init the base OT with 128 ot's with 128 bit length for the relevant role.
@@ -68,8 +68,8 @@ void OTExtensionBristolBase::shrinkArray(int sourceElementSize, int targetElemen
     }
 }
 
-OTExtensionBristolSender::OTExtensionBristolSender(const string& receiverAddress, const string& senderAddress,
-                                                   int port,bool isSemiHonest, const shared_ptr<CommParty> & channel) {
+OTExtensionBristolSender::OTExtensionBristolSender(const string &senderAddress, int port, bool isSemiHonest,
+                                                   const shared_ptr<CommParty> &channel) {
 
 	//Call the init of the base class. The host name is hard coded to localhost since the sender is the  listener.
 	init("ec2-54-165-19-113.compute-1.amazonaws.com", port, 0, isSemiHonest, channel);
@@ -247,9 +247,9 @@ byte* OTExtensionBristolBase::createCountersArray(int factor) const {//Create th
     return counters;
 }
 
-OTExtensionBristolReceiver::OTExtensionBristolReceiver(const string& selfAddress, const string& senderAddress, int port,bool isSemiHonest, const shared_ptr<CommParty> & channel) {
+OTExtensionBristolReceiver::OTExtensionBristolReceiver(const string& senderAddress, int port,bool isSemiHonest, const shared_ptr<CommParty> & channel) {
 
-	init(selfAddress, senderAddress, port, 1, isSemiHonest, channel);
+	init(senderAddress, port, 1, isSemiHonest, channel);
 }
 
 shared_ptr<OTBatchROutput> OTExtensionBristolReceiver::transfer(OTBatchRInput * input){
