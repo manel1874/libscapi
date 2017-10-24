@@ -82,11 +82,11 @@ PartyOne::PartyOne(int argc, char* argv[]) : Protocol("SemiHonestYao", argc, arg
 	// create the semi honest OT extension sender
 	SocketPartyData senderParty(IpAddress::from_string(sender_ip), sender_port);
 	cout<<"sender ip: "<<senderParty.getIpAddress() <<"port:"<<senderParty.getPort()<<endl;
-#ifdef _WIN32
+//#ifdef _WIN32
 	otSender = new OTSemiHonestExtensionSender(senderParty, 163, 1);
-#else
-	otSender = new OTExtensionBristolSender(sender_ip, senderParty.getPort(), true, channel);
-#endif
+//#else
+//	otSender = new OTExtensionBristolSender(sender_ip, senderParty.getPort(), true, channel);
+//#endif
 
 	// connect to party two
 	channel->join(500, 5000);
@@ -203,11 +203,11 @@ PartyTwo::PartyTwo(int argc, char* argv[]) : Protocol("SemiHonestYao", argc, arg
 	// create the OT receiver.
 	SocketPartyData senderParty(IpAddress::from_string(sender_ip), sender_port);
 	cout<<"sender ip: "<<senderParty.getIpAddress() <<"port:"<<senderParty.getPort()<<endl;
-#ifdef _WIN32
+//#ifdef _WIN32
 	otReceiver = new OTSemiHonestExtensionReceiver(senderParty, 163, 1);
-#else
-	otReceiver = new OTExtensionBristolReceiver(senderParty.getIpAddress().to_string(), senderParty.getPort(), true, channel);
-#endif
+//#else
+//	otReceiver = new OTExtensionBristolReceiver(senderParty.getIpAddress().to_string(), senderParty.getPort(), true, channel);
+//#endif
 
 
 	// connect to party one
