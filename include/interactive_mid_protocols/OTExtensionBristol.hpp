@@ -78,7 +78,7 @@ protected:
 	/**
 	 * Initializes the underlying OTExtensionWithMatrix object, the communication and runs the base ot.
 	 */
-	void init(const string& senderAddress, int port, int my_num, bool isSemiHonest, const shared_ptr<CommParty> & channel);
+	void init(const string& selfAddress, const string& senderAddress, int port, int my_num, bool isSemiHonest, const shared_ptr<CommParty> & channel);
 
     /**
      * Shrinks the given array to the given size.
@@ -123,7 +123,8 @@ class OTExtensionBristolReceiver: public OTExtensionBristolBase,  public OTBatch
 
 public:
 	//OTExtensionBristolReciever(const string& senderAddress, int port, bool isSemiHonest);
-	OTExtensionBristolReceiver(const string& senderAddress, int port, bool isSemiHonest, const shared_ptr<CommParty> & channel = nullptr);
+	OTExtensionBristolReceiver(const string& selfAddress, const string& senderAddress, int port,
+                               bool isSemiHonest, const shared_ptr<CommParty> & channel = nullptr);
 
 	virtual shared_ptr<OTBatchROutput> transfer(OTBatchRInput * input) override;
 };
@@ -137,7 +138,8 @@ public:
 class OTExtensionBristolSender: public OTExtensionBristolBase, public OTBatchSender{
 
 public:
-	OTExtensionBristolSender(int port, bool isSemiHonest, const shared_ptr<CommParty> & channel = nullptr);
+	OTExtensionBristolSender(const string& selfAddress, const string& senderAddress,
+							 int port, bool isSemiHonest, const shared_ptr<CommParty> & channel = nullptr);
 
 	virtual shared_ptr<OTBatchSOutput> transfer(OTBatchSInput * input) override;
 

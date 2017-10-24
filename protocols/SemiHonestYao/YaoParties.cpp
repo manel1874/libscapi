@@ -60,10 +60,10 @@ PartyOne::PartyOne(int argc, char* argv[]) : Protocol("SemiHonestYao", argc, arg
 	int receiver_port, sender_port;
 
 	//get partys IPs and ports data
-	sender_port = stoi(cf.Value("", "party_0_port"));
-	sender_ip = cf.Value("", "party_0_ip");
-	receiver_port = stoi(cf.Value("", "party_1_port"));
-	receiver_ip = cf.Value("", "party_1_ip");
+	sender_port = stoi(cf.Value("", "party_1_port"));
+	sender_ip = cf.Value("", "party_1_ip");
+	receiver_port = stoi(cf.Value("", "party_0_port"));
+	receiver_ip = cf.Value("", "party_0_ip");
 
 	cout<<"sender ip: "<<sender_ip <<"port:"<<sender_port<<endl;
 	cout<<"receiver ip: "<<receiver_ip<<"port:"<<receiver_port<<endl;
@@ -85,7 +85,7 @@ PartyOne::PartyOne(int argc, char* argv[]) : Protocol("SemiHonestYao", argc, arg
 #ifdef _WIN32
 	otSender = new OTSemiHonestExtensionSender(senderParty, 163, 1);
 #else
-	otSender = new OTExtensionBristolSender(senderParty.getPort(), true, channel);
+	otSender = new OTExtensionBristolSender(receiver_ip, sender_ip, senderParty.getPort(), true, channel);
 #endif
 
 	// connect to party two
@@ -206,7 +206,7 @@ PartyTwo::PartyTwo(int argc, char* argv[]) : Protocol("SemiHonestYao", argc, arg
 #ifdef _WIN32
 	otReceiver = new OTSemiHonestExtensionReceiver(senderParty, 163, 1);
 #else
-	otReceiver = new OTExtensionBristolReceiver(senderParty.getIpAddress().to_string(), senderParty.getPort(), true, channel);
+	otReceiver = new OTExtensionBristolReceiver(receiver_ip, senderParty.getIpAddress().to_string(), senderParty.getPort(), true, channel);
 #endif
 
 
