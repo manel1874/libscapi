@@ -39,11 +39,11 @@
 #undef AES_KEY
 #define AES_KEY OT_AES_KEY
 
-#ifdef _WIN32
+//#ifdef _WIN32
 #include "../../include/interactive_mid_protocols/OTSemiHonestExtension.hpp"
-#else
-#include "../../include/interactive_mid_protocols/OTExtensionBristol.hpp"
-#endif
+//#else
+//#include "../../include/interactive_mid_protocols/OTExtensionBristol.hpp"
+//#endif
 #undef AES_KEY
 #include <thread>
 #include "../../include/infra/Scanner.hpp"
