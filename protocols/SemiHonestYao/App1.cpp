@@ -96,17 +96,17 @@ int main(int argc, char* argv[]) {
     int partyNum = stoi(parameters["partyID"]);
 
 
-	if (partyNum == 1) {
+	if (partyNum == 0) {
 		// create Party one with the previous created objects.
 		PartyOne p1(argc, argv);
 		execute_party_one(&p1);
 	}
-	else if (partyNum == 2) {
+	else if (partyNum == 1) {
 		PartyTwo p2(argc, argv);
 		execute_party_two(&p2);
 		auto output = p2.getOutput();
 	} else {
-		std::cerr << "Usage: libscapi_examples yao <party_number(1|2)> <config_path>" << std::endl;
+		std::cerr << "Usage: libscapi_examples yao <party_number(0|1)> <config_path>" << std::endl;
 		return 1;
 	}
 

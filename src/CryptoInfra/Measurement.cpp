@@ -67,7 +67,7 @@ Measurement::~Measurement()
     try
     {
         ofstream myfile;
-        myfile.open(filePath, ios::out | ios::app);
+        myfile.open(filePath, ios::out);
         unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
         if (myfile.is_open())
         {

@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.5)
 project(scapi)
 
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx -maes -mpclmul -DRDTSC -DTEST=AES128  -O3 -mbmi2 -flto")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx -maes -msse4.1 -mpclmul -DRDTSC -DTEST=AES128  -O3 -mbmi2 -flto")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mavx -maes -msse4.1 -mpclmul -O3")
 
 SET (BOOST_ROOT $ENV{HOME}/boost_1_64_0/)
 SET (BOOST_INCLUDEDIR $ENV{HOME}/boost_1_64_0/)
@@ -19,6 +20,10 @@ link_directories(/usr/ssl/lib/ $ENV{HOME}/libscapi/install/lib ${BOOST_LIBRARYDI
 
 
 set(SOURCE_FILES
+        src/circuits_c/intrin_sequential_ks1_enc1.c
+        src/circuits_c/intrin_sequential_ks2_enc2.c
+        src/circuits_c/intrin_sequential_ks4_enc4.c
+        src/circuits_c/intrin_sequential_ks4_enc8.c
         src/circuits/BooleanCircuits.cpp
         src/circuits/FourToTwoGarbledBoleanCircuitNoAssumptions.cpp
         src/circuits/FreeXorGarbledBooleanCircuit.cpp
@@ -33,10 +38,6 @@ set(SOURCE_FILES
         src/circuits/StandardGarbledBooleanCircuit.cpp
         src/circuits/TedKrovetzAesNiWrapperC.cpp
         src/circuits/arithmeticCircuit/ArithmeticCircuit.cpp
-#        src/circuits_c/intrin_sequential_ks1_enc1.c
-#        src/circuits_c/intrin_sequential_ks2_enc2.c
-#        src/circuits_c/intrin_sequential_ks4_enc4.c
-#        src/circuits_c/intrin_sequential_ks4_enc8.c
         src/comm/Comm.cpp
         src/comm/MPCCommunication.cpp
         src/infra/CircuitConverter.cpp
