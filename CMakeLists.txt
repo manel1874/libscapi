@@ -28,6 +28,7 @@ set(SOURCE_FILES
         src/circuits/FourToTwoGarbledBoleanCircuitNoAssumptions.cpp
         src/circuits/FreeXorGarbledBooleanCircuit.cpp
         src/circuits/GarbledBooleanCircuit.cpp
+        src/circuits/GarbledBooleanCircuitNoIntrinsics.cpp
         src/circuits/GarbledBooleanCircuitFixedKey.cpp
         src/circuits/GarbledBooleanCircuitNoFixedKey.cpp
         src/circuits/GarbledCircuitFactory.cpp

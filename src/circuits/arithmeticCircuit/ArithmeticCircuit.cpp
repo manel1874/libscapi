@@ -96,7 +96,7 @@ void ArithmeticCircuit::readCircuit(const char* fileName)
                 gates[gateIndex].input1 = -1;//irrelevant
                 gates[gateIndex].input2 = -1;//irrelevant
                 gates[gateIndex].output = partiesInputs[i][j];//the wire index
-                gates[gateIndex].party = i + 1;
+                gates[gateIndex].party = i;
 
                 gateIndex++;
 
@@ -149,7 +149,7 @@ void ArithmeticCircuit::readCircuit(const char* fileName)
                 gates[gateIndex].input1 = partiesOutputs[i][j];
                 gates[gateIndex].input2 = 0;//irrelevant
                 gates[gateIndex].output = 0;//irrelevant
-                gates[gateIndex].party = i + 1;
+                gates[gateIndex].party = i;
 
                 gateIndex++;
 
