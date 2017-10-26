@@ -138,7 +138,7 @@ public:
 class OTExtensionBristolSender: public OTExtensionBristolBase, public OTBatchSender{
 
 public:
-	OTExtensionBristolSender(const string &senderAddress, int port, bool isSemiHonest,
+	OTExtensionBristolSender(int port, bool isSemiHonest,
                                  const shared_ptr<CommParty> &channel);
 
 	virtual shared_ptr<OTBatchSOutput> transfer(OTBatchSInput * input) override;
