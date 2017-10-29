@@ -31,7 +31,13 @@
 #include <boost/thread/thread.hpp>
 #include "../../include/comm/Comm.hpp"
 #define AES_KEY BC_AES_KEY // AES_KEY is defined both in GarbledBooleanCircuit and in OTSemiHonestExtension
-#include "../../include/circuits/GarbledBooleanCircuit.h"
+#define NO_AESNI
+
+#ifdef NO_AESNI
+    #include "../../include/circuits/GarbledBooleanCircuitNoIntrinsics.h"
+#else
+    #include "../../include/circuits/GarbledBooleanCircuit.h"
+#endif
 #include "../../include/CryptoInfra/Protocol.hpp"
 #include "../../include/CryptoInfra/SecurityLevel.hpp"
 #include "../../include/circuits/GarbledCircuitFactory.hpp"
@@ -39,15 +45,17 @@
 #undef AES_KEY
 #define AES_KEY OT_AES_KEY
 
-//#ifdef _WIN32
+#ifdef _WIN32
 #include "../../include/interactive_mid_protocols/OTSemiHonestExtension.hpp"
-//#else
-//#include "../../include/interactive_mid_protocols/OTExtensionBristol.hpp"
-//#endif
+#else
+#include "../../include/interactive_mid_protocols/OTExtensionBristol.hpp"
+#endif
 #undef AES_KEY
 #include <thread>
 #include "../../include/infra/Scanner.hpp"
 #include "../../include/infra/ConfigFile.hpp"
+
+
 
 
 struct YaoConfig {
@@ -104,14 +112,20 @@ private:
 	int id;
 	boost::asio::io_service io_service;
 	OTBatchSender * otSender;			//The OT object that used in the protocol.	
-	GarbledBooleanCircuit * circuit;	//The garbled circuit used in the protocol.
+
+#ifdef NO_AESNI
+	GarbledBooleanCircuitNoIntrinsics * circuit;	//The garbled circuit used in the protocol.
+#else
+	GarbledBooleanCircuit* circuit;	//The garbled circuit used in the protocol.
+#endif
 	shared_ptr<CommParty> channel;				//The channel between both parties.
-	tuple<block*, block*, vector<byte> > values;//this tuple includes the input and output keys (block*) and the translation table (vector)
-														 //to be used after filled by garbling the circuit
+
+    tuple<byte*, byte*, vector<byte> > values;//this tuple includes the input and output keys (block*) and the translation table (vector)
+                                        //to be used after filled by garbling the circuit
+
 	vector<byte> ungarbledInput;				//Inputs for the protocol
 	YaoConfig yaoConfig;
-	
-	//boost::thread t;
+
 
 	/**
 	* Sends p1 input keys to p2.
@@ -169,7 +183,11 @@ private:
 	int id;
 	boost::asio::io_service io_service;
 	OTBatchReceiver * otReceiver;			//The OT object that used in the protocol.	
-	GarbledBooleanCircuit * circuit;	//The garbled circuit used in the protocol.
+#ifdef NO_AESNI
+	GarbledBooleanCircuitNoIntrinsics * circuit;	//The garbled circuit used in the protocol.
+#else
+	GarbledBooleanCircuit* circuit;	//The garbled circuit used in the protocol.
+#endif
 	shared_ptr<CommParty> channel;				//The channel between both parties.
 	byte* p1Inputs;
 	int p1InputsSize;

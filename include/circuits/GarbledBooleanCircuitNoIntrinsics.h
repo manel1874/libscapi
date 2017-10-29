@@ -15,7 +15,8 @@ struct GarbledGate;
 #include <vector>
 #include <tuple>
 #include <openssl/rand.h>
-#include "TedKrovetzAesNiWrapperC.h"
+#include "../primitives/PrfOpenSSL.hpp"
+//#include "TedKrovetzAesNiWrapperC.h"
 
 /*
  * GarbledBooleanCircuitNoIntrinsics is a general abstract class for garbled circuits.
@@ -34,13 +35,13 @@ class GarbledBooleanCircuitNoIntrinsics
 {
 
 private:
-    byte* deltaFreeXor;//This is used to get the second garbled value in freeXor optimization. The second garbled value is the XOR
+    vector<byte> deltaFreeXor;//This is used to get the second garbled value in freeXor optimization. The second garbled value is the XOR
     //of the first key and the delta. The delta is chosen at random.
     //We use a pointer since new with 32 bit does not 16-align the variable by default.
 
 
-    byte* encryptedChunkKeys;//The result of chunk encrypting indexArray.
-    byte* indexArray;//An array that holds the number 0 to the number of nonXorGates and is calculated in advence.
+    vector<byte> encryptedChunkKeys;//The result of chunk encrypting indexArray.
+    vector<byte> indexArray;//An array that holds the number 0 to the number of nonXorGates and is calculated in advence.
     //The purpuse of this array is that we can calculate. this array and all the keys of the circuit in advence using ecb mode
     //with one chuck gaining pipelining
 
@@ -118,10 +119,9 @@ protected:
     /two aes encryption schemes that will be used in all the derived classes
     /The seed is given by the user of the garbled circuit and the fixedKey is hardcoded
     */
+//    SecretKey aesSeedKey;//We use a pointer since new with 32 bit does not 16-align the variable by default
 
-    AES_KEY aesSeedKey;//We use a pointer since new with 32 bit does not 16-align the variable by default
-
-
+    OpenSSLAES aes; //The object used to encrypt the keys
     //These values could have been defined locally in the functions that use them, however, if we define and allocate
     //these values in construction, the performance is better. Allocating the memory consumes negligible time, but using
     //values of these array without some initialization (in our case using memset) causes a lot of cache misses and thus
@@ -129,11 +129,7 @@ protected:
     byte* garbledWires;
     byte* computedWires;
 
-    block fixedKey;//ﬁxed-key AES used for the garbling process. This will be hardcoded unless the user changes it. The fixed key
-    //optimization reduses the number of the costly setKey function of the AES prp and thus optimize the performance.
-
-
-    AES_KEY aesFixedKey;//We use a pointer since new with 32 bit does not 16-align the variable by default
+    SecretKey aesFixedKey;//We use a pointer since new with 32 bit does not 16-align the variable by default
 
     int numOfRows;//number of rows
 
