@@ -68,9 +68,9 @@ PartyOne::PartyOne(int argc, char* argv[]) : Protocol("SemiHonestYao", argc, arg
 
 	cout<<"sender ip: "<<sender_ip <<"port:"<<sender_port<<endl;
 	cout<<"receiver ip: "<<receiver_ip<<"port:"<<receiver_port<<endl;
-	SocketPartyData other(IpAddress::from_string(sender_ip), sender_port++);
+	SocketPartyData me(IpAddress::from_string(sender_ip), sender_port++);
 
-	SocketPartyData me(IpAddress::from_string(receiver_ip), receiver_port);
+	SocketPartyData other(IpAddress::from_string(receiver_ip), receiver_port);
 	cout<<"my ip: "<<me.getIpAddress() <<"port:"<<me.getPort()<<endl;
 	cout<<"other ip: "<<other.getIpAddress() <<"port:"<<other.getPort()<<endl;
 	channel = make_shared<CommPartyTCPSynced>(io_service, me, other);
@@ -192,9 +192,9 @@ PartyTwo::PartyTwo(int argc, char* argv[]) : Protocol("SemiHonestYao", argc, arg
 	cout<<"sender ip: "<<sender_ip <<"port:"<<sender_port<<endl;
 	cout<<"receiver ip: "<<receiver_ip<<"port:"<<receiver_port<<endl;
 
-	SocketPartyData other(IpAddress::from_string(receiver_ip), receiver_port);
+	SocketPartyData me(IpAddress::from_string(receiver_ip), receiver_port);
 
-	SocketPartyData me(IpAddress::from_string(sender_ip), sender_port++);
+	SocketPartyData other(IpAddress::from_string(sender_ip), sender_port++);
 	cout<<"my ip: "<<me.getIpAddress() <<"port:"<<me.getPort()<<endl;
 	cout<<"other ip: "<<other.getIpAddress() <<"port:"<<other.getPort()<<endl;
 	channel = make_shared<CommPartyTCPSynced>(io_service, me, other);
