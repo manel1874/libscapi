@@ -182,10 +182,10 @@ PartyTwo::PartyTwo(int argc, char* argv[]) : Protocol("SemiHonestYao", argc, arg
 	int receiver_port, sender_port;
 
 	//get partys IPs and ports data
-	sender_port = stoi(cf.Value("", "party_0_port"));
-	sender_ip = cf.Value("", "party_0_ip");
-	receiver_port = stoi(cf.Value("", "party_1_port"));
-	receiver_ip = cf.Value("", "party_1_ip");
+	sender_port = stoi(cf.Value("", "party_1_port"));
+	sender_ip = cf.Value("", "party_1_ip");
+	receiver_port = stoi(cf.Value("", "party_0_port"));
+	receiver_ip = cf.Value("", "party_0_ip");
 	cout<<"sender ip: "<<sender_ip <<"port:"<<sender_port<<endl;
 	cout<<"receiver ip: "<<receiver_ip<<"port:"<<receiver_port<<endl;
 
