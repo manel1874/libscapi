@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
-project(SemiHonetYao)
+project(SemiHonestYao)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -maes -mpclmul -mbmi2 ")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -maes -mavx -mpclmul -mbmi2 ")
 
 SET (BOOST_ROOT $ENV{HOME}/boost_1_64_0/)
 SET (BOOST_INCLUDEDIR $ENV{HOME}/boost_1_64_0/)
@@ -18,9 +18,9 @@ set(SOURCE_FILES YaoParties.cpp App1.cpp)
 link_directories($ENV{HOME}/libscapi/install/lib ${BOOST_LIBRARYDIR})
 
 
-add_executable(SemiHonetYao ${SOURCE_FILES})
+add_executable(SemiHonestYao ${SOURCE_FILES})
 
-TARGET_LINK_LIBRARIES(SemiHonetYao
+TARGET_LINK_LIBRARIES(SemiHonestYao
         $ENV{HOME}/libscapi/libscapi.a gmp gmpxx
         OTExtensionBristol
         $ENV{HOME}/libscapi/install/lib/libsimpleot.a
