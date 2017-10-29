@@ -127,6 +127,7 @@ namespace semihonestot {
 			}
 			else
 			{
+                int on = 1;
 				setsockopt(m_hSock, SOL_SOCKET, SO_REUSEADDR, (const char*)&on, sizeof(on));
 				sockAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 			}
