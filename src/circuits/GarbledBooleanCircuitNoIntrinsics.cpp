@@ -45,7 +45,7 @@ GarbledBooleanCircuitNoIntrinsics::GarbledBooleanCircuitNoIntrinsics(const char*
 }
 
 void GarbledBooleanCircuitNoIntrinsics::createCircuitMemory(const char* fileName, bool isNonXorOutputsRequired){
-cout<<"in create circuit memory"<<endl;
+
     createCircuit(fileName, true, isNonXorOutputsRequired);
     numOfRows = 2;
 
@@ -84,16 +84,15 @@ cout<<"in create circuit memory"<<endl;
         memset(garbledWires, 0, KEY_SIZE * ((lastWireIndex + 1) + 1));
         garbledWires = garbledWires+ KEY_SIZE;
     }
-    cout<<"before encrypted chunk"<<endl;
     encryptedChunkKeys.resize(KEY_SIZE * numberOfInputs);
-    cout<<"1"<<endl;
+
 //    if (encryptedChunkKeys.size() == 0) {
 //        cout << "encryptedChunkKeys could not be allocated";
 //        exit(0);
 //    }
-    cout<<"2"<<endl;
+
     memset(encryptedChunkKeys.data(), 0, KEY_SIZE * numberOfInputs);
-cout<<"after"<<endl;
+
     indexArray.resize(KEY_SIZE * numberOfInputs);
 //    if (indexArray.size() == 0) {
 //        cout << "indexArray could not be allocated";
@@ -142,14 +141,14 @@ GarbledBooleanCircuitNoIntrinsics::~GarbledBooleanCircuitNoIntrinsics(void)
 }
 
 void GarbledBooleanCircuitNoIntrinsics::createCircuit(const char* fileName, bool isFreeXor, bool isNonXorOutputsRequired){
-cout<<"in create circuit"<<endl;
+
     //Set the fixed key.
     byte fixedKey [] = {(byte)36, (byte)-100, (byte)50, (byte)-22, (byte)92, (byte)-26, (byte)49, (byte)9, (byte)-82 , (byte)-86, (byte)-51, (byte)-96, (byte)98, (byte)-20, 29,  (byte)-13};
     aesFixedKey = SecretKey(fixedKey, KEY_SIZE, "AES");
-    cout<<"before set key"<<endl;
+
     //create the round keys for the fixed key.
     aes.setKey(aesFixedKey);
-    cout<<"after set key"<<endl;
+
     //AES_set_encrypt_key((const unsigned char *)&fixedKey, 128, &aesFixedKey);
 
     this->isFreeXor = isFreeXor;
