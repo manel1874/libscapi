@@ -153,7 +153,7 @@ namespace semihonestot {
             sockaddr_in sockAddr;
             memset(&sockAddr, 0, sizeof(sockAddr));
             sockAddr.sin_family = AF_INET;
-            sockAddr.sin_addr.s_addr = inet_addr(ip.c_str());
+            //sockAddr.sin_addr.s_addr = inet_addr(ip.c_str());
 
             if (inet_pton(AF_INET, ip.c_str(), &sockAddr.sin_addr) <= 0) {
       			hostent* lphost;
