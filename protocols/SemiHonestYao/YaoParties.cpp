@@ -236,10 +236,14 @@ byte* PartyTwo::computeCircuit(OTBatchROutput * otOutput) {
 	memcpy(&allInputs[p1InputsSize], p2Inputs.data(), p2InputsSize);
 
     // compute the circuit.
-//	block* garbledOutput = (block *)_aligned_malloc(sizeof(block) * 2 * circuit->getNumberOfOutputs(), SIZE_OF_BLOCK); ;
-	byte* garbledOutput = new byte[KEY_SIZE * 2 * circuit->getNumberOfOutputs()];
-//	circuit->compute((block*)&allInputs[0], garbledOutput);
+
+#ifdef NO_AESNI
+    byte* garbledOutput = new byte[KEY_SIZE * 2 * circuit->getNumberOfOutputs()];
 	circuit->compute(&allInputs[0], garbledOutput);
+#else
+    block* garbledOutput = (block *)_aligned_malloc(sizeof(block) * 2 * circuit->getNumberOfOutputs(), SIZE_OF_BLOCK); ;
+    circuit->compute((block*)&allInputs[0], garbledOutput);
+#endif
 
 	// translate the result from compute.
 	byte* circuitOutput = new byte[circuit->getNumberOfOutputs()];

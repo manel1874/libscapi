@@ -32,6 +32,7 @@
 #include "../../include/comm/Comm.hpp"
 #define AES_KEY BC_AES_KEY // AES_KEY is defined both in GarbledBooleanCircuit and in OTSemiHonestExtension
 #define NO_AESNI
+#define KEY_SIZE 16
 
 #ifdef NO_AESNI
     #include "../../include/circuits/GarbledBooleanCircuitNoIntrinsics.h"
@@ -115,13 +116,17 @@ private:
 
 #ifdef NO_AESNI
 	GarbledBooleanCircuitNoIntrinsics * circuit;	//The garbled circuit used in the protocol.
+    tuple<byte*, byte*, vector<byte> > values;//this tuple includes the input and output keys (block*) and the translation table (vector)
+                                        //to be used after filled by garbling the circuit
 #else
 	GarbledBooleanCircuit* circuit;	//The garbled circuit used in the protocol.
+    tuple<block*, block*, vector<byte> > values;//this tuple includes the input and output keys (block*) and the translation table (vector)
+    //to be used after filled by garbling the circuit
 #endif
 	shared_ptr<CommParty> channel;				//The channel between both parties.
 
-    tuple<byte*, byte*, vector<byte> > values;//this tuple includes the input and output keys (block*) and the translation table (vector)
-                                        //to be used after filled by garbling the circuit
+
+
 
 	vector<byte> ungarbledInput;				//Inputs for the protocol
 	YaoConfig yaoConfig;
@@ -152,6 +157,12 @@ public:
 	PartyOne(int argc, char* argv[]);
 
 	~PartyOne() {
+#ifdef NO_AESNI
+        delete [] get<0>(values);
+        delete [] get<1>(values);
+#else
+        //delete inputs and output block arrays
+#endif
 		delete circuit;
 		delete otSender;
 

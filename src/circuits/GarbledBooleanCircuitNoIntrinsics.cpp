@@ -111,7 +111,6 @@ cout<<"after"<<endl;
 
 GarbledBooleanCircuitNoIntrinsics::~GarbledBooleanCircuitNoIntrinsics(void)
 {
-    delete[] numOfInputsForEachParty;
     if (garbledGates != nullptr) {
         delete[] garbledGates;
     }
@@ -192,28 +191,6 @@ cout<<"in create circuit"<<endl;
     translationTable.reserve(numberOfOutputs);
 }
 
-
-int* GarbledBooleanCircuitNoIntrinsics::readInputsFromFile(char* fileName){
-
-    ifstream myfile;
-    int numberOfInputs;
-    int* inputs = nullptr;
-    myfile.open (fileName);
-    if (myfile.is_open())
-    {
-        //get the number of inputs
-        myfile >> numberOfInputs;//get the number of inputs
-        inputs = new int[numberOfInputs];
-
-        //fille the an int array with the bits of the inputs read from the file
-        for(int i=0; i<numberOfInputs; i++){
-            myfile >> inputs[i];
-        }
-    }
-
-    return inputs;
-}
-
 tuple<byte*, byte*, vector<unsigned char> > GarbledBooleanCircuitNoIntrinsics::garble(byte *seed)
 {
     byte *allInputWireValues = new byte[KEY_SIZE * 2 * numberOfInputs];
@@ -241,6 +218,7 @@ void GarbledBooleanCircuitNoIntrinsics::garble(byte *emptyBothInputKeys, byte *e
 
     //init encryption key of the seed and calc all the wire keys
     initAesEncryptionsAndAllKeys(emptyBothInputKeys);
+    delete [] seed;
 
     aes.setKey(aesFixedKey);
     //declare some variables that will be used for garbling
@@ -249,6 +227,14 @@ void GarbledBooleanCircuitNoIntrinsics::garble(byte *emptyBothInputKeys, byte *e
     //two different tweaks one for input0 and the other for input1
     byte* tweak = new byte[KEY_SIZE];
     byte* tweak2 = new byte[KEY_SIZE];
+
+    //create input arrays in order to get the inputs immedietly and not invoke unneeded xor's
+    byte* inputs = new byte[KEY_SIZE * 4];
+    byte* tempInputs = new byte[KEY_SIZE * 4];
+
+    //two temporary values that will eventually be XORed together to calculate the output0 zero wire
+    byte* tempK0 = new byte[KEY_SIZE];
+    byte* tempK1 = new byte[KEY_SIZE];
 
     //go over all the gates in the circuit
     for (int i = 0; i < numberOfGates; i++){
@@ -279,9 +265,7 @@ void GarbledBooleanCircuitNoIntrinsics::garble(byte *emptyBothInputKeys, byte *e
 
 //            cout<<"garble gate "<<i<<endl;
 //            cout<<"inputs:"<< garbledGates[i].input0 <<" "<< garbledGates[i].input1<<endl;
-            //create input arrays in order to get the inputs immedietly and not invoke unneeded xor's
-            byte* inputs = new byte[KEY_SIZE * 4];
-            byte* tempInputs = new byte[KEY_SIZE * 4];
+
             memcpy(inputs, garbledWires + garbledGates[i].input0*KEY_SIZE, KEY_SIZE);
             memcpy(inputs + 2*KEY_SIZE, garbledWires + garbledGates[i].input1*KEY_SIZE, KEY_SIZE);
 
@@ -369,10 +353,6 @@ void GarbledBooleanCircuitNoIntrinsics::garble(byte *emptyBothInputKeys, byte *e
                 }
             }
 
-            //two temporary values that will eventually be XORed together to calculate the output0 zero wire
-            byte* tempK0 = new byte[KEY_SIZE];
-            byte* tempK1 = new byte[KEY_SIZE];
-
             if (wire0signalBitsArray == 0){//signal bit of wire 0 of input0 is zero
                 for (int j=0; j<KEY_SIZE; j++) {
                     tempK0[j] = encryptedKeys[j] ^ keys[j];
@@ -429,9 +409,17 @@ void GarbledBooleanCircuitNoIntrinsics::garble(byte *emptyBothInputKeys, byte *e
 //            }
 //            cout<<endl;
             nonXorIndex++;
+
         }
 
     }
+
+    delete [] tweak;
+    delete [] tweak2;
+    delete []  inputs;
+    delete []  tempInputs;
+    delete []  tempK0;
+    delete []  tempK1;
 
     if (isNonXorOutputsRequired){//check if the user requires that the output keys will not have a fixed delta xor between pair of keys of a wire.
         //call the function that returns the emptyBothOutputKeys without deltaFreeXor between each pair of wires
@@ -548,36 +536,21 @@ void GarbledBooleanCircuitNoIntrinsics::initAesEncryptionsAndAllKeys(byte* empty
     translationTable.reserve(numberOfOutputs);
 
     SecretKey aesSeedKey(seed, KEY_SIZE, "AES");
-    cout<<"seed key:"<<endl;
-    for (int j=0; j<KEY_SIZE; j++) {
-        cout << (int) aesSeedKey.getEncoded()[j] << " ";
-    }
-    cout<<endl;
+
     ///create the aes with the seed as the key. This will be used for encrypting the input keys
     aes.setKey(aesSeedKey);
 
     //create the delta for the free Xor. Encrypt zero twice. We get a good enough random delta by encrypting twice
     deltaFreeXor.resize(KEY_SIZE);
     memset(deltaFreeXor.data(), 0, KEY_SIZE);
-//    AES_ecb_encrypt((block*)deltaFreeXor, &aesSeedKey);
-//    AES_ecb_encrypt((block*)deltaFreeXor, &aesSeedKey);
+
     aes.computeBlock(deltaFreeXor, 0, deltaFreeXor, 0);
     aes.computeBlock(deltaFreeXor, 0, deltaFreeXor, 0);
 
     //set the last bit of the first char to 1
     deltaFreeXor[0] |= 1;
 
-//    AES_ecb_encrypt_chunk_in_out((block*)indexArray,
-//                                 (block*)encryptedChunkKeys,
-//                                 numberOfInputs,
-//                                 &aesSeedKey);
     aes.optimizedCompute(indexArray, encryptedChunkKeys);
-    for (int i = 0; i<numberOfInputs; i++){
-        for (int j=0; j<KEY_SIZE; j++) {
-            cout << (int) *(encryptedChunkKeys.data() + i * KEY_SIZE + j) << " ";
-        }cout<<endl;
-    }
-
 
     //create the input keys. We encrypt using the aes with the seed as index and encrypt the index of the input wire,
     for (int i = 0; i<numberOfInputs; i++){
@@ -588,10 +561,8 @@ void GarbledBooleanCircuitNoIntrinsics::initAesEncryptionsAndAllKeys(byte* empty
         }
     }
 
-
     //set the fixed -1 wire to delta, this way we turn a not gate into a xor gate.
     memcpy(garbledWires - KEY_SIZE, deltaFreeXor.data(), KEY_SIZE);
-
 
 }
 
@@ -610,7 +581,7 @@ void GarbledBooleanCircuitNoIntrinsics::setGarbledTables(byte* garbledTables) {
 }
 
 
-int* GarbledBooleanCircuitNoIntrinsics::getNumOfInputsForEachParty(){
+vector<int> GarbledBooleanCircuitNoIntrinsics::getNumOfInputsForEachParty(){
     return numOfInputsForEachParty;
 }
 
@@ -678,7 +649,7 @@ void GarbledBooleanCircuitNoIntrinsics::readCircuitFromFile(const char* fileName
     myfile.open(fileName);
 
 
-    int **partiesInputs;
+    vector<vector<int>> partiesInputs;
 
     if (myfile.is_open())
     {
@@ -686,8 +657,8 @@ void GarbledBooleanCircuitNoIntrinsics::readCircuitFromFile(const char* fileName
         myfile >> numberOfGates;//get the gates
         myfile >> numberOfParties;
 
-        numOfInputsForEachParty = new int[numberOfParties];
-        partiesInputs = new int*[numberOfParties];
+        numOfInputsForEachParty.resize(numberOfParties);
+        partiesInputs.resize(numberOfParties);
 
         for(int j=0 ; j<numberOfParties; j++){
             myfile >> currentPartyNumber;
@@ -695,7 +666,7 @@ void GarbledBooleanCircuitNoIntrinsics::readCircuitFromFile(const char* fileName
             myfile >> numOfinputsForParty;
             numOfInputsForEachParty[currentPartyNumber - 1] = numOfinputsForParty;
 
-            partiesInputs[currentPartyNumber-1] = new int[numOfInputsForEachParty[currentPartyNumber-1]];
+            partiesInputs[currentPartyNumber-1].resize(numOfInputsForEachParty[currentPartyNumber-1]);
 
             for(int i = 0; i<numOfInputsForEachParty[currentPartyNumber-1]; i++){
                 myfile >>partiesInputs[currentPartyNumber-1][i];
@@ -805,10 +776,6 @@ void GarbledBooleanCircuitNoIntrinsics::readCircuitFromFile(const char* fileName
 
         }
 
-        for (int i = 0; i < numberOfParties; ++i)
-            delete[] partiesInputs[i];
-        delete[] partiesInputs;
-
     }
     myfile.close();
 }
@@ -834,6 +801,12 @@ void  GarbledBooleanCircuitNoIntrinsics::compute(byte * singleWiresInputKeys, by
         memcpy(computedWires + inputIndices[i]*KEY_SIZE, singleWiresInputKeys + i*KEY_SIZE, KEY_SIZE);
     }
 
+    byte* keys = new byte[2*KEY_SIZE];
+    byte* tweak = new byte[KEY_SIZE];
+    byte* tweak2 = new byte[KEY_SIZE];
+    byte* tempK0 = new byte[KEY_SIZE];
+    byte* tempK1 = new byte[KEY_SIZE];
+
     for (int i = 0; i < numberOfGates; i++){
 
         if (garbledGates[i].truthTable == XOR_GATE || garbledGates[i].truthTable == XOR_NOT_GATE){
@@ -858,7 +831,7 @@ void  GarbledBooleanCircuitNoIntrinsics::compute(byte * singleWiresInputKeys, by
 
         else{
 //            cout<<"gate "<<i<<endl;
-            byte* keys = new byte[2*KEY_SIZE];
+
             vector<byte> keys2(2*KEY_SIZE);
             //get the keys from the already calculated wires
             memcpy(keys, computedWires + garbledGates[i].input0*KEY_SIZE, KEY_SIZE);
@@ -879,8 +852,6 @@ void  GarbledBooleanCircuitNoIntrinsics::compute(byte * singleWiresInputKeys, by
 //            cout<<"wire1SignalBit = "<<wire1SignalBit<<endl;
 
             //Calc the tweak
-            byte* tweak = new byte[KEY_SIZE];
-            byte* tweak2 = new byte[KEY_SIZE];
             ((long*)(tweak))[0] = 0;
             ((long*)(tweak2))[0] = 0;
             ((long*)(tweak))[1] = i;
@@ -928,10 +899,6 @@ void  GarbledBooleanCircuitNoIntrinsics::compute(byte * singleWiresInputKeys, by
 //                cout<<endl;
 //            }
 
-
-
-            byte* tempK0 = new byte[KEY_SIZE];
-            byte* tempK1 = new byte[KEY_SIZE];
             //for more information look at the pseudo-code of "Two Halves Make a Whole Reducing Data Transfer in Garbled Circuits using Half Gates" page 9
             if (wire0SignalBit == 0){
                 for (int j=0; j<KEY_SIZE; j++) {
@@ -986,6 +953,12 @@ void  GarbledBooleanCircuitNoIntrinsics::compute(byte * singleWiresInputKeys, by
         }
 
     }
+
+    delete [] keys;
+    delete [] tweak;
+    delete [] tweak2;
+    delete [] tempK0;
+    delete [] tempK1;
 
     if (isNonXorOutputsRequired){//check if the user requires that the output keys will not have a fixed delta xor between pair of keys of a wire.
 
@@ -1169,6 +1142,15 @@ bool GarbledBooleanCircuitNoIntrinsics::internalVerify(byte *bothInputKeys, byte
         memcpy(garbledWires + inputIndices[i]*KEY_SIZE, bothInputKeys + 2 * i*KEY_SIZE, KEY_SIZE);
     }
 
+    byte* tweak = new byte[KEY_SIZE];
+    byte* tweak2 = new byte[KEY_SIZE];
+    byte* inputs = new byte[KEY_SIZE * 4];
+    //declare temp variables to store the 0-wire key and the 1-wire key
+    byte* k0 = new byte[KEY_SIZE];
+    byte* tempK0 = new byte[KEY_SIZE];
+    byte* tempK1 = new byte[KEY_SIZE];
+
+
     for (int i = 0; i<numberOfGates; i++){
 
         if (garbledGates[i].truthTable == XOR_GATE){
@@ -1193,14 +1175,13 @@ bool GarbledBooleanCircuitNoIntrinsics::internalVerify(byte *bothInputKeys, byte
         else{
 
             //Calc the tweak
-            byte* tweak = new byte[KEY_SIZE];
-            byte* tweak2 = new byte[KEY_SIZE];
+
             //two different tweaks
             ((long*)tweak)[1] = i;
             ((long*)tweak2)[1] = i+numberOfGates;
 
             //create input arrays in order to get the inputs immedietly and not invoke unneeded xor's
-            byte* inputs = new byte[KEY_SIZE * 4];
+
             memcpy(inputs, garbledWires + garbledGates[i].input0*KEY_SIZE, KEY_SIZE);
             memcpy(inputs + 2*KEY_SIZE, garbledWires + garbledGates[i].input1*KEY_SIZE, KEY_SIZE);
 
@@ -1234,9 +1215,6 @@ bool GarbledBooleanCircuitNoIntrinsics::internalVerify(byte *bothInputKeys, byte
 //            AES_ecb_encrypt_blks_4_in_out((block*)keys, (block*)encryptedKeys, &aesFixedKey);
             aes.optimizedCompute(keys, encryptedKeys);
 
-            //declare temp variables to store the 0-wire key and the 1-wire key
-            byte* k0 = new byte[KEY_SIZE];
-
             //for more information look at the pseudo-code of compute.
             for (int index0 = 0; index0< 2; index0++){
                 wire0SignalBit = getSignalBitOf(inputs + index0*KEY_SIZE);
@@ -1249,9 +1227,6 @@ bool GarbledBooleanCircuitNoIntrinsics::internalVerify(byte *bothInputKeys, byte
                     }
 
                     wire1SignalBit = getSignalBitOf(inputs + (j+2)*KEY_SIZE);
-
-                    byte* tempK0 = new byte[KEY_SIZE];
-                    byte* tempK1 = new byte[KEY_SIZE];
 
 
                     if (wire0SignalBit == 0){
@@ -1302,6 +1277,13 @@ bool GarbledBooleanCircuitNoIntrinsics::internalVerify(byte *bothInputKeys, byte
         }
     }
 
+    delete [] tweak;
+    delete [] tweak2;
+    delete [] inputs;
+    //declare temp variables to store the 0-wire key and the 1-wire key
+    delete [] k0;
+    delete [] tempK0;
+    delete [] tempK1;
 
     //copy the output keys to return to the caller of the function
     for (int i = 0; i < numberOfOutputs; i++) {

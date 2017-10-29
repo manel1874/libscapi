@@ -84,7 +84,7 @@ protected:
     bool NOTgateOptimization;
 
     int numberOfParties;//The number parties participating in the protocol that uses the circuit.
-    int* numOfInputsForEachParty;//An array that holds for each party the number of inputs it has in the circuit.
+    vector<int> numOfInputsForEachParty;//An array that holds for each party the number of inputs it has in the circuit.
 
     std::vector<int> inputIndices;//The indices of the input wires.
     std::vector<int> outputIndices;//The indices of the output wires.
@@ -282,12 +282,6 @@ public:
     */
     void readCircuitFromFile(const char* fileName);
 
-    /**
-    * This method gets as input a filename and filles the an int array with the bits of the inputs.
-    * For two party it should be called for each party seperatly.
-    */
-    int * readInputsFromFile(char* fileName);
-
 
     /**
      * Translates the garbled output usually obtained from the compute function into a meaningful(i.e. 0-1) output.
@@ -295,7 +289,7 @@ public:
      * outputKeys : An array that contains a single garbled value for each output wire.
      * return: An array of chars with values 0/1
      */
-    void translate(byte *ouyputKeys, unsigned char* answer);
+    void translate(byte *outputKeys, unsigned char* answer);
 
 
     /**
@@ -339,7 +333,7 @@ public:
     /**
     * Get function for class members that may be needed by users of the class, rather than a derived class.
     */
-    int *getNumOfInputsForEachParty();
+    vector<int> getNumOfInputsForEachParty();
     std::vector<int> getOutputIndices() { return outputIndices;};
     int getNumberOfOutputs() {return numberOfOutputs;};
     int getNumberOfInputs() { return numberOfInputs;};
