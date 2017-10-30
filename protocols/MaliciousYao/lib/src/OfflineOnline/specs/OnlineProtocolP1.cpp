@@ -366,7 +366,7 @@ void OnlineProtocolP1::decommitOutputKeys(BucketBundle & bucket, EvaluationPacka
 * @param mainBucket Contain the main circuits (for ex. AES).
 * @param crBucket Contain the cheating recovery circuits.
 */
-OnlineProtocolP1::OnlineProtocolP1() {
+OnlineProtocolP1::OnlineProtocolP1() : Protocol ("OnlineMalciousYao", 0, nullptr){
 
     string COMM_CONFIG_FILENAME = string("../../lib/assets/conf/PartiesConfig.txt");
     shared_ptr<CommunicationConfig> commConfig(new CommunicationConfig(COMM_CONFIG_FILENAME, 1, io_service));
@@ -400,7 +400,7 @@ void OnlineProtocolP1::setBuckets(BucketBundle & mainBucket, BucketBundle & crBu
 * Executes the first side of the online protocol.<p>
 * basically, it computes the main circuit and than the cheating recovery circuit.
 */
-void OnlineProtocolP1::run() {
+void OnlineProtocolP1::runOnline() {
 	//	LogTimer timer = new LogTimer("Evaluating Main circuit");
 
 	//Compute the main circuits part.

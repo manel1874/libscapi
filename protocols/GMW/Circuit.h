@@ -64,7 +64,7 @@ public:
     * This includes creating the gates and other information about the parties involved.
     *
     */
-    void readCircuit(const char* fileName);
+    void readCircuit(const string fileName);
 
     //get functions
     int getNrOfParties() { return numberOfParties; }

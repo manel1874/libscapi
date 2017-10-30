@@ -1,6 +1,5 @@
 #include "../../../include/OfflineOnline/specs/OfflineProtocolP1.hpp"
-OfflineProtocolP1::OfflineProtocolP1(const string CIRCUIT_FILENAME, const string CIRCUIT_CHEATING_RECOVERY,
-                                     int N1, int s1, int B1, double p1, int N2, int s2, int B2, double p2) {
+OfflineProtocolP1::OfflineProtocolP1(int argc, char* argv[]) : Protocol ("OfflineMaliciousYao", argc, argv) {
 
 	shared_ptr<CommunicationConfig> commConfig (new CommunicationConfig(COMM_CONFIG_FILENAME, 1, io_service));
 	this->channel = commConfig->getCommParty();
@@ -26,16 +25,16 @@ OfflineProtocolP1::OfflineProtocolP1(const string CIRCUIT_FILENAME, const string
     crCircuit.resize(numOfThreads);
 
     for (int i = 0; i<numOfThreads; i++) {
-        mainCircuit[i] = shared_ptr<GarbledBooleanCircuit>(GarbledCircuitFactory::createCircuit(CIRCUIT_FILENAME,
+        mainCircuit[i] = shared_ptr<GarbledBooleanCircuit>(GarbledCircuitFactory::createCircuit(HOME_DIR + arguments["circuitFileName"],
                                                                                                 GarbledCircuitFactory::CircuitType::FIXED_KEY_FREE_XOR_HALF_GATES, true));
-        crCircuit[i] = shared_ptr<GarbledBooleanCircuit>(CheatingRecoveryCircuitCreator(CIRCUIT_CHEATING_RECOVERY, mainCircuit[i]->getNumberOfGates()).create());
+        crCircuit[i] = shared_ptr<GarbledBooleanCircuit>(CheatingRecoveryCircuitCreator(HOME_DIR + arguments["circuitCRFileName"], mainCircuit[i]->getNumberOfGates()).create());
     }
 
-    mainExecution = make_shared<ExecutionParameters>(nullptr, mainCircuit, N1, s1, B1, p1);
-    crExecution = make_shared<ExecutionParameters>(nullptr, crCircuit, N2, s2, B2, p2);
+    mainExecution = make_shared<ExecutionParameters>(nullptr, mainCircuit, stoi(arguments["n1"]), stoi(arguments["s1"]), stoi(arguments["b1"]), stod(arguments["p1"]));
+    crExecution = make_shared<ExecutionParameters>(nullptr, crCircuit, stoi(arguments["n2"]), stoi(arguments["s2"]), stoi(arguments["b2"]), stod(arguments["p2"]));
 }
 
-void OfflineProtocolP1::run()
+void OfflineProtocolP1::runOffline()
 {
 
 	//LogTimer timer("Offline protocol");

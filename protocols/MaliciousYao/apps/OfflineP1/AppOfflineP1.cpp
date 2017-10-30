@@ -1,3 +1,4 @@
+
 #include <lib/include/OfflineOnline/specs/OfflineProtocolP1.hpp>
 
 
@@ -25,69 +26,25 @@ const string NISTEC_FILE_NAME = "../../../../include/configFiles/NISTEC.txt";
 								MAIN
 **************************************************************************/
 int main(int argc, char* argv[]) {
-	//set io_service for peer to peer communication
-//	boost::asio::io_service io_service;
-//	boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 
 	//set crypto primitives
 	CryptoPrimitives::setCryptoPrimitives(NISTEC_FILE_NAME);
     int counter = 1;
 
-    auto CIRCUIT_FILENAME = HOME_DIR + argv[counter++];
-    auto CIRCUIT_INPUT_FILENAME = HOME_DIR + argv[counter++];
-    auto CIRCUIT_CHEATING_RECOVERY = HOME_DIR + argv[counter++];
-    auto BUCKETS_PREFIX_MAIN = HOME_DIR + argv[counter++];
-    auto BUCKETS_PREFIX_CR = HOME_DIR + argv[counter++];
+    CmdParser parser;
+    auto parameters = parser.parseArguments("", argc, argv);
+    auto BUCKETS_PREFIX_MAIN = HOME_DIR + parameters["bucketsPrefixMain"];
+    auto BUCKETS_PREFIX_CR = HOME_DIR + parameters["bucketsPrefixCR"];
 
-    int N1 = atoi(argv[counter++]);
-    int B1 = atoi(argv[counter++]);
-    int s1 = atoi(argv[counter++]);
-    double p1 = stod(argv[counter++]);
-    int N2 = atoi(argv[counter++]);
-    int B2 = atoi(argv[counter++]);
-    int s2 = atoi(argv[counter++]);
-    double p2 = stod(argv[counter++]);
+
     int numOfThreads = 8;//atoi(argv[counter++]);
     CryptoPrimitives::setNumOfThreads(numOfThreads);
-
-    cout<<"N1 = " << N1<<" B1 = "<< B1 << " s1 = "<< s1 << " p1 = "<< p1 << " N2 = " << N2<< " B2 = "<< B2 <<
-                       " s2 = " <<s2<< " p2 = "<< p2 <<endl;
-
-	/*int N1 = 32;
-	int B1 = 7;
-	int s1 = 40;
-	double p1 = 0.62;
-
-	int N2 = 32;
-	int B2 = 20;
-	int s2 = 40;
-	double p2 = 0.71;*/
-
-	/*int N1 = 128;
-	int B1 = 6;
-	int s1 = 40;
-	double p1 = 0.77;
-
-	int N2 = 128;
-	int B2 = 14;
-	int s2 = 40;
-	double p2 = 0.76;*/
-
-	/*int N1 = 1024;
-	int B1 = 4;
-	int s1 = 40;
-	double p1 = 0.72;
-				
-	int N2 = 1024;
-	int B2 = 10;
-	int s2 = 40;
-	double p2 = 0.85;*/
 
     string tmp = "reset times";
     cout << "tmp size = " << tmp.size() << endl;
     byte tmpBuf[20];
 
-    OfflineProtocolP1* protocol = new OfflineProtocolP1(CIRCUIT_FILENAME, CIRCUIT_CHEATING_RECOVERY, N1, s1, B1, p1, N2, s2, B2, p2);
+    OfflineProtocolP1* protocol = new OfflineProtocolP1(argc, argv);
     int totalTimes = 0;
     for (int j=0; j<10; j+=4) {
         cout<<"in first loop. num threads = "<<j<<endl;

@@ -3,6 +3,7 @@
 #include <lib/include/primitives/CommunicationConfig.hpp>
 #include <lib/include/primitives/CryptoPrimitives.hpp>
 #include <libscapi/include/circuits/GarbledCircuitFactory.hpp>
+#include <libscapi/include/CryptoInfra/Protocol.hpp>
 #include <lib/include/primitives/CheatingRecoveryCircuitCreator.hpp>
 #include <lib/include/primitives/CircuitInput.hpp>
 #include <lib/include/primitives/ExecutionParameters.hpp>
@@ -36,56 +37,17 @@ int main(int argc, char* argv[]) {
 
     int counter = 1;
 
-    auto CIRCUIT_FILENAME = HOME_DIR + argv[counter++];
-    auto CIRCUIT_INPUT_FILENAME = HOME_DIR + argv[counter++];
-    auto CIRCUIT_CHEATING_RECOVERY = HOME_DIR + argv[counter++];
-    auto BUCKETS_PREFIX_MAIN = HOME_DIR + argv[counter++];
-    auto BUCKETS_PREFIX_CR = HOME_DIR + argv[counter++];
-
-    int N1 = atoi(argv[counter++]);
-    int B1 = atoi(argv[counter++]);
-    int s1 = atoi(argv[counter++]);
-    double p1 = stod(argv[counter++]);
-    int N2 = atoi(argv[counter++]);
-    int B2 = atoi(argv[counter++]);
-    int s2 = atoi(argv[counter++]);
-    double p2 = stod(argv[counter++]);
+	CmdParser parser;
+	auto parameters = parser.parseArguments("", argc, argv);
+    auto CIRCUIT_INPUT_FILENAME = HOME_DIR + parameters["inputFileName"];
+    auto BUCKETS_PREFIX_MAIN = HOME_DIR + parameters["bucketsPrefixMain"];
+    auto BUCKETS_PREFIX_CR = HOME_DIR +  parameters["bucketsPrefixCR"];
 
 	//set crypto primitives
 	CryptoPrimitives::setCryptoPrimitives(NISTEC_FILE_NAME);
 	CryptoPrimitives::setNumOfThreads(8);
 
-
-/*	int N1 = 32;
-	int B1 = 7;
-	int s1 = 40;
-	double p1 = 0.62;
-
-	int N2 = 32;
-	int B2 = 20;
-	int s2 = 40;
-	double p2 = 0.71;*/
-
-	/*int N1 = 128;
-	int B1 = 6;
-	int s1 = 40;
-	double p1 = 0.77;
-
-	int N2 = 128;
-	int B2 = 14;
-	int s2 = 40;
-	double p2 = 0.76;*/
-
-	/*int N1 = 1024;
-	int B1 = 4;
-	int s1 = 40;
-	double p1 = 0.72;
-				
-	int N2 = 1024;
-	int B2 = 10;
-	int s2 = 40;
-	double p2 = 0.85;*/
-	
+    int N1 = stoi(parameters["n1"]);
 	// we load the bundles from file
 	vector<shared_ptr<BucketBundle>> mainBuckets(N1), crBuckets(N1);
 	int size = N1;

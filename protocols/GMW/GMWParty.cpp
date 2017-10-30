@@ -4,12 +4,26 @@
 
 #include "GMWParty.h"
 
-GMWParty::GMWParty(int id, const shared_ptr<Circuit> & circuit, string partiesFileName, int numThreads, string inputFileName) :
-        id(id), circuit(circuit), inputFileName(inputFileName) {
+//GMWParty::GMWParty(int id, const shared_ptr<Circuit> & circuit, string partiesFileName, int numThreads, string inputFileName) :
+//        id(id), circuit(circuit), inputFileName(inputFileName) {
+
+GMWParty::GMWParty(int argc, char* argv[]) : Protocol("GMW", argc, argv) {
+    circuit = make_shared<Circuit>();
+    circuit->readCircuit(arguments["circuitFileName"]);
+
+    id = stoi(arguments["partyID"]);
+    m_repetitionId = stoi(arguments["repetitionId"]);
+    cout << "repetition id is : " << m_repetitionId << endl;
+
+    string tmp = "init times";
+    byte tmpBytes[20];
+    int numThreads = stoi(arguments["numThreads"]);
+    inputFileName = arguments["inputFileName"];
 
 	//Create the communication between this party and the other parties.
-    parties = MPCCommunication::setCommunication(io_service, id, circuit->getNrOfParties(), partiesFileName);
+    parties = MPCCommunication::setCommunication(io_service, id, circuit->getNrOfParties(), arguments["partiesFileName"]);
     cout << "----------end communication--------------" << endl;
+
 
     if (parties.size() <= numThreads){
         this->numThreads = parties.size();
@@ -22,44 +36,37 @@ GMWParty::GMWParty(int id, const shared_ptr<Circuit> & circuit, string partiesFi
 
 void GMWParty::run(){
 	//Run the offline phase of the protocol
-    auto start = chrono::high_resolution_clock::now();
-    generateTriples();
-    auto end = chrono::high_resolution_clock::now();
-    int generateTotalTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    cout<<"Offline time: "<<generateTotalTime <<" milliseconds"<<endl;
+    runOffline();
 
     auto inputSize = circuit->getPartyInputs(id).size(); //indices of my input wires
     myInputBits.resize(inputSize, 0); //input bits, will be adjusted to my input shares
     //read my input from the input file
     readInputs();
     //Run te online phase of the protocol
-    start = chrono::high_resolution_clock::now();
-    inputSharing();
-    auto output = computeCircuit();
-
-    end = chrono::high_resolution_clock::now();
-    generateTotalTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    cout<<"online time: "<<generateTotalTime <<" milliseconds"<<endl;
-
-	//Print the output
-    cout << "circuit output:" << endl;
-    for (int i = 0; i < output.size(); i++) {
-        cout << (int) output[i] << " ";
-    }
-    cout << endl;
-
+    runOnline();
 }
 
 void GMWParty::runOffline(){
-    generateTriples();
+    int pid = getpid();
+    string path = std::experimental::filesystem::current_path();
+    int numberOfParties = getParties().size() + 1;
+    Measurement offline("GMW", id, path, "offline", m_repetitionId, numberOfParties);
+    {
+        generateTriples();
+    }
 	auto inputSize = circuit->getPartyInputs(id).size(); //indices of my input wires
 	myInputBits.resize(inputSize, 0); //input bits, will be adjusted to my input shares
 									  //read my input from the input file
 }
 
-vector<byte>& GMWParty::runOnline(){
-    inputSharing();
-    return computeCircuit();
+void GMWParty::runOnline(){
+    string path = std::experimental::filesystem::current_path();
+    int numberOfParties = getParties().size() + 1;
+    Measurement offline("GMW", id, path, "online", m_repetitionId, numberOfParties);
+    {
+        inputSharing();
+        computeCircuit();
+    }
 }
 
 void GMWParty::generateTriples(){
@@ -550,4 +557,10 @@ void GMWParty::revealOutputFromParty(vector<byte> & output, int first, int last)
         mtx.unlock();
 
     }
+}
+
+
+vector<byte> GMWParty::getOutput()
+{
+    return output;
 }

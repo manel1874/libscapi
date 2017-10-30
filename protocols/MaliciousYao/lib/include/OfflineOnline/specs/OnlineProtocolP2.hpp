@@ -24,7 +24,7 @@
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University
 *
 */
-class OnlineProtocolP2 : public Protocol, public Malicious {
+class OnlineProtocolP2 : public Protocol, public Malicious, public TwoParty {
 
 private:
     //set io_service for peer to peer communication
@@ -199,9 +199,7 @@ public:
 	* Constructor that sets the parameters.
 	*
 	*/
-	OnlineProtocolP2(const string CIRCUIT_FILENAME, const string CIRCUIT_CHEATING_RECOVERY,
-                     const string MAIN_MATRIX, const string CR_MATRIX,
-                     int N1, int s1, int B1, double p1, int N2, int s2, int B2, double p2);
+	OnlineProtocolP2(int argc, char* argv[]);
 
     ~OnlineProtocolP2(){
         //end communication
@@ -217,7 +215,12 @@ public:
 	* Executes the second party of the online protocol.<p>
 	* basically, it computes the main circuit and than the cheating recovery circuit.
 	*/
-	void run() override;
+	void run() override {
+        runOnline();
+    }
+    bool hasOffline() override {return false; }
+    bool hasOnline() override {return true; }
+    void runOnline() override;
     shared_ptr<CommParty> getChannel(){ return channel; }
 
 	/**

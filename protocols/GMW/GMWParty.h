@@ -9,17 +9,19 @@
 #include "MPCCommunication.h"
 #include "../../include/primitives/Prg.hpp"
 #include "../../include/CryptoInfra/Protocol.hpp"
+#include "../../include/CryptoInfra/Measurement.hpp"
 #include "../../include/CryptoInfra/SecurityLevel.hpp"
 #include "CBitVector.h"
 #include <thread>
 #include <mutex>
+#include <experimental/filesystem>
 
 /**
  * This class represents the GMW protocol.
  * A general explanation of the GMW protocol can be found at http://crypto.biu.ac.il/sites/default/files/Winter%20School%2015%20-%20GMW%20and%20OT%20extension.pdf.
  * This implementation is more efficient since we use Beaver's multiplication triples instead of 1 out of 4 OT.
  */
-class GMWParty : public Protocol, public SemiHonest{
+class GMWParty : public Protocol, public SemiHonest, public MultiParty{
 
 private:
     boost::asio::io_service io_service;
@@ -32,6 +34,7 @@ private:
     string inputFileName;
     vector<byte> output;
 	vector<byte> myInputBits;
+    int m_repetitionId;
 
 	/*
 	 * Generates Beaver's multiplication triples to use in the protocol.
@@ -92,7 +95,8 @@ private:
 
 public:
 
-    GMWParty(int id, const shared_ptr<Circuit> & circuit, string partiesFileName, int numThreads, string inputFileName);
+//    GMWParty(int id, const shared_ptr<Circuit> & circuit, string partiesFileName, int numThreads, string inputFileName);
+	GMWParty(int argc, char* argv[]);
 
 	~GMWParty() {
 		io_service.stop();
@@ -103,10 +107,13 @@ public:
      */
     void run() override;
 
+    bool hasOffline() override { return true; }
+    bool hasOnline() override { return true; }
+
 	/*
 	 * Executes the offline phase of the protocol.
 	 */
-    void runOffline();
+    void runOffline() override;
 
 	/*
 	 * Reads the input from the given file.
@@ -116,9 +123,13 @@ public:
 	/*
 	* Executes the online phase of the protocol.
 	*/
-    vector<byte>& runOnline();
+    void runOnline() override;
+
+    vector<byte> getOutput();
 
     vector<shared_ptr<ProtocolPartyData>> & getParties(){ return parties; }
+
+	int getID() { return id;}
 
 
 };

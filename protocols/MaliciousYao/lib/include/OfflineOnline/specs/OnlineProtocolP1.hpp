@@ -17,7 +17,7 @@
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University (Asaf Cohen)
 *
 */
-class OnlineProtocolP1 : public Protocol, public Malicious{
+class OnlineProtocolP1 : public Protocol, public Malicious, public TwoParty{
 	
 private:
     //set io_service for peer to peer communication
@@ -138,6 +138,10 @@ public:
         io_service.stop();
     }
 
+	bool hasOffline() override {return false; }
+	bool hasOnline() override {return true; }
+	void runOnline() override;
+
     void setBuckets(BucketBundle & mainBucket, BucketBundle & crBucket);
 	void setInput(shared_ptr<CircuitInput> protocolInput) { input = protocolInput; }
 
@@ -147,7 +151,9 @@ public:
 	* Executes the first side of the online protocol.<p>
 	* basically, it computes the main circuit and than the cheating recovery circuit.
 	*/
-	void run() override;
+	void run() override {
+		runOnline();
+	}
 	
 };
 

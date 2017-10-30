@@ -28,11 +28,17 @@ prepare-emp
 compile-emp-m2pc
 compile-emp-ot
 compile-emp-tool
+compile-json
 .cproject
 .project
 protocols/GMW/CMakeFiles/*
 cmake-build-debug/
 protocols/GMW/CMakeCache.txt
+protocols/GMW/GMW.cbp
+protocols/GMW/Makefile
+protocols/GMW/Parties
+protocols/GMW/cmake_install.cmake
+
 
 # Fortran module files
 *.mod
@@ -72,6 +78,7 @@ callgrind.*
 lib/OTExtensionBristol/SimpleOT/ot_sender_test
 lib/OTExtensionBristol/SimpleOT/ot_receiver_test
 protocols/GMW/GMW
+protocols/GMW/GMW.cbp
 
 #other
 protocols/MaliciousYao/OfflineP1_*
@@ -79,4 +86,14 @@ protocols/MaliciousYao/OfflineP2_*
 protocols/MaliciousYao/OnlineP1_*
 protocols/MaliciousYao/OnlineP2_*
 protocols/GMW/NigelAes9Parties.txt
-protocols/GMW/AesInputs*.txt
+CMakeCache.txt
+CMakeFiles/
+Makefile
+build/
+cmake_install.cmake
+install/
+lib/JsonCpp/CMakeFiles/
+libscapi.cbp
+obj/
+protocols/GMW/CMakeFiles/
+*.json

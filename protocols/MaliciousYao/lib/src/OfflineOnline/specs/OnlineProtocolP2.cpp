@@ -601,10 +601,9 @@ void OnlineProtocolP2::computeCheatingRecoveryCircuit(const shared_ptr<BucketLim
 * Constructor that sets the parameters.
 
 */
-OnlineProtocolP2::OnlineProtocolP2(const string CIRCUIT_FILENAME, const string CIRCUIT_CHEATING_RECOVERY,
-                                   const string MAIN_MATRIX, const string CR_MATRIX,
-                                   int N1, int s1, int B1, double p1, int N2, int s2, int B2, double p2) {
+OnlineProtocolP2::OnlineProtocolP2(int argc, char* argv[]) : Protocol ("OnlineMaliciousYao", argc, argv) {
 
+    const string HOME_DIR = "../..";
     //read config file data and set communication config to make sockets.
     string COMM_CONFIG_FILENAME = string("../../lib/assets/conf/PartiesConfig.txt");
     CommunicationConfig commConfig(COMM_CONFIG_FILENAME, 2, io_service);
@@ -617,29 +616,31 @@ OnlineProtocolP2::OnlineProtocolP2(const string CIRCUIT_FILENAME, const string C
         commParty[i]->join(500, 5000);
 
 
-    auto mainBC = make_shared<BooleanCircuit>(new scannerpp::File(CIRCUIT_FILENAME));
-    auto crBC = make_shared<BooleanCircuit>(new scannerpp::File(CIRCUIT_CHEATING_RECOVERY));
+    int B1 = stoi(arguments["b1"]);
+    int B2 = stoi(arguments["b2"]);
+    auto mainBC = make_shared<BooleanCircuit>(new scannerpp::File(HOME_DIR + arguments["circuitFileName"]));
+    auto crBC = make_shared<BooleanCircuit>(new scannerpp::File(HOME_DIR + arguments["circuitCRFileName"]));
 
     vector<shared_ptr<GarbledBooleanCircuit>> mainCircuit(B1);
     vector<shared_ptr<GarbledBooleanCircuit>> crCircuit(B2);
 
     for (int i = 0; i<B1; i++) {
-        mainCircuit[i] = shared_ptr<GarbledBooleanCircuit>(GarbledCircuitFactory::createCircuit(CIRCUIT_FILENAME,
+        mainCircuit[i] = shared_ptr<GarbledBooleanCircuit>(GarbledCircuitFactory::createCircuit(HOME_DIR + arguments["circuitFileName"],
                                     GarbledCircuitFactory::CircuitType::FIXED_KEY_FREE_XOR_HALF_GATES, true));
     }
 
     for (int i = 0; i<B2; i++) {
-        crCircuit[i] = shared_ptr<GarbledBooleanCircuit>(CheatingRecoveryCircuitCreator(CIRCUIT_CHEATING_RECOVERY, mainCircuit[0]->getNumberOfGates()).create());
+        crCircuit[i] = shared_ptr<GarbledBooleanCircuit>(CheatingRecoveryCircuitCreator(HOME_DIR + arguments["circuitCRFileName"], mainCircuit[0]->getNumberOfGates()).create());
     }
 
-    mainExecution = ExecutionParameters(mainBC, mainCircuit, N1, s1, B1, p1);
-    crExecution = ExecutionParameters(crBC, crCircuit, N2, s2, B2, p2);
+    mainExecution = ExecutionParameters(mainBC, mainCircuit, stoi(arguments["n1"]), stoi(arguments["s1"]), B1, stod(arguments["p1"]));
+    crExecution = ExecutionParameters(crBC, crCircuit, stoi(arguments["n2"]), stoi(arguments["s2"]), B2, stod(arguments["p2"]));
 
     // we load the bundles from file
     mainMatrix = new KProbeResistantMatrix();
     crMatrix = new KProbeResistantMatrix();
-    mainMatrix->loadFromFile(MAIN_MATRIX);
-    crMatrix->loadFromFile(CR_MATRIX);
+    mainMatrix->loadFromFile(HOME_DIR + arguments["mainMatrix"]);
+    crMatrix->loadFromFile(HOME_DIR + arguments["crMatrix"]);
 
     //Set and initialize the parameters
 
@@ -660,7 +661,7 @@ void OnlineProtocolP2::setBuckets(const shared_ptr<BucketLimitedBundle> & mainBu
 * Executes the second party of the online protocol.<p>
 * basically, it computes the main circuit and than the cheating recovery circuit.
 */
-void OnlineProtocolP2::run() {
+void OnlineProtocolP2::runOnline() {
 
 	//LogTimer timer = new LogTimer("Evaluating Main circuit");
     //Compute the main circuits part.

@@ -4,7 +4,7 @@
 
 #include "Circuit.h"
 #include <unistd.h>
-void Circuit::readCircuit(const char* fileName)
+void Circuit::readCircuit(const string fileName)
 {
 cout<<fileName<<endl;
 

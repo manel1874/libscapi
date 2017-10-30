@@ -31,7 +31,14 @@
 #include <boost/thread/thread.hpp>
 #include "../../include/comm/Comm.hpp"
 #define AES_KEY BC_AES_KEY // AES_KEY is defined both in GarbledBooleanCircuit and in OTSemiHonestExtension
-#include "../../include/circuits/GarbledBooleanCircuit.h"
+#define NO_AESNI
+#define KEY_SIZE 16
+
+#ifdef NO_AESNI
+    #include "../../include/circuits/GarbledBooleanCircuitNoIntrinsics.h"
+#else
+    #include "../../include/circuits/GarbledBooleanCircuit.h"
+#endif
 #include "../../include/CryptoInfra/Protocol.hpp"
 #include "../../include/CryptoInfra/SecurityLevel.hpp"
 #include "../../include/circuits/GarbledCircuitFactory.hpp"
@@ -48,6 +55,8 @@
 #include <thread>
 #include "../../include/infra/Scanner.hpp"
 #include "../../include/infra/ConfigFile.hpp"
+
+
 
 
 struct YaoConfig {
@@ -90,11 +99,6 @@ struct YaoConfig {
 		circuit_file = cf.Value(input_section, "circuit_file");
 		input_file_1 = cf.Value(input_section, "input_file_party_1");
 		input_file_2 = cf.Value(input_section, "input_file_party_2");
-		sender_ip = IpAddress::from_string(cf.Value("", "sender_ip"));
-		receiver_ip = IpAddress::from_string(cf.Value("", "receiver_ip"));
-
-		sender_port = stoi(cf.Value("", "sender_port"));
-		receiver_port = stoi(cf.Value("", "receiver_port"));
 		circuit_type = cf.Value("", "circuit_type");
 	}
 
@@ -104,18 +108,29 @@ struct YaoConfig {
 /**
 * This is an implementation of party one of Yao protocol.
 */
-class PartyOne : public Protocol, public SemiHonest{
+class PartyOne : public Protocol, public SemiHonest, public TwoParty{
 private:
+	int id;
 	boost::asio::io_service io_service;
 	OTBatchSender * otSender;			//The OT object that used in the protocol.	
-	GarbledBooleanCircuit * circuit;	//The garbled circuit used in the protocol.
+
+#ifdef NO_AESNI
+	GarbledBooleanCircuitNoIntrinsics * circuit;	//The garbled circuit used in the protocol.
+    tuple<byte*, byte*, vector<byte> > values;//this tuple includes the input and output keys (block*) and the translation table (vector)
+                                        //to be used after filled by garbling the circuit
+#else
+	GarbledBooleanCircuit* circuit;	//The garbled circuit used in the protocol.
+    tuple<block*, block*, vector<byte> > values;//this tuple includes the input and output keys (block*) and the translation table (vector)
+    //to be used after filled by garbling the circuit
+#endif
 	shared_ptr<CommParty> channel;				//The channel between both parties.
-	tuple<block*, block*, vector<byte> > values;//this tuple includes the input and output keys (block*) and the translation table (vector)
-														 //to be used after filled by garbling the circuit
+
+
+
+
 	vector<byte> ungarbledInput;				//Inputs for the protocol
 	YaoConfig yaoConfig;
-	
-	//boost::thread t;
+
 
 	/**
 	* Sends p1 input keys to p2.
@@ -139,9 +154,15 @@ public:
 	* @param otSender The OT object to use in the protocol.
 	* @param inputForTest
 	*/
-	PartyOne(YaoConfig & yao_config);
+	PartyOne(int argc, char* argv[]);
 
 	~PartyOne() {
+#ifdef NO_AESNI
+        delete [] get<0>(values);
+        delete [] get<1>(values);
+#else
+        //delete inputs and output block arrays
+#endif
 		delete circuit;
 		delete otSender;
 
@@ -150,22 +171,34 @@ public:
 
 	void setInputs(string inputFileName, int numInputs);
 
+    bool hasOffline() override { return false; }
+    bool hasOnline() override { return true; }
+
 	/**
 	* Runs the protocol.
 	*/
 	void run() override;
 
+    void runOnline() override;
+
 	YaoConfig& getConfig() { return yaoConfig; }
+
+	int getID() {return id;}
 };
 
 /**
 * This is an implementation of party one of Yao protocol.
 */
-class PartyTwo : public Protocol, public SemiHonest{
+class PartyTwo : public Protocol, public SemiHonest, public TwoParty{
 private:
+	int id;
 	boost::asio::io_service io_service;
 	OTBatchReceiver * otReceiver;			//The OT object that used in the protocol.	
-	GarbledBooleanCircuit * circuit;	//The garbled circuit used in the protocol.
+#ifdef NO_AESNI
+	GarbledBooleanCircuitNoIntrinsics * circuit;	//The garbled circuit used in the protocol.
+#else
+	GarbledBooleanCircuit* circuit;	//The garbled circuit used in the protocol.
+#endif
 	shared_ptr<CommParty> channel;				//The channel between both parties.
 	byte* p1Inputs;
 	int p1InputsSize;
@@ -213,7 +246,7 @@ public:
 	* @param otSender The OT object to use in the protocol.
 	* @param inputForTest
 	*/
-	PartyTwo(YaoConfig & yao_config, bool print_output = false);
+	PartyTwo(int argc, char* argv[]);
 
 	~PartyTwo() {
 		delete circuit;
@@ -223,14 +256,20 @@ public:
 
 	void setInputs(string inputFileName, int numInputs);
 
+	bool hasOffline() override { return false; }
+	bool hasOnline() override { return true; }
+
 	/**
 	* Runs the protocol.
 	* @param ungarbledInput The input for the circuit, each p1's input wire gets 0 or 1.
 	*/
-	void run();
+	void run() override;
+
+    void runOnline() override;
 
 	vector<byte> getOutput() {	return circuitOutput; }
 
 	YaoConfig& getConfig() { return yaoConfig; }
 
+	int getID() {return id;}
 };
