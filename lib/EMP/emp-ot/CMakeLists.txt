@@ -11,7 +11,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} cmake/)
 FIND_PACKAGE(emp-tool)
 INCLUDE_DIRECTORIES(${EMP-TOOL_INCLUDE_DIRS})
 
-set (CMAKE_C_FLAGS "-pthread -Wall -march=native -O3 -maes")
+set (CMAKE_C_FLAGS "-pthread -Wall -Wno-unused-function -Wno-unused-variable -Wno-unused-result -Wno-return-type -Wno-sign-compare -march=native -O3 -maes")
 #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg -ggdb")
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++0x")
 

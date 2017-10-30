@@ -13,7 +13,7 @@
 #include <iostream>
 #include <vector>
 #include <array>
-#include <libscapi/include/primitives/Mersenne.hpp>
+#include <../../include/primitives/Mersenne.hpp>
 
 
 using namespace NTL;

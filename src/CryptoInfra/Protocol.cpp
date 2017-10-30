@@ -1,7 +1,7 @@
 //
 // Created by moriya on 24/09/17.
 //
-#include <libscapi/include/CryptoInfra/Protocol.hpp>
+#include <../../include/CryptoInfra/Protocol.hpp>
 
 string CmdParser::getKey(string parameter){
     if (parameter[0] == '-'){

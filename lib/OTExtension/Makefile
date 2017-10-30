@@ -1,7 +1,7 @@
 # compiler options
 CXX=g++ -g
 CFLAGS=-fPIC
-COMPILER_OPTIONS=-O3 -Wall
+COMPILER_OPTIONS=-O3 -Wall -Wno-unused-function -Wno-unused-variable -Wno-return-type -Wno-unused-result -Wno-unused-but-set-variable
 BATCH=
 
 

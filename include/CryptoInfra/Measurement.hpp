@@ -40,7 +40,7 @@
 #include <iostream>
 #include <exception>
 #include <memory>
-#include <libscapi/lib/JsonCpp/include/json/json.h>
+#include <../../lib/JsonCpp/include/json/json.h>
 
 using namespace std;
 using namespace std::chrono;

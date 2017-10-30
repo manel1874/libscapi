@@ -2,7 +2,7 @@
 // Created by moriya on 01/10/17.
 //
 
-#include "libscapi/include/primitives/Mersenne.hpp"
+#include "../../include/primitives/Mersenne.hpp"
 
 template <>
 TemplateField<ZpMersenneIntElement>::TemplateField(long fieldParam) {

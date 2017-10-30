@@ -6,7 +6,7 @@
 ############################################################
 
 # set the base image to libscapi base
-FROM libscapi_libs
+FROM scapicryptobiu/libscapi_libs
 
 # recopying to invalidate new files
 WORKDIR /root
@@ -14,7 +14,9 @@ COPY . libscapi/
 
 # build libscapi
 WORKDIR libscapi
-RUN make libscapi
+RUN rm -rf CMakeCache.txt CMakeFiles
+RUN cmake .
+RUN make
 
 # build the samples and run one of them
 WORKDIR samples

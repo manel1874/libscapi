@@ -9,7 +9,7 @@
 #include "NTL/ZZ.h"
 #include <x86intrin.h>
 #include "gmp.h"
-#include <libscapi/include/primitives/Prg.hpp>
+#include <../../include/primitives/Prg.hpp>
 
 using namespace std;
 using namespace NTL;
