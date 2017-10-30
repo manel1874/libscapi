@@ -137,6 +137,7 @@ compile-json:
 compile-boost:
 	@mkdir -p $(CURDIR)/install/lib
 	@mkdir -p $(CURDIR)/install/include
+	@mkdir -p $(builddir)/
 	echo "Compiling the boost library"
 	@cp -r lib/boost_1_64_0/ $(builddir)/boost_1_64_0
 	cd $(builddir)/boost_1_64_0/; bash -c "BOOST_BUILD_PATH='./' ./bootstrap.sh --with-libraries=thread,system && ./b2"; 
