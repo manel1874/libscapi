@@ -29,6 +29,7 @@ compile-emp-m2pc
 compile-emp-ot
 compile-emp-tool
 compile-json
+compile-boost
 .cproject
 .project
 protocols/GMW/CMakeFiles/*
@@ -97,3 +98,4 @@ libscapi.cbp
 obj/
 protocols/GMW/CMakeFiles/
 *.json
+*.cbp
