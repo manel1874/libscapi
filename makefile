@@ -19,7 +19,7 @@ export includedir=$(prefix)/include
 export bindir=$(exec_prefix)/bin
 export libdir=$(prefix)/lib
 
-SLib           = scapi.a
+SLib           = libscapi.a
 CPP_FILES     := $(wildcard src/*/*.cpp)
 C_FILES     := $(wildcard src/*/*.c)
 OBJ_FILES     := $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES))
