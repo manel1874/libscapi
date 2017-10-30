@@ -33,7 +33,7 @@ LIBRARIES_DIR  = -L$(HOME)/boost_1_64_0/stage/lib -Linstall/lib
 LD_FLAGS = 
 SUMO = no
 
-all: libs libscapi tests
+all: libs
 	echo $(WITH_EMP)
 libs: compile-boost compile-ntl compile-emp-tool compile-emp-ot compile-emp-m2pc compile-blake compile-FourQlib compile-miracl compile-otextension compile-otextension-malicious compile-otextension-bristol compile-json
 libscapi: directories $(SLib)
@@ -199,13 +199,6 @@ compile-otextension-bristol:
 	@$(MAKE) -C $(builddir)/OTExtensionBristol CXX=$(CXX) install
 	@touch compile-otextension-bristol
 
-compile-json:
-	@echo "Compiling JSON library..."
-	@cp -r lib/JsonCpp $(builddir)/JsonCpp
-	@cmake $(builddir)/JsonCpp/CMakeLists.txt
-	@$(MAKE) -C $(builddir)/JsonCpp/
-	@touch compile-json
-
 clean-miracl:
 	@echo "Cleaning the miracl build dir..."
 	@rm -rf $(builddir)/Miracl
@@ -241,17 +234,16 @@ clean-blake:
 	@rm -rf $(builddir)/BLAKE2
 	@rm -f compile-blake
 
-<<<<<<< HEAD:makefile_libs
 clean-json:
 	@echo "Cleaning JSON library"
 	@rm -rf $(builddir)/JsonCpp/
 	@rm -f compile-json
-=======
+
 clean-FourQlib:
 	@echo "Cleaning FourQlib library"
 	@rm -rf $(builddir)/FourQlib
 	@rm -f compile-FourQlib
->>>>>>> minimal:makefile
+
 
 clean-emp:
 	@echo "Cleaning EMP library"
@@ -262,9 +254,6 @@ clean-emp:
 clean-install:
 	@rm -rf install/*
 
-<<<<<<< HEAD:makefile_libs
-clean: clean-emp clean-otextension-bristol clean-otextension-malicious clean-otextension clean-ntl clean-blake clean-miracl clean-miracl-cpp clean-json clean-install
-=======
 clean-tests:
 	@rm -f test/tests.exe
 
@@ -275,4 +264,3 @@ clean-boost:
 
 clean: clean-boost clean-emp clean-otextension-bristol clean-otextension-malicious clean-otextension clean-ntl clean-blake clean-FourQlib clean-miracl clean-miracl-cpp clean-cpp clean-install clean-tests
 
->>>>>>> minimal:makefile
