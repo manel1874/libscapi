@@ -14,8 +14,6 @@ COPY . libscapi/
 
 # build libscapi
 WORKDIR libscapi
-RUN rm -rf CMakeCache.txt CMakeFiles
-RUN cmake .
 RUN make
 
 # build the samples and run one of them
