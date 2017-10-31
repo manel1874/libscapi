@@ -10,7 +10,6 @@ cout<<"in communication"<<endl;
 
 cout<<"num parties = "<<numParties<<endl;
     cout<<"my id = "<<id<<endl;
-    numParties = 3;
     vector<shared_ptr<ProtocolPartyData>> parties(numParties - 1);
 
     //open file
