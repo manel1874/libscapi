@@ -70,7 +70,7 @@ tests: compile-tests
 .PHONY: compile-tests
 compile-tests:
 	@cd ./test; \
-	g++ -std=c++11 -maes -mavx -I/usr/include/openssl  -I../install/include -o tests.exe tests.cpp interactiveMidProtocolsTests.cpp ../scapi.a -ldl -lpthread -L../install/lib ../install/lib/libboost_system.a ../install/lib/libboost_thread.a -lssl -lntl -lgmp -lblake2 -lcrypto;
+	g++ -std=c++11 -maes -mavx -I/usr/include/openssl  -I../install/include -o tests.exe tests.cpp interactiveMidProtocolsTests.cpp ../libscapi.a -ldl -lpthread -L../install/lib ../install/lib/libboost_system.a ../install/lib/libboost_thread.a -lssl -lntl -lgmp -lblake2 -lcrypto;
 	@cd ..
 	
 prepare-emp:
