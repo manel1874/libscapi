@@ -41,10 +41,10 @@ INSTALLATION AND EXECUTION
 1. Go in the YaoSingleExecution directory.
 2. Run the make command
 3. To run the program type
-~ ./YaoSingleExecution -partyID [party_id] -circuitFileName [circuit_file_name] -partiesFile [parties_file_name]
-                       -inputFileName [input_file_name] -internalIterationsNumber [#times_to_run_the_protocol]
+~ ./YaoSingleExecution -partyID [party_id] -circuitFile [circuit_file_name] -partiesFile [parties_file_name]
+                       -inputFilee [input_file_name] -internalIterationsNumber [#times_to_run_the_protocol]
 for example, in order to run p0 with aes circuit type:
-~ ./YaoSingleExecution -partyID 0 -circuitFileName NigelAes.txt -partiesFile Parties.txt -inputFileName AesInputs2.txt -internalIterationsNumber 10
+~ ./YaoSingleExecution -partyID 0 -circuitFile NigelAes.txt -partiesFile Parties.txt -inputFile AesInputs0.txt -internalIterationsNumber 10
 
 The output is printed to the screen in p1 side.
 

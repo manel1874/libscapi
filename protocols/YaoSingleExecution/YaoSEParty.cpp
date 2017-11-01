@@ -13,9 +13,9 @@ void compute(Bit * res, Bit * in, Bit * in2) {
 YaoSEParty::YaoSEParty(int argc, char* argv[]) : Protocol("YaoSingleExecution", argc, argv){
 
     id = stoi(arguments["partyID"]);
-    CircuitConverter::convertScapiToBristol(arguments["circuitFileName"], "emp_format_circuit.txt", false);
+    CircuitConverter::convertScapiToBristol(arguments["circuitFile"], "emp_format_circuit.txt", false);
 
-    string inputFile = arguments["inputFileName"];
+    string inputFile = arguments["inputFile"];
 
     //open file
     ConfigFile config(arguments["partiesFile"]);
