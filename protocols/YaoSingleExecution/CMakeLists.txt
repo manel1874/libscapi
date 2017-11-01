@@ -3,9 +3,9 @@ project(YaoSingleExecution)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -maes -mpclmul -msse4.1 -fPIC -march=native -O3")
 
-SET (BOOST_ROOT $ENV{HOME}/boost_1_60_0/)
-SET (BOOST_INCLUDEDIR $ENV{HOME}/boost_1_60_0/)
-SET (BOOST_LIBRARYDIR $ENV{HOME}/boost_1_60_0/stage/lib)
+SET (BOOST_ROOT $ENV{HOME}/boost_1_64_0/)
+SET (BOOST_INCLUDEDIR $ENV{HOME}/boost_1_64_0/)
+SET (BOOST_LIBRARYDIR $ENV{HOME}/boost_1_64_0/stage/lib)
 find_package(Boost COMPONENTS system thread REQUIRED)
 
 
