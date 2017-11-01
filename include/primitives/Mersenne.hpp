@@ -344,7 +344,7 @@ public:
     void elementToBytes(unsigned char* output,FieldType &element);
 
     FieldType bytesToElement(unsigned char* elemenetInBytes);
-
+    void elementVectorToByteVector(vector<FieldType> &elementVector, vector<byte> &byteVector);
 
     FieldType* GetZero();
     FieldType* GetOne();
