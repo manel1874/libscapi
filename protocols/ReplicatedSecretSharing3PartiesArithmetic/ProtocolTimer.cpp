@@ -26,7 +26,7 @@ void ProtocolTimer::writeToFile() {
             << computationPhaseArr[i] << ","
             << verificationPhaseArr[i] << ","
             << outputPhaseArr[i] << ","
-            << totalTimeArr[i] << ",\n";
+            << inputPreparationArr[i] + computationPhaseArr[i] + verificationPhaseArr[i] + outputPhaseArr[i] << ",\n";
     }
 
     myfile.close();

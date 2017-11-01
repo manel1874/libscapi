@@ -235,11 +235,11 @@ ProtocolParty<FieldType>::ProtocolParty(int argc, char* argv[]) : Protocol("Repl
     myInputs.resize(numOfInputGates);
     shareIndex = numOfInputGates;
 
-    parties = MPCCommunication::setCommunication(io_service, m_partyId-1, N, arguments["partiesFile"]);
+    parties = MPCCommunication::setCommunication(io_service, m_partyId, N, arguments["partiesFile"]);
 
     int R = 0, L = 1; // TO DO: communication
 
-    if(m_partyId == 2)
+    if(m_partyId == 1)
     {
         R = 1;
         L = 0;
@@ -304,6 +304,7 @@ void ProtocolParty<FieldType>::run() {
 
 template <class FieldType>
 void ProtocolParty<FieldType>::runOffline() {
+
     auto t1 = high_resolution_clock::now();
 
     if(fieldByteSize > 4) {
@@ -402,10 +403,10 @@ void ProtocolParty<FieldType>::initializationPhase()
 
     fieldByteSize = field->getElementSizeInBytes();
 
-    LEFT = (m_partyId - 2) % 3; // the number of party i Minus 1
-    RIGHT = (m_partyId) % 3; // the number of party i Plus 1
+    LEFT = (m_partyId - 1) % 3; // the number of party i Minus 1
+    RIGHT = (m_partyId + 1) % 3; // the number of party i Plus 1
 
-    if(m_partyId == 1) {
+    if(m_partyId == 0) {
         LEFT = 2;
         RIGHT = 1;
     }
@@ -807,7 +808,7 @@ void ProtocolParty<FieldType>::comparingViews(vector<FieldType>& hi,vector<Field
 
     hashObj1.getHashedDataOnce(reinterpret_cast<unsigned char*> (sendBuf.data()), sizeOfHi, hashedViewsForSend, &hashSize); // di = HASH(hi)
 
-    if (m_partyId == 1) {
+    if (m_partyId == 0) {
         hashObj4.getHashedDataOnce(reinterpret_cast<unsigned char *> (hiPlus1.data()), sizeOfHiPlus1,
                                    &(hashedViewsForSend[16]), &hashSize); // di+1 = HASH_4(hi+1)
 
@@ -815,7 +816,7 @@ void ProtocolParty<FieldType>::comparingViews(vector<FieldType>& hi,vector<Field
                                    hashedViewsForCompare, &hashSize); // di-1 = HASH_2(hi-1)
     }
 
-    if (m_partyId == 2) {
+    if (m_partyId == 1) {
         hashObj3.getHashedDataOnce(reinterpret_cast<unsigned char *> (hiPlus1.data()), sizeOfHiPlus1,
                                    &(hashedViewsForSend[16]), &hashSize); // di+1 = HASH_3(hi+1)
 
@@ -823,7 +824,7 @@ void ProtocolParty<FieldType>::comparingViews(vector<FieldType>& hi,vector<Field
                                    hashedViewsForCompare, &hashSize); // di-1 = HASH_4(hi-1)
     }
 
-    if (m_partyId == 3) {
+    if (m_partyId == 2) {
         hashObj2.getHashedDataOnce(reinterpret_cast<unsigned char *> (hiPlus1.data()), sizeOfHiPlus1,
                                    &(hashedViewsForSend[16]), &hashSize); // di+1 = HASH_2(hi+1)
 
@@ -882,10 +883,10 @@ void ProtocolParty<FieldType>::inputPreparation()
     {
         if(circuit.getGates()[k].gateType == INPUT) {
             //get the expected sized from the other parties
-            sizes[(circuit.getGates()[k].party - 1)]++;  // MEITAL
+            sizes[(circuit.getGates()[k].party)]++;  // MEITAL
 
             // send to party (which need this gate) your share for this gate
-            sendBufsElements[circuit.getGates()[k].party - 1].push_back(random_for_inputs[2*k]);// send t
+            sendBufsElements[circuit.getGates()[k].party].push_back(random_for_inputs[2*k]);// send t
         }
     }
 
@@ -893,7 +894,7 @@ void ProtocolParty<FieldType>::inputPreparation()
     {
 
         sendBufsBytes[i].resize(sendBufsElements[i].size()*fieldByteSize);
-        recBufBytes[i].resize(sizes[m_partyId - 1]*fieldByteSize);
+        recBufBytes[i].resize(sizes[m_partyId]*fieldByteSize);
         for(int j=0; j<sendBufsElements[i].size();j++) {
             field->elementToBytes(sendBufsBytes[i].data() + (j * fieldByteSize), sendBufsElements[i][j]);
         }
@@ -965,7 +966,7 @@ void ProtocolParty<FieldType>::inputPreparation()
             gateShareArr[2*(circuit.getGates()[k].output)+1] = m_s - (field->GetElement(input) - v);
 
         }
-        sizes_1[circuit.getGates()[k].party-1]++;
+        sizes_1[circuit.getGates()[k].party]++;
     }
 
     for(int i=0; i < N; i++)
@@ -1000,8 +1001,8 @@ void ProtocolParty<FieldType>::inputPreparation()
         if (circuit.getGates()[k].gateType == INPUT && circuit.getGates()[k].party != m_partyId) {
             gateShareArr[2*(circuit.getGates()[k].output)] = random_for_inputs[2*k];// set the share sent from the party owning the input
             gateShareArr[2*(circuit.getGates()[k].output)+1] = random_for_inputs[2*k + 1] -
-                    recBufElements_1[circuit.getGates()[k].party - 1][counters_1[circuit.getGates()[k].party - 1]];
-            counters_1[circuit.getGates()[k].party - 1] += 1;
+                    recBufElements_1[circuit.getGates()[k].party][counters_1[circuit.getGates()[k].party]];
+            counters_1[circuit.getGates()[k].party] += 1;
         }
     }
 
@@ -1039,7 +1040,7 @@ void ProtocolParty<FieldType>::openShare(int numOfRandomShares, vector<FieldType
 
     recBufBytes[LEFT].resize(numOfRandomShares*fieldByteSize);
     recBufBytes[RIGHT].resize(0);
-    recBufBytes[m_partyId - 1].resize(numOfRandomShares*fieldByteSize);
+    recBufBytes[m_partyId].resize(numOfRandomShares*fieldByteSize);
 
     roundFunctionSync(sendBufsBytes, recBufBytes,10);
 
@@ -1250,14 +1251,14 @@ void ProtocolParty<FieldType>::outputPhase()
         if(circuit.getGates()[k].gateType == OUTPUT)
         {
             // send to party (which need this gate) your share for this gate
-            sendBufsElements[circuit.getGates()[k].party - 1].push_back(gateShareArr[2*circuit.getGates()[k].input1]);// send t
+            sendBufsElements[circuit.getGates()[k].party].push_back(gateShareArr[2*circuit.getGates()[k].input1]);// send t
         }
     }
 
     for(int i=0; i < N; i++)
     {
         sendBufsBytes[i].resize(sendBufsElements[i].size()*fieldByteSize);
-        recBufBytes[i].resize(sendBufsElements[m_partyId - 1].size()*fieldByteSize);
+        recBufBytes[i].resize(sendBufsElements[m_partyId].size()*fieldByteSize);
         for(int j=0; j<sendBufsElements[i].size();j++) {
             field->elementToBytes(sendBufsBytes[i].data() + (j * fieldByteSize), sendBufsElements[i][j]);
         }
@@ -1312,7 +1313,7 @@ void ProtocolParty<FieldType>::roundFunctionSync(vector<vector<byte>> &sendBufs,
     int numThreads = 2;
     int numPartiesForEachThread = 1;
 
-    recBufs[m_partyId-1] = sendBufs[m_partyId-1];
+    recBufs[m_partyId] = sendBufs[m_partyId];
     //recieve the data using threads
     vector<thread> threads(numThreads);
     for (int t=0; t<numThreads; t++) {
@@ -1332,13 +1333,13 @@ void ProtocolParty<FieldType>::roundFunctionSync(vector<vector<byte>> &sendBufs,
 template <class FieldType>
 void ProtocolParty<FieldType>::sendNext(vector<byte> &sendBufs, vector<byte> &recBufs) {
 
-    if (m_partyId == 1)
+    if (m_partyId == 0)
     {
         rightChannel->write(sendBufs.data(), sendBufs.size()); // write to party 2
 
         leftChannel->read(recBufs.data(), recBufs.size()); // read from party 3
 
-    } else if (m_partyId == 2)
+    } else if (m_partyId == 1)
     {
         leftChannel->read(recBufs.data(), recBufs.size()); // read from party 1
 
@@ -1359,7 +1360,7 @@ void ProtocolParty<FieldType>::exchangeData(vector<vector<byte>> &sendBufs, vect
     //cout<<"in exchangeData";
     for (int i=first; i < last; i++) {
 
-        if ((m_partyId-1) < parties[i]->getID()) {
+        if ((m_partyId) < parties[i]->getID()) {
 
 
             //send shares to my input bits
