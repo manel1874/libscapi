@@ -19,7 +19,7 @@ export includedir=$(prefix)/include
 export bindir=$(exec_prefix)/bin
 export libdir=$(prefix)/lib
 
-SLib           = scapi.a
+SLib           = libscapi.a
 CPP_FILES     := $(wildcard src/*/*.cpp)
 C_FILES     := $(wildcard src/*/*.c)
 OBJ_FILES     := $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES))
@@ -70,7 +70,7 @@ tests: compile-tests
 .PHONY: compile-tests
 compile-tests:
 	@cd ./test; \
-	g++ -std=c++11 -maes -mavx -I/usr/include/openssl  -I../install/include -o tests.exe tests.cpp interactiveMidProtocolsTests.cpp ../scapi.a -ldl -lpthread -L../install/lib ../install/lib/libboost_system.a ../install/lib/libboost_thread.a -lssl -lntl -lgmp -lblake2 -lcrypto;
+	g++ -std=c++11 -maes -mavx -I/usr/include/openssl  -I../install/include -o tests.exe tests.cpp interactiveMidProtocolsTests.cpp ../libscapi.a -ldl -lpthread -L../install/lib ../install/lib/libboost_system.a ../install/lib/libboost_thread.a -lssl -lntl -lgmp -lblake2 -lcrypto;
 	@cd ..
 	
 prepare-emp:
@@ -133,8 +133,9 @@ compile-FourQlib:
 compile-boost:
 	@mkdir -p $(CURDIR)/install/lib
 	@mkdir -p $(CURDIR)/install/include
+	@mkdir -p $(builddir)/
 	echo "Compiling the boost library"
-	@cp -r lib/boost_1_64_0/ $(builddir)/
+	@cp -r lib/boost_1_64_0/ $(builddir)/boost_1_64_0
 	cd $(builddir)/boost_1_64_0/; bash -c "BOOST_BUILD_PATH='./' ./bootstrap.sh --with-libraries=thread,system && ./b2"; 
 	@cp $(builddir)/boost_1_64_0/stage/lib/*.a $(CURDIR)/install/lib/
 	@cp -r $(builddir)/boost_1_64_0/boost/ $(CURDIR)/install/include/

@@ -37,7 +37,7 @@ set(SOURCE_FILES
         src/circuits/RowReductionGarbledBooleanCircuit.cpp
         src/circuits/StandardGarbledBooleanCircuit.cpp
         src/circuits/TedKrovetzAesNiWrapperC.cpp
-        src/circuits/arithmeticCircuit/ArithmeticCircuit.cpp
+        src/circuits/ArithmeticCircuit.cpp
         src/comm/Comm.cpp
         src/comm/MPCCommunication.cpp
         src/infra/CircuitConverter.cpp
