@@ -115,7 +115,11 @@ int main(int argc, char* argv[]) {
 
     YaoSEParty party(argc, argv);
 
-    int runs = 20;
+    CmdParser parser;
+    auto parameters = parser.parseArguments("", argc, argv);
+
+
+    int runs = stoi(parameters["internalIterationsNumber"]);
     int time = 0;
     chrono::high_resolution_clock::time_point start, end;
 

@@ -41,11 +41,12 @@ INSTALLATION AND EXECUTION
 1. Go in the YaoSingleExecution directory.
 2. Run the make command
 3. To run the program type
-~ ./YaoSingleExecution -partyID [party_id] -circuitFileName [circuit_file_name] -ip [ip_address] -port [port_number] -inputFileName [input_file_name]
-for example, in order to run p1 with aes circuit on local host and port 12345 type:
-~ ./YaoSingleExecution -partyID 1 -circuitFileName NigelAes.txt -ip 127.0.0.1 -port 12345 -inputFileName AesInputs2.txt
+~ ./YaoSingleExecution -partyID [party_id] -circuitFileName [circuit_file_name] -partiesFile [parties_file_name]
+                       -inputFileName [input_file_name] -internalIterationsNumber [#times_to_run_the_protocol]
+for example, in order to run p0 with aes circuit type:
+~ ./YaoSingleExecution -partyID 0 -circuitFileName NigelAes.txt -partiesFile Parties.txt -inputFileName AesInputs2.txt -internalIterationsNumber 10
 
-The output is printed to the screen in p2 side.
+The output is printed to the screen in p1 side.
 
 
 

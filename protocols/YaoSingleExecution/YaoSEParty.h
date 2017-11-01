@@ -8,6 +8,7 @@
 #include <libscapi/include/CryptoInfra/Protocol.hpp>
 #include <libscapi/include/CryptoInfra/SecurityLevel.hpp>
 #include <libscapi/include/infra/CircuitConverter.hpp>
+#include <libscapi/include/infra/ConfigFile.hpp>
 #include <libscapi/lib/EMP/emp-m2pc/malicious/malicious.h>
 #include <fstream>
 
@@ -92,7 +93,7 @@ public:
      */
     vector<byte> getOutput(){
         int size = 0;
-        if (id == 2) size = cf->n3;
+        if (id == 1) size = cf->n3;
 
         vector<byte> output(size);
         for (int i=0; i<size; i++){
