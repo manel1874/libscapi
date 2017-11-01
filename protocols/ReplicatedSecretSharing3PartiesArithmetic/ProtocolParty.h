@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 #include <libscapi/include/primitives/Matrix.hpp>
-#include <libscapi/include/circuits/arithmeticCircuit/ArithmeticCircuit.hpp>
+#include <libscapi/include/circuits/ArithmeticCircuit.hpp>
 #include <libscapi/include/comm/MPCCommunication.hpp>
 #include <libscapi/include/CryptoInfra/Protocol.hpp>
 
