@@ -40,6 +40,7 @@
 #include <iostream>
 #include <exception>
 #include <memory>
+#include <experimental/filesystem>
 #include <../../lib/JsonCpp/include/json/json.h>
 
 using namespace std;
@@ -48,22 +49,23 @@ using namespace Json;
 
 class Measurement {
 public:
-    Measurement(string protocolName, int partyId, string pathToFile, string taskName, int repetitionId,
-                int numberOfParties);
+    Measurement(string m_protocolName, int partyId, int numOfIteration, vector<string> names);
     ~Measurement();
+    void startSubTask(){m_start = chrono::high_resolution_clock::now();}
+    void endSubTask(int taskIdx, int currentIterationNum)
+    {
+        m_names[taskIdx][currentIterationNum] =
+                chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - m_start).count();
+    }
 
 
 private:
-
-    string m_name;
-    int m_partyId;
-    int m_pid;
-    string m_taskName;
-    string m_path;
+    vector<vector<high_resolution_clock::time_point>> m_times;
+    vector<string> m_names;
+    string m_protocolName;
     high_resolution_clock::time_point m_start;
-    high_resolution_clock::time_point m_end;
-    int m_repetitionId;
-    int m_numberOfParties;
+    int m_partyId;
+    int m_numberOfIterations;
 
 };
 

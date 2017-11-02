@@ -29,54 +29,62 @@
 *
 */
 
-#include "../../include/CryptoInfra/Measurement.hpp"
+#include "../../include/infra/Measurement.hpp"
 
 
 
 using namespace std;
 
 
-Measurement::Measurement(string protocolName, int partyId, string pathToFile, string taskName, int repetitionId,
-                         int numberOfParties)
+Measurement::Measurement(string protocolName, int partyId, int numOfIteration, vector<string> names)
 {
-
-    m_name = protocolName;
+    m_protocolName = protocolName;
     m_partyId = partyId;
-    m_path = pathToFile + "/";
-    m_taskName = taskName;
-    m_start = chrono::high_resolution_clock::now();
-    m_repetitionId = repetitionId;
-    m_numberOfParties = numberOfParties;
+    m_numberOfIterations = numOfIteration;
+    m_times.resize(names.size());
+
+    for (int taskNameIdx = 0; taskNameIdx < names.size(); ++taskNameIdx)
+    {
+        m_times[taskNameIdx].resize(numOfIteration);
+    }
+
+    this->m_names = names;
 }
+
+
 
 Measurement::~Measurement()
 {
-    m_end = chrono::high_resolution_clock::now();
 
-    auto duration = chrono::duration_cast<chrono::milliseconds>(m_end - m_start).count();
-    Value taskName;
-    StreamWriterBuilder builder;
-    taskName[m_taskName]["startTime"] = duration_cast<milliseconds>(m_start.time_since_epoch()).count();
-    taskName[m_taskName]["endTime"] = duration_cast<milliseconds>(m_end.time_since_epoch()).count();
-    taskName[m_taskName]["duration"] = to_string(duration);
+    string filePath = std::experimental::filesystem::current_path();
 
-    //populate json object
+    ofstream myfile;
+    myfile.open(filePath, ios::out | ios::app);
 
-    string filePath = m_path + m_name + "_" + to_string(m_partyId) + "_" + m_taskName + "_" + "repdId="
-                      +to_string(m_repetitionId) + "_" + "numberOfParties=" + to_string(m_numberOfParties) + ".json";
-    try
+    for (int taskNameIdx = 0; taskNameIdx < m_names.size(); ++taskNameIdx)
     {
-        ofstream myfile;
-        myfile.open(filePath, ios::out);
-        unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
-        if (myfile.is_open())
+        //Write for each task name all the iteration
+
+        Value taskTimes;
+        for (int iterationIdx = 0; iterationIdx < m_numberOfIterations; ++iterationIdx)
         {
-            writer->write(taskName, &myfile);
+            taskTimes["Iteration_" + to_string(iterationIdx)] = m_names[taskNameIdx][iterationIdx];
+
         }
-        myfile.close();
-    }
-    catch (exception& e)
-    {
-        cout << "Exception thrown : " << e.what() << endl;
+        //Convert JSON object to string
+        StreamWriterBuilder builder;
+        unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
+        try
+        {
+            if (myfile.is_open())
+            {
+                writer->write(taskTimes, &myfile);
+            }
+        }
+
+        catch (exception& e)
+        {
+            cout << "Exception thrown : " << e.what() << endl;
+        }
     }
 }
