@@ -27,9 +27,9 @@
 
 
 #pragma once
-#include "../CryptoInfra/SecurityLevel.hpp"
-#include "../CryptoInfra/Key.hpp"
-#include "../CryptoInfra/PlainText.hpp"
+#include "../cryptoInfra/SecurityLevel.hpp"
+#include "../cryptoInfra/Key.hpp"
+#include "../cryptoInfra/PlainText.hpp"
 
 /**
 * This is the main interface for the Symmetric Encryption family.

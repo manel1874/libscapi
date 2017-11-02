@@ -29,7 +29,7 @@
 #ifndef SCAPI_PRG_H
 #define SCAPI_PRG_H
 
-#include "../CryptoInfra/Key.hpp"
+#include "../cryptoInfra/Key.hpp"
 #include "Prf.hpp"
 #include <openssl/rc4.h>
 #include <openssl/rand.h>

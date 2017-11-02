@@ -5,7 +5,7 @@
 #pragma once
 
 #include "OT.hpp"
-#include "../CryptoInfra/SecurityLevel.hpp"
+#include "../cryptoInfra/SecurityLevel.hpp"
 #include "../primitives/Kdf.hpp"
 #include "OTFullSimulation.hpp"
 
