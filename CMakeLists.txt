@@ -98,8 +98,8 @@ set(SOURCE_FILES
         include/primitives/Mersenne.hpp
         src/primitives/Mersenne.cpp
         include/primitives/Matrix.hpp
-        src/CryptoInfra/Measurement.cpp
-        src/CryptoInfra/Protocol.cpp)
+        src/infra/Measurement.cpp
+        src/cryptoInfra/Protocol.cpp)
 
 add_library(scapi ${SOURCE_FILES})
 

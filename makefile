@@ -24,18 +24,18 @@ CPP_FILES     := $(wildcard src/*/*.cpp)
 C_FILES     := $(wildcard src/*/*.c)
 OBJ_FILES     := $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES))
 OBJ_FILES     += $(patsubst src/%.c,obj/%.o,$(C_FILES))
-OUT_DIR        = obj obj/mid_layer obj/circuits obj/comm obj/infra obj/interactive_mid_protocols obj/primitives obj/circuits_c obj/CryptoInfra
+OUT_DIR        = obj obj/mid_layer obj/circuits obj/comm obj/infra obj/interactive_mid_protocols obj/primitives obj/circuits_c obj/cryptoInfra
 INC            = -Ilib -Iinstall/include -Ilib/OTExtensionBristol
 CPP_OPTIONS   := -std=c++11 $(INC)  -maes -mpclmul -Wall -Wno-unused-function -Wno-unused-variable -Wno-unused-result -Wno-sign-compare -Wno-parentheses -O3
 $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
-LINKER_OPTIONS = $(INCLUDE_ARCHIVES_START) install/lib/libOTExtensionBristol.a install/lib/libsimpleot.a install/lib/libntl.a install/lib/libboost_sytem.a install/lib/libboost_thread.a install/lib/libmiracl.a install/lib/libblake2.a -lpthread -lgmp -lcrypto -lssl -lOTExtension -lMaliciousOTExtension -ldl $(INCLUDE_ARCHIVES_END)
+LINKER_OPTIONS = $(INCLUDE_ARCHIVES_START) install/lib/libjsoncpp.a install/lib/libOTExtensionBristol.a install/lib/libsimpleot.a install/lib/libntl.a install/lib/libboost_sytem.a install/lib/libboost_thread.a install/lib/libmiracl.a install/lib/libblake2.a -lpthread -lgmp -lcrypto -lssl -lOTExtension -lMaliciousOTExtension -ldl $(INCLUDE_ARCHIVES_END)
 LIBRARIES_DIR  = -L$(HOME)/boost_1_64_0/stage/lib -Linstall/lib
 LD_FLAGS = 
 SUMO = no
 
 
 all: libs libscapi tests
-	echo $(WITH_EMP)
+	@echo $(WITH_EMP)
 libs: compile-boost compile-ntl compile-emp-tool compile-emp-ot compile-emp-m2pc compile-blake compile-FourQlib compile-miracl compile-otextension compile-otextension-malicious compile-otextension-bristol
 libscapi: directories $(SLib)
 directories: $(OUT_DIR)
@@ -61,7 +61,7 @@ obj/primitives/%.o: src/primitives/%.cpp
 	g++ -c $(CPP_OPTIONS) -o $@ $< 	 
 obj/mid_layer/%.o: src/mid_layer/%.cpp
 	g++ -c $(CPP_OPTIONS) -o $@ $<
-obj/CryptoInfra/%.o: src/CryptoInfra/%.cpp
+obj/cryptoInfra/%.o: src/cryptoInfra/%.cpp
 	g++ -c $(CPP_OPTIONS) -o $@ $<
 
 tests: compile-tests
@@ -129,6 +129,14 @@ compile-FourQlib:
 	mkdir -p $(CURDIR)/install/include/FourQlib
 	cp $(builddir)/FourQlib/FourQ_64bit_and_portable/FourQ_api.h $(CURDIR)/install/include/FourQlib	
 	touch compile-FourQlib
+
+compile-json:
+	@echo "Compiling JSON library..."
+	@cp -r lib/JsonCpp $(builddir)/JsonCpp
+	@cmake $(builddir)/JsonCpp/CMakeLists.txt
+	@$(MAKE) -C $(builddir)/JsonCpp/
+	@cp $(builddir)/JsonCpp/src/lib_json/libjsoncpp.a $(CURDIR)/install/lib/
+	@touch compile-json
 
 compile-boost:
 	@mkdir -p $(CURDIR)/install/lib
@@ -258,5 +266,10 @@ clean-boost:
 	@rm -rf $(builddir)/boost_1_64_0
 	@rm -f compile-boost
 
-clean: clean-boost clean-emp clean-otextension-bristol clean-otextension-malicious clean-otextension clean-ntl clean-blake clean-FourQlib clean-miracl clean-miracl-cpp clean-cpp clean-install clean-tests
+clean-json:
+	@echo "Cleaning JSON library"
+	@rm -rf $(builddir)/JsonCpp/
+	@rm -f compile-json
+
+clean: clean-json clean-boost clean-emp clean-otextension-bristol clean-otextension-malicious clean-otextension clean-ntl clean-blake clean-FourQlib clean-miracl clean-miracl-cpp clean-cpp clean-install clean-tests
 
