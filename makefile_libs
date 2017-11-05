@@ -132,6 +132,7 @@ compile-json:
 	@cp -r lib/JsonCpp $(builddir)/JsonCpp
 	@cmake $(builddir)/JsonCpp/CMakeLists.txt
 	@$(MAKE) -C $(builddir)/JsonCpp/
+	@cp $(builddir)/JsonCpp/src/lib_json/libjsoncpp.a $(CURDIR)/install/lib/
 	@touch compile-json
 
 compile-boost:
