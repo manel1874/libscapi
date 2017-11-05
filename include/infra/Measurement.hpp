@@ -49,8 +49,9 @@ using namespace Json;
 
 class Measurement {
 public:
-    Measurement(string protocolName, int partyId, int numOfIteration);
-    Measurement(string protocolName, int partyId, int numOfIteration, vector<string> names);
+    Measurement();
+    Measurement(string protocolName, int partyId, int numOfParties, int numOfIteration);
+    Measurement(string protocolName, int partyId, int numOfParties, int numOfIteration, vector<string> names);
     ~Measurement();
     void startSubTask(){m_start = chrono::high_resolution_clock::now();}
     void endSubTask(int taskIdx, int currentIterationNum)
@@ -68,6 +69,7 @@ private:
     string m_protocolName;
     high_resolution_clock::time_point m_start;
     int m_partyId;
+    int m_numOfParties;
     int m_numberOfIterations;
 
 };
