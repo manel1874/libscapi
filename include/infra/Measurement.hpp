@@ -49,6 +49,7 @@ using namespace Json;
 
 class Measurement {
 public:
+    Measurement();
     Measurement(string protocolName, int partyId, int numOfIteration);
     Measurement(string protocolName, int partyId, int numOfIteration, vector<string> names);
     ~Measurement();

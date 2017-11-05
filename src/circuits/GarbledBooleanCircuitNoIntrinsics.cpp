@@ -1202,7 +1202,7 @@ bool GarbledBooleanCircuitNoIntrinsics::internalVerify(byte *bothInputKeys, byte
             }
 
             for (int j=0; j<KEY_SIZE; j++){
-                keys[j] = inputs[j], tweak[j];
+                keys[j] = inputs[j] ^ tweak[j];
                 keys[KEY_SIZE + j] = inputs[KEY_SIZE + j] ^ tweak[j];
                 keys[2 * KEY_SIZE + j] = inputs[2 * KEY_SIZE + j] ^ tweak2[j];
                 keys[3 * KEY_SIZE + j] = inputs[3 * KEY_SIZE + j] ^ tweak2[j];
