@@ -29,7 +29,7 @@
 #pragma once
 
 #include "../infra/Common.hpp"
-#include "../cryptoInfra//SecurityLevel.hpp"
+#include "../cryptoInfra/SecurityLevel.hpp"
 #include "../comm/Comm.hpp"
 #include "OTBatch.hpp"
 

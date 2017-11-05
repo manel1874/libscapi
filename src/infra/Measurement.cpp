@@ -35,29 +35,31 @@
 
 using namespace std;
 
-Measurement::Measurement(string protocolName, int partyId, int numOfIteration)
+Measurement::Measurement(string protocolName, int partyId, int numOfParties, int numOfIteration)
 {
     m_protocolName = protocolName;
     m_partyId = partyId;
     m_numberOfIterations = numOfIteration;
+    m_numOfParties = numOfParties;
 }
 
 
-Measurement::Measurement(string protocolName, int partyId, int numOfIteration, vector<string> names)
+Measurement::Measurement(string protocolName, int partyId, int numOfParties, int numOfIteration, vector<string> names)
         :m_times(names.size(), vector<long>(numOfIteration)), m_names{move(names)}
 {
     m_protocolName = protocolName;
     m_partyId = partyId;
     m_numberOfIterations = numOfIteration;
+    m_numOfParties = numOfParties;
 
 }
-
 
 
 Measurement::~Measurement()
 {
     string filePath = std::experimental::filesystem::current_path();
-    string fileName = filePath + "/" + m_protocolName + "_" + to_string(m_partyId) + ".json";
+    string fileName = filePath + "/" + m_protocolName + "_" + to_string(m_partyId)
+                      + to_string(m_numOfParties) + ".json";
 
     for (int taskNameIdx = 0; taskNameIdx < m_names.size(); ++taskNameIdx)
     {
