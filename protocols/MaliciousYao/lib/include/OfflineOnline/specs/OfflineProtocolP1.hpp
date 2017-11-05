@@ -1,6 +1,6 @@
 #pragma once
 #include <boost/thread/thread.hpp>
-#include <libscapi/include/CryptoInfra/Protocol.hpp>
+#include <libscapi/include/cryptoInfra/Protocol.hpp>
 #include "../../../include/common/CommonMaliciousYao.hpp"
 #include "../../../include/primitives/CommunicationConfig.hpp"
 #include "../../../include/primitives/ExecutionParameters.hpp"

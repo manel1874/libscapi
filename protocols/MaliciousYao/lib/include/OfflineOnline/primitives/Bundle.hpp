@@ -1,7 +1,7 @@
 #pragma once
 
 #include <libscapi/include/circuits/GarbledBooleanCircuit.h>
-#include <libscapi/include/CryptoInfra/Key.hpp>
+#include <libscapi/include/cryptoInfra/Key.hpp>
 #include "../../../include/common/CommonMaliciousYao.hpp"
 #include "../../../include/OfflineOnline/primitives/CommitmentBundle.hpp"
 #include "../../../include/CommitmentWithZkProofOfDifference/DifferenceCommitmentCommitterBundle.hpp"

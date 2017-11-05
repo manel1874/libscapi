@@ -14,7 +14,7 @@
 #include <boost/range/irange.hpp>
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <libscapi/include/primitives/Prf.hpp>
-#include <libscapi/include/CryptoInfra/Key.hpp>
+#include <libscapi/include/cryptoInfra/Key.hpp>
 
 #include "../../include/primitives/CircuitInput.hpp"
 #include "CryptoPrimitives.hpp"

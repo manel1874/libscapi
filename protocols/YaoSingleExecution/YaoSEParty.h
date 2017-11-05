@@ -5,8 +5,8 @@
 #ifndef LIBSCAPI_YAOSEPARTY_H
 #define LIBSCAPI_YAOSEPARTY_H
 
-#include <libscapi/include/CryptoInfra/Protocol.hpp>
-#include <libscapi/include/CryptoInfra/SecurityLevel.hpp>
+#include <libscapi/include/cryptoInfra/Protocol.hpp>
+#include <libscapi/include/cryptoInfra/SecurityLevel.hpp>
 #include <libscapi/include/infra/CircuitConverter.hpp>
 #include <libscapi/include/infra/ConfigFile.hpp>
 #include <libscapi/lib/EMP/emp-m2pc/malicious/malicious.h>

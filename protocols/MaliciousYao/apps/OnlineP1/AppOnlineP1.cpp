@@ -3,7 +3,7 @@
 #include <lib/include/primitives/CommunicationConfig.hpp>
 #include <lib/include/primitives/CryptoPrimitives.hpp>
 #include <libscapi/include/circuits/GarbledCircuitFactory.hpp>
-#include <libscapi/include/CryptoInfra/Protocol.hpp>
+#include <libscapi/include/cryptoInfra/Protocol.hpp>
 #include <lib/include/primitives/CheatingRecoveryCircuitCreator.hpp>
 #include <lib/include/primitives/CircuitInput.hpp>
 #include <lib/include/primitives/ExecutionParameters.hpp>

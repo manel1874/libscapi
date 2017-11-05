@@ -39,8 +39,8 @@
 #else
     #include "../../include/circuits/GarbledBooleanCircuit.h"
 #endif
-#include "../../include/CryptoInfra/Protocol.hpp"
-#include "../../include/CryptoInfra/SecurityLevel.hpp"
+#include "../../include/cryptoInfra/Protocol.hpp"
+#include "../../include/cryptoInfra/SecurityLevel.hpp"
 #include "../../include/circuits/GarbledCircuitFactory.hpp"
 
 #undef AES_KEY
