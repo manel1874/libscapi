@@ -30,6 +30,7 @@ compile-emp-ot
 compile-emp-tool
 compile-json
 compile-boost
+compile-openssl
 .cproject
 .project
 protocols/GMW/CMakeFiles/*
