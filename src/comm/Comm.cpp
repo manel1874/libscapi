@@ -125,6 +125,7 @@ CommPartyTCPSynced::~CommPartyTCPSynced() {
 /*****************************************/
 /* CommPartyTcpSslSynced                 */
 /*****************************************/
+/*
 CommPartyTcpSslSynced::CommPartyTcpSslSynced(boost::asio::io_service& ioService, SocketPartyData me, 
 	SocketPartyData other, string certificateChainFile, string password, string privateKeyFile, 
 	string tmpDHFile, string clientVerifyFile) : ioServiceServer(ioService), ioServiceClient(ioService),
@@ -205,10 +206,5 @@ void CommPartyTcpSslSynced::write(const byte* data, int size) {
 		throw PartyCommunicationException("Error while writing. " + ec.message());
 }
 
-CommPartyTcpSslSynced::~CommPartyTcpSslSynced() {
-	acceptor_.close();
-	serverSocket->lowest_layer().close();
-	clientSocket->lowest_layer().close();
-}
-
+*/
 

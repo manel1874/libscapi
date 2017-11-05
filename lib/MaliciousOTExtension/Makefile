@@ -22,7 +22,7 @@ BOOST_LIBRARIES= #-lboost_system -lboost_thread
 
 LIBMIRACL = $(prefix)/lib/libmiracl.a
 
-LIBRARIES=$(INCLUDE_ARCHIVES_START) -lpthread -lssl $(LIBMIRACL) -lcrypto 
+LIBRARIES=$(INCLUDE_ARCHIVES_START) -lpthread -l:libssl.a $(LIBMIRACL) -l:libcrypto.a 
 ifeq ($(uname_S),Darwin) # bugfix in mac os x
 	LIBRARIES += /usr/local/Cellar/gcc49/4.9.1/lib/gcc/x86_64-apple-darwin13.3.0/4.9.1/libstdc++.a
 endif
@@ -46,7 +46,7 @@ OBJECTS_OT=ot/*.o
 #INCLUDE=-I..  -I/usr/include/glib-2.0/ -I/usr/lib/x86_64-linux-gnu/glib-2.0/include
 
 MIRACL_INCLUDES=-I$(prefix)/include
-OPENSSL_INCLUDES=-I$(prefix)/ssl/include
+OPENSSL_INCLUDES=
 INCLUDE=-I.. $(OPENSSL_INCLUDES) $(MIRACL_INCLUDES)
 
 ## targets ##
@@ -54,8 +54,8 @@ INCLUDE=-I.. $(OPENSSL_INCLUDES) $(MIRACL_INCLUDES)
 all: otlib
 
 otlib: ${OBJECTS_UTIL} ${OBJECTS_OT}
-	${CXX} ${SHARED_LIB_OPT} -o libMaliciousOTExtension${SHARED_LIB_EXT} ${DEBUG_OPTIONS} ${COMPILER_OPTIONS} \
-	${OBJECTS_UTIL} ${OBJECTS_OT} ${LIBRARIES_DIR} ${LIBRARIES}
+	${CXX} -c -o ${DEBUG_OPTIONS} ${COMPILER_OPTIONS} \
+	${OBJECTS_UTIL} ${OBJECTS_OT} 
 	ar ru libMaliciousOTExtension.a ${OBJECTS_UTIL} ${OBJECTS_OT} 
 	ranlib libMaliciousOTExtension.a
 
@@ -71,7 +71,6 @@ install:
 	install -d $(libdir)
 	install -d $(includedir)/MaliciousOTExtension/ot
 	install -d $(includedir)/MaliciousOTExtension/util
-	install -m 0644 libMaliciousOTExtension${SHARED_LIB_EXT} $(libdir)
 	install -m 0644 libMaliciousOTExtension.a $(libdir)
 	install -m 0644 ot/*.h $(includedir)/MaliciousOTExtension/ot
 	install -m 0644 util/*.h $(includedir)/MaliciousOTExtension/util
