@@ -77,7 +77,7 @@ public:
         int  u, v, q, r;
         long u0, v0, u1, v1, u2, v2;
 
-        int aneg = 0;
+        int aneg = 0, bneg = 0;
 
         if (a < 0) {
             if (a < -NTL_MAX_LONG) Error("XGCD: integer overflow");

@@ -90,7 +90,6 @@ protocols/MaliciousYao/OnlineP2_*
 protocols/GMW/NigelAes9Parties.txt
 CMakeCache.txt
 CMakeFiles/
-Makefile
 build/
 cmake_install.cmake
 install/
