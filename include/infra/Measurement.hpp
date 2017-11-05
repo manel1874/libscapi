@@ -49,18 +49,21 @@ using namespace Json;
 
 class Measurement {
 public:
-    Measurement(string m_protocolName, int partyId, int numOfIteration, vector<string> names);
+    Measurement(string protocolName, int partyId, int numOfIteration);
+    Measurement(string protocolName, int partyId, int numOfIteration, vector<string> names);
     ~Measurement();
     void startSubTask(){m_start = chrono::high_resolution_clock::now();}
     void endSubTask(int taskIdx, int currentIterationNum)
     {
-        m_names[taskIdx][currentIterationNum] =
+        m_times[taskIdx][currentIterationNum] =
                 chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - m_start).count();
     }
 
+    void setTaskNames(vector<string> names){m_names = move(names);}
+
 
 private:
-    vector<vector<high_resolution_clock::time_point>> m_times;
+    vector<vector<long>> m_times;
     vector<string> m_names;
     string m_protocolName;
     high_resolution_clock::time_point m_start;
