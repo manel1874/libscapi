@@ -1,5 +1,5 @@
 # compiler options
-CXX=g++ -g
+CXX=g++
 CFLAGS=-fPIC
 COMPILER_OPTIONS=-O3 -Wall -Wno-unused-function -Wno-unused-variable -Wno-return-type -Wno-unused-result -Wno-unused-but-set-variable
 BATCH=
@@ -40,8 +40,8 @@ INCLUDE=-I.. $(MIRACL_PATH)
 all: ${OT_LIBRARY}
 
 otlib: ${OBJECTS_UTIL} ${OBJECTS_OT}
-	${CXX} ${SHARED_LIB_OPT} -o libOTExtension${SHARED_LIB_EXT} ${COMPILER_OPTIONS} \
-	${OBJECTS_UTIL} ${OBJECTS_OT} ${MIRACL_PATH} ${LIBRARIES} ${LIBRARIES_DIR}
+	# ${CXX} ${SHARED_LIB_OPT} -o libOTExtension${SHARED_LIB_EXT} ${COMPILER_OPTIONS} \
+	# ${OBJECTS_UTIL} ${OBJECTS_OT} ${MIRACL_PATH} ${LIBRARIES} ${LIBRARIES_DIR}
 	ar ru libOTExtension.a ${OBJECTS_UTIL} ${OBJECTS_OT} 
 	ranlib libOTExtension.a
 
@@ -61,7 +61,7 @@ install:
 	install -d $(libdir)
 	install -d $(prefix)/include/OTExtension/ot
 	install -d $(prefix)/include/OTExtension/util
-	install -m 0644 libOTExtension${SHARED_LIB_EXT} $(libdir)
+	# install -m 0644 libOTExtension${SHARED_LIB_EXT} $(libdir)
 	install -m 0644 libOTExtension.a $(libdir)
 	install -m 0644 ot/*.h $(prefix)/include/OTExtension/ot
 	install -m 0644 util/*.h $(prefix)/include/OTExtension/util
