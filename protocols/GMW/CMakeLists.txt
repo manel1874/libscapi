@@ -15,7 +15,6 @@ link_directories(/usr/ssl/lib/ $ENV{HOME}/libscapi/install/lib ${BOOST_LIBRARYDI
 
 set(SOURCE_FILES main.cpp GMWParty.h Circuit.cpp Circuit.h MPCCommunication.cpp MPCCommunication.h GMWParty.cpp)
 add_executable(GMW ${SOURCE_FILES})
-add_library(gmw ${SOURCE_FILES})
 
 TARGET_LINK_LIBRARIES(GMW $ENV{HOME}/libscapi/libscapi.a gmp
         OTExtensionBristol
