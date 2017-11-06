@@ -195,5 +195,3 @@ private:
 	*/
 	vector<byte> runOtAsReceiver(vector<byte> sigma, int numOfOts, int bitLength, std::string version);
 };
-
-

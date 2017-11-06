@@ -26,17 +26,16 @@ OBJ_FILES     := $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES))
 OBJ_FILES     += $(patsubst src/%.c,obj/%.o,$(C_FILES))
 OUT_DIR        = obj obj/mid_layer obj/circuits obj/comm obj/infra obj/interactive_mid_protocols obj/primitives obj/circuits_c obj/cryptoInfra
 INC            = -Ilib -Iinstall/include -Ilib/OTExtensionBristol
-CPP_OPTIONS   := -std=c++11 $(INC)  -maes -mpclmul -Wall -Wno-unused-function -Wno-unused-variable -Wno-unused-result -Wno-sign-compare -Wno-parentheses -O3 -flto
+CPP_OPTIONS   := -std=c++11 $(INC)  -maes -mpclmul -Wall -Wno-unused-function -Wno-unused-variable -Wno-unused-result -Wno-sign-compare -Wno-parentheses -O3
 $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
-LINKER_OPTIONS = $(INCLUDE_ARCHIVES_START) install/lib/libjsoncpp.a install/lib/libOTExtensionBristol.a install/lib/libsimpleot.a install/lib/libntl.a install/lib/libboost_sytem.a install/lib/libboost_thread.a install/lib/libmiracl.a install/lib/libblake2.a -lpthread -lgmp -lcrypto -lssl -lOTExtension -lMaliciousOTExtension -ldl $(INCLUDE_ARCHIVES_END)
-LIBRARIES_DIR  = -L$(HOME)/boost_1_64_0/stage/lib -Linstall/lib
+LIBRARIES_DIR  = -Linstall/lib
 LD_FLAGS = 
 SUMO = no
 
 
 all: libs libscapi tests
-	@echo $(WITH_EMP)
-libs: compile-boost compile-ntl compile-emp-tool compile-emp-ot compile-emp-m2pc compile-blake compile-FourQlib compile-miracl compile-otextension compile-otextension-malicious compile-otextension-bristol
+	echo $(WITH_EMP)
+libs: compile-openssl compile-boost compile-ntl compile-emp-tool compile-emp-ot compile-emp-m2pc compile-blake compile-FourQlib compile-miracl compile-otextension compile-otextension-malicious compile-otextension-bristol
 libscapi: directories $(SLib)
 directories: $(OUT_DIR)
 
@@ -70,7 +69,7 @@ tests: compile-tests
 .PHONY: compile-tests
 compile-tests:
 	@cd ./test; \
-	g++ -std=c++11 -maes -mavx -I/usr/include/openssl  -I../install/include -o tests.exe tests.cpp interactiveMidProtocolsTests.cpp ../libscapi.a -ldl -lpthread -L../install/lib ../install/lib/libboost_system.a ../install/lib/libboost_thread.a -lssl -lntl -lgmp -lblake2 -lcrypto;
+	g++ -std=c++11 -maes -mavx  -I../install/include -o tests.exe tests.cpp interactiveMidProtocolsTests.cpp ../libscapi.a -lpthread -L../install/lib ../install/lib/libboost_system.a ../install/lib/libboost_thread.a -l:libssl.a -l:libcrypto.a -lntl -lgmp -lblake2  -ldl -lz;
 	@cd ..
 	
 prepare-emp:
@@ -129,6 +128,20 @@ compile-FourQlib:
 	mkdir -p $(CURDIR)/install/include/FourQlib
 	cp $(builddir)/FourQlib/FourQ_64bit_and_portable/FourQ_api.h $(CURDIR)/install/include/FourQlib	
 	touch compile-FourQlib
+
+compile-openssl:
+	@mkdir -p $(CURDIR)/install/lib
+	@mkdir -p $(CURDIR)/install/include
+	@mkdir -p $(builddir)/
+	echo "Compiling the openssl library"
+	@cp -r lib/openssl/ $(builddir)/openssl
+	export CFLAGS="-fPIC"	
+	cd $(builddir)/openssl/; ./config --prefix=$(builddir)/openssl/tmptrgt -no-shared
+	cd $(builddir)/openssl/; make 
+	cd $(builddir)/openssl/; make install
+	@cp $(builddir)/openssl/tmptrgt/lib/*.a $(CURDIR)/install/lib/
+	@cp -r $(builddir)/openssl/tmptrgt/include/openssl/ $(CURDIR)/install/include/
+	@touch compile-openssl
 
 compile-json:
 	@echo "Compiling JSON library..."
@@ -239,6 +252,11 @@ clean-blake:
 	@rm -rf $(builddir)/BLAKE2
 	@rm -f compile-blake
 
+clean-json:
+	@echo "Cleaning JSON library"
+	@rm -rf $(builddir)/JsonCpp/
+	@rm -f compile-json
+
 clean-FourQlib:
 	@echo "Cleaning FourQlib library"
 	@rm -rf $(builddir)/FourQlib
@@ -265,11 +283,11 @@ clean-boost:
 	@echo "Cleaning boost library"
 	@rm -rf $(builddir)/boost_1_64_0
 	@rm -f compile-boost
+	
+clean-openssl:
+	@echo "Cleaning openssl library"
+	@rm -rf $(builddir)/openssl
+	@rm -f compile-openssl
 
-clean-json:
-	@echo "Cleaning JSON library"
-	@rm -rf $(builddir)/JsonCpp/
-	@rm -f compile-json
-
-clean: clean-json clean-boost clean-emp clean-otextension-bristol clean-otextension-malicious clean-otextension clean-ntl clean-blake clean-FourQlib clean-miracl clean-miracl-cpp clean-cpp clean-install clean-tests
+clean: clean-openssl clean-boost clean-emp clean-otextension-bristol clean-otextension-malicious clean-otextension clean-ntl clean-blake clean-FourQlib clean-miracl clean-miracl-cpp clean-cpp clean-install clean-tests
 

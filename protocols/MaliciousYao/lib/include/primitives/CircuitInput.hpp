@@ -4,7 +4,7 @@
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <libscapi/include/infra/Common.hpp>
 #include <libscapi/include/circuits/GarbledCircuitFactory.hpp>
-#include <libscapi/include/CryptoInfra/Key.hpp>
+#include <libscapi/include/cryptoInfra/Key.hpp>
 #include <vector>
 #include "../../include/common/CommonMaliciousYao.hpp"
 #include "../../include/common/BinaryUtils.hpp"
