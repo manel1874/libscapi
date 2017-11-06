@@ -49,7 +49,7 @@
     <Filter Include="Source Files\mid_layer">
       <UniqueIdentifier>{4206e073-299c-4932-a26f-3f7725e48887}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\CryptoInfra">
+    <Filter Include="Header Files\cryptoInfra">
       <UniqueIdentifier>{0161b3ac-9ee5-4fb3-837f-a7c1416c171f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -446,14 +446,14 @@
     <ClInclude Include="..\..\include\mid_layer\CramerShoupEnc.hpp">
       <Filter>Header Files\MidLayer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\CryptoInfra\Key.hpp">
-      <Filter>Header Files\CryptoInfra</Filter>
+    <ClInclude Include="..\..\include\cryptoInfra\Key.hpp">
+      <Filter>Header Files\cryptoInfra</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\CryptoInfra\PlainText.hpp">
-      <Filter>Header Files\CryptoInfra</Filter>
+    <ClInclude Include="..\..\include\cryptoInfra\PlainText.hpp">
+      <Filter>Header Files\cryptoInfra</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\CryptoInfra\SecurityLevel.hpp">
-      <Filter>Header Files\CryptoInfra</Filter>
+    <ClInclude Include="..\..\include\cryptoInfra\SecurityLevel.hpp">
+      <Filter>Header Files\cryptoInfra</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\mid_layer\DamgardJurikEnc.hpp">
       <Filter>Header Files\MidLayer</Filter>
