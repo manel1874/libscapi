@@ -100,13 +100,11 @@ private:
 
 public:
 
-//    GMWParty(int id, const shared_ptr<Circuit> & circuit, string partiesFileName, int numThreads, string inputFileName);
 	GMWParty(int argc, char* argv[]);
 
 	~GMWParty() {
 		io_service.stop();
         delete timer;
-//        timer.writeToFile();
 	}
 
     /*

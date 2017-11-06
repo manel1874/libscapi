@@ -16,7 +16,8 @@ YaoSEParty::YaoSEParty(int argc, char* argv[]) : Protocol("YaoSingleExecution", 
     CircuitConverter::convertScapiToBristol(arguments["circuitFile"], "emp_format_circuit.txt", false);
 
     string inputFile = arguments["inputFile"];
-
+    timer = Measurement("YaoSingleExecution", id, 2, times);
+    times = stoi(arguments["internalIterationsNumber"]);
     //open file
     ConfigFile config(arguments["partiesFile"]);
 
@@ -60,24 +61,33 @@ void YaoSEParty::readInputs(string inputFile, bool * inputs, int size){
  * Implement the function derived from the Protocol abstract class.
  */
 void YaoSEParty::run() {
+    vector<string> subTaskNames{"Run"};
+    timer.setTaskNames(subTaskNames);
     void * f = (void *)&compute;
-
-    if(id == 0) {
-        mal->alice_run(f, input);
-    } else {
-        mal->bob_run(f, input, out);
+    for (currentIteration = 0; currentIteration<times; currentIteration++) {
+        timer.startSubTask();
+        if (id == 0) {
+            mal->alice_run(f, input);
+        } else {
+            mal->bob_run(f, input, out);
+        }
+        timer.endSubTask(0, currentIteration);
     }
 }
 
 void YaoSEParty::runOffline(){
-    void * f = (void *)&compute;
+    vector<string> subTaskNames{"Offline", "Online"};
+    timer.setTaskNames(subTaskNames);
 
+    void * f = (void *)&compute;
+    timer.startSubTask();
     if (id == 0) {
         mal->alice_offline(f);
 
     } else {
         mal->bob_offline(f);
     }
+    timer.endSubTask(0, currentIteration);
 }
 
 void YaoSEParty::sync(){
@@ -93,11 +103,13 @@ void YaoSEParty::preOnline() {
 void YaoSEParty::runOnline(){
     void * f = (void *)&compute;
 
+    timer.startSubTask();
     if (id == 0) {
         mal->alice_online(f, input);
     } else {
         mal->bob_online(f, input, out);
     }
+    timer.endSubTask(1, currentIteration);
 }
 
 #endif

@@ -22,6 +22,7 @@ add_executable(SemiHonestYao ${SOURCE_FILES})
 
 TARGET_LINK_LIBRARIES(SemiHonestYao
         $ENV{HOME}/libscapi/libscapi.a gmp gmpxx
+        $ENV{HOME}/libscapi/install/lib/libjsoncpp.a
         OTExtensionBristol
         $ENV{HOME}/libscapi/install/lib/libsimpleot.a
-        boost_system boost_thread boost_log OTExtension MaliciousOTExtension pthread crypto dl ssl z rt)
+        boost_system boost_thread boost_log OTExtension MaliciousOTExtension pthread crypto dl ssl z rt stdc++fs)
