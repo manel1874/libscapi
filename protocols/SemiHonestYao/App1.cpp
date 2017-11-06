@@ -34,10 +34,9 @@ void execute_party_one(PartyOne* p1) {
 	auto all = scapi_now();
 
     int numIterations = p1->getConfig().number_of_iterations;
-	for (int i = 0; i < numIterations; i++) {
-		// run Party one
-		p1->run();
-	}
+	// run Party one
+	p1->run();
+
 	auto end = std::chrono::system_clock::now();
 	int elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - all).count();
 	cout << "********************* PartyOne ********\nRunning " << numIterations <<
@@ -52,10 +51,9 @@ void execute_party_two(PartyTwo* p2) {
 
     int numIterations = p2->getConfig().number_of_iterations;
 
-	for (int i = 0; i < numIterations; i++) {
-		// run party two of Yao protocol.
-		p2->run();
-	}
+	// run party two of Yao protocol.
+	p2->run();
+
 	auto end = std::chrono::system_clock::now();
 	int elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - all).count();
 	cout << "********************* PartyTwo ********\nRunning " << numIterations <<

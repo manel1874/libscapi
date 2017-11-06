@@ -54,6 +54,9 @@ PartyOne::PartyOne(int argc, char* argv[]) : Protocol("SemiHonestYao", argc, arg
 	YaoConfig yao_config(arguments["configFileName"]);
 	this->yaoConfig = yao_config;
 
+	vector<string> subTaskNames{"Garble", "SendCircuitAndInputs", "OT"};
+	timer = Measurement("SemiHonestYao", id, 2, yaoConfig.number_of_iterations, subTaskNames);
+
 	//open parties file
 	ConfigFile cf(arguments["partiesFileName"]);
 
@@ -82,10 +85,9 @@ PartyOne::PartyOne(int argc, char* argv[]) : Protocol("SemiHonestYao", argc, arg
     	circuit = GarbledCircuitFactory::createCircuit(yao_config.circuit_file,
 		                GarbledCircuitFactory::CircuitType::FIXED_KEY_FREE_XOR_HALF_GATES, false);
 #endif
-cout<<"after constructor"<<endl;
+
 	setInputs(yao_config.input_file_1, circuit->getNumberOfInputs(1));
-    cout<<"after inputs"<<endl;
-	// create the semi honest OT extension sender
+    // create the semi honest OT extension sender
 	SocketPartyData senderParty(IpAddress::from_string(sender_ip), sender_port);
 	cout<<"sender ip: "<<senderParty.getIpAddress() <<"port:"<<senderParty.getPort()<<endl;
 #ifdef _WIN32
@@ -96,7 +98,6 @@ cout<<"after constructor"<<endl;
 
 	// connect to party two
 	channel->join(500, 5000);
-    cout<<"end p1 constructor"<<endl;
 };
 
 void PartyOne::setInputs(string inputFileName, int numInputs) {
@@ -123,21 +124,30 @@ void PartyOne::sendP1Inputs(byte* ungarbledInput) {
 }
 
 void PartyOne::run() {
-	runOnline();
+	for (currentIteration = 0; currentIteration<yaoConfig.number_of_iterations; currentIteration++){
+		runOnline();
+	}
+
 }
 
 void PartyOne::runOnline() {
+	timer.startSubTask();
 	values = circuit->garble();
-
+	timer.endSubTask(0, currentIteration);
 	// send garbled tables and the translation table to p2.
 	auto garbledTables = circuit->getGarbledTables();
-	
+
+	timer.startSubTask();
 	channel->write((byte *) garbledTables, circuit->getGarbledTableSize());
 	channel->write(circuit->getTranslationTable().data(), circuit->getNumberOfOutputs());
 	// send p1 input keys to p2.
 	sendP1Inputs(ungarbledInput.data());
+	timer.endSubTask(1, currentIteration);
+
 	// run OT protocol in order to send p2 the necessary keys without revealing any information.
+	timer.startSubTask();
 	runOTProtocol();
+	timer.endSubTask(2, currentIteration);
 }
 
 void PartyOne::runOTProtocol() {
@@ -176,11 +186,13 @@ PartyTwo::PartyTwo(int argc, char* argv[]) : Protocol("SemiHonestYao", argc, arg
 	YaoConfig yao_config(arguments["configFileName"]);
 	this->yaoConfig = yao_config;
 
-	this->print_output = arguments["printOutput"] == "0" ? false : true;
+	this->print_output = yaoConfig.print_output;
 
 	//open parties file
 	ConfigFile cf(arguments["partiesFileName"]);
 
+	vector<string> subTaskNames{"ReceiveCircuitAndInputs", "OT", "ComputeCircuit"};
+	timer = Measurement("SemiHonestYao", id, 2, yaoConfig.number_of_iterations, subTaskNames);
 	string receiver_ip, sender_ip;
 	int receiver_port, sender_port;
 
@@ -189,14 +201,10 @@ PartyTwo::PartyTwo(int argc, char* argv[]) : Protocol("SemiHonestYao", argc, arg
 	sender_ip = cf.Value("", "party_0_ip");
 	receiver_port = stoi(cf.Value("", "party_1_port"));
 	receiver_ip = cf.Value("", "party_1_ip");
-	cout<<"sender ip: "<<sender_ip <<"port:"<<sender_port<<endl;
-	cout<<"receiver ip: "<<receiver_ip<<"port:"<<receiver_port<<endl;
 
 	SocketPartyData me(IpAddress::from_string(receiver_ip), receiver_port);
 
 	SocketPartyData other(IpAddress::from_string(sender_ip), sender_port++);
-	cout<<"my ip: "<<me.getIpAddress() <<"port:"<<me.getPort()<<endl;
-	cout<<"other ip: "<<other.getIpAddress() <<"port:"<<other.getPort()<<endl;
 	channel = make_shared<CommPartyTCPSynced>(io_service, me, other);
 
 	// create the garbled circuit
@@ -209,7 +217,6 @@ PartyTwo::PartyTwo(int argc, char* argv[]) : Protocol("SemiHonestYao", argc, arg
 	setInputs(yao_config.input_file_2,  circuit->getNumberOfInputs(2));
 	// create the OT receiver.
 	SocketPartyData senderParty(IpAddress::from_string(sender_ip), sender_port);
-	cout<<"sender ip: "<<senderParty.getIpAddress() <<"port:"<<senderParty.getPort()<<endl;
 #ifdef _WIN32
 	otReceiver = new OTSemiHonestExtensionReceiver(senderParty, 163, 1);
 #else
@@ -225,7 +232,7 @@ void PartyTwo::setInputs(string inputFileName, int numInputs) {
 	ungarbledInput = readInputAsVector(inputFileName, numInputs);
 }
 
-byte* PartyTwo::computeCircuit(OTBatchROutput * otOutput) {
+void PartyTwo::computeCircuit(OTBatchROutput * otOutput) {
 
 	// Get the input of the protocol.
 	vector<byte> p2Inputs = ((OTOnByteArrayROutput *)otOutput)->getXSigma();
@@ -246,28 +253,32 @@ byte* PartyTwo::computeCircuit(OTBatchROutput * otOutput) {
 #endif
 
 	// translate the result from compute.
-	byte* circuitOutput = new byte[circuit->getNumberOfOutputs()];
-	circuit->translate(garbledOutput, circuitOutput);
-
-	return circuitOutput;
+	circuitOutput.resize(circuit->getNumberOfOutputs());
+	circuit->translate(garbledOutput, circuitOutput.data());
 }
 
 void PartyTwo::run() {
-	runOnline();
+	for (currentIteration = 0; currentIteration<yaoConfig.number_of_iterations; currentIteration++){
+		runOnline();
+	}
 }
 
 void PartyTwo::runOnline() {
 	// receive tables and inputs
+	timer.startSubTask();
 	receiveCircuit();
 	receiveP1Inputs();
+	timer.endSubTask(0, currentIteration);
 
+	timer.startSubTask();
 	// run OT protocol in order to get the necessary keys without revealing any information.
 	auto output = runOTProtocol(ungarbledInput.data(), ungarbledInput.size());
+	timer.endSubTask(1, currentIteration);
 
 	// Compute the circuit.
-	auto outputBytes = computeCircuit(output.get());
-	circuitOutput.resize(circuit->getNumberOfOutputs());
-	memcpy(circuitOutput.data(), outputBytes, circuitOutput.size());
+	timer.startSubTask();
+	computeCircuit(output.get());
+	timer.endSubTask(2, currentIteration);
 
 	// we're done print the output
 	if (print_output)

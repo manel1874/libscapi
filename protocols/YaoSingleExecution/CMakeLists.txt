@@ -19,5 +19,6 @@ add_executable(YaoSingleExecution ${SOURCE_FILES})
 add_library(yaoSingleExecution ${SOURCE_FILES})
 
 TARGET_LINK_LIBRARIES(YaoSingleExecution $ENV{HOME}/libscapi/libscapi.a
-        boost_system boost_thread pthread crypto dl ssl z relic gmp emp-tool)
+        $ENV{HOME}/libscapi/install/lib/libjsoncpp.a
+        boost_system boost_thread pthread crypto dl ssl z relic gmp emp-tool stdc++fs)
 
