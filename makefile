@@ -143,6 +143,14 @@ compile-openssl:
 	@cp -r $(builddir)/openssl/tmptrgt/include/openssl/ $(CURDIR)/install/include/
 	@touch compile-openssl
 
+compile-json:
+	@echo "Compiling JSON library..."
+	@cp -r lib/JsonCpp $(builddir)/JsonCpp
+	@cmake $(builddir)/JsonCpp/CMakeLists.txt
+	@$(MAKE) -C $(builddir)/JsonCpp/
+	@cp $(builddir)/JsonCpp/src/lib_json/libjsoncpp.a $(CURDIR)/install/lib/
+	@touch compile-json
+
 compile-boost:
 	@mkdir -p $(CURDIR)/install/lib
 	@mkdir -p $(CURDIR)/install/include
@@ -243,6 +251,11 @@ clean-blake:
 	@echo "Cleaning blake library"
 	@rm -rf $(builddir)/BLAKE2
 	@rm -f compile-blake
+
+clean-json:
+	@echo "Cleaning JSON library"
+	@rm -rf $(builddir)/JsonCpp/
+	@rm -f compile-json
 
 clean-FourQlib:
 	@echo "Cleaning FourQlib library"
