@@ -8,11 +8,7 @@ int main(int argc, char* argv[]) {
     string tmp = "init times";
     byte tmpBytes[20];
 
-    int allOnlineTimes = 0;
-    int allOfflineTimes = 0;
-    chrono::high_resolution_clock::time_point start, end;
-    int generateTotalTime;
-    vector<byte> output;
+
     GMWParty party(argc, argv);
 
     auto parties = party.getParties();
@@ -27,22 +23,22 @@ int main(int argc, char* argv[]) {
         }
     }
 
-
+    party.run();
     //offline phase
-    start = chrono::high_resolution_clock::now();
-    party.runOffline();
-    end = chrono::high_resolution_clock::now();
-    generateTotalTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    allOfflineTimes += generateTotalTime;
-    party.readInputs();
-
-    //Online phase
-    start = chrono::high_resolution_clock::now();
-    party.runOnline();
-    output = party.getOutput();
-    end = chrono::high_resolution_clock::now();
-    generateTotalTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    allOnlineTimes += generateTotalTime;
+//    start = chrono::high_resolution_clock::now();
+//    party.runOffline();
+//    end = chrono::high_resolution_clock::now();
+//    generateTotalTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+//    allOfflineTimes += generateTotalTime;
+//    party.readInputs();
+//
+//    //Online phase
+//    start = chrono::high_resolution_clock::now();
+//    party.runOnline();
+    vector<byte> output = party.getOutput();
+//    end = chrono::high_resolution_clock::now();
+//    generateTotalTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+//    allOnlineTimes += generateTotalTime;
 
     cout << "circuit output:" << endl;
     for (int i = 0; i < output.size(); i++)
@@ -52,8 +48,8 @@ int main(int argc, char* argv[]) {
 
     cout << endl;
 
-    cout<<"average offline time = "<<allOfflineTimes/10<<endl;
-    cout<<"average online time = "<<allOnlineTimes/10<<endl;
+//    cout<<"average offline time = "<<allOfflineTimes<<endl;
+//    cout<<"average online time = "<<allOnlineTimes<<endl;
     return 0;
 }
 
