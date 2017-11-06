@@ -49,7 +49,7 @@ using namespace Json;
 
 class Measurement {
 public:
-    Measurement();
+    Measurement(){}
     Measurement(string protocolName, int partyId, int numOfParties, int numOfIteration);
     Measurement(string protocolName, int partyId, int numOfParties, int numOfIteration, vector<string> names);
     ~Measurement();
@@ -59,7 +59,6 @@ public:
         m_times[taskIdx][currentIterationNum] =
                 chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - m_start).count();
     }
-
     void setTaskNames(vector<string> names){m_names = move(names);}
 
 
