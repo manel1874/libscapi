@@ -35,7 +35,7 @@ private:
     vector<byte> output;
 	vector<byte> myInputBits;
 
-    Measurement timer;
+    Measurement *timer;
     int times;  //Number of times to execute the protocol
     int currentIteration = 0; //Current iteration number
 
@@ -105,6 +105,7 @@ public:
 
 	~GMWParty() {
 		io_service.stop();
+        delete timer;
 //        timer.writeToFile();
 	}
 

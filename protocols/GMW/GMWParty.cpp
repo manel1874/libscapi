@@ -7,7 +7,12 @@
 //GMWParty::GMWParty(int id, const shared_ptr<Circuit> & circuit, string partiesFileName, int numThreads, string inputFileName) :
 //        id(id), circuit(circuit), inputFileName(inputFileName) {
 
-GMWParty::GMWParty(int argc, char* argv[]) : Protocol("GMW", argc, argv) {
+//GMWParty::GMWParty(int argc, char* argv[]) :
+//        Protocol("GMW", argc, argv), timer("GMW", id, circuit->getNrOfParties(), times,
+//                                           vector<string>{"Offline", "GenerateTriples", "Online",
+//                                            "InputSharing", "ComputeCircuit"})
+GMWParty::GMWParty(int argc, char* argv[]) : Protocol("GMW", argc, argv)
+{
     circuit = make_shared<Circuit>();
     circuit->readCircuit(arguments["circuitFile"]);
 
@@ -15,7 +20,7 @@ GMWParty::GMWParty(int argc, char* argv[]) : Protocol("GMW", argc, argv) {
     times = stoi(arguments["internalIterationsNumber"]);
 
     vector<string> subTaskNames{"Offline", "GenerateTriples", "Online", "InputSharing", "ComputeCircuit"};
-    timer = Measurement("GMW", id, circuit->getNrOfParties(), times, subTaskNames);
+    timer = new Measurement("GMW", id, circuit->getNrOfParties(), times, subTaskNames);
     string tmp = "init times";
     byte tmpBytes[20];
     int numThreads = stoi(arguments["numThreads"]);
@@ -43,25 +48,25 @@ void GMWParty::run(){
 
     for (currentIteration = 0; currentIteration<times; currentIteration++) {
         //Run the offline phase of the protocol
-        timer.startSubTask();
+        timer->startSubTask();
 //        start = chrono::high_resolution_clock::now();
         runOffline();
 //        end = chrono::high_resolution_clock::now();
 //        generateTotalTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 //        allOfflineTimes += generateTotalTime;
-        timer.endSubTask(0, currentIteration);
+        timer->endSubTask(0, currentIteration);
         auto inputSize = circuit->getPartyInputs(id).size(); //indices of my input wires
         myInputBits.resize(inputSize, 0); //input bits, will be adjusted to my input shares
         //read my input from the input file
         readInputs();
         //Run te online phase of the protocol
-        timer.startSubTask();
+        timer->startSubTask();
 //        start = chrono::high_resolution_clock::now();
         runOnline();
 //        end = chrono::high_resolution_clock::now();
 //        generateTotalTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 //        allOnlineTimes += generateTotalTime;
-        timer.endSubTask(2, currentIteration);
+        timer->endSubTask(2, currentIteration);
     }
 
 //    cout<<"average offline time = "<<allOfflineTimes/times<<endl;
@@ -72,9 +77,9 @@ void GMWParty::runOffline(){
     int pid = getpid();
     string path = std::experimental::filesystem::current_path();
     int numberOfParties = getParties().size() + 1;
-    timer.startSubTask();
+    timer->startSubTask();
     generateTriples();
-    timer.endSubTask(1, currentIteration);
+    timer->endSubTask(1, currentIteration);
 	auto inputSize = circuit->getPartyInputs(id).size(); //indices of my input wires
 	myInputBits.resize(inputSize, 0); //input bits, will be adjusted to my input shares
 									  //read my input from the input file
@@ -84,16 +89,16 @@ void GMWParty::runOnline(){
     string path = std::experimental::filesystem::current_path();
     int numberOfParties = getParties().size() + 1;
 //    auto start = chrono::high_resolution_clock::now();
-    timer.startSubTask();
+    timer->startSubTask();
     inputSharing();
-    timer.endSubTask(3, currentIteration);
+    timer->endSubTask(3, currentIteration);
 //    auto end = chrono::high_resolution_clock::now();
 //    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 //    cout<<"input sharing took "<<duration<<endl;
-    timer.startSubTask();
+    timer->startSubTask();
     computeCircuit();
-    timer.endSubTask(4, currentIteration);
-
+    timer->endSubTask(4, currentIteration);
+//    timer->endLogger();
 }
 
 void GMWParty::generateTriples(){
