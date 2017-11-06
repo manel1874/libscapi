@@ -272,6 +272,7 @@ clean-cpp:
 	@rm -rf $(OUT_DIR)
 	@echo "cleaning lib"
 	@rm -f $(SLib)
+	@ rm -rf $(CURDIR)/install/
 
 clean-install:
 	@rm -rf install/*
