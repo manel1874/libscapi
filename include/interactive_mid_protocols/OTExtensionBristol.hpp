@@ -27,7 +27,7 @@
 
 #pragma once
 
-#include "../CryptoInfra/SecurityLevel.hpp"
+#include "../cryptoInfra/SecurityLevel.hpp"
 #include <OTExtensionBristol/OT/OTExtensionWithMatrix.h>
 #include "OTBatch.hpp"
 #include "../comm/Comm.hpp"

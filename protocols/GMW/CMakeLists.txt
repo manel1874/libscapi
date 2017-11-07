@@ -1,24 +1,23 @@
 cmake_minimum_required(VERSION 2.8)
 project(GMW)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -maes -mpclmul -fPIC")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -maes -mpclmul -fPIC -flto")
 
 SET (BOOST_ROOT $ENV{HOME}/boost_1_64_0/)
 SET (BOOST_INCLUDEDIR $ENV{HOME}/boost_1_64_0/)
 SET (BOOST_LIBRARYDIR $ENV{HOME}/boost_1_64_0/stage/lib)
 find_package(Boost COMPONENTS system thread REQUIRED)
 
-INCLUDE_DIRECTORIES($ENV{HOME} ${BOOST_INCLUDEDIR}
+INCLUDE_DIRECTORIES($ENV{HOME} ${BOOST_INCLUDEDIR} $ENV{HOME}
         $ENV{HOME}/libscapi/lib/OTExtensionBristol $ENV{HOME}/libscapi/lib/)
 
 link_directories(/usr/ssl/lib/ $ENV{HOME}/libscapi/install/lib ${BOOST_LIBRARYDIR})
 
 set(SOURCE_FILES main.cpp GMWParty.h Circuit.cpp Circuit.h MPCCommunication.cpp MPCCommunication.h GMWParty.cpp)
 add_executable(GMW ${SOURCE_FILES})
-add_library(gmw ${SOURCE_FILES})
 
 TARGET_LINK_LIBRARIES(GMW $ENV{HOME}/libscapi/libscapi.a gmp
         OTExtensionBristol
         $ENV{HOME}/libscapi/install/lib/libsimpleot.a
-        $ENV{HOME}/libscapi/build//JsonCpp/src/lib_json/libjsoncpp.a
+        $ENV{HOME}/libscapi/install/lib/libjsoncpp.a
         boost_system boost_thread pthread crypto dl ssl z stdc++fs)

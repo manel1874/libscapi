@@ -1,7 +1,7 @@
 #pragma once
 
 #include <libscapi/include/primitives/HashOpenSSL.hpp>
-#include <libscapi/include/CryptoInfra/Key.hpp>
+#include <libscapi/include/cryptoInfra/Key.hpp>
 #include <libscapi/include/primitives/Kdf.hpp>
 #include <libscapi/include/circuits/BooleanCircuits.hpp>
 

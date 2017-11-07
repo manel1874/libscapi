@@ -5,11 +5,12 @@
 #ifndef LIBSCAPI_YAOSEPARTY_H
 #define LIBSCAPI_YAOSEPARTY_H
 
-#include <libscapi/include/CryptoInfra/Protocol.hpp>
-#include <libscapi/include/CryptoInfra/SecurityLevel.hpp>
+#include <libscapi/include/cryptoInfra/Protocol.hpp>
+#include <libscapi/include/cryptoInfra/SecurityLevel.hpp>
 #include <libscapi/include/infra/CircuitConverter.hpp>
 #include <libscapi/include/infra/ConfigFile.hpp>
 #include <libscapi/lib/EMP/emp-m2pc/malicious/malicious.h>
+#include <libscapi/include/infra/Measurement.hpp>
 #include <fstream>
 
 typedef unsigned char byte;
@@ -37,6 +38,8 @@ private:
     bool* out;          //The protocol output
     Malicious2PC <off> * mal; // The underlying object
 
+    Measurement timer;
+    int times, currentIteration;
     /*
 	 * Reads the input from the given file.
 	 */
@@ -72,6 +75,12 @@ public:
      * Synchronize the parties to be able to run the protocol without waiting.
      */
     void sync();
+
+    /**
+     * In case the user wants to execute the protocol using the offline and online functions, he has to set the iteration number himself.
+     * @param iteration
+     */
+    void setIteration(int iteration){ currentIteration = iteration; }
 
     /**
      * Execute the offline phase of the protocol.

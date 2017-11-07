@@ -27,7 +27,7 @@
 
 #pragma once
 #include "RandomValue.hpp"
-#include "../CryptoInfra/PlainText.hpp"
+#include "../cryptoInfra/PlainText.hpp"
 #include "../comm/Comm.hpp"
 
 /**

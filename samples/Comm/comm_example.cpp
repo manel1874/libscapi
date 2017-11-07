@@ -125,12 +125,6 @@ CommParty* getCommParty(CommConfig commConfig, string partyNumber, boost::asio::
 		cout << "Running Communication Example With CommPartyTCPSynced Class" << endl;
 		return new CommPartyTCPSynced(io_service, me, other);
 	}
-	else if (commConfig.classType == "CommPartyTcpSslSynced")
-	{
-		cout << "Running Communication Example With CommPartyTcpSslSynced Class" << endl;
-		return new CommPartyTcpSslSynced(io_service, me, other, commConfig.certificateChainFile,
-			commConfig.password, commConfig.privateKeyFile, commConfig.tmpDHFile, commConfig.clientVerifyFile);
-	}
 	throw invalid_argument("Got unsupported class type in config file");
 }
 

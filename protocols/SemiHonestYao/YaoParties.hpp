@@ -31,7 +31,7 @@
 #include <boost/thread/thread.hpp>
 #include "../../include/comm/Comm.hpp"
 #define AES_KEY BC_AES_KEY // AES_KEY is defined both in GarbledBooleanCircuit and in OTSemiHonestExtension
-#define NO_AESNI
+//#define NO_AESNI
 #define KEY_SIZE 16
 
 #ifdef NO_AESNI
@@ -39,8 +39,8 @@
 #else
     #include "../../include/circuits/GarbledBooleanCircuit.h"
 #endif
-#include "../../include/CryptoInfra/Protocol.hpp"
-#include "../../include/CryptoInfra/SecurityLevel.hpp"
+#include "../../include/cryptoInfra/Protocol.hpp"
+#include "../../include/cryptoInfra/SecurityLevel.hpp"
 #include "../../include/circuits/GarbledCircuitFactory.hpp"
 
 #undef AES_KEY
@@ -53,8 +53,9 @@
 #endif
 #undef AES_KEY
 #include <thread>
-#include "../../include/infra/Scanner.hpp"
-#include "../../include/infra/ConfigFile.hpp"
+#include <libscapi/include/infra/Scanner.hpp>
+#include <libscapi/include/infra/ConfigFile.hpp>
+#include <libscapi/include/infra/Measurement.hpp>
 
 
 
@@ -112,7 +113,9 @@ class PartyOne : public Protocol, public SemiHonest, public TwoParty{
 private:
 	int id;
 	boost::asio::io_service io_service;
-	OTBatchSender * otSender;			//The OT object that used in the protocol.	
+	OTBatchSender * otSender;			//The OT object that used in the protocol.
+	Measurement timer;
+	int currentIteration;
 
 #ifdef NO_AESNI
 	GarbledBooleanCircuitNoIntrinsics * circuit;	//The garbled circuit used in the protocol.
@@ -207,12 +210,14 @@ private:
 	vector<byte> circuitOutput;
 	vector<byte> ungarbledInput;
 	YaoConfig yaoConfig;
+	Measurement timer;
+	int currentIteration;
 	
 	/**
 	* Compute the garbled circuit.
 	* @param otOutput The output from the OT protocol, which are party two inputs.
 	*/
-	byte* computeCircuit(OTBatchROutput * otOutput);
+	void computeCircuit(OTBatchROutput * otOutput);
 
 	/**
 	* Receive the circuit's garbled tables and translation table.

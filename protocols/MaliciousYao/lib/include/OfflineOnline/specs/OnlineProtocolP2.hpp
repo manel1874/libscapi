@@ -1,6 +1,6 @@
 #pragma once
 
-#include <libscapi/include/CryptoInfra/Protocol.hpp>
+#include <libscapi/include/cryptoInfra/Protocol.hpp>
 #include "../../primitives/CheatingRecoveryCircuitCreator.hpp"
 #include "../../primitives/KProbeResistantMatrix.hpp"
 #include "../../primitives/ExecutionParameters.hpp"

@@ -7,10 +7,10 @@
 
 #include "Circuit.h"
 #include "MPCCommunication.h"
-#include "../../include/primitives/Prg.hpp"
-#include "../../include/CryptoInfra/Protocol.hpp"
-#include "../../include/CryptoInfra/Measurement.hpp"
-#include "../../include/CryptoInfra/SecurityLevel.hpp"
+#include <libscapi/include/primitives/Prg.hpp>
+#include <libscapi/include/cryptoInfra/Protocol.hpp>
+#include <libscapi/include/infra/Measurement.hpp>
+#include <libscapi/include/cryptoInfra/SecurityLevel.hpp>
 #include "CBitVector.h"
 #include <thread>
 #include <mutex>
@@ -34,7 +34,12 @@ private:
     string inputFileName;
     vector<byte> output;
 	vector<byte> myInputBits;
-    int m_repetitionId;
+
+    Measurement *timer;
+    int times;  //Number of times to execute the protocol
+    int currentIteration = 0; //Current iteration number
+
+//	Measurement timer;
 
 	/*
 	 * Generates Beaver's multiplication triples to use in the protocol.
@@ -95,11 +100,11 @@ private:
 
 public:
 
-//    GMWParty(int id, const shared_ptr<Circuit> & circuit, string partiesFileName, int numThreads, string inputFileName);
 	GMWParty(int argc, char* argv[]);
 
 	~GMWParty() {
 		io_service.stop();
+        delete timer;
 	}
 
     /*
@@ -109,6 +114,12 @@ public:
 
     bool hasOffline() override { return true; }
     bool hasOnline() override { return true; }
+
+    /**
+     * In case the user wants to execute the protocol using the offline and online functions, he has to set the iteration number himself.
+     * @param iteration
+     */
+    void setIteration(int iteration){ currentIteration = iteration; }
 
 	/*
 	 * Executes the offline phase of the protocol.

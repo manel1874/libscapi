@@ -5,7 +5,7 @@
 #include <libscapi/include/primitives/Matrix.hpp>
 #include <libscapi/include/circuits/ArithmeticCircuit.hpp>
 #include <libscapi/include/comm/MPCCommunication.hpp>
-#include <libscapi/include/CryptoInfra/Protocol.hpp>
+#include <libscapi/include/cryptoInfra/Protocol.hpp>
 
 #include <libscapi/include/primitives/Mersenne.hpp>
 #include "ProtocolTimer.h"

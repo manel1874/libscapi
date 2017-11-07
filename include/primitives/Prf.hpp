@@ -30,7 +30,7 @@
 #define SCAPI_PRF_H
 #include "../infra/Common.hpp"
 #include "../mid_layer/Mac.hpp"
-#include "../CryptoInfra/SecurityLevel.hpp"
+#include "../cryptoInfra/SecurityLevel.hpp"
 #include "math.h"
 
 /**

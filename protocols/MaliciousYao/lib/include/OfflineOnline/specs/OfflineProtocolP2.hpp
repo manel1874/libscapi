@@ -1,7 +1,7 @@
 #pragma once
 #include <boost/thread/thread.hpp>
 
-#include <libscapi/include/CryptoInfra/Protocol.hpp>
+#include <libscapi/include/cryptoInfra/Protocol.hpp>
 #include "../../../include/primitives/KProbeResistantMatrix.hpp"
 #include "../../../include/primitives/CommunicationConfig.hpp"
 #include "../../../include/OfflineOnline/subroutines/CutAndChooseVerifier.hpp"

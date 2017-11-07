@@ -1,6 +1,6 @@
 #pragma once
 
-#include <libscapi/include/CryptoInfra/Protocol.hpp>
+#include <libscapi/include/cryptoInfra/Protocol.hpp>
 #include "../../primitives/CommunicationConfig.hpp"
 #include "../../primitives/CryptoPrimitives.hpp"
 #include "../../primitives/CircuitInput.hpp"

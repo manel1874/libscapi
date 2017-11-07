@@ -7,21 +7,27 @@
 //GMWParty::GMWParty(int id, const shared_ptr<Circuit> & circuit, string partiesFileName, int numThreads, string inputFileName) :
 //        id(id), circuit(circuit), inputFileName(inputFileName) {
 
-GMWParty::GMWParty(int argc, char* argv[]) : Protocol("GMW", argc, argv) {
+//GMWParty::GMWParty(int argc, char* argv[]) :
+//        Protocol("GMW", argc, argv), timer("GMW", id, circuit->getNrOfParties(), times,
+//                                           vector<string>{"Offline", "GenerateTriples", "Online",
+//                                            "InputSharing", "ComputeCircuit"})
+GMWParty::GMWParty(int argc, char* argv[]) : Protocol("GMW", argc, argv)
+{
     circuit = make_shared<Circuit>();
-    circuit->readCircuit(arguments["circuitFileName"]);
+    circuit->readCircuit(arguments["circuitFile"]);
 
     id = stoi(arguments["partyID"]);
-    m_repetitionId = stoi(arguments["repetitionId"]);
-    cout << "repetition id is : " << m_repetitionId << endl;
+    times = stoi(arguments["internalIterationsNumber"]);
 
+    vector<string> subTaskNames{"Offline", "GenerateTriples", "Online", "InputSharing", "ComputeCircuit"};
+    timer = new Measurement("GMW", id, circuit->getNrOfParties(), times, subTaskNames);
     string tmp = "init times";
     byte tmpBytes[20];
     int numThreads = stoi(arguments["numThreads"]);
-    inputFileName = arguments["inputFileName"];
+    inputFileName = arguments["inputFile"];
 
 	//Create the communication between this party and the other parties.
-    parties = MPCCommunication::setCommunication(io_service, id, circuit->getNrOfParties(), arguments["partiesFileName"]);
+    parties = MPCCommunication::setCommunication(io_service, id, circuit->getNrOfParties(), arguments["partiesFile"]);
     cout << "----------end communication--------------" << endl;
 
 
@@ -35,25 +41,45 @@ GMWParty::GMWParty(int argc, char* argv[]) : Protocol("GMW", argc, argv) {
 }
 
 void GMWParty::run(){
-	//Run the offline phase of the protocol
-    runOffline();
+//    int allOnlineTimes = 0;
+//    int allOfflineTimes = 0;
+//    chrono::high_resolution_clock::time_point start, end;
+//    int generateTotalTime;
 
-    auto inputSize = circuit->getPartyInputs(id).size(); //indices of my input wires
-    myInputBits.resize(inputSize, 0); //input bits, will be adjusted to my input shares
-    //read my input from the input file
-    readInputs();
-    //Run te online phase of the protocol
-    runOnline();
+    for (currentIteration = 0; currentIteration<times; currentIteration++) {
+        //Run the offline phase of the protocol
+        timer->startSubTask();
+//        start = chrono::high_resolution_clock::now();
+        runOffline();
+//        end = chrono::high_resolution_clock::now();
+//        generateTotalTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+//        allOfflineTimes += generateTotalTime;
+        timer->endSubTask(0, currentIteration);
+        auto inputSize = circuit->getPartyInputs(id).size(); //indices of my input wires
+        myInputBits.resize(inputSize, 0); //input bits, will be adjusted to my input shares
+        //read my input from the input file
+        readInputs();
+        //Run te online phase of the protocol
+        timer->startSubTask();
+//        start = chrono::high_resolution_clock::now();
+        runOnline();
+//        end = chrono::high_resolution_clock::now();
+//        generateTotalTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+//        allOnlineTimes += generateTotalTime;
+        timer->endSubTask(2, currentIteration);
+    }
+
+//    cout<<"average offline time = "<<allOfflineTimes/times<<endl;
+//    cout<<"average online time = "<<allOnlineTimes/times<<endl;
 }
 
 void GMWParty::runOffline(){
     int pid = getpid();
     string path = std::experimental::filesystem::current_path();
     int numberOfParties = getParties().size() + 1;
-    Measurement offline("GMW", id, path, "offline", m_repetitionId, numberOfParties);
-    {
-        generateTriples();
-    }
+    timer->startSubTask();
+    generateTriples();
+    timer->endSubTask(1, currentIteration);
 	auto inputSize = circuit->getPartyInputs(id).size(); //indices of my input wires
 	myInputBits.resize(inputSize, 0); //input bits, will be adjusted to my input shares
 									  //read my input from the input file
@@ -62,11 +88,17 @@ void GMWParty::runOffline(){
 void GMWParty::runOnline(){
     string path = std::experimental::filesystem::current_path();
     int numberOfParties = getParties().size() + 1;
-    Measurement offline("GMW", id, path, "online", m_repetitionId, numberOfParties);
-    {
-        inputSharing();
-        computeCircuit();
-    }
+//    auto start = chrono::high_resolution_clock::now();
+    timer->startSubTask();
+    inputSharing();
+    timer->endSubTask(3, currentIteration);
+//    auto end = chrono::high_resolution_clock::now();
+//    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+//    cout<<"input sharing took "<<duration<<endl;
+    timer->startSubTask();
+    computeCircuit();
+    timer->endSubTask(4, currentIteration);
+//    timer->endLogger();
 }
 
 void GMWParty::generateTriples(){
@@ -87,8 +119,6 @@ void GMWParty::generateTriples(){
     int position;
     byte v, u;
 
-    shared_ptr<OTBatchSOutput> sOutput;
-    shared_ptr<OTBatchROutput> rOutput;
     PrgFromOpenSSLAES prg;
     auto key =prg.generateKey(128);
     prg.setKey(key);
@@ -126,7 +156,6 @@ void GMWParty::generateTriplesForParty(PrgFromOpenSSLAES & prg, int first, int l
         for (int i = 0; i < sigma.size(); i++) {
             sigma[i] = sigma[i] % 2; //sigma should be 0/1
         }
-
         //If this id is lower than the other id, run the sender role in the OT,
         //else, run the receiver role.
         if (id < parties[i]->getID()) {
@@ -162,7 +191,6 @@ void GMWParty::generateTriplesForParty(PrgFromOpenSSLAES & prg, int first, int l
 		x1 = ((OTExtensionRandomizedSOutput *)sOutput.get())->getR1Arr();
 		xSigma = ((OTOnByteArrayROutput *)rOutput.get())->getXSigma();
 #endif
-
         for (int j = 0; j < circuit->getNrOfAndGates(); j++) {
             //convert the output of the random ot to 0/1.
             x0[j] %= 2;
@@ -235,7 +263,7 @@ void GMWParty::sendSharesToParties(PrgFromOpenSSLAES & prg, vector<byte> & myInp
             mtx.unlock();
         }
 
-
+//        auto start = chrono::high_resolution_clock::now();
         if (id < parties[i]->getID()) {
             //send shares to my input bits
             parties[i]->getChannel()->write(myShares.data(), myShares.size());
@@ -251,6 +279,9 @@ void GMWParty::sendSharesToParties(PrgFromOpenSSLAES & prg, vector<byte> & myInp
             parties[i]->getChannel()->write(myShares.data(), myShares.size());
 
         }
+//        auto end = chrono::high_resolution_clock::now();
+//        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+//        cout<<"shares took "<<duration<<" ms"<<endl;
     }
 }
 void GMWParty::receiveShares(vector<int> & otherInputWires, vector<byte> & otherShares, int i)  {
@@ -314,9 +345,11 @@ vector<byte>& GMWParty::computeCircuit(){
         //We should run the recompute function in order to compute all gates till here.
         //After that, the input wire will be ready.
         if (!isWireReady[gate.inputIndex1] || ((gate.inFan != 1) && !isWireReady[gate.inputIndex2])) {
-
+//            auto start = chrono::high_resolution_clock::now();
             recomputeAndGatesWithThreads(firstAndGateToRecompute, myD, myE, i, isWireReady, numAndGatesComputed, index);
-
+//            auto end = chrono::high_resolution_clock::now();
+//        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+//        cout<<"recomputeAndGatesWithThreads took "<<duration<<" ms"<<endl;
             if (layer < depths.size()-1 ) {
                 layer++;
                 for (int j = 0; j < parties.size(); j++) {
@@ -439,6 +472,7 @@ void GMWParty::recomputeAndGates(int firstAndGateToRecompute, vector<CBitVector>
         otherD.CreateinBytes(myD[j].GetSize());
         otherE.CreateinBytes(myE[j].GetSize());
         //The party with the lower id will send its bytes first
+//        auto start = chrono::high_resolution_clock::now();
         if (id < parties[j]->getID()) {
             //send my d ,e
             parties[j]->getChannel()->write(myD[j].GetArr(), myD[j].GetSize());
@@ -454,7 +488,9 @@ void GMWParty::recomputeAndGates(int firstAndGateToRecompute, vector<CBitVector>
             parties[j]->getChannel()->write(myD[j].GetArr(), myD[j].GetSize());
             parties[j]->getChannel()->write(myE[j].GetArr(), myE[j].GetSize());
         }
-        
+//        auto end = chrono::high_resolution_clock::now();
+//        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+//        cout<<"communication in recomputeAndGatesWithThreads took "<<duration<<" ms"<<endl;
         //Go on each and gate in the ot and compute its output share.
         recomputeAndGatesCounter = 0;
         for (int k=firstAndGateToRecompute; k < i; k++){

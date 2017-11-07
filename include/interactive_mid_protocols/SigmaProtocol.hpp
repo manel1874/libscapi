@@ -28,7 +28,7 @@
 
 #pragma once
 #include "../infra/Common.hpp"
-#include "../CryptoInfra/SecurityLevel.hpp"
+#include "../cryptoInfra/SecurityLevel.hpp"
 #include "../comm/Comm.hpp"
 #include <openssl/rand.h>
 #include "../primitives/Dlog.hpp"
