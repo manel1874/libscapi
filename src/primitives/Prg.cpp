@@ -112,7 +112,7 @@ PrgFromOpenSSLAES::PrgFromOpenSSLAES(int cachedSize, bool isStrict) : cachedSize
 	indexPlaintext = (block *)_mm_malloc(sizeof(block) * cachedSize, 16);
 
 	//assin zero to the array of indices which are set as the plaintext. Note that we only use the list sagnificant long part of each 128 bit.
-	memset(indexPlaintext, 0, sizeof(block) * cachedSize);
+//	memset(indexPlaintext, 0, sizeof(block) * cachedSize);
 
 
 	long *plaintextArray = (long *)indexPlaintext;
@@ -120,6 +120,7 @@ PrgFromOpenSSLAES::PrgFromOpenSSLAES(int cachedSize, bool isStrict) : cachedSize
 	//go over the array and set the 64 list sagnificat bits for evey 128 bit value, we use only half of the 128 bit variables
 	for (long i = 0; i < cachedSize; i++) {
 		plaintextArray[i * 2 + 1] = i;
+        plaintextArray[i * 2] = 0;
 	}
 
 }
@@ -230,50 +231,6 @@ void PrgFromOpenSSLAES::getPRGBytes(vector<byte> & outBytes, int outOffset, int 
 	//increment the byte counter 
 	idxForBytes += outLen;
 }
-
-uint32_t PrgFromOpenSSLAES::getRandom32() {
-
-	//key must be set in order to get randoms
-	if (!isKeySet())
-		throw IllegalStateException("secret key isn't set");
-
-	//the required number of random bytes exceeds the avaliable randoms, prepare new randoms
-	if (idxForBytes + 4 >= cachedSize*BLOCK_SIZE) {
-		prepare();
-	}
-	uint32_t* cipherInInts = (uint32_t*)cipherChunk;
-
-	idxForBytes += 4;
-	return  cipherInInts[(idxForBytes-4 + 3)/4];
-}
-uint64_t PrgFromOpenSSLAES::getRandom64() {
-
-	//key must be set in order to get randoms
-	if (!isKeySet())
-		throw IllegalStateException("secret key isn't set");
-
-	//the required number of random bytes exceeds the avaliable randoms, prepare new randoms
-	if (idxForBytes + 8 >= cachedSize*BLOCK_SIZE) {
-		prepare();
-	}
-	uint64_t* cipherInLong = (uint64_t*)cipherChunk;
-
-	idxForBytes += 8;
-	return  cipherInLong[(idxForBytes-8 + 7) / 8];
-}
-block PrgFromOpenSSLAES::getRandom128() {
-
-	//key must be set in order to get randoms
-	if (!isKeySet())
-		throw IllegalStateException("secret key isn't set");
-	//the required number of random bytes exceeds the avaliable randoms, prepare new randoms
-	if (idxForBytes + 16 >= cachedSize*BLOCK_SIZE) {
-		prepare();
-	}
-	idxForBytes += 16;
-	return  cipherChunk[(idxForBytes - 16 + 15) / 16];
-}
-
 
 void PrgFromOpenSSLAES::prepare() {
 
