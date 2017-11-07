@@ -40,7 +40,8 @@
 #include <iostream>
 #include <exception>
 #include <memory>
-#include <experimental/filesystem>
+#include <unistd.h>
+#include <stdio.h>
 #include <../../lib/JsonCpp/include/json/json.h>
 
 using namespace std;
@@ -70,6 +71,11 @@ private:
     int m_partyId;
     int m_numOfParties;
     int m_numberOfIterations;
+    string getcwdStr()
+    {
+        char* buff;//automatically cleaned when it exits scope
+        return string(getcwd(buff,255));
+    }
 
 };
 

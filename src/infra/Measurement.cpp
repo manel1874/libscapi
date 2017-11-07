@@ -57,7 +57,7 @@ Measurement::Measurement(string protocolName, int partyId, int numOfParties, int
 
 Measurement::~Measurement()
 {
-    string filePath = std::experimental::filesystem::current_path();
+    string filePath = getcwdStr();
     string fileName = filePath + "/" + m_protocolName + "_partyId=" + to_string(m_partyId)
                       +"_numOfParties=" + to_string(m_numOfParties) + ".json";
 
