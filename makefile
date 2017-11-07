@@ -34,7 +34,6 @@ SUMO = no
 
 
 all: libs libscapi tests
-	echo $(WITH_EMP)
 libs: compile-openssl compile-boost compile-ntl compile-emp-tool compile-emp-ot compile-emp-m2pc compile-blake compile-FourQlib compile-miracl compile-otextension compile-otextension-malicious compile-otextension-bristol
 libscapi: directories $(SLib)
 directories: $(OUT_DIR)
@@ -273,6 +272,7 @@ clean-cpp:
 	@echo "cleaning lib"
 	@rm -f $(SLib)
 	@ rm -rf $(CURDIR)/install/
+	@ rm -rf $(CURDIR)/build/
 
 clean-install:
 	@rm -rf install/*
