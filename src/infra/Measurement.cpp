@@ -57,40 +57,44 @@ Measurement::Measurement(string protocolName, int partyId, int numOfParties, int
 
 Measurement::~Measurement()
 {
-    string filePath = std::experimental::filesystem::current_path();
+    string filePath = getcwdStr();
     string fileName = filePath + "/" + m_protocolName + "_partyId=" + to_string(m_partyId)
                       +"_numOfParties=" + to_string(m_numOfParties) + ".json";
 
-    for (int taskNameIdx = 0; taskNameIdx < m_names.size(); ++taskNameIdx)
+    //party is the root of the json objects
+    Value party(arrayValue);
+
+    for (int taskNameIdx = 0; taskNameIdx < m_names.size(); taskNameIdx++)
     {
         //Write for each task name all the iteration
-        Value taskTimes;
-        for (int iterationIdx = 0; iterationIdx < m_numberOfIterations; ++iterationIdx)
+        Value task(objectValue);
+        task["name"] = m_names[taskNameIdx];
+
+        for (int iterationIdx = 0; iterationIdx < m_numberOfIterations; iterationIdx++)
         {
-
-            taskTimes["Iteration_" + to_string(iterationIdx) + "_" + m_names[taskNameIdx]] =
-                    m_times[taskNameIdx][iterationIdx];
-
+            Value taskTimes;
+            task["iteration_" + to_string(iterationIdx)] = m_times[taskNameIdx][iterationIdx];
         }
-        //Convert JSON object to string
+        party.append(task);
+    }
 
-        StreamWriterBuilder builder;
-        unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
-        try
+
+    //Convert JSON object to string
+    StreamWriterBuilder builder;
+    unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
+    try
+    {
+        fstream myfile;
+        myfile.open(fileName, fstream::out);
+        if (myfile.is_open())
         {
-            fstream myfile;
-            myfile.open(fileName, fstream::out | fstream::app);
-            if (myfile.is_open())
-            {
-                cout << "Success" << endl;
-                writer->write(taskTimes, &myfile);
-            }
+            writer->write(party, &myfile);
         }
+    }
 
-        catch (exception& e)
-        {
-            cout << "Exception thrown : " << e.what() << endl;
-        }
+    catch (exception& e)
+    {
+        cout << "Exception thrown : " << e.what() << endl;
     }
 }
 

@@ -40,7 +40,8 @@
 #include <iostream>
 #include <exception>
 #include <memory>
-#include <experimental/filesystem>
+#include <unistd.h>
+#include <stdio.h>
 #include <../../lib/JsonCpp/include/json/json.h>
 
 using namespace std;
@@ -59,7 +60,6 @@ public:
         m_times[taskIdx][currentIterationNum] =
                 chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - m_start).count();
     }
-
     void setTaskNames(vector<string> names){m_names = move(names);}
 
 
@@ -71,6 +71,11 @@ private:
     int m_partyId;
     int m_numOfParties;
     int m_numberOfIterations;
+    string getcwdStr()
+    {
+        char* buff;//automatically cleaned when it exits scope
+        return string(getcwd(buff,255));
+    }
 
 };
 

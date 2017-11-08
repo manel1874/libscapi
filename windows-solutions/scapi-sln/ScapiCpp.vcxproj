@@ -206,9 +206,9 @@
     <ClInclude Include="..\..\include\circuits\TedKrovetzAesNiWrapperC.h" />
     <ClInclude Include="..\..\include\comm\Message.hpp" />
     <ClInclude Include="..\..\include\comm\Comm.hpp" />
-    <ClInclude Include="..\..\include\CryptoInfra\Key.hpp" />
-    <ClInclude Include="..\..\include\CryptoInfra\PlainText.hpp" />
-    <ClInclude Include="..\..\include\CryptoInfra\SecurityLevel.hpp" />
+    <ClInclude Include="..\..\include\cryptoInfra\Key.hpp" />
+    <ClInclude Include="..\..\include\cryptoInfra\PlainText.hpp" />
+    <ClInclude Include="..\..\include\cryptoInfra\SecurityLevel.hpp" />
     <ClInclude Include="..\..\include\infra\Common.hpp" />
     <ClInclude Include="..\..\include\infra\ConfigFile.hpp" />
     <ClInclude Include="..\..\include\infra\File.hpp" />

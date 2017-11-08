@@ -26,7 +26,7 @@ OBJ_FILES     := $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES))
 OBJ_FILES     += $(patsubst src/%.c,obj/%.o,$(C_FILES))
 OUT_DIR        = obj obj/mid_layer obj/circuits obj/comm obj/infra obj/interactive_mid_protocols obj/primitives obj/circuits_c obj/cryptoInfra
 INC            = -Ilib -Iinstall/include -Ilib/OTExtensionBristol
-CPP_OPTIONS   := -std=c++11 $(INC)  -maes -mpclmul -Wall -Wno-unused-function -Wno-unused-variable -Wno-unused-result -Wno-sign-compare -Wno-parentheses -O3
+CPP_OPTIONS   := -std=c++11 $(INC)  -maes -mpclmul -mbmi2 -Wall -Wno-unused-function -Wno-unused-variable -Wno-unused-result -Wno-sign-compare -Wno-parentheses -O3
 $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
 LIBRARIES_DIR  = -Linstall/lib
 LD_FLAGS = 
@@ -34,8 +34,7 @@ SUMO = no
 
 
 all: libs libscapi tests
-	echo $(WITH_EMP)
-libs: compile-openssl compile-boost compile-ntl compile-emp-tool compile-emp-ot compile-emp-m2pc compile-blake compile-FourQlib compile-miracl compile-otextension compile-otextension-malicious compile-otextension-bristol
+libs: compile-openssl compile-boost compile-ntl compile-emp-tool compile-emp-ot compile-emp-m2pc compile-blake compile-FourQlib compile-miracl compile-otextension compile-otextension-malicious compile-otextension-bristol compile-json
 libscapi: directories $(SLib)
 directories: $(OUT_DIR)
 
@@ -273,6 +272,7 @@ clean-cpp:
 	@echo "cleaning lib"
 	@rm -f $(SLib)
 	@ rm -rf $(CURDIR)/install/
+	@ rm -rf $(CURDIR)/build/
 
 clean-install:
 	@rm -rf install/*
@@ -290,5 +290,5 @@ clean-openssl:
 	@rm -rf $(builddir)/openssl
 	@rm -f compile-openssl
 
-clean: clean-openssl clean-boost clean-emp clean-otextension-bristol clean-otextension-malicious clean-otextension clean-ntl clean-blake clean-FourQlib clean-miracl clean-miracl-cpp clean-cpp clean-install clean-tests
+clean: clean-json clean-openssl clean-boost clean-emp clean-otextension-bristol clean-otextension-malicious clean-otextension clean-ntl clean-blake clean-FourQlib clean-miracl clean-miracl-cpp clean-cpp clean-install clean-tests
 
