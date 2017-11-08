@@ -34,7 +34,7 @@ SUMO = no
 
 
 all: libs libscapi tests
-libs: compile-openssl compile-boost compile-ntl compile-emp-tool compile-emp-ot compile-emp-m2pc compile-blake compile-FourQlib compile-miracl compile-otextension compile-otextension-malicious compile-otextension-bristol
+libs: compile-openssl compile-boost compile-ntl compile-emp-tool compile-emp-ot compile-emp-m2pc compile-blake compile-FourQlib compile-miracl compile-otextension compile-otextension-malicious compile-otextension-bristol compile-json
 libscapi: directories $(SLib)
 directories: $(OUT_DIR)
 
@@ -290,5 +290,5 @@ clean-openssl:
 	@rm -rf $(builddir)/openssl
 	@rm -f compile-openssl
 
-clean: clean-openssl clean-boost clean-emp clean-otextension-bristol clean-otextension-malicious clean-otextension clean-ntl clean-blake clean-FourQlib clean-miracl clean-miracl-cpp clean-cpp clean-install clean-tests
+clean: clean-json clean-openssl clean-boost clean-emp clean-otextension-bristol clean-otextension-malicious clean-otextension clean-ntl clean-blake clean-FourQlib clean-miracl clean-miracl-cpp clean-cpp clean-install clean-tests
 
