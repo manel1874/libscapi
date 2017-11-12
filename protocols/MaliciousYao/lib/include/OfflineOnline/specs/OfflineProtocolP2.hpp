@@ -1,11 +1,15 @@
 #pragma once
+#include <boost/thread/thread.hpp>
 
-#include <libscapi/include/CryptoInfra/Protocol.hpp>
+#include <libscapi/include/cryptoInfra/Protocol.hpp>
 #include "../../../include/primitives/KProbeResistantMatrix.hpp"
 #include "../../../include/primitives/CommunicationConfig.hpp"
 #include "../../../include/OfflineOnline/subroutines/CutAndChooseVerifier.hpp"
 #include "../../../include/OfflineOnline/subroutines/OfflineOtReceiverRoutine.hpp"
 #include "../../common/LogTimer.hpp"
+#include <libscapi/include/interactive_mid_protocols/OTExtensionBristol.hpp>
+#include "../../../include/primitives/CheatingRecoveryCircuitCreator.hpp"
+
 
 
 /** 
@@ -17,9 +21,11 @@
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar - Ilan University
 *
 */
-class OfflineProtocolP2 : public Protocol, public Malicious {
+class OfflineProtocolP2 : public Protocol, public Malicious, public TwoParty {
 
 private:
+    boost::asio::io_service io_service;
+
 	shared_ptr<ExecutionParameters> mainExecution;			// Parameters of the main circuit.
 	shared_ptr<ExecutionParameters> crExecution;			// Parameters of the cheating recovery circuit.
 	vector<shared_ptr<CommParty>> channel;							// The channels used communicate between the parties.
@@ -32,6 +38,9 @@ private:
 	shared_ptr<OTBatchReceiver> maliciousOtReceiver;		//The malicious OT used to transfer the keys.
 	bool writeToFile;
 
+
+	const string HOME_DIR = "../..";
+	const string COMM_CONFIG_FILENAME = HOME_DIR + string("/lib/assets/conf/PartiesConfig.txt");
 public:
 	/**
 	* Constructor that sets the parameters.
@@ -40,13 +49,30 @@ public:
 	* @param primitives Contains the low level instances to use.
 	* @param communication Configuration of communication between parties.
 	*/
-	OfflineProtocolP2(const shared_ptr<ExecutionParameters> & mainExecution, const shared_ptr<ExecutionParameters> & crExecution,
-		const shared_ptr<CommunicationConfig> & communication, const shared_ptr<OTBatchReceiver> & maliciousOtReceiver, bool writeToFile);
+	OfflineProtocolP2(int argc, char* argv[]);
 
+	~OfflineProtocolP2(){
+		io_service.stop();
+	}
 	/**
 	* Runs the second party in the offline phase of the malicious Yao protocol.
 	*/
-	void run() override;
+	void run() override {
+        runOffline();
+    }
+
+    bool hasOffline() override {return true; }
+    bool hasOnline() override {return false; }
+    void runOffline() override;
+    /**
+     * Save the buckets and matrices on the disk so the online protocol can read that.
+     */
+    void saveOnDisk(string bucket_prefix_main, string buckets_prefix_cr, string main_matrix, string cr_matrix){
+        mainBuckets->saveToFiles(bucket_prefix_main);
+        crBuckets->saveToFiles(buckets_prefix_cr);
+        mainMatrix->saveToFile(main_matrix);
+        crMatrix->saveToFile(cr_matrix);
+    }
 
 	/**
 	 * Returns the list of main circuit's buckets.
@@ -65,6 +91,7 @@ public:
 	*/
 	shared_ptr<KProbeResistantMatrix> getCheatingRecoveryProbeResistantMatrix() { return this->crMatrix; }
 
+	vector<shared_ptr<CommParty>> getChannel() { return channel; }
 	
 
 private:

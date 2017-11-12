@@ -27,7 +27,7 @@
 
 #pragma once
 
-#include "../CryptoInfra/SecurityLevel.hpp"
+#include "../cryptoInfra/SecurityLevel.hpp"
 #include <OTExtensionBristol/OT/OTExtensionWithMatrix.h>
 #include "OTBatch.hpp"
 #include "../comm/Comm.hpp"
@@ -123,7 +123,8 @@ class OTExtensionBristolReceiver: public OTExtensionBristolBase,  public OTBatch
 
 public:
 	//OTExtensionBristolReciever(const string& senderAddress, int port, bool isSemiHonest);
-	OTExtensionBristolReceiver(const string& senderAddress, int port, bool isSemiHonest, const shared_ptr<CommParty> & channel = nullptr);
+	OTExtensionBristolReceiver(const string& senderAddress, int port,
+                               bool isSemiHonest, const shared_ptr<CommParty> & channel = nullptr);
 
 	virtual shared_ptr<OTBatchROutput> transfer(OTBatchRInput * input) override;
 };
@@ -137,7 +138,8 @@ public:
 class OTExtensionBristolSender: public OTExtensionBristolBase, public OTBatchSender{
 
 public:
-	OTExtensionBristolSender(int port, bool isSemiHonest, const shared_ptr<CommParty> & channel = nullptr);
+	OTExtensionBristolSender(int port, bool isSemiHonest,
+                                 const shared_ptr<CommParty> &channel);
 
 	virtual shared_ptr<OTBatchSOutput> transfer(OTBatchSInput * input) override;
 

@@ -19,6 +19,7 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
 set(WFLAGS "-Wall")
 
+if (FALSE)
 message("\n-- Configuring ${PROJECT_NAME} ${PROJECT_VERSION}...\n")
 
 message(STATUS "Available switches (default = CHECK, VERBS, DOCUM):\n")
@@ -38,6 +39,7 @@ message("   SHLIB=[off|on] Build shared library.")
 message("   STLIB=[off|on] Build static library.")
 message("   STBIN=[off|on] Build static binaries.")
 message("   AMALG=[off|on] Build amalgamation for better performance.\n")
+endif()
 
 option(DEBUG "Build with debugging support" off)
 option(PROFL "Build with profiling support" off)
@@ -55,6 +57,7 @@ option(STLIB "Build static library" on)
 option(STBIN "Build static binaries" off)
 option(AMALG "Build amalgamation" off)
 
+if (FALSE)
 message(STATUS "Number of times each test or benchmark is ran (default = 50, 1000):\n")
 
 message("   TESTS=n        If n > 0, build automated tests and run them n times.")
@@ -126,6 +129,7 @@ message("   TIMER=CYCLE    Cycle-counting timer. (architecture-dependant)\n")
 message(STATUS "Prefix to identify this build of the library (default = \"\"):\n")
 
 message("   LABEL=relic\n")
+endif()
 
 include(cmake/arch.cmake)
 include(cmake/bn.cmake)

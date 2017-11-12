@@ -23,20 +23,26 @@ compile-scgarbledcircuit
 compile-otextension-bristol
 compile-otextension-malicious
 compile-ntl
-compile-otextension-malicious
 compile-blake
 prepare-emp
 compile-emp-m2pc
 compile-emp-ot
 compile-emp-tool
-compile-emp
-test/config_for_test.txt
+compile-json
+compile-boost
+compile-openssl
 .cproject
 .project
 protocols/GMW/CMakeFiles/*
-lib/OTExtensionBristol/cmake-build-debug/
 cmake-build-debug/
 protocols/GMW/CMakeCache.txt
+protocols/GMW/GMW.cbp
+protocols/GMW/Makefile
+protocols/GMW/Parties
+protocols/GMW/cmake_install.cmake
+protocols/YaoSingleExecution/GC_FILE
+protocols/YaoSingleExecution/YaoSingleExecution
+protocols/YaoSingleExecution/emp_format_circuit.txt
 
 # Fortran module files
 *.mod
@@ -72,12 +78,11 @@ config_for_test.txt
 samples/libscapi_examples
 samples/libscapi_example
 windows-solutions/CodeExamples/code examples.vcxproj.user.orig
-protocols/MaliciousYao/lib/data/P1/*
-protocols/MaliciousYao/lib/data/P2/*
 callgrind.*
 lib/OTExtensionBristol/SimpleOT/ot_sender_test
 lib/OTExtensionBristol/SimpleOT/ot_receiver_test
 protocols/GMW/GMW
+protocols/GMW/GMW.cbp
 
 #other
 protocols/MaliciousYao/OfflineP1_*
@@ -89,3 +94,15 @@ protocols/GMW/AesInputs*.txt
 
 # macOS specific
 .DS_Store
+protocols/YaoSingleExecution/Makefile
+CMakeCache.txt
+CMakeFiles/
+build/
+cmake_install.cmake
+install/
+lib/JsonCpp/CMakeFiles/
+libscapi.cbp
+obj/
+protocols/GMW/CMakeFiles/
+*.json
+*.cbp

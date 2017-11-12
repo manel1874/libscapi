@@ -28,7 +28,7 @@
 
 #pragma once
 
-#include "../CryptoInfra/Key.hpp"
+#include "../cryptoInfra/Key.hpp"
 
 /**
 * Enum that represent the possible validity values of trapdoor element.

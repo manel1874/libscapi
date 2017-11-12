@@ -29,7 +29,7 @@
 #pragma once
 #include "AsymmetricEnc.hpp"
 #include "../infra/Common.hpp"
-#include "../CryptoInfra/SecurityLevel.hpp"
+#include "../cryptoInfra/SecurityLevel.hpp"
 #include "../primitives/Dlog.hpp"
 #include "../primitives/DlogOpenSSL.hpp"
 #include "../primitives/Dlog.hpp"

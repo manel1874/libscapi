@@ -108,7 +108,7 @@ namespace semihonestot {
 			memset(&sockAddr, 0, sizeof(sockAddr));
 			sockAddr.sin_family = AF_INET;
 
-			if (ip != "")
+			if ( 0)  //) ip != "")
 			{
 				int on = 1;
 				setsockopt(m_hSock, SOL_SOCKET, SO_REUSEADDR, (const char*)&on, sizeof(on));
@@ -127,6 +127,8 @@ namespace semihonestot {
 			}
 			else
 			{
+                int on = 1;
+				setsockopt(m_hSock, SOL_SOCKET, SO_REUSEADDR, (const char*)&on, sizeof(on));
 				sockAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 			}
 
@@ -148,16 +150,14 @@ namespace semihonestot {
 			return TRUE;
 		}
 
-		BOOL Connect(string ip, USHORT port, LONG lTOSMilisec = -1)
-		{
-			sockaddr_in sockAddr;
-			memset(&sockAddr, 0, sizeof(sockAddr));
-			sockAddr.sin_family = AF_INET;
-			sockAddr.sin_addr.s_addr = inet_addr(ip.c_str());
+		BOOL Connect(string ip, USHORT port, LONG lTOSMilisec = -1) {
+            sockaddr_in sockAddr;
+            memset(&sockAddr, 0, sizeof(sockAddr));
+            sockAddr.sin_family = AF_INET;
+            //sockAddr.sin_addr.s_addr = inet_addr(ip.c_str());
 
-			if (sockAddr.sin_addr.s_addr == INADDR_NONE)
-			{
-				hostent* lphost;
+            if (inet_pton(AF_INET, ip.c_str(), &sockAddr.sin_addr) <= 0) {
+      			hostent* lphost;
 				lphost = gethostbyname(ip.c_str());
 				if (lphost != NULL)
 					sockAddr.sin_addr.s_addr = ((in_addr*)lphost->h_addr)->s_addr;

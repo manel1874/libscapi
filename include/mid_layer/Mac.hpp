@@ -29,7 +29,7 @@
 #ifndef SCAPI_MAC_H
 #define SCAPI_MAC_H
 #include "../infra/Common.hpp"
-#include "../CryptoInfra/Key.hpp"
+#include "../cryptoInfra/Key.hpp"
 
 /**
 * Abstract class for Mac. Every class in this family must derive this class.

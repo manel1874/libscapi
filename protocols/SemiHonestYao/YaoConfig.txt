@@ -1,15 +1,13 @@
-number_of_iterations = 1000
-print_output = false
-sender_ip = 127.0.0.1
-receiver_ip = 127.0.0.1
+number_of_iterations = 100
+print_output = true
 input_section = AES 
 circuit_type = NoFixedKey
 
 # OS name is added automatically
 [AES-Linux]
-circuit_file = ../../samples/assets/circuits/AES/NigelAes.txt
-input_file_party_1 = ../../samples/assets/circuits/AES/AESPartyOneInputs.txt
-input_file_party_2 = ../../samples/assets/circuits/AES/AESPartyTwoInputs.txt
+circuit_file = ../../protocols/SemiHonestYao/NigelAes.txt
+input_file_party_1 = ../../protocols/SemiHonestYao/AesInputs1.txt
+input_file_party_2 = ../../protocols/SemiHonestYao/AesInputs2.txt
 
 [SHA1-Linux]
 circuit_file = ../../samples/assets/circuits/SHA1/NigelSHA1.txt

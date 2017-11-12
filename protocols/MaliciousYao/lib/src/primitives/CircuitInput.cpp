@@ -31,10 +31,9 @@ CircuitInput::CircuitInput(const shared_ptr<vector<byte>> & inputBits)
  return:
 		the created CircuitInput object.
 */
-shared_ptr<CircuitInput> CircuitInput::fromFile(string filename)
+shared_ptr<CircuitInput> CircuitInput::fromFile(string filename, int inputsNumber)
 {
 	auto sc = scannerpp::Scanner(new scannerpp::File(filename));
-	int inputsNumber = sc.nextInt();
 	auto inputVector = make_shared<vector<byte>>(inputsNumber);
 	for (int i = 0; i < inputsNumber; i++)
 		inputVector->at(i) = (byte)sc.nextInt();

@@ -31,6 +31,7 @@ private:
 	int checkCircuits;				// N * B / p -  N * B
 
 public:
+	ExecutionParameters(){}
 	/*
 	 Constructor that sets the parameters.
 	*/

@@ -3,10 +3,11 @@
 //
 
 #include "Circuit.h"
-
-void Circuit::readCircuit(const char* fileName)
+#include <unistd.h>
+void Circuit::readCircuit(const string fileName)
 {
 cout<<fileName<<endl;
+
     int type, numOfinputsForParty, numOfoutputsForParty;
     int numberOfGates, currentPartyNumber;
     int gateIndex = 0;
@@ -119,10 +120,7 @@ cout<<fileName<<endl;
         cout<<"num of and gates = "<<nrOfAndGates<<endl;
         cout<<"num of xor gates = "<<nrOfXorGates<<endl;
 
-        //calcDepths();
         reArrangeCircuit();
-
-        //calcDepths();
 
         //gateIndex = numberOfGates + nrOfInputGates;
         //create the output gates for each party
@@ -142,6 +140,7 @@ cout<<fileName<<endl;
         }*/
 
     }
+    cout<<"about to close"<<endl;
     myfile.close();
 }
 
@@ -203,6 +202,7 @@ void Circuit::reArrangeCircuit() {
         depths.push_back(andCounter);
         andCounter = 0;
     }
+
     //copy the right gates
     for(int k=0; k < getNrOfGates(); k++) {
         arrangedGates[k] = gates[newOrderedIndices[k]];

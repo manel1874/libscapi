@@ -54,15 +54,18 @@ In order to compile and run The OnlineP2 application:
 1. Go in the MaliciousYao/apps/OnlineP2 directory.
 2. Run the make command.
 3. to execute run :
- ~ ./AppOnlineP2.out {main_circuit_path} {main_circuit_party_one_inputs_path} {cr_circuit_path}
-                      {location_to_put_main_buckets}  {location_to_put_cr_buckets}
-                      {location_to_put_main_matrix} {location_to_put_cr_matrix}
-                      {N1} {B1} {S1} {P1} {N2} {B2} {S2} {P2}
+ ~ ./AppOnlineP2.out -circuitFileName {main_circuit_path} -inputFileName {input_file_path} -circuitCRFileName {cr_circuit_path}
+                     -bucketsPrefixMain {location_to_put_main_buckets} -bucketsPrefixCR {location_to_put_cr_buckets}
+                     -mainMatrix {location_to_put_main_matrix} -crMatrix {location_to_put_cr_matrix}
+                     -n1 {N1} -b1 {B1} -s1 {S1} -p1 {P1} -n2 {N2} -b2 {B2} -s2 {S2} -p2 {P2}
+
+
  for example :
- ~ ./AppOnlineP2.out "/assets/circuits/AES/NigelAes.txt" "/assets/circuits/AES/AESPartyOneInputs.txt"
-                      "/assets/circuits/CheatingRecovery/UnlockP1Input.txt" "/data/P1/aes" "/data/P1/cr"
-                      "/data/P2/aes.matrix" "/data/P2/cr.matrix"
-                      32 7 40 0.62 32 20 40 0.71
+ ~ ./AppOnlineP2.out -circuitFileName "/lib/assets/circuits/AES/NigelAes.txt" -inputFileName "/lib/assets/circuits/AES/AESPartyTwoInputs.txt"
+                      -circuitCRFileName "/lib/assets/circuits/CheatingRecovery/UnlockP1Input.txt"
+                      -bucketsPrefixMain "/lib/data/P2/aes" -bucketsPrefixCR "/lib/data/P2/cr"
+                      -mainMatrix "/lib/data/P2/aes.matrix" -crMatrix "/lib/data/P2/cr.matrix"
+                      -n1 32 -b1 7 -s1 40 -p1 0.62 -n2 32 -b2 20 -s2 40 -p2 0.71
 
  The output of the protocol is the circuit's output. It is printed to the screen.
 

@@ -15,9 +15,10 @@ INCLUDE_DIRECTORIES($ENV{HOME} ${BOOST_INCLUDEDIR}
 
 link_directories(/usr/ssl/lib/ /usr/local/lib ../../install/lib ${BOOST_LIBRARYDIR})
 
-set(SOURCE_FILES YaoSEParty.cpp)
+set(SOURCE_FILES main.cpp YaoSEParty.cpp)
 add_executable(YaoSingleExecution ${SOURCE_FILES})
 add_library(yaoSingleExecution ${SOURCE_FILES})
 
-TARGET_LINK_LIBRARIES(YaoSingleExecution ${CMAKE_CURRENT_SOURCE_DIR}/../../scapi.a
-        boost_system boost_thread pthread crypto dl ssl z relic gmp emp-tool)
+TARGET_LINK_LIBRARIES(YaoSingleExecution $ENV{HOME}/libscapi/libscapi.a
+        $ENV{HOME}/libscapi/install/lib/libjsoncpp.a
+        boost_system boost_thread pthread crypto dl ssl z relic gmp emp-tool stdc++fs)

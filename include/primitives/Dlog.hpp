@@ -29,7 +29,7 @@
 #pragma once
 
 #include "../infra/Common.hpp"
-#include "../CryptoInfra/SecurityLevel.hpp"
+#include "../cryptoInfra/SecurityLevel.hpp"
 #include "../infra/MathAlgorithms.hpp"
 #include "../../include/infra/ConfigFile.hpp"
 

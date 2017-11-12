@@ -113,51 +113,69 @@ void convertCircuit(string scapiCircuit, string newCircuit){
 
 int main(int argc, char* argv[]) {
 
-    string newCircuit = "emp_format_circuit.txt";
-    convertCircuit(argv[2], newCircuit);
-    cout << "after convert circuit" << endl;
+    YaoSEParty party(argc, argv);
 
-    int id = atoi(argv[1]);
-    YaoSEParty party(id, newCircuit, argv[3], atoi(argv[4]), argv[5]);
-    cout << "after create party" << endl;
+    CmdParser parser;
+    auto parameters = parser.parseArguments("", argc, argv);
 
-    int runs = 100;
-    auto start = chrono::high_resolution_clock::now();
+
+    int runs = stoi(parameters["internalIterationsNumber"]);
+    int time = 0;
+    chrono::high_resolution_clock::time_point start, end;
+
     for (int i=0; i<runs; i++){
+        party.sync();
+        start = chrono::high_resolution_clock::now();
         party.run();
+        end = chrono::high_resolution_clock::now();
+        time += std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     }
-    cout << "after party.run()" << endl;
+    cout<<"running all at once "<<runs<<" times took in average "<<time/runs << " millis"<<endl;
+    auto out = party.getOutput();
+    if (out.size()  > 0) {
 
-    auto end = chrono::high_resolution_clock::now();
-    auto generateTotalTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    cout<<"running "<<runs<<" times took in average "<<generateTotalTime/runs << " millis"<<endl;
-    if (id == 2) {
-        auto out = party.getOutput();
-        cout << "result: " << endl;
-        for (int i = 0; i < cf->n3; i++) {
-            cout << out[i] << " ";
-        }
-        cout << endl;
-    }
-
-
-    int offlineTime = 0, onlineTime = 0;
-
-    for (int i=0; i<runs; i++){
-        offlineTime += party.runOffline();
-
-        onlineTime += party.runOnline();
-
-    }
-    cout<<"running offline "<<runs<<" times took "<<offlineTime/runs << " millis"<<endl;
-    cout<<"running online "<<runs<<" times took "<<onlineTime/runs << " millis"<<endl;
-    if (id == 2) {
-        auto out = party.getOutput();
         cout << "result: " << endl;
         for (int i = 0; i < cf->n3; i++) {
             cout << (int)out[i] << " ";
         }
         cout << endl;
     }
+
+
+    int offlineTime = 0, onlineTime = 0, loadTime = 0;
+
+    for (int i=0; i<runs; i++){
+        party.sync();
+
+        start = chrono::high_resolution_clock::now();
+        party.runOffline();
+        end = chrono::high_resolution_clock::now();
+        offlineTime += std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+
+        start = chrono::high_resolution_clock::now();
+        party.preOnline();
+        end = chrono::high_resolution_clock::now();
+        loadTime += std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        party.sync();
+
+        start = chrono::high_resolution_clock::now();
+        party.runOnline();
+        end = chrono::high_resolution_clock::now();
+        onlineTime += std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+
+    }
+    cout<<"running offline "<<runs<<" times took in average "<<offlineTime/runs << " millis"<<endl;
+    cout<<" load "<<runs<<" times took in average "<<loadTime/runs << " millis"<<endl;
+    cout<<"running online "<<runs<<" times took in average "<<onlineTime/runs << " millis"<<endl;
+    out = party.getOutput();
+
+    if (out.size()  > 0) {
+        cout << "result: " << endl;
+        for (int i = 0; i < cf->n3; i++) {
+            cout << (int)out[i] << " ";
+        }
+        cout << endl;
+    }
+
 
 }

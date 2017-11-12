@@ -27,7 +27,7 @@
 
 
 #pragma once
-#include "../CryptoInfra/SecurityLevel.hpp"
+#include "../cryptoInfra/SecurityLevel.hpp"
 #include "OTBatch.hpp"
 #include "../comm/Comm.hpp"
 

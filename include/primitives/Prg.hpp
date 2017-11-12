@@ -29,7 +29,7 @@
 #ifndef SCAPI_PRG_H
 #define SCAPI_PRG_H
 
-#include "../CryptoInfra/Key.hpp"
+#include "../cryptoInfra/Key.hpp"
 #include "Prf.hpp"
 #include <openssl/rc4.h>
 #include <openssl/rand.h>
@@ -232,9 +232,51 @@ public:
 	* @returns a random variable of the required length (32,64,128). This bytes are set to used and will not be used again
 	* Note that if all the randoms are used a new fresh randoms are genereted unless the isStrict flag is set to true
 	*/
-	uint32_t getRandom32();
-	uint64_t getRandom64();
-	block getRandom128();
+
+
+	uint32_t getRandom32() {
+
+		//key must be set in order to get randoms
+		if (!isKeySet())
+			throw IllegalStateException("secret key isn't set");
+
+		//the required number of random bytes exceeds the avaliable randoms, prepare new randoms
+		if (idxForBytes + 4 >= cachedSize*BLOCK_SIZE) {
+			prepare();
+		}
+		uint32_t* cipherInInts = (uint32_t*)cipherChunk;
+
+		idxForBytes += 4;
+		return  cipherInInts[(idxForBytes-4 + 3)/4];
+	}
+
+	uint64_t getRandom64() {
+
+		//key must be set in order to get randoms
+		if (!isKeySet())
+			throw IllegalStateException("secret key isn't set");
+
+		//the required number of random bytes exceeds the avaliable randoms, prepare new randoms
+		if (idxForBytes + 8 >= cachedSize*BLOCK_SIZE) {
+			prepare();
+		}
+		uint64_t* cipherInLong = (uint64_t*)cipherChunk;
+
+		idxForBytes += 8;
+		return  cipherInLong[(idxForBytes-8 + 7) / 8];
+	}
+	block getRandom128() {
+
+		//key must be set in order to get randoms
+		if (!isKeySet())
+			throw IllegalStateException("secret key isn't set");
+		//the required number of random bytes exceeds the avaliable randoms, prepare new randoms
+		if (idxForBytes + 16 >= cachedSize*BLOCK_SIZE) {
+			prepare();
+		}
+		idxForBytes += 16;
+		return  cipherChunk[(idxForBytes - 16 + 15) / 16];
+	}
 
 
 	/**

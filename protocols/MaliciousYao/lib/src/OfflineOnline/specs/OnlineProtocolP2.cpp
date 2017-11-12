@@ -599,36 +599,69 @@ void OnlineProtocolP2::computeCheatingRecoveryCircuit(const shared_ptr<BucketLim
 }
 /**
 * Constructor that sets the parameters.
-* @param mainExecution Parameters of the main circuit.
-* @param crExecution Parameters of the cheating recovery circuit.
-* @param primitives Contains the low level instances to use.
-* @param communication Configuration of communication between parties.
-* @param mainBucket Contain the main circuits (for ex. AES).
-* @param crBucket Contain the cheating recovery circuits.
-* @param mainMatrix The probe-resistant matrix used to restore the main circuit's keys.
-* @param crMatrix The probe-resistant matrix used to restore the cheating recovery circuit's keys.
+
 */
-OnlineProtocolP2::OnlineProtocolP2(const ExecutionParameters & mainExecution, const ExecutionParameters & crExecution, const shared_ptr<CommParty> & channel,
-	const shared_ptr<BucketLimitedBundle> & mainBucket, const shared_ptr<BucketLimitedBundle> & crBucket, KProbeResistantMatrix * mainMatrix, 
-	KProbeResistantMatrix * crMatrix) :mainExecution(mainExecution), crExecution(crExecution) {
-	//Set and initialize the parameters.
-	this->mainMatrix = mainMatrix;
-	this->crMatrix = crMatrix;
+OnlineProtocolP2::OnlineProtocolP2(int argc, char* argv[]) : Protocol ("OnlineMaliciousYao", argc, argv) {
+
+    const string HOME_DIR = "../..";
+    //read config file data and set communication config to make sockets.
+    string COMM_CONFIG_FILENAME = string("../../lib/assets/conf/PartiesConfig.txt");
+    CommunicationConfig commConfig(COMM_CONFIG_FILENAME, 2, io_service);
+    auto commParty = commConfig.getCommParty();
+
+    cout << "\nP2 start communication\n";
+
+    //make connection
+    for (int i = 0; i < commParty.size(); i++)
+        commParty[i]->join(500, 5000);
+
+
+    int B1 = stoi(arguments["b1"]);
+    int B2 = stoi(arguments["b2"]);
+    auto mainBC = make_shared<BooleanCircuit>(new scannerpp::File(HOME_DIR + arguments["circuitFileName"]));
+    auto crBC = make_shared<BooleanCircuit>(new scannerpp::File(HOME_DIR + arguments["circuitCRFileName"]));
+
+    vector<shared_ptr<GarbledBooleanCircuit>> mainCircuit(B1);
+    vector<shared_ptr<GarbledBooleanCircuit>> crCircuit(B2);
+
+    for (int i = 0; i<B1; i++) {
+        mainCircuit[i] = shared_ptr<GarbledBooleanCircuit>(GarbledCircuitFactory::createCircuit(HOME_DIR + arguments["circuitFileName"],
+                                    GarbledCircuitFactory::CircuitType::FIXED_KEY_FREE_XOR_HALF_GATES, true));
+    }
+
+    for (int i = 0; i<B2; i++) {
+        crCircuit[i] = shared_ptr<GarbledBooleanCircuit>(CheatingRecoveryCircuitCreator(HOME_DIR + arguments["circuitCRFileName"], mainCircuit[0]->getNumberOfGates()).create());
+    }
+
+    mainExecution = ExecutionParameters(mainBC, mainCircuit, stoi(arguments["n1"]), stoi(arguments["s1"]), B1, stod(arguments["p1"]));
+    crExecution = ExecutionParameters(crBC, crCircuit, stoi(arguments["n2"]), stoi(arguments["s2"]), B2, stod(arguments["p2"]));
+
+    // we load the bundles from file
+    mainMatrix = new KProbeResistantMatrix();
+    crMatrix = new KProbeResistantMatrix();
+    mainMatrix->loadFromFile(HOME_DIR + arguments["mainMatrix"]);
+    crMatrix->loadFromFile(HOME_DIR + arguments["crMatrix"]);
+
+    //Set and initialize the parameters
 
 	this->keyLength = CryptoPrimitives::getAES()->getBlockSize();
 
-	this->channel = channel;
+	this->channel = commParty[0];
 	auto hash = CryptoPrimitives::getHash();
 	cmtReceiver.reset(new CmtSimpleHashReceiver(channel, hash, hash->getHashedMsgSize()));
-	this->mainBucket = mainBucket;
-	this->crBucket = crBucket;
+
+}
+
+void OnlineProtocolP2::setBuckets(const shared_ptr<BucketLimitedBundle> & mainBucket, const shared_ptr<BucketLimitedBundle> & crBucket){
+    this->mainBucket = mainBucket;
+    this->crBucket = crBucket;
 }
 
 /**
 * Executes the second party of the online protocol.<p>
 * basically, it computes the main circuit and than the cheating recovery circuit.
 */
-void OnlineProtocolP2::run() {
+void OnlineProtocolP2::runOnline() {
 
 	//LogTimer timer = new LogTimer("Evaluating Main circuit");
     //Compute the main circuits part.

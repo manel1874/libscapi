@@ -29,7 +29,6 @@
 #pragma once
 
 #include <boost/asio.hpp>
-#include <boost/asio/ssl.hpp>
 #include <boost/system/error_code.hpp>
 #include <boost/bind.hpp>
 #include <mutex>
@@ -161,28 +160,4 @@ private:
 	SocketPartyData me;
 	SocketPartyData other;
 	void setSocketOptions();
-};
-
-typedef boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ssl_socket;
-
-class CommPartyTcpSslSynced : public CommParty {
-public:
-	CommPartyTcpSslSynced(boost::asio::io_service& ioService, SocketPartyData me, SocketPartyData other,
-		string certificateChainFile, string password, string privateKeyFile, string tmpDHFile,
-		string clientVerifyFile);
-	void join(int sleepBetweenAttempts = 500, int timeout = 5000) override;
-	void write(const byte* data, int size) override;
-	size_t read(byte* data, int sizeToRead) override {
-		return boost::asio::read(*serverSocket, boost::asio::buffer(data, sizeToRead));
-	}
-	virtual ~CommPartyTcpSslSynced();
-
-private:
-	boost::asio::io_service& ioServiceServer;
-	boost::asio::io_service& ioServiceClient;
-	tcp::acceptor acceptor_;
-	ssl_socket* serverSocket;
-	ssl_socket* clientSocket;
-	SocketPartyData me;
-	SocketPartyData other;
 };

@@ -1,6 +1,6 @@
 #pragma once
-
-#include <libscapi/include/CryptoInfra/Protocol.hpp>
+#include <boost/thread/thread.hpp>
+#include <libscapi/include/cryptoInfra/Protocol.hpp>
 #include "../../../include/common/CommonMaliciousYao.hpp"
 #include "../../../include/primitives/CommunicationConfig.hpp"
 #include "../../../include/primitives/ExecutionParameters.hpp"
@@ -12,6 +12,8 @@
 #include "../../../include/OfflineOnline/primitives/CheatingRecoveryBundleBuilder.hpp"
 #include "../../../include/OfflineOnline/subroutines/CutAndChooseProver.hpp"
 #include "../../common/LogTimer.hpp"
+#include <libscapi/include/interactive_mid_protocols/OTExtensionBristol.hpp>
+#include "../../../include/primitives/CheatingRecoveryCircuitCreator.hpp"
 
 using namespace std;
 
@@ -21,9 +23,11 @@ using namespace std;
  The full protocol specification is described in "Blazing Fast 2PC in the "Offline/Online Setting with Security for
  Malicious Adversaries" paper by Yehuda Lindell and Ben Riva, page 18 - section E, "The Full Protocol Specification".
 */
-class OfflineProtocolP1 : public Protocol, public Malicious {
+class OfflineProtocolP1 : public Protocol, public Malicious, public TwoParty {
 
 private:
+    boost::asio::io_service io_service;
+
 	shared_ptr<ExecutionParameters> mainExecution;						// Parameters of the main circuit.
 	shared_ptr<ExecutionParameters> crExecution;						// Parameters of the cheating recovery circuit.
 	vector<shared_ptr<CommParty>> channel;									// The channel used communicate between the parties.
@@ -34,6 +38,9 @@ private:
 	shared_ptr<BucketBundleList> crBuckets;				//Contain the cheating recovery circuits.
 	shared_ptr<OTBatchSender> maliciousOtSender;	//The malicious OT used to transfer the keys.
 
+
+	const  string HOME_DIR = "../..";
+	const string COMM_CONFIG_FILENAME = HOME_DIR + string("/lib/assets/conf/PartiesConfig.txt");
 public:
 	/**
 	* Constructor that sets the parameters.
@@ -42,13 +49,30 @@ public:
 	* @param primitives Contains the low level instances to use.
 	* @param communication Configuration of communication between parties.
 	*/
-	OfflineProtocolP1(const shared_ptr<ExecutionParameters> & mainExecution, const shared_ptr<ExecutionParameters> & crExecution,
-		const shared_ptr<CommunicationConfig> & communication, const shared_ptr<OTBatchSender> & maliciousOtSender);
+	OfflineProtocolP1(int argc, char* argv[]);
+
+	~OfflineProtocolP1(){
+		io_service.stop();
+	}
 
 	/**
 	* Runs the first party in the offline phase of the malicious Yao protocol.
 	*/
-	void run() override;
+    void run() override {
+        runOffline();
+    }
+
+    bool hasOffline() override {return true; }
+    bool hasOnline() override {return false; }
+    void runOffline() override;
+
+    /**
+     * Save the buckets on the disk so the online protocol can read that.
+     */
+    void saveOnDisk(string bucket_prefix_main, string buckets_prefix_cr){
+        mainBuckets->saveToFiles(bucket_prefix_main);
+        crBuckets->saveToFiles(buckets_prefix_cr);
+    }
 
 	/**
 	* @return the buckets of the main circuit.
@@ -59,6 +83,8 @@ public:
 	* @return the buckets of the cheating recovery circuit.
 	*/
 	shared_ptr<BucketBundleList> getCheatingRecoveryBuckets() { return this->crBuckets; }
+
+	vector<shared_ptr<CommParty>> getChannel() { return channel; }
 
 private:
 

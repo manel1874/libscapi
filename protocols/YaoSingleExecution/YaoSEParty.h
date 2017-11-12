@@ -5,10 +5,12 @@
 #ifndef LIBSCAPI_YAOSEPARTY_H
 #define LIBSCAPI_YAOSEPARTY_H
 
-#include <libscapi/include/CryptoInfra/Protocol.hpp>
-#include <libscapi/include/CryptoInfra/SecurityLevel.hpp>
+#include <libscapi/include/cryptoInfra/Protocol.hpp>
+#include <libscapi/include/cryptoInfra/SecurityLevel.hpp>
 #include <libscapi/include/infra/CircuitConverter.hpp>
+#include <libscapi/include/infra/ConfigFile.hpp>
 #include <libscapi/lib/EMP/emp-m2pc/malicious/malicious.h>
+#include <libscapi/include/infra/Measurement.hpp>
 #include <fstream>
 
 typedef unsigned char byte;
@@ -28,7 +30,7 @@ extern void compute(Bit * res, Bit * in, Bit * in2);
  * function.
  *
  */
-class YaoSEParty : public Protocol, public Malicious {
+class YaoSEParty : public Protocol, public Malicious, public TwoParty {
 private:
     int id;             // The party id
     bool * input;       // inputs for this party
@@ -36,6 +38,8 @@ private:
     bool* out;          //The protocol output
     Malicious2PC <off> * mal; // The underlying object
 
+    Measurement* timer;
+    int times, currentIteration;
     /*
 	 * Reads the input from the given file.
 	 */
@@ -52,11 +56,15 @@ public:
      * @param port port of the first party
      * @param inputFile file contains the inputs for this party
      */
-    YaoSEParty(int id, string circuitFile, string ip, int port, string inputFile);
+    YaoSEParty(int argc, char* argv[]);
 
     ~YaoSEParty(){
         delete cf;
+        delete timer;
     }
+
+    bool hasOffline() override { return true; }
+    bool hasOnline() override { return true; }
 
     /*
      * Implement the function derived from the Protocol abstract class.
@@ -70,9 +78,15 @@ public:
     void sync();
 
     /**
+     * In case the user wants to execute the protocol using the offline and online functions, he has to set the iteration number himself.
+     * @param iteration
+     */
+    void setIteration(int iteration){ currentIteration = iteration; }
+
+    /**
      * Execute the offline phase of the protocol.
      */
-    void runOffline();
+    void runOffline() override;
 
     /**
      * Load from the disk the output of the offline phase, in order use it in the online phase.
@@ -82,16 +96,15 @@ public:
     /**
      * Execute the online phase of the protocol.
      */
-    void runOnline();
+    void runOnline() override;
 
     /**
      * @return the output of the protocol.
      */
     vector<byte> getOutput(){
         int size = 0;
-        if (id == 2) size = cf->n3;
+        if (id == 1) size = cf->n3;
 
-        cout<<"output size = "<<cf->n3<<endl;
         vector<byte> output(size);
         for (int i=0; i<size; i++){
             output[i] = out[i];

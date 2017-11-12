@@ -821,7 +821,8 @@ TEST_CASE("Gates and Wires", "") {
 		Gate g1(1, { 0, 1, 1, 1 }, { 0, 1 }, { 5 }); // x || y
 		Gate g2(2, { 0, 0, 0, 1 }, { 2, 3 }, { 6 }); // x && y
 		Gate g3(3, { 0, 0, 0, 1, 0, 1, 0, 1 }, { 5, 6, 4 }, { 7 }); // (x || y) && z
-		BooleanCircuit bc({ g1, g2, g3 }, { 7 }, { {1,2,3,4} });
+        vector<int> outputs = { 7 };
+		BooleanCircuit bc({ g1, g2, g3 }, outputs, { {1,2,3,4} });
 		map<int, Wire> presetInputWires = { { 0, Wire(1) }, { 1, Wire(0) }, { 2, Wire(1) },
 											{ 3, Wire(0) }, { 4, Wire(1) } };
 		bc.setInputs(presetInputWires, 1);
@@ -832,13 +833,20 @@ TEST_CASE("Gates and Wires", "") {
 	SECTION("Boolean Circuit From file") {
 #ifdef _WIN32
 		BooleanCircuit bc(new scannerpp::File("../../../../test/testCircuit.txt"));
+		bc.write("../../../../test/testCircuitOutput.txt");
 #else
+
 		BooleanCircuit bc(new scannerpp::File("../test/testCircuit.txt"));
+		bc.write("../test/testCircuitOutput.txt");
+
+		BooleanCircuit aesbc(new scannerpp::File("../test/NigelAes.txt"));
+		aesbc.write("../test/NigelAesOutput.txt");
 #endif
-		
 		REQUIRE(bc.getNumberOfInputs(1) == 4);
 		REQUIRE(bc.getNumberOfInputs(2) == 1);
 		REQUIRE(bc.getOutputWireIndices().size() == 1);
+
+
 	}
 }
 

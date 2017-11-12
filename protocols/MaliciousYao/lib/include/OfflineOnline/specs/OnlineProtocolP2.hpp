@@ -1,6 +1,7 @@
 #pragma once
 
-#include <libscapi/include/CryptoInfra/Protocol.hpp>
+#include <libscapi/include/cryptoInfra/Protocol.hpp>
+#include "../../primitives/CheatingRecoveryCircuitCreator.hpp"
 #include "../../primitives/KProbeResistantMatrix.hpp"
 #include "../../primitives/ExecutionParameters.hpp"
 #include "../../primitives/CryptoPrimitives.hpp"
@@ -13,6 +14,7 @@
 #include "../../primitives/CutAndChooseSelection.hpp"
 
 
+
 /**
 * This class represents the second party in the online phase of Malicious Yao protocol. 
 *
@@ -22,14 +24,15 @@
 * @author Cryptography and Computer Security Research Group Department of Computer Science Bar-Ilan University
 *
 */
-class OnlineProtocolP2 : public Protocol, public Malicious {
+class OnlineProtocolP2 : public Protocol, public Malicious, public TwoParty {
 
 private:
-
+    //set io_service for peer to peer communication
+    boost::asio::io_service io_service;
 	ExecutionParameters mainExecution;		// Parameters of the main circuit.
 	ExecutionParameters crExecution;		// Parameters of the cheating recovery circuit.
 	unique_ptr<CmtSimpleHashReceiver> cmtReceiver;		//The receiver of the commitment protocol used to verify the decommitments.
-	shared_ptr<CommParty> channel;			//Used to communicate between the parties.					
+	shared_ptr<CommParty> channel;			//Used to communicate between the parties.
 
 	int keyLength;							//The length of each secret key in bytes.
 
@@ -194,26 +197,31 @@ private:
 public:
 	/**
 	* Constructor that sets the parameters.
-	* @param mainExecution Parameters of the main circuit.
-	* @param crExecution Parameters of the cheating recovery circuit.
-	* @param primitives Contains the low level instances to use.
-	* @param communication Configuration of communication between parties.
-	* @param mainBucket Contain the main circuits (for ex. AES).
-	* @param crBucket Contain the cheating recovery circuits.
-	* @param mainMatrix The probe-resistant matrix used to restore the main circuit's keys.
-	* @param crMatrix The probe-resistant matrix used to restore the cheating recovery circuit's keys.
+	*
 	*/
-	OnlineProtocolP2(const ExecutionParameters & mainExecution, const ExecutionParameters & crExecution, const shared_ptr<CommParty> & channel,
-		const shared_ptr<BucketLimitedBundle> & mainBucket, const shared_ptr<BucketLimitedBundle> & crBucket,
-		KProbeResistantMatrix * mainMatrix, KProbeResistantMatrix * crMatrix);
+	OnlineProtocolP2(int argc, char* argv[]);
 
+    ~OnlineProtocolP2(){
+        //end communication
+        io_service.stop();
+    }
+
+    void setBuckets(const shared_ptr<BucketLimitedBundle> & mainBucket, const shared_ptr<BucketLimitedBundle> & crBucket);
 	void setInput(CircuitInput & protocolInput) { input = protocolInput; }
+
+    shared_ptr<GarbledBooleanCircuit> getMainCircuit(){ return mainExecution.getCircuit(0); }
 
 	/**
 	* Executes the second party of the online protocol.<p>
 	* basically, it computes the main circuit and than the cheating recovery circuit.
 	*/
-	void run() override;
+	void run() override {
+        runOnline();
+    }
+    bool hasOffline() override {return false; }
+    bool hasOnline() override {return true; }
+    void runOnline() override;
+    shared_ptr<CommParty> getChannel(){ return channel; }
 
 	/**
 	* Get the output of the protocol.
