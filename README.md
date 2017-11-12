@@ -67,6 +67,11 @@ Boost provides free peer-reviewed portable C++ source libraries. We emphasize li
 
 cereal is a header-only C++11 serialization library. cereal takes arbitrary data types and reversibly turns them into different representations, such as compact binary encodings, XML, or JSON. cereal was designed to be fast, light-weight, and easy to extend - it has no external dependencies and can be easily bundled with other code or used standalone.
 
+##### JsonCpp : A library for creating json files in C++
+[https://github.com/open-source-parsers/jsoncpp](https://github.com/open-source-parsers/jsoncpp)
+
+JsonCpp is used to create our logger log files.
+
 ### Implementations by other Academic Institutes
 
 ##### Engineering Cryptographic Protocols Group at TU Darmstadt OT Extension
