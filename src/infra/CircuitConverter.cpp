@@ -185,21 +185,16 @@
 
         Gate* gates = new Gate[numberOfGates];
         for(int i=0; i<numberOfGates;i++) {
-
             //read from the file and print the exat values
             scapiFile >> gates[i].in;
             scapiFile >> gates[i].out;
-
             scapiFile >> gates[i].input0;
-
             if (gates[i].in != 1)//a 2 input 1 output gate - regualr gate, else we have a not gate
             {
                 scapiFile >> gates[i].input1;
             }
 
-
             scapiFile >> gates[i].output;
-
             scapiFile >> typeBin;
             type = binaryTodecimal(typeBin);
 
