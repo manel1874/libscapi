@@ -38,7 +38,7 @@ private:
     bool* out;          //The protocol output
     Malicious2PC <off> * mal; // The underlying object
 
-    Measurement timer;
+    Measurement* timer;
     int times, currentIteration;
     /*
 	 * Reads the input from the given file.
@@ -60,6 +60,7 @@ public:
 
     ~YaoSEParty(){
         delete cf;
+        delete timer;
     }
 
     bool hasOffline() override { return true; }

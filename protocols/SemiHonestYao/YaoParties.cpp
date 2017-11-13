@@ -55,7 +55,7 @@ PartyOne::PartyOne(int argc, char* argv[]) : Protocol("SemiHonestYao", argc, arg
 	this->yaoConfig = yao_config;
 
 	vector<string> subTaskNames{"Garble", "SendCircuitAndInputs", "OT"};
-	timer = Measurement("SemiHonestYao", id, 2, yaoConfig.number_of_iterations, subTaskNames);
+	timer = new Measurement("SemiHonestYao", id, 2, yaoConfig.number_of_iterations, subTaskNames);
 
 	//open parties file
 	ConfigFile cf(arguments["partiesFileName"]);
@@ -131,23 +131,23 @@ void PartyOne::run() {
 }
 
 void PartyOne::runOnline() {
-	timer.startSubTask();
+	timer->startSubTask();
 	values = circuit->garble();
-	timer.endSubTask(0, currentIteration);
+	timer->endSubTask(0, currentIteration);
 	// send garbled tables and the translation table to p2.
 	auto garbledTables = circuit->getGarbledTables();
 
-	timer.startSubTask();
+	timer->startSubTask();
 	channel->write((byte *) garbledTables, circuit->getGarbledTableSize());
 	channel->write(circuit->getTranslationTable().data(), circuit->getNumberOfOutputs());
 	// send p1 input keys to p2.
 	sendP1Inputs(ungarbledInput.data());
-	timer.endSubTask(1, currentIteration);
+	timer->endSubTask(1, currentIteration);
 
 	// run OT protocol in order to send p2 the necessary keys without revealing any information.
-	timer.startSubTask();
+	timer->startSubTask();
 	runOTProtocol();
-	timer.endSubTask(2, currentIteration);
+	timer->endSubTask(2, currentIteration);
 }
 
 void PartyOne::runOTProtocol() {
@@ -192,7 +192,7 @@ PartyTwo::PartyTwo(int argc, char* argv[]) : Protocol("SemiHonestYao", argc, arg
 	ConfigFile cf(arguments["partiesFileName"]);
 
 	vector<string> subTaskNames{"ReceiveCircuitAndInputs", "OT", "ComputeCircuit"};
-	timer = Measurement("SemiHonestYao", id, 2, yaoConfig.number_of_iterations, subTaskNames);
+	timer = new Measurement("SemiHonestYao", id, 2, yaoConfig.number_of_iterations, subTaskNames);
 	string receiver_ip, sender_ip;
 	int receiver_port, sender_port;
 
@@ -265,20 +265,20 @@ void PartyTwo::run() {
 
 void PartyTwo::runOnline() {
 	// receive tables and inputs
-	timer.startSubTask();
+	timer->startSubTask();
 	receiveCircuit();
 	receiveP1Inputs();
-	timer.endSubTask(0, currentIteration);
+	timer->endSubTask(0, currentIteration);
 
-	timer.startSubTask();
+	timer->startSubTask();
 	// run OT protocol in order to get the necessary keys without revealing any information.
 	auto output = runOTProtocol(ungarbledInput.data(), ungarbledInput.size());
-	timer.endSubTask(1, currentIteration);
+	timer->endSubTask(1, currentIteration);
 
 	// Compute the circuit.
-	timer.startSubTask();
+	timer->startSubTask();
 	computeCircuit(output.get());
-	timer.endSubTask(2, currentIteration);
+	timer->endSubTask(2, currentIteration);
 
 	// we're done print the output
 	if (print_output)

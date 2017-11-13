@@ -114,7 +114,7 @@ private:
 	int id;
 	boost::asio::io_service io_service;
 	OTBatchSender * otSender;			//The OT object that used in the protocol.
-	Measurement timer;
+	Measurement* timer;
 	int currentIteration;
 
 #ifdef NO_AESNI
@@ -170,6 +170,8 @@ public:
 		delete otSender;
 
 		io_service.stop();
+
+        delete timer;
 	}
 
 	void setInputs(string inputFileName, int numInputs);
@@ -210,7 +212,7 @@ private:
 	vector<byte> circuitOutput;
 	vector<byte> ungarbledInput;
 	YaoConfig yaoConfig;
-	Measurement timer;
+	Measurement* timer;
 	int currentIteration;
 	
 	/**
@@ -257,6 +259,7 @@ public:
 		delete circuit;
 		delete otReceiver;
 		io_service.stop();
+        delete timer;
 	}
 
 	void setInputs(string inputFileName, int numInputs);

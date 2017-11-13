@@ -5,7 +5,7 @@ uname_S := $(shell sh -c 'uname -s 2>/dev/null || echo not')
 ARCH := $(shell getconf LONG_BIT)
 SHARED_LIB_EXT:=.so
 INCLUDE_ARCHIVES_START = -Wl,-whole-archive # linking options, we prefer our generated shared object will be self-contained.
-INCLUDE_ARCHIVES_END = -Wl,-no-whole-archive 
+INCLUDE_ARCHIVES_END = -Wl,-no-whole-archive
 SHARED_LIB_OPT:=-shared
 
 export uname_S
@@ -29,12 +29,12 @@ INC            = -Ilib -Iinstall/include -Ilib/OTExtensionBristol
 CPP_OPTIONS   := -std=c++11 $(INC)  -maes -mpclmul -mbmi2 -Wall -Wno-unused-function -Wno-unused-variable -Wno-unused-result -Wno-sign-compare -Wno-parentheses -O3
 $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
 LIBRARIES_DIR  = -Linstall/lib
-LD_FLAGS = 
+LD_FLAGS =
 SUMO = no
 
 
 all: libs libscapi tests
-libs: compile-openssl compile-boost compile-ntl compile-emp-tool compile-emp-ot compile-emp-m2pc compile-blake compile-FourQlib compile-miracl compile-otextension compile-otextension-malicious compile-otextension-bristol
+libs: compile-openssl compile-boost compile-ntl compile-emp-tool compile-emp-ot compile-emp-m2pc compile-blake compile-FourQlib compile-miracl compile-otextension compile-otextension-malicious compile-otextension-bristol compile-json
 libscapi: directories $(SLib)
 directories: $(OUT_DIR)
 
@@ -42,21 +42,21 @@ $(OUT_DIR):
 	mkdir -p $(OUT_DIR)
 
 $(SLib): $(OBJ_FILES)
-	ar ru $@ $^ 
+	ar ru $@ $^
 	ranlib $@
 
 obj/circuits/%.o: src/circuits/%.cpp
-	g++ -c $(CPP_OPTIONS) -o $@ $< 	 
+	g++ -c $(CPP_OPTIONS) -o $@ $<
 obj/circuits_c/%.o: src/circuits_c/%.c
-	gcc -fPIC -mavx -maes -mpclmul -DRDTSC -DTEST=AES128  -O3 -c -o $@ $< 
+	gcc -fPIC -mavx -maes -mpclmul -DRDTSC -DTEST=AES128  -O3 -c -o $@ $<
 obj/comm/%.o: src/comm/%.cpp
-	g++ -c $(CPP_OPTIONS) -o $@ $< 	 
+	g++ -c $(CPP_OPTIONS) -o $@ $<
 obj/infra/%.o: src/infra/%.cpp
-	g++ -c $(CPP_OPTIONS) -o $@ $< 	 
+	g++ -c $(CPP_OPTIONS) -o $@ $<
 obj/interactive_mid_protocols/%.o: src/interactive_mid_protocols/%.cpp
-	g++ -c $(CPP_OPTIONS) -o $@ $< 	 
+	g++ -c $(CPP_OPTIONS) -o $@ $<
 obj/primitives/%.o: src/primitives/%.cpp
-	g++ -c $(CPP_OPTIONS) -o $@ $< 	 
+	g++ -c $(CPP_OPTIONS) -o $@ $<
 obj/mid_layer/%.o: src/mid_layer/%.cpp
 	g++ -c $(CPP_OPTIONS) -o $@ $<
 obj/cryptoInfra/%.o: src/cryptoInfra/%.cpp
@@ -64,13 +64,13 @@ obj/cryptoInfra/%.o: src/cryptoInfra/%.cpp
 
 tests: compile-tests
 	cd ./test; ./tests.exe
-	
+
 .PHONY: compile-tests
 compile-tests:
 	@cd ./test; \
-	g++ -std=c++11 -maes -mavx  -I../install/include -o tests.exe tests.cpp interactiveMidProtocolsTests.cpp ../libscapi.a -lpthread -L../install/lib ../install/lib/libboost_system.a ../install/lib/libboost_thread.a -l:libssl.a -l:libcrypto.a -lntl -lgmp -lblake2  -ldl -lz;
+	g++ -std=c++11 -maes -mavx -mpclmul -msse2 -msse4 -msse4.1 -mbmi2 -I../install/include -o tests.exe tests.cpp interactiveMidProtocolsTests.cpp ../libscapi.a -lpthread -L../install/lib ../install/lib/libboost_system.a ../install/lib/libboost_thread.a -l:libssl.a -l:libcrypto.a -lntl -lgmp -lblake2  -ldl -lz;
 	@cd ..
-	
+
 prepare-emp:
 ifeq ($(SUMO),yes)
 	@mkdir -p $(builddir)/EMP
@@ -84,7 +84,7 @@ endif
 compile-emp-tool:prepare-emp
 ifeq ($(SUMO),yes)
 	@cd $(builddir)/EMP/emp-tool
-	@cmake -D CMAKE_CXX_FLAGS="-Wno-unused-function -Wno-unused-variable -Wno-return-type" $(builddir)/EMP/emp-tool/CMakeLists.txt 
+	@cmake -D CMAKE_CXX_FLAGS="-Wno-unused-function -Wno-unused-variable -Wno-return-type" $(builddir)/EMP/emp-tool/CMakeLists.txt
 	@cd $(builddir)/EMP/emp-tool/ && $(MAKE)
 	@cd $(builddir)/EMP/emp-tool/ && $(MAKE) install
 	@touch compile-emp-tool
@@ -93,16 +93,16 @@ endif
 compile-emp-ot:prepare-emp
 ifeq ($(SUMO),yes)
 	@cd $(builddir)/EMP/emp-ot
-	@cmake -D CMAKE_CXX_FLAGS="-Wno-unused-function -Wno-unused-variable -Wno-return-type" $(builddir)/EMP/emp-ot/CMakeLists.txt 
+	@cmake -D CMAKE_CXX_FLAGS="-Wno-unused-function -Wno-unused-variable -Wno-return-type" $(builddir)/EMP/emp-ot/CMakeLists.txt
 	@cd $(builddir)/EMP/emp-ot/ && $(MAKE)
 	@cd $(builddir)/EMP/emp-ot/ && $(MAKE) install
 	@touch compile-emp-ot
 endif
-	
+
 compile-emp-m2pc:compile-emp-ot compile-emp-tool
 ifeq ($(SUMO),yes)
 	@cd $(builddir)/EMP/emp-m2pc
-	@cmake -D CMAKE_CXX_FLAGS="-Wno-unused-function -Wno-unused-variable -Wno-return-type -Wno-unused-result" $(builddir)/EMP/emp-m2pc/CMakeLists.txt 
+	@cmake -D CMAKE_CXX_FLAGS="-Wno-unused-function -Wno-unused-variable -Wno-return-type -Wno-unused-result" $(builddir)/EMP/emp-m2pc/CMakeLists.txt
 	@cd $(builddir)/EMP/emp-m2pc/ && $(MAKE)
 	@touch compile-emp-m2pc
 endif
@@ -120,12 +120,12 @@ compile-FourQlib:
 	@mkdir -p $(CURDIR)/install/lib
 	echo "Compiling the FourQlib library"
 	cp -r lib/FourQlib $(builddir)
-	cd $(builddir)/FourQlib/FourQ_64bit_and_portable/; $(MAKE) ARCH=x64	
+	cd $(builddir)/FourQlib/FourQ_64bit_and_portable/; $(MAKE) ARCH=x64
 	cd $(builddir)/FourQlib/FourQ_64bit_and_portable/; ar cr libFourQlib.a crypto_tests.o eccp2_core.o eccp2.o fp2_1271_AVX2.o  kex.o schnorrq.o test_extras.o crypto_util.o eccp2_no_endo.o ecc_tests.o fp_tests.o random.o sha512.o
 	cd $(builddir)/FourQlib/FourQ_64bit_and_portable/; ranlib libFourQlib.a
 	cp $(builddir)/FourQlib/FourQ_64bit_and_portable/*.a $(CURDIR)/install/lib/
 	mkdir -p $(CURDIR)/install/include/FourQlib
-	cp $(builddir)/FourQlib/FourQ_64bit_and_portable/FourQ_api.h $(CURDIR)/install/include/FourQlib	
+	cp $(builddir)/FourQlib/FourQ_64bit_and_portable/FourQ_api.h $(CURDIR)/install/include/FourQlib
 	touch compile-FourQlib
 
 compile-openssl:
@@ -134,9 +134,9 @@ compile-openssl:
 	@mkdir -p $(builddir)/
 	echo "Compiling the openssl library"
 	@cp -r lib/openssl/ $(builddir)/openssl
-	export CFLAGS="-fPIC"	
+	export CFLAGS="-fPIC"
 	cd $(builddir)/openssl/; ./config --prefix=$(builddir)/openssl/tmptrgt -no-shared
-	cd $(builddir)/openssl/; make 
+	cd $(builddir)/openssl/; make
 	cd $(builddir)/openssl/; make install
 	@cp $(builddir)/openssl/tmptrgt/lib/*.a $(CURDIR)/install/lib/
 	@cp -r $(builddir)/openssl/tmptrgt/include/openssl/ $(CURDIR)/install/include/
@@ -156,7 +156,7 @@ compile-boost:
 	@mkdir -p $(builddir)/
 	echo "Compiling the boost library"
 	@cp -r lib/boost_1_64_0/ $(builddir)/boost_1_64_0
-	cd $(builddir)/boost_1_64_0/; bash -c "BOOST_BUILD_PATH='./' ./bootstrap.sh --with-libraries=thread,system && ./b2"; 
+	cd $(builddir)/boost_1_64_0/; bash -c "BOOST_BUILD_PATH='./' ./bootstrap.sh --with-libraries=thread,system && ./b2";
 	@cp $(builddir)/boost_1_64_0/stage/lib/*.a $(CURDIR)/install/lib/
 	@cp -r $(builddir)/boost_1_64_0/boost/ $(CURDIR)/install/include/
 	@touch compile-boost
@@ -209,7 +209,7 @@ compile-otextension-malicious: compile-miracl-cpp
 	@$(MAKE) -C $(builddir)/MaliciousOTExtension CXX=$(CXX) SHARED_LIB_EXT=$(SHARED_LIB_EXT) install
 	@touch compile-otextension-malicious
 
-compile-otextension-bristol: 
+compile-otextension-bristol:
 	@echo "Compiling the OtExtension malicious Bristol library..."
 	@cp -r lib/OTExtensionBristol $(builddir)/OTExtensionBristol
 	@$(MAKE) -C $(builddir)/OTExtensionBristol CXX=$(CXX)
@@ -230,7 +230,7 @@ clean-otextension:
 	@echo "Cleaning the otextension build dir..."
 	@rm -rf $(builddir)/OTExtension
 	@rm -f compile-otextension
-	
+
 clean-otextension-malicious:
 	@echo "Cleaning the otextension malicious build dir..."
 	@rm -rf $(builddir)/MaliciousOTExtension
@@ -244,7 +244,7 @@ clean-otextension-bristol:
 clean-ntl:
 	echo "Cleaning the ntl build dir..."
 	rm -rf $(builddir)/NTL
-	rm -f compile-ntl	
+	rm -f compile-ntl
 
 clean-blake:
 	@echo "Cleaning blake library"
@@ -284,11 +284,10 @@ clean-boost:
 	@echo "Cleaning boost library"
 	@rm -rf $(builddir)/boost_1_64_0
 	@rm -f compile-boost
-	
+
 clean-openssl:
 	@echo "Cleaning openssl library"
 	@rm -rf $(builddir)/openssl
 	@rm -f compile-openssl
 
-clean: clean-openssl clean-boost clean-emp clean-otextension-bristol clean-otextension-malicious clean-otextension clean-ntl clean-blake clean-FourQlib clean-miracl clean-miracl-cpp clean-cpp clean-install clean-tests
-
+clean: clean-json clean-openssl clean-boost clean-emp clean-otextension-bristol clean-otextension-malicious clean-otextension clean-ntl clean-blake clean-FourQlib clean-miracl clean-miracl-cpp clean-cpp clean-install clean-tests

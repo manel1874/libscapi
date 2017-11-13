@@ -14,7 +14,7 @@ COPY . libscapi/
 
 # build libscapi
 WORKDIR libscapi
-RUN make
+RUN make -f makefile
 
 # build the samples and run one of them
 WORKDIR samples
