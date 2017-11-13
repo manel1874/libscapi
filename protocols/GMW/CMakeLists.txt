@@ -3,9 +3,9 @@ project(GMW)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -maes -mpclmul -fPIC -flto")
 
-SET (BOOST_ROOT $ENV{HOME}/boost_1_64_0/)
-SET (BOOST_INCLUDEDIR $ENV{HOME}/boost_1_64_0/)
-SET (BOOST_LIBRARYDIR $ENV{HOME}/boost_1_64_0/stage/lib)
+SET (BOOST_ROOT $ENV{HOME}/libscapi/lib/boost_1_64_0/)
+SET (BOOST_INCLUDEDIR $ENV{HOME}/libscapi/lib/boost_1_64_0/)
+SET (BOOST_LIBRARYDIR $ENV{HOME}/libscapi/install/lib/)
 find_package(Boost COMPONENTS system thread REQUIRED)
 
 INCLUDE_DIRECTORIES($ENV{HOME} ${BOOST_INCLUDEDIR} $ENV{HOME}
@@ -20,4 +20,4 @@ TARGET_LINK_LIBRARIES(GMW $ENV{HOME}/libscapi/libscapi.a gmp
         OTExtensionBristol
         $ENV{HOME}/libscapi/install/lib/libsimpleot.a
         $ENV{HOME}/libscapi/install/lib/libjsoncpp.a
-        boost_system boost_thread pthread crypto dl ssl z stdc++fs)
+        boost_system boost_thread pthread crypto dl ssl z )
