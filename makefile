@@ -35,7 +35,7 @@ SUMO = no
 
 all: libs libscapi tests
 	echo $(WITH_EMP)
-libs: compile-openssl compile-boost compile-ntl compile-emp-tool compile-emp-ot compile-emp-m2pc compile-otextension-bristol
+libs: compile-openssl compile-boost compile-json compile-libote compile-ntl compile-emp-tool compile-emp-ot compile-emp-m2pc compile-otextension-bristol
 libscapi: directories $(SLib)
 directories: $(OUT_DIR)
 
@@ -133,6 +133,24 @@ compile-boost:
 	@cp -r $(builddir)/boost_1_64_0/boost/ $(CURDIR)/install/include/
 	@touch compile-boost
 
+compile-json:
+	@echo "Compiling JSON library..."
+	@cp -r lib/JsonCpp $(builddir)/JsonCpp
+	@cmake $(builddir)/JsonCpp/CMakeLists.txt
+	@$(MAKE) -C $(builddir)/JsonCpp/
+	@cp $(builddir)/JsonCpp/src/lib_json/libjsoncpp.a $(CURDIR)/install/lib/
+	@touch compile-json
+
+compile-libote:compile-boost
+	@echo "Compiling libOTe library..."
+	@cp -r lib/libOTe $(builddir)/libOTe
+	@cmake $(builddir)/libOTe/CMakeLists.txt
+	@$(MAKE) -C $(builddir)/libOTe/
+	@cp $(builddir)/libOTe/lib/*.a $(CURDIR)/install/lib/
+	@mkdir -p $(CURDIR)/install/include/libOTe
+	@cd $(builddir)/libOTe/ && find . -name "*.h" -type f |xargs -I {} cp --parents {} ../../install/include/libOTe
+	@touch compile-libote
+
 compile-ntl:
 	echo "Compiling the NTL library..."
 	mkdir -p $(builddir)/NTL
@@ -187,5 +205,15 @@ clean-openssl:
 	@rm -rf $(builddir)/openssl
 	@rm -f compile-openssl
 
-clean: clean-openssl clean-boost clean-emp clean-otextension-bristol clean-ntl clean-install clean-tests
+clean-json:
+	@echo "Cleaning JSON library"
+	@rm -rf $(builddir)/JsonCpp/
+	@rm -f compile-json
+
+clean-libote:
+	@echo "Cleaning libOTe library"
+	@rm -rf $(builddir)/libOTe/
+	@rm -f compile-libote
+
+clean: clean-json clean-libote clean-openssl clean-boost clean-emp clean-otextension-bristol clean-ntl clean-install clean-tests
 
