@@ -144,6 +144,7 @@ compile-json:
 compile-libote:compile-boost
 	@echo "Compiling libOTe library..."
 	@cp -r lib/libOTe $(builddir)/libOTe
+	@ mv $(builddir)/libOTe/cryptoTools/thirdparty/linux/miracl2/ $(builddir)/libOTe/cryptoTools/thirdparty/linux/miracl/
 	@cmake $(builddir)/libOTe/CMakeLists.txt
 	@$(MAKE) -C $(builddir)/libOTe/
 	@cp $(builddir)/libOTe/lib/*.a $(CURDIR)/install/lib/
