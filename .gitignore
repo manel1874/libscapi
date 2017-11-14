@@ -52,7 +52,9 @@ protocols/YaoSingleExecution/emp_format_circuit.txt
 # Compiled Static libraries
 *.lai
 *.la
-*.a
+libscapi.a
+protocols/GMW/libgmw.a
+protocols/YaoSingleExecution/libyaoSingleExecution.a
 *.lib
 
 # Executables
