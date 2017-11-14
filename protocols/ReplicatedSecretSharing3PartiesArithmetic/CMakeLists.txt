@@ -18,4 +18,5 @@ TARGET_LINK_LIBRARIES(ReplicatedSecretSharing3PartiesArithmetic $ENV{HOME}/ntl-9
         $ENV{HOME}/libscapi/libscapi.a gmp gmpxx
         OTExtensionBristol
         $ENV{HOME}/libscapi/install/lib/libsimpleot.a
+	$ENV{HOME}/libscapi/install/lib/libjsoncpp.a
         libboost_system.a libboost_thread.a pthread crypto dl ssl z)
