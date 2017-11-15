@@ -14,7 +14,6 @@
 #include "CBitVector.h"
 #include <thread>
 #include <mutex>
-#include <experimental/filesystem>
 
 /**
  * This class represents the GMW protocol.
