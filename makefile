@@ -26,7 +26,7 @@ OBJ_FILES     := $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES))
 OBJ_FILES     += $(patsubst src/%.c,obj/%.o,$(C_FILES))
 OUT_DIR        = obj obj/mid_layer obj/circuits obj/comm obj/infra obj/interactive_mid_protocols obj/primitives obj/circuits_c obj/cryptoInfra
 INC            = -Ilib -Iinstall/include -Ilib/OTExtensionBristol
-CPP_OPTIONS   := -std=c++11 $(INC)  -maes -mpclmul -mbmi2 -Wall -Wno-unused-function -Wno-unused-variable -Wno-unused-result -Wno-sign-compare -Wno-parentheses -O3
+CPP_OPTIONS   := -std=c++11 $(INC)  -maes -mpclmul -mbmi2 -Wall -Wno-uninitialized -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable -Wno-unused-result -Wno-sign-compare -Wno-parentheses -O3
 $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
 LIBRARIES_DIR  = -Linstall/lib
 LD_FLAGS = 
@@ -34,7 +34,8 @@ SUMO = no
 
 
 all: libs libscapi tests
-libs: compile-openssl compile-boost compile-ntl compile-emp-tool compile-emp-ot compile-emp-m2pc compile-blake compile-FourQlib compile-miracl compile-otextension compile-otextension-malicious compile-otextension-bristol compile-json
+	echo $(WITH_EMP)
+libs: compile-openssl compile-boost compile-json compile-libote compile-ntl compile-emp-tool compile-emp-ot compile-emp-m2pc compile-otextension-bristol
 libscapi: directories $(SLib)
 directories: $(OUT_DIR)
 
@@ -68,7 +69,7 @@ tests: compile-tests
 .PHONY: compile-tests
 compile-tests:
 	@cd ./test; \
-	g++ -std=c++11 -maes -mavx  -I../install/include -o tests.exe tests.cpp interactiveMidProtocolsTests.cpp ../libscapi.a -lpthread -L../install/lib ../install/lib/libboost_system.a ../install/lib/libboost_thread.a -l:libssl.a -l:libcrypto.a -lntl -lgmp -lblake2  -ldl -lz;
+	g++ -std=c++11 -maes -mavx -I/usr/include/openssl  -I../install/include -o tests.exe tests.cpp interactiveMidProtocolsTests.cpp ../libscapi.a -lpthread -L../install/lib ../install/lib/libboost_system.a ../install/lib/libboost_thread.a -l:libssl.a -lntl -lgmp -l:libcrypto.a -ldl -lz;
 	@cd ..
 	
 prepare-emp:
@@ -107,27 +108,6 @@ ifeq ($(SUMO),yes)
 	@touch compile-emp-m2pc
 endif
 
-compile-blake:
-	@echo "Compiling the BLAKE2 library"
-	@mkdir -p $(builddir)/BLAKE2/
-	@cp -r lib/BLAKE2/sse/. $(builddir)/BLAKE2
-	@$(MAKE) -C $(builddir)/BLAKE2
-	@$(MAKE) -C $(builddir)/BLAKE2 BUILDDIR=$(builddir)  install
-#	@ cp $(builddir)/BLAKE2/libblake2.a install/lib/
-	@touch compile-blake
-
-compile-FourQlib:
-	@mkdir -p $(CURDIR)/install/lib
-	echo "Compiling the FourQlib library"
-	cp -r lib/FourQlib $(builddir)
-	cd $(builddir)/FourQlib/FourQ_64bit_and_portable/; $(MAKE) ARCH=x64	
-	cd $(builddir)/FourQlib/FourQ_64bit_and_portable/; ar cr libFourQlib.a crypto_tests.o eccp2_core.o eccp2.o fp2_1271_AVX2.o  kex.o schnorrq.o test_extras.o crypto_util.o eccp2_no_endo.o ecc_tests.o fp_tests.o random.o sha512.o
-	cd $(builddir)/FourQlib/FourQ_64bit_and_portable/; ranlib libFourQlib.a
-	cp $(builddir)/FourQlib/FourQ_64bit_and_portable/*.a $(CURDIR)/install/lib/
-	mkdir -p $(CURDIR)/install/include/FourQlib
-	cp $(builddir)/FourQlib/FourQ_64bit_and_portable/FourQ_api.h $(CURDIR)/install/include/FourQlib	
-	touch compile-FourQlib
-
 compile-openssl:
 	@mkdir -p $(CURDIR)/install/lib
 	@mkdir -p $(CURDIR)/install/include
@@ -142,14 +122,6 @@ compile-openssl:
 	@cp -r $(builddir)/openssl/tmptrgt/include/openssl/ $(CURDIR)/install/include/
 	@touch compile-openssl
 
-compile-json:
-	@echo "Compiling JSON library..."
-	@cp -r lib/JsonCpp $(builddir)/JsonCpp
-	@cmake $(builddir)/JsonCpp/CMakeLists.txt
-	@$(MAKE) -C $(builddir)/JsonCpp/
-	@cp $(builddir)/JsonCpp/src/lib_json/libjsoncpp.a $(CURDIR)/install/lib/
-	@touch compile-json
-
 compile-boost:
 	@mkdir -p $(CURDIR)/install/lib
 	@mkdir -p $(CURDIR)/install/include
@@ -161,6 +133,26 @@ compile-boost:
 	@cp -r $(builddir)/boost_1_64_0/boost/ $(CURDIR)/install/include/
 	@touch compile-boost
 
+compile-json:
+	@echo "Compiling JSON library..."
+	@cp -r lib/JsonCpp $(builddir)/JsonCpp
+	@cmake $(builddir)/JsonCpp/CMakeLists.txt
+	@$(MAKE) -C $(builddir)/JsonCpp/
+	@cp $(builddir)/JsonCpp/src/lib_json/libjsoncpp.a $(CURDIR)/install/lib/
+	@touch compile-json
+
+compile-libote:compile-boost
+	@echo "Compiling libOTe library..."
+	@cp -r lib/libOTe $(builddir)/libOTe
+	@mkdir -p $(builddir)/libOTe/cryptoTools/thirdparty/linux/miracl/
+	@mv $(builddir)/libOTe/cryptoTools/thirdparty/linux/miracl2/* $(builddir)/libOTe/cryptoTools/thirdparty/linux/miracl/
+	@cmake $(builddir)/libOTe/CMakeLists.txt
+	@$(MAKE) -C $(builddir)/libOTe/
+	@cp $(builddir)/libOTe/lib/*.a $(CURDIR)/install/lib/
+	@mkdir -p $(CURDIR)/install/include/libOTe
+	@cd $(builddir)/libOTe/ && find . -name "*.h" -type f |xargs -I {} cp --parents {} ../../install/include/libOTe
+	@touch compile-libote
+
 compile-ntl:
 	echo "Compiling the NTL library..."
 	mkdir -p $(builddir)/NTL
@@ -171,70 +163,12 @@ compile-ntl:
 	$(MAKE) -C $(builddir)/NTL/src/ PREFIX=$(prefix) install
 	touch compile-ntl
 
-prepare-miracl:
-	@echo "Copying the miracl source files into the miracl build dir..."
-	@mkdir -p $(builddir)/$(MIRACL_DIR)
-	@find lib/Miracl/ -type f -exec cp '{}' $(builddir)/$(MIRACL_DIR)/ \;
-	@rm -f $(builddir)/$(MIRACL_DIR)/mirdef.h
-	@rm -f $(builddir)/$(MIRACL_DIR)/mrmuldv.c
-	@cp -r lib/MiraclCompilation/* $(builddir)/$(MIRACL_DIR)/
-
-compile-miracl:
-	@$(MAKE) prepare-miracl MIRACL_DIR=Miracl
-	@echo "Compiling the Miracl library (C)..."
-	@$(MAKE) -C $(builddir)/Miracl MIRACL_TARGET_LANG=c
-	@echo "Installing the Miracl library..."
-	@$(MAKE) -C $(builddir)/Miracl MIRACL_TARGET_LANG=c install
-	@touch compile-miracl
-
-compile-miracl-cpp:
-	@$(MAKE) prepare-miracl MIRACL_DIR=MiraclCPP CXX=$(CXX)
-	@echo "Compiling the Miracl library (C++)..."
-	@$(MAKE) -C $(builddir)/MiraclCPP MIRACL_TARGET_LANG=cpp CXX=$(CXX)
-	@echo "Installing the Miracl library..."
-	@$(MAKE) -C $(builddir)/MiraclCPP MIRACL_TARGET_LANG=cpp CXX=$(CXX) install
-	@touch compile-miracl-cpp
-
-compile-otextension: compile-miracl-cpp
-	@echo "Compiling the OtExtension library..."
-	@cp -r lib/OTExtension $(builddir)/OTExtension
-	@$(MAKE) -C $(builddir)/OTExtension CXX=$(CXX)
-	@$(MAKE) -C $(builddir)/OTExtension CXX=$(CXX) SHARED_LIB_EXT=$(SHARED_LIB_EXT) install
-	@touch compile-otextension
-
-compile-otextension-malicious: compile-miracl-cpp
-	@echo "Compiling the OtExtension malicious library..."
-	@cp -r lib/MaliciousOTExtension $(builddir)/MaliciousOTExtension
-	@$(MAKE) -C $(builddir)/MaliciousOTExtension CXX=$(CXX)
-	@$(MAKE) -C $(builddir)/MaliciousOTExtension CXX=$(CXX) SHARED_LIB_EXT=$(SHARED_LIB_EXT) install
-	@touch compile-otextension-malicious
-
 compile-otextension-bristol: 
 	@echo "Compiling the OtExtension malicious Bristol library..."
 	@cp -r lib/OTExtensionBristol $(builddir)/OTExtensionBristol
 	@$(MAKE) -C $(builddir)/OTExtensionBristol CXX=$(CXX)
 	@$(MAKE) -C $(builddir)/OTExtensionBristol CXX=$(CXX) install
 	@touch compile-otextension-bristol
-
-clean-miracl:
-	@echo "Cleaning the miracl build dir..."
-	@rm -rf $(builddir)/Miracl
-	@rm -f compile-miracl
-
-clean-miracl-cpp:
-	@echo "Cleaning the miracl build dir..."
-	@rm -rf $(builddir)/MiraclCPP
-	@rm -f compile-miracl-cpp
-
-clean-otextension:
-	@echo "Cleaning the otextension build dir..."
-	@rm -rf $(builddir)/OTExtension
-	@rm -f compile-otextension
-	
-clean-otextension-malicious:
-	@echo "Cleaning the otextension malicious build dir..."
-	@rm -rf $(builddir)/MaliciousOTExtension
-	@rm -f compile-otextension-malicious
 
 clean-otextension-bristol:
 	@echo "Cleaning the otextension malicious bristol build dir..."
@@ -246,21 +180,6 @@ clean-ntl:
 	rm -rf $(builddir)/NTL
 	rm -f compile-ntl	
 
-clean-blake:
-	@echo "Cleaning blake library"
-	@rm -rf $(builddir)/BLAKE2
-	@rm -f compile-blake
-
-clean-json:
-	@echo "Cleaning JSON library"
-	@rm -rf $(builddir)/JsonCpp/
-	@rm -f compile-json
-
-clean-FourQlib:
-	@echo "Cleaning FourQlib library"
-	@rm -rf $(builddir)/FourQlib
-	@rm -f compile-FourQlib
-
 clean-emp:
 	@echo "Cleaning EMP library"
 	@rm -rf $(builddir)/EMP
@@ -271,8 +190,6 @@ clean-cpp:
 	@rm -rf $(OUT_DIR)
 	@echo "cleaning lib"
 	@rm -f $(SLib)
-	@ rm -rf $(CURDIR)/install/
-	@ rm -rf $(CURDIR)/build/
 
 clean-install:
 	@rm -rf install/*
@@ -290,5 +207,15 @@ clean-openssl:
 	@rm -rf $(builddir)/openssl
 	@rm -f compile-openssl
 
-clean: clean-json clean-openssl clean-boost clean-emp clean-otextension-bristol clean-otextension-malicious clean-otextension clean-ntl clean-blake clean-FourQlib clean-miracl clean-miracl-cpp clean-cpp clean-install clean-tests
+clean-json:
+	@echo "Cleaning JSON library"
+	@rm -rf $(builddir)/JsonCpp/
+	@rm -f compile-json
+
+clean-libote:
+	@echo "Cleaning libOTe library"
+	@rm -rf $(builddir)/libOTe/
+	@rm -f compile-libote
+
+clean: clean-json clean-libote clean-openssl clean-boost clean-emp clean-otextension-bristol clean-ntl clean-install clean-tests
 
