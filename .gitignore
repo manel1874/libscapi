@@ -44,6 +44,8 @@ protocols/GMW/cmake_install.cmake
 protocols/YaoSingleExecution/GC_FILE
 protocols/YaoSingleExecution/YaoSingleExecution
 protocols/YaoSingleExecution/emp_format_circuit.txt
+protocols/ReplicatedSecretSharing3PartiesArithmetic/Makefile
+protocols/ReplicatedSecretSharing3PartiesArithmetic/ReplicatedSecretSharing3PartiesArithmetic
 
 # Fortran module files
 *.mod
