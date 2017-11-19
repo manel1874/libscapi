@@ -94,9 +94,9 @@ PartyOne::PartyOne(int argc, char* argv[]) : Protocol("SemiHonestYao", argc, arg
 	otSender = new OTSemiHonestExtensionSender(senderParty, 163, 1);
 #else
 //#ifdef NO_AESNI
-//    otSender = new OTExtensionLiboteSender(sender_ip, senderParty.getPort(), channel.get());
+    otSender = new OTExtensionLiboteSender(sender_ip, senderParty.getPort(), channel.get());
 //#else
-    otSender = new OTExtensionBristolSender(senderParty.getPort(), true, channel);
+//    otSender = new OTExtensionBristolSender(senderParty.getPort(), true, channel);
 //#endif
 
 #endif
@@ -226,9 +226,9 @@ PartyTwo::PartyTwo(int argc, char* argv[]) : Protocol("SemiHonestYao", argc, arg
 	otReceiver = new OTSemiHonestExtensionReceiver(senderParty, 163, 1);
 #else
 //#ifdef NO_AESNI
-//    otReceiver = new OTExtensionLiboteReceiver(sender_ip, sender_port, channel.get());
+    otReceiver = new OTExtensionLiboteReceiver(sender_ip, sender_port, channel.get());
 //#else
-    otReceiver = new OTExtensionBristolReceiver(senderParty.getIpAddress().to_string(), senderParty.getPort(), true, channel);
+//    otReceiver = new OTExtensionBristolReceiver(senderParty.getIpAddress().to_string(), senderParty.getPort(), true, channel);
 //#endif
 
 #endif
