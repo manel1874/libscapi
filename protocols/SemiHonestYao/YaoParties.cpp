@@ -93,7 +93,12 @@ PartyOne::PartyOne(int argc, char* argv[]) : Protocol("SemiHonestYao", argc, arg
 #ifdef _WIN32
 	otSender = new OTSemiHonestExtensionSender(senderParty, 163, 1);
 #else
-	otSender = new OTExtensionBristolSender(senderParty.getPort(), true, channel);
+//#ifdef NO_AESNI
+//    otSender = new OTExtensionLiboteSender(sender_ip, senderParty.getPort(), channel.get());
+//#else
+    otSender = new OTExtensionBristolSender(senderParty.getPort(), true, channel);
+//#endif
+
 #endif
 
 	// connect to party two
@@ -220,7 +225,12 @@ PartyTwo::PartyTwo(int argc, char* argv[]) : Protocol("SemiHonestYao", argc, arg
 #ifdef _WIN32
 	otReceiver = new OTSemiHonestExtensionReceiver(senderParty, 163, 1);
 #else
-	otReceiver = new OTExtensionBristolReceiver(senderParty.getIpAddress().to_string(), senderParty.getPort(), true, channel);
+//#ifdef NO_AESNI
+//    otReceiver = new OTExtensionLiboteReceiver(sender_ip, sender_port, channel.get());
+//#else
+    otReceiver = new OTExtensionBristolReceiver(senderParty.getIpAddress().to_string(), senderParty.getPort(), true, channel);
+//#endif
+
 #endif
 
 
