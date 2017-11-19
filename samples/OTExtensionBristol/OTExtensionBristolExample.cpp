@@ -1,7 +1,6 @@
 #ifndef _WIN32
 #include <iostream>
 #include "../../include/interactive_mid_protocols/OTExtensionBristol.hpp"
-#include "../../include/interactive_mid_protocols/OTSemiHonestExtension.hpp"
 
 using namespace std;
 
@@ -16,8 +15,18 @@ int mainBristol(string partyNum) {
 
 
 
-/*  if (my_num == 0) {
-      OTExtensionBristolSender sender(12000, true);
+  if (my_num == 1) {
+      boost::asio::io_service io_service;
+      SocketPartyData me(IpAddress::from_string("127.0.0.1"), 1212);
+      SocketPartyData other(IpAddress::from_string("127.0.0.1"), 1213);
+      shared_ptr<CommParty> channel = make_shared<CommPartyTCPSynced>(io_service, me, other);
+
+      // connect to party one
+      channel->join(500, 5000);
+
+
+      cout<<"nOTS: "<< nOTs<<endl;
+      OTExtensionBristolSender sender(12001,true,channel);
 
       OTBatchSInput *input = new OTExtensionRandomizedSInput(nOTs, elementSize);
 
@@ -51,8 +60,18 @@ int mainBristol(string partyNum) {
 
 
   } else {
-        cout<<"nOTS: "<< nOTs<<endl;
-        OTExtensionBristolReceiver receiver("localhost", 12000,true);
+      boost::asio::io_service io_service;
+      SocketPartyData me(IpAddress::from_string("127.0.0.1"), 1213);
+      SocketPartyData other(IpAddress::from_string("127.0.0.1"), 1212);
+      //SocketPartyData receiverParty(yao_config.receiver_ip, 7766);
+      //CommParty * channel = new CommPartyTCPSynced(io_service, me, other);
+
+      shared_ptr<CommParty> channel = make_shared<CommPartyTCPSynced>(io_service, me, other);
+
+      // connect to party one
+      channel->join(500, 5000);
+
+      OTExtensionBristolReceiver receiver("localhost", 12001,true,channel);
 
         vector<byte> sigma;
 		sigma.resize(nOTs);
@@ -83,7 +102,7 @@ int mainBristol(string partyNum) {
 
     cout<<"Done running randomized"<<endl;
 
-*/
+
 
    /*if (my_num == 0) {
     	boost::asio::io_service io_service;
@@ -193,7 +212,7 @@ int mainBristol(string partyNum) {
 
 	}*/
 
-
+/*
 
     if (my_num == 1) {
         	boost::asio::io_service io_service;
@@ -307,58 +326,6 @@ int mainBristol(string partyNum) {
 
 
     	}
-
-
-
-    /*
-    int size = 1280000;
-    SocketPartyData senderParty(IpAddress::from_string("127.0.0.1"), 7766);
-    if (my_num == 0) {
-
-
-    	OTBatchReceiver * otReceiver = new OTSemiHonestExtensionReceiver(senderParty, 163, 1);
-
-    	vector<byte> sigma;
-    	sigma.resize(size);
-    	sigma[0] = 1;
-    	sigma[1] = 1;
-
-
-		int elementSize = 128;
-		OTBatchRInput * input = new OTExtensionGeneralRInput(sigma, elementSize);
-		//Run the Ot protocol.
-		auto start = scapi_now();
-		auto output = otReceiver->transfer(input);
-		print_elapsed_ms(start, "Transfer for general semi-honest");
-
-
-		vector<byte> outputbytes = ((OTOnByteArrayROutput *)output.get())->getXSigma();
-
-		cout<<"the size is :" <<outputbytes.size();
-		for(int i=0; i<100; i++){
-
-			cout<< (int)outputbytes[i];
-		}
-
-		cout<<endl;
-    }
-    else{
-
-    	OTBatchSender * otSender = new OTSemiHonestExtensionSender(senderParty, 163, 1);
-    	vector<byte> x0Arr;
-		x0Arr.resize(size * 16);
-
-		vector<byte> x1Arr;
-		x1Arr.resize(size*16);
-		for(size_t i=0; i<x1Arr.size();i++)
-			x1Arr[i] = 1;
-    	OTBatchSInput * input = new OTExtensionGeneralSInput(x0Arr, x1Arr, size);
-    		// run the OT's transfer phase.
-    	auto start = scapi_now();
-    	otSender->transfer(input);
-    	print_elapsed_ms(start, "Transfer for general semi-honest");
-    }
-
 */
     return 0;
 }
