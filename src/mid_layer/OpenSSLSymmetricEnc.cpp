@@ -26,7 +26,7 @@
 */
 
 
-#include "../include/mid_layer/OpenSSLSymmetricEnc.hpp"
+#include "../../include/mid_layer/OpenSSLSymmetricEnc.hpp"
 
 void OpenSSLEncWithIVAbs::doConstruct() {
 	//Check that the given prp name is a valid algorithm for this encryption scheme.
