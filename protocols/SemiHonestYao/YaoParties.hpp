@@ -36,9 +36,17 @@
 
 #ifdef NO_AESNI
     #include "../../include/circuits/GarbledBooleanCircuitNoIntrinsics.h"
+
 #else
     #include "../../include/circuits/GarbledBooleanCircuit.h"
 #endif
+#ifdef _WIN32
+    #include "../../include/interactive_mid_protocols/OTSemiHonestExtension.hpp"
+#else
+    #include "../../include/interactive_mid_protocols/OTExtensionBristol.hpp"
+//    #include "../../include/interactive_mid_protocols/OTExtensionLibote.hpp"
+#endif
+//#endif
 #include "../../include/cryptoInfra/Protocol.hpp"
 #include "../../include/cryptoInfra/SecurityLevel.hpp"
 #include "../../include/circuits/GarbledCircuitFactory.hpp"
@@ -46,11 +54,6 @@
 #undef AES_KEY
 #define AES_KEY OT_AES_KEY
 
-#ifdef _WIN32
-#include "../../include/interactive_mid_protocols/OTSemiHonestExtension.hpp"
-#else
-#include "../../include/interactive_mid_protocols/OTExtensionBristol.hpp"
-#endif
 #undef AES_KEY
 #include <thread>
 #include <libscapi/include/infra/Scanner.hpp>

@@ -123,14 +123,7 @@ int main(int argc, char* argv[]) {
     int time = 0;
     chrono::high_resolution_clock::time_point start, end;
 
-    for (int i=0; i<runs; i++){
-        party.sync();
-        start = chrono::high_resolution_clock::now();
-        party.run();
-        end = chrono::high_resolution_clock::now();
-        time += std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    }
-    cout<<"running all at once "<<runs<<" times took in average "<<time/runs << " millis"<<endl;
+    party.run();
     auto out = party.getOutput();
     if (out.size()  > 0) {
 
@@ -145,6 +138,7 @@ int main(int argc, char* argv[]) {
     int offlineTime = 0, onlineTime = 0, loadTime = 0;
 
     for (int i=0; i<runs; i++){
+        party.setIteration(i);
         party.sync();
 
         start = chrono::high_resolution_clock::now();

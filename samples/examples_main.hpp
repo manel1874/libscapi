@@ -39,5 +39,6 @@ int mainOTSemiHonest(string party);
 int mainOSPSI(string inputFilePath_0, string inputFilePath_1);
 #ifndef _WIN32
 int mainBristol(string party);
+int mainLibote(string party);
 #endif
 int mainCommitment(string partyNumber, string filePath);

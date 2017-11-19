@@ -211,7 +211,7 @@ bool ZKPOKFromSigmaCmtPedersenVerifier::verify(ZKCommonInput* input,
 */
 long ZKPOKFromSigmaCmtPedersenVerifier::commit(const vector<byte> & e) {
 	auto val = committer->generateCommitValue(e);
-	long id = random->getRandom64();
+	auto id = random->getRandom64();
 	id = abs(id);
 	committer->commit(val, id);
 	return id;

@@ -26,7 +26,7 @@
 */
 
 
-#include "../include/interactive_mid_protocols/SigmaProtocolOrMultiple.hpp"
+#include "../../include/interactive_mid_protocols/SigmaProtocolOrMultiple.hpp"
 
 string SigmaOrMultipleCommonInput::toString() {
 	string output = "";

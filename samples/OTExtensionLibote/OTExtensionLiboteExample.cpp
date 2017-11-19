@@ -1,82 +1,80 @@
 #ifndef _WIN32
 #include <iostream>
-#include "../../include/interactive_mid_protocols/OTExtensionBristol.hpp"
+#include "../../include/interactive_mid_protocols/OTExtensionLibote.hpp"
 
 using namespace std;
 
-int mainBristol(string partyNum) {
+int mainLibote(string partyNum) {
 
     int my_num = stoi(partyNum);
 
 
     int nOTs = 12;
 
-    int elementSize = 128;
+    int elementSize = 136;
+/*
+    if (my_num == 1) {
+
+        boost::asio::io_service io_service;
+        SocketPartyData me(IpAddress::from_string("127.0.0.1"), 1212);
+        SocketPartyData other(IpAddress::from_string("127.0.0.1"), 1213);
+        shared_ptr<CommParty> channel = make_shared<CommPartyTCPSynced>(io_service, me, other);
+
+        // connect to party one
+        channel->join(500, 5000);
+        cout<<"in party 1"<<endl;
+        OTExtensionLiboteSender sender("127.0.0.1", 8000, channel.get());
+
+        OTBatchSInput *input = new OTExtensionRandomizedSInput(nOTs, elementSize);
+
+        auto start = scapi_now();
+        auto output = sender.transfer(input);
+        print_elapsed_ms(start, "Transfer for random");
+
+        vector<byte> outputbytes = ((OTExtensionRandomizedSOutput *) output.get())->getR0Arr();
+
+        cout << "the size is :" << outputbytes.size() << " r0Arr " << endl;
+        for (int i = 0; i < nOTs * elementSize / 8; i++) {
+
+            if (i % (elementSize / 8) == 0) {
+                cout << endl;
+            }
+            cout << (int) outputbytes[i] << "--";
+
+        }
+        cout<<endl;
+        outputbytes = ((OTExtensionRandomizedSOutput *) output.get())->getR1Arr();
+
+        cout << "the size is :" << outputbytes.size() << " r1Arr " << endl;
+        for (int i = 0; i < nOTs * elementSize / 8; i++) {
+
+            if (i % (elementSize / 8) == 0) {
+                cout << endl;
+            }
+            cout << (int) outputbytes[i] << "--";
+
+        }
+        cout<<endl;
 
 
+    } else {
+        cout<<"in party 2"<<endl;
+        boost::asio::io_service io_service;
+        SocketPartyData me(IpAddress::from_string("127.0.0.1"), 1213);
+        SocketPartyData other(IpAddress::from_string("127.0.0.1"), 1212);
 
-  if (my_num == 1) {
-      boost::asio::io_service io_service;
-      SocketPartyData me(IpAddress::from_string("127.0.0.1"), 1212);
-      SocketPartyData other(IpAddress::from_string("127.0.0.1"), 1213);
-      shared_ptr<CommParty> channel = make_shared<CommPartyTCPSynced>(io_service, me, other);
+        shared_ptr<CommParty> channel = make_shared<CommPartyTCPSynced>(io_service, me, other);
 
-      // connect to party one
-      channel->join(500, 5000);
+        // connect to party one
+        channel->join(500, 5000);
 
-
-      cout<<"nOTS: "<< nOTs<<endl;
-      OTExtensionBristolSender sender(12001,true,channel);
-
-      OTBatchSInput *input = new OTExtensionRandomizedSInput(nOTs, elementSize);
-
-      auto start = scapi_now();
-      auto output = sender.transfer(input);
-      print_elapsed_ms(start, "Transfer for random");
-
-      vector<byte> outputbytes = ((OTExtensionRandomizedSOutput *) output.get())->getR0Arr();
-
-      cout << "the size is :" << outputbytes.size() << " r0Arr " << endl;
-      for (int i = 0; i < nOTs * elementSize / 8; i++) {
-
-          if (i % (elementSize / 8) == 0) {
-              cout << endl;
-          }
-          cout << (int) outputbytes[i] << "--";
-
-      }
-
-      outputbytes = ((OTExtensionRandomizedSOutput *) output.get())->getR1Arr();
-
-      cout << "the size is :" << outputbytes.size() << " r1Arr " << endl;
-      for (int i = 0; i < nOTs * elementSize / 8; i++) {
-
-          if (i % (elementSize / 8) == 0) {
-              cout << endl;
-          }
-          cout << (int) outputbytes[i] << "--";
-
-      }
-
-
-  } else {
-      boost::asio::io_service io_service;
-      SocketPartyData me(IpAddress::from_string("127.0.0.1"), 1213);
-      SocketPartyData other(IpAddress::from_string("127.0.0.1"), 1212);
-      //SocketPartyData receiverParty(yao_config.receiver_ip, 7766);
-      //CommParty * channel = new CommPartyTCPSynced(io_service, me, other);
-
-      shared_ptr<CommParty> channel = make_shared<CommPartyTCPSynced>(io_service, me, other);
-
-      // connect to party one
-      channel->join(500, 5000);
-
-      OTExtensionBristolReceiver receiver("localhost", 12001,true,channel);
+        cout<<"nOTS: "<< nOTs<<endl;
+        OTExtensionLiboteReceiver receiver("127.0.0.1", 8000, channel.get());
 
         vector<byte> sigma;
-		sigma.resize(nOTs);
-		sigma[0] = 1;
-		sigma[1] = 1;
+        sigma.resize(nOTs);
+	    sigma[0] = 1;
+	    sigma[1] = 1;
 
 
         OTBatchRInput * input = new OTExtensionRandomizedRInput(sigma, elementSize);
@@ -85,26 +83,27 @@ int mainBristol(string partyNum) {
         auto output = receiver.transfer(input);
         print_elapsed_ms(start, "Transfer for random");
 
-		vector<byte> outputbytes = ((OTOnByteArrayROutput *)output.get())->getXSigma();
+        vector<byte> outputbytes = ((OTOnByteArrayROutput *)output.get())->getXSigma();
 
-		cout<<"the size is :" <<outputbytes.size()<<endl;
-		for(int i=0; i<nOTs*(elementSize/8); i++){
+	    cout<<"the size is :" <<outputbytes.size()<<endl;
+	    for(int i=0; i<nOTs*(elementSize/8); i++){
 
-			if (i%(elementSize/8)==0){
-								cout<<endl;
-							}
-			cout<< (int)outputbytes[i]<<"--";
+		    if (i%(elementSize/8)==0){
+			    cout<<endl;
+		    }
+		    cout<< (int)outputbytes[i]<<"--";
 
-		}
+	    }
 
+        cout<<endl;
     }
 
 
     cout<<"Done running randomized"<<endl;
 
+*/
 
-
-   /*if (my_num == 0) {
+   if (my_num == 1) {
     	boost::asio::io_service io_service;
 		SocketPartyData me(IpAddress::from_string("127.0.0.1"), 1212);
 		SocketPartyData other(IpAddress::from_string("127.0.0.1"), 1213);
@@ -115,14 +114,7 @@ int mainBristol(string partyNum) {
 
 
 		cout<<"nOTS: "<< nOTs<<endl;
-		OTExtensionBristolSender sender(12001,true,channel);
-
-		//BitMatrix x0(nOTs);
-		//BitMatrix x1(nOTs);
-
-		//for(int i=0; i<nOTs; i++){
-		//	x1.squares[i/128].rows[i % 128] = _mm_set_epi32(1,1,1,1);
-		//}
+		OTExtensionLiboteSender sender("127.0.0.1", 8000, channel.get());
 
 		vector<byte> x0Arr;
 		x0Arr.resize(nOTs * elementSize/8);
@@ -165,8 +157,7 @@ int mainBristol(string partyNum) {
 		}
 
 
-   }
-	else {
+   } else {
 		boost::asio::io_service io_service;
 		SocketPartyData me(IpAddress::from_string("127.0.0.1"), 1213);
 		SocketPartyData other(IpAddress::from_string("127.0.0.1"), 1212);
@@ -178,7 +169,7 @@ int mainBristol(string partyNum) {
 		// connect to party one
 		channel->join(500, 5000);
 
-		OTExtensionBristolReceiver receiver("localhost", 12001,true,channel);
+		OTExtensionLiboteReceiver receiver("127.0.0.1", 8000, channel.get());
 
 		vector<byte> sigma;
 		sigma.resize(nOTs);
@@ -210,11 +201,9 @@ int mainBristol(string partyNum) {
 
 
 
-	}*/
+	}
 
-/*
-
-    if (my_num == 1) {
+	/*if (my_num == 1) {
         	boost::asio::io_service io_service;
     		SocketPartyData me(IpAddress::from_string("127.0.0.1"), 1212);
     		SocketPartyData other(IpAddress::from_string("127.0.0.1"), 1213);
@@ -326,7 +315,10 @@ int mainBristol(string partyNum) {
 
 
     	}
-*/
+
+
+
+   */
     return 0;
 }
 #endif

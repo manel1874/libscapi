@@ -45,6 +45,7 @@ example_name can one of the following:
 	* commitment  <party_number (1|2)> <config_file_path>
 	* ot  <party_number (1|2)> <config_file_path>
 	* OTExtensionBristol <party_number (1|2)> (linux only)
+	* OTExtensionLibote <party_number (1|2)>
 	* ospsi input_file_1 input_file_2
 				)";
 	cerr << usage << endl;
@@ -61,23 +62,26 @@ int main(int argc, char* argv[]) {
 		return mainSha1();
 	if (argc == 2)
 		return exampleUsage();
-	if (exampleName == "maliciousOT")
-		return mainOTMalicious(argv[2]);
-	if (exampleName == "semiHonestOT")
-		return mainOTSemiHonest(argv[2]);
+//	if (exampleName == "maliciousOT")
+//		return mainOTMalicious(argv[2]);
+//	if (exampleName == "semiHonestOT")
+//		return mainOTSemiHonest(argv[2]);
+	if (exampleName == "OTExtensionLibote")
+		return mainLibote(argv[2]);
 #ifndef _WIN32
 	if (exampleName == "OTExtensionBristol")
 		return mainBristol(argv[2]);
 #endif
+
 	if (argc != 4)
 		return exampleUsage();
 
-	if (exampleName == "ospsi")
-		return mainOSPSI(argv[2], argv[3]);
+//	if (exampleName == "ospsi")
+//		return mainOSPSI(argv[2], argv[3]);
 	if (exampleName == "comm") 
 		return mainComm(argv[2], argv[3]);
-	if (exampleName == "yao")
-		return mainYao(argv[2], argv[3]);
+//	if (exampleName == "yao")
+//		return mainYao(argv[2], argv[3]);
 	if (exampleName == "sigma")
 		return mainSigma(argv[2], argv[3]);
 	if (exampleName == "commitment")
