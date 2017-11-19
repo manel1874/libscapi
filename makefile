@@ -25,7 +25,7 @@ C_FILES     := $(wildcard src/*/*.c)
 OBJ_FILES     := $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES))
 OBJ_FILES     += $(patsubst src/%.c,obj/%.o,$(C_FILES))
 OUT_DIR        = obj obj/mid_layer obj/circuits obj/comm obj/infra obj/interactive_mid_protocols obj/primitives obj/circuits_c obj/cryptoInfra
-INC            = -Ilib -Iinstall/include -Ilib/OTExtensionBristol
+INC            = -Iinstall/include -Iinstall/include/OTExtensionBristol
 CPP_OPTIONS   := -std=c++11 $(INC)  -maes -mpclmul -mbmi2 -Wall -Wno-uninitialized -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable -Wno-unused-result -Wno-sign-compare -Wno-parentheses -O3
 $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
 LIBRARIES_DIR  = -Linstall/lib
@@ -137,7 +137,8 @@ compile-boost:
 	@mkdir -p $(builddir)/
 	echo "Compiling the boost library"
 	@cp -r lib/boost_1_64_0/ $(builddir)/boost_1_64_0
-	cd $(builddir)/boost_1_64_0/; bash -c "BOOST_BUILD_PATH='./' ./bootstrap.sh --with-libraries=thread,system && ./b2"; 
+	@cd $(builddir)/boost_1_64_0/; bash -c "BOOST_BUILD_PATH='./' ./bootstrap.sh --with-libraries=thread,system \
+	&& ./b2";
 	@cp $(builddir)/boost_1_64_0/stage/lib/*.a $(CURDIR)/install/lib/
 	@cp -r $(builddir)/boost_1_64_0/boost/ $(CURDIR)/install/include/
 	@touch compile-boost
@@ -155,9 +156,11 @@ compile-libote:compile-boost
 	@cp -r lib/libOTe $(builddir)/libOTe
 	@mkdir -p $(builddir)/libOTe/cryptoTools/thirdparty/linux/miracl/
 	@mv $(builddir)/libOTe/cryptoTools/thirdparty/linux/miracl2/* $(builddir)/libOTe/cryptoTools/thirdparty/linux/miracl/
-	@cmake $(builddir)/libOTe/CMakeLists.txt
+	@cmake $(builddir)/libOTe/CMakeLists.txt -DCMAKE_BUILD_TYPE=Release
 	@$(MAKE) -C $(builddir)/libOTe/
 	@cp $(builddir)/libOTe/lib/*.a $(CURDIR)/install/lib/
+	@cp $(builddir)/libOTe/cryptoTools/thirdparty/linux/miracl/miracl/source/libmiracl.a $(CURDIR)/install/lib/
+	@mv $(CURDIR)/install/lib/liblibOTe.a $(CURDIR)/install/lib/libOTe.a
 	@mkdir -p $(CURDIR)/install/include/libOTe
 	@cd $(builddir)/libOTe/ && find . -name "*.h" -type f |xargs -I {} cp --parents {} ../../install/include/libOTe
 	@touch compile-libote

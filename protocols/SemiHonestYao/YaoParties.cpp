@@ -131,13 +131,13 @@ void PartyOne::run() {
 }
 
 void PartyOne::runOnline() {
-	timer->startSubTask();
+	timer->startSubTask(0, currentIteration);
 	values = circuit->garble();
 	timer->endSubTask(0, currentIteration);
 	// send garbled tables and the translation table to p2.
 	auto garbledTables = circuit->getGarbledTables();
 
-	timer->startSubTask();
+	timer->startSubTask(1, currentIteration);
 	channel->write((byte *) garbledTables, circuit->getGarbledTableSize());
 	channel->write(circuit->getTranslationTable().data(), circuit->getNumberOfOutputs());
 	// send p1 input keys to p2.
@@ -145,7 +145,7 @@ void PartyOne::runOnline() {
 	timer->endSubTask(1, currentIteration);
 
 	// run OT protocol in order to send p2 the necessary keys without revealing any information.
-	timer->startSubTask();
+	timer->startSubTask(2, currentIteration);
 	runOTProtocol();
 	timer->endSubTask(2, currentIteration);
 }
@@ -265,18 +265,18 @@ void PartyTwo::run() {
 
 void PartyTwo::runOnline() {
 	// receive tables and inputs
-	timer->startSubTask();
+	timer->startSubTask(0, currentIteration);
 	receiveCircuit();
 	receiveP1Inputs();
 	timer->endSubTask(0, currentIteration);
 
-	timer->startSubTask();
+	timer->startSubTask(1, currentIteration);
 	// run OT protocol in order to get the necessary keys without revealing any information.
 	auto output = runOTProtocol(ungarbledInput.data(), ungarbledInput.size());
 	timer->endSubTask(1, currentIteration);
 
 	// Compute the circuit.
-	timer->startSubTask();
+	timer->startSubTask(2, currentIteration);
 	computeCircuit(output.get());
 	timer->endSubTask(2, currentIteration);
 
