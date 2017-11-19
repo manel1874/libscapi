@@ -45,7 +45,9 @@ Measurement::Measurement(string protocolName, int partyId, int numOfParties, int
 
 
 Measurement::Measurement(string protocolName, int partyId, int numOfParties, int numOfIteration, vector<string> names)
-        :m_times(names.size(), vector<long>(numOfIteration)), m_names{move(names)}
+        :m_startTimes(names.size(), vector<long>(numOfIteration)),
+         m_times(names.size(), vector<long>(numOfIteration)),
+         m_names{move(names)}
 {
     m_protocolName = protocolName;
     m_partyId = partyId;

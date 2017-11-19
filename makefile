@@ -35,7 +35,7 @@ SUMO = no
 
 all: libs libscapi tests
 	echo $(WITH_EMP)
-libs: compile-openssl compile-boost compile-json compile-libote compile-ntl compile-emp-tool compile-emp-ot compile-emp-m2pc compile-otextension-bristol
+libs: compile-openssl compile-boost compile-json compile-libote compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc compile-otextension-bristol
 libscapi: directories $(SLib)
 directories: $(OUT_DIR)
 
@@ -108,6 +108,15 @@ ifeq ($(SUMO),yes)
 	@touch compile-emp-m2pc
 endif
 
+
+compile-blake:
+	@echo "Compiling the BLAKE2 library"
+	@mkdir -p $(builddir)/BLAKE2/
+	@cp -r lib/BLAKE2/sse/. $(builddir)/BLAKE2
+	@$(MAKE) -C $(builddir)/BLAKE2
+	@$(MAKE) -C $(builddir)/BLAKE2 BUILDDIR=$(builddir)  install
+	@touch compile-blake
+
 compile-openssl:
 	@mkdir -p $(CURDIR)/install/lib
 	@mkdir -p $(CURDIR)/install/include
@@ -178,7 +187,12 @@ clean-otextension-bristol:
 clean-ntl:
 	echo "Cleaning the ntl build dir..."
 	rm -rf $(builddir)/NTL
-	rm -f compile-ntl	
+	rm -f compile-ntl
+
+clean-blake:
+	@echo "Cleaning blake library"
+	@rm -rf $(builddir)/BLAKE2
+	@rm -f compile-blake
 
 clean-emp:
 	@echo "Cleaning EMP library"

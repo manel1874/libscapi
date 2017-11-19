@@ -37,7 +37,7 @@ void GMWParty::run(){
 
     for (currentIteration = 0; currentIteration<times; currentIteration++) {
         //Run the offline phase of the protocol
-        timer->startSubTask();
+        timer->startSubTask(0, currentIteration);
         runOffline();
         timer->endSubTask(0, currentIteration);
         auto inputSize = circuit->getPartyInputs(id).size(); //indices of my input wires
@@ -45,7 +45,7 @@ void GMWParty::run(){
         //read my input from the input file
         readInputs();
         //Run te online phase of the protocol
-        timer->startSubTask();
+        timer->startSubTask(2, currentIteration);
         runOnline();
         timer->endSubTask(2, currentIteration);
     }
@@ -53,10 +53,8 @@ void GMWParty::run(){
 }
 
 void GMWParty::runOffline(){
-    int pid = getpid();
-    string path = std::experimental::filesystem::current_path();
     int numberOfParties = getParties().size() + 1;
-    timer->startSubTask();
+    timer->startSubTask(1, currentIteration);
     generateTriples();
     timer->endSubTask(1, currentIteration);
 	auto inputSize = circuit->getPartyInputs(id).size(); //indices of my input wires
@@ -65,12 +63,11 @@ void GMWParty::runOffline(){
 }
 
 void GMWParty::runOnline(){
-    string path = std::experimental::filesystem::current_path();
     int numberOfParties = getParties().size() + 1;
-    timer->startSubTask();
+    timer->startSubTask(3, currentIteration);
     inputSharing();
     timer->endSubTask(3, currentIteration);
-    timer->startSubTask();
+    timer->startSubTask(4, currentIteration);
     computeCircuit();
     timer->endSubTask(4, currentIteration);
 }

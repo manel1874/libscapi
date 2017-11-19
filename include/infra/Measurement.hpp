@@ -54,29 +54,38 @@ public:
     Measurement(string protocolName, int partyId, int numOfParties, int numOfIteration);
     Measurement(string protocolName, int partyId, int numOfParties, int numOfIteration, vector<string> names);
     ~Measurement();
-    void startSubTask(){m_start = chrono::high_resolution_clock::now();}
+    void startSubTask(int taskIdx, int currentIterationNum)
+    {
+        auto now = system_clock::now();
+        //Cast the time point to ms, then get its duration, then get the duration's count.
+        auto ms = time_point_cast<milliseconds>(now).time_since_epoch().count();
+
+        m_startTimes[taskIdx][currentIterationNum] = ms;
+    }
     void endSubTask(int taskIdx, int currentIterationNum)
     {
-        m_times[taskIdx][currentIterationNum] =
-                chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - m_start).count();
+        auto now = system_clock::now();
+        //Cast the time point to ms, then get its duration, then get the duration's count.
+        auto ms = time_point_cast<milliseconds>(now).time_since_epoch().count();
+
+        m_times[taskIdx][currentIterationNum] = ms - m_startTimes[taskIdx][currentIterationNum];
     }
-    void setTaskNames(vector<string> names){m_names = move(names);}
-
-
-private:
-    vector<vector<long>> m_times;
-    vector<string> m_names;
-    string m_protocolName;
-    high_resolution_clock::time_point m_start;
-    int m_partyId;
-    int m_numOfParties;
-    int m_numberOfIterations;
+    void setTaskNames(vector<string> & names){m_names = names;}
     string getcwdStr()
     {
         char* buff;//automatically cleaned when it exits scope
         return string(getcwd(buff,255));
     }
 
+
+private:
+    vector<vector<long>> m_startTimes;
+    vector<vector<long>> m_times;
+    vector<string> m_names;
+    string m_protocolName;
+    int m_partyId;
+    int m_numOfParties;
+    int m_numberOfIterations;
 };
 
 
