@@ -7,9 +7,7 @@
 #include <libscapi/include/comm/MPCCommunication.hpp>
 #include <libscapi/include/cryptoInfra/Protocol.hpp>
 #include <libscapi/include/infra/Measurement.hpp>
-
 #include <libscapi/include/primitives/Mersenne.hpp>
-#include "ProtocolTimer.h"
 #include "HashEncrypt.h"
 #include <libscapi/include/infra/Common.hpp>
 #include <thread>
@@ -31,7 +29,6 @@ private:
      * T - number of malicious
      * M - number of gates
      */
-    ProtocolTimer* protocolTimer;
     Measurement* timer;
     int currentCirciutLayer = 0;
     int M, m_partyId;
@@ -212,15 +209,13 @@ template <class FieldType>
 ProtocolParty<FieldType>::ProtocolParty(int argc, char* argv[]) : Protocol("Replicated secret sharing 3 parties arithmetic", argc, argv) {
 
     this->times = stoi(arguments["internalIterationsNumber"]);
-    string outputTimerFileName = arguments["circuitFile"] + "Times" + arguments["internalIterationsNumber"] + ".csv";
-
-    this->protocolTimer = new ProtocolTimer(times, outputTimerFileName);
 
     string fieldType = arguments["fieldType"];
     if(fieldType.compare("ZpMersenne") == 0)
     {
         field = new TemplateField<FieldType>(2147483647);
-    } else if(fieldType.compare("ZpMersenne61") == 0)
+    }
+    else if(fieldType.compare("ZpMersenne61") == 0)
     {
         field = new TemplateField<FieldType>(0);
     }
@@ -301,11 +296,11 @@ void ProtocolParty<FieldType>::readMyInputs()
 template <class FieldType>
 void ProtocolParty<FieldType>::run() {
     for (iteration=0; iteration<times; iteration++){
-        timer->startSubTask();
+        timer->startSubTask(0, iteration);
         runOffline();
         timer->endSubTask(0, iteration);
 
-        timer->startSubTask();
+        timer->startSubTask(2, iteration);
         runOnline();
         timer->endSubTask(2, iteration);
     }
@@ -315,7 +310,7 @@ template <class FieldType>
 void ProtocolParty<FieldType>::runOffline() {
 
     auto t1 = high_resolution_clock::now();
-    timer->startSubTask();
+    timer->startSubTask(1, iteration);
     if(fieldByteSize > 4) {
         generateRandomness61Bits();
     } else {
@@ -328,14 +323,12 @@ void ProtocolParty<FieldType>::runOffline() {
     if(flag_print_timings) {
         cout << "time in milliseconds  generateRandomness: " << duration << endl;
     }
-
-    protocolTimer->preparationPhaseArr[iteration] =duration;
 }
 
 template <class FieldType>
 void ProtocolParty<FieldType>::runOnline() {
     auto t1 = high_resolution_clock::now();
-    timer->startSubTask();
+    timer->startSubTask(3, iteration);
     inputPreparation();
     timer->endSubTask(3, iteration);
     auto t2 = high_resolution_clock::now();
@@ -345,11 +338,9 @@ void ProtocolParty<FieldType>::runOnline() {
         cout << "time in milliseconds   inputPreparation: " << duration << endl;
     }
 
-    protocolTimer->inputPreparationArr[iteration] =duration;
-
 
     t1 = high_resolution_clock::now();
-    timer->startSubTask();
+    timer->startSubTask(4, iteration);
     computationPhase();
     timer->endSubTask(4, iteration);
 
@@ -361,12 +352,10 @@ void ProtocolParty<FieldType>::runOnline() {
         cout << "time in milliseconds   computationPhase: " << duration << endl;
     }
 
-    protocolTimer->computationPhaseArr[iteration] =duration;
-
 
     t1 = high_resolution_clock::now();
 
-    timer->startSubTask();
+    timer->startSubTask(5, iteration);
     if(circuit.getNrOfMultiplicationGates() > 0) {
 
         if(fieldByteSize <= 4) {
@@ -385,10 +374,8 @@ void ProtocolParty<FieldType>::runOnline() {
         cout << "time in milliseconds   verification: " << duration << endl;
     }
 
-    protocolTimer->verificationPhaseArr[iteration] =duration;
-
     t1 = high_resolution_clock::now();
-    timer->startSubTask();
+    timer->startSubTask(6, iteration);
     outputPhase();
     timer->endSubTask(6, iteration);
 
@@ -399,8 +386,6 @@ void ProtocolParty<FieldType>::runOnline() {
     if(flag_print_timings) {
         cout << "time in milliseconds   outputPhase: " << duration << endl;
     }
-
-    protocolTimer->outputPhaseArr[iteration] =duration;
 }
 
 template <class FieldType>
@@ -1377,44 +1362,32 @@ void ProtocolParty<FieldType>::exchangeData(vector<vector<byte>> &sendBufs, vect
 
         if ((m_partyId) < parties[i]->getID()) {
 
-
             //send shares to my input bits
             parties[i]->getChannel()->write(sendBufs[parties[i]->getID()].data(), sendBufs[parties[i]->getID()].size());
             //cout<<"write the data:: my Id = " << m_partyId - 1<< "other ID = "<< parties[i]->getID() <<endl;
-
 
             //receive shares from the other party and set them in the shares array
             parties[i]->getChannel()->read(recBufs[parties[i]->getID()].data(), recBufs[parties[i]->getID()].size());
             //cout<<"read the data:: my Id = " << m_partyId-1<< "other ID = "<< parties[i]->getID()<<endl;
 
         } else{
-
-
             //receive shares from the other party and set them in the shares array
             parties[i]->getChannel()->read(recBufs[parties[i]->getID()].data(), recBufs[parties[i]->getID()].size());
             //cout<<"read the data:: my Id = " << m_partyId-1<< "other ID = "<< parties[i]->getID()<<endl;
-
-
 
             //send shares to my input bits
             parties[i]->getChannel()->write(sendBufs[parties[i]->getID()].data(), sendBufs[parties[i]->getID()].size());
             //cout<<"write the data:: my Id = " << m_partyId-1<< "other ID = "<< parties[i]->getID() <<endl;
 
-
         }
-
     }
-
 }
 
 
 template <class FieldType>
 ProtocolParty<FieldType>::~ProtocolParty()
 {
-    protocolTimer->writeToFile();
-    delete protocolTimer;
     delete field;
-
     delete timer;
     //delete comm;
 }

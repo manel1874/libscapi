@@ -43,8 +43,8 @@
 #ifdef _WIN32
     #include "../../include/interactive_mid_protocols/OTSemiHonestExtension.hpp"
 #else
-    #include "../../include/interactive_mid_protocols/OTExtensionBristol.hpp"
-//    #include "../../include/interactive_mid_protocols/OTExtensionLibote.hpp"
+//    #include "../../include/interactive_mid_protocols/OTExtensionBristol.hpp"
+    #include "../../include/interactive_mid_protocols/OTExtensionLibote.hpp"
 #endif
 //#endif
 #include "../../include/cryptoInfra/Protocol.hpp"
