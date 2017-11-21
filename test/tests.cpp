@@ -49,6 +49,7 @@
 #include "../include/mid_layer/DamgardJurikEnc.hpp"
 #include "../include/interactive_mid_protocols/SigmaProtocol.hpp"
 #include <ctype.h>
+#include <smmintrin.h>
 
 biginteger endcode_decode(biginteger bi) {
 	auto s = bi.str();
