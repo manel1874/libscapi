@@ -93,11 +93,11 @@ PartyOne::PartyOne(int argc, char* argv[]) : Protocol("SemiHonestYao", argc, arg
 #ifdef _WIN32
 	otSender = new OTSemiHonestExtensionSender(senderParty, 163, 1);
 #else
-//#ifdef NO_AESNI
-//    otSender = new OTExtensionLiboteSender(sender_ip, senderParty.getPort(), channel.get());
-//#else
+#ifdef NO_AESNI
+    otSender = new OTExtensionLiboteSender(sender_ip, senderParty.getPort(), true, false, channel.get());
+#else
     otSender = new OTExtensionBristolSender(senderParty.getPort(), true, channel);
-//#endif
+#endif
 
 #endif
 
@@ -136,13 +136,13 @@ void PartyOne::run() {
 }
 
 void PartyOne::runOnline() {
-	timer->startSubTask();
+	timer->startSubTask(0, currentIteration);
 	values = circuit->garble();
 	timer->endSubTask(0, currentIteration);
 	// send garbled tables and the translation table to p2.
 	auto garbledTables = circuit->getGarbledTables();
 
-	timer->startSubTask();
+	timer->startSubTask(1, currentIteration);
 	channel->write((byte *) garbledTables, circuit->getGarbledTableSize());
 	channel->write(circuit->getTranslationTable().data(), circuit->getNumberOfOutputs());
 	// send p1 input keys to p2.
@@ -150,7 +150,7 @@ void PartyOne::runOnline() {
 	timer->endSubTask(1, currentIteration);
 
 	// run OT protocol in order to send p2 the necessary keys without revealing any information.
-	timer->startSubTask();
+	timer->startSubTask(2, currentIteration);
 	runOTProtocol();
 	timer->endSubTask(2, currentIteration);
 }
@@ -225,11 +225,11 @@ PartyTwo::PartyTwo(int argc, char* argv[]) : Protocol("SemiHonestYao", argc, arg
 #ifdef _WIN32
 	otReceiver = new OTSemiHonestExtensionReceiver(senderParty, 163, 1);
 #else
-//#ifdef NO_AESNI
-//    otReceiver = new OTExtensionLiboteReceiver(sender_ip, sender_port, channel.get());
-//#else
+#ifdef NO_AESNI
+    otReceiver = new OTExtensionLiboteReceiver(sender_ip, sender_port, true, false, channel.get());
+#else
     otReceiver = new OTExtensionBristolReceiver(senderParty.getIpAddress().to_string(), senderParty.getPort(), true, channel);
-//#endif
+#endif
 
 #endif
 
@@ -275,18 +275,18 @@ void PartyTwo::run() {
 
 void PartyTwo::runOnline() {
 	// receive tables and inputs
-	timer->startSubTask();
+	timer->startSubTask(0, currentIteration);
 	receiveCircuit();
 	receiveP1Inputs();
 	timer->endSubTask(0, currentIteration);
 
-	timer->startSubTask();
+	timer->startSubTask(1, currentIteration);
 	// run OT protocol in order to get the necessary keys without revealing any information.
 	auto output = runOTProtocol(ungarbledInput.data(), ungarbledInput.size());
 	timer->endSubTask(1, currentIteration);
 
 	// Compute the circuit.
-	timer->startSubTask();
+	timer->startSubTask(2, currentIteration);
 	computeCircuit(output.get());
 	timer->endSubTask(2, currentIteration);
 

@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
 project(scapi)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx -maes -msse4.1 -mpclmul -DRDTSC -DTEST=AES128  -O3 -mbmi2 -flto")
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx -maes -msse4.1 -mpclmul -DRDTSC -DTEST=AES128  -O3 -mbmi2")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mavx -maes -msse4.1 -mpclmul -O3")
 
 SET (BOOST_ROOT $ENV{HOME}/boost_1_64_0/)
@@ -15,7 +15,7 @@ SET(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> qcs <TARGET> <LINK_FLAGS> <OBJECTS>")
 SET(CMAKE_CXX_ARCHIVE_FINISH   true)
 
 INCLUDE_DIRECTORIES($ENV{HOME} ${BOOST_INCLUDEDIR} ${SCAPI_BASE_DIR}/lib ${SCAPI_BASE_DIR}/install/include
-        ${SCAPI_BASE_DIR}/lib/OTExtensionBristol )
+        ${SCAPI_BASE_DIR}/lib/OTExtensionBristol $ENV{HOME}/libOTe $ENV{HOME}/libOTe/cryptoTools)
 link_directories(/usr/ssl/lib/ $ENV{HOME}/libscapi/install/lib ${BOOST_LIBRARYDIR})
 
 
@@ -52,6 +52,7 @@ set(SOURCE_FILES
         src/interactive_mid_protocols/CommitmentSchemeSimpleHash.cpp
         src/interactive_mid_protocols/OT.cpp
         src/interactive_mid_protocols/OTExtensionBristol.cpp
+        src/interactive_mid_protocols/OTExtensionLibote.cpp
         src/interactive_mid_protocols/OTExtensionMalicious.cpp
         src/interactive_mid_protocols/OTFullSimulation.cpp
         src/interactive_mid_protocols/OTFullSimulationROM.cpp

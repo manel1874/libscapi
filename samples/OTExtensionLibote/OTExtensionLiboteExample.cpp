@@ -114,7 +114,7 @@ int mainLibote(string partyNum) {
 
 
 		cout<<"nOTS: "<< nOTs<<endl;
-		OTExtensionLiboteSender sender("127.0.0.1", 8000, channel.get());
+		OTExtensionLiboteSender sender("127.0.0.1", 8000, false, false, channel.get());
 
 		vector<byte> x0Arr;
 		x0Arr.resize(nOTs * elementSize/8);
@@ -169,7 +169,7 @@ int mainLibote(string partyNum) {
 		// connect to party one
 		channel->join(500, 5000);
 
-		OTExtensionLiboteReceiver receiver("127.0.0.1", 8000, channel.get());
+		OTExtensionLiboteReceiver receiver("127.0.0.1", 8000, false, false, channel.get());
 
 		vector<byte> sigma;
 		sigma.resize(nOTs);

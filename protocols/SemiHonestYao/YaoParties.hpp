@@ -36,17 +36,18 @@
 
 #ifdef NO_AESNI
     #include "../../include/circuits/GarbledBooleanCircuitNoIntrinsics.h"
+    #include "../../include/interactive_mid_protocols/OTExtensionLibote.hpp"
 
 #else
     #include "../../include/circuits/GarbledBooleanCircuit.h"
+
+    #ifdef _WIN32
+        #include "../../include/interactive_mid_protocols/OTSemiHonestExtension.hpp"
+    #else
+         #include "../../include/interactive_mid_protocols/OTExtensionBristol.hpp"
+    #endif
+
 #endif
-#ifdef _WIN32
-    #include "../../include/interactive_mid_protocols/OTSemiHonestExtension.hpp"
-#else
-    #include "../../include/interactive_mid_protocols/OTExtensionBristol.hpp"
-//    #include "../../include/interactive_mid_protocols/OTExtensionLibote.hpp"
-#endif
-//#endif
 #include "../../include/cryptoInfra/Protocol.hpp"
 #include "../../include/cryptoInfra/SecurityLevel.hpp"
 #include "../../include/circuits/GarbledCircuitFactory.hpp"

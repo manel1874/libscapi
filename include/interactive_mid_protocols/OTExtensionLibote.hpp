@@ -12,6 +12,8 @@
 #include <libOTe/cryptoTools/cryptoTools/Network/Endpoint.h>
 #include <libOTe/libOTe/TwoChooseOne/IknpOtExtReceiver.h>
 #include <libOTe/libOTe/TwoChooseOne/IknpOtExtSender.h>
+#include <libOTe/libOTe/TwoChooseOne/KosOtExtReceiver.h>
+#include <libOTe/libOTe/TwoChooseOne/KosOtExtSender.h>
 #include <libOTe/libOTe/Base/naor-pinkas.h>
 
 using namespace osuCrypto;
@@ -21,15 +23,20 @@ class OTExtensionLiboteSender : public OTBatchSender {
 private:
     osuCrypto::IOService ios_ot;             //used in LibOTe communication
     PrgFromOpenSSLAES prg;
-    IknpOtExtSender sender;
+    OtExtSender* sender;
     CommParty* channel;              //this is a shared pointer for the general case where there is one communication between the
 								                //sender and the receiver after the libOTe ot extension is done in providing random x0 and x1 for the sender.
     //ot channel
     osuCrypto::Endpoint* ep;
     osuCrypto::Channel otChannel;
+
+    //Base ot will fill that in the constructor.
+    //We save that since the specific sender will be created at the transfer
+    vector<block> baseRecv;
+    osuCrypto::BitVector baseChoice;
 public:
 
-    OTExtensionLiboteSender(string address, int port, CommParty* channel);
+    OTExtensionLiboteSender(string address, int port, bool isSemiHonest, bool isCorrelated, CommParty* channel);
     ~OTExtensionLiboteSender();
 
     shared_ptr<OTBatchSOutput> transfer(OTBatchSInput * input);
@@ -48,10 +55,10 @@ private:
 
     PrgFromOpenSSLAES prg;
 
-    IknpOtExtReceiver receiver;
+    OtExtReceiver* receiver;
 public:
 
-    OTExtensionLiboteReceiver(string address, int port, CommParty* channel);
+    OTExtensionLiboteReceiver(string address, int port, bool isSemiHonest, bool isCorrelated, CommParty* channel);
     ~OTExtensionLiboteReceiver();
 
     shared_ptr<OTBatchROutput> transfer(OTBatchRInput * input);

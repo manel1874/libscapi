@@ -4,7 +4,7 @@
 
 #include "../../include/interactive_mid_protocols/OTExtensionLibote.hpp"
 
-OTExtensionLiboteSender::OTExtensionLiboteSender(string address, int port, CommParty* channel): channel(channel){
+OTExtensionLiboteSender::OTExtensionLiboteSender(string address, int port, bool isSemiHonest, bool isCorrelated, CommParty* channel): channel(channel){
 
     //connect ot channel
     ep = new osuCrypto::Endpoint(ios_ot, address, port, osuCrypto::EpMode::Server, "ep");
@@ -22,7 +22,20 @@ OTExtensionLiboteSender::OTExtensionLiboteSender(string address, int port, CommP
     osuCrypto::NaorPinkas base;
     base.receive(baseChoice, baseRecv,prng, otChannel, 2);
 
-    sender.setBaseOts(baseRecv, baseChoice);
+    if (isSemiHonest){
+        if (isCorrelated){
+            sender = new IknpDotOtExtSender();
+        } else {
+            sender = new IknpOtExtSender();
+        }
+    } else {
+        if (isCorrelated){
+            sender = new KosOtExtSender();
+        } else {
+            sender = new KosDotOtExtSender();
+        }
+    }
+    sender->setBaseOts(baseRecv, baseChoice);
 
 }
 
@@ -32,6 +45,8 @@ OTExtensionLiboteSender::~OTExtensionLiboteSender(){
     ep->stop();
     ios_ot.stop();
     delete ep;
+
+    delete sender;
 }
 
 void expandOutput(int elementSize, byte * key, vector<byte> & output, int factor, const byte *counters,
@@ -96,7 +111,7 @@ shared_ptr<OTBatchSOutput> OTExtensionLiboteSender::transfer(OTBatchSInput * inp
         vector<array<block, 2>> q(nOTsReal);
 //        start = scapi_now();
 
-        sender.send(q, prng, otChannel);
+        sender->send(q, prng, otChannel);
 
 //        print_elapsed_ms(start, "send");
 //        for (int i = 0; i < nOTsReal; i++) {
@@ -211,7 +226,7 @@ shared_ptr<OTBatchSOutput> OTExtensionLiboteSender::transfer(OTBatchSInput * inp
 	}
 }
 
-OTExtensionLiboteReceiver::OTExtensionLiboteReceiver(string address, int port, CommParty* channel): channel(channel) {
+OTExtensionLiboteReceiver::OTExtensionLiboteReceiver(string address, int port, bool isSemiHonest, bool isCorrelated, CommParty* channel): channel(channel) {
 
     //connect ot channel
     ep = new osuCrypto::Endpoint(ios_ot, address, port, osuCrypto::EpMode::Client, "ep");
@@ -226,7 +241,20 @@ OTExtensionLiboteReceiver::OTExtensionLiboteReceiver(string address, int port, C
     osuCrypto::NaorPinkas base;
     base.send(baseSend, prng, otChannel, 2);
 
-    receiver.setBaseOts(baseSend);
+    if (isSemiHonest){
+        if (isCorrelated){
+            receiver = new IknpDotOtExtReceiver();
+        } else {
+            receiver = new IknpOtExtReceiver();
+        }
+    } else {
+        if (isCorrelated){
+            receiver = new KosDotOtExtReceiver();
+        } else {
+            receiver = new KosOtExtReceiver();
+        }
+    }
+    receiver->setBaseOts(baseSend);
 }
 
 OTExtensionLiboteReceiver::~OTExtensionLiboteReceiver(){
@@ -235,6 +263,8 @@ OTExtensionLiboteReceiver::~OTExtensionLiboteReceiver(){
     ep->stop();
     ios_ot.stop();
     delete ep;
+
+    delete receiver;
 
 }
 
@@ -257,7 +287,7 @@ shared_ptr<OTBatchROutput> OTExtensionLiboteReceiver::transfer(OTBatchRInput * i
             sigma[i] = sigmaArr[i];
         }
 
-        receiver.receive(sigma, t, prng, otChannel);
+        receiver->receive(sigma, t, prng, otChannel);
 
 //        for (int i = 0; i < nOTsReal; i++) {
 //            cout << "ot no. " << i << ":" << endl;
