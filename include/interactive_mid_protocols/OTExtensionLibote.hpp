@@ -14,6 +14,10 @@
 #include <libOTe/libOTe/TwoChooseOne/IknpOtExtSender.h>
 #include <libOTe/libOTe/TwoChooseOne/KosOtExtReceiver.h>
 #include <libOTe/libOTe/TwoChooseOne/KosOtExtSender.h>
+#include <libOTe/libOTe/TwoChooseOne/IknpDotExtReceiver.h>
+#include <libOTe/libOTe/TwoChooseOne/IknpDotExtSender.h>
+#include <libOTe/libOTe/TwoChooseOne/KosDotExtReceiver.h>
+#include <libOTe/libOTe/TwoChooseOne/KosDotExtSender.h>
 #include <libOTe/libOTe/Base/naor-pinkas.h>
 
 using namespace osuCrypto;

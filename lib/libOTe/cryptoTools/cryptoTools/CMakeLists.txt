@@ -125,7 +125,7 @@ set(Boost_USE_STATIC_RUNTIME     ON)
 #include_directories(${Boost_INCLUDE_DIR}) 
 
 target_include_directories(cryptoTools PUBLIC ${Boost_INCLUDE_DIR}) 
-target_link_libraries(cryptoTools libboost_system.a libboost_thread.a)
+target_link_libraries(cryptoTools libboost_system.a libboost_thread.a libssl.a libcrypto.a dl z)
 
 
 IF(INSTALL_BOOST)

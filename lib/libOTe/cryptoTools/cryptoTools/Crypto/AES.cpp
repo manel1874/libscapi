@@ -6,14 +6,14 @@ namespace osuCrypto {
     const AES mAesFixedKey(_mm_set_epi8(36, -100, 50, -22, 92, -26, 49, 9, -82, -86, -51, -96, 98, -20, 29, -13));
 
 
-    block keyGenHelper(block key, block keyRcon)
+    /*block keyGenHelper(block key, block keyRcon)
     {
         keyRcon = _mm_shuffle_epi32(keyRcon, _MM_SHUFFLE(3, 3, 3, 3));
         key = _mm_xor_si128(key, _mm_slli_si128(key, 4));
         key = _mm_xor_si128(key, _mm_slli_si128(key, 4));
         key = _mm_xor_si128(key, _mm_slli_si128(key, 4));
         return _mm_xor_si128(key, keyRcon);
-    }
+    }*/
 
     AES::AES(const block & userKey)
     {
@@ -22,32 +22,43 @@ namespace osuCrypto {
 
     void AES::setKey(const block & userKey)
     {
-        mRoundKey[0] = userKey;
-        mRoundKey[1] = keyGenHelper(mRoundKey[0], _mm_aeskeygenassist_si128(mRoundKey[0], 0x01));
-        mRoundKey[2] = keyGenHelper(mRoundKey[1], _mm_aeskeygenassist_si128(mRoundKey[1], 0x02));
-        mRoundKey[3] = keyGenHelper(mRoundKey[2], _mm_aeskeygenassist_si128(mRoundKey[2], 0x04));
-        mRoundKey[4] = keyGenHelper(mRoundKey[3], _mm_aeskeygenassist_si128(mRoundKey[3], 0x08));
-        mRoundKey[5] = keyGenHelper(mRoundKey[4], _mm_aeskeygenassist_si128(mRoundKey[4], 0x10));
-        mRoundKey[6] = keyGenHelper(mRoundKey[5], _mm_aeskeygenassist_si128(mRoundKey[5], 0x20));
-        mRoundKey[7] = keyGenHelper(mRoundKey[6], _mm_aeskeygenassist_si128(mRoundKey[6], 0x40));
-        mRoundKey[8] = keyGenHelper(mRoundKey[7], _mm_aeskeygenassist_si128(mRoundKey[7], 0x80));
-        mRoundKey[9] = keyGenHelper(mRoundKey[8], _mm_aeskeygenassist_si128(mRoundKey[8], 0x1B));
-        mRoundKey[10] = keyGenHelper(mRoundKey[9], _mm_aeskeygenassist_si128(mRoundKey[9], 0x36));
+        opensslAes = EVP_CIPHER_CTX_new();
+        const EVP_CIPHER* cipher = EVP_aes_128_ecb();
+        // Initialize the AES objects with the key.
+        EVP_EncryptInit(opensslAes, cipher, (byte*)&userKey, NULL);
+
+        // Set the AES objects with NO PADDING.
+        EVP_CIPHER_CTX_set_padding(opensslAes, 0);
+
+//        mRoundKey[0] = userKey;
+//        mRoundKey[1] = keyGenHelper(mRoundKey[0], _mm_aeskeygenassist_si128(mRoundKey[0], 0x01));
+//        mRoundKey[2] = keyGenHelper(mRoundKey[1], _mm_aeskeygenassist_si128(mRoundKey[1], 0x02));
+//        mRoundKey[3] = keyGenHelper(mRoundKey[2], _mm_aeskeygenassist_si128(mRoundKey[2], 0x04));
+//        mRoundKey[4] = keyGenHelper(mRoundKey[3], _mm_aeskeygenassist_si128(mRoundKey[3], 0x08));
+//        mRoundKey[5] = keyGenHelper(mRoundKey[4], _mm_aeskeygenassist_si128(mRoundKey[4], 0x10));
+//        mRoundKey[6] = keyGenHelper(mRoundKey[5], _mm_aeskeygenassist_si128(mRoundKey[5], 0x20));
+//        mRoundKey[7] = keyGenHelper(mRoundKey[6], _mm_aeskeygenassist_si128(mRoundKey[6], 0x40));
+//        mRoundKey[8] = keyGenHelper(mRoundKey[7], _mm_aeskeygenassist_si128(mRoundKey[7], 0x80));
+//        mRoundKey[9] = keyGenHelper(mRoundKey[8], _mm_aeskeygenassist_si128(mRoundKey[8], 0x1B));
+//        mRoundKey[10] = keyGenHelper(mRoundKey[9], _mm_aeskeygenassist_si128(mRoundKey[9], 0x36));
     }
 
     void  AES::ecbEncBlock(const block & plaintext, block & cyphertext) const
     {
-        cyphertext = _mm_xor_si128(plaintext, mRoundKey[0]);
-        cyphertext = _mm_aesenc_si128(cyphertext, mRoundKey[1]);
-        cyphertext = _mm_aesenc_si128(cyphertext, mRoundKey[2]);
-        cyphertext = _mm_aesenc_si128(cyphertext, mRoundKey[3]);
-        cyphertext = _mm_aesenc_si128(cyphertext, mRoundKey[4]);
-        cyphertext = _mm_aesenc_si128(cyphertext, mRoundKey[5]);
-        cyphertext = _mm_aesenc_si128(cyphertext, mRoundKey[6]);
-        cyphertext = _mm_aesenc_si128(cyphertext, mRoundKey[7]);
-        cyphertext = _mm_aesenc_si128(cyphertext, mRoundKey[8]);
-        cyphertext = _mm_aesenc_si128(cyphertext, mRoundKey[9]);
-        cyphertext = _mm_aesenclast_si128(cyphertext, mRoundKey[10]);
+        int size;
+        // Compute aes on the given plaintext
+	    EVP_EncryptUpdate(opensslAes, (byte*)&cyphertext, &size, (byte*)&plaintext, 16);
+//        cyphertext = _mm_xor_si128(plaintext, mRoundKey[0]);
+//        cyphertext = _mm_aesenc_si128(cyphertext, mRoundKey[1]);
+//        cyphertext = _mm_aesenc_si128(cyphertext, mRoundKey[2]);
+//        cyphertext = _mm_aesenc_si128(cyphertext, mRoundKey[3]);
+//        cyphertext = _mm_aesenc_si128(cyphertext, mRoundKey[4]);
+//        cyphertext = _mm_aesenc_si128(cyphertext, mRoundKey[5]);
+//        cyphertext = _mm_aesenc_si128(cyphertext, mRoundKey[6]);
+//        cyphertext = _mm_aesenc_si128(cyphertext, mRoundKey[7]);
+//        cyphertext = _mm_aesenc_si128(cyphertext, mRoundKey[8]);
+//        cyphertext = _mm_aesenc_si128(cyphertext, mRoundKey[9]);
+//        cyphertext = _mm_aesenclast_si128(cyphertext, mRoundKey[10]);
     }
 
     block AES::ecbEncBlock(const block & plaintext) const
@@ -59,7 +70,10 @@ namespace osuCrypto {
 
     void AES::ecbEncBlocks(const block * plaintexts, u64 blockLength, block * cyphertext) const
     {
-        const u64 step = 8;
+        int size;
+        // Compute aes on the given plaintext
+	    EVP_EncryptUpdate(opensslAes, (byte*)&cyphertext, &size, (byte*)&plaintexts, 16*blockLength);
+        /*const u64 step = 8;
         u64 idx = 0;
         u64 length = blockLength - blockLength % step;
 
@@ -181,13 +195,16 @@ namespace osuCrypto {
             cyphertext[idx] = _mm_aesenc_si128(cyphertext[idx], mRoundKey[8]);
             cyphertext[idx] = _mm_aesenc_si128(cyphertext[idx], mRoundKey[9]);
             cyphertext[idx] = _mm_aesenclast_si128(cyphertext[idx], mRoundKey[10]);
-        }
+        }*/
     }
 
 
     void AES::ecbEncTwoBlocks(const block * plaintexts, block * cyphertext) const
     {
-        cyphertext[0] = _mm_xor_si128(plaintexts[0], mRoundKey[0]);
+        int size;
+        // Compute aes on the given plaintext
+	    EVP_EncryptUpdate(opensslAes, (byte*)&cyphertext, &size, (byte*)&plaintexts, 16*2);
+        /*cyphertext[0] = _mm_xor_si128(plaintexts[0], mRoundKey[0]);
         cyphertext[1] = _mm_xor_si128(plaintexts[1], mRoundKey[0]);
 
         cyphertext[0] = _mm_aesenc_si128(cyphertext[0], mRoundKey[1]);
@@ -219,11 +236,16 @@ namespace osuCrypto {
 
         cyphertext[0] = _mm_aesenclast_si128(cyphertext[0], mRoundKey[10]);
         cyphertext[1] = _mm_aesenclast_si128(cyphertext[1], mRoundKey[10]);
+         */
     }
 
     void AES::ecbEncFourBlocks(const block * plaintexts, block * cyphertext) const
     {
-        cyphertext[0] = _mm_xor_si128(plaintexts[0], mRoundKey[0]);
+        int size;
+        // Compute aes on the given plaintext
+	    EVP_EncryptUpdate(opensslAes, (byte*)&cyphertext, &size, (byte*)&plaintexts, 16*4);
+
+        /*cyphertext[0] = _mm_xor_si128(plaintexts[0], mRoundKey[0]);
         cyphertext[1] = _mm_xor_si128(plaintexts[1], mRoundKey[0]);
         cyphertext[2] = _mm_xor_si128(plaintexts[2], mRoundKey[0]);
         cyphertext[3] = _mm_xor_si128(plaintexts[3], mRoundKey[0]);
@@ -277,11 +299,16 @@ namespace osuCrypto {
         cyphertext[1] = _mm_aesenclast_si128(cyphertext[1], mRoundKey[10]);
         cyphertext[2] = _mm_aesenclast_si128(cyphertext[2], mRoundKey[10]);
         cyphertext[3] = _mm_aesenclast_si128(cyphertext[3], mRoundKey[10]);
+         */
     }
 
     void AES::ecbEnc16Blocks(const block * plaintexts, block * cyphertext) const
     {
-        cyphertext[0] = _mm_xor_si128(plaintexts[0], mRoundKey[0]);
+        int size;
+        // Compute aes on the given plaintext
+	    EVP_EncryptUpdate(opensslAes, (byte*)&cyphertext, &size, (byte*)&plaintexts, 16*16);
+
+        /*cyphertext[0] = _mm_xor_si128(plaintexts[0], mRoundKey[0]);
         cyphertext[1] = _mm_xor_si128(plaintexts[1], mRoundKey[0]);
         cyphertext[2] = _mm_xor_si128(plaintexts[2], mRoundKey[0]);
         cyphertext[3] = _mm_xor_si128(plaintexts[3], mRoundKey[0]);
@@ -467,12 +494,29 @@ namespace osuCrypto {
         cyphertext[13] = _mm_aesenclast_si128(cyphertext[13], mRoundKey[10]);
         cyphertext[14] = _mm_aesenclast_si128(cyphertext[14], mRoundKey[10]);
         cyphertext[15] = _mm_aesenclast_si128(cyphertext[15], mRoundKey[10]);
-
+        */
     }
 
     void AES::ecbEncCounterMode(u64 baseIdx, u64 blockLength, block * cyphertext)
     {
-        const u64 step = 8;
+
+        block* indexPlaintext = (block *)_mm_malloc(sizeof(block) * blockLength, 16);
+
+        //assin zero to the array of indices which are set as the plaintext. Note that we only use the list sagnificant long part of each 128 bit.
+        u64 *plaintextArray = (u64 *)indexPlaintext;
+
+        //go over the array and set the 64 list sagnificat bits for evey 128 bit value, we use only half of the 128 bit variables
+        for (u64 i = 0; i < blockLength; i++) {
+            plaintextArray[i * 2 + 1] = i;
+            plaintextArray[i * 2] = 0;
+        }
+
+        int size;
+        // Compute aes on the given plaintext
+	    EVP_EncryptUpdate(opensslAes, (byte*)&cyphertext, &size, (byte*)&indexPlaintext, 16*blockLength);
+
+
+        /*const u64 step = 8;
         u64 idx = 0;
         u64 length = blockLength - blockLength % step;
 
@@ -594,7 +638,7 @@ namespace osuCrypto {
             cyphertext[idx] = _mm_aesenc_si128(cyphertext[idx], mRoundKey[9]);
             cyphertext[idx] = _mm_aesenclast_si128(cyphertext[idx], mRoundKey[10]);
         }
-
+        */
     }
 
 
@@ -737,7 +781,15 @@ namespace osuCrypto {
 
     void AESDec::setKey(const block & userKey)
     {
-        const block& v0 = userKey;
+        opensslAesDec = EVP_CIPHER_CTX_new();
+        const EVP_CIPHER* cipher = EVP_aes_128_ecb();
+        // Initialize the AES objects with the key.
+        EVP_DecryptInit(opensslAesDec, cipher, (byte*)&userKey, NULL);
+
+        // Set the AES objects with NO PADDING.
+        EVP_CIPHER_CTX_set_padding(opensslAesDec, 0);
+
+        /*const block& v0 = userKey;
         const block  v1 = keyGenHelper(v0, _mm_aeskeygenassist_si128(v0, 0x01));
         const block  v2 = keyGenHelper(v1, _mm_aeskeygenassist_si128(v1, 0x02));
         const block  v3 = keyGenHelper(v2, _mm_aeskeygenassist_si128(v2, 0x04));
@@ -761,12 +813,17 @@ namespace osuCrypto {
         _mm_storeu_si128(mRoundKey + 8, _mm_aesimc_si128(v2));
         _mm_storeu_si128(mRoundKey + 9, _mm_aesimc_si128(v1));
         _mm_storeu_si128(mRoundKey + 10, v0);
-
+        */
     }
 
     void  AESDec::ecbDecBlock(const block & cyphertext, block & plaintext)
     {
-        plaintext = _mm_xor_si128(cyphertext, mRoundKey[0]);
+        int size;
+
+        //Invert the prp on the given input array, put the result in ret.
+        EVP_DecryptUpdate(opensslAesDec, (byte*)&cyphertext, &size, (byte*)&plaintext, 16);
+
+        /*plaintext = _mm_xor_si128(cyphertext, mRoundKey[0]);
         plaintext = _mm_aesdec_si128(plaintext, mRoundKey[1]);
         plaintext = _mm_aesdec_si128(plaintext, mRoundKey[2]);
         plaintext = _mm_aesdec_si128(plaintext, mRoundKey[3]);
@@ -777,7 +834,7 @@ namespace osuCrypto {
         plaintext = _mm_aesdec_si128(plaintext, mRoundKey[8]);
         plaintext = _mm_aesdec_si128(plaintext, mRoundKey[9]);
         plaintext = _mm_aesdeclast_si128(plaintext, mRoundKey[10]);
-
+        */
     }
 
     block AESDec::ecbDecBlock(const block & plaintext)

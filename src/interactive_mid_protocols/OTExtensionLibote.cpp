@@ -24,15 +24,15 @@ OTExtensionLiboteSender::OTExtensionLiboteSender(string address, int port, bool 
 
     if (isSemiHonest){
         if (isCorrelated){
-            sender = new IknpDotOtExtSender();
+            sender = new IknpDotExtSender();
         } else {
             sender = new IknpOtExtSender();
         }
     } else {
         if (isCorrelated){
-            sender = new KosOtExtSender();
+            sender = new KosDotExtSender();
         } else {
-            sender = new KosDotOtExtSender();
+            sender = new KosOtExtSender();
         }
     }
     sender->setBaseOts(baseRecv, baseChoice);
@@ -243,13 +243,13 @@ OTExtensionLiboteReceiver::OTExtensionLiboteReceiver(string address, int port, b
 
     if (isSemiHonest){
         if (isCorrelated){
-            receiver = new IknpDotOtExtReceiver();
+            receiver = new IknpDotExtReceiver();
         } else {
             receiver = new IknpOtExtReceiver();
         }
     } else {
         if (isCorrelated){
-            receiver = new KosDotOtExtReceiver();
+            receiver = new KosDotExtReceiver();
         } else {
             receiver = new KosOtExtReceiver();
         }

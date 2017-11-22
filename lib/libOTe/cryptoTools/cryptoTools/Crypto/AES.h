@@ -1,7 +1,10 @@
 #pragma once
 // This file and the associated implementation has been placed in the public domain, waiving all copyright. No restrictions are placed on its use.
 #include <cryptoTools/Common/Defines.h>
-#include <wmmintrin.h>
+#include <openssl/evp.h>
+
+typedef unsigned char byte;
+//#include <wmmintrin.h>
 
 namespace osuCrypto {
 
@@ -9,6 +12,8 @@ namespace osuCrypto {
 	// An AES-NI implemenation of AES encryption. 
     class AES
     {
+    private:
+        EVP_CIPHER_CTX* opensslAes;		//OpenSSL's object used to compute aes.
     public:
 
 		// Default constructor leave the class in an invalid state
@@ -116,12 +121,15 @@ namespace osuCrypto {
         }
     };
 
+
 	// An AES instance with a fixed and public key.
     extern const AES mAesFixedKey;
 
 	// A class to perform AES decryption.
     class AESDec
     {
+    private:
+        EVP_CIPHER_CTX* opensslAesDec;		//OpenSSL's object used to decrypt aes.
     public:
         AESDec();
         AESDec(const block& userKey);
