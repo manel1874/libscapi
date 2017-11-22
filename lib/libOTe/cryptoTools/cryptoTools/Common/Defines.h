@@ -24,7 +24,7 @@
 	#define CRYPTO_TOOLS_ALIGNED(__Declaration, __alignment) __declspec(align(__alignment)) __Declaration
 	#define OSU_CRYPTO_COMPILER_UNROLL_LOOP_HINT __pragma(loop( ivdep ))
 #else
-//	#pragma GCC diagnostic ignored "-Wignored-attributes"
+	#pragma GCC diagnostic ignored "-Wignored-attributes"
 	#define TODO(x)
 	#define CRYPTO_TOOLS_ALIGNED(__Declaration, __alignment) __Declaration __attribute__((aligned (16)))
 	#define OSU_CRYPTO_COMPILER_UNROLL_LOOP_HINT
