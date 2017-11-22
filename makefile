@@ -26,7 +26,8 @@ OBJ_FILES     := $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES))
 OBJ_FILES     += $(patsubst src/%.c,obj/%.o,$(C_FILES))
 OUT_DIR        = obj obj/mid_layer obj/circuits obj/comm obj/infra obj/interactive_mid_protocols obj/primitives obj/circuits_c obj/cryptoInfra
 INC            = -Iinstall/include -Iinstall/include/OTExtensionBristol -Iinstall/include/libOTe -Iinstall/include/libOTe/cryptoTools
-CPP_OPTIONS   := -std=c++14 $(INC)  -maes -mpclmul -mbmi2 -Wall -Wno-uninitialized -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable -Wno-unused-result -Wno-sign-compare -Wno-parentheses -O3
+GCC_STANDARD = c++14
+CPP_OPTIONS   := -std=$(GCC_STANDARD) $(INC)  -maes -mpclmul -mbmi2 -Wall -Wno-uninitialized -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable -Wno-unused-result -Wno-sign-compare -Wno-parentheses -O3
 $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
 LIBRARIES_DIR  = -Linstall/lib
 LD_FLAGS = 
@@ -35,7 +36,11 @@ SUMO = no
 
 all: libs libscapi tests
 	echo $(WITH_EMP)
+ifeq ($(GCC_STANDARD), c++11)
+    libs: compile-openssl compile-boost compile-json compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc compile-otextension-bristol
+else
 libs: compile-openssl compile-boost compile-json compile-libote compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc compile-otextension-bristol
+endif
 libscapi: directories $(SLib)
 directories: $(OUT_DIR)
 
@@ -137,7 +142,8 @@ compile-boost:
 	@mkdir -p $(builddir)/
 	echo "Compiling the boost library"
 	@cp -r lib/boost_1_64_0/ $(builddir)/boost_1_64_0
-	cd $(builddir)/boost_1_64_0/; bash -c "BOOST_BUILD_PATH='./' ./bootstrap.sh --with-libraries=thread,system && ./b2"; 
+	@cd $(builddir)/boost_1_64_0/; bash -c "BOOST_BUILD_PATH='./' ./bootstrap.sh --with-libraries=thread,system,log \
+	&& ./b2 -j4"; # compile boost faster with threads
 	@cp $(builddir)/boost_1_64_0/stage/lib/*.a $(CURDIR)/install/lib/
 	@cp -r $(builddir)/boost_1_64_0/boost/ $(CURDIR)/install/include/
 	@touch compile-boost
@@ -150,6 +156,7 @@ compile-json:
 	@cp $(builddir)/JsonCpp/src/lib_json/libjsoncpp.a $(CURDIR)/install/lib/
 	@touch compile-json
 
+# Support only in c++14
 compile-libote:compile-boost
 	@echo "Compiling libOTe library..."
 	@cp -r lib/libOTe $(builddir)/libOTe
@@ -158,8 +165,11 @@ compile-libote:compile-boost
 	@cmake $(builddir)/libOTe/CMakeLists.txt -DCMAKE_BUILD_TYPE=Release
 	@$(MAKE) -C $(builddir)/libOTe/
 	@cp $(builddir)/libOTe/lib/*.a $(CURDIR)/install/lib/
+	@cp $(builddir)/libOTe/cryptoTools/thirdparty/linux/miracl/miracl/source/libmiracl.a $(CURDIR)/install/lib/
+	@mv $(CURDIR)/install/lib/liblibOTe.a $(CURDIR)/install/lib/libOTe.a
 	@mkdir -p $(CURDIR)/install/include/libOTe
-	@cd $(builddir)/libOTe/ && find . -name "*.h" -type f |xargs -I {} cp --parents {} ../../install/include/libOTe
+	@cd $(builddir)/libOTe/ && find . -name "*.h" -type f |xargs -I {} cp --parents {} $(CURDIR)/install/include/libOTe
+	@cp -r $(builddir)/libOTe/cryptoTools/cryptoTools/gsl $(CURDIR)/install/include/libOTe/cryptoTools/cryptoTools
 	@touch compile-libote
 
 compile-ntl:

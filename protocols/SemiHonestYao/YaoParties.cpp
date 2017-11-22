@@ -82,7 +82,7 @@ PartyOne::PartyOne(int argc, char* argv[]) : Protocol("SemiHonestYao", argc, arg
 #ifdef NO_AESNI
     circuit = new GarbledBooleanCircuitNoIntrinsics(yao_config.circuit_file.c_str());
 #else
-    	circuit = GarbledCircuitFactory::createCircuit(yao_config.circuit_file,
+    circuit = GarbledCircuitFactory::createCircuit(yao_config.circuit_file,
 		                GarbledCircuitFactory::CircuitType::FIXED_KEY_FREE_XOR_HALF_GATES, false);
 #endif
 
@@ -93,12 +93,12 @@ PartyOne::PartyOne(int argc, char* argv[]) : Protocol("SemiHonestYao", argc, arg
 #ifdef _WIN32
 	otSender = new OTSemiHonestExtensionSender(senderParty, 163, 1);
 #else
-#ifdef NO_AESNI
-    otSender = new OTExtensionLiboteSender(sender_ip, senderParty.getPort(), true, false, channel.get());
-#else
-    otSender = new OTExtensionBristolSender(senderParty.getPort(), true, channel);
-#endif
 
+    #ifdef NO_AESNI
+        otSender = new OTExtensionLiboteSender(sender_ip, senderParty.getPort(), true, false, channel.get());
+    #else
+        otSender = new OTExtensionBristolSender(senderParty.getPort(), true, channel);
+    #endif
 #endif
 
 	// connect to party two
@@ -225,11 +225,12 @@ PartyTwo::PartyTwo(int argc, char* argv[]) : Protocol("SemiHonestYao", argc, arg
 #ifdef _WIN32
 	otReceiver = new OTSemiHonestExtensionReceiver(senderParty, 163, 1);
 #else
-#ifdef NO_AESNI
-    otReceiver = new OTExtensionLiboteReceiver(sender_ip, sender_port, true, false, channel.get());
-#else
-    otReceiver = new OTExtensionBristolReceiver(senderParty.getIpAddress().to_string(), senderParty.getPort(), true, channel);
-#endif
+
+    #ifdef NO_AESNI
+        otReceiver = new OTExtensionLiboteReceiver(sender_ip, sender_port, true, false, channel.get());
+    #else
+        otReceiver = new OTExtensionBristolReceiver(senderParty.getIpAddress().to_string(), senderParty.getPort(), true, channel);
+    #endif
 
 #endif
 

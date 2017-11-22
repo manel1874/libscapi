@@ -20,15 +20,20 @@ YaoSEParty::YaoSEParty(int argc, char* argv[]) : Protocol("YaoSingleExecution", 
     times = stoi(arguments["internalIterationsNumber"]);
     //open file
     ConfigFile config(arguments["partiesFile"]);
+    cout << "After parties file" << endl;
 
     string portString = "party_1_port";
     string ipString = "party_1_ip";
     int port;
     string ip;
 
+
     //get partys IPs and ports data
     port = stoi(config.Value("", portString));
+    cout << "After parties port" << endl;
     ip = config.Value("", ipString);
+    cout << "After parties ip" << endl;
+
 
     io = new NetIO(id==0 ? nullptr:ip.c_str(), port);
     cf = new CircuitFile("emp_format_circuit.txt");
@@ -65,7 +70,7 @@ void YaoSEParty::run() {
     timer->setTaskNames(subTaskNames);
     void * f = (void *)&compute;
     for (currentIteration = 0; currentIteration<times; currentIteration++) {
-        timer->startSubTask();
+        timer->startSubTask(0, currentIteration);
         if (id == 0) {
             mal->alice_run(f, input);
         } else {
@@ -80,7 +85,7 @@ void YaoSEParty::runOffline(){
     timer->setTaskNames(subTaskNames);
 
     void * f = (void *)&compute;
-    timer->startSubTask();
+    timer->startSubTask(0, currentIteration);
     if (id == 0) {
         mal->alice_offline(f);
 
@@ -103,7 +108,7 @@ void YaoSEParty::preOnline() {
 void YaoSEParty::runOnline(){
     void * f = (void *)&compute;
 
-    timer->startSubTask();
+    timer->startSubTask(1, currentIteration);
     if (id == 0) {
         mal->alice_online(f, input);
     } else {
