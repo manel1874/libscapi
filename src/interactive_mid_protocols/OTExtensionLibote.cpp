@@ -4,7 +4,7 @@
 
 #include "../../include/interactive_mid_protocols/OTExtensionLibote.hpp"
 
-OTExtensionLiboteSender::OTExtensionLiboteSender(string address, int port, bool isSemiHonest, bool isCorrelated, CommParty* channel): channel(channel){
+OTExtensionLiboteSender::OTExtensionLiboteSender(string address, int port, bool isSemiHonest, bool isCorrelated, CommParty* channel): channel(channel), isSemiHonest(isSemiHonest){
 
     //connect ot channel
     ep = new osuCrypto::Endpoint(ios_ot, address, port, osuCrypto::EpMode::Server, "ep");
@@ -14,6 +14,7 @@ OTExtensionLiboteSender::OTExtensionLiboteSender(string address, int port, bool 
     prg.setKey(key);
 
     osuCrypto::PRNG prng(prg.getRandom128());
+
     vector<block> baseRecv(128);
 
     auto sigma = prg.getRandom128();
@@ -106,7 +107,14 @@ shared_ptr<OTBatchSOutput> OTExtensionLiboteSender::transfer(OTBatchSInput * inp
         } else {
 
             nOTsReal = ((OTExtensionCorrelatedSInput *) input)->getNumOfOts();
-            elementSize = 8 * (((OTExtensionCorrelatedSInput *) input)->getDeltaArr().size() / nOTsReal);
+            elementSize = 8 * (((OTExtensionCorrelatedSInput *) input)->getDeltaArr().size());
+            block delta;
+            memcpy((byte*)&delta, (((OTExtensionCorrelatedSInput *) input)->getDeltaArr().data()), 16);
+            if (isSemiHonest) {
+                ((IknpDotExtSender*)sender)->setDelta(delta);
+            } else {
+                ((KosDotExtSender*)sender)->setDelta(delta);
+            }
         }
         vector<array<block, 2>> q(nOTsReal);
 //        start = scapi_now();
@@ -114,6 +122,7 @@ shared_ptr<OTBatchSOutput> OTExtensionLiboteSender::transfer(OTBatchSInput * inp
         sender->send(q, prng, otChannel);
 
 //        print_elapsed_ms(start, "send");
+//        cout<<"element size = "<<elementSize<<endl;
 //        for (int i = 0; i < nOTsReal; i++) {
 //            cout << "ot no. " << i << ":" << endl;
 //            for (int j = 0; j < 16; j++) {
@@ -288,15 +297,6 @@ shared_ptr<OTBatchROutput> OTExtensionLiboteReceiver::transfer(OTBatchRInput * i
         }
 
         receiver->receive(sigma, t, prng, otChannel);
-
-//        for (int i = 0; i < nOTsReal; i++) {
-//            cout << "ot no. " << i << ":" << endl;
-//
-//            for (int j = 0; j < 16; j++) {
-//                cout << (int) ((byte *) (&t[i]))[j] << " ";
-//            }
-//            cout << endl;
-//        }
 
         auto elementSize = (((OTExtensionRInput *) input)->getElementSize());
 

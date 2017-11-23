@@ -34,10 +34,7 @@ private:
     osuCrypto::Endpoint* ep;
     osuCrypto::Channel otChannel;
 
-    //Base ot will fill that in the constructor.
-    //We save that since the specific sender will be created at the transfer
-    vector<block> baseRecv;
-    osuCrypto::BitVector baseChoice;
+    bool isSemiHonest;
 public:
 
     OTExtensionLiboteSender(string address, int port, bool isSemiHonest, bool isCorrelated, CommParty* channel);

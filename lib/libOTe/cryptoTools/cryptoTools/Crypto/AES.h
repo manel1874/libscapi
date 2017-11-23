@@ -2,6 +2,9 @@
 // This file and the associated implementation has been placed in the public domain, waiving all copyright. No restrictions are placed on its use.
 #include <cryptoTools/Common/Defines.h>
 #include <openssl/evp.h>
+#include <iostream>
+
+using namespace std;
 
 typedef unsigned char byte;
 //#include <wmmintrin.h>
@@ -23,6 +26,13 @@ namespace osuCrypto {
 
 		// Constructor to initialize the class with the given key
         AES(const block& userKey);
+
+        ~AES(){
+            if(opensslAes != nullptr) {
+                EVP_CIPHER_CTX_cleanup(opensslAes);
+                delete opensslAes;
+            }
+        }
 
 		// Set the key to be used for encryption.
         void setKey(const block& userKey);
@@ -133,6 +143,14 @@ namespace osuCrypto {
     public:
         AESDec();
         AESDec(const block& userKey);
+
+        ~AESDec(){
+            if(opensslAesDec != nullptr) {
+                EVP_CIPHER_CTX_cleanup(opensslAesDec);
+                delete opensslAesDec;
+            }
+        }
+
         void setKey(const block& userKey);
         void ecbDecBlock(const block& cyphertext, block& plaintext);
         block ecbDecBlock(const block& cyphertext);
