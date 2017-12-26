@@ -142,7 +142,7 @@ compile-boost:
 	@mkdir -p $(builddir)/
 	echo "Compiling the boost library"
 	@cp -r lib/boost_1_64_0/ $(builddir)/boost_1_64_0
-	@cd $(builddir)/boost_1_64_0/; bash -c "BOOST_BUILD_PATH='./' ./bootstrap.sh --with-libraries=thread,system,log \
+	@cd $(builddir)/boost_1_64_0/; bash -c "BOOST_BUILD_PATH='./' ./bootstrap.sh --with-libraries=thread,system,log,serialization \
 	&& ./b2 -j4"; # compile boost faster with threads
 	@cp $(builddir)/boost_1_64_0/stage/lib/*.a $(CURDIR)/install/lib/
 	@cp -r $(builddir)/boost_1_64_0/boost/ $(CURDIR)/install/include/
