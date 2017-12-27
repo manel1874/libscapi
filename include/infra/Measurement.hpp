@@ -70,7 +70,12 @@ public:
 
         m_times[taskIdx][currentIterationNum] = ms - m_startTimes[taskIdx][currentIterationNum];
     }
-    void setTaskNames(vector<string> & names){m_names = names;}
+    void setTaskNames(vector<string> & names){
+        m_startTimes = vector<vector<long>>(names.size(), vector<long>(m_numberOfIterations));
+        m_times = vector<vector<long>>(names.size(), vector<long>(m_numberOfIterations)),
+        m_names = move(names);
+
+    }
     string getcwdStr()
     {
         char* buff;//automatically cleaned when it exits scope

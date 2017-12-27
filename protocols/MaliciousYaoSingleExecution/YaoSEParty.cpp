@@ -10,13 +10,13 @@ void compute(Bit * res, Bit * in, Bit * in2) {
     cf->compute((block*)res, (block*)in, (block*)in2);
 }
 
-YaoSEParty::YaoSEParty(int argc, char* argv[]) : Protocol("YaoSingleExecution", argc, argv){
+YaoSEParty::YaoSEParty(int argc, char* argv[]) : Protocol("MaliciousYaoSingleExecution", argc, argv){
 
     id = stoi(arguments["partyID"]);
     CircuitConverter::convertScapiToBristol(arguments["circuitFile"], "emp_format_circuit.txt", false);
 
     string inputFile = arguments["inputFile"];
-    timer = new Measurement("YaoSingleExecution", id, 2, times);
+    timer = new Measurement("MaliciousYaoSingleExecution", id, 2, times);
     times = stoi(arguments["internalIterationsNumber"]);
     //open file
     ConfigFile config(arguments["partiesFile"]);
