@@ -122,8 +122,9 @@ int main(int argc, char* argv[]) {
     int runs = stoi(parameters["internalIterationsNumber"]);
     int time = 0;
     chrono::high_resolution_clock::time_point start, end;
-
+cout<<"before run"<<endl;
     party.run();
+    cout<<"after run"<<endl;
     auto out = party.getOutput();
     if (out.size()  > 0) {
 

@@ -48,10 +48,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/moriya/libscapi/protocols/YaoSingleExecution
+CMAKE_SOURCE_DIR = /home/moriya/libscapi/protocols/MaliciousYaoSingleExecution
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/moriya/libscapi/protocols/YaoSingleExecution
+CMAKE_BINARY_DIR = /home/moriya/libscapi/protocols/MaliciousYaoSingleExecution
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -80,9 +80,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/moriya/libscapi/protocols/YaoSingleExecution/CMakeFiles /home/moriya/libscapi/protocols/YaoSingleExecution/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/moriya/libscapi/protocols/MaliciousYaoSingleExecution/CMakeFiles /home/moriya/libscapi/protocols/MaliciousYaoSingleExecution/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/moriya/libscapi/protocols/YaoSingleExecution/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/moriya/libscapi/protocols/MaliciousYaoSingleExecution/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -111,30 +111,17 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named yaoSingleExecution
+# Target rules for targets named MaliciousYaoSingleExecution
 
 # Build rule for target.
-yaoSingleExecution: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 yaoSingleExecution
-.PHONY : yaoSingleExecution
+MaliciousYaoSingleExecution: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 MaliciousYaoSingleExecution
+.PHONY : MaliciousYaoSingleExecution
 
 # fast build rule for target.
-yaoSingleExecution/fast:
-	$(MAKE) -f CMakeFiles/yaoSingleExecution.dir/build.make CMakeFiles/yaoSingleExecution.dir/build
-.PHONY : yaoSingleExecution/fast
-
-#=============================================================================
-# Target rules for targets named YaoSingleExecution
-
-# Build rule for target.
-YaoSingleExecution: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 YaoSingleExecution
-.PHONY : YaoSingleExecution
-
-# fast build rule for target.
-YaoSingleExecution/fast:
-	$(MAKE) -f CMakeFiles/YaoSingleExecution.dir/build.make CMakeFiles/YaoSingleExecution.dir/build
-.PHONY : YaoSingleExecution/fast
+MaliciousYaoSingleExecution/fast:
+	$(MAKE) -f CMakeFiles/MaliciousYaoSingleExecution.dir/build.make CMakeFiles/MaliciousYaoSingleExecution.dir/build
+.PHONY : MaliciousYaoSingleExecution/fast
 
 YaoSEParty.o: YaoSEParty.cpp.o
 
@@ -142,8 +129,7 @@ YaoSEParty.o: YaoSEParty.cpp.o
 
 # target to build an object file
 YaoSEParty.cpp.o:
-	$(MAKE) -f CMakeFiles/yaoSingleExecution.dir/build.make CMakeFiles/yaoSingleExecution.dir/YaoSEParty.cpp.o
-	$(MAKE) -f CMakeFiles/YaoSingleExecution.dir/build.make CMakeFiles/YaoSingleExecution.dir/YaoSEParty.cpp.o
+	$(MAKE) -f CMakeFiles/MaliciousYaoSingleExecution.dir/build.make CMakeFiles/MaliciousYaoSingleExecution.dir/YaoSEParty.cpp.o
 .PHONY : YaoSEParty.cpp.o
 
 YaoSEParty.i: YaoSEParty.cpp.i
@@ -152,8 +138,7 @@ YaoSEParty.i: YaoSEParty.cpp.i
 
 # target to preprocess a source file
 YaoSEParty.cpp.i:
-	$(MAKE) -f CMakeFiles/yaoSingleExecution.dir/build.make CMakeFiles/yaoSingleExecution.dir/YaoSEParty.cpp.i
-	$(MAKE) -f CMakeFiles/YaoSingleExecution.dir/build.make CMakeFiles/YaoSingleExecution.dir/YaoSEParty.cpp.i
+	$(MAKE) -f CMakeFiles/MaliciousYaoSingleExecution.dir/build.make CMakeFiles/MaliciousYaoSingleExecution.dir/YaoSEParty.cpp.i
 .PHONY : YaoSEParty.cpp.i
 
 YaoSEParty.s: YaoSEParty.cpp.s
@@ -162,8 +147,7 @@ YaoSEParty.s: YaoSEParty.cpp.s
 
 # target to generate assembly for a file
 YaoSEParty.cpp.s:
-	$(MAKE) -f CMakeFiles/yaoSingleExecution.dir/build.make CMakeFiles/yaoSingleExecution.dir/YaoSEParty.cpp.s
-	$(MAKE) -f CMakeFiles/YaoSingleExecution.dir/build.make CMakeFiles/YaoSingleExecution.dir/YaoSEParty.cpp.s
+	$(MAKE) -f CMakeFiles/MaliciousYaoSingleExecution.dir/build.make CMakeFiles/MaliciousYaoSingleExecution.dir/YaoSEParty.cpp.s
 .PHONY : YaoSEParty.cpp.s
 
 main.o: main.cpp.o
@@ -172,8 +156,7 @@ main.o: main.cpp.o
 
 # target to build an object file
 main.cpp.o:
-	$(MAKE) -f CMakeFiles/yaoSingleExecution.dir/build.make CMakeFiles/yaoSingleExecution.dir/main.cpp.o
-	$(MAKE) -f CMakeFiles/YaoSingleExecution.dir/build.make CMakeFiles/YaoSingleExecution.dir/main.cpp.o
+	$(MAKE) -f CMakeFiles/MaliciousYaoSingleExecution.dir/build.make CMakeFiles/MaliciousYaoSingleExecution.dir/main.cpp.o
 .PHONY : main.cpp.o
 
 main.i: main.cpp.i
@@ -182,8 +165,7 @@ main.i: main.cpp.i
 
 # target to preprocess a source file
 main.cpp.i:
-	$(MAKE) -f CMakeFiles/yaoSingleExecution.dir/build.make CMakeFiles/yaoSingleExecution.dir/main.cpp.i
-	$(MAKE) -f CMakeFiles/YaoSingleExecution.dir/build.make CMakeFiles/YaoSingleExecution.dir/main.cpp.i
+	$(MAKE) -f CMakeFiles/MaliciousYaoSingleExecution.dir/build.make CMakeFiles/MaliciousYaoSingleExecution.dir/main.cpp.i
 .PHONY : main.cpp.i
 
 main.s: main.cpp.s
@@ -192,8 +174,7 @@ main.s: main.cpp.s
 
 # target to generate assembly for a file
 main.cpp.s:
-	$(MAKE) -f CMakeFiles/yaoSingleExecution.dir/build.make CMakeFiles/yaoSingleExecution.dir/main.cpp.s
-	$(MAKE) -f CMakeFiles/YaoSingleExecution.dir/build.make CMakeFiles/YaoSingleExecution.dir/main.cpp.s
+	$(MAKE) -f CMakeFiles/MaliciousYaoSingleExecution.dir/build.make CMakeFiles/MaliciousYaoSingleExecution.dir/main.cpp.s
 .PHONY : main.cpp.s
 
 # Help Target
@@ -203,9 +184,8 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
-	@echo "... yaoSingleExecution"
 	@echo "... rebuild_cache"
-	@echo "... YaoSingleExecution"
+	@echo "... MaliciousYaoSingleExecution"
 	@echo "... YaoSEParty.o"
 	@echo "... YaoSEParty.i"
 	@echo "... YaoSEParty.s"
