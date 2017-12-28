@@ -7,7 +7,7 @@
 using namespace std;
 
 typedef unsigned char byte;
-//#include <wmmintrin.h>
+#include <wmmintrin.h>
 
 namespace osuCrypto {
 
