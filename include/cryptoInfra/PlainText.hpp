@@ -225,7 +225,8 @@ public:
 		//Since BigIntegerCiphertext is both an AsymmetricCiphertext and a AsymmetricCiphertextSendableData, on the one hand it has to implement
 		//the generateSendableData() function, but on the other hand it is in itself an AsymmetricCiphertextSendableData, so we do not really
 		//generate sendable data, but just return this object.
-		return shared_ptr<AsymmetricCiphertextSendableData>(this);
+        //In order to avoid double deletion, we tell the pointer to use empty destructor.
+		return shared_ptr<AsymmetricCiphertextSendableData>(this, [](void*){});
 	}
 
 	bool operator==(const AsymmetricCiphertext &other) const {
