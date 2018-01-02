@@ -45,8 +45,12 @@ Measurement::Measurement(string protocolName, int partyId, int numOfParties, int
 
 
 Measurement::Measurement(string protocolName, int partyId, int numOfParties, int numOfIteration, vector<string> names)
-        :m_startTimes(names.size(), vector<long>(numOfIteration)),
-         m_times(names.size(), vector<long>(numOfIteration)),
+        :m_cpuStartTimes(names.size(), vector<long>(numOfIteration)),
+         m_cpuEndTimes(names.size(), vector<long>(numOfIteration)),
+         m_commSentStartTimes(names.size(), vector<unsigned long int>(numOfIteration)),
+         m_commReceivedStartTimes(names.size(), vector<unsigned long int>(numOfIteration)),
+         m_commSentEndTimes(names.size(), vector<unsigned long int>(numOfIteration)),
+         m_commReceivedEndTimes(names.size(), vector<unsigned long int>(numOfIteration)),
          m_names{move(names)}
 {
     m_protocolName = protocolName;
@@ -56,11 +60,64 @@ Measurement::Measurement(string protocolName, int partyId, int numOfParties, int
 
 }
 
+void Measurement::startSubTask(int taskIdx, int currentIterationNum)
+{
+    //calculate cpu start time
+    auto now = system_clock::now();
+    //Cast the time point to ms, then get its duration, then get the duration's count.
+    auto ms = time_point_cast<milliseconds>(now).time_since_epoch().count();
+    m_cpuStartTimes[taskIdx][currentIterationNum] = ms;
+    tuple<unsigned long int, unsigned long int> startData = commData();
+    m_commSentStartTimes[taskIdx][currentIterationNum] = get<0>(startData);
+    m_commReceivedStartTimes[taskIdx][currentIterationNum] = get<1>(startData);
+    cout << "Tupple data : {0} = " << get<0>(startData) << " {1} = " << get<1>(startData) << endl;
+}
 
-Measurement::~Measurement()
+void Measurement::endSubTask(int taskIdx, int currentIterationNum)
+{
+    auto now = system_clock::now();
+    //Cast the time point to ms, then get its duration, then get the duration's count.
+    auto ms = time_point_cast<milliseconds>(now).time_since_epoch().count();
+
+    m_cpuEndTimes[taskIdx][currentIterationNum] = ms - m_cpuStartTimes[taskIdx][currentIterationNum];
+
+    tuple<unsigned long int, unsigned long int> endData = commData();
+    m_commSentStartTimes[taskIdx][currentIterationNum] = get<0>(endData) -
+            m_commSentStartTimes[taskIdx][currentIterationNum];
+    m_commReceivedStartTimes[taskIdx][currentIterationNum] = get<1>(endData) -
+            m_commReceivedStartTimes[taskIdx][currentIterationNum];
+
+    cout << "Tupple data : {0} = " << get<0>(endData) << " {1} = " << get<1>(endData) << endl;
+}
+
+tuple<unsigned long int, unsigned long int> Measurement::commData()
+{
+    FILE *fp = fopen("/proc/net/dev", "r");
+    char buf[200], ifname[20];
+    unsigned long int r_bytes, t_bytes, r_packets, t_packets;
+
+    // skip first two lines
+    for (int i = 0; i < 3; i++) {
+        fgets(buf, 200, fp);
+    }
+
+    while (fgets(buf, 200, fp)) {
+        sscanf(buf, "%[^:]: %lu %lu %*lu %*lu %*lu %*lu %*lu %*lu %lu %lu",
+               ifname, &r_bytes, &r_packets, &t_bytes, &t_packets);
+//        printf("%s: rbytes: %lu rpackets: %lu tbytes: %lu tpackets: %lu\n",
+//               ifname, r_bytes, r_packets, t_bytes, t_packets);
+        break;
+    }
+
+    fclose(fp);
+    cout << "data from function {0} = " << r_bytes << " {1} = " << t_bytes << endl;
+    return make_tuple(r_bytes, t_bytes);
+}
+
+void Measurement::analyzeCpuData()
 {
     string filePath = getcwdStr();
-    string fileName = filePath + "/" + m_protocolName + "_partyId=" + to_string(m_partyId)
+    string fileName = filePath + "/" + m_protocolName + "_cpu_partyId=" + to_string(m_partyId)
                       +"_numOfParties=" + to_string(m_numOfParties) + ".json";
 
     //party is the root of the json objects
@@ -75,13 +132,71 @@ Measurement::~Measurement()
         for (int iterationIdx = 0; iterationIdx < m_numberOfIterations; iterationIdx++)
         {
             Value taskTimes;
-            task["iteration_" + to_string(iterationIdx)] = m_times[taskNameIdx][iterationIdx];
+            task["iteration_" + to_string(iterationIdx)] = m_cpuEndTimes[taskNameIdx][iterationIdx];
         }
         party.append(task);
     }
 
+    //send json object to create file
+    createJsonFile(party, fileName);
+}
 
-    //Convert JSON object to string
+void Measurement::analyzeCommSentData()
+{
+    string filePath = getcwdStr();
+    string fileName = filePath + "/" + m_protocolName + "_comm_partyId=" + to_string(m_partyId)
+                      +"_numOfParties=" + to_string(m_numOfParties) + ".json";
+
+    //party is the root of the json objects
+    Value partySent(arrayValue);
+
+    for (int taskNameIdx = 0; taskNameIdx < m_names.size(); taskNameIdx++)
+    {
+        //Write for each task name all the iteration
+        Value task(objectValue);
+        task["name"] = m_names[taskNameIdx];
+
+        for (int iterationIdx = 0; iterationIdx < m_numberOfIterations; iterationIdx++)
+        {
+            Value taskTimes;
+            task["iteration_" + to_string(iterationIdx)] = m_commSentEndTimes[taskNameIdx][iterationIdx];
+        }
+        partySent.append(task);
+    }
+
+    //send json object to create file
+    createJsonFile(partySent, fileName);
+}
+
+void Measurement::analyzeCommReceivedData()
+{
+    string filePath = getcwdStr();
+    string fileName = filePath + "/" + m_protocolName + "_comm_partyId=" + to_string(m_partyId)
+                      +"_numOfParties=" + to_string(m_numOfParties) + ".json";
+
+    //party is the root of the json objects
+    Value partyReceived(arrayValue);
+
+    for (int taskNameIdx = 0; taskNameIdx < m_names.size(); taskNameIdx++)
+    {
+        //Write for each task name all the iteration
+        Value task(objectValue);
+        task["name"] = m_names[taskNameIdx];
+
+        for (int iterationIdx = 0; iterationIdx < m_numberOfIterations; iterationIdx++)
+        {
+            Value taskTimes;
+            task["iteration_" + to_string(iterationIdx)] = m_commReceivedEndTimes[taskNameIdx][iterationIdx];
+        }
+        partyReceived.append(task);
+    }
+
+    //send json object to create file
+    createJsonFile(partyReceived, fileName);
+}
+
+void Measurement::createJsonFile(Value v, string fileName)
+{
     StreamWriterBuilder builder;
     unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
     try
@@ -90,7 +205,7 @@ Measurement::~Measurement()
         myfile.open(fileName, fstream::out);
         if (myfile.is_open())
         {
-            writer->write(party, &myfile);
+            writer->write(v, &myfile);
         }
     }
 
@@ -98,5 +213,13 @@ Measurement::~Measurement()
     {
         cout << "Exception thrown : " << e.what() << endl;
     }
+}
+
+
+Measurement::~Measurement()
+{
+    analyzeCpuData();
+    analyzeCommSentData();
+    analyzeCommReceivedData();
 }
 

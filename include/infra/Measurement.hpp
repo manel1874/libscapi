@@ -42,6 +42,7 @@
 #include <memory>
 #include <unistd.h>
 #include <stdio.h>
+#include <tuple>
 #include <../../lib/JsonCpp/include/json/json.h>
 
 using namespace std;
@@ -54,25 +55,20 @@ public:
     Measurement(string protocolName, int partyId, int numOfParties, int numOfIteration);
     Measurement(string protocolName, int partyId, int numOfParties, int numOfIteration, vector<string> names);
     ~Measurement();
-    void startSubTask(int taskIdx, int currentIterationNum)
-    {
-        auto now = system_clock::now();
-        //Cast the time point to ms, then get its duration, then get the duration's count.
-        auto ms = time_point_cast<milliseconds>(now).time_since_epoch().count();
+    void startSubTask(int taskIdx, int currentIterationNum);
+    void endSubTask(int taskIdx, int currentIterationNum);
 
-        m_startTimes[taskIdx][currentIterationNum] = ms;
-    }
-    void endSubTask(int taskIdx, int currentIterationNum)
-    {
-        auto now = system_clock::now();
-        //Cast the time point to ms, then get its duration, then get the duration's count.
-        auto ms = time_point_cast<milliseconds>(now).time_since_epoch().count();
-
-        m_times[taskIdx][currentIterationNum] = ms - m_startTimes[taskIdx][currentIterationNum];
-    }
     void setTaskNames(vector<string> & names){
-        m_startTimes = vector<vector<long>>(names.size(), vector<long>(m_numberOfIterations));
-        m_times = vector<vector<long>>(names.size(), vector<long>(m_numberOfIterations)),
+        m_cpuStartTimes = vector<vector<long>>(names.size(), vector<long>(m_numberOfIterations));
+        m_commSentStartTimes = vector<vector<unsigned long int>>(names.size(),
+                vector<unsigned long int>(m_numberOfIterations));
+        m_commReceivedStartTimes = vector<vector<unsigned long int>>(names.size(),
+                vector<unsigned long int>(m_numberOfIterations));
+        m_cpuEndTimes = vector<vector<long>>(names.size(), vector<long>(m_numberOfIterations));
+        m_commSentEndTimes = vector<vector<unsigned long int>>(names.size(),
+                vector<unsigned long int>(m_numberOfIterations));
+        m_commReceivedEndTimes = vector<vector<unsigned long int>>(names.size(),
+                vector<unsigned long int>(m_numberOfIterations));
         m_names = move(names);
 
     }
@@ -84,8 +80,17 @@ public:
 
 
 private:
-    vector<vector<long>> m_startTimes;
-    vector<vector<long>> m_times;
+    tuple<unsigned long int, unsigned long int> commData();
+    void analyzeCpuData(); //create JSON file with cpu times
+    void analyzeCommSentData(); // create JSON file with comm sent times
+    void analyzeCommReceivedData(); // create JSON file with comm received times
+    void createJsonFile(Value v, string fileName);
+    vector<vector<long>> m_cpuStartTimes;
+    vector<vector<unsigned long int>> m_commSentStartTimes;
+    vector<vector<unsigned long int>> m_commReceivedStartTimes;
+    vector<vector<long>> m_cpuEndTimes;
+    vector<vector<unsigned long int>> m_commSentEndTimes;
+    vector<vector<unsigned long int>> m_commReceivedEndTimes;
     vector<string> m_names;
     string m_protocolName;
     int m_partyId;
