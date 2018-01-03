@@ -95,12 +95,7 @@ tuple<unsigned long int, unsigned long int> Measurement::commData()
     FILE *fp = fopen("/proc/net/dev", "r");
     char buf[200], ifname[20];
     unsigned long int r_bytes, t_bytes, r_packets, t_packets;
-
-    // skip first two lines
-    for (int i = 0; i < 3; i++) {
-        fgets(buf, 200, fp);
-    }
-
+    
     while (fgets(buf, 200, fp)) {
         sscanf(buf, "%[^:]: %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu",
                ifname, &r_bytes, &r_packets, &t_bytes, &t_packets);
