@@ -46,9 +46,9 @@ Measurement::Measurement(string protocolName, int partyId, int numOfParties, int
 
 Measurement::Measurement(string protocolName, int partyId, int numOfParties, int numOfIteration, vector<string> names)
         :m_cpuStartTimes(names.size(), vector<long>(numOfIteration)),
-         m_cpuEndTimes(names.size(), vector<long>(numOfIteration)),
          m_commSentStartTimes(names.size(), vector<unsigned long int>(numOfIteration)),
          m_commReceivedStartTimes(names.size(), vector<unsigned long int>(numOfIteration)),
+         m_cpuEndTimes(names.size(), vector<long>(numOfIteration)),
          m_commSentEndTimes(names.size(), vector<unsigned long int>(numOfIteration)),
          m_commReceivedEndTimes(names.size(), vector<unsigned long int>(numOfIteration)),
          m_names{move(names)}
@@ -102,10 +102,8 @@ tuple<unsigned long int, unsigned long int> Measurement::commData()
     }
 
     while (fgets(buf, 200, fp)) {
-        sscanf(buf, "%[^:]: %lu %lu %*lu %*lu %*lu %*lu %*lu %*lu %lu %lu",
+        sscanf(buf, "%[^:]: %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu",
                ifname, &r_bytes, &r_packets, &t_bytes, &t_packets);
-//        printf("%s: rbytes: %lu rpackets: %lu tbytes: %lu tpackets: %lu\n",
-//               ifname, r_bytes, r_packets, t_bytes, t_packets);
         break;
     }
 
@@ -144,7 +142,7 @@ void Measurement::analyzeCpuData()
 void Measurement::analyzeCommSentData()
 {
     string filePath = getcwdStr();
-    string fileName = filePath + "/" + m_protocolName + "_comm_partyId=" + to_string(m_partyId)
+    string fileName = filePath + "/" + m_protocolName + "_commSent_partyId=" + to_string(m_partyId)
                       +"_numOfParties=" + to_string(m_numOfParties) + ".json";
 
     //party is the root of the json objects
@@ -171,7 +169,7 @@ void Measurement::analyzeCommSentData()
 void Measurement::analyzeCommReceivedData()
 {
     string filePath = getcwdStr();
-    string fileName = filePath + "/" + m_protocolName + "_comm_partyId=" + to_string(m_partyId)
+    string fileName = filePath + "/" + m_protocolName + "_commReceived_partyId=" + to_string(m_partyId)
                       +"_numOfParties=" + to_string(m_numOfParties) + ".json";
 
     //party is the root of the json objects
