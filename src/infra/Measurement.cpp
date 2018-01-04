@@ -83,7 +83,7 @@ void Measurement::startSubTask(int taskIdx, int currentIterationNum)
     //Cast the time point to ms, then get its duration, then get the duration's count.
     auto ms = time_point_cast<milliseconds>(now).time_since_epoch().count();
     m_cpuStartTimes[taskIdx][currentIterationNum] = ms;
-    tuple<unsigned long int, unsigned long int> startData = commData();
+    tuple<unsigned long int, unsigned long int> startData = commData("ens3");
     m_commSentStartTimes[taskIdx][currentIterationNum] = get<0>(startData);
     m_commReceivedStartTimes[taskIdx][currentIterationNum] = get<1>(startData);
     cout << "Tupple data : {0} = " << get<0>(startData) << " {1} = " << get<1>(startData) << endl;
@@ -100,7 +100,7 @@ void Measurement::endSubTask(int taskIdx, int currentIterationNum)
 
     m_cpuEndTimes[taskIdx][currentIterationNum] = ms - m_cpuStartTimes[taskIdx][currentIterationNum];
 
-    tuple<unsigned long int, unsigned long int> endData = commData();
+    tuple<unsigned long int, unsigned long int> endData = commData("ens3");
     m_commSentEndTimes[taskIdx][currentIterationNum] = get<0>(endData) -
             m_commSentStartTimes[taskIdx][currentIterationNum];
     m_commReceivedEndTimes[taskIdx][currentIterationNum] = get<1>(endData) -
