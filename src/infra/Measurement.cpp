@@ -147,9 +147,9 @@ tuple<unsigned long int, unsigned long int> Measurement::commData(const char * n
 	}
 	if(done)
 	{
-		cout << "data from function {0} = " << r_bytes << " {1} = " << t_bytes << endl;
+		cout << "data from function {0} = " << rbytes << " {1} = " << tbytes << endl;
 	}
-	return make_tuple(t_bytes, r_bytes);
+	return make_tuple(tbytes, rbytes);
 }
 
 void Measurement::analyzeCpuData()
