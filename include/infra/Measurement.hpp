@@ -43,6 +43,8 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <tuple>
+#include <sys/resource.h>
+#include <sys/time.h>
 #include <../../lib/JsonCpp/include/json/json.h>
 
 using namespace std;
@@ -57,21 +59,7 @@ public:
     ~Measurement();
     void startSubTask(int taskIdx, int currentIterationNum);
     void endSubTask(int taskIdx, int currentIterationNum);
-
-    void setTaskNames(vector<string> & names){
-        m_cpuStartTimes = vector<vector<long>>(names.size(), vector<long>(m_numberOfIterations));
-        m_commSentStartTimes = vector<vector<unsigned long int>>(names.size(),
-                vector<unsigned long int>(m_numberOfIterations));
-        m_commReceivedStartTimes = vector<vector<unsigned long int>>(names.size(),
-                vector<unsigned long int>(m_numberOfIterations));
-        m_cpuEndTimes = vector<vector<long>>(names.size(), vector<long>(m_numberOfIterations));
-        m_commSentEndTimes = vector<vector<unsigned long int>>(names.size(),
-                vector<unsigned long int>(m_numberOfIterations));
-        m_commReceivedEndTimes = vector<vector<unsigned long int>>(names.size(),
-                vector<unsigned long int>(m_numberOfIterations));
-        m_names = move(names);
-
-    }
+    void setTaskNames(vector<string> & names);
     string getcwdStr()
     {
         char* buff;//automatically cleaned when it exits scope
@@ -84,10 +72,12 @@ private:
     void analyzeCpuData(); //create JSON file with cpu times
     void analyzeCommSentData(); // create JSON file with comm sent times
     void analyzeCommReceivedData(); // create JSON file with comm received times
+    void analyzeMemory(); // create JSON file with memory usage
     void createJsonFile(Value v, string fileName);
     vector<vector<long>> m_cpuStartTimes;
     vector<vector<unsigned long int>> m_commSentStartTimes;
     vector<vector<unsigned long int>> m_commReceivedStartTimes;
+    vector<vector<long>> m_memoryUsage;
     vector<vector<long>> m_cpuEndTimes;
     vector<vector<unsigned long int>> m_commSentEndTimes;
     vector<vector<unsigned long int>> m_commReceivedEndTimes;
