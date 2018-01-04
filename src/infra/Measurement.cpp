@@ -107,26 +107,49 @@ void Measurement::endSubTask(int taskIdx, int currentIterationNum)
             m_commReceivedStartTimes[taskIdx][currentIterationNum];
 }
 
-tuple<unsigned long int, unsigned long int> Measurement::commData()
+tuple<unsigned long int, unsigned long int> Measurement::commData(const char * nic_)
 {
-    FILE *fp = fopen("/proc/net/dev", "r");
-    char buf[200], ifname[20];
-    unsigned long int r_bytes, t_bytes, r_packets, t_packets;
+	unsigned long rbytes = 0, tbytes = 0;
+	std::string nic = nic_;
+	FILE * pf = fopen("/proc/net/dev", "r");
+	bool done = false;
+	if(NULL != pf)
+	{
+		char sz[2048];
+		while(NULL != fgets(sz, 2048, pf))
+		{
+			std::string line = sz;
+			std::string::size_type i = line.find(nic);
+			if(std::string::npos != i)
+			{
+				line = line.substr(nic.size() + 1); //+1 for colon ':'
+				for(int j = 0; j < 9; j++)
+				{
+					while(isspace(line[0])) line.erase(0, 1);
 
-    // skip first two lines
-    for (int i = 0; i < 1; i++) {
-        fgets(buf, 200, fp);
-    }
+					i = line.find_first_of(" \f\n\r\t\v");
+					if(std::string::npos == i) break;
 
-    while (fgets(buf, 200, fp)) {
-        sscanf(buf, "%[^:]: %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu",
-               ifname, &r_bytes, &r_packets, &t_bytes, &t_packets);
-        break;
-    }
-
-    fclose(fp);
-    cout << "data from function {0} = " << r_bytes << " {1} = " << t_bytes << endl;
-    return make_tuple(t_bytes, r_bytes);
+					if(j == 0) //rbytes
+					{
+						rbytes = strtol(line.substr(0, i).c_str(), NULL, 10);
+					}
+					else if(j == 8)//tbytes
+					{
+						tbytes = strtol(line.substr(0, i).c_str(), NULL, 10);
+						done = true;
+					}
+					line = line.substr(i);
+				}
+			}
+		}
+		fclose(pf);
+	}
+	if(done)
+	{
+		cout << "data from function {0} = " << r_bytes << " {1} = " << t_bytes << endl;
+	}
+	return make_tuple(t_bytes, r_bytes);
 }
 
 void Measurement::analyzeCpuData()

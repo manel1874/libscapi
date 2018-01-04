@@ -68,7 +68,7 @@ public:
 
 
 private:
-    tuple<unsigned long int, unsigned long int> commData();
+    tuple<unsigned long int, unsigned long int> commData(const char * nic_);
     void analyzeCpuData(); //create JSON file with cpu times
     void analyzeCommSentData(); // create JSON file with comm sent times
     void analyzeCommReceivedData(); // create JSON file with comm received times
