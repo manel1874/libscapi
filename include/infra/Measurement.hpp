@@ -43,9 +43,13 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <tuple>
+#include <fstream>
+#include <algorithm>
 #include <sys/resource.h>
 #include <sys/time.h>
 #include <../../lib/JsonCpp/include/json/json.h>
+#include "../cryptoInfra/Protocol.hpp"
+#include "ConfigFile.hpp"
 
 using namespace std;
 using namespace std::chrono;
@@ -53,39 +57,48 @@ using namespace Json;
 
 class Measurement {
 public:
-    Measurement(){}
-    Measurement(string protocolName, int partyId, int numOfParties, int numOfIteration);
-    Measurement(string protocolName, int partyId, int numOfParties, int numOfIteration, vector<string> names);
-    ~Measurement();
-    void startSubTask(int taskIdx, int currentIterationNum);
-    void endSubTask(int taskIdx, int currentIterationNum);
+//    Measurement(string protocolName, int partyId, int numOfParties, int numOfIteration);
+    Measurement(Protocol &protocol);
+//    Measurement(string protocolName, int partyId, int numOfParties, int numOfIteration, vector<string> names);
+    Measurement(Protocol &protocol, vector<string> names);
     void setTaskNames(vector<string> & names);
+    ~Measurement();
+    void startSubTask(string taskName, int currentIterationNum);
+    void endSubTask(string taskName, int currentIterationNum);
+
+
+private:
     string getcwdStr()
     {
         char* buff;//automatically cleaned when it exits scope
         return string(getcwd(buff,255));
     }
 
+    int getNumberOfParties(string path);
+    void init(Protocol &protocol);
+    void init(vector <string> names);
+    int getTaskIdx(string name); // return the index of given task name
+    void setCommInterface(string partiesFile);
 
-private:
     tuple<unsigned long int, unsigned long int> commData(const char * nic_);
-    void analyzeCpuData(); //create JSON file with cpu times
+    void analyzeCpuData(); // create JSON file with cpu times
     void analyzeCommSentData(); // create JSON file with comm sent times
     void analyzeCommReceivedData(); // create JSON file with comm received times
     void analyzeMemory(); // create JSON file with memory usage
     void createJsonFile(Value v, string fileName);
-    vector<vector<long>> m_cpuStartTimes;
-    vector<vector<unsigned long int>> m_commSentStartTimes;
-    vector<vector<unsigned long int>> m_commReceivedStartTimes;
-    vector<vector<long>> m_memoryUsage;
-    vector<vector<long>> m_cpuEndTimes;
-    vector<vector<unsigned long int>> m_commSentEndTimes;
-    vector<vector<unsigned long int>> m_commReceivedEndTimes;
+    vector<vector<long>> *m_cpuStartTimes;
+    vector<vector<unsigned long int>> *m_commSentStartTimes;
+    vector<vector<unsigned long int>> *m_commReceivedStartTimes;
+    vector<vector<long>> *m_memoryUsage;
+    vector<vector<long>> *m_cpuEndTimes;
+    vector<vector<unsigned long int>> *m_commSentEndTimes;
+    vector<vector<unsigned long int>> *m_commReceivedEndTimes;
     vector<string> m_names;
     string m_protocolName;
     int m_partyId;
     int m_numOfParties;
     int m_numberOfIterations;
+    string m_interface; // states the network interface to listen too
 };
 
 

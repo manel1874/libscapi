@@ -73,6 +73,7 @@ public:
     virtual void runOffline(){};
     virtual bool hasOnline() = 0;
     virtual void runOnline(){};
+    map<string, string> getArguments();
 
     virtual ~Protocol() {}
 };

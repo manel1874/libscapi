@@ -31,80 +31,124 @@
 
 #include "../../include/infra/Measurement.hpp"
 
-
-
 using namespace std;
 
-Measurement::Measurement(string protocolName, int partyId, int numOfParties, int numOfIteration)
+
+Measurement::Measurement(Protocol &protocol)
 {
-    m_protocolName = protocolName;
-    m_partyId = partyId;
-    m_numberOfIterations = numOfIteration;
-    m_numOfParties = numOfParties;
+    init(protocol);
 }
 
-
-Measurement::Measurement(string protocolName, int partyId, int numOfParties, int numOfIteration, vector<string> names)
-        :m_cpuStartTimes(names.size(), vector<long>(numOfIteration)),
-         m_commSentStartTimes(names.size(), vector<unsigned long int>(numOfIteration)),
-         m_commReceivedStartTimes(names.size(), vector<unsigned long int>(numOfIteration)),
-         m_memoryUsage(names.size(), vector<long>(numOfIteration)),
-         m_cpuEndTimes(names.size(), vector<long>(numOfIteration)),
-         m_commSentEndTimes(names.size(), vector<unsigned long int>(numOfIteration)),
-         m_commReceivedEndTimes(names.size(), vector<unsigned long int>(numOfIteration)),
-         m_names{move(names)}
+Measurement::Measurement(Protocol &protocol, vector<string> names)
 {
-    m_protocolName = protocolName;
-    m_partyId = partyId;
-    m_numberOfIterations = numOfIteration;
-    m_numOfParties = numOfParties;
+    init(protocol);
+    init(names);
+}
+
+int Measurement::getNumberOfParties(string path)
+{
+    string line;
+    ifstream file(path);
+    int partiesCounter = 0;
+    while (getline(file, line))
+        partiesCounter++;
+    cout << "partiesCounter : " << partiesCounter << endl;
+    return (int) partiesCounter / 2;
 }
 
 void Measurement::setTaskNames(vector<string> & names)
 {
-    m_cpuStartTimes = vector<vector<long>>(names.size(), vector<long>(m_numberOfIterations));
-    m_commSentStartTimes = vector<vector<unsigned long int>>(names.size(),
+    init(names);
+}
+
+void Measurement::init(Protocol &protocol)
+{
+    map<string, string> arguments = protocol.getArguments();
+    m_protocolName = arguments["protocolName"];
+    m_numberOfIterations = stoi(arguments["internalIterationsNumber"]);
+    m_partyId =  stoi(arguments["partyID"]);
+    string partiesFile = arguments["partiesFile"];
+    m_numOfParties = getNumberOfParties(partiesFile);
+    setCommInterface(partiesFile);
+}
+
+void Measurement::init(vector <string> names)
+{
+    m_cpuStartTimes = new vector<vector<long>>(names.size(), vector<long>(m_numberOfIterations));
+    m_commSentStartTimes = new vector<vector<unsigned long int>>(names.size(),
             vector<unsigned long int>(m_numberOfIterations));
-    m_commReceivedStartTimes = vector<vector<unsigned long int>>(names.size(),
+    m_commReceivedStartTimes = new vector<vector<unsigned long int>>(names.size(),
             vector<unsigned long int>(m_numberOfIterations));
-    m_memoryUsage = vector<vector<long>>(names.size(), vector<long>(m_numberOfIterations));
-    m_cpuEndTimes = vector<vector<long>>(names.size(), vector<long>(m_numberOfIterations));
-    m_commSentEndTimes = vector<vector<unsigned long int>>(names.size(),
+    m_memoryUsage = new vector<vector<long>>(names.size(), vector<long>(m_numberOfIterations));
+    m_cpuEndTimes = new vector<vector<long>>(names.size(), vector<long>(m_numberOfIterations));
+    m_commSentEndTimes = new vector<vector<unsigned long int>>(names.size(),
             vector<unsigned long int>(m_numberOfIterations));
-    m_commReceivedEndTimes = vector<vector<unsigned long int>>(names.size(),
+    m_commReceivedEndTimes = new vector<vector<unsigned long int>>(names.size(),
             vector<unsigned long int>(m_numberOfIterations));
     m_names = move(names);
 }
 
-void Measurement::startSubTask(int taskIdx, int currentIterationNum)
+
+int Measurement::getTaskIdx(string name)
+{
+    auto it = std::find(m_names.begin(), m_names.end(), name);
+    auto idx = distance(m_names.begin(), it);
+    return idx;
+}
+
+void Measurement::setCommInterface(string partiesFile)
+{
+    ConfigFile cf(partiesFile);
+    string ipPattern = "party_0_ip";
+    string ip = cf.Value("", ipPattern);
+
+    //define addresses prefixes
+    string localPrefix = "127.0";
+    string awsPrefix = "172.0";
+    string serversPrefix = "10.0";
+
+    if(ip.find(localPrefix) != string::npos)
+        m_interface = "lo";
+    else if (ip.find(serversPrefix) != string::npos)
+        m_interface = "eth0";
+    else
+        m_interface = "ens3";
+    cout << "*** inter = "<< m_interface << endl;
+}
+
+void Measurement::startSubTask(string taskName, int currentIterationNum)
 {
     //calculate cpu start time
     auto now = system_clock::now();
+
     //Cast the time point to ms, then get its duration, then get the duration's count.
     auto ms = time_point_cast<milliseconds>(now).time_since_epoch().count();
-    m_cpuStartTimes[taskIdx][currentIterationNum] = ms;
-    tuple<unsigned long int, unsigned long int> startData = commData("ens3");
-    m_commSentStartTimes[taskIdx][currentIterationNum] = get<0>(startData);
-    m_commReceivedStartTimes[taskIdx][currentIterationNum] = get<1>(startData);
-    cout << "Tupple data : {0} = " << get<0>(startData) << " {1} = " << get<1>(startData) << endl;
+
+    int taskIdx = getTaskIdx(taskName);
+
+    (*m_cpuStartTimes)[taskIdx][currentIterationNum] = ms;
+    tuple<unsigned long int, unsigned long int> startData = commData(m_interface.c_str());
+    (*m_commSentStartTimes)[taskIdx][currentIterationNum] = get<0>(startData);
+    (*m_commReceivedStartTimes)[taskIdx][currentIterationNum] = get<1>(startData);
 }
 
-void Measurement::endSubTask(int taskIdx, int currentIterationNum)
+void Measurement::endSubTask(string taskName, int currentIterationNum)
 {
+    int taskIdx = getTaskIdx(taskName);
     struct rusage r_usage;
     getrusage(RUSAGE_SELF, &r_usage);
-    m_memoryUsage[taskIdx][currentIterationNum] = r_usage.ru_maxrss;
+    (*m_memoryUsage)[taskIdx][currentIterationNum] = r_usage.ru_maxrss;
+
     auto now = system_clock::now();
     //Cast the time point to ms, then get its duration, then get the duration's count.
     auto ms = time_point_cast<milliseconds>(now).time_since_epoch().count();
+    (*m_cpuEndTimes)[taskIdx][currentIterationNum] = ms - (*m_cpuStartTimes)[taskIdx][currentIterationNum];
 
-    m_cpuEndTimes[taskIdx][currentIterationNum] = ms - m_cpuStartTimes[taskIdx][currentIterationNum];
-
-    tuple<unsigned long int, unsigned long int> endData = commData("ens3");
-    m_commSentEndTimes[taskIdx][currentIterationNum] = get<0>(endData) -
-            m_commSentStartTimes[taskIdx][currentIterationNum];
-    m_commReceivedEndTimes[taskIdx][currentIterationNum] = get<1>(endData) -
-            m_commReceivedStartTimes[taskIdx][currentIterationNum];
+    tuple<unsigned long int, unsigned long int> endData = commData(m_interface.c_str());
+    (*m_commSentEndTimes)[taskIdx][currentIterationNum] = get<0>(endData) -
+            (*m_commSentStartTimes)[taskIdx][currentIterationNum];
+    (*m_commReceivedEndTimes)[taskIdx][currentIterationNum] = get<1>(endData) -
+            (*m_commReceivedStartTimes)[taskIdx][currentIterationNum];
 }
 
 tuple<unsigned long int, unsigned long int> Measurement::commData(const char * nic_)
@@ -133,10 +177,12 @@ tuple<unsigned long int, unsigned long int> Measurement::commData(const char * n
 					if(j == 0) //rbytes
 					{
 						rbytes = strtol(line.substr(0, i).c_str(), NULL, 10);
+                        cout << "rbytes = " << rbytes << endl;
 					}
 					else if(j == 8)//tbytes
 					{
 						tbytes = strtol(line.substr(0, i).c_str(), NULL, 10);
+                        cout << "tbytes = " << tbytes << endl;
 						done = true;
 					}
 					line = line.substr(i);
@@ -145,10 +191,10 @@ tuple<unsigned long int, unsigned long int> Measurement::commData(const char * n
 		}
 		fclose(pf);
 	}
-	if(done)
-	{
-		cout << "data from function {0} = " << rbytes << " {1} = " << tbytes << endl;
-	}
+//	if(done)
+//	{
+//		cout << "data from function {0} = " << rbytes << " {1} = " << tbytes << endl;
+//	}
 	return make_tuple(tbytes, rbytes);
 }
 
@@ -170,7 +216,7 @@ void Measurement::analyzeCpuData()
         for (int iterationIdx = 0; iterationIdx < m_numberOfIterations; iterationIdx++)
         {
             Value taskTimes;
-            task["iteration_" + to_string(iterationIdx)] = m_cpuEndTimes[taskNameIdx][iterationIdx];
+            task["iteration_" + to_string(iterationIdx)] = (*m_cpuEndTimes)[taskNameIdx][iterationIdx];
         }
         party.append(task);
     }
@@ -197,7 +243,7 @@ void Measurement::analyzeCommSentData()
         for (int iterationIdx = 0; iterationIdx < m_numberOfIterations; iterationIdx++)
         {
             Value taskTimes;
-            task["iteration_" + to_string(iterationIdx)] = m_commSentEndTimes[taskNameIdx][iterationIdx];
+            task["iteration_" + to_string(iterationIdx)] = (*m_commSentEndTimes)[taskNameIdx][iterationIdx];
         }
         partySent.append(task);
     }
@@ -224,7 +270,7 @@ void Measurement::analyzeCommReceivedData()
         for (int iterationIdx = 0; iterationIdx < m_numberOfIterations; iterationIdx++)
         {
             Value taskTimes;
-            task["iteration_" + to_string(iterationIdx)] = m_commReceivedEndTimes[taskNameIdx][iterationIdx];
+            task["iteration_" + to_string(iterationIdx)] = (*m_commReceivedEndTimes)[taskNameIdx][iterationIdx];
         }
         partyReceived.append(task);
     }
@@ -251,7 +297,7 @@ void Measurement::analyzeMemory()
         for (int iterationIdx = 0; iterationIdx < m_numberOfIterations; iterationIdx++)
         {
             Value taskTimes;
-            task["iteration_" + to_string(iterationIdx)] = m_commReceivedEndTimes[taskNameIdx][iterationIdx];
+            task["iteration_" + to_string(iterationIdx)] = (*m_commReceivedEndTimes)[taskNameIdx][iterationIdx];
         }
         partyMemory.append(task);
     }
