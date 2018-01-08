@@ -65,7 +65,12 @@ void Measurement::init(Protocol &protocol)
     map<string, string> arguments = protocol.getArguments();
     m_protocolName = arguments["protocolName"];
     m_numberOfIterations = stoi(arguments["internalIterationsNumber"]);
-    m_partyId =  stoi(arguments["partyID"]);
+    map<string, string>::iterator it = arguments.find("partyID");
+    if(it != arguments.end())
+    {
+        m_partyId =  stoi(arguments["partyID"]);
+    }
+
     string partiesFile = arguments["partiesFile"];
     m_numOfParties = getNumberOfParties(partiesFile);
     setCommInterface(partiesFile);

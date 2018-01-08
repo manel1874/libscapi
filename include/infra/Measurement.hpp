@@ -96,7 +96,7 @@ private:
     vector<vector<unsigned long int>> *m_commReceivedEndTimes;
     vector<string> m_names;
     string m_protocolName;
-    int m_partyId;
+    int m_partyId = 0;
     int m_numOfParties;
     int m_numberOfIterations;
     string m_interface; // states the network interface to listen too
