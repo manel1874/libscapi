@@ -113,7 +113,6 @@ void Measurement::setCommInterface(string partiesFile)
         m_interface = "eth0";
     else
         m_interface = "ens3";
-    cout << "*** inter = "<< m_interface << endl;
 }
 
 void Measurement::startSubTask(string taskName, int currentIterationNum)
@@ -191,133 +190,68 @@ tuple<unsigned long int, unsigned long int> Measurement::commData(const char * n
 		}
 		fclose(pf);
 	}
-//	if(done)
-//	{
-//		cout << "data from function {0} = " << rbytes << " {1} = " << tbytes << endl;
-//	}
+	if(done)
+	{
+		cout << "data from function {0} = " << rbytes << " {1} = " << tbytes << endl;
+	}
 	return make_tuple(tbytes, rbytes);
 }
 
-void Measurement::analyzeCpuData()
+
+void Measurement::analyze(string type)
 {
     string filePath = getcwdStr();
-    string fileName = filePath + "/" + m_protocolName + "_cpu_partyId=" + to_string(m_partyId)
+    string fileName = filePath + "/" + m_protocolName + "_" + type + "_partyId=" + to_string(m_partyId)
                       +"_numOfParties=" + to_string(m_numOfParties) + ".json";
 
     //party is the root of the json objects
-    Value party(arrayValue);
+    json party = json::array();
 
     for (int taskNameIdx = 0; taskNameIdx < m_names.size(); taskNameIdx++)
     {
         //Write for each task name all the iteration
-        Value task(objectValue);
+        json task = json::object();
         task["name"] = m_names[taskNameIdx];
 
         for (int iterationIdx = 0; iterationIdx < m_numberOfIterations; iterationIdx++)
         {
-            Value taskTimes;
             task["iteration_" + to_string(iterationIdx)] = (*m_cpuEndTimes)[taskNameIdx][iterationIdx];
         }
-        party.append(task);
+        party.insert(party.begin(), task);
     }
 
     //send json object to create file
     createJsonFile(party, fileName);
 }
 
+
+void Measurement::analyzeCpuData()
+{
+    analyze("cpu");
+}
+
 void Measurement::analyzeCommSentData()
 {
-    string filePath = getcwdStr();
-    string fileName = filePath + "/" + m_protocolName + "_commSent_partyId=" + to_string(m_partyId)
-                      +"_numOfParties=" + to_string(m_numOfParties) + ".json";
-
-    //party is the root of the json objects
-    Value partySent(arrayValue);
-
-    for (int taskNameIdx = 0; taskNameIdx < m_names.size(); taskNameIdx++)
-    {
-        //Write for each task name all the iteration
-        Value task(objectValue);
-        task["name"] = m_names[taskNameIdx];
-
-        for (int iterationIdx = 0; iterationIdx < m_numberOfIterations; iterationIdx++)
-        {
-            Value taskTimes;
-            task["iteration_" + to_string(iterationIdx)] = (*m_commSentEndTimes)[taskNameIdx][iterationIdx];
-        }
-        partySent.append(task);
-    }
-
-    //send json object to create file
-    createJsonFile(partySent, fileName);
+    analyze("commSent");
 }
 
 void Measurement::analyzeCommReceivedData()
 {
-    string filePath = getcwdStr();
-    string fileName = filePath + "/" + m_protocolName + "_commReceived_partyId=" + to_string(m_partyId)
-                      +"_numOfParties=" + to_string(m_numOfParties) + ".json";
-
-    //party is the root of the json objects
-    Value partyReceived(arrayValue);
-
-    for (int taskNameIdx = 0; taskNameIdx < m_names.size(); taskNameIdx++)
-    {
-        //Write for each task name all the iteration
-        Value task(objectValue);
-        task["name"] = m_names[taskNameIdx];
-
-        for (int iterationIdx = 0; iterationIdx < m_numberOfIterations; iterationIdx++)
-        {
-            Value taskTimes;
-            task["iteration_" + to_string(iterationIdx)] = (*m_commReceivedEndTimes)[taskNameIdx][iterationIdx];
-        }
-        partyReceived.append(task);
-    }
-
-    //send json object to create file
-    createJsonFile(partyReceived, fileName);
+    analyze("commReceived");
 }
 
 void Measurement::analyzeMemory()
 {
-    string filePath = getcwdStr();
-    string fileName = filePath + "/" + m_protocolName + "_memory_partyId=" + to_string(m_partyId)
-                      +"_numOfParties=" + to_string(m_numOfParties) + ".json";
-
-    //party is the root of the json objects
-    Value partyMemory(arrayValue);
-
-    for (int taskNameIdx = 0; taskNameIdx < m_names.size(); taskNameIdx++)
-    {
-        //Write for each task name all the iteration
-        Value task(objectValue);
-        task["name"] = m_names[taskNameIdx];
-
-        for (int iterationIdx = 0; iterationIdx < m_numberOfIterations; iterationIdx++)
-        {
-            Value taskTimes;
-            task["iteration_" + to_string(iterationIdx)] = (*m_commReceivedEndTimes)[taskNameIdx][iterationIdx];
-        }
-        partyMemory.append(task);
-    }
-
-    //send json object to create file
-    createJsonFile(partyMemory, fileName);
+    analyze("memory");
 }
 
-void Measurement::createJsonFile(Value v, string fileName)
+void Measurement::createJsonFile(json j, string fileName)
 {
-    StreamWriterBuilder builder;
-    unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
     try
     {
-        fstream myfile;
-        myfile.open(fileName, fstream::out);
-        if (myfile.is_open())
-        {
-            writer->write(v, &myfile);
-        }
+        ofstream myfile (fileName, ostream::out);
+        cout << j << endl;
+        myfile << j;
     }
 
     catch (exception& e)
