@@ -52,7 +52,6 @@ int Measurement::getNumberOfParties(string path)
     int partiesCounter = 0;
     while (getline(file, line))
         partiesCounter++;
-    cout << "partiesCounter : " << partiesCounter << endl;
     return (int) partiesCounter / 2;
 }
 
@@ -162,6 +161,7 @@ tuple<unsigned long int, unsigned long int> Measurement::commData(const char * n
 		while(NULL != fgets(sz, 2048, pf))
 		{
 			std::string line = sz;
+            while(isspace(line[0])) line.erase(0, 1);
 			std::string::size_type i = line.find(nic);
 			if(std::string::npos != i)
 			{
@@ -169,23 +169,25 @@ tuple<unsigned long int, unsigned long int> Measurement::commData(const char * n
 				for(int j = 0; j < 9; j++)
 				{
 					while(isspace(line[0])) line.erase(0, 1);
-
 					i = line.find_first_of(" \f\n\r\t\v");
 					if(std::string::npos == i) break;
 
 					if(j == 0) //rbytes
 					{
+//                        cout << "****************" << i <<endl;
 						rbytes = strtol(line.substr(0, i).c_str(), NULL, 10);
-                        cout << "rbytes = " << rbytes << endl;
+//                        cout << "rbytes = " << rbytes << endl;
 					}
 					else if(j == 8)//tbytes
 					{
+//                        cout << "###########" << i <<endl;
 						tbytes = strtol(line.substr(0, i).c_str(), NULL, 10);
-                        cout << "tbytes = " << tbytes << endl;
+//                        cout << "tbytes = " << tbytes << endl;
 						done = true;
 					}
 					line = line.substr(i);
 				}
+                break;
 			}
 		}
 		fclose(pf);
@@ -250,7 +252,6 @@ void Measurement::createJsonFile(json j, string fileName)
     try
     {
         ofstream myfile (fileName, ostream::out);
-        cout << j << endl;
         myfile << j;
     }
 
