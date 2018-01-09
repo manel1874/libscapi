@@ -15,5 +15,4 @@ add_executable(ReplicatedSecretSharing3PartiesArithmetic ${SOURCE_FILES})
 
 TARGET_LINK_LIBRARIES(ReplicatedSecretSharing3PartiesArithmetic $ENV{HOME}/ntl-9.10.0/src/ntl.a
 	$ENV{HOME}/libscapi/libscapi.a gmp
-	OTExtensionBristol libsimpleot.a libjsoncpp.a
 	libboost_system.a libboost_thread.a pthread crypto dl ssl z)
