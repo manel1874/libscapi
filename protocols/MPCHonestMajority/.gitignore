@@ -5,4 +5,4 @@ callgrind*
 CMakeCache.txt
 cmake_install.cmake
 Makefile
-Secret_Sharing
+MPCHonestMajority
