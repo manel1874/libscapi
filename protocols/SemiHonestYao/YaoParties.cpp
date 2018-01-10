@@ -51,14 +51,14 @@ PartyOne::PartyOne(int argc, char* argv[]) : Protocol("SemiHonestYao", argc, arg
 
 	id = stoi(arguments["partyID"]);
 
-	YaoConfig yao_config(arguments["configFileName"]);
+	YaoConfig yao_config(arguments["configFile"]);
 	this->yaoConfig = yao_config;
 
 	vector<string> subTaskNames{"Garble", "SendCircuitAndInputs", "OT"};
-	timer = new Measurement("SemiHonestYao", id, 2, yaoConfig.number_of_iterations, subTaskNames);
+	timer = new Measurement(*this, subTaskNames);
 
 	//open parties file
-	ConfigFile cf(arguments["partiesFileName"]);
+	ConfigFile cf(arguments["partiesFile"]);
 
 	string receiver_ip, sender_ip;
 	int receiver_port, sender_port;
@@ -136,23 +136,23 @@ void PartyOne::run() {
 }
 
 void PartyOne::runOnline() {
-	timer->startSubTask(0, currentIteration);
+	timer->startSubTask("Garble", currentIteration);
 	values = circuit->garble();
-	timer->endSubTask(0, currentIteration);
+	timer->endSubTask("Garble", currentIteration);
 	// send garbled tables and the translation table to p2.
 	auto garbledTables = circuit->getGarbledTables();
 
-	timer->startSubTask(1, currentIteration);
+	timer->startSubTask("SendCircuitAndInputs", currentIteration);
 	channel->write((byte *) garbledTables, circuit->getGarbledTableSize());
 	channel->write(circuit->getTranslationTable().data(), circuit->getNumberOfOutputs());
 	// send p1 input keys to p2.
 	sendP1Inputs(ungarbledInput.data());
-	timer->endSubTask(1, currentIteration);
+	timer->endSubTask("SendCircuitAndInputs", currentIteration);
 
 	// run OT protocol in order to send p2 the necessary keys without revealing any information.
-	timer->startSubTask(2, currentIteration);
+	timer->startSubTask("OT", currentIteration);
 	runOTProtocol();
-	timer->endSubTask(2, currentIteration);
+	timer->endSubTask("OT", currentIteration);
 }
 
 void PartyOne::runOTProtocol() {
@@ -188,16 +188,16 @@ PartyTwo::PartyTwo(int argc, char* argv[]) : Protocol("SemiHonestYao", argc, arg
 
 	id = stoi(arguments["partyID"]);
 
-	YaoConfig yao_config(arguments["configFileName"]);
+	YaoConfig yao_config(arguments["configFile"]);
 	this->yaoConfig = yao_config;
 
 	this->print_output = yaoConfig.print_output;
 
 	//open parties file
-	ConfigFile cf(arguments["partiesFileName"]);
+	ConfigFile cf(arguments["partiesFile"]);
 
 	vector<string> subTaskNames{"ReceiveCircuitAndInputs", "OT", "ComputeCircuit"};
-	timer = new Measurement("SemiHonestYao", id, 2, yaoConfig.number_of_iterations, subTaskNames);
+	timer = new Measurement(*this, subTaskNames);
 	string receiver_ip, sender_ip;
 	int receiver_port, sender_port;
 
@@ -276,20 +276,20 @@ void PartyTwo::run() {
 
 void PartyTwo::runOnline() {
 	// receive tables and inputs
-	timer->startSubTask(0, currentIteration);
+	timer->startSubTask("ReceiveCircuitAndInputs", currentIteration);
 	receiveCircuit();
 	receiveP1Inputs();
-	timer->endSubTask(0, currentIteration);
+	timer->endSubTask("ReceiveCircuitAndInputs", currentIteration);
 
-	timer->startSubTask(1, currentIteration);
+	timer->startSubTask("OT", currentIteration);
 	// run OT protocol in order to get the necessary keys without revealing any information.
 	auto output = runOTProtocol(ungarbledInput.data(), ungarbledInput.size());
-	timer->endSubTask(1, currentIteration);
+	timer->endSubTask("OT", currentIteration);
 
 	// Compute the circuit.
-	timer->startSubTask(2, currentIteration);
+	timer->startSubTask("ComputeCircuit", currentIteration);
 	computeCircuit(output.get());
-	timer->endSubTask(2, currentIteration);
+	timer->endSubTask("ComputeCircuit", currentIteration);
 
 	// we're done print the output
 	if (print_output)
