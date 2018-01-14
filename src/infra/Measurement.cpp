@@ -45,16 +45,6 @@ Measurement::Measurement(Protocol &protocol, vector<string> names)
     init(names);
 }
 
-int Measurement::getNumberOfParties(string path)
-{
-    string line;
-    ifstream file(path);
-    int partiesCounter = 0;
-    while (getline(file, line))
-        partiesCounter++;
-    return (int) partiesCounter / 2;
-}
-
 void Measurement::setTaskNames(vector<string> & names)
 {
     init(names);
@@ -72,7 +62,7 @@ void Measurement::init(Protocol &protocol)
     }
 
     string partiesFile = arguments["partiesFile"];
-    m_numOfParties = getNumberOfParties(partiesFile);
+    m_numOfParties = atoi(arguments["partiesNumber"].c_str());
     setCommInterface(partiesFile);
 }
 

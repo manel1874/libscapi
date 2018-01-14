@@ -74,7 +74,6 @@ private:
         return string(getcwd(buff,255));
     }
 
-    int getNumberOfParties(string path);
     void init(Protocol &protocol);
     void init(vector <string> names);
     int getTaskIdx(string name); // return the index of given task name
