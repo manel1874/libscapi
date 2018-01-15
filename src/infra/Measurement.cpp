@@ -149,7 +149,6 @@ tuple<unsigned long int, unsigned long int> Measurement::commData(const char * n
 	unsigned long rbytes = 0, tbytes = 0;
 	std::string nic = nic_;
 	FILE * pf = fopen("/proc/net/dev", "r");
-	bool done = false;
 	if(NULL != pf)
 	{
 		char sz[2048];
@@ -169,16 +168,11 @@ tuple<unsigned long int, unsigned long int> Measurement::commData(const char * n
 
 					if(j == 0) //rbytes
 					{
-//                        cout << "****************" << i <<endl;
 						rbytes = strtol(line.substr(0, i).c_str(), NULL, 10);
-//                        cout << "rbytes = " << rbytes << endl;
 					}
 					else if(j == 8)//tbytes
 					{
-//                        cout << "###########" << i <<endl;
 						tbytes = strtol(line.substr(0, i).c_str(), NULL, 10);
-//                        cout << "tbytes = " << tbytes << endl;
-						done = true;
 					}
 					line = line.substr(i);
 				}
@@ -186,10 +180,6 @@ tuple<unsigned long int, unsigned long int> Measurement::commData(const char * n
 			}
 		}
 		fclose(pf);
-	}
-	if(done)
-	{
-		cout << "data from function {0} = " << rbytes << " {1} = " << tbytes << endl;
 	}
 	return make_tuple(tbytes, rbytes);
 }
