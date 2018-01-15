@@ -212,7 +212,14 @@ void Measurement::analyze(string type)
 
         for (int iterationIdx = 0; iterationIdx < m_numberOfIterations; iterationIdx++)
         {
-            task["iteration_" + to_string(iterationIdx)] = (*m_cpuEndTimes)[taskNameIdx][iterationIdx];
+            if(type.compare("cpu") == 0)
+                task["iteration_" + to_string(iterationIdx)] = (*m_cpuEndTimes)[taskNameIdx][iterationIdx];
+            else if (type.compare("commSent") == 0)
+                task["iteration_" + to_string(iterationIdx)] = (*m_commSentEndTimes)[taskNameIdx][iterationIdx];
+            else if (type.compare("commReceived") == 0)
+                task["iteration_" + to_string(iterationIdx)] = (*m_commReceivedStartTimes)[taskNameIdx][iterationIdx];
+            else if (type.compare("memory") == 0)
+                task["iteration_" + to_string(iterationIdx)] = (*m_memoryUsage)[taskNameIdx][iterationIdx];
         }
         party.insert(party.begin(), task);
     }
