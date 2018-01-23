@@ -37,8 +37,6 @@ To run an example:
 example_name can one of the following: 
 	* dlog
 	* sha1
-	* maliciousOT <party_number (1|2)>
-	* semiHonestOT <party_number (1|2)>
 	* comm		  <party_number (1|2)> <config_file_path>
 	* yao		  <party_number (1|2)> <config_file_path>
 	* sigma		  <party_number (1|2)> <config_file_path>
@@ -46,7 +44,6 @@ example_name can one of the following:
 	* ot  <party_number (1|2)> <config_file_path>
 	* OTExtensionBristol <party_number (1|2)> (linux only)
 	* OTExtensionLibote <party_number (1|2)>
-	* ospsi input_file_1 input_file_2
 				)";
 	cerr << usage << endl;
 	return 1;
@@ -62,10 +59,6 @@ int main(int argc, char* argv[]) {
 		return mainSha1();
 	if (argc == 2)
 		return exampleUsage();
-//	if (exampleName == "maliciousOT")
-//		return mainOTMalicious(argv[2]);
-//	if (exampleName == "semiHonestOT")
-//		return mainOTSemiHonest(argv[2]);
 	if (exampleName == "OTExtensionLibote")
 		return mainLibote(argv[2]);
 #ifndef _WIN32
@@ -75,13 +68,10 @@ int main(int argc, char* argv[]) {
 
 	if (argc != 4)
 		return exampleUsage();
-
-//	if (exampleName == "ospsi")
-//		return mainOSPSI(argv[2], argv[3]);
 	if (exampleName == "comm") 
 		return mainComm(argv[2], argv[3]);
-//	if (exampleName == "yao")
-//		return mainYao(argv[2], argv[3]);
+	if (exampleName == "yao")
+		return mainYao(argv[2], argv[3]);
 	if (exampleName == "sigma")
 		return mainSigma(argv[2], argv[3]);
 	if (exampleName == "commitment")

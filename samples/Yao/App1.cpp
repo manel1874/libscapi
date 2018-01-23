@@ -72,7 +72,7 @@ void execute_party_one(YaoConfig yao_config) {
 	boost::asio::io_service io_service;
 	SocketPartyData me(yao_config.sender_ip, 1213);
 	SocketPartyData other(yao_config.receiver_ip, 1212);
-	CommParty * channel = new CommPartyTCPSynced(io_service, me, other);
+	shared_ptr<CommParty> channel = make_shared<CommPartyTCPSynced>(io_service, me, other);
 	boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 	print_elapsed_ms(start, "PartyOne: Init");
 	
@@ -87,7 +87,7 @@ void execute_party_one(YaoConfig yao_config) {
 
 	// create the semi honest OT extension sender
 	SocketPartyData senderParty(yao_config.sender_ip, 7766);
-	OTBatchSender * otSender = new OTSemiHonestExtensionSender(senderParty, 163, 1);
+	OTBatchSender * otSender = new OTExtensionBristolSender(senderParty.getPort(), true, channel);
 	
 	// connect to party two
 	channel->join(500, 5000);
@@ -100,7 +100,7 @@ void execute_party_one(YaoConfig yao_config) {
 
 	cout << "after reading input";
 	// create Party one with the previous created objects.
-	p1 = new PartyOne(channel, otSender, circuit);
+	p1 = new PartyOne(channel.get(), otSender, circuit);
 	for (int i = 0; i < yao_config.number_of_iterations ; i++) {
 		// run Party one
 		p1->run(ungarbledInput->data());
@@ -112,7 +112,10 @@ void execute_party_one(YaoConfig yao_config) {
 		<< "Average time per iteration: " << elapsed_ms / (float)yao_config.number_of_iterations << " milliseconds" << endl;
 	
 	// exit cleanly
-	delete p1; delete  channel; delete circuit; delete otSender; delete ungarbledInput;
+	delete p1;
+    delete circuit;
+    delete otSender;
+    delete ungarbledInput;
 	io_service.stop();
 	t.join();
 }
@@ -124,7 +127,7 @@ void execute_party_two(YaoConfig yao_config) {
 	SocketPartyData me(yao_config.receiver_ip, 1212);
 	SocketPartyData other(yao_config.sender_ip, 1213);
 	//SocketPartyData receiverParty(yao_config.receiver_ip, 7766);
-	CommParty * channel = new CommPartyTCPSynced(io_service, me, other);
+	shared_ptr<CommParty> channel = make_shared<CommPartyTCPSynced>(io_service, me, other);
 	boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 	print_elapsed_ms(start, "PartyTwo: Init");
 
@@ -139,7 +142,7 @@ void execute_party_two(YaoConfig yao_config) {
 	start = scapi_now();
 	SocketPartyData senderParty(yao_config.sender_ip, 7766);
 	
-	OTBatchReceiver * otReceiver = new OTSemiHonestExtensionReceiver(senderParty, 163, 1);
+	OTBatchReceiver * otReceiver = new OTExtensionBristolReceiver(senderParty.getIpAddress().to_string(), senderParty.getPort(), true, channel);
 	print_elapsed_ms(start, "PartyTwo: creating OTSemiHonestExtensionReceiver");
 
 	// connect to party one
@@ -153,7 +156,7 @@ void execute_party_two(YaoConfig yao_config) {
 
 	PartyTwo * p2;
 	auto all = scapi_now();
-	p2 = new PartyTwo(channel, otReceiver, circuit);
+	p2 = new PartyTwo(channel.get(), otReceiver, circuit);
 	for (int i = 0; i < yao_config.number_of_iterations ; i++) {
 		// init the P1 yao protocol and run party two of Yao protocol.
 		p2->run(&(ungarbledInput->at(0)), ungarbledInput->size(), yao_config.print_output);
@@ -164,7 +167,10 @@ void execute_party_two(YaoConfig yao_config) {
 		" iterations took: " << elapsed_ms << " milliseconds" << endl;
 	cout << "Average time per iteration: " << elapsed_ms / (float)yao_config.number_of_iterations 
 		<< " milliseconds" << endl;
-	delete p2; delete  channel; delete circuit; delete otReceiver; delete ungarbledInput;
+	delete p2;
+    delete circuit;
+    delete otReceiver;
+    delete ungarbledInput;
 	io_service.stop();
 	t.join();
 }

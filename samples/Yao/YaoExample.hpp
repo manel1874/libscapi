@@ -33,9 +33,9 @@
 #define AES_KEY BC_AES_KEY // AES_KEY is defined both in GarbledBooleanCircuit and in OTSemiHonestExtension
 //#include "../../include/circuits/FastGarbledBooleanCircuit.hpp"
 #include "../../include/circuits/GarbledBooleanCircuit.h"
+#include "../../include/interactive_mid_protocols/OTExtensionBristol.hpp"
 #undef AES_KEY
 #define AES_KEY OT_AES_KEY
-#include "../../include/interactive_mid_protocols/OTSemiHonestExtension.hpp"
 #undef AES_KEY
 #include <thread>
 #include "../../include/infra/Scanner.hpp"

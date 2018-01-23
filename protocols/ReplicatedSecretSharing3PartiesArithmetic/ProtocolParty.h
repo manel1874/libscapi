@@ -225,7 +225,7 @@ ProtocolParty<FieldType>::ProtocolParty(int argc, char* argv[]) : Protocol("Repl
     m_partyId = stoi(arguments["partyID"]);
 
     vector<string> subTaskNames{"Offline", "GenerateRandomness", "Online", "InputPreparation", "ComputationPhase", "Verification", "OutputPhase"};
-    timer = new Measurement("ReplicatedSecretSharing3PartiesArithmetic", m_partyId, N, times, subTaskNames);
+    timer = new Measurement(*this, subTaskNames);
     s = to_string(m_partyId);
     circuit.readCircuit(arguments["circuitFile"].c_str());
     circuit.reArrangeCircuit();
@@ -296,13 +296,13 @@ void ProtocolParty<FieldType>::readMyInputs()
 template <class FieldType>
 void ProtocolParty<FieldType>::run() {
     for (iteration=0; iteration<times; iteration++){
-        timer->startSubTask(0, iteration);
+        timer->startSubTask("Offline", iteration);
         runOffline();
-        timer->endSubTask(0, iteration);
+        timer->endSubTask("Offline", iteration);
 
-        timer->startSubTask(2, iteration);
+        timer->startSubTask("Online", iteration);
         runOnline();
-        timer->endSubTask(2, iteration);
+        timer->endSubTask("Online", iteration);
     }
 }
 
@@ -310,13 +310,13 @@ template <class FieldType>
 void ProtocolParty<FieldType>::runOffline() {
 
     auto t1 = high_resolution_clock::now();
-    timer->startSubTask(1, iteration);
+    timer->startSubTask("GenerateRandomness", iteration);
     if(fieldByteSize > 4) {
         generateRandomness61Bits();
     } else {
         generateRandomness31Bits();
     }
-    timer->endSubTask(1, iteration);
+    timer->endSubTask("GenerateRandomness", iteration);
     auto t2 = high_resolution_clock::now();
 
     auto duration = duration_cast<milliseconds>(t2-t1).count();
@@ -328,9 +328,9 @@ void ProtocolParty<FieldType>::runOffline() {
 template <class FieldType>
 void ProtocolParty<FieldType>::runOnline() {
     auto t1 = high_resolution_clock::now();
-    timer->startSubTask(3, iteration);
+    timer->startSubTask("InputPreparation", iteration);
     inputPreparation();
-    timer->endSubTask(3, iteration);
+    timer->endSubTask("InputPreparation", iteration);
     auto t2 = high_resolution_clock::now();
 
     auto duration = duration_cast<milliseconds>(t2-t1).count();
@@ -340,9 +340,9 @@ void ProtocolParty<FieldType>::runOnline() {
 
 
     t1 = high_resolution_clock::now();
-    timer->startSubTask(4, iteration);
+    timer->startSubTask("ComputationPhase", iteration);
     computationPhase();
-    timer->endSubTask(4, iteration);
+    timer->endSubTask("ComputationPhase", iteration);
 
 
     t2 = high_resolution_clock::now();
@@ -355,7 +355,7 @@ void ProtocolParty<FieldType>::runOnline() {
 
     t1 = high_resolution_clock::now();
 
-    timer->startSubTask(5, iteration);
+    timer->startSubTask("Verification", iteration);
     if(circuit.getNrOfMultiplicationGates() > 0) {
 
         if(fieldByteSize <= 4) {
@@ -364,7 +364,7 @@ void ProtocolParty<FieldType>::runOnline() {
             verification(x_triple, y_triple, z_triple, a_triple, b_triple, c_triple, circuit.getNrOfMultiplicationGates());
         }
     }
-    timer->endSubTask(5, iteration);
+    timer->endSubTask("Verification", iteration);
 
 
     t2 = high_resolution_clock::now();
@@ -375,9 +375,9 @@ void ProtocolParty<FieldType>::runOnline() {
     }
 
     t1 = high_resolution_clock::now();
-    timer->startSubTask(6, iteration);
+    timer->startSubTask("OutputPhase", iteration);
     outputPhase();
-    timer->endSubTask(6, iteration);
+    timer->endSubTask("OutputPhase", iteration);
 
 
     t2 = high_resolution_clock::now();

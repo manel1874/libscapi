@@ -42,50 +42,63 @@
 #include <memory>
 #include <unistd.h>
 #include <stdio.h>
-#include <../../lib/JsonCpp/include/json/json.h>
+#include <tuple>
+#include <fstream>
+#include <algorithm>
+#include <sys/resource.h>
+#include <sys/time.h>
+//#include <../../lib/JsonCpp/include/json/json.h>
+#include "json.hpp"
+#include "../cryptoInfra/Protocol.hpp"
+#include "ConfigFile.hpp"
 
 using namespace std;
 using namespace std::chrono;
-using namespace Json;
+//using namespace Json;
+using json = nlohmann::json;
 
 class Measurement {
 public:
-    Measurement(){}
-    Measurement(string protocolName, int partyId, int numOfParties, int numOfIteration);
-    Measurement(string protocolName, int partyId, int numOfParties, int numOfIteration, vector<string> names);
+    Measurement(Protocol &protocol);
+    Measurement(Protocol &protocol, vector<string> names);
+    void setTaskNames(vector<string> & names);
     ~Measurement();
-    void startSubTask(int taskIdx, int currentIterationNum)
-    {
-        auto now = system_clock::now();
-        //Cast the time point to ms, then get its duration, then get the duration's count.
-        auto ms = time_point_cast<milliseconds>(now).time_since_epoch().count();
+    void startSubTask(string taskName, int currentIterationNum);
+    void endSubTask(string taskName, int currentIterationNum);
 
-        m_startTimes[taskIdx][currentIterationNum] = ms;
-    }
-    void endSubTask(int taskIdx, int currentIterationNum)
-    {
-        auto now = system_clock::now();
-        //Cast the time point to ms, then get its duration, then get the duration's count.
-        auto ms = time_point_cast<milliseconds>(now).time_since_epoch().count();
 
-        m_times[taskIdx][currentIterationNum] = ms - m_startTimes[taskIdx][currentIterationNum];
-    }
-    void setTaskNames(vector<string> & names){m_names = names;}
+private:
     string getcwdStr()
     {
         char* buff;//automatically cleaned when it exits scope
         return string(getcwd(buff,255));
     }
 
+    void init(Protocol &protocol);
+    void init(vector <string> names);
+    int getTaskIdx(string name); // return the index of given task name
+    void setCommInterface(string partiesFile);
 
-private:
-    vector<vector<long>> m_startTimes;
-    vector<vector<long>> m_times;
+    tuple<unsigned long int, unsigned long int> commData(const char * nic_);
+    void analyze(string type);
+    void analyzeCpuData(); // create JSON file with cpu times
+    void analyzeCommSentData(); // create JSON file with comm sent times
+    void analyzeCommReceivedData(); // create JSON file with comm received times
+    void analyzeMemory(); // create JSON file with memory usage
+    void createJsonFile(json j, string fileName);
+    vector<vector<long>> *m_cpuStartTimes;
+    vector<vector<unsigned long int>> *m_commSentStartTimes;
+    vector<vector<unsigned long int>> *m_commReceivedStartTimes;
+    vector<vector<long>> *m_memoryUsage;
+    vector<vector<long>> *m_cpuEndTimes;
+    vector<vector<unsigned long int>> *m_commSentEndTimes;
+    vector<vector<unsigned long int>> *m_commReceivedEndTimes;
     vector<string> m_names;
     string m_protocolName;
-    int m_partyId;
+    int m_partyId = 0;
     int m_numOfParties;
     int m_numberOfIterations;
+    string m_interface; // states the network interface to listen too
 };
 
 
