@@ -260,5 +260,12 @@ Measurement::~Measurement()
     analyzeCommSentData();
     analyzeCommReceivedData();
     analyzeMemory();
+    delete m_cpuStartTimes;
+    delete m_commSentStartTimes;
+    delete m_commReceivedStartTimes;
+    delete m_memoryUsage;
+    delete m_cpuEndTimes;
+    delete m_commSentEndTimes;
+    delete m_commReceivedEndTimes;
 }
 

@@ -47,14 +47,12 @@
 #include <algorithm>
 #include <sys/resource.h>
 #include <sys/time.h>
-//#include <../../lib/JsonCpp/include/json/json.h>
+#include "ConfigFile.hpp"
 #include "json.hpp"
 #include "../cryptoInfra/Protocol.hpp"
-#include "ConfigFile.hpp"
 
 using namespace std;
 using namespace std::chrono;
-//using namespace Json;
 using json = nlohmann::json;
 
 class Measurement {
