@@ -77,7 +77,7 @@ compile-tests:
 	g++ -std=c++14 -maes -mavx -I/usr/include/openssl  -I../install/include -o tests.exe tests.cpp interactiveMidProtocolsTests.cpp ../libscapi.a -lpthread -L../install/lib ../install/lib/libboost_system.a ../install/lib/libboost_thread.a -l:libssl.a -lntl -lgmp -l:libcrypto.a -ldl -lz;
 	@cd ..
 	
-prepare-emp:
+prepare-emp:compile-openssl
 ifeq ($(SUMO),yes)
 	@mkdir -p $(builddir)/EMP
 	@cp -r lib/EMP/. $(builddir)/EMP
@@ -90,25 +90,37 @@ endif
 compile-emp-tool:prepare-emp
 ifeq ($(SUMO),yes)
 	@cd $(builddir)/EMP/emp-tool
-	@cmake -D CMAKE_CXX_FLAGS="-Wno-unused-function -Wno-unused-variable -Wno-return-type" $(builddir)/EMP/emp-tool/CMakeLists.txt 
+	@cmake -DOPENSSL_ROOT_DIR=$(includedir) -DOPENSSL_INCLUDE_DIR=$(includedir) \
+	-DOPENSSL_LIBRARIES=$(libdir) -DOPENSSL_CRYPTO_LIBRARY=$(libdir)/libcrypto.a \
+	-DOPENSSL_SSL_LIBRARY=$(libdir)/libssl.a \
+	-D CMAKE_CXX_FLAGS="-Wno-unused-function -Wno-unused-variable -Wno-return-type" \
+	$(builddir)/EMP/emp-tool/CMakeLists.txt
 	@cd $(builddir)/EMP/emp-tool/ && $(MAKE)
 	@cd $(builddir)/EMP/emp-tool/ && $(MAKE) install
 	@touch compile-emp-tool
 endif
 
-compile-emp-ot:prepare-emp
+compile-emp-ot:compile-emp-tool
 ifeq ($(SUMO),yes)
 	@cd $(builddir)/EMP/emp-ot
-	@cmake -D CMAKE_CXX_FLAGS="-Wno-unused-function -Wno-unused-variable -Wno-return-type" $(builddir)/EMP/emp-ot/CMakeLists.txt 
+	@cmake -DOPENSSL_ROOT_DIR=$(includedir) -DOPENSSL_INCLUDE_DIR=$(includedir) \
+	-DOPENSSL_LIBRARIES=$(libdir) -DOPENSSL_CRYPTO_LIBRARY=$(libdir)/libcrypto.a \
+	-DOPENSSL_SSL_LIBRARY=$(libdir)/libssl.a \
+	-D CMAKE_CXX_FLAGS="-Wno-unused-function -Wno-unused-variable -Wno-return-type" \
+	$(builddir)/EMP/emp-ot/CMakeLists.txt
 	@cd $(builddir)/EMP/emp-ot/ && $(MAKE)
 	@cd $(builddir)/EMP/emp-ot/ && $(MAKE) install
 	@touch compile-emp-ot
 endif
 	
-compile-emp-m2pc:compile-emp-ot compile-emp-tool
+compile-emp-m2pc:compile-emp-ot
 ifeq ($(SUMO),yes)
 	@cd $(builddir)/EMP/emp-m2pc
-	@cmake -D CMAKE_CXX_FLAGS="-Wno-unused-function -Wno-unused-variable -Wno-return-type -Wno-unused-result" $(builddir)/EMP/emp-m2pc/CMakeLists.txt 
+	@cmake -DOPENSSL_ROOT_DIR=$(includedir) -DOPENSSL_INCLUDE_DIR=$(includedir) \
+	-DOPENSSL_LIBRARIES=$(libdir) -DOPENSSL_CRYPTO_LIBRARY=$(libdir)/libcrypto.a \
+	-DOPENSSL_SSL_LIBRARY=$(libdir)/libssl.a \
+	-D CMAKE_CXX_FLAGS="-Wno-unused-function -Wno-unused-variable -Wno-return-type" \
+	$(builddir)/EMP/emp-m2pc/CMakeLists.txt
 	@cd $(builddir)/EMP/emp-m2pc/ && $(MAKE)
 	@touch compile-emp-m2pc
 endif
