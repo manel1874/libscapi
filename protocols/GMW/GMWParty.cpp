@@ -13,7 +13,7 @@ GMWParty::GMWParty(int argc, char* argv[]) : Protocol("GMW", argc, argv)
     times = stoi(arguments["internalIterationsNumber"]);
 
     vector<string> subTaskNames{"Offline", "GenerateTriples", "Online", "InputSharing", "ComputeCircuit"};
-    timer = new Measurement("GMW", id, circuit->getNrOfParties(), times, subTaskNames);
+    timer = new Measurement(*this, subTaskNames);
     string tmp = "init times";
     byte tmpBytes[20];
     int numThreads = stoi(arguments["numThreads"]);
@@ -37,26 +37,26 @@ void GMWParty::run(){
 
     for (currentIteration = 0; currentIteration<times; currentIteration++) {
         //Run the offline phase of the protocol
-        timer->startSubTask(0, currentIteration);
+        timer->startSubTask("Offline", currentIteration);
         runOffline();
-        timer->endSubTask(0, currentIteration);
+        timer->endSubTask("Offline", currentIteration);
         auto inputSize = circuit->getPartyInputs(id).size(); //indices of my input wires
         myInputBits.resize(inputSize, 0); //input bits, will be adjusted to my input shares
         //read my input from the input file
         readInputs();
         //Run te online phase of the protocol
-        timer->startSubTask(2, currentIteration);
+        timer->startSubTask("Online", currentIteration);
         runOnline();
-        timer->endSubTask(2, currentIteration);
+        timer->endSubTask("Online", currentIteration);
     }
 
 }
 
 void GMWParty::runOffline(){
     int numberOfParties = getParties().size() + 1;
-    timer->startSubTask(1, currentIteration);
+    timer->startSubTask("GenerateTriples", currentIteration);
     generateTriples();
-    timer->endSubTask(1, currentIteration);
+    timer->endSubTask("GenerateTriples", currentIteration);
 	auto inputSize = circuit->getPartyInputs(id).size(); //indices of my input wires
 	myInputBits.resize(inputSize, 0); //input bits, will be adjusted to my input shares
 									  //read my input from the input file
@@ -64,12 +64,12 @@ void GMWParty::runOffline(){
 
 void GMWParty::runOnline(){
     int numberOfParties = getParties().size() + 1;
-    timer->startSubTask(3, currentIteration);
+    timer->startSubTask("InputSharing", currentIteration);
     inputSharing();
-    timer->endSubTask(3, currentIteration);
-    timer->startSubTask(4, currentIteration);
+    timer->endSubTask("InputSharing", currentIteration);
+    timer->startSubTask("ComputeCircuit", currentIteration);
     computeCircuit();
-    timer->endSubTask(4, currentIteration);
+    timer->endSubTask("ComputeCircuit", currentIteration);
 }
 
 void GMWParty::generateTriples(){

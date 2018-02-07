@@ -18,5 +18,5 @@ add_executable(SemiHonestYao ${SOURCE_FILES})
 
 TARGET_LINK_LIBRARIES(SemiHonestYao
         $ENV{HOME}/libscapi/libscapi.a gmp gmpxx
-        libjsoncpp.a OTExtensionBristol libsimpleot.a libOTe.a libcryptoTools.a libmiracl.a
-        boost_system boost_thread pthread crypto dl ssl z rt stdc++fs)
+        OTExtensionBristol libsimpleot.a libOTe.a libcryptoTools.a libmiracl.a
+        boost_system boost_thread pthread crypto dl ssl z rt)

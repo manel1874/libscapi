@@ -23,13 +23,13 @@ Update and install git, gcc, gmp, and open ssl. On Ubuntu environment is should 
   
 Download and install boost (the last step might take some time. patience): ::
   
-  $ wget -O boost_1_60_0.tar.bz2 http://sourceforge.net/projects/boost/files/boost/1.60.0/boost_1_60_0.tar.bz2/download
-  $ tar --bzip2 -xf boost_1_60_0.tar.bz2
-  $ cd boost_1_60_0
+  $ wget -O boost_1_64_0.tar.bz2 http://sourceforge.net/projects/boost/files/boost/1.64.0/boost_1_64_0.tar.bz2/download
+  $ tar --bzip2 -xf boost_1_64_0.tar.bz2
+  $ cd boost_1_64_0
   $  ./bootstrap.sh
   $  ./b2 
 
-More details about boost here: http://www.boost.org/doc/libs/1_60_0/more/getting_started/unix-variants.html  
+More details about boost here: http://www.boost.org/doc/libs/1_64_0/more/getting_started/unix-variants.html  
 
 Building libscapi and publishing libs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
