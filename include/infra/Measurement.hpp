@@ -45,6 +45,7 @@
 #include <tuple>
 #include <fstream>
 #include <algorithm>
+#include <iterator>
 #include <sys/resource.h>
 #include <sys/time.h>
 #include "ConfigFile.hpp"
@@ -84,6 +85,7 @@ private:
     void analyzeCommReceivedData(); // create JSON file with comm received times
     void analyzeMemory(); // create JSON file with memory usage
     void createJsonFile(json j, string fileName);
+
     vector<vector<long>> *m_cpuStartTimes;
     vector<vector<unsigned long int>> *m_commSentStartTimes;
     vector<vector<unsigned long int>> *m_commReceivedStartTimes;
@@ -92,6 +94,8 @@ private:
     vector<vector<unsigned long int>> *m_commSentEndTimes;
     vector<vector<unsigned long int>> *m_commReceivedEndTimes;
     vector<string> m_names;
+    map<string, string> m_arguments;
+
     string m_protocolName;
     int m_partyId = 0;
     int m_numOfParties;
