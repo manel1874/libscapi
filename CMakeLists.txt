@@ -5,18 +5,14 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx -maes -msse4.1 -mpclmul -DRDTSC -DTEST=AES128  -O3 -mbmi2")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mavx -maes -msse4.1 -mpclmul -O3")
 
-SET (BOOST_ROOT $ENV{HOME}/boost_1_64_0/)
-SET (BOOST_INCLUDEDIR $ENV{HOME}/boost_1_64_0/)
-SET (BOOST_LIBRARYDIR $ENV{HOME}/boost_1_64_0/stage/lib)
 SET(SCAPI_BASE_DIR $ENV{HOME}/libscapi)
-find_package(Boost COMPONENTS system thread REQUIRED)
 SET(CMAKE_AR  "gcc-ar")
 SET(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> qcs <TARGET> <LINK_FLAGS> <OBJECTS>")
 SET(CMAKE_CXX_ARCHIVE_FINISH   true)
 
-INCLUDE_DIRECTORIES($ENV{HOME} ${BOOST_INCLUDEDIR} ${SCAPI_BASE_DIR}/lib ${SCAPI_BASE_DIR}/install/include
+INCLUDE_DIRECTORIES($ENV{HOME} ${SCAPI_BASE_DIR}/install/include
         ${SCAPI_BASE_DIR}/lib/OTExtensionBristol $ENV{HOME}/libOTe $ENV{HOME}/libOTe/cryptoTools)
-link_directories(/usr/ssl/lib/ $ENV{HOME}/libscapi/install/lib ${BOOST_LIBRARYDIR})
+link_directories(/usr/ssl/lib/ $ENV{HOME}/libscapi/install/lib )
 
 
 set(SOURCE_FILES
@@ -53,13 +49,11 @@ set(SOURCE_FILES
         src/interactive_mid_protocols/OT.cpp
         src/interactive_mid_protocols/OTExtensionBristol.cpp
         src/interactive_mid_protocols/OTExtensionLibote.cpp
-        src/interactive_mid_protocols/OTExtensionMalicious.cpp
         src/interactive_mid_protocols/OTFullSimulation.cpp
         src/interactive_mid_protocols/OTFullSimulationROM.cpp
         src/interactive_mid_protocols/OTOneSidedSimulation.cpp
         src/interactive_mid_protocols/OTPrivacyOnly.cpp
         src/interactive_mid_protocols/OTSemiHonest.cpp
-        src/interactive_mid_protocols/OTSemiHonestExtension.cpp
         src/interactive_mid_protocols/OTUC.cpp
         src/interactive_mid_protocols/SigmaProtocol.cpp
         src/interactive_mid_protocols/SigmaProtocolAnd.cpp
@@ -79,7 +73,6 @@ set(SOURCE_FILES
         src/interactive_mid_protocols/SigmaProtocolPedersenCmtKnowledge.cpp
         src/interactive_mid_protocols/SigmaProtocolPedersenCommittedValue.cpp
         src/interactive_mid_protocols/ZeroKnowledge.cpp
-        src/mid_layer/BiLinearMaps.cpp
         src/mid_layer/CramerShoupEnc.cpp
         src/mid_layer/DamgardJurikEnc.cpp
         src/mid_layer/ElGamalEnc.cpp
@@ -87,7 +80,6 @@ set(SOURCE_FILES
         src/primitives/Dlog.cpp
         src/primitives/DlogCryptopp.cpp
         src/primitives/DlogOpenSSL.cpp
-        src/primitives/HashBlake2.cpp
         src/primitives/HashOpenSSL.cpp
         src/primitives/Kdf.cpp
         src/primitives/prf.cpp
@@ -109,4 +101,4 @@ add_custom_target(scapi_build ALL
         WORKING_DIRECTORY ${SCAPI_BASE_DIR}
         COMMENT "Original libscapi libs makefile target")
 
-TARGET_LINK_LIBRARIES(scapi gmp boost_system boost_thread pthread crypto dl ssl z)
+TARGET_LINK_LIBRARIES(scapi gmp libboost_system.a libboost_thread.a pthread crypto dl ssl z)
