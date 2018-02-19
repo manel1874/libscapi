@@ -94,7 +94,7 @@ private:
     vector<vector<unsigned long int>> *m_commSentEndTimes;
     vector<vector<unsigned long int>> *m_commReceivedEndTimes;
     vector<string> m_names;
-    map<string, string> m_arguments;
+    vector<pair<string, string>> m_arguments;
 
     string m_protocolName;
     int m_partyId = 0;

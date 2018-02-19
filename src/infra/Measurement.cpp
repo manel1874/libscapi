@@ -53,17 +53,18 @@ void Measurement::setTaskNames(vector<string> & names)
 void Measurement::init(Protocol &protocol)
 {
     m_arguments = protocol.getArguments();
-    m_protocolName = m_arguments["protocolName"];
-    m_numberOfIterations = stoi(m_arguments["internalIterationsNumber"]);
-    map<string, string>::iterator it = m_arguments.find("partyID");
-    if(it != m_arguments.end())
+    CmdParser parser = protocol.getParser();
+    m_protocolName = parser.getValueByKey(m_arguments, "protocolName");
+    m_numberOfIterations = stoi(parser.getValueByKey(m_arguments,"internalIterationsNumber"));
+    string partyId = parser.getValueByKey(m_arguments, "partyID");
+    if(partyId.compare("NotFound") != 0)
     {
-        m_partyId =  stoi(m_arguments["partyID"]);
+        m_partyId =  stoi(partyId);
     }
 
-    string partiesFile = m_arguments["partiesFile"];
-    m_numOfParties = atoi(m_arguments["partiesNumber"].c_str());
+    string partiesFile = parser.getValueByKey(m_arguments, "partiesFile");
     setCommInterface(partiesFile);
+    m_numOfParties = atoi(parser.getValueByKey(m_arguments, "partiesNumber").c_str());
 }
 
 void Measurement::init(vector <string> names)
@@ -188,14 +189,11 @@ tuple<unsigned long int, unsigned long int> Measurement::commData(const char * n
 void Measurement::analyze(string type)
 {
     string filePath = getcwdStr();
-    string fileName = filePath + "/" + m_protocolName + "_" + type + "_partyId=" + to_string(m_partyId)
-                      +"_numOfParties=" + to_string(m_numOfParties);
+    string fileName = filePath + "/" + m_protocolName + "*" + type;
 
-    cout << "******************************* size is : " << m_arguments.size() << endl;
-
-    for ( auto const& x : m_arguments)
+    for (int idx = 1; idx< m_arguments.size(); idx++)
     {
-        fileName += "_" + x.second;
+        fileName += "*" + m_arguments[idx].second;
 
     }
     fileName += ".json";
