@@ -141,7 +141,7 @@ compile-openssl:
 	echo "Compiling the openssl library"
 	@cp -r lib/openssl/ $(builddir)/openssl
 	export CFLAGS="-fPIC"	
-	cd $(builddir)/openssl/; ./config --prefix=$(builddir)/openssl/tmptrgt -no-shared
+	cd $(builddir)/openssl/; ./config --prefix=$(builddir)/openssl/tmptrgt  enable-ec_nistp_64_gcc_128 -no-shared
 	cd $(builddir)/openssl/; make 
 	cd $(builddir)/openssl/; make install
 	@cp $(builddir)/openssl/tmptrgt/lib/*.a $(CURDIR)/install/lib/
