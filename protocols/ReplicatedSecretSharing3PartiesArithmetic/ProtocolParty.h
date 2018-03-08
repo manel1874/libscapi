@@ -64,7 +64,7 @@ private:
     int shareIndex; // number of shares for inputs
     int mult_count = 0;
 
-    vector<int> myInputs;
+    vector<long> myInputs;
     string s;
 
     shared_ptr<CommParty> leftChannel; // the channel with party i minus 1
@@ -278,7 +278,7 @@ template <class FieldType>
 void ProtocolParty<FieldType>::readMyInputs()
 {
     ifstream myfile;
-    int input;
+    long input;
     int i =0;
     myfile.open(inputsFile);
     do {
@@ -1153,6 +1153,16 @@ int ProtocolParty<FieldType>::processNotMult(){
 
             gateShareArr[circuit.getGates()[k].output * 2] = gateShareArr[circuit.getGates()[k].input1 * 2]; // t
             gateShareArr[(circuit.getGates()[k].output * 2) + 1] = gateShareArr[(circuit.getGates()[k].input1 * 2) + 1] * e; // s*e
+
+            count++;
+        }
+        else if(circuit.getGates()[k].gateType == SCALAR_ADD)
+        {
+            long scalar(circuit.getGates()[k].input2);
+            FieldType e = field->GetElement(scalar);
+
+            gateShareArr[circuit.getGates()[k].output * 2] = gateShareArr[circuit.getGates()[k].input1 * 2]; // t
+            gateShareArr[(circuit.getGates()[k].output * 2) + 1] = gateShareArr[(circuit.getGates()[k].input1 * 2) + 1] - e; // s-e
 
             count++;
         }
