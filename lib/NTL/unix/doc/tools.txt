@@ -93,7 +93,7 @@ void swap(int& a, int& b);
 
 // The following platform-dependent macros are defined:
 
-#define NTL_BITS_PER_LONG      (...)  /* bits in a long */
+#define NTL_SP_BOUND      (...)  /* bits in a long */
 #define NTL_MAX_LONG           (...)  /* max value of a long */
 #define NTL_MIN_LONG           (...)  /* min value of a long */
 
