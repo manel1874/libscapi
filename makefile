@@ -172,12 +172,9 @@ compile-json:
 compile-libote:compile-boost
 	@echo "Compiling libOTe library..."
 	@cp -r lib/libOTe $(builddir)/libOTe
-	@mkdir -p $(builddir)/libOTe/cryptoTools/thirdparty/linux/miracl/
-	@mv $(builddir)/libOTe/cryptoTools/thirdparty/linux/miracl2/* $(builddir)/libOTe/cryptoTools/thirdparty/linux/miracl/
 	@cmake $(builddir)/libOTe/CMakeLists.txt -DCMAKE_BUILD_TYPE=Release
 	@$(MAKE) -C $(builddir)/libOTe/
 	@cp $(builddir)/libOTe/lib/*.a $(CURDIR)/install/lib/
-	@cp $(builddir)/libOTe/cryptoTools/thirdparty/linux/miracl/miracl/source/libmiracl.a $(CURDIR)/install/lib/
 	@mv $(CURDIR)/install/lib/liblibOTe.a $(CURDIR)/install/lib/libOTe.a
 	@mkdir -p $(CURDIR)/install/include/libOTe
 	@cd $(builddir)/libOTe/ && find . -name "*.h" -type f |xargs -I {} cp --parents {} $(CURDIR)/install/include/libOTe
