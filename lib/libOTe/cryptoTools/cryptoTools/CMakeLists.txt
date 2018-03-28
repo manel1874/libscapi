@@ -74,7 +74,7 @@ install(TARGETS cryptoTools DESTINATION lib)
 ## Miracl
 ###########################################################################
 
-set(Miracl_Dirs "${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/linux/miracl/")
+set(Miracl_Dirs "${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/")
 
 set(Miracl_Lib_Dirs "${Miracl_Dirs}/miracl/source/")
 find_library(MIRACL_LIB NAMES miracl  HINTS "${Miracl_Lib_Dirs}")
@@ -94,21 +94,20 @@ target_link_libraries(cryptoTools ${MIRACL_LIB})
 ## Boost
 ###########################################################################
 
-set(BOOST_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/linux/boost/")
+set(BOOST_ROOT "$ENV{HOME}/libscapi/install/include")
+set(Boost_INCLUDE_DIR "$ENV{HOME}/libscapi/install/include")
+link_directories($ENV{HOME}/libscapi/install/lib/)
 
 set(Boost_USE_STATIC_LIBS        ON) # only find static libs
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_USE_STATIC_RUNTIME     ON)
 
-find_package(Boost COMPONENTS system thread)
 
-if(NOT Boost_FOUND)
-    message(FATAL_ERROR "Failed to find boost at " ${Boost_Lib_Dirs} " Need system thread")
-endif()
+target_include_directories(cryptoTools PUBLIC ${Boost_INCLUDE_DIR})
+target_link_libraries(cryptoTools libboost_system.a libboost_thread.a libssl.a libcrypto.a dl z)
 
-#include_directories(${Boost_INCLUDE_DIR}) 
 
-target_include_directories(cryptoTools PUBLIC ${Boost_INCLUDE_DIR}) 
-target_link_libraries(cryptoTools ${Boost_LIBRARIES})
-
-message(STATUS "Boost_LIBS ${Boost_LIBRARIES}" )
+IF(INSTALL_BOOST)
+  INSTALL(DIRECTORY "${Boost_INCLUDE_DIR}/boost" DESTINATION include)
+  INSTALL(FILES ${Boost_LIBRARIES} DESTINATION lib)
+ENDIF(INSTALL_BOOST)
