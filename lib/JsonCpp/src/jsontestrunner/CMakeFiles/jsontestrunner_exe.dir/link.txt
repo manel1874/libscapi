@@ -1,1 +1,0 @@
-/usr/bin/c++    -Wall -Wconversion -Wshadow -Wextra -pedantic -O3 -DNDEBUG   CMakeFiles/jsontestrunner_exe.dir/main.cpp.o  -o jsontestrunner_exe -rdynamic ../lib_json/libjsoncpp.a 
