@@ -191,7 +191,7 @@ public:
 	*					are all used up, or throws an exception if the user asks for more randoms.
 	*					If isStrict is true, the user can only use cachedSize*16 random bytes.		
 	*/
-	PrgFromOpenSSLAES( int cachedSize = DEFAULT_NUM_OF_RANDOMS, bool isStrict = false);
+	PrgFromOpenSSLAES( int cachedSize = DEFAULT_NUM_OF_RANDOMS, bool isStrict = false, byte * cache_prealloc = nullptr);
 
 	//move assignment
 	PrgFromOpenSSLAES& operator=(PrgFromOpenSSLAES&& other);
@@ -228,6 +228,8 @@ public:
 	*/
 	void getPRGBytes(vector<byte> & outBytes, int outOffset, int outLen) override;
 
+	byte * getPRGBytesEX(int outLen);
+	
 	/**
 	* @returns a random variable of the required length (32,64,128). This bytes are set to used and will not be used again
 	* Note that if all the randoms are used a new fresh randoms are genereted unless the isStrict flag is set to true
