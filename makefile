@@ -125,7 +125,6 @@ ifeq ($(SUMO),yes)
 	@touch compile-emp-m2pc
 endif
 
-
 compile-blake:
 	@echo "Compiling the BLAKE2 library"
 	@mkdir -p $(builddir)/BLAKE2/
@@ -171,6 +170,7 @@ compile-libote:compile-boost
 	@mkdir -p $(CURDIR)/install/include/libOTe
 	@cd $(builddir)/libOTe/ && find . -name "*.h" -type f |xargs -I {} cp --parents {} $(CURDIR)/install/include/libOTe
 	@cp -r $(builddir)/libOTe/cryptoTools/cryptoTools/gsl $(CURDIR)/install/include/libOTe/cryptoTools/cryptoTools
+	@cp $(builddir)/libOTe/cryptoTools/thirdparty/miracl/source/libmiracl.a $(CURDIR)/install/lib
 	@touch compile-libote
 
 compile-ntl:

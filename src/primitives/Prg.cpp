@@ -103,12 +103,18 @@ void ScPrgFromPrf::increaseCtr() {
 	}
 }
 
-PrgFromOpenSSLAES::PrgFromOpenSSLAES(int cachedSize, bool isStrict) : cachedSize(cachedSize), isStrict(isStrict) {
+PrgFromOpenSSLAES::PrgFromOpenSSLAES(int cachedSize, bool isStrict, byte * cache_prealloc ) : cachedSize(cachedSize), isStrict(isStrict) {
 
 
 	//allocate memory for the plaintext which is an array of indices and for the ciphertext which is the output
 	//of the encryption
-	cipherChunk = (block *)_mm_malloc(sizeof(block) * cachedSize, 16);
+	if (cache_prealloc == nullptr) {
+		cipherChunk = (block *)_mm_malloc(sizeof(block) * cachedSize, 16);
+	}
+	else {
+		cipherChunk = (block *) cache_prealloc; 
+	}
+		
 	indexPlaintext = (block *)_mm_malloc(sizeof(block) * cachedSize, 16);
 
 	//assin zero to the array of indices which are set as the plaintext. Note that we only use the list sagnificant long part of each 128 bit.
@@ -230,6 +236,19 @@ void PrgFromOpenSSLAES::getPRGBytes(vector<byte> & outBytes, int outOffset, int 
 
 	//increment the byte counter 
 	idxForBytes += outLen;
+}
+
+byte * PrgFromOpenSSLAES::getPRGBytesEX(int outLen)
+{
+	//key must be set in order to get randoms
+	if (!isKeySet())
+		throw IllegalStateException("secret key isn't set");
+	prepare();
+	byte* cipherInBytes = (byte*)cipherChunk;
+	return cipherInBytes;
+
+	
+
 }
 
 void PrgFromOpenSSLAES::prepare() {

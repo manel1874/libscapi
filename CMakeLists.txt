@@ -48,7 +48,6 @@ set(SOURCE_FILES
         src/interactive_mid_protocols/CommitmentSchemeSimpleHash.cpp
         src/interactive_mid_protocols/OT.cpp
         src/interactive_mid_protocols/OTExtensionBristol.cpp
-        src/interactive_mid_protocols/OTExtensionLibote.cpp
         src/interactive_mid_protocols/OTFullSimulation.cpp
         src/interactive_mid_protocols/OTFullSimulationROM.cpp
         src/interactive_mid_protocols/OTOneSidedSimulation.cpp
