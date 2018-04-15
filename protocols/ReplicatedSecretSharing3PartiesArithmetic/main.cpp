@@ -17,13 +17,10 @@ using namespace std::chrono;
  */
 int main(int argc, char* argv[])
 {
-
-
-
     CmdParser parser;
     auto parameters = parser.parseArguments("", argc, argv);
-    string fieldType(parameters["fieldType"]);
-    int times = stoi(parameters["internalIterationsNumber"]);
+    string fieldType(parser.getValueByKey(parameters, "fieldType"));
+    int times = stoi(parser.getValueByKey(parameters, "internalIterationsNumber"));
 
     if(fieldType.compare("ZpMersenne") == 0)
     {
@@ -37,7 +34,6 @@ int main(int argc, char* argv[])
         cout << "time in milliseconds for " << times << " runs: " << duration << endl;
 
         cout << "end main" << '\n';
-
     }
 
     if(fieldType.compare("ZpMersenne61") == 0)
@@ -52,10 +48,7 @@ int main(int argc, char* argv[])
         cout << "time in milliseconds for " << times << " runs: " << duration << endl;
 
         cout << "end main" << '\n';
-
     }
-
-
 
     return 0;
 }

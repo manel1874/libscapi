@@ -1,8 +1,7 @@
 #include "Rr17NcoOtSender.h"
+#include <cryptoTools/Common/ByteStream.h>
 
-
-#include <cryptoTools/Network/Channel.h>
-#include <cryptoTools/Crypto/sha1.h>
+#include <cryptoTools/Common/Log.h>
 namespace osuCrypto
 {
 
@@ -13,7 +12,7 @@ namespace osuCrypto
     }
 
     void Rr17NcoOtSender::setBaseOts(
-        span<block> baseRecvOts, const BitVector & choices)
+        ArrayView<block> baseRecvOts, const BitVector & choices)
     {
         mKos.setBaseOts(baseRecvOts, choices);
     }
@@ -21,19 +20,16 @@ namespace osuCrypto
     std::unique_ptr<NcoOtExtSender> Rr17NcoOtSender::split()
     {
         auto ret = std::unique_ptr<NcoOtExtSender>(new Rr17NcoOtSender());
-        if (hasBaseOts())
+
+        std::vector<block> baseOts(mKos.mBaseChoiceBits.size());
+
+        for (u64 i = 0; i < baseOts.size(); ++i)
         {
-
-            std::vector<block> baseOts(mKos.mBaseChoiceBits.size());
-
-            for (u64 i = 0; i < baseOts.size(); ++i)
-            {
-                baseOts[i] = mKos.mGens[i].get<block>();
-            }
-
-            ret->setBaseOts(baseOts, mKos.mBaseChoiceBits);
+            baseOts[i] = mKos.mGens[i].get<block>();
         }
-        ((Rr17NcoOtSender*)ret.get())->mInputByteCount = mInputByteCount;
+
+        ret->setBaseOts(baseOts, mKos.mBaseChoiceBits);
+        ((Rr17NcoOtSender*)ret.get())->mEncodeSize = mEncodeSize;
 
         return std::move(ret);
     }
@@ -41,7 +37,7 @@ namespace osuCrypto
     void Rr17NcoOtSender::init(u64 numOtExt, PRNG& prng, Channel& chl)
     {
 
-        mMessages.resize(numOtExt * mInputByteCount * 8);
+        mMessages.resize(numOtExt * mEncodeSize);
         prng.mAes.ecbEncCounterMode(prng.mBlockIdx, mMessages.size() * 2, (block*)mMessages.data());
         prng.mBlockIdx += mMessages.size() * 2;
 
@@ -49,7 +45,7 @@ namespace osuCrypto
         mCorrection.resize(mMessages.size());
 
         u8* buff(new u8[mMessages.size() * sizeof(std::array<block, 2>)]);
-        span<std::array<block, 2>> view((std::array<block, 2>*)buff, mMessages.size());
+        ArrayView<std::array<block, 2>> view((std::array<block, 2>*)buff, mMessages.size());
         //std::cout << "ots = " << log2(view.size()) << std::endl;
         //std::cout << IoStream::lock;
         mKos.send(view, prng, chl);
@@ -94,11 +90,34 @@ namespace osuCrypto
 
     }
 
+    //static const u8 bitMasks[8]{ 0,1,3,7,15,31,63, 127 };
+
+    //inline block shiftRight(block v, u8 n)
+    //{
+    //    auto v1 = _mm_srli_epi64(v, n);
+    //    auto v2 = _mm_srli_si128(v, 8);
+    //    v2 = _mm_slli_epi64(v2, 64 - (n));
+    //    return _mm_or_si128(v1, v2);
+    //}
+
+    //block loadFromBit(u8* data, u64 bitPosition)
+    //{
+
+    //    data += bitPosition / 8;
+    //    bitPosition = bitPosition % 8;
+
+    //    block ret = toBlock(data);
+    //    shiftRight(ret, bitPosition);
+
+    //    *(u8*)&ret |= data[sizeof(block)] & bitMasks[bitPosition];
+
+    //    return ret;
+    //}
 
     void Rr17NcoOtSender::encode(
         u64 otIdx,
-        const void* input,
-        void* dest,
+        const block* choiceWord,
+        u8* dest,
         u64 destSize)
     {
 
@@ -107,13 +126,12 @@ namespace osuCrypto
 //            throw std::runtime_error(LOCATION);
 //#endif
         //BitVector mCorrections;
-        block correction = toBlock(mCorrection.data() + otIdx * mInputByteCount);
-        block choice = ZeroBlock;
-        memcpy(&choice, input, mInputByteCount);
-        choice = choice ^ correction;
+
+        block correction = toBlock(mCorrection.data() + otIdx * mEncodeSize / 8);
+        block choice = choiceWord[0] ^ correction;
 
         BitIterator iter((u8*)&choice, 0);
-        otIdx *= mInputByteCount * 8;
+        otIdx *= mEncodeSize;
 
         //encoding = ZeroBlock;
         //for (u64 i = 0; i < mEncodeSize; ++i)
@@ -122,32 +140,41 @@ namespace osuCrypto
         SHA1 sha;
         u8 buff[SHA1::HashSize];
 
-        for (u64 i = 0; i < (mInputByteCount*8); ++i)
+        for (u64 i = 0; i < mEncodeSize; ++i)
             sha.Update(mMessages[otIdx++][*iter++]);
 
-        sha.Update((u8*)input, mInputByteCount);
+        sha.Update((u8*)choiceWord, mEncodeSize / 8);
         sha.Final(buff);
         memcpy(dest, buff, std::min<u64>(SHA1::HashSize, destSize));
         //encoding = *(block*)buff;
     }
 
-    void Rr17NcoOtSender::configure(
+    void Rr17NcoOtSender::getParams(
         bool maliciousSecure,
+        u64 compSecParm,
         u64 statSecParam,
-        u64 inputBitCount)
+        u64 inputBitCount,
+        u64 inputCount,
+        u64 & inputBlkSize,
+        u64 & baseOtCount)
     {
         if (maliciousSecure == false)
+            throw std::runtime_error(LOCATION);
+
+        if (compSecParm != 128)
             throw std::runtime_error(LOCATION);
 
         if (inputBitCount > 128)
             throw std::runtime_error(LOCATION);
 
-        mInputByteCount = (inputBitCount + 7) / 8; 
+        mEncodeSize = roundUpTo(inputBitCount, 8);
+        inputBlkSize = (inputBitCount + 127) / 128;
+        baseOtCount = 128;
     }
 
     void Rr17NcoOtSender::recvCorrection(Channel & chl, u64 recvCount)
     {
-        auto size = recvCount * mInputByteCount;
+        auto size = recvCount * mEncodeSize / 8;
         chl.recv(mCorrection.data() + mCorrectionIdx, size);
         mCorrectionIdx += size;
     }

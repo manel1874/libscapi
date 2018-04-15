@@ -136,6 +136,9 @@ void ArithmeticCircuit::readCircuit(const char* fileName)
             else if(type==6){
                 nrOfSubtractionGates++;
             }
+            else if(type==7){
+                nrOfScalarMultGates++;
+            }
 
         }
 
@@ -177,15 +180,13 @@ void ArithmeticCircuit::reArrangeCircuit() {
     int numOfGates = getNrOfGates();
     vector<TGate> arrangedGates(getNrOfGates());
     vector<long> newOrderedIndices(getNrOfGates());
-    vector<bool> gateDoneArr(getNrOfGates());
+    vector<bool> gateDoneArr(getNrOfGates(),false);
+    vector<bool> isWireReady(getNrOfGates(), false);
 
-    for(int i=0; i<gateDoneArr.size(); i++)
-    {
-        gateDoneArr[i] = false;
-    }
 
     for(int i=0; i<nrOfInputGates; i++){
         gateDoneArr[i] = true;
+        isWireReady[i] = true;
         newOrderedIndices[i] = i;
     }
 
@@ -205,29 +206,33 @@ void ArithmeticCircuit::reArrangeCircuit() {
         loopCount=count;
         for(int k=(nrOfInputGates); k < (numOfGates - nrOfOutputGates); k++)
         {
-            if(gates[k].gateType==5){
-                if(!gateDoneArr[k] && gateDoneArr[gates[k].input1])
-                {
-                    //gateDoneArr[k] = true;
 
+            if(gates[k].gateType==5 || gates[k].gateType==7){
+                if(!gateDoneArr[k] && isWireReady[gates[k].input1])
+                {
                     newOrderedIndices[count] = k;
                     count++;
+                    isWireReady[gates[k].output] = true;
                 }
             }
 
-            else if(!gateDoneArr[k] && gateDoneArr[gates[k].input1]
-               && gateDoneArr[gates[k].input2])
+            else if(!gateDoneArr[k] && isWireReady[gates[k].input1]
+                    && isWireReady[gates[k].input2])
             {
-                //gateDoneArr[k] = true;
-
                 newOrderedIndices[count] = k;
                 count++;
+                if(gates[k].gateType!=2) {//not a mult gate
+                    isWireReady[gates[k].output] = true;
+                }
             }
+
+
 
         }
 
         for(int i=loopCount; i<count; i++){
             gateDoneArr[newOrderedIndices[i]] = true;
+            isWireReady[gates[newOrderedIndices[i]].output] = true;
 
         }
 

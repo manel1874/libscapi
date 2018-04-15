@@ -52,18 +52,19 @@ void Measurement::setTaskNames(vector<string> & names)
 
 void Measurement::init(Protocol &protocol)
 {
-    map<string, string> arguments = protocol.getArguments();
-    m_protocolName = arguments["protocolName"];
-    m_numberOfIterations = stoi(arguments["internalIterationsNumber"]);
-    map<string, string>::iterator it = arguments.find("partyID");
-    if(it != arguments.end())
+    m_arguments = protocol.getArguments();
+    CmdParser parser = protocol.getParser();
+    m_protocolName = parser.getValueByKey(m_arguments, "protocolName");
+    m_numberOfIterations = stoi(parser.getValueByKey(m_arguments,"internalIterationsNumber"));
+    string partyId = parser.getValueByKey(m_arguments, "partyID");
+    if(partyId.compare("NotFound") != 0)
     {
-        m_partyId =  stoi(arguments["partyID"]);
+        m_partyId =  stoi(partyId);
     }
 
-    string partiesFile = arguments["partiesFile"];
-    m_numOfParties = atoi(arguments["partiesNumber"].c_str());
+    string partiesFile = parser.getValueByKey(m_arguments, "partiesFile");
     setCommInterface(partiesFile);
+    m_numOfParties = atoi(parser.getValueByKey(m_arguments, "partiesNumber").c_str());
 }
 
 void Measurement::init(vector <string> names)
@@ -188,8 +189,14 @@ tuple<unsigned long int, unsigned long int> Measurement::commData(const char * n
 void Measurement::analyze(string type)
 {
     string filePath = getcwdStr();
-    string fileName = filePath + "/" + m_protocolName + "_" + type + "_partyId=" + to_string(m_partyId)
-                      +"_numOfParties=" + to_string(m_numOfParties) + ".json";
+    string fileName = filePath + "/" + m_protocolName + "*" + type;
+
+    for (int idx = 1; idx< m_arguments.size(); idx++)
+    {
+        fileName += "*" + m_arguments[idx].second;
+
+    }
+    fileName += ".json";
 
     //party is the root of the json objects
     json party = json::array();
@@ -260,5 +267,12 @@ Measurement::~Measurement()
     analyzeCommSentData();
     analyzeCommReceivedData();
     analyzeMemory();
+    delete m_cpuStartTimes;
+    delete m_commSentStartTimes;
+    delete m_commReceivedStartTimes;
+    delete m_memoryUsage;
+    delete m_cpuEndTimes;
+    delete m_commSentEndTimes;
+    delete m_commReceivedEndTimes;
 }
 

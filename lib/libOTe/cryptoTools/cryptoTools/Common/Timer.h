@@ -31,6 +31,5 @@ namespace osuCrypto
 
         void reset();
     };
-	extern Timer gTimer;
-
+     
 }

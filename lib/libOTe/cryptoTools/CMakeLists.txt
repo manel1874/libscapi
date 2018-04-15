@@ -1,6 +1,7 @@
 cmake_minimum_required (VERSION 2.8)
 
-if("${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_SOURCE_DIR}")
+if(hasParent)
+else()
 
 	############################################
 	#          If top level cmake              #
@@ -11,7 +12,7 @@ if("${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_SOURCE_DIR}")
 	set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/lib)
 
 	
-	set(CMAKE_C_FLAGS "-ffunction-sections -Wall  -maes -msse2 -msse4.1 -mpclmul -Wfatal-errors -pthread -fPIC -Wno-ignored-attributes")
+	set(CMAKE_C_FLAGS "-ffunction-sections -Wall  -maes -msse2 -msse4.1 -mpclmul -Wfatal-errors -pthread")
 	set(CMAKE_CXX_FLAGS  "${CMAKE_C_FLAGS}  -std=c++14")
 
 	
@@ -55,5 +56,3 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 add_subdirectory(cryptoTools)
 add_subdirectory(tests_cryptoTools)
 add_subdirectory(frontend_cryptoTools)
-
-install(FILES cryptotools-config.cmake DESTINATION cmake/)

@@ -1,10 +1,9 @@
 #include "AknOtReceiver.h"
 #include <cryptoTools/Common/Log.h>
-#include <cryptoTools/Common/Timer.h>
-#include <cryptoTools/Crypto/sha1.h>
-
 #include "libOTe/Base/naor-pinkas.h"
+#include <cryptoTools/Common/Timer.h>
 #include "libOTe/TwoChooseOne/LzKosOtExtReceiver.h"
+
 
 namespace osuCrypto
 {
@@ -19,20 +18,20 @@ namespace osuCrypto
     }
 
     void AknOtReceiver::init(u64 totalOTCount, u64 numberOfOnes, double p,
-        OtExtReceiver & ots, span<Channel> chls, PRNG & prng)
+        OtExtReceiver & ots, ArrayView<Channel> chls, PRNG & prng)
     {
 
         auto& chl0 = chls[0];
 
         if (ots.hasBaseOts() == false)
-        {
+        { 
             std::array<std::array<block, 2>, gOtExtBaseOtCount> baseMsg;
 
             NaorPinkas base;
             base.send(baseMsg, prng, chl0, 2);
             ots.setBaseOts(baseMsg);
         }
-
+         
         mMessages.resize(totalOTCount);
         mChoices.nChoosek(totalOTCount, numberOfOnes, prng);
 
@@ -63,19 +62,26 @@ namespace osuCrypto
             BitVector choices;
             choices.copy(mChoices, start, end - start);
 
+            u8 shaBuff[SHA1::HashSize];
             // do the OT extension for this range of messages.
             PRNG prng(extSeed);
             //std::cout << IoStream::lock << "recv 0 "  << end << std::endl;
             otExt.receive(choices, range, prng, chl);
 
 
-            // ok, OTs are done.
+            //for (u64 k = 0; k < range.size();++k)
+            //{
+            //    std::cout << k << " * " << range[k] << std::endl;
+            //}
+            //std::cout << IoStream::unlock;
+
+            // ok, OTs are done. 
             if (t == 0)
             {
                 gTimer.setTimePoint("AknOt.extDone");
                 // if thread 0, get the seed that determines the cut and choose.
                 block cncRootSeed;
-                chl.recv((u8*)&cncRootSeed, sizeof(block));
+                chl.recv(&cncRootSeed, sizeof(block));
                 PRNG gg(cncRootSeed);
 
                 gTimer.setTimePoint("AknOt.CncSeedReceived");
@@ -102,7 +108,7 @@ namespace osuCrypto
             auto openChoiceIter = choiceBuff->begin();
             auto choiceIter = mChoices.begin() + start;
 
-            // the index of the current openChoiceIter.
+            // the index of the current openChoiceIter. 
             u64 j = 0;
 
             //create a local list of ones and zero indices.
@@ -112,6 +118,8 @@ namespace osuCrypto
             double oneFrac(double(numberOfOnes) / mMessages.size());
             u64 expectZerosCount((u64)(mMessages.size() *(1 - oneFrac) / chls.size() * 1.5));
             u64 expectOnesCount((u64)(mMessages.size() * oneFrac / chls.size() * 1.5));
+
+            //std::cout << IoStream::lock << "recv " << end << "  " << px << std::endl;
 
             // reserve that must space.
             zeroOneLists[0].reserve(expectZerosCount);
@@ -123,6 +131,9 @@ namespace osuCrypto
                 // this is the value of our choice bit at index i
                 const u8 cc = *choiceIter;
                 ++choiceIter;
+
+                //if (i < 100)
+                //    std::cout << mMessages[i] << " " << "  " << i << "  " << (u32)cc << std::endl;
 
                 // if cc = 1, then this OT message should be opened.
                 auto vv = cncGens[t].get<u32>();
@@ -139,7 +150,9 @@ namespace osuCrypto
                         openChoiceIter = choiceBuff->begin();
                         j = 0;
 
+                        //std::cout <<   "   " << i << std::endl;
                     }
+                    //std::cout << (u32)cc;
                     // copy our choice bit into the buffer
                     *openChoiceIter = cc;
                     ++openChoiceIter;
@@ -153,12 +166,14 @@ namespace osuCrypto
 
                         SHA1 sha;
                         sha.Update(mMessages[i]);
-                        sha.Final(mMessages[i]);
+                        sha.Final(shaBuff);
+                        mMessages[i] = *(block*)shaBuff;
                     }
 
                     // keep a running sum of the OT messages that are opened in this thread.
                     partialSum = partialSum ^ mMessages[i];
 
+                    //std::cout << mMessages[i] << " " << partialSum << "  " << i<< "  "<< (u32)cc<< "  " << vv<< std::endl;
                 }
                 else
                 {
@@ -184,7 +199,10 @@ namespace osuCrypto
                 totalSum = totalSum ^ partialSum;
             }
 
-            // now move the list list into the shared list.
+            //std::cout << std::endl << IoStream::unlock;
+
+
+            // now move the list list into the shared list. 
             // We didn't initially do this to prevent false sharing
             threadsZeroOnesList[t][0] = std::move(zeroOneLists[0]);
             threadsZeroOnesList[t][1] = std::move(zeroOneLists[1]);
@@ -193,7 +211,7 @@ namespace osuCrypto
             // now indicate that we are done. If we are last, set the promise.
             u32 d = --remaining;
             if (d == 0)
-                doneProm.set_value();
+                doneProm.set_value(); 
 
 
             if (t == 0)
@@ -207,7 +225,7 @@ namespace osuCrypto
                 // all other threads have finished.
 
                 // send the other guy the sum of our ot messages as proof.
-                chl0.asyncSendCopy((u8*)&totalSum, sizeof(block));
+                chl0.asyncSendCopy(&totalSum, sizeof(block));
 
 
                 // now merge and shuffle all the indices for the one OT messages
@@ -230,7 +248,7 @@ namespace osuCrypto
                 std::random_shuffle(mOnes.begin(), mOnes.begin(), prng);
 
             }
-
+            
             if (t == 1 || chls.size() == 1)
             {
                 // now merge and shuffle all the indices for the zero OT messages
@@ -271,7 +289,7 @@ namespace osuCrypto
 
             // create a seed for it.
             block seed = prng.get<block>();
-
+            
             //compute the thread idk t
             u64 t = i + 1;
 

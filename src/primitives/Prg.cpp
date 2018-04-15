@@ -243,12 +243,12 @@ byte * PrgFromOpenSSLAES::getPRGBytesEX(int outLen)
 	//key must be set in order to get randoms
 	if (!isKeySet())
 		throw IllegalStateException("secret key isn't set");
-//	idxForBytes=0;
 	prepare();
 	byte* cipherInBytes = (byte*)cipherChunk;
 	return cipherInBytes;
 
 	
+
 }
 
 void PrgFromOpenSSLAES::prepare() {

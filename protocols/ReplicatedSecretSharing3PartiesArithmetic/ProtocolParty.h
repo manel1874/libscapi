@@ -64,7 +64,7 @@ private:
     int shareIndex; // number of shares for inputs
     int mult_count = 0;
 
-    vector<int> myInputs;
+    vector<long> myInputs;
     string s;
 
     shared_ptr<CommParty> leftChannel; // the channel with party i minus 1
@@ -208,9 +208,9 @@ public:
 template <class FieldType>
 ProtocolParty<FieldType>::ProtocolParty(int argc, char* argv[]) : Protocol("Replicated secret sharing 3 parties arithmetic", argc, argv) {
 
-    this->times = stoi(arguments["internalIterationsNumber"]);
+    this->times = stoi(this->getParser().getValueByKey(arguments, "internalIterationsNumber"));
 
-    string fieldType = arguments["fieldType"];
+    string fieldType = this->getParser().getValueByKey(arguments, "fieldType");
     if(fieldType.compare("ZpMersenne") == 0)
     {
         field = new TemplateField<FieldType>(2147483647);
@@ -219,15 +219,15 @@ ProtocolParty<FieldType>::ProtocolParty(int argc, char* argv[]) : Protocol("Repl
     {
         field = new TemplateField<FieldType>(0);
     }
-    this->inputsFile = arguments["inputFile"];
-    this->outputFile = arguments["outputFile"];
+    this->inputsFile = this->getParser().getValueByKey(arguments, "inputFile");
+    this->outputFile = this->getParser().getValueByKey(arguments, "outputFile");
 
-    m_partyId = stoi(arguments["partyID"]);
+    m_partyId = stoi(this->getParser().getValueByKey(arguments, "partyID"));
 
     vector<string> subTaskNames{"Offline", "GenerateRandomness", "Online", "InputPreparation", "ComputationPhase", "Verification", "OutputPhase"};
     timer = new Measurement(*this, subTaskNames);
     s = to_string(m_partyId);
-    circuit.readCircuit(arguments["circuitFile"].c_str());
+    circuit.readCircuit(this->getParser().getValueByKey(arguments, "circuitFile").c_str());
     circuit.reArrangeCircuit();
     M = circuit.getNrOfGates();
     numOfInputGates = circuit.getNrOfInputGates();
@@ -235,7 +235,8 @@ ProtocolParty<FieldType>::ProtocolParty(int argc, char* argv[]) : Protocol("Repl
     myInputs.resize(numOfInputGates);
     shareIndex = numOfInputGates;
 
-    parties = MPCCommunication::setCommunication(io_service, m_partyId, N, arguments["partiesFile"]);
+    parties = MPCCommunication::setCommunication(io_service, m_partyId, N,
+                this->getParser().getValueByKey(arguments, "partiesFile"));
 
     int R = 0, L = 1; // TO DO: communication
 
@@ -278,7 +279,7 @@ template <class FieldType>
 void ProtocolParty<FieldType>::readMyInputs()
 {
     ifstream myfile;
-    int input;
+    long input;
     int i =0;
     myfile.open(inputsFile);
     do {
@@ -1153,6 +1154,16 @@ int ProtocolParty<FieldType>::processNotMult(){
 
             gateShareArr[circuit.getGates()[k].output * 2] = gateShareArr[circuit.getGates()[k].input1 * 2]; // t
             gateShareArr[(circuit.getGates()[k].output * 2) + 1] = gateShareArr[(circuit.getGates()[k].input1 * 2) + 1] * e; // s*e
+
+            count++;
+        }
+        else if(circuit.getGates()[k].gateType == SCALAR_ADD)
+        {
+            long scalar(circuit.getGates()[k].input2);
+            FieldType e = field->GetElement(scalar);
+
+            gateShareArr[circuit.getGates()[k].output * 2] = gateShareArr[circuit.getGates()[k].input1 * 2]; // t
+            gateShareArr[(circuit.getGates()[k].output * 2) + 1] = gateShareArr[(circuit.getGates()[k].input1 * 2) + 1] - e; // s-e
 
             count++;
         }

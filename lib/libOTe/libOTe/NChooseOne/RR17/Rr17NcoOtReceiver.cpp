@@ -1,7 +1,7 @@
 #include "Rr17NcoOtReceiver.h"
+#include <cryptoTools/Common/ByteStream.h>
+#include <cryptoTools/Common/Log.h>
 
-#include <cryptoTools/Network/Channel.h>
-#include <cryptoTools/Crypto/sha1.h>
 namespace osuCrypto
 {
 
@@ -18,7 +18,7 @@ namespace osuCrypto
     {
         return mKos.hasBaseOts();
     }
-    void Rr17NcoOtReceiver::setBaseOts(span<std::array<block, 2>> baseRecvOts)
+    void Rr17NcoOtReceiver::setBaseOts(ArrayView<std::array<block, 2>> baseRecvOts)
     {
         mKos.setBaseOts(baseRecvOts);
     }
@@ -26,18 +26,15 @@ namespace osuCrypto
     {
         auto ret = std::unique_ptr<NcoOtExtReceiver>(new Rr17NcoOtReceiver());
 
-        if (hasBaseOts())
+        std::vector<std::array<block,2>> baseOts(mKos.mGens.size());
+
+        for (u64 i = 0; i < baseOts.size(); ++i)
         {
-            std::vector<std::array<block, 2>> baseOts(mKos.mGens.size());
-
-            for (u64 i = 0; i < baseOts.size(); ++i)
-            {
-                baseOts[i][0] = mKos.mGens[i][0].get<block>();
-                baseOts[i][1] = mKos.mGens[i][1].get<block>();
-            }
-
-            ret->setBaseOts(baseOts);
+            baseOts[i][0] = mKos.mGens[i][0].get<block>();
+            baseOts[i][1] = mKos.mGens[i][1].get<block>();
         }
+
+        ret->setBaseOts(baseOts);
 
         ((Rr17NcoOtReceiver*)ret.get())->mEncodeSize = mEncodeSize;
 
@@ -62,8 +59,8 @@ namespace osuCrypto
         auto stepSize = 1 << 24;
         auto count = (mMessages.size() + stepSize - 1) / stepSize;
 
-        std::vector<std::array<block, 2>> buff(std::min<u64>(mMessages.size(), stepSize));
-        auto& view = buff;
+        Buff buff(std::min<u64>(mMessages.size(), stepSize) * sizeof(std::array<block, 2>));
+        auto view = buff.getArrayView<std::array<block, 2>>();
         auto choiceIter = mChoices.begin();
 
         //std::cout << IoStream::lock;
@@ -72,7 +69,7 @@ namespace osuCrypto
 
             auto curSize = std::min<u64>(stepSize, mMessages.size() - step * stepSize);
 
-            chl.recv(buff.data(), curSize);
+            chl.recv(buff.data(), curSize * sizeof(std::array<block, 2>));
             //std::cout << "recv " << *(block*)buff.data() << " c " << count << " s " << curSize << std::endl;
             //std::cout << "recv " << ((block*)buff.data())[600 * 2] << " c " << count << " s " << curSize << std::endl;
 
@@ -92,8 +89,8 @@ namespace osuCrypto
      
     void Rr17NcoOtReceiver::encode(
         u64 otIdx, 
-        const void* choiceWord, 
-        void* dest,
+        const block* choiceWord, 
+        u8* dest,
         u64 destSize)
     {
 #ifndef NDEBUG
@@ -137,18 +134,27 @@ namespace osuCrypto
         // no op
     }
 
-    void Rr17NcoOtReceiver::configure(
+    void Rr17NcoOtReceiver::getParams(
         bool maliciousSecure, 
+        u64 compSecParm, 
         u64 statSecParam, 
-        u64 inputBitCount)
+        u64 inputBitCount, 
+        u64 inputCount, 
+        u64 & inputBlkSize, 
+        u64 & baseOtCount)
     {
         if (maliciousSecure == false)
+            throw std::runtime_error(LOCATION);
+
+        if (compSecParm != 128)
             throw std::runtime_error(LOCATION);
 
         if (inputBitCount > 128)
             throw std::runtime_error(LOCATION);
 
         mEncodeSize = roundUpTo(inputBitCount, 8);
+        inputBlkSize = (inputBitCount + 127) / 128;
+        baseOtCount = 128;
     }
 
     void Rr17NcoOtReceiver::sendCorrection(Channel & chl, u64 sendCount)

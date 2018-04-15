@@ -2,9 +2,8 @@
 
 #include "libOTe/Tools/Tools.h"
 #include <cryptoTools/Common/Log.h>
+#include <cryptoTools/Common/ByteStream.h>
 #include <cryptoTools/Crypto/Commit.h>
-#include <cryptoTools/Network/Channel.h>
-
 #include "TcoOtDefines.h"
 
 namespace osuCrypto
@@ -84,9 +83,9 @@ namespace osuCrypto
             {
                 u64 step = std::min<u64>(numSuperBlocks - superBlkIdx, (u64)commStepSize);
 
-                chl.recv((u8*)u.data(), step * superBlkSize * 128 * sizeof(block));
+                chl.recv(u.data(), step * superBlkSize * 128 * sizeof(block));
                 uIter = (block*)u.data();
-            }
+            } 
 
             // transpose 128 columns at at time. Each column will be 128 * superBlkSize = 1024 bits long.
             for (u64 colIdx = 0; colIdx < 128; ++colIdx)
@@ -118,7 +117,7 @@ namespace osuCrypto
                 tIter += 8;
             }
 
-            // transpose our 128 columns of 1024 bits. We will have 1024 rows,
+            // transpose our 128 columns of 1024 bits. We will have 1024 rows, 
             // each 128 bits wide.
             sse_transpose128x1024(t);
 

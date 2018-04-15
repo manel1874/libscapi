@@ -4,7 +4,6 @@
 #include <cryptoTools/Common/Log.h>
 #define BITSET
 #include <bitset>
-#include <iomanip>
 
 #include <cryptoTools/Common/MatrixView.h>
 namespace osuCrypto
@@ -95,13 +94,6 @@ namespace osuCrypto
         generateMod8Table();
     }
 
-    void LinearCode::load(const unsigned char * data, u64 size)
-    {
-        std::stringstream ss(std::stringstream::out | std::stringstream::in | std::stringstream::binary);
-        ss.write((char*)data, size);
-        loadBinFile(ss);
-    }
-
     void LinearCode::writeTextFile(const std::string & fileName)
     {
         std::fstream out;
@@ -174,31 +166,7 @@ namespace osuCrypto
         out.open(fileName, std::ios::out | std::ios::binary | std::ios::trunc);
 
         writeBinFile(out);
-    }
 
-    void LinearCode::writeBinCppFile(const std::string & fileName, const std::string & name)
-    {
-        std::stringstream out(std::ios::out | std::ios::in | std::ios::binary);
-        writeBinFile(out);
-
-        std::fstream fOut;
-        fOut.open(fileName, std::ios::out | std::ios::trunc);
-
-        int c = 0;
-        out.read((char*)&c, 1);
-        fOut << "static unsigned char "<< name << "[] = { 0x" << std::hex << std::setw(2) << std::setfill('0') << c;
-
-        while (true)
-        {
-            out.read((char*)&c, 1);
-
-            if (out.eof() == false)
-                fOut << ", 0x" << std::hex << std::setw(2) << std::setfill('0') << c;
-            else
-                break;
-        }
-
-        fOut << " };";
     }
     void LinearCode::writeBinFile(std::ostream & out)
     {
