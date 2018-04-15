@@ -60,6 +60,9 @@ class Measurement {
 public:
     Measurement(Protocol &protocol);
     Measurement(Protocol &protocol, vector<string> names);
+    Measurement(string protocolName, int internalIterationsNumber, int partyId, int partiesNumber, string partiesFile);
+    Measurement(string protocolName, int internalIterationsNumber, int partyId, int partiesNumber,
+                string partiesFile, vector<string> names);
     void setTaskNames(vector<string> & names);
     ~Measurement();
     void startSubTask(string taskName, int currentIterationNum);
@@ -75,6 +78,7 @@ private:
 
     void init(Protocol &protocol);
     void init(vector <string> names);
+    void init(string protocolName, int internalIterationsNumber, int partyId, int partiesNumber, string partiesFile);
     int getTaskIdx(string name); // return the index of given task name
     void setCommInterface(string partiesFile);
 
