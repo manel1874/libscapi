@@ -237,5 +237,5 @@ clean-libote:
 	@rm -rf $(builddir)/libOTe/
 	@rm -f compile-libote
 
-clean: clean-libote clean-openssl clean-boost clean-emp clean-otextension-bristol clean-ntl clean-install clean-tests
+clean: clean-libote clean-openssl clean-boost clean-emp clean-otextension-bristol clean-ntl clean-install clean-tests clean-cpp
 
