@@ -37,9 +37,9 @@ SUMO = no
 all: libs libscapi tests
 	echo $(WITH_EMP)
 ifeq ($(GCC_STANDARD), c++11)
-    libs: compile-openssl compile-boost compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc compile-otextension-bristol
+    libs: compile-openssl compile-boost compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc compile-otextension-bristol compile-cotsk
 else
-libs: compile-openssl compile-boost compile-libote compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc compile-otextension-bristol
+libs: compile-openssl compile-boost compile-libote compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc compile-otextension-bristol compile-cotsk
 endif
 libscapi: directories $(SLib)
 directories: $(OUT_DIR)
@@ -124,6 +124,12 @@ ifeq ($(SUMO),yes)
 	@cd $(builddir)/EMP/emp-m2pc/ && $(MAKE)
 	@touch compile-emp-m2pc
 endif
+
+compile-cotsk:compile-otextension-bristol
+	@echo "Compiling COTSK"
+	@mkdir -p $(builddir)/COTSK/
+	@cp -r lib/COTShortKeys $(builddir)/COTShortKeys
+	@$(MAKE) -C $(builddir)/COTShortKeys
 
 compile-blake:
 	@echo "Compiling the BLAKE2 library"
