@@ -30,6 +30,8 @@
 */
 
 #include "../../include/infra/Measurement.hpp"
+#include "../../include/cryptoInfra/Protocol.hpp"
+
 
 using namespace std;
 

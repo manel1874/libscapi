@@ -50,7 +50,8 @@
 #include <sys/time.h>
 #include "ConfigFile.hpp"
 #include "json.hpp"
-#include "../cryptoInfra/Protocol.hpp"
+
+class Protocol;
 
 using namespace std;
 using namespace std::chrono;
