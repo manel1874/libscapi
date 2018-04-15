@@ -51,7 +51,7 @@ private:
 	vector<byte> entropySource;	// Random bit sequence.
 	int prfKeySize;				// Prf key size in bits.
 
-public:	
+public:
 
 	/**
 	* Constructor that gets a random bit sequence which is the entropy source, and prf key size in 
@@ -79,32 +79,32 @@ public:
 	* The key can be changed at any time.
 	*/
 	virtual void setKey(SecretKey & secretKey)=0;
-	
+
 	/**
 	* An object trying to use an instance of prg needs to check if it has already been initialized with a key.
 	* @return true if the object was initialized by calling the function setKey.
 	*/
 	virtual bool isKeySet()=0;
-	
+
 	/**
 	* @return the algorithm name. For example - RC4
 	*/
 	virtual string getAlgorithmName()=0;
-	
+
 	/**
 	* Generates a secret key to initialize this prg object.
 	* @param keyParams algorithmParameterSpec contains the required parameters for the key generation
 	* @return the generated secret key
 	*/
 	virtual SecretKey generateKey(AlgorithmParameterSpec & keyParams)=0;
-	
+
 	/**
 	* Generates a secret key to initialize this prg object.
 	* @param keySize is the required secret key size in bits
 	* @return the generated secret key
 	*/
 	virtual SecretKey generateKey(int keySize)=0;
-	
+
 	/**
 	* Streams the prg bytes.
 	* @param outBytes - output bytes. The result of streaming the bytes.
@@ -130,7 +130,7 @@ private:
 	shared_ptr<PseudorandomFunction> prf;	// Underlying PRF.
 	vector<byte> ctr;						// Counter used for key generation.
 	bool _isKeySet=false;
-	
+
 	/**
 	* Increases the ctr byte array by 1 bit.
 	*/
@@ -142,7 +142,7 @@ public:
 	* @param prf underlying PseudorandomFunction.
 	*/
 	ScPrgFromPrf(const shared_ptr<PseudorandomFunction> & prf) {this->prf = prf; };
-	
+
 	/**
 	* Constructor that lets the user choose the underlying PRF algorithm.
 	* @param prfName PseudorandomFunction algorithm name.
@@ -191,21 +191,24 @@ public:
 	*					are all used up, or throws an exception if the user asks for more randoms.
 	*					If isStrict is true, the user can only use cachedSize*16 random bytes.		
 	*/
-	PrgFromOpenSSLAES( int cachedSize = DEFAULT_NUM_OF_RANDOMS, bool isStrict = false, byte * cache_prealloc = nullptr);
+	PrgFromOpenSSLAES( );
+	PrgFromOpenSSLAES( int cachedSize );
+	PrgFromOpenSSLAES( int cachedSize, bool isStrict );
+	PrgFromOpenSSLAES( int cachedSize, bool isStrict, byte * cache_prealloc );
 
 	//move assignment
 	PrgFromOpenSSLAES& operator=(PrgFromOpenSSLAES&& other);
 
 	//copy assignment - not allowed to prevent unneccessary copy of arrays.
 	PrgFromOpenSSLAES& operator=(PrgFromOpenSSLAES& other) = delete;
-	
+
 	//move constructor
 	PrgFromOpenSSLAES(PrgFromOpenSSLAES&& old);
 	//copy constructor - not allowed to prevent unneccessary copy of arrays.
 	PrgFromOpenSSLAES(PrgFromOpenSSLAES& other) = delete;
 
 	~PrgFromOpenSSLAES();
-	
+
 	/**
 	* This function does the following.
 	* - Calls OpenSSL init function to create the key schedule. 
@@ -229,7 +232,7 @@ public:
 	void getPRGBytes(vector<byte> & outBytes, int outOffset, int outLen) override;
 
 	byte * getPRGBytesEX(int outLen);
-	
+
 	/**
 	* @returns a random variable of the required length (32,64,128). This bytes are set to used and will not be used again
 	* Note that if all the randoms are used a new fresh randoms are genereted unless the isStrict flag is set to true
@@ -304,7 +307,7 @@ private:
 
 public:
 	OpenSSLRC4() { rc4 = new RC4_KEY();	}
-	void setKey(SecretKey & secretKey) override;	
+	void setKey(SecretKey & secretKey) override;
 	bool isKeySet() override { return _isKeySet; };
 	string getAlgorithmName() override { return "RC4"; };
 	SecretKey generateKey(AlgorithmParameterSpec  & keyParams) override{
@@ -323,7 +326,7 @@ public:
 class PrgSingleton {
 private:
 	static shared_ptr<PrgFromOpenSSLAES> prg; //Instance to return in getInstance function.
-	
+
 	/**
 	* The constructor is private to disable creation objects of the class.
 	*/
@@ -335,13 +338,13 @@ public:
 	* If it is the first time, create the instance and return it.
 	* Else, just return the instance.
 	*/
-	static shared_ptr<PrgFromOpenSSLAES> getInstance() { 
+	static shared_ptr<PrgFromOpenSSLAES> getInstance() {
 		if (prg == nullptr) {
 			prg = make_shared<PrgFromOpenSSLAES>();
 			auto key = prg->generateKey(128);
 			prg->setKey(key);
 		}
-		return prg; 
+		return prg;
 	}
 };
 
