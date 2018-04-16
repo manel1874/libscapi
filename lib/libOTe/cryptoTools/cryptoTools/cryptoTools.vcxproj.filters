@@ -18,13 +18,22 @@
     <Text Include="CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Common\ArrayView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Common\BitIterator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Common\BitVector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Common\ByteStream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Common\Defines.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\Exceptions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Common\Log.h">
@@ -57,10 +66,16 @@
     <ClInclude Include="Common\Matrix.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Network\Acceptor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Network\Channel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Network\IOService.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Network\Endpoint.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Network\IoBuffer.h">
@@ -72,39 +87,15 @@
     <ClInclude Include="Common\ThreadBarrier.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Network\SocketAdapter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Common\CLP.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Network\Session.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Network\Endpoint.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Crypto\Blake2\blake2.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Crypto\Blake2\blake2b-load-sse2.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Crypto\Blake2\blake2b-load-sse41.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Crypto\Blake2\blake2b-round.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Crypto\Blake2\blake2-config.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Crypto\Blake2\blake2-impl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Common\BitIterator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Common\BitVector.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\ByteStream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Common\Defines.cpp">
@@ -128,22 +119,19 @@
     <ClCompile Include="Crypto\sha1.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Network\Acceptor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Network\Channel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Network\IOService.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Network\Endpoint.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Common\CuckooIndex.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Network\SocketAdapter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Common\CLP.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Network\Session.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -153,10 +141,6 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Network\gsl\span" />
-    <None Include="cryptoToolsconfig.cmake" />
-  </ItemGroup>
-  <ItemGroup>
-    <Natvis Include="gsl\GSL.natvis" />
+    <None Include="gsl\span" />
   </ItemGroup>
 </Project>

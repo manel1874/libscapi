@@ -1,7 +1,7 @@
 #include <cryptoTools/Crypto/Curve.h>
 #include <cryptoTools/Common/Log.h>
+#include <cryptoTools/Common/ByteStream.h>
 #include <miracl/include/miracl.h>
-#include <sstream>
 
 namespace osuCrypto
 {
@@ -71,11 +71,6 @@ namespace osuCrypto
 
         mOrder.reset(new EccNumber(*this));
         mOrder->fromHex((char*)params.n);
-		mIsPrimeOrder = ::isprime(mMiracl, mOrder->mVal);
-
-		if (mIsPrimeOrder) {
-			prepare_monty(mMiracl, mOrder->mVal);
-		}
 
         mFieldPrime.reset(new EccNumber(*this));
         mFieldPrime->fromHex((char*)params.p);
@@ -147,11 +142,7 @@ namespace osuCrypto
 
         mOrder.reset(new EccNumber(*this));
         mOrder->fromHex((char*)(params.order));
-		mIsPrimeOrder = ::isprime(mMiracl, mOrder->mVal);
 
-		if (mIsPrimeOrder) {
-			prepare_monty(mMiracl, mOrder->mVal);
-		}
 
         ecurve2_init(
             mMiracl,
@@ -213,14 +204,6 @@ namespace osuCrypto
         return *mFieldPrime;
     }
 
-	u64 EllipticCurve::bitCount() const
-	{
-		if (mIsPrimeField)
-			return mEccpParams.bitCount;
-		else
-			return mEcc2mParams.bitCount;
-	}
-
     EccPoint::EccPoint(
         EllipticCurve & curve)
         :
@@ -244,16 +227,6 @@ namespace osuCrypto
 
         *this = copy;
     }
-
-	EccPoint::EccPoint(EllipticCurve & curve, PRNG & prng)
-		:
-		mVal(nullptr),
-		mMem(nullptr),
-		mCurve(&curve)
-	{
-		init();
-		randomize(prng);
-	}
 
     EccPoint::EccPoint(
         const EccPoint & copy)
@@ -414,7 +387,9 @@ namespace osuCrypto
 
     u64 EccPoint::sizeBytes() const
     {
-        return (mCurve->bitCount()
+        return ((mCurve->mIsPrimeField ?
+            mCurve->mEccpParams.bitCount :
+            mCurve->mEcc2mParams.bitCount)
             + 7) / 8 + 1;
     }
 
@@ -442,22 +417,16 @@ namespace osuCrypto
     {
         big varX = mirvar(mCurve->mMiracl, 0);
 
-		bool success;
         bytes_to_big(mCurve->mMiracl, (int)sizeBytes() - 1, (char*)src + 1, varX);
         if (mCurve->mIsPrimeField)
         {
-			success = epoint_set(mCurve->mMiracl, varX, varX, src[0], mVal);
+            epoint_set(mCurve->mMiracl, varX, varX, src[0], mVal);
         }
         else
         {
-			success = epoint2_set(mCurve->mMiracl, varX, varX, src[0], mVal);
+            epoint2_set(mCurve->mMiracl, varX, varX, src[0], mVal);
         }
 
-
-		if (success == false)
-		{
-			throw std::runtime_error(LOCATION);
-		}
         mirkill(varX);
     }
 
@@ -510,56 +479,59 @@ namespace osuCrypto
 
     void EccPoint::randomize(PRNG& prng)
     {
-//		u64 byteSize = (mCurve->bitCount() + 7) / 8;
-//		u8* buff = new u8[byteSize];
-//		//u8* buff2 = new u8[sizeBytes()];
-//
-//		// a mask for the top bits so the buff contains at most
-//		// bitCount non zeros
-//		u8 mask = u8(-1);
-//		auto mod = mCurve->bitCount() & 7;
-//		if (mod)
-//			mask >>= (8 - mod);
-//
-//
-//		big var = mirvar(mCurve->mMiracl, 0);
-//
-////		do
-//		{
-//			//TODO("replace bigdig with our PRNG");
-//
-//			//bigdig(mCurve->mMiracl, mCurve->mParams.bitCount, 2, var);
-//			prng.get(buff, byteSize);
-//			buff[byteSize - 1] &= mask;
-//
-//			bytes_to_big(mCurve->mMiracl, static_cast<int>(byteSize), (char*)buff, var);
-//			if (mCurve->mIsPrimeField)
-//			{
-//				epoint_set(mCurve->mMiracl, var, var, 0, mVal);
-//			}
-//			else
-//			{
-//				epoint2_set(mCurve->mMiracl, var, var, 0, mVal);
-//			}
-//			//toBytes(buff2);
-//			//fromBytes(buff2);
+        u64 byteSize = (mCurve->mEcc2mParams.bitCount + 7) / 8;
+        u8* buff = new u8[byteSize];
+        //u8* buff2 = new u8[sizeBytes()];
 
-			//delete[] buff;
-			////delete[] buff2;
-			//mirkill(var);
-
-//		}
-//
-		if (point_at_infinity(mVal))
-		{
-			// if that failed, just get a random point
-			// by computing g^r    where r <- Z_p
-			EccNumber num(*mCurve, prng);
-
-			*this = mCurve->getGenerator() * num;
-		}
+        // a mask for the top bits so the buff contains at most
+        // bitCount non zeros
+        u8 mask = u8(-1);
+        if (mCurve->mEcc2mParams.bitCount & 7)
+            mask >>= (8 - (mCurve->mEcc2mParams.bitCount & 7));
 
 
+        big var = mirvar(mCurve->mMiracl, 0);
+
+        //do
+        {
+            //TODO("replace bigdig with our PRNG");
+
+            //bigdig(mCurve->mMiracl, mCurve->mParams.bitCount, 2, var);
+            prng.get(buff, byteSize);
+            buff[byteSize - 1] &= mask;
+
+            bytes_to_big(mCurve->mMiracl, static_cast<int>(byteSize), (char*)buff, var);
+            if (mCurve->mIsPrimeField)
+            {
+                epoint_set(mCurve->mMiracl, var, var, 0, mVal);
+            }
+            else
+            {
+                epoint2_set(mCurve->mMiracl, var, var, 0, mVal);
+            }
+            //toBytes(buff2);
+            //fromBytes(buff2);
+        }
+
+        if (point_at_infinity(mVal))
+        {
+            // if that failed, just get a random point
+            // by computing g^r    where r <- Z_p
+            EccNumber num(*mCurve, prng);
+
+            *this = mCurve->getGenerator() * num;
+        }
+
+
+        delete[] buff;
+        //delete[] buff2;
+        mirkill(var);
+
+
+        //const auto& g = mCurve->getGenerator();
+        //EccNumber num(mCurve,prng);
+
+        //*this = g * num;
     }
 
     void EccPoint::randomize(const block & seed)
@@ -750,7 +722,11 @@ namespace osuCrypto
     }
     EccNumber& EccNumber::operator/=(const EccNumber& b)
     {
-		*this *= b.inverse();
+        divide(mCurve->mMiracl, mVal, mCurve->getOrder().mVal, mVal);
+
+        //toNres();
+        //b.toNres();
+        //nres_moddiv(mCurve->mMiracl, mVal, b.mVal, mVal);
         return *this;
     }
     EccNumber& EccNumber::operator/=(int i)
@@ -775,21 +751,6 @@ namespace osuCrypto
         //nres_negate(mCurve->mMiracl, mVal, mVal);
         return *this;
     }
-
-
-	EccNumber EccNumber::inverse() const
-	{
-		if (mCurve->mIsPrimeOrder == false)
-			throw std::runtime_error(LOCATION);
-
-		EccNumber ret(*this);
-
-		// ret = ret ^ -1 mod order
-		xgcd(mCurve->mMiracl, ret.mVal, mCurve->mOrder->mVal, ret.mVal, ret.mVal, ret.mVal);
-
-		return ret;
-	}
-
 
     bool EccNumber::operator==(const EccNumber & cmp) const
     {
@@ -960,7 +921,10 @@ namespace osuCrypto
 
     u64 EccNumber::sizeBytes() const
     {
-        return (mCurve->bitCount() + 7) / 8;
+        return ((mCurve->mIsPrimeField ?
+            mCurve->mEccpParams.bitCount :
+            mCurve->mEcc2mParams.bitCount)
+            + 7) / 8;
     }
 
     void EccNumber::toBytes(u8 * dest) const

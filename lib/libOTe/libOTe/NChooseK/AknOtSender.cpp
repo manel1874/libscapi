@@ -1,9 +1,8 @@
 #include "AknOtSender.h"
 #include "libOTe/Base/naor-pinkas.h"
-#include "libOTe/TwoChooseOne/LzKosOtExtSender.h"
 #include <cryptoTools/Common/Log.h>
-#include <cryptoTools/Common/Timer.h>
-#include <cryptoTools/Crypto/sha1.h>
+#include "libOTe/TwoChooseOne/LzKosOtExtSender.h"
+#include <cryptoTools/Common/ByteStream.h>
 
 namespace osuCrypto
 {
@@ -19,11 +18,11 @@ namespace osuCrypto
 
 
     void AknOtSender::init(
-        u64 totalOTCount,
-        u64 cutAndChooseThreshold,
-        double p,
-        OtExtSender & ots,
-        span<Channel>  chls,
+        u64 totalOTCount, 
+        u64 cutAndChooseThreshold, 
+        double p, 
+        OtExtSender & ots, 
+        ArrayView<Channel>  chls, 
         PRNG & prng)
     {
 
@@ -83,6 +82,8 @@ namespace osuCrypto
 
             PRNG prng(extSeed);
             //std::cout << IoStream::lock << "send 0 " << end << std::endl;
+            u8 shaBuff[SHA1::HashSize];
+
 
             otExt.send(range, prng, chl);
 
@@ -97,7 +98,7 @@ namespace osuCrypto
             if (t == 0)
             {
                 gTimer.setTimePoint("AknOt.SenderExtDone");
-                chl.asyncSend((u8*)&cncRootSeed, sizeof(block));
+                chl.asyncSend(&cncRootSeed, sizeof(block));
             }
 
             u64 sampleCount(0);
@@ -106,11 +107,15 @@ namespace osuCrypto
             block partialSum(ZeroBlock);
             u64 onesCount(0);
 
-            std::vector<u8> choiceBuff;
+
+
+            ByteStream choiceBuff;
             chl.recv(choiceBuff);
-			auto choiceIter = BitIterator(choiceBuff.data(), 0);
+            auto choiceIter = choiceBuff.bitIterBegin();
             u64 bitsRemaining = choiceBuff.size() * 8;
 
+
+            //std::cout << IoStream::lock << "send " << end << "  " << px << std::endl;
             for (u64 i = start; i < end; ++i)
             {
                 auto vv = cncGens[t].get<u32>();
@@ -126,26 +131,40 @@ namespace osuCrypto
                     {
                         chl.recv(choiceBuff);
                         bitsRemaining = choiceBuff.size() * 8 - 1;
-						choiceIter = BitIterator(choiceBuff.data(), 0);
+                        choiceIter = choiceBuff.bitIterBegin();
+                        //std::cout << "   " << i << std::endl;
+
                     }
 
                     ++sampleCount;
+
                     u8 cc = *choiceIter;
+                    //std::cout << (u32)cc;
+
                     if (cc == 0 && dynamic_cast<LzKosOtExtSender*>(&ots))
                     {
                         // if this is a zero message and our OT extension class is
                         // LzKosOtExtSender, then we need to hash the 0-message now
                         // because it was lazy and didn't ;)
+
                         SHA1 sha;
                         sha.Update(mMessages[i][0]);
-						sha.Final(mMessages[i][0]);
+                        sha.Final(shaBuff);
+                        mMessages[i][0] = *(block*)shaBuff;
                     }
 
                     partialSum = partialSum ^ mMessages[i][cc];
+                    //std::cout << mMessages[i][cc] << " " << partialSum << " " << "  " << i << "  " << (u32)cc << "  " << vv << std::endl;
+
+
+
                     onesCount += cc;
+
                     ++choiceIter;
-                }
+                }  
             }
+
+            //std::cout << std::endl << IoStream::unlock;
 
             std::lock_guard<std::mutex>lock(finalMtx);
             totalOnesCount += onesCount;
@@ -159,17 +178,21 @@ namespace osuCrypto
             parThrds[i] = std::thread([&,seed, i]()
             {
                 auto  t = i + 1;
+
                 routine(t,seed, *parOts[i], chls[t]);
             });
         }
 
         routine(0, prng.get<block>(), ots, chl0);
+
+
+
         for (auto& thrd : parThrds)
             thrd.join();
 
 
         block proof;
-        chl0.recv((u8*)&proof, sizeof(block));
+        chl0.recv(&proof, sizeof(block));
         if (totalOnesCount > cutAndChooseThreshold ||
             neq(proof, totalSum))
         {

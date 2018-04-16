@@ -3,10 +3,8 @@
 
 #include "libOTe/Tools/Tools.h"
 #include <cryptoTools/Common/Log.h>
-
+#include <cryptoTools/Common/ByteStream.h>
 #include <cryptoTools/Crypto/Commit.h>
-#include <cryptoTools/Network/Channel.h>
-#include <cryptoTools/Common/Timer.h>
 
 namespace osuCrypto
 {
@@ -34,7 +32,7 @@ namespace osuCrypto
         return std::move(ret);
     }
 
-    void LzKosOtExtSender::setBaseOts(span<block> baseRecvOts, const BitVector & choices)
+    void LzKosOtExtSender::setBaseOts(ArrayView<block> baseRecvOts, const BitVector & choices)
     {
         if (baseRecvOts.size() != gOtExtBaseOtCount || choices.size() != gOtExtBaseOtCount)
             throw std::runtime_error("not supported/implemented");
@@ -48,7 +46,7 @@ namespace osuCrypto
     }
 
     void LzKosOtExtSender::send(
-        span<std::array<block, 2>> messages,
+        ArrayView<std::array<block, 2>> messages,
         PRNG& prng,
         Channel& chl/*,
                     std::atomic<u64>& doneIdx*/)
@@ -69,10 +67,10 @@ namespace osuCrypto
 
         u64 doneIdx = 0;
         std::array<block, gOtExtBaseOtCount> q;
-        std::vector<block> buff;
+        ByteStream buff;
 #ifdef OTEXT_DEBUG
         Log::out << "sender delta " << delta << Log::endl;
-        buff.push_back(delta);
+        buff.append(delta);
         chl.AsyncSendCopy(buff);
 #endif
 
@@ -88,10 +86,10 @@ namespace osuCrypto
         for (u64 blkIdx = 0; blkIdx < numBlocks; ++blkIdx)
         {
             chl.recv(buff);
-            assert(buff.size() == gOtExtBaseOtCount);
+            assert(buff.size() == sizeof(block) * gOtExtBaseOtCount);
 
-            // u = t0 + t1 + x
-            auto u = buff.data();
+            // u = t0 + t1 + x 
+            auto u = buff.getArrayView<block>();
 
             for (u64 colIdx = 0; colIdx < gOtExtBaseOtCount; colIdx++)
             {
@@ -108,7 +106,9 @@ namespace osuCrypto
             sse_transpose128(q);
 
 #ifdef OTEXT_DEBUG
-			chl.AsyncSendCopy(q);
+            buff.setp(0);
+            buff.append((u8*)&q, sizeof(q));
+            chl.AsyncSendCopy(buff);
 #endif
 
             u32 blkRowIdx = 0;
@@ -126,9 +126,9 @@ namespace osuCrypto
         }
 
         block seed = prng.get<block>();
-        chl.asyncSend((u8*)&seed, sizeof(block));
+        chl.asyncSend(&seed, sizeof(block));
         block theirSeed;
-        chl.recv((u8*)&theirSeed, sizeof(block));
+        chl.recv(&theirSeed, sizeof(block));
 
         if (Commit(theirSeed) != theirSeedComm)
             throw std::runtime_error("bad commit " LOCATION);
@@ -214,7 +214,7 @@ namespace osuCrypto
         }
 
         block t1, t2;
-        std::vector<u8> data(sizeof(block) * 3);
+        std::vector<char> data(sizeof(block) * 3);
 
         chl.recv(data.data(), data.size());
 
@@ -222,7 +222,7 @@ namespace osuCrypto
         block& received_t = ((block*)data.data())[1];
         block& received_t2 = ((block*)data.data())[2];
 
-        // check t = x * Delta + q
+        // check t = x * Delta + q 
         mul128(received_x, delta, t1, t2);
         t1 = t1 ^ q1;
         t2 = t2 ^ q2;

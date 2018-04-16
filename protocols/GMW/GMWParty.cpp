@@ -7,20 +7,21 @@
 GMWParty::GMWParty(int argc, char* argv[]) : Protocol("GMW", argc, argv)
 {
     circuit = make_shared<Circuit>();
-    circuit->readCircuit(arguments["circuitFile"]);
+    circuit->readCircuit(this->getParser().getValueByKey(arguments, "circuitFile"));
 
-    id = stoi(arguments["partyID"]);
-    times = stoi(arguments["internalIterationsNumber"]);
+    id = stoi(this->getParser().getValueByKey(arguments, "partyID"));
+    times = stoi(this->getParser().getValueByKey(arguments, "internalIterationsNumber"));
 
     vector<string> subTaskNames{"Offline", "GenerateTriples", "Online", "InputSharing", "ComputeCircuit"};
     timer = new Measurement(*this, subTaskNames);
     string tmp = "init times";
     byte tmpBytes[20];
-    int numThreads = stoi(arguments["numThreads"]);
-    inputFileName = arguments["inputFile"];
+    int numThreads = stoi(this->getParser().getValueByKey(arguments, "numThreads"));
+    inputFileName = this->getParser().getValueByKey(arguments, "inputFile");
 
 	//Create the communication between this party and the other parties.
-    parties = MPCCommunication::setCommunication(io_service, id, circuit->getNrOfParties(), arguments["partiesFile"]);
+    parties = MPCCommunication::setCommunication(io_service, id, circuit->getNrOfParties(),
+                                                 this->getParser().getValueByKey(arguments, "partiesFile"));
     cout << "----------end communication--------------" << endl;
 
 

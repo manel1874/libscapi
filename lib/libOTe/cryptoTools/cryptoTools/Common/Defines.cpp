@@ -1,23 +1,89 @@
 #include <cryptoTools/Common/Defines.h>
-#include <cryptoTools/Crypto/AES.h>
+#include <cryptoTools/Crypto/Commit.h>
+#include <cryptoTools/Common/BitVector.h>
 #include <random>
-#include <sstream>
-#include <iomanip>
-#include <cstring>
+//#include <cryptoTools/Common/Timer.h>
 
 namespace osuCrypto {
 
+    Timer gTimer(true);
     const block ZeroBlock = _mm_set_epi64x(0, 0);
     const block OneBlock = _mm_set_epi64x(0, 1);
     const block AllOneBlock = _mm_set_epi64x(u64(-1), u64(-1));
-    const std::array<block, 2> zeroAndAllOne = { { ZeroBlock, AllOneBlock } };
     const block CCBlock = ([]() {block cc; memset(&cc, 0xcc, sizeof(block)); return cc; })();
 
 
+    std::ostream& operator<<(std::ostream& out, const block& blk)
+    {
+        out << std::hex;
+        u64* data = (u64*)&blk;
 
+        out << std::setw(16) << std::setfill('0') << data[1]
+            << std::setw(16) << std::setfill('0') << data[0];
+
+        out << std::dec << std::setw(0);
+
+        return out;
+    }
+
+    template<size_t N>
+    std::ostream& operator<<(std::ostream& out, const MultiBlock<N>& blk)
+    {
+        out << std::hex;
+        u64* data = (u64*)&blk;
+
+        out << std::setw(16) << std::setfill('0') << data[0] << "..."
+            //<< std::setw(16) << std::setfill('0') << data[1]
+            //<< std::setw(16) << std::setfill('0') << data[2]
+            //<< std::setw(16) << std::setfill('0') << data[3]
+            //<< std::setw(16) << std::setfill('0') << data[4]
+            //<< std::setw(16) << std::setfill('0') << data[5]
+            << std::setw(16) << std::setfill('0') << data[blk.size() * 2 - 1];
+
+        out << std::dec << std::setw(0);
+
+        return out;
+    }
+
+
+    std::ostream* gOut = &std::cout;
+
+
+
+    std::ostream& operator<<(std::ostream& out, const Commit& comm)
+    {
+        out << std::hex;
+
+        u32* data = (u32*)comm.data();
+
+        out << std::setw(8) << std::setfill('0') << data[0]
+            << std::setw(8) << std::setfill('0') << data[1]
+            << std::setw(8) << std::setfill('0') << data[2]
+            << std::setw(8) << std::setfill('0') << data[3]
+            << std::setw(8) << std::setfill('0') << data[4];
+
+        out << std::dec << std::setw(0);
+
+        return out;
+    }
     block PRF(const block& b, u64 i)
     {
-		return AES(b).ecbEncBlock(toBlock(i));
+        //TODO("REMOVE THIS!!");
+        //return b;
+
+
+
+
+
+        block ret, tweak = _mm_set1_epi64x(i), enc;
+
+        ret = b ^ tweak;
+
+        mAesFixedKey.ecbEncBlock(ret, enc);
+
+        ret = ret ^ enc; // H( a0 )
+
+        return ret;
     }
 
     void split(const std::string &s, char delim, std::vector<std::string> &elems) {
@@ -64,22 +130,10 @@ namespace osuCrypto {
     block sysRandomSeed()
     {
         std::random_device rd;
-		auto ret = std::array<unsigned int, 4>{rd(), rd(), rd(), rd()};
-		return *(block*)&ret;
+        u64 x = rd();
+        u64 y = rd();
+        return osuCrypto::toBlock(x, y);
     }
 }
 
 
-
-std::ostream& operator<<(std::ostream& out, const oc::block& blk)
-{
-	using namespace oc;
-	out << std::hex;
-	u64* data = (u64*)&blk;
-
-	out << std::setw(16) << std::setfill('0') << data[1]
-		<< std::setw(16) << std::setfill('0') << data[0];
-
-	out << std::dec << std::setw(0);
-	return out;
-}

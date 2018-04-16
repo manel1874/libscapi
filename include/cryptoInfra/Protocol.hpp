@@ -31,14 +31,17 @@
 #include <string>
 #include <map>
 #include <iostream>
+#include <vector>
+#include <utility>
+#include <algorithm>
 
 using namespace std;
 
 class CmdParser {
-private:
-    string getKey(string parameter);
 public:
-    map<string, string> parseArguments(string protocolName, int argc, char* argv[]);
+    string getKey(string parameter);
+    vector<pair<string, string>> parseArguments(string protocolName, int argc, char* argv[]);
+    string getValueByKey(vector<pair<string, string>>arguments, string key);
 };
 
 /**
@@ -60,9 +63,9 @@ class Protocol {
 private:
     CmdParser parser;
 protected:
-    map<string, string> arguments;
-public:
+    vector<pair<string, string>> arguments;
 
+public:
     Protocol(string protocolName, int argc, char* argv[]);
 
     /**
@@ -73,7 +76,8 @@ public:
     virtual void runOffline(){};
     virtual bool hasOnline() = 0;
     virtual void runOnline(){};
-    map<string, string> getArguments();
+    vector<pair<string, string>> getArguments();
+    CmdParser getParser();
 
     virtual ~Protocol() {}
 };

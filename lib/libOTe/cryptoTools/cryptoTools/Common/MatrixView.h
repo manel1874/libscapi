@@ -2,9 +2,12 @@
 // This file and the associated implementation has been placed in the public domain, waiving all copyright. No restrictions are placed on its use. 
 #include <cryptoTools/Common/Defines.h>
 #include <array>
+#include <cryptoTools/Common/ArrayView.h>
 
+//#include "cryptoTools/gsl/multi_span.h"
 namespace osuCrypto
 {
+
 
     template<class T>
     class MatrixView
@@ -71,14 +74,14 @@ namespace osuCrypto
             if (rows * columns != size())
                 throw std::runtime_error(LOCATION);
 
-            mView = span<T>(mView.data(), rows * columns);
+            mView = ArrayView<T>(mView.data(), rows * columns);
             mStride = columns;
         }
 
         const size_type size() const { return mView.size(); }
         const size_type stride() const { return mStride; }
 
-        std::array<size_type, 2> bounds() const { return { stride() ? size() / stride() : 0 , stride() }; }
+        std::array<size_type, 2> bounds() const { return {size() / stride() , stride() }; }
 
         pointer data() const { return mView.data(); };
 
@@ -90,24 +93,19 @@ namespace osuCrypto
             return mView[rowIdx * stride() + colIdx];
         }
 
-		const T& operator()(size_type rowIdx, size_type colIdx) const
-		{
-			return mView[rowIdx * stride() + colIdx];
-		}
-
-        span<T> operator[](size_type rowIdx) const
+        ArrayView<T> operator[](size_type rowIdx) const
         {
 #ifndef NDEBUG
             if (rowIdx >= mView.size() / stride()) throw std::runtime_error(LOCATION);
 #endif
 
-            return span<T>(mView.data() + rowIdx * stride(), stride());
+            return ArrayView<T>(mView.data() + rowIdx * stride(), stride());
         }
 
 
 
     protected:
-        span<T> mView;
+        ArrayView<T> mView;
         size_type mStride;
 
 

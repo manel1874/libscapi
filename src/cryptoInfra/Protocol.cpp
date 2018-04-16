@@ -11,23 +11,36 @@ string CmdParser::getKey(string parameter)
         return parameter;
 }
 
-map<string, string> CmdParser::parseArguments(string protocolName, int argc, char* argv[])
+
+string CmdParser::getValueByKey(vector<pair<string, string>> arguments, string key)
 {
-    map<string, string> arguments;
+    int size = arguments.size();
+    for (int i = 0; i < size; ++i)
+    {
+        pair<string, string> p = arguments[i];
+        if (p.first == key)
+            return p.second;
+    }
+    return "NotFound";
+}
 
-    string key;
+vector<pair<string, string>> CmdParser::parseArguments(string protocolName, int argc, char* argv[])
+{
+    string key, value;
 
-    //Put the protocol name in the map
-    arguments["protocolName"] = protocolName;
+    //Put the protocol name in the vector pairs
+    vector<pair<string, string>> arguments;
+    arguments.push_back(make_pair("protocolName", protocolName));
 
     //Put all other parameters in the map
     for(int i=1; i<argc; i+=2)
     {
 
         key = getKey(string(argv[i]));
-        arguments[key] = argv[i+1];
+        value = getKey(string(argv[i+1]));
+        arguments.emplace_back(make_pair(key, value));
 
-        cout<<"key = "<<key<<" value = "<<arguments[key]<<endl;
+        cout<<"key = "<< key <<" value = "<< value <<endl;
     }
 
     return arguments;
@@ -38,7 +51,12 @@ Protocol::Protocol(string protocolName, int argc, char* argv[])
     arguments = parser.parseArguments(protocolName, argc, argv);
 }
 
-map <string, string> Protocol::getArguments()
+vector<pair<string, string>> Protocol::getArguments()
 {
     return arguments;
+}
+
+CmdParser Protocol::getParser()
+{
+    return parser;
 }

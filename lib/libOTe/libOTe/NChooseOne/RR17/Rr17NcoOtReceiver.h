@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cryptoTools/Common/Defines.h>
-#include <cryptoTools/Common/Defines.h>
+#include <cryptoTools/Common/ArrayView.h>
 #include "libOTe/NChooseOne/NcoOtExt.h"
 #include "libOTe/TwoChooseOne/KosOtExtReceiver.h"
 #include <cryptoTools/Common/BitVector.h>
@@ -27,11 +27,10 @@ namespace osuCrypto
         ~Rr17NcoOtReceiver();
 
 
-        u64 getBaseOTCount() const override { return 128; }
         bool hasBaseOts() const override;
 
         void setBaseOts(
-            span<std::array<block, 2>> baseRecvOts) override;
+            ArrayView<std::array<block, 2>> baseRecvOts) override;
 
         std::unique_ptr<NcoOtExtReceiver> split() override;
 
@@ -40,16 +39,17 @@ namespace osuCrypto
         using NcoOtExtReceiver::encode;
         void encode(
             u64 otIdx,
-            const void* choiceWord,
-            void* dest ,
+            const block* choiceWord,
+            u8* dest, 
             u64 destSize) override;
 
         void zeroEncode(u64 otIdx) override;
 
 
-        void configure(
+        void getParams(
             bool maliciousSecure,
-            u64 statSecParam, u64 inputBitCount) override;
+            u64 compSecParm, u64 statSecParam, u64 inputBitCount, u64 inputCount,
+            u64& inputBlkSize, u64& baseOtCount) override;
 
         void sendCorrection(Channel& chl, u64 sendCount) override;
 

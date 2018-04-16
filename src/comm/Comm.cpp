@@ -67,8 +67,8 @@ size_t CommParty::readWithSizeIntoVector(vector<byte> & targetVector) {
 
 void CommPartyTCPSynced::join(int sleepBetweenAttempts, int timeout) {
 	int     totalSleep = 0;
-	bool    isAccepted  = false;
-	bool    isConnected = false;
+	bool    isAccepted  = (role == 1);//false;
+	bool    isConnected = (role == 0); //false;
 	// establish connections
 	while (!isConnected || !isAccepted) {
 		try {
@@ -94,6 +94,7 @@ void CommPartyTCPSynced::join(int sleepBetweenAttempts, int timeout) {
 		}
 		if (!isAccepted) {
 			boost::system::error_code ec;
+			cout << "accepting..." << endl;
 			acceptor_.accept(serverSocket, ec);
 			isAccepted = true;
 		}
@@ -103,13 +104,16 @@ void CommPartyTCPSynced::join(int sleepBetweenAttempts, int timeout) {
 
 void CommPartyTCPSynced::setSocketOptions() {
 	boost::asio::ip::tcp::no_delay option(true);
-	serverSocket.set_option(option);
-	clientSocket.set_option(option);
+	if (role != 1)
+		serverSocket.set_option(option);
+	if (role != 0)
+		clientSocket.set_option(option);
+	
 }
 
 void CommPartyTCPSynced::write(const byte* data, int size) {
 	boost::system::error_code ec;
-	boost::asio::write(clientSocket,
+	boost::asio::write(socketForWrite(),
 		boost::asio::buffer(data, size),
 		boost::asio::transfer_all(), ec);
 	if (ec)
@@ -117,7 +121,11 @@ void CommPartyTCPSynced::write(const byte* data, int size) {
 }
 
 CommPartyTCPSynced::~CommPartyTCPSynced() {
-	acceptor_.close();
-	serverSocket.close();
-	clientSocket.close();
+	if (role != 1) 
+		acceptor_.close();
+	if (role != 1)
+		serverSocket.close();
+	if (role != 0)
+		clientSocket.close();
 }
+

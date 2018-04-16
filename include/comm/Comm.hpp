@@ -135,19 +135,20 @@ public:
 
 class CommPartyTCPSynced : public CommParty {
 public:
-	CommPartyTCPSynced(boost::asio::io_service& ioService, SocketPartyData me, SocketPartyData other) :
+	CommPartyTCPSynced(boost::asio::io_service& ioService, SocketPartyData me, SocketPartyData other, int role = 2) : //0 : Server, 1: Client, 2 : Both
 		ioServiceServer(ioService), ioServiceClient(ioService),
-		acceptor_(ioService, tcp::endpoint(tcp::v4(), me.getPort())),
+		acceptor_(ioService, tcp::endpoint(tcp::v4(), (role == 1) ? (10000 + me.getPort()) : me.getPort() )),
 		serverSocket(ioService), clientSocket(ioService)
 	{
 		this->me = me;
 		this->other = other;
+		this->role = role;
 	};
 	void join(int sleepBetweenAttempts = 500, int timeout = 5000) override;
 
 	void write(const byte* data, int size) override;
 	size_t read(byte* data, int sizeToRead) override {
-		return boost::asio::read(serverSocket, boost::asio::buffer(data, sizeToRead));
+		return boost::asio::read(socketForRead(), boost::asio::buffer(data, sizeToRead));
 	}
 	virtual ~CommPartyTCPSynced(); 
 
@@ -159,5 +160,20 @@ private:
 	tcp::socket clientSocket;
 	SocketPartyData me;
 	SocketPartyData other;
+	int role;
 	void setSocketOptions();
+	tcp::socket & socketForRead() {
+		if (role == 1) 
+			return clientSocket;
+		return serverSocket;
+	}
+	
+	tcp::socket & socketForWrite() {
+		if (role == 0) 
+			return serverSocket;
+		return clientSocket;
+	
+	}
+
+	
 };
