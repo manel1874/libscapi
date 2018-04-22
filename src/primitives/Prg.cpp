@@ -303,6 +303,25 @@ byte * PrgFromOpenSSLAES::getPRGBytesEX(int outLen)
 
 }
 
+void PrgFromOpenSSLAES::getPRGBytes(byte* & outBytes, int outLen){
+	//key must be set in order to get randoms
+	if (!isKeySet())
+		throw IllegalStateException("secret key isn't set");
+
+	//the required number of random bytes exceeds the avaliable randoms, prepare new randoms
+	if (outLen + idxForBytes > cachedSize * 16) {
+		prepare();
+	}
+
+	byte* cipherInBytes = (byte*)cipherChunk;
+    outBytes = &cipherInBytes[idxForBytes];
+
+	//Copy the output bytes to the given output array.
+//	memcpy(outBytes, &cipherInBytes[idxForBytes], outLen);
+
+	//increment the byte counter
+	idxForBytes += outLen;
+}
 void PrgFromOpenSSLAES::prepare() {
 
     if (isStrict == true)

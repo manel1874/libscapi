@@ -203,13 +203,13 @@ void BooleanCircuit::setInputs(scannerpp::File * inputWiresFile, int partyNumber
 	if (partyNumber < 1 || partyNumber > numberOfParties)
 		throw NoSuchPartyException("wrong number of party. got: " + to_string(partyNumber));
 	scannerpp::Scanner s(inputWiresFile);
-	int numberOfInputWires = stoi(read(s));
-	if (numberOfInputWires != getNumberOfInputs(partyNumber))
-		throw InvalidInputException("number of input wires is different than real input");
-
+	int numberOfInputWires = getNumberOfInputs(partyNumber);
+	auto inputIndices = getInputWireIndices(partyNumber);
 	map<int, Wire> presetInputWires;
-	for (int i = 0; i < numberOfInputWires; i++) 
-		presetInputWires[stoi(read(s))] = Wire((byte)read(s)[0]);
+	for (int i = 0; i < numberOfInputWires; i++) {
+        presetInputWires[inputIndices[i]] = Wire(stoi(read(s)));
+    }
+
 		
 	setInputs(presetInputWires, partyNumber);
 }
