@@ -2,193 +2,179 @@
 #define COTSHORTKEYS_SENDER_IMPL_H___
 
 #include "COTSK_impl.h"
-/*
-    HELPER METHODS   
-*/
-/*********************************************
-    CLASS DEFINITION - SENDER
-**********************************************/
-template<class S> 
-class COTSK_Sender : public COTSK_Base {
-	public:
-		COTSK_Sender(const string& serverAddr, 
-					 int baseOTport, 
-					 const shared_ptr<CommParty> & channel,
-					 uint32_t L,
-					 uint32_t K,
-					 uint32_t M);	
 
-		void initialize(const vector<byte> & delta); //delta has l bytes, each byte is 0 or 1
+#include <cryptoTools/Common/MatrixView.h>
+#include "../../install/include/libOTe/libOTe/Tools/Tools.h"
+
+class COTSK_SenderSessionExtendHandler {
+
+    public:
+        COTSK_SenderSessionExtendHandler(const shared_ptr<CommParty> & channel, uint32_t L,uint32_t maxExpandBits) :
+																		_L(L),
+																		_maxExpandBits(maxExpandBits), 
+																		_prg_delta(L), 
+																		_u(L*maxExpandBits/8) ,
+																		_q(L*maxExpandBits/8),
+																		_delta(L)
+	   {
+		    _tdeltai_aligned16 = (byte *) _mm_malloc(L*maxExpandBits/8,16);
+			_channel = channel;
+        }
 	
-		void extend(byte **q_j_out); //qj_out: array of (m_tag_bits * L) bits
+		void keyPrg(const byte *k, const vector<byte> & delta) {
+			uint32_t prgCacheSize = _maxExpandBits/8;
+			_delta = delta;
+			for (uint32_t i= 0; i < _L; i++) {
+				_prg_delta[i].init((byte *)k+16*i,prgCacheSize);
+			}
+		}
 	
-	private:
-		vector<byte> _delta;
-		vector<PrgFromOpenSSLAES *> _prg_delta;
-		const string& _serverAddr;
-		byte* _prg_delta_buff;
-		byte* _q_j_out; 
-		byte *_qi;
-		byte *_u;
-		byte *_chi;
+       void extend (uint32_t size_bits, byte *q_j_out)
+	   {
+		   uint32_t mBytes = size_bits/8; 
+		   _channel->read(_u.data(),mBytes*_L);
+		   for (uint32_t i =0; i < _L; i++) {
+			   const byte * tdeltai = expand_tdeltai(i,mBytes);
+			   update_qi(mBytes,qi(i,mBytes), ui(i,mBytes), tdeltai, _delta[i]); 
+		   }
+	   
+	   		osuCrypto::MatrixView<osuCrypto::u8> m1(_q.data(), _L ,mBytes);
+			osuCrypto::MatrixView<osuCrypto::u8> m2(q_j_out, mBytes*8 ,_L/8);
+ 			osuCrypto::sse_transpose(m1,m2);
+		    
+	 }
+
 	
+    private:
+	
+	     byte * ui(uint32_t i, uint32_t mBytes) {return _u.data() + i*mBytes;} 
+ 	     byte * qi(uint32_t i, uint32_t mBytes) {return _q.data() + i*mBytes;} 
+         const byte * expand_tdeltai(uint32_t i, uint32_t mBytes) {return _prg_delta[i].getBytes(_tdeltai_aligned16+i*mBytes, mBytes); }
+    
+         void update_qi(uint32_t mBytes, byte *qi, const byte * ui, const byte *tdeltai , const byte deltai) {
+             for (uint32_t j = 0; j < mBytes; j++) {
+                	qi[j] = deltai ? ui[j] ^ tdeltai[j] : tdeltai[j];
+	          }
+         }
+	
+         uint32_t _L;
+         uint32_t _maxExpandBits;
+         shared_ptr<CommParty>  _channel;
+		 vector<COTSK_Prg> _prg_delta;
+		 vector<byte> _u;
+		 vector<byte> _q;
+		 vector<byte> _delta;
+		 byte *_tdeltai_aligned16;
 };
 
-/*********************************************
-    SENDER CTOR
-**********************************************/
-template <class S>
-COTSK_Sender<S>::COTSK_Sender( const string& serverAddr, 
-                            int baseOTport, 
-                            const shared_ptr<CommParty> & channel, 
-                            uint32_t L, 
-                            uint32_t K, 
-                            uint32_t M) : COTSK_Base(baseOTport,channel,L,K,M,sizeof(S)),_serverAddr(serverAddr)
-{
-	_Mtag_bytes_align_16 = (M+sizeof(S)*8+64)/8;
-	this->_prg_delta_buff = (byte *) _mm_malloc(_L_CEIL8*_Mtag_bytes_align_16,16); 
-	this->_q_j_out =  (byte *) _mm_malloc(_L_CEIL8*_Mtag_bytes_align_16,16);
-	this->_qi = (byte *) _mm_malloc (_L_CEIL8*_Mtag_bytes_align_16, 16); 
-	this->_u = (byte *) _mm_malloc (_L*_Mtag_bytes_align_16, 16); 
-    //this->_chi = (byte *) _mm_malloc (_M*_S_bytes,16);
- 
-	
-	this->_prg_delta.resize(L);
-	for (uint32_t i = 0; i < L; i++) {
-		this->_prg_delta[i] = new PrgFromOpenSSLAES(_Mtag_bytes_align_16 / 16, false, _prg_delta_buff+i*_Mtag_bytes_align_16);
-	}
-}
+class COTSK_SenderSessionOTHandler {
+    public:
+        COTSK_SenderSessionOTHandler(OTExtensionBristolReceiver & baseOTReceiver, uint32_t L) : 
+                _delta(L+1,0x00),
+                _L(L),
+				_x_sigma((L+1)*16),
+                _baseOTReceiver(baseOTReceiver)
+                {}
+        
+        void initializeOrRekey(const byte *delta) {
+            for (uint32_t i=0; i < _L; i++) {
+                _delta[i+1] = index(delta,i) ? 0x01 : 0x00;
+            }
+			OTExtensionGeneralRInput generalRInput(_delta, 128);
+            auto output = _baseOTReceiver.transfer(&generalRInput);
+			_x_sigma = ((OTOnByteArrayROutput *)output.get() )->getXSigma();
 
-/*********************************************
-    SENDER INITIALIZE 
-**********************************************/
-template <class S>
-void COTSK_Sender<S>::initialize(const vector<byte> & delta)
-{
-	_delta = delta;
-	assert (delta.size() == _L);
 #ifdef DEBUG_PRINT
-	cout << "delta: " ;
-	for (uint32_t i=0; i < delta.size(); i++) {
-		cout << hex << (int)delta[i] << " ";
-	}
-	cout << endl;
+//			debugPrint((OTOnByteArrayROutput *)output.get());
 #endif
+        }
+		const vector<byte> & getDelta() {return _delta;}
 	
-#ifdef DEBUG_PRINT
-	cout << "Initializing OTBristolReceiver...." << endl;
-#endif	
-	
-  	OTExtensionBristolReceiver receiver(_serverAddr,this->_baseOTport,true,this->_channel);
- 
-#ifdef DEBUG_PRINT
-	cout << "OTBristolReceiver initialized" << endl;
-#endif	
-	
-	_delta.insert( _delta.begin(), 0);
-    OTBatchRInput * input = new OTExtensionGeneralRInput(_delta, _K);
- 	
-	auto start = scapi_now();
-#ifdef DEBUG_PRINT
-	cout << "Calling OT transfer...." << endl;
-#endif	
-    auto output = receiver.transfer(input);
-    print_elapsed_ms(start, "Base Transfer");
-
-	auto out = (OTOnByteArrayROutput *) output.get();
-#ifdef DEBUG_PRINT
-	cout << "First byte of each selected key: " << endl ;
-#endif	
- 	for (uint32_t i= 0; i < _L; i++) {
-		byte *b = out->getXSigma().data() + (i+1)*_K_bytes;
-#ifdef DEBUG_PRINT
-		cout <<  hex << (int)b[0] << " " ;
-#endif		
-		SecretKey sk( b, _K_bytes ,"AES128");
-		_prg_delta[i]->setKey(sk);
-	}
-#ifdef DEBUG_PRINT
-		cout <<  endl; 
-#endif	
-}	
-
-/*********************************************
-    SENDER EXTEND 
-**********************************************/
-template <class S>
-void COTSK_Sender<S>::extend(byte **q_j_out)
-{
-	byte *t_i_delta;
-	(*q_j_out) = _q_j_out;
-	this->_channel->read(_u, _L*_Mtag_bytes_align_16);
-
-#ifdef DEBUG_PRINT
-        cout << "** Sender extend :: read u, size= " << dec << _L*_Mtag_bytes_align_16 << endl;
-#endif	
-	
-    for (uint32_t i = 0; i < _L; i++) {
-		t_i_delta = this->_prg_delta[i]->getPRGBytesEX(_Mtag_bytes_align_16);
-		for (uint32_t j=0;j<_Mtag_bytes;j++) {
-			if (_delta[i]) {
-				_qi[i*_Mtag_bytes_align_16+j] =  _u[i*_Mtag_bytes_align_16+j] ^ t_i_delta[j];
-			}
-			else {
-				_qi[i*_Mtag_bytes_align_16+j] = t_i_delta[j];
-			}
-				
+        const byte *getKdelta() { 
+            return _x_sigma.data() + 16;
 		}
-	}	
-
-	if (_L == 1)
-		return;
-
-#ifdef DEBUG_PRINT
-    cout << "** Sender extend :: Entering transpose " << endl;
-#endif		
-	transpose(_L_CEIL8,_qi,_Mtag_bytes_align_16,_q_j_out);	
-#ifdef DEBUG_PRINT
-    cout << "** Sender extend :: transpose " << endl;
-#endif	
 	
-	//check consistency
+    private:
+	
+		void debugPrint(OTOnByteArrayROutput *sigma) {
+    	    cout << "Arr 0 : First byte of each key" << endl; 
+    		for (uint32_t i= 0; i < _L; i++) {
+				byte *b = sigma->getXSigma().data() + (i+1)*16;
+				cout <<  hex << (int)b[0] << " " ;
+			}
+			cout << dec << endl;
+		}
+	
+    private:
+        vector<byte> _delta;
+        uint32_t _L;
+		vector<byte> _x_sigma;
+        OTExtensionBristolReceiver & _baseOTReceiver;
+
   
-	_chi = this->_sampling_prg->getPRGBytesEX(_M*_S_bytes);
-#ifdef DEBUG_PRINT
-    cout << "** Sender check correlation: sampled m=  " << dec << _M << " _S_bytes " << _S_bytes << endl;
-#endif	
-	
-   	this->_channel->write(_chi,_M*_S_bytes);
-	
-#ifdef DEBUG_PRINT
-    cout << "** Sender check correlation: sent chi  " << dec << _M*_S_bytes << " bytes " << endl;
-#endif	
+};
+
+class COTSK_SenderSession {
  
-	S y,tau,nu=0;
-	
-	this->_channel->read((byte *)&y,sizeof(S));
-
-#ifdef DEBUG_PRINT
-        cout << "** Sender : recieved y = " << dec << y << endl;
-#endif	
-	
- 	this->_channel->read((byte *)&tau,sizeof(S));
-
-#ifdef DEBUG_PRINT
-        cout << "** Sender : recieved tau = " << dec << tau << endl;
-#endif	
-		
-	S *p_chi = (S *)_chi;
-    for (uint32_t j=0; j < _M; j++) {
-    	if (index(_q_j_out,j)) {
-			nu = nu ^ p_chi[j];
+    public:
+        COTSK_SenderSession(OTExtensionBristolReceiver & baseOTReceiver,
+                            const shared_ptr<CommParty> & channel,
+                            uint32_t L,
+                            uint32_t maxExpandBits) : _L(L), _maxExpandBits(maxExpandBits),_OThandler(baseOTReceiver,L),_extendHandler(channel,L,maxExpandBits)
+		{
+			_channel = channel;
 		}
-	}
-	for (uint32_t j=0; j < _S; j++) {
-    	if (index(_q_j_out,j+_M)) {
-			nu = nu ^ _gf2x_precomputed.get(j);
+    
+        void initializeOrRekey(const byte *delta) {
+			cerr << "calling handler init.." << endl; 
+            _OThandler.initializeOrRekey(delta);
+		    _extendHandler.keyPrg(_OThandler.getKdelta(),_OThandler.getDelta());
+        }
+    
+        void extend (uint32_t size_bits, byte *t_j_i_out) {
+#ifdef DEBUG_PRINT
+//			cout << "Sender extend: size_bits "  << size_bits << endl;
+#endif		
+			_extendHandler.extend(size_bits,t_j_i_out);
 		}
-	}
+    
+    private:
+      uint32_t _L;
+      uint32_t _maxExpandBits;
+      shared_ptr<CommParty> _channel;
+      COTSK_SenderSessionOTHandler  _OThandler;
+	  COTSK_SenderSessionExtendHandler _extendHandler;
+    
+};
 
-}
+class COTSK_Sender {
+	public:
+		COTSK_Sender(const string& serverAddr, int baseOTport, const shared_ptr<CommParty> & channel, uint32_t L, uint8_t numSessions,uint32_t maxExpandBits) 
+            : _baseOTReceiver(serverAddr,baseOTport,true,channel) {
+       
+           _sessions.resize(numSessions);
+           for (uint8_t i=0; i < numSessions; i++) {
+               _sessions[i] =new COTSK_SenderSession(_baseOTReceiver,channel,L,maxExpandBits);              
+   		   }
 
-#endif // COTSHORTKEYS_H___
+		}
+    
+	    void initializeOrRekey(uint8_t sessionId, const byte *delta) {
+			cerr << "calling session init.." << endl; 
+			_sessions[sessionId]->initializeOrRekey(delta);
+        }
+    
+        void extend (uint8_t sessionId, uint32_t size_bits , byte *q_i_j) {
+            _sessions[sessionId]->extend(size_bits, q_i_j);
+        }
+ 	
+	private:
+        OTExtensionBristolReceiver _baseOTReceiver;
+		vector<COTSK_SenderSession *> _sessions;
+};
+
+
+
+
+
+#endif

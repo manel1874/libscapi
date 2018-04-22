@@ -13,21 +13,13 @@
 #include "MPCCommunicationEX.hpp"
 #include "COTSK_Receiver_impl.h"
 #include "COTSK_Sender_impl.h"
+
 /**
 * Facade for the OT functionality with shorty keys
 * This is the only file that needs to be included and used directly 
 * Written by: Assi Barak, April 2018
 */
 
-/**
-* Constants in the current implementation:
-     S = 64;  
-	 K = 128; length of base OT keys.
-	 KNOWN_LIMITATION: S is fixed to 64
-*/
-typedef COTSK_Sender<uint64_t> COTSK_SenderS64;
-typedef COTSK_Receiver<uint64_t> COTSK_ReceiverS64;
- 
 
 class COTSK_pOne {
 	public:	
@@ -45,13 +37,6 @@ class COTSK_pOne {
  		*			    - lbits = 1 is a special case (no check-correlation)
 		*               - KNOWN LIMITATION - for this version, L <= 16 (no larger transpose yet)			
 		*
-		* [in] mBits    - the size in bits of vectors passed to exend is lBits * mBits
-		*				- we use a fixed mBits size to optimze performance
-		*               - KNOWN LIMITATION - mBits must be a multiplier of 16.
-		*                
-		*               - COTSK_pOne and COTSK_pTwo must use the same parameters when 
-		*                 communicating with each other
-		*
 		* There are 3 required communication parameters: 
 		*
 		* [in] partyIdInCommitee - Id of self party in commitee P1. This is an Id relative to the 
@@ -70,22 +55,21 @@ class COTSK_pOne {
 		*
 		* the constructor also opens all communication channels.
 		*/
-		COTSK_pOne(uint8_t lBits,
-				   uint32_t mBits, 
-	 			   int partyIdInCommitee,
+		COTSK_pOne(uint8_t  lBits,
+				   uint8_t  numSessions,
+				   uint32_t maxExpandBits,
+	 			   int partyIdInCommitee,            
 				   const string & selfAddr,
-				   const vector<string> &peerIps);
+				   const vector<string> &peerIps); 
 	
 		/**
 		* Initialize the Party. This runs the Base Protocol (Bristol_OT_Extension) with all peers.
 		* Parameters:
 		*
-		* [in] a byte vector of size lBits, where each byte is 0x00 or 0x01, based on the selection
-		* note that the same delta vector is used for all peers Pj. (this is in accordance with
-		* correspondence with Peter Scholl and the protocol description)
 		*/
-		void initialize(const vector<byte> & delta);
+		void initializeOrRekey(uint8_t sessionId, const byte * delta);  
 	
+		
 		/**
 		* Extend. Local party is i. Runs the protocol for m bits, with each of the peers j
 		*
@@ -97,41 +81,22 @@ class COTSK_pOne {
 		* 				by the pOne class. It is valid until the next call to extend. There is no need 
 		* 				to free memory. From my understanding of the use case, there is no need to copy as well
 		*
-		* 				KNOWN_LIMITATION - It would be nicer to return a vector of BitVector classes, however the
-		* 				current implementation of BitVector cannot accept external memory.
 		*/
-		void extend (vector<byte *> & q_i_j);
+		void extend (  uint8_t sessionId  , uint32_t size_bits, vector<byte *> & q_i_j);
 		
-		/**
-		* SwitchCorrelation. This re-runs the Base Protocol (Bristol_OT_Extension) with all peers.
-		* This reuses the buffer allocations and the existing communication channel between the peers
-		*
-		*  Parameters:
-		*
-	    *  [in] a byte vector of size lBits, where each byte is 0x00 or 0x01
-		*/
-		void switchCorrelation(const vector<byte> & delta);
-	
-		/**
-		* close. Gracefully close the communication with peer and clean up.
-		* If close is not called explicity, this will take place in the destructor.
-		*/
-		void close();
-	
-		~COTSK_pOne();
 	
 	private:
 		boost::asio::io_service _io_service;
 		vector<shared_ptr<ProtocolPartyDataEX>> _peers;	
-		vector<COTSK_SenderS64 *> _senders;
+		vector<COTSK_Sender *> _senders;
 		int _nPeers;
-		uint32_t _mBits;
-		uint32_t _mtagBits;
 		uint32_t _lBits;
+		uint8_t _numSessions;
 	
 };
 
 class COTSK_pTwo {
+	
 	public:
 		/**
 		* Construct a party in pTwo group. (Pj). a single COTSK_pOne should be used 
@@ -147,13 +112,6 @@ class COTSK_pTwo {
  		*			    - lbits = 1 is a special case (no check-correlation)
 		*               - KNOWN LIMITATION - for this version, L <= 16 (no larger transpose yet)			
 		*
-		* [in] mBits    - the size in bits of vectors passed to exend is lBits * mBits
-		*				- we use a fixed mBits size to optimze performance
-		*               - KNOWN LIMITATION - mBits must be a multiplier of 16.
-		*                
-		*               - COTSK_pOne and COTSK_pTwo must use the same parameters when 
-		*                 communicating with each other
-		*
 		* There are 3 required communication parameters: 
 		*
 		* [in] partyIdInCommitee - Id of self party in commitee P1. This is an Id relative to the 
@@ -171,28 +129,26 @@ class COTSK_pTwo {
 		*	           - allocation scheme
 		*
 		* the constructor also opens all communication channels.
-		*/		COTSK_pTwo(uint8_t lBits,
-				   uint32_t mBits, 
-				   int partyIdInCommitee,
-				   const string & selfAddr,
-				   const vector<string> &peerIps);
+		*/		COTSK_pTwo(	uint8_t lBits,
+						   	uint8_t numSessions,
+						    uint32_t maxExpandBits,
+						   	int partyIdInCommitee,
+				   			const string & selfAddr,
+				   			const vector<string> &peerIps);
 	
 		/**
 		* Initialize the Party. This runs the Base Protocol (Bristol_OT_Extension) with all peers.
 		* No input is required. Inputs are set by the other party.
 		*/
-		void initialize();
-	
-		/**
+		void initializeOrRekey(uint8_t sessionId);
+
+			/**
 		* Extend. Local party is j. Runs the protocol for m bits, with each of the peers i
 		* Parameters:
 		*
 		* [in] x_h_j - bit vector of x_h_j. note that the same x_h_j is used for all peers i
 		*            - If the caller holds x_h_j in a BitVector, you can pass in the octets() 
 		*
-		* [i] r_j_i_k - REMOVED. the class generates fresh randoms for each peer i,
-		*             - there is no need for the caller to pass this. 
-		*             - This is for performance reasons as well as clarity handling alignment
 		* 
 		* [out] t_j_i_out
 		*			   - A vector of bit vectors, one for each peer. in the bit vectors, each
@@ -204,33 +160,19 @@ class COTSK_pTwo {
 		* 				KNOWN_LIMITATION - It would be nicer to return a vector of BitVector classes, however the
 		* 				current implementation of BitVector cannot accept external memory.
 		*/
-		void extend(const byte *x_h_j,
-					//const byte *r_j_i_k ,
-					vector<byte *> & t_j_i_out);	
+		void extend( uint8_t sessionId,
+					 uint32_t size_bits,
+					 const byte *x_and_r,
+					 vector<byte *> & t_j_i_out);	
 	
-		/**
-		* SwitchCorrelation. This re-runs the Base Protocol (Bristol_OT_Extension) with all peers.
-		* This reuses the buffer allocations and the existing communication channel between the peers
-		* No input is required. Inputs are set by the other party.
-		*/
-		void switchCorrelation();
-	
-		/**
-		* close. Gracefully close the communication with peer and clean up.
-		* If close is not called explicity, this will take place in the destructor.
-		*/
-		void close();
-	
-		~COTSK_pTwo();
-	
+		
 	private:
-	boost::asio::io_service _io_service;
+		boost::asio::io_service _io_service;
 		vector<shared_ptr<ProtocolPartyDataEX>> _peers;	
-		vector<COTSK_ReceiverS64 *> _receivers;
+		vector<COTSK_Receiver *> _receivers;
 		int _nPeers;
-		uint32_t _mBits;
-		uint32_t _mtagBits;
 		uint32_t _lBits;
+		uint8_t _numSessions;
 };
 
 
