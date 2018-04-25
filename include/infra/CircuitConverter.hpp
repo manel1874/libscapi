@@ -35,7 +35,7 @@ public:
      * @param bristolFileName The original file to convert
      * @param scapiFileName The destination file to create
      */
-    static void convertBristolToScapi(string bristolFileName, string scapiFileName, bool isMultiParty);
+    static void convertBristolToScapi(string bristolFileName, string scapiFileName, int numParties, bool isMultiParty);
 
     /**
     * Converts the given circuit from scapi format into bristol format.
