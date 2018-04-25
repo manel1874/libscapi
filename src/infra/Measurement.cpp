@@ -79,7 +79,7 @@ void Measurement::init(Protocol &protocol)
 
     string partiesFile = parser.getValueByKey(m_arguments, "partiesFile");
     setCommInterface(partiesFile);
-    m_numOfParties = atoi(parser.getValueByKey(m_arguments, "partiesNumber").c_str());
+    m_numOfParties = atoi(parser.getValueByKey(m_arguments, "numParties").c_str());
 }
 
 void Measurement::init(string protocolName, int internalIterationsNumber, int partyId, int partiesNumber,
