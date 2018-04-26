@@ -1,7 +1,7 @@
 #include "IknpOtExtReceiver.h"
 #include "libOTe/Tools/Tools.h"
 #include <cryptoTools/Common/Log.h>
-
+#include <cryptoTools/Common/ByteStream.h>
 #include <cryptoTools/Common/BitVector.h>
 #include <cryptoTools/Crypto/PRNG.h>
 #include <cryptoTools/Crypto/Commit.h>
@@ -74,11 +74,11 @@ namespace osuCrypto
         auto mIter = messages.begin();
 
         u64 step = std::min<u64>(numSuperBlocks, (u64)commStepSize);
-        std::vector<block> uBuff(step * 128 * superBlkSize);
+        std::unique_ptr<ByteStream> uBuff(new ByteStream(step * 128 * superBlkSize * sizeof(block)));
 
         // get an array of blocks that we will fill. 
-        auto uIter = (block*)uBuff.data();
-        auto uEnd = uIter + uBuff.size();
+        auto uIter = (block*)uBuff->data();
+        auto uEnd = uIter + step * 128 * superBlkSize;
 
         // NOTE: We do not transpose a bit-matrix of size numCol * numCol.
         //   Instead we break it down into smaller chunks. We do 128 columns 
@@ -139,9 +139,10 @@ namespace osuCrypto
 
                 if (step)
                 {
-                    uBuff.resize(step * 128 * superBlkSize);
-                    uIter = (block*)uBuff.data();
-                    uEnd = uIter + uBuff.size();
+                    uBuff.reset(new ByteStream(step * 128 * superBlkSize * sizeof(block)));
+
+                    uIter = (block*)uBuff->data();
+                    uEnd = uIter + step * 128 * superBlkSize;
                 }
             }
 

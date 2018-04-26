@@ -37,9 +37,9 @@ SUMO = no
 all: libs libscapi tests
 	echo $(WITH_EMP)
 ifeq ($(GCC_STANDARD), c++11)
-    libs: compile-openssl compile-boost compile-json compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc compile-otextension-bristol
+    libs: compile-openssl compile-boost compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc compile-otextension-bristol
 else
-libs: compile-openssl compile-boost compile-json compile-libote compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc compile-otextension-bristol
+libs: compile-openssl compile-boost compile-libote compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc compile-otextension-bristol
 endif
 libscapi: directories $(SLib)
 directories: $(OUT_DIR)
@@ -125,7 +125,6 @@ ifeq ($(SUMO),yes)
 	@touch compile-emp-m2pc
 endif
 
-
 compile-blake:
 	@echo "Compiling the BLAKE2 library"
 	@mkdir -p $(builddir)/BLAKE2/
@@ -160,28 +159,18 @@ compile-boost:
 	@cp -r $(builddir)/boost_1_64_0/boost/ $(CURDIR)/install/include/
 	@touch compile-boost
 
-compile-json:
-	@echo "Compiling JSON library..."
-	@cp -r lib/JsonCpp $(builddir)/JsonCpp
-	@cmake $(builddir)/JsonCpp/CMakeLists.txt
-	@$(MAKE) -C $(builddir)/JsonCpp/
-	@cp $(builddir)/JsonCpp/src/lib_json/libjsoncpp.a $(CURDIR)/install/lib/
-	@touch compile-json
-
 # Support only in c++14
 compile-libote:compile-boost
 	@echo "Compiling libOTe library..."
 	@cp -r lib/libOTe $(builddir)/libOTe
-	@mkdir -p $(builddir)/libOTe/cryptoTools/thirdparty/linux/miracl/
-	@mv $(builddir)/libOTe/cryptoTools/thirdparty/linux/miracl2/* $(builddir)/libOTe/cryptoTools/thirdparty/linux/miracl/
 	@cmake $(builddir)/libOTe/CMakeLists.txt -DCMAKE_BUILD_TYPE=Release
 	@$(MAKE) -C $(builddir)/libOTe/
 	@cp $(builddir)/libOTe/lib/*.a $(CURDIR)/install/lib/
-	@cp $(builddir)/libOTe/cryptoTools/thirdparty/linux/miracl/miracl/source/libmiracl.a $(CURDIR)/install/lib/
 	@mv $(CURDIR)/install/lib/liblibOTe.a $(CURDIR)/install/lib/libOTe.a
 	@mkdir -p $(CURDIR)/install/include/libOTe
 	@cd $(builddir)/libOTe/ && find . -name "*.h" -type f |xargs -I {} cp --parents {} $(CURDIR)/install/include/libOTe
 	@cp -r $(builddir)/libOTe/cryptoTools/cryptoTools/gsl $(CURDIR)/install/include/libOTe/cryptoTools/cryptoTools
+	@cp $(builddir)/libOTe/cryptoTools/thirdparty/miracl/source/libmiracl.a $(CURDIR)/install/lib
 	@touch compile-libote
 
 compile-ntl:
@@ -207,9 +196,9 @@ clean-otextension-bristol:
 	@rm -f compile-otextension-bristol
 
 clean-ntl:
-	echo "Cleaning the ntl build dir..."
-	rm -rf $(builddir)/NTL
-	rm -f compile-ntl
+	@echo "Cleaning the ntl build dir..."
+	@rm -rf $(builddir)/NTL
+	@rm -f compile-ntl
 
 clean-blake:
 	@echo "Cleaning blake library"
@@ -243,15 +232,10 @@ clean-openssl:
 	@rm -rf $(builddir)/openssl
 	@rm -f compile-openssl
 
-clean-json:
-	@echo "Cleaning JSON library"
-	@rm -rf $(builddir)/JsonCpp/
-	@rm -f compile-json
-
 clean-libote:
 	@echo "Cleaning libOTe library"
 	@rm -rf $(builddir)/libOTe/
 	@rm -f compile-libote
 
-clean: clean-json clean-libote clean-openssl clean-boost clean-emp clean-otextension-bristol clean-ntl clean-install clean-tests
+clean: clean-libote clean-openssl clean-boost clean-emp clean-otextension-bristol clean-ntl clean-install clean-tests clean-cpp
 

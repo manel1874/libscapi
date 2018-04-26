@@ -59,8 +59,6 @@ int main(int argc, char* argv[]) {
 		return mainSha1();
 	if (argc == 2)
 		return exampleUsage();
-	if (exampleName == "OTExtensionLibote")
-		return mainLibote(argv[2]);
 #ifndef _WIN32
 	if (exampleName == "OTExtensionBristol")
 		return mainBristol(argv[2]);

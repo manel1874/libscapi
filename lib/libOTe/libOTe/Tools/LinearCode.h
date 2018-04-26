@@ -1,7 +1,7 @@
 #pragma once
 // This file and the associated implementation has been placed in the public domain, waiving all copyright. No restrictions are placed on its use. 
 #include <cryptoTools/Common/Defines.h>
-#include <cryptoTools/Common/Defines.h>
+#include <cryptoTools/Common/ArrayView.h>
 #include <string>
 namespace osuCrypto
 {
@@ -20,18 +20,13 @@ namespace osuCrypto
         void loadTxtFile(const std::string& fileName);
         void loadTxtFile(std::istream& in);
 
-        void load(const unsigned char* data, u64 size);
+
 
         void loadBinFile(const std::string& fileName);
         void loadBinFile(std::istream& in);
 
-        // outputs a c file contains an char array containing the binary data. e.g. bch511.h
-        void writeBinCppFile(const std::string& fileName, const std::string & name);
-
         void writeBinFile(const std::string& fileName);
         void writeBinFile(std::ostream& out);
-
-
 
         void writeTextFile(const std::string& fileName);
         void writeTextFile(std::ostream& out);

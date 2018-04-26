@@ -13,10 +13,8 @@ namespace osuCrypto
         std::vector<std::array<block, 2>> mMessages;
 
         std::vector<u8> mCorrection;
-        u64 mCorrectionIdx, mInputByteCount;
+        u64 mEncodeSize, mCorrectionIdx;
 
-
-        u64 getBaseOTCount() const override { return 128; }
 
         // returns whether this OT extension has base OTs
         bool hasBaseOts() const override;
@@ -27,7 +25,7 @@ namespace osuCrypto
         // @ baseRecvOts: The base 1 out of 2 OTs. 
         // @ choices: The select bits that were used in the base OT
         void setBaseOts(
-            span<block> baseRecvOts,
+            ArrayView<block> baseRecvOts,
             const BitVector& choices) override;
 
         // Creates a new OT extesion of the same type that can be used
@@ -44,12 +42,15 @@ namespace osuCrypto
         using NcoOtExtSender::encode;
         void encode(
             u64 otIdx,
-            const void* choiceWord,
-            void* dest,
+            const block* choiceWord,
+            u8* dest, 
             u64 destSize) override;
 
 
-        void configure(bool maliciousSecure,u64 statSecParam, u64 inputBitCount) override;
+        void getParams(
+            bool maliciousSecure,
+            u64 compSecParm, u64 statSecParam, u64 inputBitCount, u64 inputCount,
+            u64& inputBlkSize, u64& baseOtCount) override;
 
         void recvCorrection(Channel& chl, u64 recvCount) override;
 

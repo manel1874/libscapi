@@ -1,18 +1,16 @@
 #include "LzKosOtExtReceiver.h"
 #include "libOTe/Tools/Tools.h"
 #include <cryptoTools/Common/Log.h>
-
+#include <cryptoTools/Common/ByteStream.h>
 #include <cryptoTools/Common/BitVector.h>
 #include <cryptoTools/Crypto/PRNG.h>
 #include <cryptoTools/Crypto/Commit.h>
-#include <cryptoTools/Network/Channel.h>
-#include <cryptoTools/Common/Timer.h>
 
 using namespace std;
 
 namespace osuCrypto
 {
-    void LzKosOtExtReceiver::setBaseOts(span<std::array<block, 2>> baseOTs)
+    void LzKosOtExtReceiver::setBaseOts(ArrayView<std::array<block, 2>> baseOTs)
     {
         if (baseOTs.size() != gOtExtBaseOtCount)
             throw std::runtime_error(LOCATION);
@@ -46,14 +44,14 @@ namespace osuCrypto
 
     void LzKosOtExtReceiver::receive(
         const BitVector& choices,
-        span<block> messages,
+        ArrayView<block> messages,
         PRNG& prng,
         Channel& chl/*,
                     std::atomic<u64>& doneIdx*/)
     {
         if (choices.size() == 0) return;
 
-        if (mHasBase == false || choices.size() != u64(messages.size()))
+        if (mHasBase == false || choices.size() != messages.size())
             throw std::runtime_error(LOCATION);
 
         // round up
@@ -71,24 +69,24 @@ namespace osuCrypto
         SHA1 sha;
         u8 hashBuff[SHA1::HashSize];
 
-        // commit to as seed which will be used to
+        // commit to as seed which will be used to 
         block seed = prng.get<block>();
         Commit myComm(seed);
         chl.asyncSend(myComm.data(), myComm.size());
 
-        // turn the choice vbitVector into an array of blocks.
+        // turn the choice vbitVector into an array of blocks. 
         BitVector choices2(numBlocks * 128);
         choices2 = choices;
         choices2.resize(numBlocks * 128);
-        auto choiceBlocks = choices2.getSpan<block>();
+        auto choiceBlocks = choices2.getArrayView<block>();
 
 #ifdef OTEXT_DEBUG
-        std::vector<u8> debugBuff;
+        ByteStream debugBuff;
         chl.recv(debugBuff);
         block debugDelta; debugBuff.consume(debugDelta);
 
         Log::out << "delta" << Log::endl << debugDelta << Log::endl;
-#endif
+#endif 
 
         std::vector<block> extraBlocks;
         extraBlocks.reserve(256);
@@ -97,14 +95,16 @@ namespace osuCrypto
         for (u64 blkIdx = 0; blkIdx < numBlocks; ++blkIdx)
         {
             // this will store the next 128 rows of the matrix u
-			std::vector<block> uBuff(gOtExtBaseOtCount);
-            // get an array of blocks that we will fill.
-            auto u = uBuff.data();
+            std::unique_ptr<ByteStream> uBuff(new ByteStream(gOtExtBaseOtCount * sizeof(block)));
+            uBuff->setp(gOtExtBaseOtCount * sizeof(block));
+
+            // get an array of blocks that we will fill. 
+            auto u = uBuff->getArrayView<block>();
 
             for (u64 colIdx = 0; colIdx < gOtExtBaseOtCount; colIdx++)
             {
-                // use the base key material from the base OTs to
-                // extend the i'th column of t0 and t1
+                // use the base key material from the base OTs to 
+                // extend the i'th column of t0 and t1    
                 t0[colIdx] = mGens[colIdx][0].get<block>();
 
                 // This is t1[colIdx]
@@ -122,7 +122,7 @@ namespace osuCrypto
             // transpose t0 in place
             sse_transpose128(t0);
 
-#ifdef OTEXT_DEBUG
+#ifdef OTEXT_DEBUG 
             chl.recv(debugBuff); assert(debugBuff.size() == sizeof(t0));
             block* q = (block*)debugBuff.data();
 #endif
@@ -157,21 +157,22 @@ namespace osuCrypto
 
 
         // do correlation check and hashing
-        // For the malicious secure OTs, we need a random PRNG that is chosen random
-        // for both parties. So that is what this is.
+        // For the malicious secure OTs, we need a random PRNG that is chosen random 
+        // for both parties. So that is what this is. 
         PRNG commonPrng;
         //random_seed_commit(ByteArray(seed), chl, SEED_SIZE, prng.get<block>());
         block theirSeed;
-        chl.recv((u8*)&theirSeed, sizeof(block));
-        chl.asyncSendCopy((u8*)&seed, sizeof(block));
+        chl.recv(&theirSeed, sizeof(block));
+        chl.asyncSendCopy(&seed, sizeof(block));
         commonPrng.SetSeed(seed ^ theirSeed);
 
-        // this buffer will be sent to the other party to prove we used the
+        // this buffer will be sent to the other party to prove we used the 
         // same value of r in all of the column vectors...
-        std::vector<block> correlationData(3);
-        block& x = correlationData[0];
-        block& t = correlationData[1];
-        block& t2 =correlationData[2];
+        std::unique_ptr<ByteStream> correlationData(new ByteStream(3 * sizeof(block)));
+        correlationData->setp(correlationData->capacity());
+        block& x = correlationData->getArrayView<block>()[0];
+        block& t = correlationData->getArrayView<block>()[1];
+        block& t2 = correlationData->getArrayView<block>()[2];
         x = t = t2 = ZeroBlock;
         block chij, ti, ti2;
 

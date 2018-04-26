@@ -1,6 +1,6 @@
 #include <iostream>
 
-//using namespace std;
+using namespace std;
 #include "tests_cryptoTools/UnitTests.h"
 #include "libOTe_Tests/UnitTests.h"
 
@@ -13,19 +13,16 @@ using namespace osuCrypto;
 #include "libOTe/TwoChooseOne/KosDotExtSender.h"
 
 #include <cryptoTools/Network/Channel.h>
-#include <cryptoTools/Network/Session.h>
-#include <cryptoTools/Network/IOService.h>
+#include <cryptoTools/Network/Endpoint.h>
 #include <numeric>
-#include <cryptoTools/Common/Timer.h>
 #include <cryptoTools/Common/Log.h>
 int miraclTestMain();
 
 #include "libOTe/Tools/LinearCode.h"
-#include "libOTe/Tools/bch511.h"
 #include "libOTe/NChooseOne/Oos/OosNcoOtReceiver.h"
 #include "libOTe/NChooseOne/Oos/OosNcoOtSender.h"
-#include "libOTe/NChooseOne/Kkrt/KkrtNcoOtReceiver.h"
-#include "libOTe/NChooseOne/Kkrt/KkrtNcoOtSender.h"
+#include "libOTe/NChooseOne/KkrtNcoOtReceiver.h"
+#include "libOTe/NChooseOne/KkrtNcoOtSender.h"
 
 #include "libOTe/TwoChooseOne/IknpOtExtReceiver.h"
 #include "libOTe/TwoChooseOne/IknpOtExtSender.h"
@@ -55,7 +52,7 @@ void kkrt_test(int i)
     auto rr = i ? EpMode::Server : EpMode::Client;
     std::string name = "n";
     IOService ios(0);
-    Session  ep0(ios, "localhost", 1212, rr, name);
+    Endpoint ep0(ios, "localhost", 1212, rr, name);
     std::vector<Channel> chls(numThreads);
 
     for (u64 k = 0; k < numThreads; ++k)
@@ -63,7 +60,8 @@ void kkrt_test(int i)
 
 
 
-    u64 baseCount = 4 * 128;
+    u64 ncoinputBlkSize = 1, baseCount = 4 * 128;
+    u64 codeSize = (baseCount + 127) / 128;
 
     std::vector<block> baseRecv(baseCount);
     std::vector<std::array<block, 2>> baseSend(baseCount);
@@ -76,9 +74,10 @@ void kkrt_test(int i)
         baseRecv[i] = baseSend[i][baseChoice[i]];
     }
 
-    block choice = prng0.get<block>();// ((u8*)choice.data(), ncoinputBlkSize * sizeof(block));
+    std::vector<block> choice(ncoinputBlkSize), correction(codeSize);
+    prng0.get((u8*)choice.data(), ncoinputBlkSize * sizeof(block));
 
-    std::vector<std::thread> thds(numThreads);
+    std::vector< thread> thds(numThreads);
 
     if (i == 0)
     {
@@ -89,7 +88,6 @@ void kkrt_test(int i)
                 [&, k]()
             {
                 KkrtNcoOtReceiver r;
-				r.configure(false, 40, 128);
                 r.setBaseOts(baseSend);
                 auto& chl = chls[k];
 
@@ -99,7 +97,7 @@ void kkrt_test(int i)
                 {
                     for (u64 j = 0; j < step; ++j)
                     {
-                        r.encode(i + j, &choice, &encoding1);
+                        r.encode(i + j, choice, encoding1);
                     }
 
                     r.sendCorrection(chl, step);
@@ -124,7 +122,6 @@ void kkrt_test(int i)
                 [&, k]()
             {
                 KkrtNcoOtSender s;
-				s.configure(false, 40, 128);
                 s.setBaseOts(baseRecv, baseChoice);
                 auto& chl = chls[k];
 
@@ -136,7 +133,7 @@ void kkrt_test(int i)
 
                     for (u64 j = 0; j < step; ++j)
                     {
-                        s.encode(i + j, &choice, &encoding2);
+                        s.encode(i + j, choice, encoding2);
                     }
                 }
                 s.check(chl, ZeroBlock);
@@ -176,7 +173,7 @@ void oos_test(int i)
 
     std::string name = "n";
     IOService ios(0);
-    Session  ep0(ios, "localhost", 1212, rr, name);
+    Endpoint ep0(ios, "localhost", 1212, rr, name);
     std::vector<Channel> chls(numThreads);
 
     for (u64 k = 0; k < numThreads; ++k)
@@ -184,12 +181,13 @@ void oos_test(int i)
 
 
     LinearCode code;
-    code.load(bch511_binary, sizeof(bch511_binary));
+    code.loadBinFile(std::string(SOLUTION_DIR) + "/libOTe/Tools/bch511.bin");
 
 
 
 
-    u64 baseCount = 4 * 128;
+    u64 ncoinputBlkSize = 1, baseCount = 4 * 128;
+    u64 codeSize = (baseCount + 127) / 128;
 
     std::vector<block> baseRecv(baseCount);
     std::vector<std::array<block, 2>> baseSend(baseCount);
@@ -202,9 +200,10 @@ void oos_test(int i)
         baseRecv[i] = baseSend[i][baseChoice[i]];
     }
 
-    block choice = prng0.get<block>();
+    std::vector<block> choice(ncoinputBlkSize), correction(codeSize);
+    prng0.get((u8*)choice.data(), ncoinputBlkSize * sizeof(block));
 
-    std::vector<std::thread> thds(numThreads);
+    std::vector< thread> thds(numThreads);
 
 
     if (i == 0)
@@ -215,8 +214,7 @@ void oos_test(int i)
             thds[k] = std::thread(
                 [&, k]()
             {
-                OosNcoOtReceiver r;
-                r.configure(true, 40, 76);
+                OosNcoOtReceiver r(code, 40);
                 r.setBaseOts(baseSend);
                 auto& chl = chls[k];
 
@@ -226,7 +224,7 @@ void oos_test(int i)
                 {
                     for (u64 j = 0; j < step; ++j)
                     {
-                        r.encode(i + j, &choice, &encoding1);
+                        r.encode(i + j, choice, encoding1);
                     }
 
                     r.sendCorrection(chl, step);
@@ -248,8 +246,7 @@ void oos_test(int i)
             thds[k] = std::thread(
                 [&, k]()
             {
-                OosNcoOtSender s;// (code);// = sender[k];
-				s.configure(true, 40, 76);
+                OosNcoOtSender s(code, 40);// = sender[k];
                 s.setBaseOts(baseRecv, baseChoice);
                 auto& chl = chls[k];
 
@@ -261,7 +258,7 @@ void oos_test(int i)
 
                     for (u64 j = 0; j < step; ++j)
                     {
-                        s.encode(i + j, &choice, &encoding2);
+                        s.encode(i + j, choice, encoding2);
                     }
                 }
                 s.check(chl, ZeroBlock);
@@ -298,7 +295,7 @@ void kos_test(int iii)
     auto rr = iii ? EpMode::Server : EpMode::Client;
     std::string name = "n";
     IOService ios(0);
-    Session  ep0(ios, "localhost", 1212, rr, name);
+    Endpoint ep0(ios, "localhost", 1212, rr, name);
 
     u64 numThread = 1;
     std::vector<Channel> chls(numThread);
@@ -390,7 +387,7 @@ void dkos_test(int i)
     // get up the networking
     std::string name = "n";
     IOService ios(0);
-    Session  ep0(ios, "localhost", 1212, rr, name);
+    Endpoint ep0(ios, "localhost", 1212, rr, name);
     Channel chl = ep0.addChannel(name, name);
 
     u64 s = 40;
@@ -457,7 +454,7 @@ void iknp_test(int i)
     // get up the networking
     std::string name = "n";
     IOService ios(0);
-    Session  ep0(ios, "localhost", 1212, rr, name);
+    Endpoint ep0(ios, "localhost", 1212, rr, name);
     Channel chl = ep0.addChannel(name, name);
 
 
@@ -526,7 +523,7 @@ void akn_test(int i)
     setThreadName("Recvr");
 
     IOService ios(0);
-    Session   ep0(ios, "127.0.0.1", 1212, rr, "ep");
+    Endpoint  ep0(ios, "127.0.0.1", 1212, rr, "ep");
 
     u64 numTHreads(4);
 
@@ -597,7 +594,7 @@ oos{ "o", "oos" },
 akn{ "a", "akn" };
 #include "signalHandle.h"
 
-
+#include <cryptoTools/Common/ByteStream.h>
 
 //
 //template<typename, typename T>
@@ -670,8 +667,8 @@ void base()
 {
 
     IOService ios(0);
-    Session   ep0(ios, "127.0.0.1", 1212, EpMode::Server, "ep");
-    Session   ep1(ios, "127.0.0.1", 1212, EpMode::Client, "ep");
+    Endpoint  ep0(ios, "127.0.0.1", 1212, EpMode::Server, "ep");
+    Endpoint  ep1(ios, "127.0.0.1", 1212, EpMode::Client, "ep");
 
     auto chl1 = ep1.addChannel("s");
     auto chl0 = ep0.addChannel("s");
@@ -715,7 +712,7 @@ void base()
 }
 
 #include <cryptoTools/gsl/span>
-
+#include <cryptoTools/Common/ByteStream.h>
 #include <cryptoTools/Common/Matrix.h>
 
 int main(int argc, char** argv)
@@ -812,10 +809,8 @@ int main(int argc, char** argv)
     {
         std::cout << "this program takes a runtime argument.\n\nTo run the unit tests, run\n\n"
             << "    frontend.exe -unitTest\n\n"
-			<< "to run the OOS16 active secure 1-out-of-N OT for N=2^76, run\n\n"
-			<< "    frontend.exe -oos\n\n"
-			<< "to run the KKRT16 passive secure 1-out-of-N OT for N=2^128, run\n\n"
-			<< "    frontend.exe -kkrt\n\n"
+            << "to run the OOS16 active secure 1-out-of-N OT for N=2^76, run\n\n"
+            << "    frontend.exe -oos\n\n"
             << "to run the KOS active secure 1-out-of-2 OT, run\n\n"
             << "    frontend.exe -kos\n\n"
             << "to run the KOS active secure 1-out-of-2 Delta-OT, run\n\n"

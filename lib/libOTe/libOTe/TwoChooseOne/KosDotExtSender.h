@@ -13,7 +13,7 @@ namespace osuCrypto {
     public: 
 
 
-		block mDelta = ZeroBlock;
+
         std::vector<PRNG> mGens;
         BitVector mBaseChoiceBits;
 
@@ -21,7 +21,7 @@ namespace osuCrypto {
         {
             return mBaseChoiceBits.size() > 0;
         }
-        //LinearCode mCode;
+        LinearCode mCode;
         //BitVector mmChoices;
 
         std::unique_ptr<OtExtSender> split() override;
@@ -30,7 +30,6 @@ namespace osuCrypto {
             span<block> baseRecvOts,
             const BitVector& choices) override;
 
-		void setDelta(const block& delta);
 
         void send(
             span<std::array<block, 2>> messages,

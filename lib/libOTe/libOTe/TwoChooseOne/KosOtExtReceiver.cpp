@@ -1,12 +1,10 @@
 #include "KosOtExtReceiver.h"
 #include "libOTe/Tools/Tools.h"
-
+#include <cryptoTools/Common/Log.h>
+#include <cryptoTools/Common/ByteStream.h>
 #include <cryptoTools/Common/BitVector.h>
-#include <cryptoTools/Common/Timer.h>
 #include <cryptoTools/Crypto/PRNG.h>
 #include <cryptoTools/Crypto/Commit.h>
-#include <cryptoTools/Network/Channel.h>
-
 #include "TcoOtDefines.h"
 using namespace std;
 
@@ -41,7 +39,7 @@ namespace osuCrypto
         ret->setBaseOts(baseRecvOts);
 
         return std::move(ret);
-    }
+    } 
 
 
     void KosOtExtReceiver::receive(
@@ -61,26 +59,26 @@ namespace osuCrypto
         u64 numSuperBlocks = (numOtExt / 128 + superBlkSize) / superBlkSize;
         u64 numBlocks = numSuperBlocks * superBlkSize;
 
-        // commit to as seed which will be used to
+        // commit to as seed which will be used to 
         block seed = prng.get<block>();
         Commit myComm(seed);
         chl.asyncSend(myComm.data(), myComm.size());
 
         PRNG zPrng(ZeroBlock);
-        // turn the choice vbitVector into an array of blocks.
+        // turn the choice vbitVector into an array of blocks. 
         BitVector choices2(numBlocks * 128);
         //choices2.randomize(zPrng);
         choices2 = choices;
         choices2.resize(numBlocks * 128);
         for (u64 i = 0; i < 128; ++i)
-        {
+        { 
             choices2[choices.size() + i] = prng.getBit();
 
             //std::cout << "extra " << i << "  " << choices2[choices.size() + i] << std::endl;
         }
 
         auto choiceBlocks = choices2.getSpan<block>();
-        // this will be used as temporary buffers of 128 columns,
+        // this will be used as temporary buffers of 128 columns, 
         // each containing 1024 bits. Once transposed, they will be copied
         // into the T1, T0 buffers for long term storage.
         std::array<std::array<block, superBlkSize>, 128> t0;
@@ -95,18 +93,18 @@ namespace osuCrypto
         auto mIter = messages.begin();
 
         u64 step = std::min<u64>(numSuperBlocks, (u64)commStepSize);
-        std::vector<block> uBuff(step * 128 * superBlkSize);
+        std::unique_ptr<ByteStream> uBuff(new ByteStream(step * 128 * superBlkSize * sizeof(block)));
 
-        // get an array of blocks that we will fill.
-        auto uIter = (block*)uBuff.data();
-        auto uEnd = uIter + uBuff.size();
+        // get an array of blocks that we will fill. 
+        auto uIter = (block*)uBuff->data();
+        auto uEnd = uIter + step * 128 * superBlkSize;
 
         // NOTE: We do not transpose a bit-matrix of size numCol * numCol.
-        //   Instead we break it down into smaller chunks. We do 128 columns
-        //   times 8 * 128 rows at a time, where 8 = superBlkSize. This is done for
-        //   performance reasons. The reason for 8 is that most CPUs have 8 AES vector
+        //   Instead we break it down into smaller chunks. We do 128 columns 
+        //   times 8 * 128 rows at a time, where 8 = superBlkSize. This is done for  
+        //   performance reasons. The reason for 8 is that most CPUs have 8 AES vector  
         //   lanes, and so its more efficient to encrypt (aka prng) 8 blocks at a time.
-        //   So that's what we do.
+        //   So that's what we do. 
         for (u64 superBlkIdx = 0; superBlkIdx < numSuperBlocks; ++superBlkIdx)
         {
 
@@ -120,7 +118,7 @@ namespace osuCrypto
             {
                 // generate the column indexed by colIdx. This is done with
                 // AES in counter mode acting as a PRNG. We don'tIter use the normal
-                // PRNG interface because that would result in a data copy when
+                // PRNG interface because that would result in a data copy when 
                 // we move it into the T0,T1 matrices. Instead we do it directly.
                 mGens[colIdx][0].mAes.ecbEncCounterMode(mGens[colIdx][0].mBlockIdx, superBlkSize, tIter);
                 mGens[colIdx][1].mAes.ecbEncCounterMode(mGens[colIdx][1].mBlockIdx, superBlkSize, uIter);
@@ -160,17 +158,18 @@ namespace osuCrypto
 
                 if (step)
                 {
-                    uBuff.resize(step * 128 * superBlkSize);
-					uIter = (block*)uBuff.data();
-					uEnd = uIter + uBuff.size();
+                    uBuff.reset(new ByteStream(step * 128 * superBlkSize * sizeof(block)));
+
+                    uIter = (block*)uBuff->data();
+                    uEnd = uIter + step * 128 * superBlkSize;
                 }
             }
 
-            // transpose our 128 columns of 1024 bits. We will have 1024 rows,
+            // transpose our 128 columns of 1024 bits. We will have 1024 rows, 
             // each 128 bits wide.
             sse_transpose128x1024(t0);
 
-
+             
 
             //block* mStart = mIter;
             auto mEnd = mIter + std::min<u64>(128 * superBlkSize, messages.end() - mIter);
@@ -178,8 +177,8 @@ namespace osuCrypto
             // compute how many rows are unused.
             u64 unusedCount = mIter - mEnd + 128 * superBlkSize;
 
-            // compute the begin and end index of the extra rows that
-            // we will compute in this iters. These are taken from the
+            // compute the begin and end index of the extra rows that 
+            // we will compute in this iters. These are taken from the 
             // unused rows what we computed above.
             block* xEnd = std::min<block*>(xIter + unusedCount, extraBlocks.data() + 128);
 
@@ -240,22 +239,23 @@ namespace osuCrypto
         gTimer.setTimePoint("recv.transposeDone");
 
         // do correlation check and hashing
-        // For the malicious secure OTs, we need a random PRNG that is chosen random
-        // for both parties. So that is what this is.
+        // For the malicious secure OTs, we need a random PRNG that is chosen random 
+        // for both parties. So that is what this is. 
         PRNG commonPrng;
         //random_seed_commit(ByteArray(seed), chl, SEED_SIZE, prng.get<block>());
         block theirSeed;
-        chl.recv((u8*)&theirSeed, sizeof(block));
-        chl.asyncSendCopy((u8*)&seed, sizeof(block));
+        chl.recv(&theirSeed, sizeof(block));
+        chl.asyncSendCopy(&seed, sizeof(block));
         commonPrng.SetSeed(seed ^ theirSeed);
         gTimer.setTimePoint("recv.cncSeed");
 
-        // this buffer will be sent to the other party to prove we used the
+        // this buffer will be sent to the other party to prove we used the 
         // same value of r in all of the column vectors...
-        std::vector<block> correlationData(3);
-        block& x =  correlationData[0];
-        block& t =  correlationData[1];
-        block& t2 = correlationData[2];
+        std::unique_ptr<ByteStream> correlationData(new ByteStream(3 * sizeof(block)));
+        correlationData->setp(correlationData->capacity());
+        block& x = correlationData->getSpan<block>()[0];
+        block& t = correlationData->getSpan<block>()[1];
+        block& t2 = correlationData->getSpan<block>()[2];
         x = t = t2 = ZeroBlock;
         block ti, ti2;
 
@@ -290,7 +290,7 @@ namespace osuCrypto
             expendedChoiceBlk[5] = mask & _mm_srai_epi16(choiceBlocks[blockIdx], 5);
             expendedChoiceBlk[6] = mask & _mm_srai_epi16(choiceBlocks[blockIdx], 6);
             expendedChoiceBlk[7] = mask & _mm_srai_epi16(choiceBlocks[blockIdx], 7);
-
+             
             for (u64 i = 0, dd = doneIdx; dd < stop; ++dd, ++i)
             {
 
@@ -311,7 +311,7 @@ namespace osuCrypto
 #endif
             }
 #ifndef KOS_SHA_HASH
-            auto& aesHashTemp = expendedChoiceBlk;
+            auto& aesHashTemp = expendedChoiceBlk; 
             auto length = stop - doneIdx;
             auto steps = length / 8;
             block* mIter = messages.data() + doneIdx;

@@ -3,10 +3,12 @@
 //
 
 #include "../../include/infra/CircuitConverter.hpp"
+#include <vector>
 
- void CircuitConverter::convertBristolToScapi(string bristolFileName, string scapiFileName, bool isMultiParty){
+ void CircuitConverter::convertBristolToScapi(string bristolFileName, string scapiFileName, int numParties, bool isMultiParty){
     
-    int inFan, outFan, input0, input1, output, numOfInputsForParty0, numOfInputsForParty1, numberOfGates, numberOfOutputs, numberOfWires;
+    int inFan, outFan, input0, input1, output, numberOfGates, numberOfOutputs, numberOfWires;
+     vector<int> numInputsPerParty(numParties);
     string type;
 
     ifstream bristolfile;
@@ -21,21 +23,17 @@
 
         bristolfile >> numberOfGates;//get the gates
         scapiFile << numberOfGates << " "; //print number of gates
-        scapiFile << "2" << endl; //print number of parties
+        scapiFile << numParties << endl; //print number of parties
 
         bristolfile >> numberOfWires; //number of wires
 
-        bristolfile >> numOfInputsForParty0; //number of wires for first party
-        bristolfile >> numOfInputsForParty1;
-
-        scapiFile << "1 " << numOfInputsForParty0 << endl;
-        for(int i = 0; i<numOfInputsForParty0; i++){
-            scapiFile << i << endl;
-        }
-
-        scapiFile << "2 " << numOfInputsForParty1 << endl;
-        for(int i = 0; i<numOfInputsForParty1; i++){
-            scapiFile << i + numOfInputsForParty0 <<endl;
+        int index = 0;
+        for (int i=0; i<numParties; i++){
+            bristolfile >> numInputsPerParty[i];
+            scapiFile << i+1 << " "<< numInputsPerParty[i] << endl;
+            for(int j = 0; j<numInputsPerParty[i]; j++, index++){
+                scapiFile << index + j << endl;
+            }
         }
 
         //get the number of outputs
@@ -48,7 +46,7 @@
             }
 
         } else{
-            for (int i=0; i<2; i++){
+            for (int i=0; i<numParties; i++){
                 scapiFile << i+1 << " " << numberOfOutputs << endl;
 
                 for (int j=0; j<numberOfOutputs; j++){

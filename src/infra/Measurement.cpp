@@ -30,6 +30,8 @@
 */
 
 #include "../../include/infra/Measurement.hpp"
+#include "../../include/cryptoInfra/Protocol.hpp"
+
 
 using namespace std;
 
@@ -42,6 +44,19 @@ Measurement::Measurement(Protocol &protocol)
 Measurement::Measurement(Protocol &protocol, vector<string> names)
 {
     init(protocol);
+    init(names);
+}
+
+Measurement::Measurement(string protocolName, int internalIterationsNumber, int partyId, int partiesNumber,
+                         string partiesFile)
+{
+    init(protocolName, internalIterationsNumber, partyId, partiesNumber, partiesFile);
+}
+
+Measurement::Measurement(string protocolName, int internalIterationsNumber, int partyId, int partiesNumber,
+                         string partiesFile, vector<string> names)
+{
+    init(protocolName, internalIterationsNumber, partyId, partiesNumber, partiesFile);
     init(names);
 }
 
@@ -64,7 +79,17 @@ void Measurement::init(Protocol &protocol)
 
     string partiesFile = parser.getValueByKey(m_arguments, "partiesFile");
     setCommInterface(partiesFile);
-    m_numOfParties = atoi(parser.getValueByKey(m_arguments, "partiesNumber").c_str());
+    m_numOfParties = atoi(parser.getValueByKey(m_arguments, "numParties").c_str());
+}
+
+void Measurement::init(string protocolName, int internalIterationsNumber, int partyId, int partiesNumber,
+                       string partiesFile)
+{
+    m_protocolName = protocolName;
+    m_numberOfIterations = internalIterationsNumber;
+    m_partyId = partyId;
+    m_numOfParties = partiesNumber;
+    setCommInterface(partiesFile);
 }
 
 void Measurement::init(vector <string> names)
@@ -82,6 +107,7 @@ void Measurement::init(vector <string> names)
             vector<unsigned long int>(m_numberOfIterations));
     m_names = move(names);
 }
+
 
 
 int Measurement::getTaskIdx(string name)
