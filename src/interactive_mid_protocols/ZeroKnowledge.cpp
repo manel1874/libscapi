@@ -27,6 +27,7 @@
 
 
 #include "../../include/interactive_mid_protocols/ZeroKnowledge.hpp"
+#include <boost/algorithm/string/replace.hpp>
 
 
 /************************************************/
@@ -235,7 +236,7 @@ void ZKPOKFromSigmaCmtPedersenVerifier::receiveTrapFromProver(CmtRCommitPhaseOut
 }
 
 void ZKPOKFiatShamirProof::initFromString(const string & row) {
-	
+
 	auto str_vec = explode(row, ':');
 	//recover a
 	int xSize = atoi(str_vec[0].c_str());
@@ -270,7 +271,9 @@ string ZKPOKFiatShamirProof::toString() {
 	output += ":";
 
 	//print e
-	output += string(reinterpret_cast<char const*>(e.data()), e.size());
+    string eString = string(reinterpret_cast<char const*>(e.data()), e.size());
+    boost::replace_all(eString, ":", "+");
+	output += eString;
 	output += ":";
 
 	//print z
@@ -300,8 +303,9 @@ vector<byte> ZKPOKFiatShamirFromSigmaProver::computeChallenge(ZKPOKFiatShamirPro
 	vector<byte> messageArray(msgString.begin(), msgString.end());
 
 	auto cont = input->getContext();
+    string str1(cont.begin(), cont.end());
 
-	vector<byte> inputToRO;
+    vector<byte> inputToRO;
 
 	if (cont.size() != 0) {
 		inputToRO.resize(inputArray.size() + messageArray.size() + cont.size());
@@ -316,6 +320,9 @@ vector<byte> ZKPOKFiatShamirFromSigmaProver::computeChallenge(ZKPOKFiatShamirPro
 	int outLen = sProver->getSoundnessParam() / 8;
 	vector<byte> output(outLen);
 	ro->compute(inputToRO, 0, inputToRO.size(), output, outLen);
+
+    string str(output.begin(), output.end());
+
 	return output;
 }
 
@@ -423,9 +430,13 @@ vector<byte> ZKPOKFiatShamirFromSigmaVerifier::computeChallenge(ZKPOKFiatShamirC
 	vector<byte> inputArray(inputString.begin(), inputString.end());
 	
 	auto msgString = a->toString();
+
 	vector<byte> messageArray(msgString.begin(), msgString.end());
 	
 	auto cont = input->getContext();
+    string str1(cont.begin(), cont.end());
+
+
 
 	vector<byte> inputToRO;
 
@@ -442,6 +453,9 @@ vector<byte> ZKPOKFiatShamirFromSigmaVerifier::computeChallenge(ZKPOKFiatShamirC
 	int outLen = sVerifier->getSoundnessParam() / 8;
 	vector<byte> output(outLen);
 	ro->compute(inputToRO, 0, inputToRO.size(), output, outLen);
+
+    string str(output.begin(), output.end());
+
 	return output;
 }
 
@@ -514,20 +528,28 @@ bool ZKPOKFiatShamirFromSigmaVerifier::verifyFiatShamirProof(ZKCommonInput* inpu
 
 	//Compute e=H(x,a,cont)
 	auto computedE = computeChallenge(fsInput, a.get());
-	
-	//get the given challenge.
+    auto fixedComputedE = computedE;
+
+    string eString = string(reinterpret_cast<char const*>(computedE.data()), computedE.size());
+    boost::replace_all(eString, ":", "+");
+
+
+    fixedComputedE.assign(eString.begin(), eString.end());
+
+
+    //get the given challenge.
 	auto receivedE = msg->getE();
 
 	//check that e=H(x,a,cont):
 	bool valid = true;
 	//In case that lengths of computed e and received e are not the same, set valid to false.
-	if (computedE.size() != receivedE.size()) {
+	if (fixedComputedE.size() != receivedE.size()) {
 		valid = false;
 	}
 	
 	//In case that  computed e and received e are not the same, set valid to false.
-	for (int i = 0; i< (int) computedE.size(); i++) {
-		if (computedE[i] != receivedE[i]) {
+	for (int i = 0; i< (int) fixedComputedE.size(); i++) {
+		if (fixedComputedE[i] != receivedE[i]) {
 			valid = false;
 		}
 	}

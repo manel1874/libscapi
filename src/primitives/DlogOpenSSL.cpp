@@ -1148,8 +1148,19 @@ shared_ptr<GroupElement> OpenSSLDlogECF2m::generateElement(bool bCheckMembership
  * Meanwhile we return null.
 */
 shared_ptr<GroupElement> OpenSSLDlogECF2m::encodeByteArrayToGroupElement(const vector<unsigned char> & binaryString) {
-	
-	return NULL;
+
+
+    shared_ptr<EC_POINT> point(EC_POINT_new(curve.get()), EC_POINT_free);
+    if (NULL == point) {
+        return NULL;
+    }
+
+
+
+    EC_POINT_oct2point(curve.get(), point.get(), binaryString.data(), binaryString.size(), ctx.get());
+
+    return createPoint(point);
+
 }
 
 /*
@@ -1163,7 +1174,20 @@ const vector<unsigned char> OpenSSLDlogECF2m::decodeGroupElementToByteArray(Grou
 		throw invalid_argument("element type doesn't match the group type");
 	}
 
-	return vector<byte>();
+
+    vector<byte> vec(100);
+    bool valid = EC_POINT_is_on_curve(curve.get(), point->getPoint().get(), ctx.get());
+
+    int size = EC_POINT_point2oct(curve.get(),
+                                  point->getPoint().get(),
+                                  POINT_CONVERSION_COMPRESSED,
+                                  vec.data(),
+                                  vec.size(),
+                                  ctx.get());
+
+    vec.resize(size);
+
+	return vec;
 }
 
 shared_ptr<GroupElement> OpenSSLDlogECF2m::reconstructElement(bool bCheckMembership, GroupElementSendableData* data) {
