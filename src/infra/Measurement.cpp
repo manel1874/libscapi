@@ -136,6 +136,12 @@ void Measurement::setCommInterface(string partiesFile)
         m_interface = "ens3";
 }
 
+void Measurement::writeValue(int value)
+{
+    (*m_commSentEndTimes)[0][0] += value;
+    (*m_commReceivedEndTimes)[0][0] += value;
+}
+
 void Measurement::startSubTask(string taskName, int currentIterationNum)
 {
     //calculate cpu start time

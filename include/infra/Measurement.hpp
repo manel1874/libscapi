@@ -68,6 +68,7 @@ public:
     ~Measurement();
     void startSubTask(string taskName, int currentIterationNum);
     void endSubTask(string taskName, int currentIterationNum);
+    void writeValue(int value);
 
 
 private:
