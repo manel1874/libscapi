@@ -136,7 +136,7 @@ void Measurement::setCommInterface(string partiesFile)
         m_interface = "ens3";
 }
 
-void Measurement::writeValue(int value)
+void Measurement::writeValue(unsigned long int value)
 {
     (*m_commSentEndTimes)[0][0] += value;
     (*m_commReceivedEndTimes)[0][0] += value;
@@ -170,11 +170,11 @@ void Measurement::endSubTask(string taskName, int currentIterationNum)
     auto ms = time_point_cast<milliseconds>(now).time_since_epoch().count();
     (*m_cpuEndTimes)[taskIdx][currentIterationNum] = ms - (*m_cpuStartTimes)[taskIdx][currentIterationNum];
 
-    tuple<unsigned long int, unsigned long int> endData = commData(m_interface.c_str());
-    (*m_commSentEndTimes)[taskIdx][currentIterationNum] = get<0>(endData) -
-            (*m_commSentStartTimes)[taskIdx][currentIterationNum];
-    (*m_commReceivedEndTimes)[taskIdx][currentIterationNum] = get<1>(endData) -
-            (*m_commReceivedStartTimes)[taskIdx][currentIterationNum];
+//    tuple<unsigned long int, unsigned long int> endData = commData(m_interface.c_str());
+//    (*m_commSentEndTimes)[taskIdx][currentIterationNum] = get<0>(endData) -
+//            (*m_commSentStartTimes)[taskIdx][currentIterationNum];
+//    (*m_commReceivedEndTimes)[taskIdx][currentIterationNum] = get<1>(endData) -
+//            (*m_commReceivedStartTimes)[taskIdx][currentIterationNum];
 }
 
 tuple<unsigned long int, unsigned long int> Measurement::commData(const char * nic_)
