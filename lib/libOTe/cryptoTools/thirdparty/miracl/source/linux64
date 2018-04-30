@@ -1,56 +1,56 @@
 
 rm libmiracl.a
-g++ -c -m64 -O3 mrcore.c     -I../include
-g++ -c -m64 -O3 mrarth0.c    -I../include
-g++ -c -m64 -O3 mrarth1.c    -I../include
-g++ -c -m64 -O3 mrarth2.c    -I../include
-g++ -c -m64 -O3 mralloc.c    -I../include
-g++ -c -m64 -O3 mrsmall.c    -I../include
-g++ -c -m64 -O3 mrio1.c      -I../include
-g++ -c -m64 -O3 mrio2.c      -I../include
-g++ -c -m64 -O3 mrgcd.c      -I../include
-g++ -c -m64 -O3 mrjack.c     -I../include
-g++ -c -m64 -O3 mrxgcd.c     -I../include
-g++ -c -m64 -O3 mrarth3.c    -I../include
-g++ -c -m64 -O3 mrbits.c     -I../include
-g++ -c -m64 -O3 mrrand.c     -I../include
-g++ -c -m64 -O3 mrprime.c    -I../include
-g++ -c -m64 -O3 mrcrt.c      -I../include
-g++ -c -m64 -O3 mrscrt.c     -I../include
-g++ -c -m64 -O3 mrmonty.c    -I../include
-g++ -c -m64 -O3 mrpower.c    -I../include
-g++ -c -m64 -O3 mrsroot.c    -I../include
-g++ -c -m64 -O3 mrcurve.c    -I../include
-g++ -c -m64 -O3 mrfast.c     -I../include
-g++ -c -m64 -O3 mrshs.c      -I../include
-g++ -c -m64 -O3 mrshs256.c   -I../include
-g++ -c -m64 -O3 mrshs512.c   -I../include
-g++ -c -m64 -O3 mrsha3.c     -I../include
-g++ -c -m64 -O3 mrfpe.c      -I../include
-g++ -c -m64 -O3 mraes.c      -I../include
-g++ -c -m64 -O3 mrgcm.c      -I../include
-g++ -c -m64 -O3 mrlucas.c    -I../include
-g++ -c -m64 -O3 mrzzn2.c     -I../include
-g++ -c -m64 -O3 mrzzn2b.c    -I../include
-g++ -c -m64 -O3 mrzzn3.c     -I../include
-g++ -c -m64 -O3 mrzzn4.c     -I../include
-g++ -c -m64 -O3 mrecn2.c     -I../include
-g++ -c -m64 -O3 mrstrong.c   -I../include
-g++ -c -m64 -O3 mrbrick.c    -I../include
-g++ -c -m64 -O3 mrebrick.c   -I../include
-g++ -c -m64 -O3 mrec2m.c     -I../include
-g++ -c -m64 -O3 mrgf2m.c     -I../include
-g++ -c -m64 -O3 mrflash.c    -I../include
-g++ -c -m64 -O3 mrfrnd.c     -I../include
-g++ -c -m64 -O3 mrdouble.c   -I../include
-g++ -c -m64 -O3 mrround.c    -I../include
-g++ -c -m64 -O3 mrbuild.c    -I../include
-g++ -c -m64 -O3 mrflsh1.c    -I../include
-g++ -c -m64 -O3 mrpi.c       -I../include
-g++ -c -m64 -O3 mrflsh2.c    -I../include
-g++ -c -m64 -O3 mrflsh3.c    -I../include
-g++ -c -m64 -O3 mrflsh4.c    -I../include
-g++ -c -m64 -O3 mrmuldv.c    -I../include
+g++ -c -m64 -O3 -fPIC mrcore.c     -I../include
+g++ -c -m64 -O3 -fPIC mrarth0.c    -I../include
+g++ -c -m64 -O3 -fPIC mrarth1.c    -I../include
+g++ -c -m64 -O3 -fPIC mrarth2.c    -I../include
+g++ -c -m64 -O3 -fPIC mralloc.c    -I../include
+g++ -c -m64 -O3 -fPIC mrsmall.c    -I../include
+g++ -c -m64 -O3 -fPIC mrio1.c      -I../include
+g++ -c -m64 -O3 -fPIC mrio2.c      -I../include
+g++ -c -m64 -O3 -fPIC mrgcd.c      -I../include
+g++ -c -m64 -O3 -fPIC mrjack.c     -I../include
+g++ -c -m64 -O3 -fPIC mrxgcd.c     -I../include
+g++ -c -m64 -O3 -fPIC mrarth3.c    -I../include
+g++ -c -m64 -O3 -fPIC mrbits.c     -I../include
+g++ -c -m64 -O3 -fPIC mrrand.c     -I../include
+g++ -c -m64 -O3 -fPIC mrprime.c    -I../include
+g++ -c -m64 -O3 -fPIC mrcrt.c      -I../include
+g++ -c -m64 -O3 -fPIC mrscrt.c     -I../include
+g++ -c -m64 -O3 -fPIC mrmonty.c    -I../include
+g++ -c -m64 -O3 -fPIC mrpower.c    -I../include
+g++ -c -m64 -O3 -fPIC mrsroot.c    -I../include
+g++ -c -m64 -O3 -fPIC mrcurve.c    -I../include
+g++ -c -m64 -O3 -fPIC mrfast.c     -I../include
+g++ -c -m64 -O3 -fPIC mrshs.c      -I../include
+g++ -c -m64 -O3 -fPIC mrshs256.c   -I../include
+g++ -c -m64 -O3 -fPIC mrshs512.c   -I../include
+g++ -c -m64 -O3 -fPIC mrsha3.c     -I../include
+g++ -c -m64 -O3 -fPIC mrfpe.c      -I../include
+g++ -c -m64 -O3 -fPIC mraes.c      -I../include
+g++ -c -m64 -O3 -fPIC mrgcm.c      -I../include
+g++ -c -m64 -O3 -fPIC mrlucas.c    -I../include
+g++ -c -m64 -O3 -fPIC mrzzn2.c     -I../include
+g++ -c -m64 -O3 -fPIC mrzzn2b.c    -I../include
+g++ -c -m64 -O3 -fPIC mrzzn3.c     -I../include
+g++ -c -m64 -O3 -fPIC mrzzn4.c     -I../include
+g++ -c -m64 -O3 -fPIC mrecn2.c     -I../include
+g++ -c -m64 -O3 -fPIC mrstrong.c   -I../include
+g++ -c -m64 -O3 -fPIC mrbrick.c    -I../include
+g++ -c -m64 -O3 -fPIC mrebrick.c   -I../include
+g++ -c -m64 -O3 -fPIC mrec2m.c     -I../include
+g++ -c -m64 -O3 -fPIC mrgf2m.c     -I../include
+g++ -c -m64 -O3 -fPIC mrflash.c    -I../include
+g++ -c -m64 -O3 -fPIC mrfrnd.c     -I../include
+g++ -c -m64 -O3 -fPIC mrdouble.c   -I../include
+g++ -c -m64 -O3 -fPIC mrround.c    -I../include
+g++ -c -m64 -O3 -fPIC mrbuild.c    -I../include
+g++ -c -m64 -O3 -fPIC mrflsh1.c    -I../include
+g++ -c -m64 -O3 -fPIC mrpi.c       -I../include
+g++ -c -m64 -O3 -fPIC mrflsh2.c    -I../include
+g++ -c -m64 -O3 -fPIC mrflsh3.c    -I../include
+g++ -c -m64 -O3 -fPIC mrflsh4.c    -I../include
+g++ -c -m64 -O3 -fPIC mrmuldv.c    -I../include
 
 ar rc libmiracl.a mrcore.o mrarth0.o mrarth1.o mrarth2.o mralloc.o mrsmall.o mrzzn2.o mrzzn3.o
 ar r libmiracl.a mrio1.o mrio2.o mrjack.o mrgcd.o mrxgcd.o mrarth3.o mrbits.o mrecn2.o mrzzn4.o
