@@ -111,3 +111,5 @@ obj/
 protocols/GMW/CMakeFiles/
 *.json
 *.cbp
+
+comm_client/Makefile
