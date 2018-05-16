@@ -44,7 +44,7 @@ int cct_proxy_service::serve(const service_t & a_svc, const client_t & a_clnt)
 	m_svc = a_svc;
 	m_clnt = a_clnt;
 
-	struct event_base * m_base = event_base_new();
+	m_base = event_base_new();
 	if(NULL != m_base)
 	{
 		struct event * sigint_event = evsignal_new(m_base, 2/*=SIGINT*/, sigint_cb, this);

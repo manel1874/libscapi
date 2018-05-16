@@ -7,6 +7,7 @@ INCLUDE_DIRECTORIES(
 )
 
 set(SOURCE_FILES
+	cct_proxy_client.cpp
 	cct_proxy_service.cpp
 	comm_client.cpp
 	comm_client_tcp_mesh.cpp
