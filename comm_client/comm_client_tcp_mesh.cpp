@@ -607,6 +607,6 @@ void comm_client_tcp_mesh::on_read(const unsigned int id)
 	else
 	{
 		syslog(LOG_DEBUG, "%s: %d bytes read from peer id %u with fd %d.", __FUNCTION__, (int)nread, id, m_peers[id].sockfd);
-		this->m_sink->on_message(id, buffer, nread);
+		this->m_sink->on_comm_message(id, buffer, nread);
 	}
 }

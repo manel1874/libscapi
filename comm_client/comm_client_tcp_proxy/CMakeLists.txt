@@ -12,9 +12,13 @@ set(SOURCE_FILES
 	main.cpp
 )
 
+link_directories(
+	$ENV{HOME}/libscapi/comm_client )
+
 add_executable(cct_proxy ${SOURCE_FILES})
 
 target_link_libraries( cct_proxy
+	commclient
 	log4cpp
 	event
 )

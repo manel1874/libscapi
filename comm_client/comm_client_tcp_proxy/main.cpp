@@ -13,27 +13,10 @@
 #include <log4cpp/SimpleLayout.hh>
 #include <log4cpp/BasicLayout.hh>
 #include <log4cpp/PatternLayout.hh>
+#include <event2/event.h>
 
-typedef struct __client
-{
-	unsigned int id;
-	unsigned int count;
-	std::string conf_file;
-
-	__client()
-	: id((unsigned int)-1), count((unsigned int)-1)
-	{}
-}client_t;
-
-typedef struct __service
-{
-	std::string svc_ip;
-	u_int16_t svc_port;
-
-	__service()
-	: svc_port((u_int16_t)-1)
-	{}
-}service_t;
+#include "comm_client_cb_api.h"
+#include "cct_proxy_service.h"
 
 typedef struct __log
 {
@@ -48,24 +31,26 @@ typedef struct __log
 	{}
 }log_t;
 
-void get_options(int argc, char *argv[], client_t & clnt, service_t & svc, log_t & log);
+void get_options(int argc, char *argv[], cct_proxy_service::client_t & clnt, cct_proxy_service::service_t & svc, log_t & log);
 void show_usage(const char * prog);
 void init_log(const log_t & log);
-void serve(const service_t & svc, const client_t & clnt);
 
 int main(int argc, char *argv[])
 {
-	client_t clnt;
-	service_t svc;
+	cct_proxy_service::client_t clnt;
+	cct_proxy_service::service_t svc;
 	log_t log;
 	get_options(argc, argv, clnt, svc, log);
 	init_log(log);
-	serve(svc, clnt);
+
+	cct_proxy_service proxy("cct");
+	proxy.serve(svc, clnt);
+
 	return 0;
 }
 
 
-void get_options(int argc, char *argv[], client_t & clnt, service_t & svc, log_t & log)
+void get_options(int argc, char *argv[], cct_proxy_service::client_t & clnt, cct_proxy_service::service_t & svc, log_t & log)
 {
 	if(argc == 1)
 	{
@@ -90,10 +75,10 @@ void get_options(int argc, char *argv[], client_t & clnt, service_t & svc, log_t
 			clnt.conf_file = optarg;
 			break;
 		case 'a':
-			svc.svc_ip = optarg;
+			svc.ip = optarg;
 			break;
 		case 'p':
-			svc.svc_port = (u_int16_t)strtol(optarg, NULL, 10);
+			svc.port = (u_int16_t)strtol(optarg, NULL, 10);
 			break;
 		case 'x':
 			log.file = optarg;
