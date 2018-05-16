@@ -37,11 +37,12 @@ public:
 
 	int serve(const service_t & a_svc, const client_t & a_clnt);
 
-	friend void sigint_cb(evutil_socket_t fd, short what, void * arg);
-	friend void accept_cb(evutil_socket_t fd, short what, void * arg);
-	friend void connwr1_cb(evutil_socket_t fd, short what, void * arg);
-	friend void connwr2_cb(evutil_socket_t fd, short what, void * arg);
-	friend void connrd_cb(evutil_socket_t fd, short what, void * arg);
+	static void sigint_cb(evutil_socket_t fd, short what, void * arg);
+	static void accept_cb(evutil_socket_t fd, short what, void * arg);
+	static void connwr1_cb(evutil_socket_t fd, short what, void * arg);
+	static void connwr2_cb(evutil_socket_t fd, short what, void * arg);
+	static void connrd_cb(evutil_socket_t fd, short what, void * arg);
+
 private:
 	std::string m_cat;
 	service_t m_svc;

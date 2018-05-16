@@ -29,59 +29,6 @@
 static const struct timeval zeroto = {0,0};
 static const struct timeval asec = {1,0};
 
-void accept_cb(evutil_socket_t fd, short what, void * arg)
-{
-	if(0 == (EV_READ & what))
-		syslog(LOG_ERR, "%s called with read flag not set.", __FUNCTION__);
-	((comm_client_tcp_mesh *)arg)->on_accept();
-}
-
-void connect_cb(evutil_socket_t fd, short what, void * arg)
-{
-	if(0 == (EV_TIMEOUT & what))
-		syslog(LOG_ERR, "%s called with timeout flag not set.", __FUNCTION__);
-	((comm_client_tcp_mesh *)arg)->on_connect((const unsigned int)fd);
-}
-
-void select_cb(evutil_socket_t fd, short what, void * arg)
-{
-	if(0 != (EV_READ & what))
-		((comm_client_tcp_mesh *)arg)->on_select_read(fd);
-	else if(0 != (EV_TIMEOUT & what))
-		((comm_client_tcp_mesh *)arg)->on_select_timeout(fd);
-	else
-		syslog(LOG_ERR, "%s called with no read/timeout flags set.", __FUNCTION__);
-}
-
-void write1_cb(evutil_socket_t fd, short what, void * arg)
-{
-	if(0 == (EV_READ & what))
-		syslog(LOG_ERR, "%s called with read flag not set.", __FUNCTION__);
-	peer_t * peer = (peer_t *)arg;
-	peer->client->on_write1(peer->id);
-}
-
-void write2_cb(evutil_socket_t fd, short what, void * arg)
-{
-	if(0 == (EV_WRITE & what))
-		syslog(LOG_ERR, "%s called with write flag not set.", __FUNCTION__);
-	peer_t * peer = (peer_t *)arg;
-	peer->client->on_write2(peer->id);
-}
-
-void read_cb(evutil_socket_t fd, short what, void * arg)
-{
-	if(0 == (EV_READ & what))
-		syslog(LOG_ERR, "%s called with read flag not set.", __FUNCTION__);
-	peer_t * peer = (peer_t *)arg;
-	peer->client->on_read(peer->id);
-}
-
-void timer_cb(evutil_socket_t fd, short what, void * arg)
-{
-	((comm_client_tcp_mesh *)arg)->on_timer();
-}
-
 comm_client_tcp_mesh::comm_client_tcp_mesh()
 : comm_client(), the_base(NULL)
 {
@@ -191,7 +138,7 @@ void comm_client_tcp_mesh::run()
 		return;
 	}
 
-	struct event * timer = event_new(the_base, -1, EV_TIMEOUT|EV_PERSIST, timer_cb, this);
+	struct event * timer = event_new(the_base, -1, EV_TIMEOUT|EV_PERSIST, comm_client_tcp_mesh::timer_cb, this);
 	if(0 != event_add(timer, &asec))
 	{
 		syslog(LOG_ERR, "%s: timer event addition failure.", __FUNCTION__);
@@ -225,7 +172,7 @@ int comm_client_tcp_mesh::set_accept()
 {
 	syslog(LOG_DEBUG, "%s: ", __FUNCTION__);
 
-	m_peers[m_id].reader = event_new(the_base, m_peers[m_id].sockfd, EV_READ, accept_cb, this);
+	m_peers[m_id].reader = event_new(the_base, m_peers[m_id].sockfd, EV_READ, comm_client_tcp_mesh::accept_cb, this);
 	if(0 != event_add(m_peers[m_id].reader, NULL))
 	{
 		syslog(LOG_ERR, "%s: acceptor addition failure.", __FUNCTION__);
@@ -251,7 +198,7 @@ int comm_client_tcp_mesh::add_connectors()
 
 int comm_client_tcp_mesh::add_peer_connector(const unsigned int id, const struct timeval & to)
 {
-	m_peers[id].reader = event_new(the_base, (int)id, EV_TIMEOUT, connect_cb, this);
+	m_peers[id].reader = event_new(the_base, (int)id, EV_TIMEOUT, comm_client_tcp_mesh::connect_cb, this);
 	if(0 != event_add(m_peers[id].reader, &to))
 	{
 		event_free(m_peers[id].reader);
@@ -380,7 +327,7 @@ void comm_client_tcp_mesh::on_accept()
 		//TODO: possibly trace the source address of the accepted conn: conn_addr/conn_addr_len
 
 		static const struct timeval select_timeout = {10,0};
-		m_peers[m_id].reader = event_new(the_base, conn_fd, EV_READ, select_cb, this);
+		m_peers[m_id].reader = event_new(the_base, conn_fd, EV_READ, comm_client_tcp_mesh::select_cb, this);
 		if(0 == event_add(m_peers[m_id].reader, &select_timeout))
 		{
 			syslog(LOG_INFO, "%s: accepted conn fd %d; waiting to select it.", __FUNCTION__, conn_fd);
@@ -496,10 +443,10 @@ int comm_client_tcp_mesh::set_peer_conn(const unsigned int id, int conn_fd)
 {
 	if(0 == pipe(m_peers[id].out_pipe))
 	{
-		m_peers[id].writer = event_new(the_base, m_peers[id].out_pipe[PIPE_READ_FD], EV_READ, write1_cb, (void *)(m_peers.data() + id));
+		m_peers[id].writer = event_new(the_base, m_peers[id].out_pipe[PIPE_READ_FD], EV_READ, comm_client_tcp_mesh::write1_cb, (void *)(m_peers.data() + id));
 		if(0 == event_add(m_peers[id].writer, NULL))
 		{
-			m_peers[id].reader = event_new(the_base, conn_fd, EV_READ|EV_PERSIST, read_cb, (void *)(m_peers.data() + id));
+			m_peers[id].reader = event_new(the_base, conn_fd, EV_READ|EV_PERSIST, comm_client_tcp_mesh::read_cb, (void *)(m_peers.data() + id));
 			if(0 == event_add(m_peers[id].reader, NULL))
 			{
 				m_peers[id].sockfd = conn_fd;
@@ -549,7 +496,7 @@ void comm_client_tcp_mesh::on_write1(const unsigned int id)
 	event_free(m_peers[id].writer);
 	m_peers[id].writer = NULL;
 
-	m_peers[id].writer = event_new(the_base, m_peers[id].sockfd, EV_WRITE, write2_cb, (void *)(m_peers.data() + id));
+	m_peers[id].writer = event_new(the_base, m_peers[id].sockfd, EV_WRITE, comm_client_tcp_mesh::write2_cb, (void *)(m_peers.data() + id));
 	if(0 != event_add(m_peers[id].writer, NULL))
 	{
 		syslog(LOG_ERR, "%s: failed adding the writer event of peer id %u with fd %d.", __FUNCTION__, id, m_peers[id].sockfd);
@@ -576,7 +523,7 @@ void comm_client_tcp_mesh::on_write2(const unsigned int id)
 	else
 		syslog(LOG_DEBUG, "%s: %d bytes spliced out to peer id %u with fd %d.", __FUNCTION__, result, id, m_peers[id].sockfd);
 
-	m_peers[id].writer = event_new(the_base, m_peers[id].out_pipe[PIPE_READ_FD], EV_READ, write1_cb, (void *)(m_peers.data() + id));
+	m_peers[id].writer = event_new(the_base, m_peers[id].out_pipe[PIPE_READ_FD], EV_READ, comm_client_tcp_mesh::write1_cb, (void *)(m_peers.data() + id));
 	if(0 != event_add(m_peers[id].writer, NULL))
 	{
 		syslog(LOG_ERR, "%s: failed adding the writer event of peer id %u with fd %d.", __FUNCTION__, id, m_peers[id].sockfd);
@@ -609,4 +556,57 @@ void comm_client_tcp_mesh::on_read(const unsigned int id)
 		syslog(LOG_DEBUG, "%s: %d bytes read from peer id %u with fd %d.", __FUNCTION__, (int)nread, id, m_peers[id].sockfd);
 		this->m_sink->on_comm_message(id, buffer, nread);
 	}
+}
+
+void comm_client_tcp_mesh::timer_cb(evutil_socket_t fd, short what, void * arg)
+{
+	((comm_client_tcp_mesh *)arg)->on_timer();
+}
+
+void comm_client_tcp_mesh::connect_cb(evutil_socket_t fd, short what, void * arg)
+{
+	if(0 == (EV_TIMEOUT & what))
+		syslog(LOG_ERR, "%s called with timeout flag not set.", __FUNCTION__);
+	((comm_client_tcp_mesh *)arg)->on_connect((const unsigned int)fd);
+}
+
+void comm_client_tcp_mesh::accept_cb(evutil_socket_t fd, short what, void * arg)
+{
+	if(0 == (EV_READ & what))
+		syslog(LOG_ERR, "%s called with read flag not set.", __FUNCTION__);
+	((comm_client_tcp_mesh *)arg)->on_accept();
+}
+
+void comm_client_tcp_mesh::select_cb(evutil_socket_t fd, short what, void * arg)
+{
+	if(0 != (EV_READ & what))
+		((comm_client_tcp_mesh *)arg)->on_select_read(fd);
+	else if(0 != (EV_TIMEOUT & what))
+		((comm_client_tcp_mesh *)arg)->on_select_timeout(fd);
+	else
+		syslog(LOG_ERR, "%s called with no read/timeout flags set.", __FUNCTION__);
+}
+
+void comm_client_tcp_mesh::write1_cb(evutil_socket_t fd, short what, void * arg)
+{
+	if(0 == (EV_READ & what))
+		syslog(LOG_ERR, "%s called with read flag not set.", __FUNCTION__);
+	peer_t * peer = (peer_t *)arg;
+	peer->client->on_write1(peer->id);
+}
+
+void comm_client_tcp_mesh::write2_cb(evutil_socket_t fd, short what, void * arg)
+{
+	if(0 == (EV_WRITE & what))
+		syslog(LOG_ERR, "%s called with write flag not set.", __FUNCTION__);
+	peer_t * peer = (peer_t *)arg;
+	peer->client->on_write2(peer->id);
+}
+
+void comm_client_tcp_mesh::read_cb(evutil_socket_t fd, short what, void * arg)
+{
+	if(0 == (EV_READ & what))
+		syslog(LOG_ERR, "%s called with read flag not set.", __FUNCTION__);
+	peer_t * peer = (peer_t *)arg;
+	peer->client->on_read(peer->id);
 }

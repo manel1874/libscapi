@@ -48,11 +48,11 @@ public:
 
 	int send(const unsigned int dst_id, const unsigned char * msg, const size_t size);
 
-	friend void timer_cb(evutil_socket_t fd, short what, void * arg);
-	friend void connect_cb(evutil_socket_t fd, short what, void * arg);
-	friend void accept_cb(evutil_socket_t fd, short what, void * arg);
-	friend void select_cb(evutil_socket_t fd, short what, void * arg);
-	friend void write1_cb(evutil_socket_t fd, short what, void * arg);
-	friend void write2_cb(evutil_socket_t fd, short what, void * arg);
-	friend void read_cb(evutil_socket_t fd, short what, void * arg);
+	static void timer_cb(evutil_socket_t fd, short what, void * arg);
+	static void connect_cb(evutil_socket_t fd, short what, void * arg);
+	static void accept_cb(evutil_socket_t fd, short what, void * arg);
+	static void select_cb(evutil_socket_t fd, short what, void * arg);
+	static void write1_cb(evutil_socket_t fd, short what, void * arg);
+	static void write2_cb(evutil_socket_t fd, short what, void * arg);
+	static void read_cb(evutil_socket_t fd, short what, void * arg);
 };

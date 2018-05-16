@@ -25,12 +25,6 @@
 
 static const struct timeval minute = {60,0};
 
-void sigint_cb(evutil_socket_t fd, short what, void * arg);
-void accept_cb(evutil_socket_t fd, short what, void * arg);
-void connwr1_cb(evutil_socket_t fd, short what, void * arg);
-void connwr2_cb(evutil_socket_t fd, short what, void * arg);
-void connrd_cb(evutil_socket_t fd, short what, void * arg);
-
 cct_proxy_service::cct_proxy_service(const char * logcat)
 : m_base(NULL), m_tcp(NULL), m_svc_sock(-1), m_conn_sock(-1), m_cat(logcat), m_cc(NULL), m_conn_rd(NULL), m_conn_wr(NULL)
 {
@@ -61,7 +55,7 @@ int cct_proxy_service::serve(const service_t & a_svc, const client_t & a_clnt)
 				if(0 == start_tcp_svc())
 				{
 					//allocate the TCP accept handler
-					m_tcp = event_new(m_base, m_svc_sock, EV_READ|EV_TIMEOUT|EV_PERSIST, accept_cb, this);
+					m_tcp = event_new(m_base, m_svc_sock, EV_READ|EV_TIMEOUT|EV_PERSIST, cct_proxy_service::accept_cb, this);
 					if(NULL != m_tcp)
 					{
 						if(0 == event_add(m_tcp, &minute))
@@ -425,12 +419,12 @@ void cct_proxy_service::process_conn_msgs()
 	}
 }
 
-void sigint_cb(evutil_socket_t fd, short what, void * arg)
+void cct_proxy_service::sigint_cb(evutil_socket_t fd, short what, void * arg)
 {
 	((cct_proxy_service *)arg)->on_sigint();
 }
 
-void accept_cb(evutil_socket_t fd, short what, void * arg)
+void cct_proxy_service::accept_cb(evutil_socket_t fd, short what, void * arg)
 {
 	if(0 != (EV_READ & what))
 		((cct_proxy_service *)arg)->on_accept();
@@ -438,17 +432,17 @@ void accept_cb(evutil_socket_t fd, short what, void * arg)
 		((cct_proxy_service *)arg)->on_accept_timeout();
 }
 
-void connwr1_cb(evutil_socket_t fd, short what, void * arg)
+void cct_proxy_service::connwr1_cb(evutil_socket_t fd, short what, void * arg)
 {
 	((cct_proxy_service *)arg)->on_connwr1();
 }
 
-void connwr2_cb(evutil_socket_t fd, short what, void * arg)
+void cct_proxy_service::connwr2_cb(evutil_socket_t fd, short what, void * arg)
 {
 	((cct_proxy_service *)arg)->on_connwr2();
 }
 
-void connrd_cb(evutil_socket_t fd, short what, void * arg)
+void cct_proxy_service::connrd_cb(evutil_socket_t fd, short what, void * arg)
 {
 	((cct_proxy_service *)arg)->on_connrd();
 }
