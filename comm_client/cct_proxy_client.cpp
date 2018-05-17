@@ -146,18 +146,20 @@ int cct_proxy_client::send(const unsigned int dst_id, const unsigned char * msg,
 		return -1;
 	}
 
-	peer_msg_t msghdr;
-	msghdr.peer_id = dst_id;
-	msghdr.size = size;
+	proxy_msg_t pm;
+	pm.type = MSG_TYPE_PMS;
+	pm.id = dst_id;
+	pm.param = size;
+	pm.hton();
 
 	struct iovec iov[2];
-	iov[0].iov_base = &msghdr;
-	iov[0].iov_len = sizeof(peer_msg_t);
+	iov[0].iov_base = &pm;
+	iov[0].iov_len = sizeof(proxy_msg_t);
 	iov[1].iov_base = (void *)msg;
 	iov[1].iov_len = size;
 
 	ssize_t nwrit = writev(m_out_pipe[PPWRFD], iov, 2);
-	if((ssize_t)(sizeof(peer_msg_t) + size) != nwrit)
+	if((ssize_t)(sizeof(proxy_msg_t) + size) != nwrit)
 	{
 		if(0 > nwrit)
 		{
@@ -168,7 +170,7 @@ int cct_proxy_client::send(const unsigned int dst_id, const unsigned char * msg,
 		}
 		else
 		{
-			syslog(LOG_ERR, "%s: writev() partial write of %lu out of %lu.", __FUNCTION__, (size_t)nwrit, (sizeof(peer_msg_t) + size));
+			syslog(LOG_ERR, "%s: writev() partial write of %lu out of %lu.", __FUNCTION__, (size_t)nwrit, (sizeof(proxy_msg_t) + size));
 	        exit(-__LINE__);
 		}
 	}
@@ -339,7 +341,31 @@ int cct_proxy_client::make_connection()
 			if(0 == connect(m_sockfd, (const struct sockaddr *)&sockaddr, sizeof(struct sockaddr_in)))
 			{
 				syslog(LOG_NOTICE, "%s: socket %d connected to [%s:%hu].", __FUNCTION__, m_sockfd, m_proxy_addr.c_str(), m_proxy_port);
-				return 0;
+
+				proxy_msg_t cdm;
+				ssize_t nread = read(m_sockfd, &cdm, sizeof(proxy_msg_t));
+				if((ssize_t)sizeof(proxy_msg_t) == nread)
+				{
+					cdm.ntoh();
+					if(MSG_TYPE_CDM == cdm.type)
+					{
+						syslog(LOG_NOTICE, "%s: client details from proxy service: id=%u; count=%u;.", __FUNCTION__, cdm.id, cdm.param);
+						if(cdm.id == this->m_id && cdm.param == this->m_peer_count)
+							return 0;
+						else
+							syslog(LOG_ERR, "%s: proxy service client details mismatch.", __FUNCTION__);
+					}
+					else
+						syslog(LOG_ERR, "%s: read message is not a client details message; type = %u.", __FUNCTION__, cdm.type);
+				}
+				else if(0 > nread)
+				{
+					int errcode = errno;
+					char errmsg[512];
+			        syslog(LOG_ERR, "%s: read() failed with error %d : [%s].", __FUNCTION__, errcode, strerror_r(errcode, errmsg, 256));
+				}
+				else
+					syslog(LOG_ERR, "%s: failure reading client details message on connection; %ld bytes read.", __FUNCTION__, nread);
 			}
 			else
 			{
@@ -368,16 +394,44 @@ int cct_proxy_client::process_messages()
 	while(!m_data.empty())
 	{
 		size_t data_size = m_data.size();
-		if(sizeof(peer_msg_t) > data_size)
-			break;
+		if(sizeof(proxy_msg_t) > data_size)
+			return 0;
 
-		peer_msg_t hdr = *((peer_msg_t *)m_data.data());
+		proxy_msg_t hdr = *((proxy_msg_t *)m_data.data());
 		hdr.ntoh();
-		if((sizeof(peer_msg_t) + hdr.size) > data_size)
-			break;
 
-		this->m_sink->on_comm_message(hdr.peer_id, m_data.data() + sizeof(peer_msg_t), hdr.size);
-		m_data.erase(m_data.begin(), m_data.begin() + (sizeof(peer_msg_t) + hdr.size));
+		switch(hdr.type)
+		{
+		case MSG_TYPE_PCU:
+			if(0 == hdr.param)
+			{
+				size_t offset = hdr.id/8;
+				u_int8_t mask = 0x01 << (hdr.id%8);
+				m_peer_mask[offset] &= ~(mask);
+				this->m_sink->on_comm_down_with_party(hdr.id);
+			}
+			else
+			{
+				size_t offset = hdr.id/8;
+				u_int8_t mask = 0x01 << (hdr.id%8);
+				m_peer_mask[offset] |= mask;
+				this->m_sink->on_comm_up_with_party(hdr.id);
+			}
+			m_data.erase(m_data.begin(), m_data.begin() + sizeof(proxy_msg_t));
+			break;
+		case MSG_TYPE_PMS:
+			if((sizeof(proxy_msg_t) + hdr.param) > data_size)
+				return 0;
+			else
+			{
+				this->m_sink->on_comm_message(hdr.id, m_data.data() + sizeof(proxy_msg_t), hdr.param);
+				m_data.erase(m_data.begin(), m_data.begin() + (sizeof(proxy_msg_t) + hdr.param));
+			}
+			break;
+		default:
+			syslog(LOG_ERR, "%s: invalid message type %u.", __FUNCTION__, hdr.type);
+			exit(-__LINE__);
+		}
 	}
 	return 0;
 }

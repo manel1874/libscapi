@@ -193,12 +193,13 @@ void cct_proxy_service::on_accept()
 						if(0 == event_add(m_conn_rd, NULL))
 						{
 				    		syslog(LOG_DEBUG, "%s: proxy client conn read event added.", __FUNCTION__);
-							client_details_msg_t cdm;
-							cdm.proxy_id = m_clnt.id;
-							cdm.peer_count = m_clnt.count;
+							proxy_msg_t cdm;
+							cdm.type = MSG_TYPE_CDM;
+							cdm.id = m_clnt.id;
+							cdm.param = m_clnt.count;
 							cdm.hton();
-							ssize_t nwrit = write(m_conn_pipe[PPWRFD], &cdm, sizeof(client_details_msg_t));
-							if((ssize_t)sizeof(client_details_msg_t) == nwrit)
+							ssize_t nwrit = write(m_conn_pipe[PPWRFD], &cdm, sizeof(proxy_msg_t));
+							if((ssize_t)sizeof(proxy_msg_t) == nwrit)
 							{
 					    		syslog(LOG_DEBUG, "%s: proxy client details written to conn.", __FUNCTION__);
 								m_cc = new comm_client_tcp_mesh;
@@ -206,6 +207,7 @@ void cct_proxy_service::on_accept()
 								{
 									event_del(m_tcp);
 									syslog(LOG_NOTICE, "%s: proxy client is connected and running.", __FUNCTION__);
+									return;
 								}
 								else
 									syslog(LOG_ERR, "%s: comm client start failed.", __FUNCTION__);
@@ -356,19 +358,20 @@ void cct_proxy_service::on_comm_down_with_party(const unsigned int party_id)
 
 void cct_proxy_service::on_comm_message(const unsigned int src_id, const unsigned char * msg, const size_t size)
 {
-	peer_msg_t msghdr;
-	msghdr.peer_id = src_id;
-	msghdr.size = size;
+	proxy_msg_t msghdr;
+	msghdr.type = MSG_TYPE_PMS;
+	msghdr.id = src_id;
+	msghdr.param = size;
 	msghdr.hton();
 
 	struct iovec iov[2];
 	iov[0].iov_base = &msghdr;
-	iov[0].iov_len = sizeof(peer_msg_t);
+	iov[0].iov_len = sizeof(proxy_msg_t);
 	iov[1].iov_base = (void *)msg;
 	iov[1].iov_len = size;
 
 	ssize_t nwrit = writev(m_conn_pipe[PPWRFD], iov, 2);
-	if((ssize_t)(sizeof(peer_msg_t) + size) != nwrit)
+	if((ssize_t)(sizeof(proxy_msg_t) + size) != nwrit)
 	{
 		if(0 > nwrit)
 		{
@@ -380,7 +383,7 @@ void cct_proxy_service::on_comm_message(const unsigned int src_id, const unsigne
 		}
 		else
 		{
-	        syslog(LOG_ERR, "%s: writev() partial write of %lu out of %lu.", __FUNCTION__, (size_t)nwrit, (sizeof(peer_msg_t) + size));
+	        syslog(LOG_ERR, "%s: writev() partial write of %lu out of %lu.", __FUNCTION__, (size_t)nwrit, (sizeof(proxy_msg_t) + size));
 	        exit(-__LINE__);
 		}
 	}
@@ -390,12 +393,13 @@ void cct_proxy_service::on_comm_message(const unsigned int src_id, const unsigne
 
 void cct_proxy_service::update_peer_comm(const unsigned int party_id, const unsigned int connected)
 {
-	peer_comm_update_t pcu;
-	pcu.peer_id = party_id;
-	pcu.connected = connected;
+	proxy_msg_t pcu;
+	pcu.type = MSG_TYPE_PCU;
+	pcu.id = party_id;
+	pcu.param = connected;
 	pcu.hton();
-	ssize_t nwrit = write(m_conn_pipe[PPWRFD], &pcu, sizeof(peer_comm_update_t));
-	if((ssize_t)sizeof(peer_comm_update_t) != nwrit)
+	ssize_t nwrit = write(m_conn_pipe[PPWRFD], &pcu, sizeof(proxy_msg_t));
+	if((ssize_t)sizeof(proxy_msg_t) != nwrit)
 	{
 		if(0 > nwrit)
 		{
@@ -405,8 +409,10 @@ void cct_proxy_service::update_peer_comm(const unsigned int party_id, const unsi
 	        		__FUNCTION__, errcode, strerror_r(errcode, errmsg, 256));
 		}
 		else
-			syslog(LOG_ERR, "%s: peer comm update written %lu out of %lu bytes.", __FUNCTION__, (size_t)nwrit, sizeof(peer_comm_update_t));
+			syslog(LOG_ERR, "%s: peer comm update written %lu out of %lu bytes.", __FUNCTION__, (size_t)nwrit, sizeof(proxy_msg_t));
 	}
+	else
+		syslog(LOG_DEBUG, "%s: %lu bytes of peer comm update written to conn pipe.", __FUNCTION__, (size_t)nwrit);
 }
 
 void cct_proxy_service::process_conn_msgs()
@@ -414,20 +420,26 @@ void cct_proxy_service::process_conn_msgs()
 	while(!m_conn_data.empty())
 	{
 		size_t data_size = m_conn_data.size();
-		if(sizeof(peer_msg_t) > data_size)
+		if(sizeof(proxy_msg_t) > data_size)
 			break;
 
-		peer_msg_t hdr = *((peer_msg_t *)m_conn_data.data());
+		proxy_msg_t hdr = *((proxy_msg_t *)m_conn_data.data());
 		hdr.ntoh();
-		if((sizeof(peer_msg_t) + hdr.size) > data_size)
+		if((sizeof(proxy_msg_t) + hdr.param) > data_size)
 			break;
 
-		if(0 != m_cc->send(hdr.peer_id, m_conn_data.data() + sizeof(peer_msg_t), hdr.size))
+		if(hdr.type != MSG_TYPE_PMS)
+		{
+			syslog(LOG_ERR, "%s: invalid message type %u from proxy client conn.", __FUNCTION__, hdr.type);
+			exit(-__LINE__);
+		}
+
+		if(0 != m_cc->send(hdr.id, m_conn_data.data() + sizeof(proxy_msg_t), hdr.param))
 		{
 			syslog(LOG_ERR, "%s: comm client send() failed.", __FUNCTION__);
 	        exit(-__LINE__);
 		}
-		m_conn_data.erase(m_conn_data.begin(), m_conn_data.begin() + (sizeof(peer_msg_t) + hdr.size));
+		m_conn_data.erase(m_conn_data.begin(), m_conn_data.begin() + (sizeof(proxy_msg_t) + hdr.param));
 	}
 }
 
