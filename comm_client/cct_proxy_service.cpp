@@ -373,7 +373,7 @@ void cct_proxy_service::on_comm_message(const unsigned int src_id, const unsigne
 		}
 	}
 	else
-		log4cpp::Category::getInstance(m_cat).debug("%s: %d bytes written to conn pipe.", __FUNCTION__, (size_t)nwrit);
+		log4cpp::Category::getInstance(m_cat).debug("%s: %lu bytes written to conn pipe.", __FUNCTION__, (size_t)nwrit);
 }
 
 void cct_proxy_service::update_peer_comm(const unsigned int party_id, const unsigned int connected)

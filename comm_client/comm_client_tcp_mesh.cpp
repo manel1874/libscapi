@@ -250,7 +250,7 @@ int comm_client_tcp_mesh::parse_address(const char * address, std::string & ip, 
 		ip.assign(address, p);
 		port = (u_int16_t)strtol(p + 1, NULL, 10);
 
-		if (inet_aton(ip.c_str(), &sockaddr.sin_addr) == 0)
+		if (0 == inet_aton(ip.c_str(), &sockaddr.sin_addr))
 	    {
 			syslog(LOG_ERR, "%s: failure converting IP address <%s>.", __FUNCTION__, ip.c_str());
 	        return -1;
