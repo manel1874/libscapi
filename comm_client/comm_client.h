@@ -7,6 +7,7 @@ class comm_client
 {
 protected:
 	char m_syslog_name[32];
+	virtual void set_syslog_name() = 0;
 
 	void start_log();
 	void stop_log();

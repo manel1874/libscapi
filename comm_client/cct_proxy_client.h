@@ -16,6 +16,7 @@ class cct_proxy_client : public comm_client
 	std::vector<u_int8_t> m_data;
 
 	void run();
+	void set_syslog_name();
 
 	static void connect_cb(evutil_socket_t fd, short what, void * arg);
 	static void timer_cb(evutil_socket_t fd, short what, void * arg);

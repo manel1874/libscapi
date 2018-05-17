@@ -19,7 +19,7 @@ class comm_client_tcp_mesh : public comm_client
 	std::vector< peer_t > m_peers;
 	struct event_base * the_base;
 	void run();
-
+	void set_syslog_name();
 	int load_peers(const unsigned int peer_count);
 	int parse_address(const char * address, std::string & ip, u_int16_t & port, struct sockaddr_in & sockaddr);
 	int start_service();

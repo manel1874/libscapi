@@ -155,6 +155,12 @@ void comm_client_tcp_mesh::run()
 	event_base_free(the_base);
 }
 
+void comm_client_tcp_mesh::set_syslog_name()
+{
+	memset(m_syslog_name, 0, 32);
+	snprintf(m_syslog_name, 32, "cct-mesh-%u", m_id);
+}
+
 void comm_client_tcp_mesh::clear_peers()
 {
 	for(std::vector< peer_t >::iterator i = m_peers.begin(); i != m_peers.end(); ++i)

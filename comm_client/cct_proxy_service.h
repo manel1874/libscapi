@@ -5,6 +5,7 @@ class comm_client;
 
 class cct_proxy_service : public comm_client_cb_api
 {
+	char m_syslog_name[32];
 public:
 	cct_proxy_service();
 	virtual ~cct_proxy_service();

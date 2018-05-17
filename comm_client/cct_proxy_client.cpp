@@ -25,13 +25,13 @@
 #define PPRDFD	0
 #define PPWRFD	1
 
-static const struct timeval naught {0,0};
-static const struct timeval _50ms_ {0,50000};
-static const struct timeval _1sec_ {1,0};
+static const struct timeval naught = {0,0};
+static const struct timeval _50ms_ = {0,50000};
+static const struct timeval _1sec_ = {1,0};
 
 cct_proxy_client::cct_proxy_client(const char * proxy_addr, const u_int16_t proxy_port)
 : m_proxy_addr(proxy_addr), m_proxy_port(proxy_port), m_peer_mask(NULL), m_mask_size(0)
-, m_base(NULL), m_timer(NULL), m_read(NULL), m_write(NULL), m_sockfd(-1)
+, m_sockfd(-1), m_base(NULL), m_timer(NULL), m_read(NULL), m_write(NULL)
 {
 }
 
@@ -128,6 +128,12 @@ void cct_proxy_client::run()
 	}
 	else
 		syslog(LOG_ERR, "%s: event base allocation failed.", __FUNCTION__);
+}
+
+void cct_proxy_client::set_syslog_name()
+{
+	memset(m_syslog_name, 0, 32);
+	snprintf(m_syslog_name, 32, "cct-prxy-clnt-%u", m_id);
 }
 
 int cct_proxy_client::send(const unsigned int dst_id, const unsigned char * msg, const size_t size)
@@ -373,6 +379,7 @@ int cct_proxy_client::process_messages()
 		this->m_sink->on_comm_message(hdr.peer_id, m_data.data() + sizeof(peer_msg_t), hdr.size);
 		m_data.erase(m_data.begin(), m_data.begin() + (sizeof(peer_msg_t) + hdr.size));
 	}
+	return 0;
 }
 
 void cct_proxy_client::connect_cb(evutil_socket_t fd, short what, void * arg)

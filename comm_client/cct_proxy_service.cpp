@@ -28,7 +28,7 @@
 static const struct timeval minute = {60,0};
 
 cct_proxy_service::cct_proxy_service()
-: m_base(NULL), m_tcp(NULL), m_svc_sock(-1), m_conn_sock(-1), m_cc(NULL), m_conn_rd(NULL), m_conn_wr(NULL)
+: m_base(NULL), m_tcp(NULL), m_svc_sock(-1), m_conn_sock(-1), m_conn_rd(NULL), m_conn_wr(NULL), m_cc(NULL)
 {
 	m_conn_pipe[PPRDFD] = -1;
 	m_conn_pipe[PPWRFD] = -1;
@@ -40,7 +40,16 @@ cct_proxy_service::~cct_proxy_service()
 
 int cct_proxy_service::serve(const service_t & a_svc, const client_t & a_clnt)
 {
-	syslog(LOG_NOTICE, "%s: proxy service started.", __FUNCTION__);
+	int result = -1;
+
+	memset(m_syslog_name, 0, 32);
+	snprintf(m_syslog_name, 32, "cct-prxy-svc-%u", a_clnt.id);
+	openlog(m_syslog_name, LOG_NDELAY|LOG_PID, LOG_USER);
+	setlogmask(LOG_UPTO(LOG_DEBUG));
+
+	struct timespec ts;
+	clock_gettime(CLOCK_REALTIME, &ts);
+	syslog(LOG_NOTICE, "%s: start %lu.%03lu", __FUNCTION__, ts.tv_sec, ts.tv_nsec/1000000);
 
 	m_svc = a_svc;
 	m_clnt = a_clnt;
@@ -63,7 +72,7 @@ int cct_proxy_service::serve(const service_t & a_svc, const client_t & a_clnt)
 						{
 							syslog(LOG_INFO, "%s: Running event loop.", __FUNCTION__);
 							event_base_dispatch(m_base);
-
+							result = 0;
 							event_del(m_tcp);
 						}
 						else
@@ -96,7 +105,9 @@ int cct_proxy_service::serve(const service_t & a_svc, const client_t & a_clnt)
 	else
 		syslog(LOG_ERR, "%s: proxy service event base allocation failed.", __FUNCTION__);
 
-	syslog(LOG_NOTICE, "%s: proxy service stopped.", __FUNCTION__);
+	clock_gettime(CLOCK_REALTIME, &ts);
+	syslog(LOG_NOTICE, "%s: stop %lu.%03lu", __FUNCTION__, ts.tv_sec, ts.tv_nsec/1000000);
+	return result;
 }
 
 int cct_proxy_service::start_tcp_svc()

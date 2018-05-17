@@ -10,7 +10,7 @@
 #include "comm_client.h"
 #include "comm_client_cb_api.h"
 
-int log_level = LOG_NOTICE;
+int log_level = LOG_DEBUG;//LOG_NOTICE;
 
 void * comm_client_proc(void * arg)
 {
@@ -105,8 +105,7 @@ void comm_client::stop()
 
 void comm_client::start_log()
 {
-	memset(m_syslog_name, 0, 32);
-	snprintf(m_syslog_name, 32, "comm-clnt-%u", m_id);
+	set_syslog_name();
 	openlog(m_syslog_name, LOG_NDELAY|LOG_PID, LOG_USER);
 	setlogmask(LOG_UPTO(log_level));
 
