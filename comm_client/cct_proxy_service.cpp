@@ -4,14 +4,16 @@
 #include <errno.h>
 #include <string.h>
 #include <semaphore.h>
+#include <syslog.h>
+#include <fcntl.h>
 
 #include <string>
+#include <vector>
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
-#include <log4cpp/Category.hh>
 #include <event2/event.h>
 
 #include "comm_client_cb_api.h"
@@ -25,10 +27,9 @@
 
 static const struct timeval minute = {60,0};
 
-cct_proxy_service::cct_proxy_service(const char * logcat)
-: m_base(NULL), m_tcp(NULL), m_svc_sock(-1), m_conn_sock(-1), m_cat(logcat), m_cc(NULL), m_conn_rd(NULL), m_conn_wr(NULL)
+cct_proxy_service::cct_proxy_service()
+: m_base(NULL), m_tcp(NULL), m_svc_sock(-1), m_conn_sock(-1), m_cc(NULL), m_conn_rd(NULL), m_conn_wr(NULL)
 {
-	m_cat += ".prx";
 	m_conn_pipe[PPRDFD] = -1;
 	m_conn_pipe[PPWRFD] = -1;
 }
@@ -39,7 +40,7 @@ cct_proxy_service::~cct_proxy_service()
 
 int cct_proxy_service::serve(const service_t & a_svc, const client_t & a_clnt)
 {
-	log4cpp::Category::getInstance(m_cat).notice("%s: proxy service started.", __FUNCTION__);
+	syslog(LOG_NOTICE, "%s: proxy service started.", __FUNCTION__);
 
 	m_svc = a_svc;
 	m_clnt = a_clnt;
@@ -60,42 +61,42 @@ int cct_proxy_service::serve(const service_t & a_svc, const client_t & a_clnt)
 					{
 						if(0 == event_add(m_tcp, &minute))
 						{
-							log4cpp::Category::getInstance(m_cat).info("%s: Running event loop.", __FUNCTION__);
+							syslog(LOG_INFO, "%s: Running event loop.", __FUNCTION__);
 							event_base_dispatch(m_base);
 
 							event_del(m_tcp);
 						}
 						else
-							log4cpp::Category::getInstance(m_cat).error("%s: proxy service tcp event addition failed.", __FUNCTION__);
+							syslog(LOG_ERR, "%s: proxy service tcp event addition failed.", __FUNCTION__);
 
 						event_free(m_tcp);
 						m_tcp = NULL;
 					}
 					else
-						log4cpp::Category::getInstance(m_cat).error("%s: proxy service tcp event allocation failed.", __FUNCTION__);
+						syslog(LOG_ERR, "%s: proxy service tcp event allocation failed.", __FUNCTION__);
 
 					close(m_svc_sock);
 					m_svc_sock = -1;
 				}
 				else
-					log4cpp::Category::getInstance(m_cat).error("%s: proxy service tcp service start failed.", __FUNCTION__);
+					syslog(LOG_ERR, "%s: proxy service tcp service start failed.", __FUNCTION__);
 				event_del(sigint_event);
 			}
 			else
-				log4cpp::Category::getInstance(m_cat).error("%s: proxy service sigint event addition failed.", __FUNCTION__);
+				syslog(LOG_ERR, "%s: proxy service sigint event addition failed.", __FUNCTION__);
 			event_free(sigint_event);
 			sigint_event = NULL;
 		}
 		else
-			log4cpp::Category::getInstance(m_cat).error("%s: proxy service sigint event allocation failed.", __FUNCTION__);
+			syslog(LOG_ERR, "%s: proxy service sigint event allocation failed.", __FUNCTION__);
 
 		event_base_free(m_base);
 		m_base = NULL;
 	}
 	else
-		log4cpp::Category::getInstance(m_cat).error("%s: proxy service event base allocation failed.", __FUNCTION__);
+		syslog(LOG_ERR, "%s: proxy service event base allocation failed.", __FUNCTION__);
 
-	log4cpp::Category::getInstance(m_cat).notice("%s: proxy service stopped.", __FUNCTION__);
+	syslog(LOG_NOTICE, "%s: proxy service stopped.", __FUNCTION__);
 }
 
 int cct_proxy_service::start_tcp_svc()
@@ -104,17 +105,17 @@ int cct_proxy_service::start_tcp_svc()
     {
         int errcode = errno;
         char errmsg[256];
-        log4cpp::Category::getInstance(m_cat).error("%s: socket() failed with error %d : [%s].",
+        syslog(LOG_ERR, "%s: socket() failed with error %d : [%s].",
         		__FUNCTION__, errcode, strerror_r(errcode, errmsg, 256));
         return -1;
     }
 	else
-		 log4cpp::Category::getInstance(m_cat).debug("%s: socket fd %d created.", __FUNCTION__, m_svc_sock);
+		 syslog(LOG_DEBUG, "%s: socket fd %d created.", __FUNCTION__, m_svc_sock);
 
 	struct sockaddr_in service_address;
 	if (inet_aton(m_svc.ip.c_str(), &service_address.sin_addr) == 0)
     {
-		log4cpp::Category::getInstance(m_cat).error("%s: invalid service address [%s].", __FUNCTION__, m_svc.ip.c_str());
+		syslog(LOG_ERR, "%s: invalid service address [%s].", __FUNCTION__, m_svc.ip.c_str());
 		close(m_svc_sock); m_svc_sock = -1;
         return -1;
     }
@@ -125,32 +126,32 @@ int cct_proxy_service::start_tcp_svc()
 	{
         int errcode = errno;
         char errmsg[256];
-        log4cpp::Category::getInstance(m_cat).error("%s: bind() to [%s:%hu] failed with error %d : [%s].",
+        syslog(LOG_ERR, "%s: bind() to [%s:%hu] failed with error %d : [%s].",
         		__FUNCTION__, m_svc.ip.c_str(), m_svc.port, errcode, strerror_r(errcode, errmsg, 256));
 		close(m_svc_sock); m_svc_sock = -1;
         return -1;
 	}
 	else
-		 log4cpp::Category::getInstance(m_cat).debug("%s: socket fd %d bound to [%s:%hu].", __FUNCTION__, m_svc_sock, m_svc.ip.c_str(), m_svc.port);
+		 syslog(LOG_DEBUG, "%s: socket fd %d bound to [%s:%hu].", __FUNCTION__, m_svc_sock, m_svc.ip.c_str(), m_svc.port);
 
 	if (0 != listen(m_svc_sock, 1))
 	{
         int errcode = errno;
         char errmsg[256];
-        log4cpp::Category::getInstance(m_cat).error("%s: listen() on [%s:%hu] failed with error %d : [%s].",
+        syslog(LOG_ERR, "%s: listen() on [%s:%hu] failed with error %d : [%s].",
         		__FUNCTION__, m_svc.ip.c_str(), m_svc.port, errcode, strerror_r(errcode, errmsg, 256));
 		close(m_svc_sock); m_svc_sock = -1;
         return -1;
 	}
 	else
-		 log4cpp::Category::getInstance(m_cat).debug("%s: listening with socket fd %d on [%s:%hu].", __FUNCTION__, m_svc_sock, m_svc.ip.c_str(), m_svc.port);
+		 syslog(LOG_DEBUG, "%s: listening with socket fd %d on [%s:%hu].", __FUNCTION__, m_svc_sock, m_svc.ip.c_str(), m_svc.port);
 
 	return 0;
 }
 
 void cct_proxy_service::on_sigint()
 {
-	log4cpp::Category::getInstance(m_cat).info("%s: Breaking event loop.", __FUNCTION__);
+	syslog(LOG_INFO, "%s: Breaking event loop.", __FUNCTION__);
 	event_base_loopbreak(m_base);
 }
 
@@ -162,25 +163,25 @@ void cct_proxy_service::on_accept()
     if(0 <= m_conn_sock)
     {
     	char address[64];
-    	log4cpp::Category::getInstance(m_cat).notice("%s: accepted a new connection: FD=%d from [%s:%hu].",
+    	syslog(LOG_NOTICE, "%s: accepted a new connection: FD=%d from [%s:%hu].",
     			__FUNCTION__, m_conn_sock, inet_ntop(AF_INET, &conn_addr.sin_addr, address, 64), ntohs(conn_addr.sin_port));
 
     	if(0 == pipe(m_conn_pipe))
     	{
-    		log4cpp::Category::getInstance(m_cat).debug("%s: proxy client conn pipe is open.", __FUNCTION__);
+    		syslog(LOG_DEBUG, "%s: proxy client conn pipe is open.", __FUNCTION__);
     		m_conn_data.clear();
     		m_conn_wr = event_new(m_base, m_conn_pipe[PPRDFD], EV_READ, connwr1_cb, this);
 			if(NULL != m_conn_wr)
     		{
 				if(0 == event_add(m_conn_wr, NULL))
 				{
-		    		log4cpp::Category::getInstance(m_cat).debug("%s: proxy client conn write event added.", __FUNCTION__);
+		    		syslog(LOG_DEBUG, "%s: proxy client conn write event added.", __FUNCTION__);
 					m_conn_rd = event_new(m_base, m_conn_sock, EV_READ|EV_PERSIST, connrd_cb, this);
 					if(NULL != m_conn_rd)
 					{
 						if(0 == event_add(m_conn_rd, NULL))
 						{
-				    		log4cpp::Category::getInstance(m_cat).debug("%s: proxy client conn read event added.", __FUNCTION__);
+				    		syslog(LOG_DEBUG, "%s: proxy client conn read event added.", __FUNCTION__);
 							client_details_msg_t cdm;
 							cdm.proxy_id = m_clnt.id;
 							cdm.peer_count = m_clnt.count;
@@ -188,37 +189,37 @@ void cct_proxy_service::on_accept()
 							ssize_t nwrit = write(m_conn_pipe[PPWRFD], &cdm, sizeof(client_details_msg_t));
 							if((ssize_t)sizeof(client_details_msg_t) == nwrit)
 							{
-					    		log4cpp::Category::getInstance(m_cat).debug("%s: proxy client details written to conn.", __FUNCTION__);
+					    		syslog(LOG_DEBUG, "%s: proxy client details written to conn.", __FUNCTION__);
 								m_cc = new comm_client_tcp_mesh;
 								if(0 == m_cc->start(m_clnt.id, m_clnt.count, m_clnt.conf_file.c_str(), this))
 								{
 									event_del(m_tcp);
-									log4cpp::Category::getInstance(m_cat).notice("%s: proxy client is connected and running.", __FUNCTION__);
+									syslog(LOG_NOTICE, "%s: proxy client is connected and running.", __FUNCTION__);
 								}
 								else
-									log4cpp::Category::getInstance(m_cat).error("%s: comm client start failed.", __FUNCTION__);
+									syslog(LOG_ERR, "%s: comm client start failed.", __FUNCTION__);
 								delete m_cc;
 							}
 							else
-								log4cpp::Category::getInstance(m_cat).error("%s: client details write failed.", __FUNCTION__);
+								syslog(LOG_ERR, "%s: client details write failed.", __FUNCTION__);
 							event_del(m_conn_rd);
 						}
 						else
-							log4cpp::Category::getInstance(m_cat).error("%s: conn-read event addition failed.", __FUNCTION__);
+							syslog(LOG_ERR, "%s: conn-read event addition failed.", __FUNCTION__);
 						event_free(m_conn_rd);
 						m_conn_rd = NULL;
 					}
 					else
-						log4cpp::Category::getInstance(m_cat).error("%s: conn-read event allocation failed.", __FUNCTION__);
+						syslog(LOG_ERR, "%s: conn-read event allocation failed.", __FUNCTION__);
 					event_del(m_conn_wr);
 				}
 				else
-					log4cpp::Category::getInstance(m_cat).error("%s: conn-write event addition failed.", __FUNCTION__);
+					syslog(LOG_ERR, "%s: conn-write event addition failed.", __FUNCTION__);
 				event_free(m_conn_wr);
 				m_conn_wr = NULL;
     		}
 			else
-				log4cpp::Category::getInstance(m_cat).error("%s: conn-write event allocation failed.", __FUNCTION__);
+				syslog(LOG_ERR, "%s: conn-write event allocation failed.", __FUNCTION__);
     		close(m_conn_pipe[PPRDFD]);
     		m_conn_pipe[PPRDFD] = -1;
     		close(m_conn_pipe[PPWRFD]);
@@ -228,7 +229,7 @@ void cct_proxy_service::on_accept()
     	{
             int errcode = errno;
             char errmsg[256];
-            log4cpp::Category::getInstance(m_cat).error("%s: pipe() failed with error %d : [%s].",
+            syslog(LOG_ERR, "%s: pipe() failed with error %d : [%s].",
             		__FUNCTION__, errcode, strerror_r(errcode, errmsg, 256));
     	}
     	close(m_conn_sock);
@@ -238,7 +239,7 @@ void cct_proxy_service::on_accept()
     {
         int errcode = errno;
         char errmsg[256];
-        log4cpp::Category::getInstance(m_cat).error("%s: accept() failed with error %d : [%s].",
+        syslog(LOG_ERR, "%s: accept() failed with error %d : [%s].",
         		__FUNCTION__, errcode, strerror_r(errcode, errmsg, 256));
     }
     //accept event still pending
@@ -246,7 +247,7 @@ void cct_proxy_service::on_accept()
 
 void cct_proxy_service::on_accept_timeout()
 {
-	log4cpp::Category::getInstance(m_cat).info("%s: accept timed out waiting for an incoming connection.", __FUNCTION__);
+	syslog(LOG_INFO, "%s: accept timed out waiting for an incoming connection.", __FUNCTION__);
 }
 
 void cct_proxy_service::on_connwr1()
@@ -255,7 +256,7 @@ void cct_proxy_service::on_connwr1()
 	m_conn_wr = event_new(m_base, m_conn_sock, EV_WRITE, connwr2_cb, this);
 	if(0 != event_add(m_conn_wr, NULL))
 	{
-        log4cpp::Category::getInstance(m_cat).fatal("%s: conn write 2 event add failed.", __FUNCTION__);
+        syslog(LOG_ERR, "%s: conn write 2 event add failed.", __FUNCTION__);
         exit(-__LINE__);
 	}
 }
@@ -268,17 +269,17 @@ void cct_proxy_service::on_connwr2()
 	{
 		int errcode = errno;
 		char errmsg[512];
-        log4cpp::Category::getInstance(m_cat).fatal("%s: splice() failed with error %d : [%s].",
+        syslog(LOG_ERR, "%s: splice() failed with error %d : [%s].",
         		__FUNCTION__, errcode, strerror_r(errcode, errmsg, 256));
         exit(-__LINE__);
 	}
 	else
-		log4cpp::Category::getInstance(m_cat).debug("%s: %d bytes spliced out to conn.", __FUNCTION__, result);
+		syslog(LOG_DEBUG, "%s: %d bytes spliced out to conn.", __FUNCTION__, result);
 
 	m_conn_wr = event_new(m_base, m_conn_pipe[PPRDFD], EV_READ, connwr1_cb, this);
 	if(0 != event_add(m_conn_wr, NULL))
 	{
-        log4cpp::Category::getInstance(m_cat).fatal("%s: conn write 1 event add failed.", __FUNCTION__);
+        syslog(LOG_ERR, "%s: conn write 1 event add failed.", __FUNCTION__);
         exit(-__LINE__);
 	}
 }
@@ -294,12 +295,12 @@ void cct_proxy_service::on_connrd()
 		return;
 	}
 	else if(0 == nread)
-		log4cpp::Category::getInstance(m_cat).notice("%s: read 0 bytes; disconnection.", __FUNCTION__);
+		syslog(LOG_NOTICE, "%s: read 0 bytes; disconnection.", __FUNCTION__);
 	else
 	{
 		int errcode = errno;
 		char errmsg[512];
-        log4cpp::Category::getInstance(m_cat).error("%s: read() failed with error %d : [%s].",
+        syslog(LOG_ERR, "%s: read() failed with error %d : [%s].",
         		__FUNCTION__, errcode, strerror_r(errcode, errmsg, 256));
 	}
 	//disconnect conn
@@ -327,7 +328,7 @@ void cct_proxy_service::on_connrd()
 
 	if(0 != event_add(m_tcp, &minute))
 	{
-        log4cpp::Category::getInstance(m_cat).fatal("%s: accept event add failed.", __FUNCTION__);
+        syslog(LOG_ERR, "%s: accept event add failed.", __FUNCTION__);
         exit(-__LINE__);
 	}
 }
@@ -362,18 +363,18 @@ void cct_proxy_service::on_comm_message(const unsigned int src_id, const unsigne
 		{
 			int errcode = errno;
 			char errmsg[512];
-	        log4cpp::Category::getInstance(m_cat).fatal("%s: writev() failed with error %d : [%s].",
+	        syslog(LOG_ERR, "%s: writev() failed with error %d : [%s].",
 	        		__FUNCTION__, errcode, strerror_r(errcode, errmsg, 256));
 	        exit(-__LINE__);
 		}
 		else
 		{
-	        log4cpp::Category::getInstance(m_cat).fatal("%s: writev() partial write of %lu out of %lu.", __FUNCTION__, (size_t)nwrit, (sizeof(peer_msg_t) + size));
+	        syslog(LOG_ERR, "%s: writev() partial write of %lu out of %lu.", __FUNCTION__, (size_t)nwrit, (sizeof(peer_msg_t) + size));
 	        exit(-__LINE__);
 		}
 	}
 	else
-		log4cpp::Category::getInstance(m_cat).debug("%s: %lu bytes written to conn pipe.", __FUNCTION__, (size_t)nwrit);
+		syslog(LOG_DEBUG, "%s: %lu bytes written to conn pipe.", __FUNCTION__, (size_t)nwrit);
 }
 
 void cct_proxy_service::update_peer_comm(const unsigned int party_id, const unsigned int connected)
@@ -389,11 +390,11 @@ void cct_proxy_service::update_peer_comm(const unsigned int party_id, const unsi
 		{
 	        int errcode = errno;
 	        char errmsg[256];
-	        log4cpp::Category::getInstance(m_cat).error("%s: write() failed with error %d : [%s].",
+	        syslog(LOG_ERR, "%s: write() failed with error %d : [%s].",
 	        		__FUNCTION__, errcode, strerror_r(errcode, errmsg, 256));
 		}
 		else
-			log4cpp::Category::getInstance(m_cat).error("%s: peer comm update written %lu out of %lu bytes.", __FUNCTION__, (size_t)nwrit, sizeof(peer_comm_update_t));
+			syslog(LOG_ERR, "%s: peer comm update written %lu out of %lu bytes.", __FUNCTION__, (size_t)nwrit, sizeof(peer_comm_update_t));
 	}
 }
 
@@ -412,7 +413,7 @@ void cct_proxy_service::process_conn_msgs()
 
 		if(0 != m_cc->send(hdr.peer_id, m_conn_data.data() + sizeof(peer_msg_t), hdr.size))
 		{
-	        log4cpp::Category::getInstance(m_cat).fatal("%s: comm client send() failed.", __FUNCTION__);
+			syslog(LOG_ERR, "%s: comm client send() failed.", __FUNCTION__);
 	        exit(-__LINE__);
 		}
 		m_conn_data.erase(m_conn_data.begin(), m_conn_data.begin() + (sizeof(peer_msg_t) + hdr.size));

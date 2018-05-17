@@ -6,7 +6,7 @@ class comm_client;
 class cct_proxy_service : public comm_client_cb_api
 {
 public:
-	cct_proxy_service(const char * logcat);
+	cct_proxy_service();
 	virtual ~cct_proxy_service();
 
 	typedef struct __client
@@ -44,7 +44,6 @@ public:
 	static void connrd_cb(evutil_socket_t fd, short what, void * arg);
 
 private:
-	std::string m_cat;
 	service_t m_svc;
 	client_t m_clnt;
 	struct event_base * m_base;
