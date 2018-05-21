@@ -16,6 +16,5 @@ set(SOURCE_FILES
 add_library(commclient SHARED ${SOURCE_FILES})
 
 target_link_libraries( commclient
-	log4cpp
 	event
 )

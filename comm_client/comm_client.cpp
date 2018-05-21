@@ -7,6 +7,8 @@
 #include <semaphore.h>
 #include <errno.h>
 
+#include <sys/uio.h>
+
 #include "comm_client.h"
 #include "comm_client_cb_api.h"
 

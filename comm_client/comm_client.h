@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <semaphore.h>
+
 class comm_client_cb_api;
 
 class comm_client
