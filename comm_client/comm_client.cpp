@@ -12,7 +12,7 @@
 #include "comm_client.h"
 #include "comm_client_cb_api.h"
 
-int log_level = LOG_DEBUG;//LOG_NOTICE;
+int log_level = LOG_NOTICE;//;LOG_DEBUG
 
 void * comm_client_proc(void * arg)
 {

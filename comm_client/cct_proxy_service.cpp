@@ -46,7 +46,7 @@ int cct_proxy_service::serve(const service_t & a_svc, const client_t & a_clnt)
 	memset(m_syslog_name, 0, 32);
 	snprintf(m_syslog_name, 32, "cct-prxy-svc-%u", a_clnt.id);
 	openlog(m_syslog_name, LOG_NDELAY|LOG_PID, LOG_USER);
-	setlogmask(LOG_UPTO(LOG_DEBUG));
+	setlogmask(LOG_UPTO(LOG_NOTICE));
 
 	struct timespec ts;
 	clock_gettime(CLOCK_REALTIME, &ts);

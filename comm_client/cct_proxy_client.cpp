@@ -73,7 +73,7 @@ void cct_proxy_client::run()
 					m_timer = event_new(m_base, -1, EV_TIMEOUT|EV_PERSIST, timer_cb, this);
 					if(NULL != m_timer)
 					{
-						if(0 == event_add(m_read, &_50ms_))
+						if(0 == event_add(m_timer, &_50ms_))
 						{
 							syslog(LOG_NOTICE, "%s: starting event loop.", __FUNCTION__);
 							event_base_dispatch(m_base);
@@ -187,7 +187,7 @@ void cct_proxy_client::on_connect()
 		event_free(m_read);
 		m_data.clear();
 
-		m_read = event_new(m_base, m_sockfd, EV_READ, read_cb, this);
+		m_read = event_new(m_base, m_sockfd, EV_READ|EV_PERSIST, read_cb, this);
 		if(0 != event_add(m_read, NULL))
 		{
 			syslog(LOG_ERR, "%s: read event addition failed.", __FUNCTION__);
@@ -226,6 +226,7 @@ void cct_proxy_client::on_read()
 	ssize_t nread = read(m_sockfd, buffer, 4096);
 	if(0 < nread)
 	{
+		syslog(LOG_DEBUG, "%s: read %ld bytes.", __FUNCTION__, nread);
 		m_data.insert(m_data.end(), buffer, buffer + nread);
 		process_messages();
 		return;
