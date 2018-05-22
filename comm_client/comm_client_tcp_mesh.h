@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <event2/util.h>
+
 typedef struct
 {
 	unsigned int id;
