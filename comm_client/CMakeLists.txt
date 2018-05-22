@@ -11,7 +11,6 @@ set(SOURCE_FILES
 	cct_proxy_service.cpp
 	comm_client.cpp
 	comm_client_tcp_mesh.cpp
-	protocol_barrier.cpp
 )
 
 add_library(commclient SHARED ${SOURCE_FILES})
