@@ -157,8 +157,8 @@ compile-blake:
 	@touch compile-blake
 
 compile-openssl:
-	@mkdir -p $(CURDIR)/install/lib
-	@mkdir -p $(CURDIR)/install/include
+	@mkdir -p $(PWD)/install/lib
+	@mkdir -p $(PWD)/install/include
 	@mkdir -p $(builddir)/
 	echo "Compiling the openssl library"
 	@cp -r lib/openssl/ $(builddir)/openssl
@@ -171,20 +171,20 @@ ifeq ($(uname_os), Darwin)
 endif
 	cd $(builddir)/openssl/; make 
 	cd $(builddir)/openssl/; make install
-	@cp $(builddir)/openssl/tmptrgt/lib/*.a $(CURDIR)/install/lib/
-	@cp -r $(builddir)/openssl/tmptrgt/include/openssl/ $(CURDIR)/install/include/
+	@cp $(builddir)/openssl/tmptrgt/lib/*.a $(PWD)/install/lib/
+	@cp -r $(builddir)/openssl/tmptrgt/include/openssl/ $(PWD)/install/include/
 	@touch compile-openssl
 
 compile-boost:
-	@mkdir -p $(CURDIR)/install/lib
-	@mkdir -p $(CURDIR)/install/include
+	@mkdir -p $(PWD)/install/lib
+	@mkdir -p $(PWD)/install/include
 	@mkdir -p $(builddir)/
 	echo "Compiling the boost library"
 	@cp -r lib/boost_1_64_0/ $(builddir)/boost_1_64_0
 	@cd $(builddir)/boost_1_64_0/; bash -c "BOOST_BUILD_PATH='./' ./bootstrap.sh --with-libraries=thread,system,log,serialization \
 	&& ./b2 -j4"; # compile boost faster with threads
-	@cp $(builddir)/boost_1_64_0/stage/lib/*.a $(CURDIR)/install/lib/
-	@cp -r $(builddir)/boost_1_64_0/boost/ $(CURDIR)/install/include/
+	@cp $(builddir)/boost_1_64_0/stage/lib/*.a $(PWD)/install/lib/
+	@cp -r $(builddir)/boost_1_64_0/boost/ $(PWD)/install/include/
 	@touch compile-boost
 
 # Support only in c++14
@@ -193,12 +193,12 @@ compile-libote:compile-boost
 	@cp -r lib/libOTe $(builddir)/libOTe
 	@cmake $(builddir)/libOTe/CMakeLists.txt -DCMAKE_BUILD_TYPE=Release
 	@$(MAKE) -C $(builddir)/libOTe/
-	@cp $(builddir)/libOTe/lib/*.a $(CURDIR)/install/lib/
-	@mv $(CURDIR)/install/lib/liblibOTe.a $(CURDIR)/install/lib/libOTe.a
-	@mkdir -p $(CURDIR)/install/include/libOTe
-	@cd $(builddir)/libOTe/ && find . -name "*.h" -type f |xargs -I {} cp --parents {} $(CURDIR)/install/include/libOTe
-	@cp -r $(builddir)/libOTe/cryptoTools/cryptoTools/gsl $(CURDIR)/install/include/libOTe/cryptoTools/cryptoTools
-	@cp $(builddir)/libOTe/cryptoTools/thirdparty/miracl/source/libmiracl.a $(CURDIR)/install/lib
+	@cp $(builddir)/libOTe/lib/*.a $(PWD)/install/lib/
+	@mv $(PWD)/install/lib/liblibOTe.a $(PWD)/install/lib/libOTe.a
+	@mkdir -p $(PWD)/install/include/libOTe
+	@cd $(builddir)/libOTe/ && find . -name "*.h" -type f |xargs -I {} cp --parents {} $(PWD)/install/include/libOTe
+	@cp -r $(builddir)/libOTe/cryptoTools/cryptoTools/gsl $(PWD)/install/include/libOTe/cryptoTools/cryptoTools
+	@cp $(builddir)/libOTe/cryptoTools/thirdparty/miracl/source/libmiracl.a $(PWD)/install/lib
 	@touch compile-libote
 
 compile-ntl:
