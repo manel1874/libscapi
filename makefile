@@ -1,14 +1,14 @@
 export builddir=$(abspath ./build)
 export prefix=$(abspath ./install)
 CXX=g++
-uname_S := $(shell sh -c 'uname -s 2>/dev/null || echo not')
+uname_os := $(shell sh -c 'uname -s 2>/dev/null || echo not')
 ARCH := $(shell getconf LONG_BIT)
 SHARED_LIB_EXT:=.so
 INCLUDE_ARCHIVES_START = -Wl,-whole-archive # linking options, we prefer our generated shared object will be self-contained.
 INCLUDE_ARCHIVES_END = -Wl,-no-whole-archive 
 SHARED_LIB_OPT:=-shared
 
-export uname_S
+export uname_os
 export ARCH
 export SHARED_LIB_EXT
 export INCLUDE_ARCHIVES_START
@@ -24,23 +24,44 @@ CPP_FILES     := $(wildcard src/*/*.cpp)
 C_FILES     := $(wildcard src/*/*.c)
 OBJ_FILES     := $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES))
 OBJ_FILES     += $(patsubst src/%.c,obj/%.o,$(C_FILES))
-OUT_DIR        = obj obj/mid_layer obj/circuits obj/comm obj/infra obj/interactive_mid_protocols obj/primitives obj/circuits_c obj/cryptoInfra
-INC            = -Iinstall/include -Iinstall/include/OTExtensionBristol -Iinstall/include/libOTe -Iinstall/include/libOTe/cryptoTools
+OUT_DIR        = obj obj/mid_layer obj/circuits obj/comm obj/infra obj/interactive_mid_protocols obj/primitives obj/circuits_c obj/cryptoInfra obj/commClient
+
+ifeq ($(uname_os), Linux)
+    INC            = -Iinstall/include -Iinstall/include/OTExtensionBristol -Iinstall/include/libOTe -Iinstall/include/libOTe/cryptoTools -I/usr/local/opt/openssl/include/
+    LIBRARIES_DIR  = -Linstall/lib /usr/local/opt/openssl/lib
+endif
+ifeq ($(uname_os), Darwin)
+    INC            = -Iinstall/include -Iinstall/include/OTExtensionBristol -Iinstall/include/libOTe -Iinstall/include/libOTe/cryptoTools -I/usr/local/opt/openssl/include/
+    LIBRARIES_DIR  = -Linstall/lib /usr/local/opt/openssl/lib
+endif
+
 GCC_STANDARD = c++14
 CPP_OPTIONS   := -g -std=$(GCC_STANDARD) $(INC)  -maes -mpclmul -mbmi2 -Wall -Wno-uninitialized -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable -Wno-unused-result -Wno-sign-compare -Wno-parentheses -O3
 $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
-LIBRARIES_DIR  = -Linstall/lib
+
 LD_FLAGS = 
 SUMO = no
 
-
 all: libs libscapi tests
 	echo $(WITH_EMP)
+
 ifeq ($(GCC_STANDARD), c++11)
+ifeq ($(uname_os), Linux)
     libs: compile-openssl compile-boost compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc compile-otextension-bristol
-else
-libs: compile-openssl compile-boost compile-libote compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc compile-otextension-bristol
+endif # Linux c++11
+ifeq ($(uname_os), Darwin)
+    libs: compile-openssl compile-boost compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc
+endif # Darwin c++11
+endif # c++11
+ifeq ($(GCC_STANDARD), c++14)
+ifeq ($(uname_os), Linux)
+    libs: compile-openssl compile-boost compile-libote compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc compile-otextension-bristol
+endif # Linux c++14
+ifeq ($(uname_os), Darwin)
+    libs: compile-openssl compile-boost compile-libote compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc
+endif # Darwin c++14
 endif
+
 libscapi: directories $(SLib)
 directories: $(OUT_DIR)
 
@@ -56,7 +77,9 @@ obj/circuits/%.o: src/circuits/%.cpp
 obj/circuits_c/%.o: src/circuits_c/%.c
 	gcc -fPIC -mavx -maes -mpclmul -DRDTSC -DTEST=AES128  -O3 -c -o $@ $< 
 obj/comm/%.o: src/comm/%.cpp
-	g++ -c $(CPP_OPTIONS) -o $@ $< 	 
+	g++ -c $(CPP_OPTIONS) -o $@ $<
+obj/commClient/%.o: src/commClient/%.cpp
+	g++ -c $(CPP_OPTIONS) -o $@ $<
 obj/infra/%.o: src/infra/%.cpp
 	g++ -c $(CPP_OPTIONS) -o $@ $< 	 
 obj/interactive_mid_protocols/%.o: src/interactive_mid_protocols/%.cpp
@@ -139,8 +162,13 @@ compile-openssl:
 	@mkdir -p $(builddir)/
 	echo "Compiling the openssl library"
 	@cp -r lib/openssl/ $(builddir)/openssl
-	export CFLAGS="-fPIC"	
-	cd $(builddir)/openssl/; ./config --prefix=$(builddir)/openssl/tmptrgt  enable-ec_nistp_64_gcc_128 -no-shared
+	export CFLAGS="-fPIC"
+ifeq ($(uname_os), Linux)
+	    cd $(builddir)/openssl/; ./config --prefix=$(builddir)/openssl/tmptrgt  enable-ec_nistp_64_gcc_128 -no-shared
+endif
+ifeq ($(uname_os), Darwin)
+        cd $(builddir)/openssl/; ./Configure darwin64-x86_64-cc --prefix=$(builddir)/openssl/tmptrgt  enable-ec_nistp_64_gcc_128 -no-shared
+endif
 	cd $(builddir)/openssl/; make 
 	cd $(builddir)/openssl/; make install
 	@cp $(builddir)/openssl/tmptrgt/lib/*.a $(CURDIR)/install/lib/
