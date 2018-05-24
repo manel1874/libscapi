@@ -48,17 +48,17 @@ vector<byte> readInputAsVector(string input_file, int numInputs) {
 
 PartyOne::PartyOne(int argc, char* argv[]) : Protocol("SemiHonestYao", argc, argv) {
 	//t = boost::thread(boost::bind(&boost::asio::io_service::run, &io_service));
+	id = stoi(this->getParser().getValueByKey(arguments, "partyID"));
 
-	id = stoi(arguments["partyID"]);
 
-	YaoConfig yao_config(arguments["configFile"]);
+	YaoConfig yao_config(this->getParser().getValueByKey(arguments, "configFile"));
 	this->yaoConfig = yao_config;
 
 	vector<string> subTaskNames{"Garble", "SendCircuitAndInputs", "OT"};
 	timer = new Measurement(*this, subTaskNames);
 
 	//open parties file
-	ConfigFile cf(arguments["partiesFile"]);
+	ConfigFile cf(this->getParser().getValueByKey(arguments, "partiesFile"));
 
 	string receiver_ip, sender_ip;
 	int receiver_port, sender_port;
@@ -186,15 +186,15 @@ void PartyOne::runOTProtocol() {
 
 PartyTwo::PartyTwo(int argc, char* argv[]) : Protocol("SemiHonestYao", argc, argv){
 
-	id = stoi(arguments["partyID"]);
+	id = stoi(this->getParser().getValueByKey(arguments, "partyID"));
 
-	YaoConfig yao_config(arguments["configFile"]);
+	YaoConfig yao_config(this->getParser().getValueByKey(arguments, "configFile"));
 	this->yaoConfig = yao_config;
 
 	this->print_output = yaoConfig.print_output;
 
 	//open parties file
-	ConfigFile cf(arguments["partiesFile"]);
+	ConfigFile cf(this->getParser().getValueByKey(arguments, "partiesFile"));
 
 	vector<string> subTaskNames{"ReceiveCircuitAndInputs", "OT", "ComputeCircuit"};
 	timer = new Measurement(*this, subTaskNames);
