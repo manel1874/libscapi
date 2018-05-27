@@ -167,7 +167,7 @@ ifeq ($(uname_os), Linux)
 	    cd $(builddir)/openssl/; ./config --prefix=$(builddir)/openssl/tmptrgt  enable-ec_nistp_64_gcc_128 -no-shared
 endif
 ifeq ($(uname_os), Darwin)
-        cd $(builddir)/openssl/; ./Configure darwin64-x86_64-cc --prefix=$(builddir)/openssl/tmptrgt  enable-ec_nistp_64_gcc_128 -no-shared
+	cd $(builddir)/openssl/; ./Configure darwin64-x86_64-cc --prefix=$(builddir)/openssl/tmptrgt  enable-ec_nistp_64_gcc_128 -no-shared
 endif
 	cd $(builddir)/openssl/; make 
 	cd $(builddir)/openssl/; make install
