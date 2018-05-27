@@ -13,7 +13,7 @@ SCAPI uses other open source libraries as listed below. Please see these project
 - The GNU Multiple Precision Arithmetic Library (GMP) [https://gmplib.org/](https://gmplib.org/)
 - NTL: A Library for doing Number Theory- Victor Shoup [http://www.shoup.net/ntl/](http://www.shoup.net/ntl/)
 - MIRACL Cryptographic SDK [https://github.com/miracl/MIRACL](https://github.com/miracl/MIRACL)
-- Boost 1.60 [http://www.boost.org/](http://www.boost.org/)
+- Boost [http://www.boost.org/](http://www.boost.org/)
 - Cereal C++ Serialization Library [https://github.com/USCiLab/cereal](http://uscilab.github.io/cereal/)
 - TU Darmstadt OT Extension[https://github.com/encryptogroup/OTExtension](https://github.com/encryptogroup/OTExtension)
 - University of Bristol: APRICOT -[https://github.com/bristolcrypto/apricot](https://github.com/bristolcrypto/apricot)

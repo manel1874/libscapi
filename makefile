@@ -185,10 +185,10 @@ compile-boost:
 	&& ./b2 -j4"; # compile boost faster with threads
 	@cp $(builddir)/boost_1_64_0/stage/lib/*.a $(PWD)/install/lib/
 ifeq ($(uname_os), Linux)
-	@cp -r $(builddir)/boost_1_64_0/boost/ $(PWD)/install/include/
+	@cp -r $(builddir)/boost_1_64_0/boost $(PWD)/install/include/
 endif
 ifeq ($(uname_os), Darwin)
-	@cp -R $(builddir)/boost_1_64_0/boost/ $(PWD)/install/include/
+	@cp -R $(builddir)/boost_1_64_0/boost $(PWD)/install/include/
 endif
 	@touch compile-boost
 
@@ -255,7 +255,7 @@ clean-cpp:
 	@rm -f $(SLib)
 
 clean-install:
-	@rm -rf install/*
+	@rm -rf install
 
 clean-tests:
 	@rm -f test/tests.exe

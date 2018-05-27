@@ -28,9 +28,11 @@ Go to http://biulibscapi.readthedocs.org/ for a detailed explanations of our imp
 
 ## Installing libscapi
 
-Libscapi has is tested on Ubuntu 14.04/16.04LTS and should run on all major versions of Linux. It also executes on Windows 8.1/10 but with performance limitations. Internally we use the Windows option for development only. All tests execute on Linux.
-Mac OSX has not been tested so far. 
-For detailed instructions, see [INSTALL.MD](build_scripts/INSTALL.MD)
+Libscapi supports this OSs (with C++11/C++14):
+- Ubuntu 14.04/16.04/18.04 LTS
+- CentOS 7.3
+- Mac OSx High Sierra 10.13
+For detailed instructions, see [INSTALL.md](build_scripts/INSTALL.md)
 
 ## Libraries used by libscapi
 
@@ -50,12 +52,7 @@ The main target applications for GMP are cryptography applications and research,
 ##### NTL: A Library for doing Number Theory- Victor Shoup
 [ttp://www.shoup.net/ntl/](http://www.shoup.net/ntl/)
 
- NTL is a high-performance, portable C++ library providing data structures and algorithms for manipulating signed, arbitrary length integers, and for vectors, matrices, and polynomials over the integers and over finite fields.On modern platforms supporting C++11, NTL can be compiled in thread safe and exception safe modes. 
-
-##### MIRACL Cryptographic SDK
-[https://github.com/miracl/MIRACL](https://github.com/miracl/MIRACL)
-
-MIRACL Cryptographic SDK: Multiprecision Integer and Rational Arithmetic Cryptographic Library C software library
+NTL is a high-performance, portable C++ library providing data structures and algorithms for manipulating signed, arbitrary length integers, and for vectors, matrices, and polynomials over the integers and over finite fields.On modern platforms supporting C++11, NTL can be compiled in thread safe and exception safe modes. 
 
 ##### Boost 1.64
 [http://www.boost.org/](http://www.boost.org/)
@@ -65,12 +62,12 @@ Boost provides free peer-reviewed portable C++ source libraries. We emphasize li
 ##### Cereal C++ Serialization Library
 [https://github.com/USCiLab/cereal](http://uscilab.github.io/cereal/)
 
-cereal is a header-only C++11 serialization library. cereal takes arbitrary data types and reversibly turns them into different representations, such as compact binary encodings, XML, or JSON. cereal was designed to be fast, light-weight, and easy to extend - it has no external dependencies and can be easily bundled with other code or used standalone.
+Cereal is a header-only C++11 serialization library. cereal takes arbitrary data types and reversibly turns them into different representations, such as compact binary encodings, XML, or JSON. cereal was designed to be fast, light-weight, and easy to extend - it has no external dependencies and can be easily bundled with other code or used standalone.
 
-##### JsonCpp : A library for creating json files in C++
-[https://github.com/open-source-parsers/jsoncpp](https://github.com/open-source-parsers/jsoncpp)
+##### JSON for modern C++
+[https://github.com/nlohmann/json](https://github.com/nlohmann/json)
 
-JsonCpp is used to create our logger log files.
+JSON for modern C++ is used to create our log files.
 
 ### Implementations by other Academic Institutes
 
