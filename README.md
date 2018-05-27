@@ -31,7 +31,8 @@ Go to http://biulibscapi.readthedocs.org/ for a detailed explanations of our imp
 Libscapi supports this OSs (with C++11/C++14):
 - Ubuntu 14.04/16.04/18.04 LTS
 - CentOS 7.3
-- Mac OSx High Sierra 10.13
+- Mac OSx High Sierra 10.13  
+
 For detailed instructions, see [INSTALL.md](build_scripts/INSTALL.md)
 
 ## Libraries used by libscapi
