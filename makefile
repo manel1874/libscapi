@@ -184,7 +184,12 @@ compile-boost:
 	@cd $(builddir)/boost_1_64_0/; bash -c "BOOST_BUILD_PATH='./' ./bootstrap.sh --with-libraries=thread,system,log,serialization \
 	&& ./b2 -j4"; # compile boost faster with threads
 	@cp $(builddir)/boost_1_64_0/stage/lib/*.a $(PWD)/install/lib/
+ifeq ($(uname_os), Linux)
 	@cp -r $(builddir)/boost_1_64_0/boost/ $(PWD)/install/include/
+endif
+ifeq ($(uname_os), Darwin)
+	@cp -R $(builddir)/boost_1_64_0/boost/ $(PWD)/install/include/
+endif
 	@touch compile-boost
 
 # Support only in c++14
@@ -197,7 +202,12 @@ compile-libote:compile-boost
 	@mv $(PWD)/install/lib/liblibOTe.a $(PWD)/install/lib/libOTe.a
 	@mkdir -p $(PWD)/install/include/libOTe
 	@cd $(builddir)/libOTe/ && find . -name "*.h" -type f |xargs -I {} cp --parents {} $(PWD)/install/include/libOTe
+ifeq ($(uname_os), Linux)
 	@cp -r $(builddir)/libOTe/cryptoTools/cryptoTools/gsl $(PWD)/install/include/libOTe/cryptoTools/cryptoTools
+endif
+ifeq ($(uname_os), Darwin)
+	@cp -R $(builddir)/libOTe/cryptoTools/cryptoTools/gsl $(PWD)/install/include/libOTe/cryptoTools/cryptoTools
+endif
 	@cp $(builddir)/libOTe/cryptoTools/thirdparty/miracl/source/libmiracl.a $(PWD)/install/lib
 	@touch compile-libote
 
