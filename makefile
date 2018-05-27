@@ -1,7 +1,7 @@
 export builddir=$(abspath ./build)
 export prefix=$(abspath ./install)
 CXX=g++
-uname_os := $(shell sh -c 'uname -s 2>/dev/null || echo not')
+uname_os := $(shell uname)
 ARCH := $(shell getconf LONG_BIT)
 SHARED_LIB_EXT:=.so
 INCLUDE_ARCHIVES_START = -Wl,-whole-archive # linking options, we prefer our generated shared object will be self-contained.
