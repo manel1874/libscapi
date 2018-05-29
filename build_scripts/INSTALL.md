@@ -2,7 +2,7 @@
 
 ### Prerequisites
 
-#### Ubuntu 16.04 LTS
+#### Ubuntu LTS
 - sudo apt-get update
 - sudo apt-get install -y git
 - sudo apt-get install -y build-essential
