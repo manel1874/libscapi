@@ -119,14 +119,41 @@ int Measurement::getTaskIdx(string name)
 
 void Measurement::setCommInterface(string partiesFile)
 {
-    ConfigFile cf(partiesFile);
-    string ipPattern = "party_0_ip";
-    string ip = cf.Value("", ipPattern);
-
+    static const string ipPattern = "party_0_ip";
     //define addresses prefixes
-    string localPrefix = "127.0";
-    string awsPrefix = "172.0";
-    string serversPrefix = "10.0";
+    static const string localPrefix = "127.0";
+    static const string awsPrefix = "172.0";
+    static const string serversPrefix = "10.0";
+
+    std::string ip;
+    FILE * pf = fopen(partiesFile.c_str(), "r");
+    if(NULL != pf)
+    {
+        char buffer[64];
+        if(NULL != fgets(buffer, 64, pf))
+        {
+            char * sc = strstr(buffer, ":");
+            if(NULL != sc)
+            {
+                ip.assign(buffer, sc);
+            }
+            else if(0 == strncmp(buffer, ipPattern.c_str(), ipPattern.size()))
+            {
+                //old format
+                ip = buffer;
+                std::string::size_type x = ip.find('=');
+                if(std::string::npos != x)
+                {
+                    ip.erase(0, x + 1);
+                }
+            }
+            if(ip.empty())
+                cerr << "Unrecognized format" << endl;
+        }
+        fclose(pf);
+    }
+    else
+        cerr << "Unable to open file, exit" << endl;
 
     if(ip.find(localPrefix) != string::npos)
         m_interface = "lo";
