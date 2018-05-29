@@ -1,4 +1,4 @@
-#Installing libscapi
+# Installing libscapi
 
 ### Prerequisites
 
