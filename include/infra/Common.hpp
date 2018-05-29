@@ -135,10 +135,17 @@ void copy_byte_array_to_byte_vector(const byte* src, int src_len, vector<byte>& 
 */
 void encodeBigInteger(const biginteger & value, byte* output, size_t length);
 
+void fastEncodeBigInteger(const biginteger & value, byte* output, size_t length);
+
+
 /*
 * Decodoing big integer from byte array back to a biginteger object
 */
 biginteger decodeBigInteger(const byte* input, size_t length);
+
+biginteger fastDecodeBigInteger(const byte* input, size_t length);
+
+
 
 biginteger convert_hex_to_biginteger(const string & hex);
 
@@ -147,6 +154,8 @@ biginteger convert_hex_to_biginteger(const string & hex);
 */
 biginteger getRandomInRange(const biginteger & min, const biginteger & max, PrgFromOpenSSLAES* random);
 
+
+biginteger fastGetRandomInRange(const biginteger & max, PrgFromOpenSSLAES* random, int length);
 /*
 * Returns a random prime number with the given number of bytes.
 */

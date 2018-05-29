@@ -129,6 +129,15 @@ void encodeBigInteger(const biginteger & raw_value, byte* output, size_t length)
 	}
 }
 
+
+void fastEncodeBigInteger(const biginteger & value, byte* output, size_t length){
+
+
+	mpz_export((void*)output, NULL, -1, length, 0, 0, value.backend().data());
+
+
+}
+
 const vector<string> explode(const string& s, const char& c)
 {
 	string buff{ "" };
@@ -163,6 +172,16 @@ biginteger decodeBigInteger(const byte* input, size_t length)
 	auto res_value = result.convert_to<mp::mpz_int>();
 #endif
 	return res_value;
+}
+
+
+biginteger fastDecodeBigInteger(const byte* input, size_t length){
+
+	biginteger output;
+    mpz_import(output.backend().data(), 1, -1, length, 0, 0, (void*)input);
+
+    return output;
+
 }
 
 biginteger convert_hex_to_biginteger(const string & input) {
@@ -212,6 +231,16 @@ biginteger getRandomInRange(const biginteger & min, const biginteger & max, PrgF
 	biginteger num = abs(decodeBigInteger(out.data(), out.size()));
 	num = num % (max + 1 - min); // max + 1 because max also can be chosen.
 	return num + min;
+}
+
+biginteger fastGetRandomInRange(const biginteger & max, PrgFromOpenSSLAES* random, int length){
+
+    vector<byte> out(length + 5);
+    random->getPRGBytes(out, 0, length + 5);
+    biginteger num = fastDecodeBigInteger(out.data(), out.size());
+    num = num % max + 1; // max + 1 because max also can be chosen.
+    return num;
+
 }
 
 biginteger getRandomPrime(int numBytes, int certainty, PrgFromOpenSSLAES* random) {
