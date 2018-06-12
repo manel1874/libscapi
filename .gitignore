@@ -89,6 +89,9 @@ lib/OTExtensionBristol/SimpleOT/ot_receiver_test
 protocols/GMW/GMW
 protocols/GMW/GMW.cbp
 
+# macOS specific
+.DS_Store
+
 #other
 protocols/MaliciousYao/OfflineP1_*
 protocols/MaliciousYao/OfflineP2_*
@@ -97,8 +100,7 @@ protocols/MaliciousYao/OnlineP2_*
 protocols/GMW/NigelAes9Parties.txt
 protocols/GMW/AesInputs*.txt
 
-# macOS specific
-.DS_Store
+
 protocols/YaoSingleExecution/Makefile
 CMakeCache.txt
 CMakeFiles/
@@ -111,7 +113,3 @@ obj/
 protocols/GMW/CMakeFiles/
 *.json
 *.cbp
-
-comm_client/Makefile
-comm_client/comm_client_tcp_proxy/Makefile
-comm_client/comm_client_tcp_proxy/cct_proxy
