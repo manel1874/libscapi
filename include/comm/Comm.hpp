@@ -33,13 +33,19 @@
 #include <boost/bind.hpp>
 #include <mutex>
 #include <thread>
+#include <string>
+#include <iostream>
 #include <condition_variable>
-#include "Message.hpp"
-#include "../infra/Common.hpp"
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 namespace boost_ip = boost::asio::ip; // reduce the typing a bit later...
 using IpAddress = boost_ip::address;
 using tcp = boost_ip::tcp;
+using namespace std;
+
+typedef unsigned char byte;
 
 
 class TimeoutException : public logic_error
