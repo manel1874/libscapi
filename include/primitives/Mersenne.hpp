@@ -393,9 +393,8 @@ FieldType TemplateField<FieldType>::Random() {
     unsigned long b;
     if(elementSizeInBytes<=4)
         b = prg.getRandom32();
-    else{
+    else
         b = prg.getRandom64()>>(64-elementSizeInBits);
-    }
 
     return GetElement(b);
 }

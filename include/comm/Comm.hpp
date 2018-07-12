@@ -36,9 +36,6 @@
 #include <string>
 #include <iostream>
 #include <condition_variable>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
 
 namespace boost_ip = boost::asio::ip; // reduce the typing a bit later...
 using IpAddress = boost_ip::address;
