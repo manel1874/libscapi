@@ -91,7 +91,7 @@ set(SOURCE_FILES
         src/primitives/Mersenne.cpp
         include/primitives/Matrix.hpp
         src/infra/Measurement.cpp
-        src/cryptoInfra/Protocol.cpp)
+        src/cryptoInfra/Protocol.cpp src/mid_layer/OpenSSLMac.cpp include/mid_layer/OpenSSLMac.h)
 
 add_library(scapi ${SOURCE_FILES})
 

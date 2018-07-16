@@ -33,6 +33,7 @@ int mainOT(string side, string configPath);
 int mainYao(string partyNum, string configPath);
 int mainDlog();
 int mainSha1();
+int mainGmac();
 int mainSigma(string side, string configPath);
 int mainOTMalicious(string party);
 int mainOTSemiHonest(string party);

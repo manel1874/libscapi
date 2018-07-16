@@ -57,6 +57,8 @@ int main(int argc, char* argv[]) {
 		return mainDlog();
 	if (exampleName == "sha1")
 		return mainSha1();
+	if(exampleName=="gmac")
+		return mainGmac();
 	if (argc == 2)
 		return exampleUsage();
 #ifndef _WIN32
