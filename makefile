@@ -214,9 +214,9 @@ endif
 compile-ntl:
 	echo "Compiling the NTL library..."
 	mkdir -p $(builddir)/NTL
-	cp -r lib/NTL/unix/. $(builddir)/NTL
+	cp -r lib/NTL/. $(builddir)/NTL
 	chmod 777 $(builddir)/NTL/src/configure
-	cd $(builddir)/NTL/src/ && ./configure CXX=$(CXX) WIZARD=off
+	cd $(builddir)/NTL/src/ && ./configure CXX=$(CXX) 
 	$(MAKE) -C $(builddir)/NTL/src/
 	$(MAKE) -C $(builddir)/NTL/src/ PREFIX=$(prefix) install
 	touch compile-ntl
