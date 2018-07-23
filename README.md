@@ -10,10 +10,12 @@ Libscapi is developed by [Bar Ilan University Cryptography Research Group](http:
 
 ## Publications using libscapi
 - Fast Large-Scale Honest-Majority MPC for Malicious Adversaries [CGHIKLN18](https://eprint.iacr.org/2018/570)
-- A Framework for Constructing Fast MPC over Arithmetic Circuits with Malicious Adversaries and an Honest-Majority[LN17] (https://eprint.iacr.org/2017/816.pdf)
+- A Framework for Constructing Fast MPC over Arithmetic Circuits with Malicious Adversaries [LN17](https://eprint.iacr.org/2017/816.pdf)
+- Low Cost Constant Round MPC Combining BMR and Oblivious Transfer[HSSV17](https://eprint.iacr.org/2017/214.pdf)
+
 
 ## libscapi Modules
-- Primitives: Dlog, Cryptographic Hash Function, HMAC and KDF, Pseudorandom Functions and Permutations, Pseudo Random Generator, Trapdoor Permutation, Random Oracle (to be elaborated)
+- Primitives: Dlog, Cryptographic Hash Function, HMAC and KDF, Pseudorandom Functions and Permutations, Pseudo Random Generator, Trapdoor Permutation, Random Oracle etc.
 - Mid-layer protocols: Public Key Encryption Schemes: Cramer-Shoup, Damgard-Jurik, El-Gamal
 - Interactive Mid-layer protocols: Sigma Protocols, Zero Knowledge Proofs, Commitment Schemes
 - OT Extension : Wrappers for LibOTE and SimpleOT by OSU-Cypto and Bristol University  
