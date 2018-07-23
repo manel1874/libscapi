@@ -9,12 +9,12 @@ Libscapi is developed by [Bar Ilan University Cryptography Research Group](http:
 - High Performance implementation on standard Linux & Intelx64 Architecture. We use modern techniques like Intel Intrinsics  Instructions, Pipelining and TCP optimizations.  
 
 ## libscapi Modules
-- __Primitives__: Dlog, Cryptographic Hash Function, HMAC and KDF, Pseudorandom Functions and Permutations, Pseudo Random Generator, Trapdoor Permutation, Random Oracle (to be elaborated)
-- __Mid-layer protocols__: Currently includes Public Key Encryption Schemes: Cramer-Shoup, Damgard-Jurik, El-Gamal
-- __Interactive Mid-layer protocols__: Sigma Protocols, Zero Knowledge Proofs, Commitment Schemes (to be elaborated)
-- __OT Extension__ - Semi-Honest and Malicious 
-- __Circuits__: To be elaborated
-- __Communication Channel__: To be elaborated
+- Primitives: Dlog, Cryptographic Hash Function, HMAC and KDF, Pseudorandom Functions and Permutations, Pseudo Random Generator, Trapdoor Permutation, Random Oracle (to be elaborated)
+- Mid-layer protocols: Public Key Encryption Schemes: Cramer-Shoup, Damgard-Jurik, El-Gamal
+- Interactive Mid-layer protocols: Sigma Protocols, Zero Knowledge Proofs, Commitment Schemes
+- OT Extension : Wrappers for LibOTE and SimpleOT by OSU-Cypto and Bristol University  
+- Circuits: Some commonly used circuits for AES etc
+- Communication Channel: TCP Peer-To-Peer communication setup and channel methods 
 
 ## License information
 Libscapi is released under the MIT open source license. However, some of the libraries we use have different licenses. For further information pleare refer to [LICENSE.MD](build_scripts/LICENSE.MD)
