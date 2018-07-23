@@ -24,7 +24,13 @@ Libscapi is integrated with [MATRIX](https://github.com/cryptobiu/MATRIX) MPC Te
 - Circuits: Some commonly used circuits for AES etc
 - Communication Channel: TCP Peer-To-Peer communication setup and channel methods 
 
-## License information
+## Other Libscapi versions
+- [ScapiLite](https://github.com/cryptobiu/ScapiLite) is an experimental version used to develop MPC protocols on Android and Raspberry Pi. ScapiLite currently supports secret-sharing protocols only (As no OT has been ported)
+- [Scapi] We have discontinued support for the Java Scapi library
+
+If you have interest in any of these versions, please contact us
+
+## License
 Libscapi is released under the MIT open source license. However, some of the libraries we use have different licenses. For further information pleare refer to [LICENSE.MD](build_scripts/LICENSE.MD)
 
 ## Documentation
