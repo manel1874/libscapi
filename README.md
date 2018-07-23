@@ -39,6 +39,8 @@ For detailed instructions, see [INSTALL.md](build_scripts/INSTALL.md)
 ##### Cryptography Research at Oragon State University : LibOTE A fast, portable, and easy to use Oblivious Transfer Libary
 [https://github.com/osu-crypto/libOTe](https://github.com/osu-crypto/libOTe)
 
+This library provides several different classes of OT protocols. First is the base OT protocol of Naor Prinkas [NP00]. This protocol bootstraps all the other OT extension protocols. Within the OT extension protocols, we have 1-out-of-2, 1-out-of-N and ~K-out-of-N, both in the semi-honest and malicious settings. All implementations are highly optimized using fast SSE instructions and vectorization to obtain optimal performance both in the single and multi-threaded setting. See the Performance section for a comparison between protocols and to other libraries.Networking can be performed using both the sockets provided by the library and external socket classes. 
+
 ##### University of Bristol: Advanced Protocols for Real-world Implementation of Computational Oblivious Transfers
 [https://github.com/bristolcrypto/apricot](https://github.com/bristolcrypto/apricot)
 
