@@ -60,22 +60,10 @@ NTL is a high-performance, portable C++ library providing data structures and al
 
 Boost provides free peer-reviewed portable C++ source libraries. We emphasize libraries that work well with the C++ Standard Library. Boost libraries are intended to be widely useful, and usable across a broad spectrum of applications
 
-##### Cereal C++ Serialization Library
-[https://github.com/USCiLab/cereal](http://uscilab.github.io/cereal/)
-
-Cereal is a header-only C++11 serialization library. cereal takes arbitrary data types and reversibly turns them into different representations, such as compact binary encodings, XML, or JSON. cereal was designed to be fast, light-weight, and easy to extend - it has no external dependencies and can be easily bundled with other code or used standalone.
-
-##### JSON for modern C++
-[https://github.com/nlohmann/json](https://github.com/nlohmann/json)
-
-JSON for modern C++ is used to create our log files.
-
 ### Implementations by other Academic Institutes
 
-##### Engineering Cryptographic Protocols Group at TU Darmstadt OT Extension
-[https://github.com/encryptogroup/OTExtension](https://github.com/encryptogroup/OTExtension)
-
-Implementation of the passive secure OT extension protocol of [1] and the active secure OT extension protocols of [2] and [3]. Implements the general OT (G_OT), correlated OT (C_OT), global correlated OT (GC_OT), sender random OT (SR_OT), and receiver random OT (RR_OT) (Definitions of the functionalities will follow). Implements the base-OTs by Naor-Pinkas [4], Peikert-Vaikuntanathan-Waters [5], and Chou-Orlandi [6]. The code is based on the OT extension implementation of [7] and uses the MIRACL libary [8] for elliptic curve arithmetic. Update: Implemented 1-out-of-2 OT from the 1-out-of-N OT extension of [10].
+##### Cryptography Research at Oragon State University : LibOTE A fast, portable, and easy to use Oblivious Transfer Libary
+[https://github.com/osu-crypto/libOTe](https://github.com/osu-crypto/libOTe)
 
 ##### University of Bristol: Advanced Protocols for Real-world Implementation of Computational Oblivious Transfers
 [https://github.com/bristolcrypto/apricot](https://github.com/bristolcrypto/apricot)
