@@ -2,14 +2,11 @@
 
 libscapi is the Open source C++ library for implementing high performance secure two-party and multiparty computation protocols (SCAPI stands for the "Secure Computation API"). It provides a reliable, efficient, and highly flexible cryptographic infrastructure.
 
-The latest release can be found here. Alternately you can simply clone the repository to get the latest and greatest.
-
 Libscapi is developed by [Bar Ilan University Cryptography Research Group](http://crypto.biu.ac.il/). The goal of libscapi is to promote research by Academy and Industry practitioners in this field by providing:
 
 - A consistent API over Primitives, Mid-Layer Protocols, Interactive Mid-Layer Protocols and Communication Channels, simplifying the development and evaluation fo new protocols. We focus on keeping libscapi easy to build and use.
 - Integrating best performance open-source implementations by other Academy Research Institutes.  
-- High Performance implementation on standard Linux & Intelx64 Architecture. We use modern techniques like Intel Intrinsics Instructions, Pipelining and TCP optimizations. However, we avoid using techniques that are too advanced or not available on common platforms (such as Intel AVX-512 and DPDK, GPGPU exc).   
-- Provide a common platfrom for benchmarking different alogirthms and implementations
+- High Performance implementation on standard Linux & Intelx64 Architecture. We use modern techniques like Intel Intrinsics  Instructions, Pipelining and TCP optimizations.  
 
 ## libscapi Modules
 - __Primitives__: Dlog, Cryptographic Hash Function, HMAC and KDF, Pseudorandom Functions and Permutations, Pseudo Random Generator, Trapdoor Permutation, Random Oracle (to be elaborated)
@@ -37,6 +34,17 @@ For detailed instructions, see [INSTALL.md](build_scripts/INSTALL.md)
 
 ## Libraries used by libscapi
 
+### Implementations by other Academic Institutes
+
+##### Cryptography Research at Oragon State University : LibOTE A fast, portable, and easy to use Oblivious Transfer Libary
+[https://github.com/osu-crypto/libOTe](https://github.com/osu-crypto/libOTe)
+
+##### University of Bristol: Advanced Protocols for Real-world Implementation of Computational Oblivious Transfers
+[https://github.com/bristolcrypto/apricot](https://github.com/bristolcrypto/apricot)
+
+##### Tung Chou and Claudio Orlandi: The Simplest Oblivious Transfer Protocol
+[http://users-cs.au.dk/orlandi/simpleOT/](http://users-cs.au.dk/orlandi/simpleOT/)
+
 ### Math and General Purpose Libraries
 
 ##### OpenSSL
@@ -60,13 +68,3 @@ NTL is a high-performance, portable C++ library providing data structures and al
 
 Boost provides free peer-reviewed portable C++ source libraries. We emphasize libraries that work well with the C++ Standard Library. Boost libraries are intended to be widely useful, and usable across a broad spectrum of applications
 
-### Implementations by other Academic Institutes
-
-##### Cryptography Research at Oragon State University : LibOTE A fast, portable, and easy to use Oblivious Transfer Libary
-[https://github.com/osu-crypto/libOTe](https://github.com/osu-crypto/libOTe)
-
-##### University of Bristol: Advanced Protocols for Real-world Implementation of Computational Oblivious Transfers
-[https://github.com/bristolcrypto/apricot](https://github.com/bristolcrypto/apricot)
-
-##### Tung Chou and Claudio Orlandi: The Simplest Oblivious Transfer Protocol
-[http://users-cs.au.dk/orlandi/simpleOT/](http://users-cs.au.dk/orlandi/simpleOT/)
