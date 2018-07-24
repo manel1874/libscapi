@@ -33,7 +33,7 @@ Libscapi is integrated with [MATRIX](https://github.com/cryptobiu/MATRIX) MPC Te
 - We have discontinued support for the Java Scapi library due to performance and portability issues. We would be happy to support anyone interested in developing new Java or Go bindings.
 
 ## License
-Libscapi is released under the MIT open source license. However, some of the libraries we use have different licenses. For further information pleare refer to [LICENSE.md](LICENSE.md)
+Libscapi is released under the MIT open source license. However, some of the libraries we use have different licenses. For further information pleare refer to [LICENSE.md](https://github.com/cryptobiu/libscapi/blob/master/LICENSE.md)
 
 ## Documentation
 
