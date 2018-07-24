@@ -12,7 +12,7 @@ Libscapi is developed by [Bar Ilan University Cryptography Research Group](http:
 - Generalizing the SPDZ Compiler For Other Protocols. Accepted ACM-CCS 18 [ABFKLOT18]()  
 - An End-to-ent System for Large Scale P2P MPC as-a-Service and Low-Bandwidth MPC for Weak Prtipipants. Includes HyperMPC protocol
   Accepted ACM-CCS 18 [BHKL18]()  
-- Efficient MPC from Syndrome Decoding(or:Honey, I Shrunk the Keys)[HOSSV18](https://eprint.iacr.org/2018/208)  
+- Efficient MPC from Syndrome Decoding (or:Honey, I Shrunk the Keys) [HOSSV18](https://eprint.iacr.org/2018/208)  
 - Fast Large-Scale Honest-Majority MPC for Malicious Adversaries [CGHIKLN18](https://eprint.iacr.org/2018/570)
 - A Framework for Constructing Fast MPC over Arithmetic Circuits with Malicious Adversaries [LN17](https://eprint.iacr.org/2017/816.pdf)
 - Low Cost Constant Round MPC Combining BMR and Oblivious Transfer [HSSV17](https://eprint.iacr.org/2017/214.pdf)
@@ -29,8 +29,8 @@ Libscapi is integrated with [MATRIX](https://github.com/cryptobiu/MATRIX) MPC Te
 - Communication Channel: TCP Peer-To-Peer communication setup and channel methods 
 
 ## Other Libscapi versions
-- [ScapiLite](https://github.com/cryptobiu/ScapiLite) is an experimental version used to develop MPC protocols on Android and Raspberry Pi. ScapiLite currently supports secret-sharing protocols only (As no OT has been ported)
-- [Scapi] We have discontinued support for the Java Scapi library
+- [ScapiLite](https://github.com/cryptobiu/ScapiLite) is an experimental version used to develop MPC protocols on Android and Raspberry Pi. It has also been ported to Javascript using emscripten. ScapiLite currently supports secret-sharing protocols only (As no OT has been ported)
+- We have discontinued support for the Java Scapi library due to performance and portability issues. We would be happy to support anyone interested in developing new Java or Go bindings.
 
 If you have interest in any of these versions, please contact us
 
