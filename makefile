@@ -36,7 +36,7 @@ ifeq ($(uname_os), Darwin)
 endif
 
 GCC_STANDARD = c++14
-CPP_OPTIONS   := -g -std=$(GCC_STANDARD) $(INC)  -maes -mpclmul -mbmi2 -Wall -Wno-uninitialized -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable -Wno-unused-result -Wno-sign-compare -Wno-parentheses -O3
+CPP_OPTIONS   := -g -std=$(GCC_STANDARD) $(INC)  -maes -mpclmul -mbmi2 -Wall -Wno-uninitialized -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable -Wno-unused-result -Wno-sign-compare -Wno-parentheses -O3 -fPIC
 $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
 
 LD_FLAGS = 
@@ -182,7 +182,7 @@ compile-boost:
 	echo "Compiling the boost library"
 	@cp -r lib/boost_1_64_0/ $(builddir)/boost_1_64_0
 	@cd $(builddir)/boost_1_64_0/; bash -c "BOOST_BUILD_PATH='./' ./bootstrap.sh --with-libraries=thread,system,log,serialization \
-	&& ./b2 -j4"; # compile boost faster with threads
+	&& ./b2 cxxflags=-fPIC -j4"; # compile boost faster with threads
 	@cp $(builddir)/boost_1_64_0/stage/lib/*.a $(PWD)/install/lib/
 ifeq ($(uname_os), Linux)
 	@cp -r $(builddir)/boost_1_64_0/boost $(PWD)/install/include/
