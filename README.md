@@ -9,6 +9,9 @@ Libscapi is developed by [Bar Ilan University Cryptography Research Group](http:
 - High Performance implementation on standard Linux & Intelx64 Architecture. We use modern techniques like Intel Intrinsics  Instructions, Pipelining and TCP optimizations.  
 
 ## Publications using libscapi
+- Generalizing the SPDZ Compiler For Other Protocols. Accepted ACM-CCS 18 [ABFKLOT18]()  
+- An End-to-ent System for Large Scale P2P MPC as-a-Service and Low-Bandwidth MPC for Weak Prtipipants. Includes HyperMPC protocol
+  Accepted ACM-CCS 18 [BHKL18]()  
 - Fast Large-Scale Honest-Majority MPC for Malicious Adversaries [CGHIKLN18](https://eprint.iacr.org/2018/570)
 - A Framework for Constructing Fast MPC over Arithmetic Circuits with Malicious Adversaries [LN17](https://eprint.iacr.org/2017/816.pdf)
 - Low Cost Constant Round MPC Combining BMR and Oblivious Transfer [HSSV17](https://eprint.iacr.org/2017/214.pdf)
