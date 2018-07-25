@@ -1,26 +1,39 @@
 # LIBSCAPI - The Secure Computation API
 
+## Introduction
 libscapi is the Open source C++ library for implementing high performance secure two-party and multiparty computation protocols (SCAPI stands for the "Secure Computation API"). It provides a reliable, efficient, and highly flexible cryptographic infrastructure.
 
-The latest release can be found here. Alternately you can simply clone the repository to get the latest and greatest.
-
 Libscapi is developed by [Bar Ilan University Cryptography Research Group](http://crypto.biu.ac.il/). The goal of libscapi is to promote research by Academy and Industry practitioners in this field by providing:
-
 - A consistent API over Primitives, Mid-Layer Protocols, Interactive Mid-Layer Protocols and Communication Channels, simplifying the development and evaluation fo new protocols. We focus on keeping libscapi easy to build and use.
 - Integrating best performance open-source implementations by other Academy Research Institutes.  
-- High Performance implementation on standard Linux & Intelx64 Architecture. We use modern techniques like Intel Intrinsics Instructions, Pipelining and TCP optimizations. However, we avoid using techniques that are too advanced or not available on common platforms (such as Intel AVX-512 and DPDK, GPGPU exc).   
-- Provide a common platfrom for benchmarking different alogirthms and implementations
+- High Performance implementation on standard Linux & Intelx64 Architecture. We use modern techniques like Intel Intrinsics  Instructions, Pipelining and TCP optimizations.  
+
+## Publications using libscapi
+- Generalizing the SPDZ Compiler For Other Protocols. Accepted ACM-CCS 18 [ABFKLOT18]()  
+- An End-to-ent System for Large Scale P2P MPC as-a-Service and Low-Bandwidth MPC for Weak Prtipipants. Includes HyperMPC protocol
+  Accepted ACM-CCS 18 [BHKL18]()  
+- TinyKeys: A New Approach to Efficient Multi-Party Computation [HOSSV18](https://eprint.iacr.org/2018/208)  
+- Fast Large-Scale Honest-Majority MPC for Malicious Adversaries [CGHIKLN18](https://eprint.iacr.org/2018/570)
+- A Framework for Constructing Fast MPC over Arithmetic Circuits with Malicious Adversaries [LN17](https://eprint.iacr.org/2017/816.pdf)
+- Low Cost Constant Round MPC Combining BMR and Oblivious Transfer [HSSV17](https://eprint.iacr.org/2017/214.pdf)
+
+## Benchmarking and Automation
+Libscapi is integrated with [MATRIX](https://github.com/cryptobiu/MATRIX) MPC Test Automation Framework. We use MATRIX to benchmark   protocols on AWS cloud, including cross region experiments with up to 500 parties. MATRIX can easily run protocols that do not itegrate libscapi as well, including for example the SPDZ-2 protocol implemtation by Btistol University.  
 
 ## libscapi Modules
-- __Primitives__: Dlog, Cryptographic Hash Function, HMAC and KDF, Pseudorandom Functions and Permutations, Pseudo Random Generator, Trapdoor Permutation, Random Oracle (to be elaborated)
-- __Mid-layer protocols__: Currently includes Public Key Encryption Schemes: Cramer-Shoup, Damgard-Jurik, El-Gamal
-- __Interactive Mid-layer protocols__: Sigma Protocols, Zero Knowledge Proofs, Commitment Schemes (to be elaborated)
-- __OT Extension__ - Semi-Honest and Malicious 
-- __Circuits__: To be elaborated
-- __Communication Channel__: To be elaborated
+- Primitives: Dlog, Cryptographic Hash Function, HMAC and KDF, Pseudorandom Functions and Permutations, Pseudo Random Generator, Trapdoor Permutation, Random Oracle etc.
+- Mid-layer protocols: Public Key Encryption Schemes: Cramer-Shoup, Damgard-Jurik, El-Gamal
+- Interactive Mid-layer protocols: Sigma Protocols, Zero Knowledge Proofs, Commitment Schemes
+- OT Extension : Wrappers for LibOTE and SimpleOT by OSU-Cypto and Bristol University  
+- Circuits: Some commonly used circuits for AES etc
+- Communication Channel: TCP Peer-To-Peer communication setup and channel methods 
 
-## License information
-Libscapi is released under the MIT open source license. However, some of the libraries we use have different licenses. For further information pleare refer to [LICENSE.MD](build_scripts/LICENSE.MD)
+## Other Libscapi versions
+- [ScapiLite](https://github.com/cryptobiu/ScapiLite) is an experimental version used to develop MPC protocols on Android and Raspberry Pi. It has also been ported to Javascript using emscripten. ScapiLite currently supports secret-sharing protocols only (As no OT has been ported)
+- We have discontinued support for the Java Scapi library due to performance and portability issues. We would be happy to support anyone interested in developing new Java or Go bindings.
+
+## License
+Libscapi is released under the MIT open source license. However, some of the libraries we use have different licenses. For further information pleare refer to [LICENSE.md](https://github.com/cryptobiu/libscapi/blob/master/LICENSE.md)
 
 ## Documentation
 
@@ -28,14 +41,26 @@ Go to http://biulibscapi.readthedocs.org/ for a detailed explanations of our imp
 
 ## Installing libscapi
 
-Libscapi supports this OSs (with C++11/C++14):
+Libscapi runs on Linux and MacOS anh has been tested on the following version:
 - Ubuntu 14.04/16.04/18.04 LTS
 - CentOS 7.3
-- Mac OSx High Sierra 10.13  
-
+- Mac OS High Sierra 10.13  
 For detailed instructions, see [INSTALL.md](build_scripts/INSTALL.md)
 
 ## Libraries used by libscapi
+
+### Implementations by other Academic Institutes
+
+##### Cryptography Research at Oragon State University : LibOTE A fast, portable, and easy to use Oblivious Transfer Libary
+[https://github.com/osu-crypto/libOTe](https://github.com/osu-crypto/libOTe)
+
+This library provides several different classes of OT protocols. First is the base OT protocol of Naor Prinkas [NP00]. This protocol bootstraps all the other OT extension protocols. Within the OT extension protocols, we have 1-out-of-2, 1-out-of-N and ~K-out-of-N, both in the semi-honest and malicious settings. All implementations are highly optimized using fast SSE instructions and vectorization to obtain optimal performance both in the single and multi-threaded setting. See the Performance section for a comparison between protocols and to other libraries.Networking can be performed using both the sockets provided by the library and external socket classes. 
+
+##### University of Bristol: Advanced Protocols for Real-world Implementation of Computational Oblivious Transfers
+[https://github.com/bristolcrypto/apricot](https://github.com/bristolcrypto/apricot)
+
+##### Tung Chou and Claudio Orlandi: The Simplest Oblivious Transfer Protocol
+[http://users-cs.au.dk/orlandi/simpleOT/](http://users-cs.au.dk/orlandi/simpleOT/)
 
 ### Math and General Purpose Libraries
 
@@ -60,25 +85,3 @@ NTL is a high-performance, portable C++ library providing data structures and al
 
 Boost provides free peer-reviewed portable C++ source libraries. We emphasize libraries that work well with the C++ Standard Library. Boost libraries are intended to be widely useful, and usable across a broad spectrum of applications
 
-##### Cereal C++ Serialization Library
-[https://github.com/USCiLab/cereal](http://uscilab.github.io/cereal/)
-
-Cereal is a header-only C++11 serialization library. cereal takes arbitrary data types and reversibly turns them into different representations, such as compact binary encodings, XML, or JSON. cereal was designed to be fast, light-weight, and easy to extend - it has no external dependencies and can be easily bundled with other code or used standalone.
-
-##### JSON for modern C++
-[https://github.com/nlohmann/json](https://github.com/nlohmann/json)
-
-JSON for modern C++ is used to create our log files.
-
-### Implementations by other Academic Institutes
-
-##### Engineering Cryptographic Protocols Group at TU Darmstadt OT Extension
-[https://github.com/encryptogroup/OTExtension](https://github.com/encryptogroup/OTExtension)
-
-Implementation of the passive secure OT extension protocol of [1] and the active secure OT extension protocols of [2] and [3]. Implements the general OT (G_OT), correlated OT (C_OT), global correlated OT (GC_OT), sender random OT (SR_OT), and receiver random OT (RR_OT) (Definitions of the functionalities will follow). Implements the base-OTs by Naor-Pinkas [4], Peikert-Vaikuntanathan-Waters [5], and Chou-Orlandi [6]. The code is based on the OT extension implementation of [7] and uses the MIRACL libary [8] for elliptic curve arithmetic. Update: Implemented 1-out-of-2 OT from the 1-out-of-N OT extension of [10].
-
-##### University of Bristol: Advanced Protocols for Real-world Implementation of Computational Oblivious Transfers
-[https://github.com/bristolcrypto/apricot](https://github.com/bristolcrypto/apricot)
-
-##### Tung Chou and Claudio Orlandi: The Simplest Oblivious Transfer Protocol
-[http://users-cs.au.dk/orlandi/simpleOT/](http://users-cs.au.dk/orlandi/simpleOT/)
