@@ -265,10 +265,10 @@ public:
 
 
         unsigned long low61 = (low & p);
-        unsigned long low61to64 = (low>>61);
+        unsigned long low62to64 = (low>>61);
         unsigned long highShift3 = (high<<3);
 
-        unsigned long res = low61 + low61to64 + highShift3;
+        unsigned long res = low61 + low62to64 + highShift3;
 
         if(res >= p)
             res-= p;
