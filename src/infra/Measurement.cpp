@@ -96,15 +96,15 @@ void Measurement::init(vector <string> names)
 {
     m_cpuStartTimes = new vector<vector<long>>(names.size(), vector<long>(m_numberOfIterations));
     m_commSentStartTimes = new vector<vector<unsigned long int>>(names.size(),
-            vector<unsigned long int>(m_numberOfIterations));
+            vector<unsigned long int>(m_numberOfIterations, 0));
     m_commReceivedStartTimes = new vector<vector<unsigned long int>>(names.size(),
-            vector<unsigned long int>(m_numberOfIterations));
-    m_memoryUsage = new vector<vector<long>>(names.size(), vector<long>(m_numberOfIterations));
-    m_cpuEndTimes = new vector<vector<long>>(names.size(), vector<long>(m_numberOfIterations));
+            vector<unsigned long int>(m_numberOfIterations, 0));
+    m_memoryUsage = new vector<vector<long>>(names.size(), vector<long>(m_numberOfIterations, 0));
+    m_cpuEndTimes = new vector<vector<long>>(names.size(), vector<long>(m_numberOfIterations, 0));
     m_commSentEndTimes = new vector<vector<unsigned long int>>(names.size(),
-            vector<unsigned long int>(m_numberOfIterations));
+            vector<unsigned long int>(m_numberOfIterations, 0));
     m_commReceivedEndTimes = new vector<vector<unsigned long int>>(names.size(),
-            vector<unsigned long int>(m_numberOfIterations));
+            vector<unsigned long int>(m_numberOfIterations, 0));
     m_names = move(names);
 }
 
