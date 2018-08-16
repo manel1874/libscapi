@@ -20,6 +20,9 @@ Libscapi is developed by [Bar Ilan University Cryptography Research Group](http:
 ## Benchmarking and Automation
 Libscapi is integrated with [MATRIX](https://github.com/cryptobiu/MATRIX) MPC Test Automation Framework. We use MATRIX to benchmark   protocols on AWS cloud, including cross region experiments with up to 500 parties. MATRIX can easily run protocols that do not itegrate libscapi as well, including for example the SPDZ-2 protocol implemtation by Btistol University.  
 
+## Protocol implementations 
+The [MPC-Benchmark](https://github.com/cryptobiu/MPC-Benchmark) repository includes protocols implemented using libscapi, and integrated with the MATRIX benchmarking and automation platform. This includes implementations of the protocols listed above.
+
 ## libscapi Modules
 - Primitives: Dlog, Cryptographic Hash Function, HMAC and KDF, Pseudorandom Functions and Permutations, Pseudo Random Generator, Trapdoor Permutation, Random Oracle etc.
 - Mid-layer protocols: Public Key Encryption Schemes: Cramer-Shoup, Damgard-Jurik, El-Gamal
