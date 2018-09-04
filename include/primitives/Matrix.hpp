@@ -303,7 +303,7 @@ void VDM<FieldType>::InitVDM() {
 
     for (int i = 0; i < m_n; i++) {
         m_matrix[i][0] = *(field->GetOne());
-        for (int k = 1; k < m_n; k++) {
+        for (int k = 1; k < m_m; k++) {
             m_matrix[i][k] = m_matrix[i][k - 1] * (alpha[i]);
         }
     }
@@ -315,9 +315,9 @@ void VDM<FieldType>::InitVDM() {
 template<typename FieldType>
 void VDM<FieldType>::Print()
 {
-    for (int i = 0; i < m_m; i++)
+    for (int i = 0; i < m_n; i++)
     {
-        for(int j = 0; j < m_n; j++)
+        for(int j = 0; j < m_m; j++)
         {
             cout << (m_matrix[i][j]) << " ";
 
@@ -330,7 +330,7 @@ void VDM<FieldType>::Print()
 template<typename FieldType>
 void VDM<FieldType>::MatrixMult(std::vector<FieldType> &vector, std::vector<FieldType> &answer, int length)
 {
-    for(int i = 0; i < m_m; i++)
+    for(int i = 0; i < m_n; i++)
     {
         // answer[i] = 0
         answer[i] = *(field->GetZero());
@@ -435,7 +435,7 @@ void VDMTranspose<FieldType>::MatrixMult(std::vector<FieldType> &vector, std::ve
         // answer[i] = 0
         answer[i] = *(field->GetZero());
 
-        for(int j=0; j < m_n; j++)
+        for(int j=0; j < m_m; j++)
         {
             answer[i] += (m_matrix[i][j] * vector[j]);
         }

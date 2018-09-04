@@ -48,8 +48,10 @@
 #include "../include/mid_layer/CramerShoupEnc.hpp"
 #include "../include/mid_layer/DamgardJurikEnc.hpp"
 #include "../include/interactive_mid_protocols/SigmaProtocol.hpp"
+#include "../include/primitives/Mersenne.hpp"
 #include <ctype.h>
 #include <smmintrin.h>
+
 
 biginteger endcode_decode(biginteger bi) {
 	auto s = bi.str();
@@ -413,6 +415,83 @@ TEST_CASE("DlogGroup", "[Dlog, DlogGroup, CryptoPpDlogZpSafePrime]")
 		test_exponentiate(dg);
 		test_exponentiate_with_pre_computed_values(dg);
 	}
+}
+
+
+template <class FieldType>
+void  test_field(FieldType elem1){
+
+    //test templateField
+
+    TemplateField<FieldType> field(0);
+
+    //get a random element
+    auto random = field.Random();
+
+
+    //check element to bytes and vice versa
+    byte * outBuytes = new byte[field.getElementSizeInBytes()];
+    field.elementToBytes(outBuytes, random);
+    auto fromBytes = field.bytesToElement(outBuytes);
+
+    REQUIRE(fromBytes==random);
+
+
+    //check multiplication
+    FieldType two(2);
+    FieldType one(1);
+
+    FieldType  pminus1(FieldType::p - 1);
+    //test mult and add
+    FieldType twicePMinus1 = pminus1 * two;
+
+    REQUIRE(!(twicePMinus1!=pminus1 - one ));
+
+    //test division
+    elem1 = elem1 - two;
+
+    auto temp = elem1*pminus1;
+    temp = temp/elem1;
+
+    REQUIRE(temp==pminus1);
+
+
+
+
+
+
+}
+
+TEST_CASE("field operations", "[ZpMersenneIntElement, ZpMersenneLongElement, ZpMersenne127Element]") {
+
+	SECTION("testing ZpMersenneIntElement") {
+
+        ZpMersenneIntElement elem1;
+
+
+        test_field(elem1);
+
+	}
+
+	SECTION("testing ZpMersenneLongElement") {
+
+        ZpMersenneLongElement elem1;
+
+
+        test_field(elem1);
+
+	}
+
+	SECTION("testing ZpMersenne127Element") {
+
+        ZpMersenne127Element elem1;
+
+
+        test_field(elem1);
+
+	}
+
+
 }
 
 void test_hash(CryptographicHash * hash, string in, string expect)
