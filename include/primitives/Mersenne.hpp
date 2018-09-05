@@ -341,6 +341,10 @@ public:
     ZpMersenne127Element(__uint128_t e)
     {
         this->elem = e;
+        if(this->elem>=p){
+           
+            this->elem-= p;
+        }
     }
 
     inline ZpMersenne127Element& operator=(const ZpMersenne127Element& other){
@@ -380,14 +384,16 @@ public:
     ZpMersenne127Element operator/(const ZpMersenne127Element& f2)
     {
         mp_limb_t* me = (mp_limb_t *) &elem;
-        mp_limb_t* elem = (mp_limb_t *) &(f2.elem); //keep same naming convention as other ZpMersenne classes
+
+        auto f2Eleme = f2.elem;
+        mp_limb_t* elemOff2 = (mp_limb_t *) &(f2Eleme); //keep same naming convention as other ZpMersenne classes
         mp_limb_t *d = (mp_limb_t *) &p; //d is actually p
         mp_limb_t result_1[2]; //result is used a few times. we do not allow override in low-level, so more vars.
         mp_limb_t result_2[4]; //result of mult is 256 bits (limb is 64 bit)
         __uint128_t res;
 
         mp_limb_t tp[16]; //scratch space for invert
-        mpn_sec_invert (result_1, elem, d, 2, 256, tp);
+        mpn_sec_invert (result_1, elemOff2, d, 2, 256, tp);
         mpn_mul (result_2, result_1, 2,me, 2);
 
         mp_limb_t q[4];
