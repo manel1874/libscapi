@@ -342,7 +342,7 @@ public:
     {
         this->elem = e;
         if(this->elem>=p){
-           
+
             this->elem-= p;
         }
     }
