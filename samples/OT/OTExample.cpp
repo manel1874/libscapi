@@ -11,7 +11,7 @@ OTParams readOTConfig(string config_file) {
 	string protocolName = cf.Value("", "protocolName");
 	OTParams params(senderIp, receiverIp, senderPort, receiverPort, protocolName);
 
-	if (protocolName.find("UC") != -1){
+	if (protocolName.find("UC") != string::npos){
         auto dlog = make_shared<OpenSSLDlogECF2m>();
         vector<biginteger> point(2);
         point[0] = biginteger("4373527398576640063579304354969275615843559206632");

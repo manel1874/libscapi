@@ -58,5 +58,5 @@ int mainGmac()
 
     cout<<"output of verification is "<< ver<<endl;
 
-
+    return 0;
 }
