@@ -22,6 +22,7 @@
 - brew install nasm
 
 ### Build libscapi
+- from the user home directory, for example /home/ab/ (this is a limitation in the current version, will be fixed shortly)
 - git clone https://github.com/cryptobiu/libscapi.git
 - cd libscapi
 - make
