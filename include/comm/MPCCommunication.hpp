@@ -5,8 +5,8 @@
 #ifndef MPCCOMMUNICATION_H
 #define MPCCOMMUNICATION_H
 
-#include "../../include/interactive_mid_protocols/OTBatch.hpp"
-#include "../../include/interactive_mid_protocols/OTExtensionBristol.hpp"
+#include "Comm.hpp"
+#include "../infra/ConfigFile.hpp"
 
 class ProtocolPartyData {
 private:
