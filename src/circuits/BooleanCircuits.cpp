@@ -89,8 +89,9 @@ int Gate::calculateIndexOfTruthTable(map<int, Wire> computedWires) const {
 	*/
 	int truthTableIndex = 0;
 	int numberOfInputs = inputWireIndices.size();
-	for (int i = numberOfInputs - 1, j = 0; j < numberOfInputs; i--, j++) 
+	for (int i = numberOfInputs - 1, j = 0; j < numberOfInputs; i--, j++)
 		truthTableIndex += (int) computedWires[inputWireIndices[i]].getValue() * pow(2, j);
+
 	return truthTableIndex;
 }
 
@@ -195,7 +196,20 @@ BooleanCircuit::BooleanCircuit(scannerpp::Scanner s) {
 void BooleanCircuit::setInputs(const map<int, Wire> & presetInputWires, int partyNumber) {
 	if (partyNumber < 1 || partyNumber > numberOfParties)
 		throw NoSuchPartyException("wrong number of party. got: " + to_string(partyNumber));
-	computedWires.insert(presetInputWires.begin(), presetInputWires.end());
+
+	if (!isInputSet[partyNumber - 1]) {
+		computedWires.insert(presetInputWires.begin(), presetInputWires.end());
+	} else {
+
+		int numberOfInputWires = getNumberOfInputs(partyNumber);
+		auto inputIndices = getInputWireIndices(partyNumber);
+
+		for (int i = 0; i < numberOfInputWires; i++) {
+			computedWires[inputIndices[i]] = presetInputWires.at(inputIndices[i]).getValue();
+		}
+
+	}
+
 	isInputSet[partyNumber - 1] = true;
 }
 
