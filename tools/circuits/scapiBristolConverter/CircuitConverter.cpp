@@ -2,7 +2,7 @@
 // Created by moriya on 19/02/17.
 //
 
-#include "../../include/infra/CircuitConverter.hpp"
+#include "CircuitConverter.hpp"
 #include <vector>
 
  void CircuitConverter::convertBristolToScapi(string bristolFileName, string scapiFileName, int numParties, bool isMultiParty){
@@ -31,9 +31,10 @@
         for (int i=0; i<numParties; i++){
             bristolfile >> numInputsPerParty[i];
             scapiFile << i+1 << " "<< numInputsPerParty[i] << endl;
-            for(int j = 0; j<numInputsPerParty[i]; j++, index++){
+            for(int j = 0; j<numInputsPerParty[i]; j++){
                 scapiFile << index + j << endl;
             }
+            index += numInputsPerParty[i];
         }
 
         //get the number of outputs

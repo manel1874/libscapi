@@ -36,7 +36,7 @@ set(SOURCE_FILES
         src/circuits/ArithmeticCircuit.cpp
         src/comm/Comm.cpp
         src/comm/MPCCommunication.cpp
-        src/infra/CircuitConverter.cpp
+        tools/circuits/scapiBristolConverter/CircuitConverter.cpp
         src/infra/Common.cpp
         src/infra/ConfigFile.cpp
         src/infra/MathAlgorithms.cpp
