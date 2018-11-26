@@ -10,7 +10,7 @@ Libscapi is developed by [Bar Ilan University Cryptography Research Group](http:
 
 ## Publications using libscapi
 - Generalizing the SPDZ Compiler For Other Protocols. Accepted ACM-CCS 18 [ABFKLOT18]()  
-- An End-to-ent System for Large Scale P2P MPC as-a-Service and Low-Bandwidth MPC for Weak Prtipipants. Includes HyperMPC protocol
+- An End-to-ent System for Large Scale P2P MPC as-a-Service and Low-Bandwidth MPC for Weak Participants. Includes HyperMPC protocol
   Accepted ACM-CCS 18 [BHKL18]()  
 - TinyKeys: A New Approach to Efficient Multi-Party Computation [HOSSV18](https://eprint.iacr.org/2018/208)  
 - Fast Large-Scale Honest-Majority MPC for Malicious Adversaries [CGHIKLN18](https://eprint.iacr.org/2018/570)
