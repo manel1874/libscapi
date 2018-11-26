@@ -92,7 +92,6 @@ MPCProtocol::MPCProtocol(string protocolName, int argc, char* argv[]): Protocol 
         numPartiesForEachThread = (numParties + numThreads - 1)/ numThreads;
     }
 
-    initTimes();
 
 }
 
@@ -109,10 +108,9 @@ void MPCProtocol::initTimes(){
 }
 
 void MPCProtocol::run(){
-    auto start = std::chrono::system_clock::now();
 
     for (currentIteration = 0; currentIteration<times; currentIteration++){
-
+        initTimes();
         timer->startSubTask("Offline", currentIteration);
         runOffline();
         timer->endSubTask("Offline", currentIteration);
@@ -123,10 +121,6 @@ void MPCProtocol::run(){
 
     }
 
-    auto end = std::chrono::system_clock::now();
-    int elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    cout << "Running " << times <<" iterations took: " << elapsed_ms << " milliseconds" << endl
-         << "Average time per iteration: " << elapsed_ms / (float)times << " milliseconds" << endl;
 
 }
 
