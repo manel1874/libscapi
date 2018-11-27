@@ -1,6 +1,6 @@
 # LIBSCAPI - The Secure Computation API
 
-[![Build Status](http://18.235.113.60:8080/job/Libscapi-dev/badge/icon)](http://54.165.113.247:8080/job/Libscapi-dev/)
+[![Build Status](http://18.235.113.60:8080/job/Libscapi-dev/badge/icon)](http://18.235.113.60:8080/job/Libscapi-dev/)
 
 ## Introduction
 libscapi is the Open source C++ library for implementing high performance secure two-party and multiparty computation protocols (SCAPI stands for the "Secure Computation API"). It provides a reliable, efficient, and highly flexible cryptographic infrastructure.
