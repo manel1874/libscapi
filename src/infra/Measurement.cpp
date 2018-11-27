@@ -65,6 +65,21 @@ void Measurement::setTaskNames(vector<string> & names)
     init(names);
 }
 
+void Measurement::addTaskNames(vector<string> & names)
+{
+    names.insert(names.end(), m_names.begin(), m_names.end());
+
+    delete m_cpuStartTimes;
+    delete m_commSentStartTimes;
+    delete m_commReceivedStartTimes;
+    delete m_memoryUsage;
+    delete m_cpuEndTimes;
+    delete m_commSentEndTimes;
+    delete m_commReceivedEndTimes;
+
+    init(names);
+}
+
 void Measurement::init(Protocol &protocol)
 {
     m_arguments = protocol.getArguments();

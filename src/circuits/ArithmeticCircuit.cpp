@@ -93,6 +93,7 @@ void ArithmeticCircuit::readCircuit(const char* fileName)
             for (int j = 0; j < numOfInputsForEachParty[i];j++) {
 
                 gates[gateIndex].gateType = 0;
+                gates[gateIndex].inputsNum = 0;//irrelevant
                 gates[gateIndex].input1 = -1;//irrelevant
                 gates[gateIndex].input2 = -1;//irrelevant
                 gates[gateIndex].output = partiesInputs[i][j];//the wire index
@@ -112,11 +113,21 @@ void ArithmeticCircuit::readCircuit(const char* fileName)
             myfile >> outFan;
             myfile >> input1;
             myfile >> input2;
+
+            gates[i].inputsNum = inFan;
+            gates[i].inputIndices.resize(inFan);
+            gates[i].input1 = gates[i].inputIndices[0] = input1;
+            gates[i].input2 = gates[i].inputIndices[1] = input2;
+
+            if (inFan > 2){
+                for (int j=2; j<inFan; j++){
+                    myfile >> gates[i].inputIndices[j];
+                }
+            }
+
             myfile >> output;
             myfile >> type;
 
-            gates[i].input1 = input1;
-            gates[i].input2 = input2;
             gates[i].output = output;
             gates[i].gateType = type;
             gates[i].party = -1;//irrelevant
@@ -140,6 +151,10 @@ void ArithmeticCircuit::readCircuit(const char* fileName)
                 nrOfScalarMultGates++;
             }
 
+            else if(type==8){
+                nrOfSumProductsGates++;
+            }
+
         }
 
         gateIndex = numberOfGates + nrOfInputGates;
@@ -149,6 +164,7 @@ void ArithmeticCircuit::readCircuit(const char* fileName)
             for (int j = 0; j < numOfOutputsForEachParty[i]; j++) {
 
                 gates[gateIndex].gateType = 3;
+                gates[gateIndex].inputsNum = 1;
                 gates[gateIndex].input1 = partiesOutputs[i][j];
                 gates[gateIndex].input2 = 0;//irrelevant
                 gates[gateIndex].output = 0;//irrelevant
@@ -173,7 +189,6 @@ void ArithmeticCircuit::readCircuit(const char* fileName)
     }
     myfile.close();
 }
-
 
 void ArithmeticCircuit::writeToFile(string outputFileName, int numberOfParties){
 

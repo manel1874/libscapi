@@ -189,6 +189,7 @@ PrgFromOpenSSLAES::PrgFromOpenSSLAES(PrgFromOpenSSLAES && old) :
 {
     old.cipherChunk = nullptr;
     old.indexPlaintext = nullptr;
+    old.aes = nullptr;
 }
 
 PrgFromOpenSSLAES & PrgFromOpenSSLAES::operator=(PrgFromOpenSSLAES && other)
@@ -220,7 +221,7 @@ PrgFromOpenSSLAES::~PrgFromOpenSSLAES() {
     //free aes
     if(aes != nullptr) {
         EVP_CIPHER_CTX_cleanup(aes);
-        //delete aes;
+        delete aes;
     }
 }
 
@@ -243,7 +244,7 @@ void PrgFromOpenSSLAES::setKey(SecretKey & secretKey) {
 
     if (_isKeySet == false) {
 
-        aes = new EVP_CIPHER_CTX();
+        aes = new EVP_CIPHER_CTX;
 
         //init the aes prp using openssl
         EVP_CIPHER_CTX_init(aes);

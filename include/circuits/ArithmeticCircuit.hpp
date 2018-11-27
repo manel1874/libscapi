@@ -30,6 +30,7 @@ private:
     int nrOfScalarMultGates = 0;
     int nrOfInputGates = 0;
     int nrOfOutputGates = 0;
+    int nrOfSumProductsGates = 0;
 
     bool isCircuitArranged = false;
     vector<int> layersIndices;
@@ -45,6 +46,7 @@ public:
     *
     */
     void readCircuit(const char* fileName);
+
     void writeToFile(string outputFileName,int numberOfParties);
 
     //get functions
@@ -55,11 +57,13 @@ public:
     int getNrOfScalarMultGates() {return nrOfScalarMultGates;}
     int getNrOfInputGates() { return nrOfInputGates; }
     int getNrOfOutputGates() { return nrOfOutputGates; }
+    int getNrOfSumOfProductsGates() { return nrOfSumProductsGates; }
     int getNrOfGates() { return (nrOfMultiplicationGates +
                                  nrOfSubtractionGates +
                                  nrOfRandomGates +
                                  nrOfScalarMultGates +
                                  nrOfAdditionGates +
+                                 nrOfSumProductsGates +
                                  nrOfInputGates +
                                  nrOfOutputGates); }
 

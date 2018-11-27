@@ -5,6 +5,9 @@
 #ifndef TGATE_H_
 #define TGATE_H_
 
+#include <vector>
+using namespace std;
+
 /**
 * The Gate class is a software representation of a circuit's gate, that is the structure of the aryhtmetic circuit and not the actuall values assigned.
 * It contains a type that performs a logical function on the values of the input wires (input1 and input2)  and assigns
@@ -21,9 +24,12 @@
 #define SCALAR 5
 #define SUB 6
 #define SCALAR_ADD 7
+#define SUM_OF_PRODUCTS 8
 
 struct TGate
 {
+    int inputsNum;
+    vector<int> inputIndices;
     int input1;//the 0-gate index, relevant for addition/multiplication/output
     int input2;//the 1-gate index, relevant for addition/multiplication
     int output;//the output index of this gate, relevant for input/addition/multiplication

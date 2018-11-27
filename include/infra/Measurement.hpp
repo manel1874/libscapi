@@ -65,6 +65,7 @@ public:
     Measurement(string protocolName, int internalIterationsNumber, int partyId, int partiesNumber,
                 string partiesFile, vector<string> names);
     void setTaskNames(vector<string> & names);
+    void addTaskNames(vector<string> & names);
     ~Measurement();
     void startSubTask(string taskName, int currentIterationNum);
     void endSubTask(string taskName, int currentIterationNum);

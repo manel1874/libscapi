@@ -34,6 +34,8 @@
 #include <vector>
 #include <utility>
 #include <algorithm>
+#include "../infra/Measurement.hpp"
+#include "../comm/MPCCommunication.hpp"
 
 using namespace std;
 
@@ -80,6 +82,50 @@ public:
     CmdParser getParser();
 
     virtual ~Protocol() {}
+};
+
+class MPCProtocol : public Protocol{
+
+private:
+
+    void initTimes();
+    void exchangeDataSameInput(byte* sendData, byte* receiveData, int first, int last, int msgSize);
+    void exchangeDataDiffInput(byte* sendData, byte* receiveData, int first, int last, int msgSize);
+protected:
+
+    Measurement* timer;
+    MPCCommunication comm;
+    vector<shared_ptr<CommParty>> parties;
+
+    int partyID;
+    int numParties;
+    int times; //Number of times to execute the protocol
+    int currentIteration; //The current execution number
+    int numThreads, numPartiesForEachThread;
+
+public:
+    MPCProtocol(string protocolName, int argc, char* argv[]);
+    ~MPCProtocol();
+
+    void run();
+
+    /**
+     * This function sends the same message to all the other parties and receive data from all the other parties.
+     * All messages are in the same size.
+     * The sendData array contains the message that should be sent to all the other parties.
+     * The receiveData array will be filled with all the messages that the other parties sent to this party, ordered by the party id index.
+     */
+    void roundFunctionSameMsg(byte* sendData, byte* receiveData, int msgSize);
+
+    /**
+     * This function sends a unique message to each one of the other parties and receive data from all the other parties.
+     * All messages are in the same size.
+     * The sendData array contains a message for each one of the other parties, ordered by the party id index.
+     * The receiveData array will be filled with all the messages that the other parties sent to this party, ordered by the party id index.
+     */
+    void roundFunctionDiffMsg(byte* sendData, byte* receiveData, int msgSize);
+
+
 };
 
 
