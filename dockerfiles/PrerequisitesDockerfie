@@ -1,6 +1,6 @@
 ############################################################
 # Dockerfile to build and image with all libscapi prerequisites
-# Based on Ubuntu 16.04
+# Based on Ubuntu 18.04
 ############################################################
 
 # Set the base image to Ubuntu
