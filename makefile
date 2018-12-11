@@ -36,7 +36,7 @@ ifeq ($(uname_os), Darwin)
 endif
 
 GCC_STANDARD = c++14
-CPP_OPTIONS   := -g -std=$(GCC_STANDARD) $(INC)  -maes -mpclmul -mbmi2 -Wall -Wno-uninitialized -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable -Wno-unused-result -Wno-sign-compare -Wno-parentheses -O3 -fPIC
+CPP_OPTIONS   := -g -std=$(GCC_STANDARD) $(INC) -Wall -Wno-uninitialized -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable -Wno-unused-result -Wno-sign-compare -Wno-parentheses -O3 -fPIC
 $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
 
 LD_FLAGS = 
