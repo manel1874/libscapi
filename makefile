@@ -93,7 +93,7 @@ tests: compile-tests
 .PHONY: compile-tests
 compile-tests:
 	@cd ./test; \
-	g++ -std=c++14 -maes -mavx -mbmi2 -I/usr/include/openssl  -I../install/include -o tests.exe tests.cpp interactiveMidProtocolsTests.cpp ../libscapi.a -lpthread -L../install/lib ../install/lib/libboost_system.a ../install/lib/libboost_thread.a -l:libssl.a -lntl -lgmp -l:libcrypto.a -ldl -lz;
+	g++ -std=c++14 -I/usr/include/openssl  -I../install/include -o tests.exe tests.cpp interactiveMidProtocolsTests.cpp ../libscapi.a -lpthread -L../install/lib ../install/lib/libboost_system.a ../install/lib/libboost_thread.a -l:libssl.a -lntl -lgmp -l:libcrypto.a -ldl -lz -Wno-narrowing;
 	@cd ..
 	
 prepare-emp:compile-openssl
