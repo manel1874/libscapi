@@ -18,6 +18,7 @@ TemplateField<ZpMersenneIntElement>::TemplateField(long fieldParam) {
     m_ONE = new ZpMersenneIntElement(1);
 }
 
+#ifdef __x86_64__
 template <>
 TemplateField<ZpMersenneLongElement>::TemplateField(long fieldParam) {
 
@@ -47,6 +48,7 @@ TemplateField<ZpMersenne127Element>::TemplateField(long fieldParam) {
 
 
 }
+#endif
 
 template <>
 ZpMersenneIntElement TemplateField<ZpMersenneIntElement>::GetElement(long b) {
@@ -66,7 +68,7 @@ ZpMersenneIntElement TemplateField<ZpMersenneIntElement>::GetElement(long b) {
     }
 }
 
-
+#ifdef __x86_64__
 template <>
 ZpMersenne127Element TemplateField<ZpMersenne127Element>::GetElement(long b) {
 
@@ -102,6 +104,7 @@ ZpMersenneLongElement TemplateField<ZpMersenneLongElement>::GetElement(long b) {
         return element;
     }
 }
+#endif
 
 template <>
 void TemplateField<ZpMersenneIntElement>::elementToBytes(unsigned char* elemenetInBytes, ZpMersenneIntElement& element){
@@ -109,6 +112,7 @@ void TemplateField<ZpMersenneIntElement>::elementToBytes(unsigned char* elemenet
     memcpy(elemenetInBytes, (byte*)(&element.elem), 4);
 }
 
+#ifdef __x86_64__
 template <>
 void TemplateField<ZpMersenneLongElement>::elementToBytes(unsigned char* elemenetInBytes, ZpMersenneLongElement& element){
 
@@ -120,6 +124,7 @@ void TemplateField<ZpMersenne127Element>::elementToBytes(unsigned char* elemenet
 
     memcpy(elemenetInBytes, (byte*)(&element.elem), 16);
 }
+#endif
 
 template <>
 void TemplateField<ZpMersenneIntElement>::elementVectorToByteVector(vector<ZpMersenneIntElement> &elementVector, vector<byte> &byteVector){
@@ -127,6 +132,7 @@ void TemplateField<ZpMersenneIntElement>::elementVectorToByteVector(vector<ZpMer
     copy_byte_array_to_byte_vector((byte *)elementVector.data(), elementVector.size()*elementSizeInBytes, byteVector,0);
 }
 
+#ifdef __x86_64__
 template <>
 void TemplateField<ZpMersenneLongElement>::elementVectorToByteVector(vector<ZpMersenneLongElement> &elementVector, vector<byte> &byteVector){
 
@@ -138,6 +144,7 @@ void TemplateField<ZpMersenne127Element>::elementVectorToByteVector(vector<ZpMer
 
     copy_byte_array_to_byte_vector((byte *)elementVector.data(), elementVector.size()*elementSizeInBytes, byteVector,0);
 }
+#endif
 
 template <>
 ZpMersenneIntElement TemplateField<ZpMersenneIntElement>::bytesToElement(unsigned char* elemenetInBytes){
@@ -145,7 +152,7 @@ ZpMersenneIntElement TemplateField<ZpMersenneIntElement>::bytesToElement(unsigne
     return ZpMersenneIntElement((unsigned int)(*(unsigned int *)elemenetInBytes));
 }
 
-
+#ifdef __x86_64__
 template <>
 ZpMersenneLongElement TemplateField<ZpMersenneLongElement>::bytesToElement(unsigned char* elemenetInBytes){
 
@@ -159,3 +166,4 @@ ZpMersenne127Element TemplateField<ZpMersenne127Element>::bytesToElement(unsigne
 }
 
 __uint128_t ZpMersenne127Element::p = 0;
+#endif

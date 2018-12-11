@@ -105,9 +105,13 @@ void ScPrgFromPrf::increaseCtr() {
 
 PrgFromOpenSSLAES::PrgFromOpenSSLAES() : cachedSize(DEFAULT_NUM_OF_RANDOMS), isStrict(false) {
 
-    cipherChunk = (block *)_mm_malloc(sizeof(block) * cachedSize, 16);
+#ifdef __x86_64__
+	cipherChunk = (block *)_mm_malloc(sizeof(block) * cachedSize, 16);
     indexPlaintext = (block *)_mm_malloc(sizeof(block) * cachedSize, 16);
-
+#elif __aarch64__
+    cipherChunk = (block *)memalign(16, sizeof(block) * cachedSize);
+    indexPlaintext = (block *)memalign(16, sizeof(block) * cachedSize);
+#endif
     //assin zero to the array of indices which are set as the plaintext. Note that we only use the list sagnificant long part of each 128 bit.
     //memset(indexPlaintext, 0, sizeof(block) * cachedSize);
 
@@ -123,9 +127,13 @@ PrgFromOpenSSLAES::PrgFromOpenSSLAES() : cachedSize(DEFAULT_NUM_OF_RANDOMS), isS
 
 PrgFromOpenSSLAES::PrgFromOpenSSLAES(int cachedSize_ ) : cachedSize(cachedSize_), isStrict(false) {
 
+#ifdef __x86_64__
     cipherChunk = (block *)_mm_malloc(sizeof(block) * cachedSize, 16);
     indexPlaintext = (block *)_mm_malloc(sizeof(block) * cachedSize, 16);
-
+#elif __aarch64__
+    cipherChunk = (block *)memalign(16, sizeof(block) * cachedSize);
+    indexPlaintext = (block *)memalign(16, sizeof(block) * cachedSize);
+#endif
     //assin zero to the array of indices which are set as the plaintext. Note that we only use the list sagnificant long part of each 128 bit.
     //memset(indexPlaintext, 0, sizeof(block) * cachedSize);
 
@@ -140,10 +148,13 @@ PrgFromOpenSSLAES::PrgFromOpenSSLAES(int cachedSize_ ) : cachedSize(cachedSize_)
 }
 
 PrgFromOpenSSLAES::PrgFromOpenSSLAES(int cachedSize_, bool isStrict_ ) : cachedSize(cachedSize_), isStrict(isStrict_) {
-
+#ifdef __x86_64__
     cipherChunk = (block *)_mm_malloc(sizeof(block) * cachedSize, 16);
     indexPlaintext = (block *)_mm_malloc(sizeof(block) * cachedSize, 16);
-
+#elif __aarch64__
+    cipherChunk = (block *)memalign(16, sizeof(block) * cachedSize);
+    indexPlaintext = (block *)memalign(16, sizeof(block) * cachedSize);
+#endif
     //assin zero to the array of indices which are set as the plaintext. Note that we only use the list sagnificant long part of each 128 bit.
     //memset(indexPlaintext, 0, sizeof(block) * cachedSize);
 
@@ -162,14 +173,20 @@ PrgFromOpenSSLAES::PrgFromOpenSSLAES(int cachedSize_, bool isStrict_, byte * cac
     //allocate memory for the plaintext which is an array of indices and for the ciphertext which is the output
     //of the encryption
     if (cache_prealloc == nullptr) {
+#ifdef __x86_64__
         cipherChunk = (block *)_mm_malloc(sizeof(block) * cachedSize, 16);
+#elif __aarch64__
+        cipherChunk = (block *)memalign(16, sizeof(block) * cachedSize);
+#endif
     }
     else {
         cipherChunk = (block *) cache_prealloc;
     }
-
+#ifdef __x86_64__
     indexPlaintext = (block *)_mm_malloc(sizeof(block) * cachedSize, 16);
-
+#elif __arch64__
+    indexPlaintext = (block *)memalign(16, sizeof(block) * cachedSize);
+#endif
     //assin zero to the array of indices which are set as the plaintext. Note that we only use the list sagnificant long part of each 128 bit.
     //memset(indexPlaintext, 0, sizeof(block) * cachedSize);
 
@@ -215,9 +232,13 @@ PrgFromOpenSSLAES & PrgFromOpenSSLAES::operator=(PrgFromOpenSSLAES && other)
 
 PrgFromOpenSSLAES::~PrgFromOpenSSLAES() {
     //free allocated aligned memory
-    _mm_free(cipherChunk);
+#ifdef __x86_64__
+	_mm_free(cipherChunk);
     _mm_free(indexPlaintext);
-
+#elif __arch64__
+	free(cipherChunk);
+    free(indexPlaintext);
+#endif
     //free aes
     if(aes != nullptr) {
         EVP_CIPHER_CTX_cleanup(aes);
