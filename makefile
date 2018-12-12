@@ -80,7 +80,7 @@ ifeq ($(GCC_STANDARD), c++14)
 ifeq ($(uname_os), Linux)
 ifeq ($(uname_arch), x86_64)
     libs: compile-openssl compile-boost compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc \
-    compile-libote
+    compile-libote compile-otextension-bristol
 endif
 ifeq ($(uname_arch), aarch64)
     libs: compile-openssl compile-boost compile-ntl
