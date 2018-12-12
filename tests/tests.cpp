@@ -891,11 +891,11 @@ TEST_CASE("Gates and Wires", "") {
 		bc.write("../../../../test/testCircuitOutput.txt");
 #else
 
-		BooleanCircuit bc(new scannerpp::File("../test/testCircuit.txt"));
-		bc.write("../test/testCircuitOutput.txt");
+		BooleanCircuit bc(new scannerpp::File("testCircuit.txt"));
+		bc.write("testCircuitOutput.txt");
 
-		BooleanCircuit aesbc(new scannerpp::File("../test/NigelAes.txt"));
-		aesbc.write("../test/NigelAesOutput.txt");
+		BooleanCircuit aesbc(new scannerpp::File("NigelAes.txt"));
+		aesbc.write("NigelAesOutput.txt");
 #endif
 		REQUIRE(bc.getNumberOfInputs(1) == 4);
 		REQUIRE(bc.getNumberOfInputs(2) == 1);
