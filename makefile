@@ -21,10 +21,10 @@ export libdir=$(prefix)/lib
 
 SLib           = libscapi.a
 CPP_FILES     := $(wildcard src/*/*.cpp)
-C_FILES     := $(wildcard src/*/*.c)
+C_FILES       := $(wildcard src/*/*.c)
 OBJ_FILES     := $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES))
 OBJ_FILES     += $(patsubst src/%.c,obj/%.o,$(C_FILES))
-OUT_DIR        = obj obj/mid_layer obj/comm obj/infra obj/interactive_mid_protocols obj/primitives obj/cryptoInfra obj/commClient obj/circuits
+OUT_DIR        = obj obj/primitives obj/interactive_mid_protocols obj/mid_layer obj/comm obj/infra obj/cryptoInfra obj/circuits obj/circuits_c
 
 ifeq ($(uname_os), Linux)
     INC            = -Iinstall/include -Iinstall/include/OTExtensionBristol -Iinstall/include/libOTe -Iinstall/include/libOTe/cryptoTools -I/usr/local/opt/openssl/include/
@@ -36,7 +36,7 @@ ifeq ($(uname_os), Darwin)
 endif
 
 GCC_STANDARD = c++14
-CPP_OPTIONS   := -g -std=$(GCC_STANDARD) $(INC) -Wall -Wno-narrowing -Wno-uninitialized -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable -Wno-unused-result -Wno-sign-compare -Wno-parentheses -O3 -fPIC
+CPP_OPTIONS   := -g -std=$(GCC_STANDARD) $(INC) -mavx -maes -msse4.1 -mpclmul -Wall -Wno-narrowing -Wno-uninitialized -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable -Wno-unused-result -Wno-sign-compare -Wno-parentheses -O3 -fPIC
 $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
 
 LD_FLAGS = 
@@ -72,6 +72,8 @@ $(SLib): $(OBJ_FILES)
 	ar ru $@ $^ 
 	ranlib $@
 
+obj/circuits_c/%.o: src/circuits_c/%.c
+	gcc -fPIC -mavx -maes -mpclmul -DRDTSC -DTEST=AES128  -O3 -c -o $@ $<
 obj/circuits/%.o: src/circuits/%.cpp
 	g++ -c $(CPP_OPTIONS) -o $@ $<
 obj/comm/%.o: src/comm/%.cpp
@@ -95,7 +97,7 @@ tests: compile-tests
 .PHONY: compile-tests
 compile-tests:
 	@cd ./test; \
-	g++ -std=c++14 -I/usr/include/openssl  -I../install/include -o tests.exe tests.cpp interactiveMidProtocolsTests.cpp ../libscapi.a -lpthread -L../install/lib ../install/lib/libboost_system.a ../install/lib/libboost_thread.a -l:libssl.a -lntl -lgmp -l:libcrypto.a -ldl -lz -Wno-narrowing;
+	g++ -std=c++14 -mavx -maes -msse4.1 -mpclmul -mbmi2 -I/usr/include/openssl  -I../install/include -o tests.exe tests.cpp interactiveMidProtocolsTests.cpp ../libscapi.a -lpthread -L../install/lib ../install/lib/libboost_system.a ../install/lib/libboost_thread.a -l:libssl.a -lntl -lgmp -l:libcrypto.a -ldl -lz -Wno-narrowing;
 	@cd ..
 	
 prepare-emp:compile-openssl
