@@ -2,6 +2,7 @@ export builddir=$(abspath ./build)
 export prefix=$(abspath ./install)
 CXX=g++
 uname_os := $(shell uname)
+uname_arch := $(shell uname -i)
 ARCH := $(shell getconf LONG_BIT)
 SHARED_LIB_EXT:=.so
 INCLUDE_ARCHIVES_START = -Wl,-whole-archive # linking options, we prefer our generated shared object will be self-contained.
@@ -24,19 +25,32 @@ CPP_FILES     := $(wildcard src/*/*.cpp)
 C_FILES       := $(wildcard src/*/*.c)
 OBJ_FILES     := $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES))
 OBJ_FILES     += $(patsubst src/%.c,obj/%.o,$(C_FILES))
-OUT_DIR        = obj obj/primitives obj/interactive_mid_protocols obj/mid_layer obj/comm obj/infra obj/cryptoInfra obj/circuits obj/circuits_c
+GCC_STANDARD = c++14
 
 ifeq ($(uname_os), Linux)
-    INC            = -Iinstall/include -Iinstall/include/OTExtensionBristol -Iinstall/include/libOTe -Iinstall/include/libOTe/cryptoTools -I/usr/local/opt/openssl/include/
+	INC            = -Iinstall/include -Iinstall/include/OTExtensionBristol -Iinstall/include/libOTe \
+	 -Iinstall/include/libOTe/cryptoTools -I/usr/local/opt/openssl/include/
     LIBRARIES_DIR  = -Linstall/lib /usr/local/opt/openssl/lib
 endif
 ifeq ($(uname_os), Darwin)
-    INC            = -Iinstall/include -Iinstall/include/OTExtensionBristol -Iinstall/include/libOTe -Iinstall/include/libOTe/cryptoTools -I/usr/local/opt/openssl/include/
+    INC            = -Iinstall/include -Iinstall/include/OTExtensionBristol -Iinstall/include/libOTe \
+    -Iinstall/include/libOTe/cryptoTools -I/usr/local/opt/openssl/include/
     LIBRARIES_DIR  = -Linstall/lib /usr/local/opt/openssl/lib
 endif
 
-GCC_STANDARD = c++14
-CPP_OPTIONS   := -g -std=$(GCC_STANDARD) $(INC) -mavx -maes -msse4.1 -mpclmul -Wall -Wno-narrowing -Wno-uninitialized -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable -Wno-unused-result -Wno-sign-compare -Wno-parentheses -O3 -fPIC
+ifeq ($(uname_arch), x86_64)
+	OUT_DIR        = obj obj/primitives obj/interactive_mid_protocols obj/mid_layer obj/comm obj/infra obj/cryptoInfra obj/circuits obj/circuits_c
+	CPP_OPTIONS   := -g -std=$(GCC_STANDARD) $(INC) -mavx -maes -msse4.1 -mpclmul -Wall \
+	-Wno-uninitialized -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable -Wno-unused-result \
+	-Wno-sign-compare -Wno-parentheses -O3 -fPIC
+endif
+ifeq ($(uname_arch), aarch64)
+	OUT_DIR        = obj obj/primitives obj/interactive_mid_protocols obj/mid_layer obj/comm obj/infra obj/cryptoInfra
+	CPP_OPTIONS   := -g -std=$(GCC_STANDARD) $(INC) -Wall -Wno-narrowing -Wno-uninitialized \
+	-Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable -Wno-unused-result \
+	-Wno-sign-compare -Wno-parentheses -O3 -fPIC
+endif
+
 $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
 
 LD_FLAGS = 
@@ -47,15 +61,30 @@ all: libs libscapi tests
 
 ifeq ($(GCC_STANDARD), c++11)
 ifeq ($(uname_os), Linux)
-    libs: compile-openssl compile-boost compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc compile-otextension-bristol
+ifeq ($(uname_arch), x86_64)
+    libs: compile-openssl compile-boost compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc \
+     compile-otextension-bristol
+endif
+ifeq ($(uname_arch), aarch64)
+    libs: compile-openssl compile-boost compile-ntl
+endif
 endif # Linux c++11
+
 ifeq ($(uname_os), Darwin)
     libs: compile-openssl compile-boost compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc
 endif # Darwin c++11
 endif # c++11
+
+##### c++14 #####
 ifeq ($(GCC_STANDARD), c++14)
 ifeq ($(uname_os), Linux)
-    libs: compile-openssl compile-boost compile-ntl 
+ifeq ($(uname_arch), x86_64)
+    libs: compile-openssl compile-boost compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc \
+    compile-libote
+endif
+ifeq ($(uname_arch), aarch64)
+    libs: compile-openssl compile-boost compile-ntl
+endif
 endif # Linux c++14
 ifeq ($(uname_os), Darwin)
     libs: compile-openssl compile-boost compile-libote compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc
@@ -92,13 +121,25 @@ obj/cryptoInfra/%.o: src/cryptoInfra/%.cpp
 	g++ -c $(CPP_OPTIONS) -o $@ $<
 
 tests: compile-tests
-	cd ./test; ./tests.exe
+	cd ./tests; ./tests.exe
 	
 .PHONY: compile-tests
 compile-tests:
-	@cd ./test; \
-	g++ -std=c++14 -mavx -maes -msse4.1 -mpclmul -mbmi2 -I/usr/include/openssl  -I../install/include -o tests.exe tests.cpp interactiveMidProtocolsTests.cpp ../libscapi.a -lpthread -L../install/lib ../install/lib/libboost_system.a ../install/lib/libboost_thread.a -l:libssl.a -lntl -lgmp -l:libcrypto.a -ldl -lz -Wno-narrowing;
-	@cd ..
+ifeq ($(uname_os), Linux)
+ifeq ($(uname_arch), x86_64)
+	g++ -std=c++14 -mavx -maes -msse4.1 -mpclmul -mbmi2 -I/usr/include/openssl  -Iinstall/include -o tests/tests.exe \
+	 tests/tests.cpp tests/interactiveMidProtocolsTests.cpp libscapi.a -lpthread -Linstall/lib \
+	  install/lib/libboost_system.a install/lib/libboost_thread.a -l:libssl.a -lntl -lgmp \
+	   -l:libcrypto.a -ldl -lz -Wno-narrowing;
+endif
+ifeq ($(uname_arch), aarch64)
+	g++ -std=c++14 -I/usr/include/openssl  -Iinstall/include -o tests/tests.exe \
+	 tests/tests.cpp tests/interactiveMidProtocolsTests.cpp libscapi.a -lpthread -Linstall/lib \
+	  install/lib/libboost_system.a install/lib/libboost_thread.a -l:libssl.a -lntl -lgmp \
+	   -l:libcrypto.a -ldl -lz -Wno-narrowing;
+endif
+endif
+
 	
 prepare-emp:compile-openssl
 ifeq ($(SUMO),yes)
@@ -258,7 +299,7 @@ clean-install:
 	@rm -rf install
 
 clean-tests:
-	@rm -f test/tests.exe
+	@rm -f tests/tests.exe
 
 clean-boost:
 	@echo "Cleaning boost library"
