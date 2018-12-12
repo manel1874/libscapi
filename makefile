@@ -24,7 +24,7 @@ CPP_FILES     := $(wildcard src/*/*.cpp)
 C_FILES     := $(wildcard src/*/*.c)
 OBJ_FILES     := $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES))
 OBJ_FILES     += $(patsubst src/%.c,obj/%.o,$(C_FILES))
-OUT_DIR        = obj obj/mid_layer obj/comm obj/infra obj/interactive_mid_protocols obj/primitives obj/cryptoInfra obj/commClient
+OUT_DIR        = obj obj/mid_layer obj/comm obj/infra obj/interactive_mid_protocols obj/primitives obj/cryptoInfra obj/commClient obj/circuits
 
 ifeq ($(uname_os), Linux)
     INC            = -Iinstall/include -Iinstall/include/OTExtensionBristol -Iinstall/include/libOTe -Iinstall/include/libOTe/cryptoTools -I/usr/local/opt/openssl/include/
@@ -72,6 +72,8 @@ $(SLib): $(OBJ_FILES)
 	ar ru $@ $^ 
 	ranlib $@
 
+obj/circuits/%.o: src/circuits/%.cpp
+	g++ -c $(CPP_OPTIONS) -o $@ $<
 obj/comm/%.o: src/comm/%.cpp
 	g++ -c $(CPP_OPTIONS) -o $@ $<
 obj/commClient/%.o: src/commClient/%.cpp
