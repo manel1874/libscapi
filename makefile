@@ -140,6 +140,14 @@ ifeq ($(uname_arch), aarch64)
 endif
 endif
 
+ifeq ($(uname_os), Darwin)
+	g++ -std=c++14 -mavx -maes -msse4.1 -mpclmul -mbmi2 $(INC) -o tests/tests.exe \
+	 tests/tests.cpp tests/interactiveMidProtocolsTests.cpp libscapi.a -Linstall/lib \
+	  install/lib/libboost_system.a install/lib/libboost_thread.a install/lib/libssl.a install/lib/libcrypto.a install/lib/libntl.a -lgmp \
+	  -ldl -lz -Wno-inconsistent-missing-override -Wno-expansion-to-defined -Wno-string-plus-int \
+	  -Wno-mismatched-new-delete -Wno-delete-non-virtual-dtor -Wno-tautological-constant-out-of-range-compare
+endif
+
 	
 prepare-emp:compile-openssl
 ifeq ($(SUMO),yes)
@@ -238,7 +246,7 @@ compile-libote:compile-boost
 	@echo "Compiling libOTe library..."
 	@cp -r lib/libOTe $(builddir)/libOTe
 ifeq ($(uname_os), Darwin)
-    @bash /build/libOTe/cryptoTools/thirdparty/miracl/source/linux64
+	@cd $(builddir)/libOTe/cryptoTools/thirdparty/miracl/source && bash linux64 && cd ../../../../../../
 endif
 	@cmake $(builddir)/libOTe/CMakeLists.txt -DCMAKE_BUILD_TYPE=Release
 	@$(MAKE) -C $(builddir)/libOTe/
