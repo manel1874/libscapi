@@ -237,6 +237,9 @@ endif
 compile-libote:compile-boost
 	@echo "Compiling libOTe library..."
 	@cp -r lib/libOTe $(builddir)/libOTe
+ifeq ($(uname_os), Darwin)
+    @bash /build/libOTe/cryptoTools/thirdparty/miracl/source/linux64
+endif
 	@cmake $(builddir)/libOTe/CMakeLists.txt -DCMAKE_BUILD_TYPE=Release
 	@$(MAKE) -C $(builddir)/libOTe/
 	@cp $(builddir)/libOTe/lib/*.a $(PWD)/install/lib/
