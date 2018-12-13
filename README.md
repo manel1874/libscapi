@@ -50,7 +50,7 @@ Libscapi runs on Linux, MacOS and ARM64 and has been tested on the following ver
 - Ubuntu 14.04/16.04/18.04 LTS
 - CentOS 7.3
 - Mac OS High Sierra 10.13
-- ARM64 - tested on Cortex A72 with Ubuntu 18.04 LTS (prior versions to 18.04 on ARM may run as well).
+- ARM64 - tested on Cortex A72 with Ubuntu 18.04 LTS (prior versions to 18.04 on ARM may run as well).  
 For detailed instructions, see [INSTALL.md](build_scripts/INSTALL.md)
 
 ## Libraries used by libscapi
