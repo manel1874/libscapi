@@ -7,9 +7,13 @@
 
 #include "NTL/ZZ_p.h"
 #include "NTL/ZZ.h"
+#ifdef __x86_64__
 #include <x86intrin.h>
-#include "gmp.h"
-#include <../../include/primitives/Prg.hpp>
+#elif __aarch64__
+#include "../infra/SSE2NEON.h"
+#endif
+#include <gmp.h>
+#include "Prg.hpp"
 
 using namespace std;
 using namespace NTL;
@@ -195,7 +199,7 @@ public:
 inline ::ostream& operator<<(::ostream& s, const ZpMersenneIntElement& a){ return s << a.elem; };
 
 
-
+#ifdef __x86_64__
 class ZpMersenneLongElement {
 
 //private:
@@ -527,19 +531,8 @@ inline ::ostream& operator<<(::ostream& s, const ZpMersenne127Element& a){
     return s<< abytes[1] << " "  << abytes[0] << endl;
     };
 
-
+#endif
 //------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
 
 
 

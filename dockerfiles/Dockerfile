@@ -17,7 +17,7 @@ WORKDIR libscapi
 RUN make -f makefile
 
 # build the samples and run one of them
-WORKDIR samples
+WORKDIR examples
 RUN make -f makefile
 RUN ./libscapi_example dlog
 RUN ./libscapi_example sha1

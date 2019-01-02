@@ -80,9 +80,7 @@ protocols/YaoSingleExecution/libyaoSingleExecution.a
 config_for_test.txt
 *.VC.db
 *~
-samples/libscapi_examples
-samples/libscapi_example
-windows-solutions/CodeExamples/code examples.vcxproj.user.orig
+examples/libscapi_example
 callgrind.*
 lib/OTExtensionBristol/SimpleOT/ot_sender_test
 lib/OTExtensionBristol/SimpleOT/ot_receiver_test
@@ -99,8 +97,6 @@ protocols/MaliciousYao/OnlineP1_*
 protocols/MaliciousYao/OnlineP2_*
 protocols/GMW/NigelAes9Parties.txt
 protocols/GMW/AesInputs*.txt
-
-
 protocols/YaoSingleExecution/Makefile
 CMakeCache.txt
 CMakeFiles/

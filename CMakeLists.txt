@@ -16,10 +16,6 @@ link_directories(/usr/ssl/lib/ $ENV{HOME}/libscapi/install/lib )
 
 
 set(SOURCE_FILES
-        src/circuits_c/intrin_sequential_ks1_enc1.c
-        src/circuits_c/intrin_sequential_ks2_enc2.c
-        src/circuits_c/intrin_sequential_ks4_enc4.c
-        src/circuits_c/intrin_sequential_ks4_enc8.c
         src/circuits/BooleanCircuits.cpp
         src/circuits/FourToTwoGarbledBoleanCircuitNoAssumptions.cpp
         src/circuits/FreeXorGarbledBooleanCircuit.cpp
