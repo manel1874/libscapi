@@ -165,6 +165,31 @@ public:
         return *this;
     }
 
+    ZpMersenneIntElement sqrt()
+    {
+        //The algorithm for checking the square root of a value is as follows:
+        //We know that 2^31 and 2^61 are both divisible by 4 (the results are 2^29 and 2^59 respectively). So 2^31-1=3 mod 4 and 2^61-1=3 mod 4.
+        //So if we have b=x^2 (over Mersenne61) then we can compute x by b^{2^59}.
+        //To do this, we can make about 58 field multiplications:
+        //Set b_1 = b, then
+        //For i=2...59:
+        //compute b_i = (b_{i-1})^2.
+        //So x1=b_59 and x2=-b_59 = 2^61-1-b_59
+        //Check that x1^2 = b, if it does then output it, otherwise, it means that a cheat is detected.
+        ZpMersenneIntElement answer = *this;
+        for (int i=2; i<=30; i++){
+            answer *= answer;
+        }
+        ZpMersenneIntElement check = answer*answer;
+
+        if (check != *this){
+            cout<<"CHEATING!!!"<<endl;
+            return ZpMersenneIntElement(0);
+        }
+
+        return answer;
+    }
+
 };
 
 inline ::ostream& operator<<(::ostream& s, const ZpMersenneIntElement& a){ return s << a.elem; };
@@ -306,6 +331,31 @@ public:
         elem = res;
 
         return *this;
+    }
+
+    ZpMersenneLongElement sqrt()
+    {
+        //The algorithm for checking the square root of a value is as follows:
+        //We know that 2^31 and 2^61 are both divisible by 4 (the results are 2^29 and 2^59 respectively). So 2^31-1=3 mod 4 and 2^61-1=3 mod 4.
+        //So if we have b=x^2 (over Mersenne61) then we can compute x by b^{2^59}.
+        //To do this, we can make about 58 field multiplications:
+        //Set b_1 = b, then
+        //For i=2...59:
+        //compute b_i = (b_{i-1})^2.
+        //So x1=b_59 and x2=-b_59 = 2^61-1-b_59
+        //Check that x1^2 = b, if it does then output it, otherwise, it means that a cheat is detected.
+        ZpMersenneLongElement answer = *this;
+        for (int i=2; i<=60; i++){
+            answer *= answer;
+        }
+        ZpMersenneLongElement check = answer*answer;
+
+        if (check != *this){
+            cout<<"CHEATING!!!"<<endl;
+            return ZpMersenneLongElement(0);
+        }
+
+        return answer;
     }
 
 };
