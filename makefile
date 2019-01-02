@@ -22,10 +22,9 @@ export libdir=$(prefix)/lib
 
 SLib           = libscapi.a
 CPP_FILES     := $(wildcard src/*/*.cpp)
-C_FILES     := $(wildcard src/*/*.c)
+C_FILES       := $(wildcard src/*/*.c)
 OBJ_FILES     := $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES))
 OBJ_FILES     += $(patsubst src/%.c,obj/%.o,$(C_FILES))
-OUT_DIR        = obj obj/mid_layer obj/circuits obj/comm obj/infra obj/interactive_mid_protocols obj/primitives obj/circuits_c obj/cryptoInfra obj/commClient
 GCC_STANDARD = c++14
 
 ifeq ($(uname_os), Linux)
@@ -102,13 +101,6 @@ $(SLib): $(OBJ_FILES)
 	ar ru $@ $^ 
 	ranlib $@
 
-<<<<<<< HEAD
-obj/circuits/%.o: src/circuits/%.cpp
-	g++ -c $(CPP_OPTIONS) -o $@ $<
-obj/circuits/%.o: src/circuits/%.pb.cc
-	g++ -c $(CPP_OPTIONS) -o $@ $<
-=======
->>>>>>> 1166f86bb234b777fa1b8e3409a1e5d691c0d5be
 obj/circuits_c/%.o: src/circuits_c/%.c
 	gcc -fPIC -mavx -maes -mpclmul -DRDTSC -DTEST=AES128  -O3 -c -o $@ $<
 obj/circuits/%.o: src/circuits/%.cpp
