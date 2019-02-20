@@ -109,7 +109,7 @@ void Measurement::init(string protocolName, int internalIterationsNumber, int pa
 
 void Measurement::init(vector <string> names)
 {
-    m_cpuStartTimes = new vector<vector<long>>(names.size(), vector<long>(m_numberOfIterations));
+    m_cpuStartTimes = new vector<vector<long>>(names.size(), vector<long>(m_numberOfIterations,0));
     m_commSentStartTimes = new vector<vector<unsigned long int>>(names.size(),
             vector<unsigned long int>(m_numberOfIterations, 0));
     m_commReceivedStartTimes = new vector<vector<unsigned long int>>(names.size(),
@@ -193,7 +193,6 @@ void Measurement::startSubTask(string taskName, int currentIterationNum)
     auto ms = time_point_cast<milliseconds>(now).time_since_epoch().count();
 
     int taskIdx = getTaskIdx(taskName);
-
     (*m_cpuStartTimes)[taskIdx][currentIterationNum] = ms;
     tuple<unsigned long int, unsigned long int> startData = commData(m_interface.c_str());
     (*m_commSentStartTimes)[taskIdx][currentIterationNum] = get<0>(startData);
