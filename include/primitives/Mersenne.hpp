@@ -29,18 +29,32 @@ public: //TODO return to private after tesing
 public:
 
     ZpMersenneIntElement(){elem = 0;};
-    ZpMersenneIntElement(int elem)
+    ZpMersenneIntElement(long elem)
     {
-        this->elem = elem;
-        if(this->elem<p){
+        if(elem<2*p) {
+            this->elem = elem;
+            if (this->elem < p) {
+                return;
+            }
+            this->elem -= p;
             return;
         }
-        this->elem -=p;
-        if(this->elem<p){
-            return;
+        else{
+            //get the bottom 31 bit
+            unsigned int bottom = elem & p;
+
+            //get the top 31 bits
+            unsigned int top = (elem>>31);
+
+            this->elem = bottom + top;
+
+            //maximim the value of 2p-2
+            if(this->elem>=p)
+                this->elem-=p;
         }
-        this->elem -=p;
     }
+
+
 
     ZpMersenneIntElement& operator=(const ZpMersenneIntElement& other){elem = other.elem; return *this;};
     bool operator!=(const ZpMersenneIntElement& other){ return !(other.elem == elem); };
