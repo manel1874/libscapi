@@ -149,7 +149,14 @@ public:
         return answer;
     }
 
-    ZpMersenneIntElement& operator+=(const ZpMersenneIntElement& f2){ elem = (f2.elem + elem) %p; return *this;};
+    ZpMersenneIntElement& operator+=(const ZpMersenneIntElement& f2){
+        elem = (f2.elem + elem);
+
+        if(elem>=p)
+            elem-=p;
+
+        return *this;
+    };
     ZpMersenneIntElement& operator*=(const ZpMersenneIntElement& f2)
     {
         long multLong = (long)elem * (long) f2.elem;
