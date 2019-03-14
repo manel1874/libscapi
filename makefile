@@ -63,15 +63,16 @@ ifeq ($(GCC_STANDARD), c++11)
 ifeq ($(uname_os), Linux)
 ifeq ($(uname_arch), x86_64)
     libs: compile-openssl compile-boost compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc \
-     compile-otextension-bristol
+     compile-otextension-bristol compile-kcp
 endif
 ifeq ($(uname_arch), aarch64)
-    libs: compile-openssl compile-boost compile-ntl
+    libs: compile-openssl compile-boost compile-ntl compile-kcp
 endif
 endif # Linux c++11
 
 ifeq ($(uname_os), Darwin)
-    libs: compile-openssl compile-boost compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc
+    libs: compile-openssl compile-boost compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc \
+    compile-kcp
 endif # Darwin c++11
 endif # c++11
 
@@ -80,14 +81,15 @@ ifeq ($(GCC_STANDARD), c++14)
 ifeq ($(uname_os), Linux)
 ifeq ($(uname_arch), x86_64)
     libs: compile-openssl compile-boost compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc \
-    compile-libote compile-otextension-bristol
+    compile-libote compile-otextension-bristol compile-kcp
 endif
 ifeq ($(uname_arch), aarch64)
-    libs: compile-openssl compile-boost compile-ntl
+    libs: compile-openssl compile-boost compile-ntl compile-kcp
 endif
 endif # Linux c++14
 ifeq ($(uname_os), Darwin)
-    libs: compile-openssl compile-boost compile-libote compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc
+    libs: compile-openssl compile-boost compile-libote compile-ntl compile-blake compile-emp-tool compile-emp-ot \
+     compile-emp-m2pc compile-kcp
 endif # Darwin c++14
 endif
 
@@ -196,6 +198,15 @@ ifeq ($(SUMO),yes)
 	@cd $(builddir)/EMP/emp-m2pc/ && $(MAKE)
 	@touch compile-emp-m2pc
 endif
+
+compile-kcp:
+	@echo "Compiling the KCP library"
+	@mkdir -p $(builddir)/
+	@cp -r lib/KCP/ $(builddir)/
+	@$(MAKE) -C $(builddir)/KCP
+	@mv $(builddir)/KCP/ikcp.a install/lib
+	@touch compile-kcp
+
 
 compile-blake:
 	@echo "Compiling the BLAKE2 library"
