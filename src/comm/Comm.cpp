@@ -65,7 +65,7 @@ size_t CommParty::readWithSizeIntoVector(vector<byte> & targetVector) {
 /* CommPartyTCPSynced                    */
 /*****************************************/
 
-void CommPartyTCPSynced::join(int sleepBetweenAttempts, int timeout) {
+int CommPartyTCPSynced::join(int sleepBetweenAttempts, int timeout, bool first) {
 	int     totalSleep = 0;
 	bool    isAccepted  = (role == 1);//false;
 	bool    isConnected = (role == 0); //false;
@@ -100,6 +100,7 @@ void CommPartyTCPSynced::join(int sleepBetweenAttempts, int timeout) {
 		}
 	}
 	setSocketOptions();
+	return 0;
 }
 
 void CommPartyTCPSynced::setSocketOptions() {
@@ -111,13 +112,11 @@ void CommPartyTCPSynced::setSocketOptions() {
 	
 }
 
-void CommPartyTCPSynced::write(const byte* data, int size) {
+size_t CommPartyTCPSynced::write(const byte* data, int size, int peer, int protocol) {
 	boost::system::error_code ec;
-	boost::asio::write(socketForWrite(),
+	return boost::asio::write(socketForWrite(),
 		boost::asio::buffer(data, size),
 		boost::asio::transfer_all(), ec);
-	if (ec)
-		throw PartyCommunicationException("Error while writing. " + ec.message());
 }
 
 CommPartyTCPSynced::~CommPartyTCPSynced() {

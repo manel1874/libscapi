@@ -204,6 +204,8 @@ compile-kcp:
 	@mkdir -p $(builddir)/
 	@cp -r lib/KCP/ $(builddir)/
 	@$(MAKE) -C $(builddir)/KCP
+	@mkdir -p install/include/KCP
+	@mv $(builddir)/KCP/*.h install/include/KCP
 	@mv $(builddir)/KCP/ikcp.a install/lib
 	@touch compile-kcp
 
@@ -337,6 +339,11 @@ clean-libote:
 	@echo "Cleaning libOTe library"
 	@rm -rf $(builddir)/libOTe/
 	@rm -f compile-libote
+
+clean-kcp:
+	@echo "Cleaning KCP library"
+	@rm -rf $(builddir)/KCP/
+	@rm -f compile-kcp
 
 clean: clean-libote clean-openssl clean-boost clean-emp clean-otextension-bristol clean-ntl clean-install clean-tests clean-cpp
 
