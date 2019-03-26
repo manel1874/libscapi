@@ -210,7 +210,7 @@ size_t CommUDP::write(const byte *data, int size, int peer, int protocol)
 size_t CommUDP::read(byte *buffer, int sizeToRead, int peer, int protocol)
 {
     assert(0 <= peer && peer < mNumPeers && peer!= mPid);
-    assert(0 <= protocol && protocol << mNumProtocols);
+    assert(0 <= protocol && protocol < mNumProtocols);
 
     return ikcp_recv(mConnections[peer * mNumProtocols + protocol], (char*)buffer, sizeToRead);
 }
