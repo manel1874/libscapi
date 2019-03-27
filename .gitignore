@@ -46,6 +46,7 @@ protocols/YaoSingleExecution/YaoSingleExecution
 protocols/YaoSingleExecution/emp_format_circuit.txt
 protocols/ReplicatedSecretSharing3PartiesArithmetic/Makefile
 protocols/ReplicatedSecretSharing3PartiesArithmetic/ReplicatedSecretSharing3PartiesArithmetic
+docs/build
 
 # Fortran module files
 *.mod
