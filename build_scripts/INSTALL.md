@@ -12,7 +12,7 @@
 - sudo yum groupinstall -y 'Development Tools'
 - sudo yum install -y update
 - sudo yum install -y git
-- sudo yum install -y openssl-devel libgmp3-dev cmake
+- sudo yum install -y openssl-devel libgmp3-dev cmake zlib1g-dev
 
 #### Mac Osx
 - /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
