@@ -57,7 +57,6 @@ LD_FLAGS =
 SUMO = no
 
 all: libs libscapi tests
-	echo $(WITH_EMP)
 
 ifeq ($(GCC_STANDARD), c++11)
 ifeq ($(uname_os), Linux)
@@ -147,6 +146,7 @@ ifeq ($(uname_os), Darwin)
 	  -ldl -lz -Wno-inconsistent-missing-override -Wno-expansion-to-defined -Wno-string-plus-int \
 	  -Wno-mismatched-new-delete -Wno-delete-non-virtual-dtor -Wno-tautological-constant-out-of-range-compare
 endif
+	@rm -rf build
 
 	
 prepare-emp:compile-openssl
