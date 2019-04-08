@@ -48,9 +48,6 @@ public:
 
     size_t write(const byte* data, int size, int peer=-1, int protocol=-1) override;
     size_t read(byte* buffer, int sizeToRead, int peer=-1, int protocol=-1) override;
-//    int recv(int peer, int protocol, char *buffer, int len);
-    void update(int peer, int protocol);
-    void flush(int peer, int protocol);
 
 private:
 
