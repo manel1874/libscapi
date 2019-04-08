@@ -31,6 +31,7 @@ set(SOURCE_FILES
         src/circuits/TedKrovetzAesNiWrapperC.cpp
         src/circuits/ArithmeticCircuit.cpp
         src/comm/Comm.cpp
+        src/comm/CommUDP.cpp
         src/comm/MPCCommunication.cpp
         tools/circuits/scapiBristolConverter/CircuitConverter.cpp
         src/infra/Common.cpp

@@ -74,7 +74,7 @@ This library provides several different classes of OT protocols. First is the ba
 ##### OpenSSL
 [https://www.openssl.org/](https://www.openssl.org/)
 
- OpenSSL is an open source project that provides a robust, commercial-grade, and full-featured toolkit for the Transport Layer Security (TLS) and Secure Sockets Layer (SSL) protocols. It is also a general-purpose cryptography library. For more information about the team and community around the project, or to start making your own contributions, start with the community page. To get the latest news, download the source, and so on, please see the sidebar or the buttons at the top of every page.
+OpenSSL is an open source project that provides a robust, commercial-grade, and full-featured toolkit for the Transport Layer Security (TLS) and Secure Sockets Layer (SSL) protocols. It is also a general-purpose cryptography library. For more information about the team and community around the project, or to start making your own contributions, start with the community page. To get the latest news, download the source, and so on, please see the sidebar or the buttons at the top of every page.
 
 ##### The GNU Multiple Precision Arithmetic Library (GMP)
 [https://gmplib.org/](https://gmplib.org/)
@@ -83,7 +83,7 @@ GMP is a free library for arbitrary precision arithmetic, operating on signed in
 The main target applications for GMP are cryptography applications and research, Internet security applications, algebra systems, computational algebra research, etc.
 
 ##### NTL: A Library for doing Number Theory- Victor Shoup
-[ttp://www.shoup.net/ntl/](http://www.shoup.net/ntl/)
+[http://www.shoup.net/ntl/](http://www.shoup.net/ntl/)
 
 NTL is a high-performance, portable C++ library providing data structures and algorithms for manipulating signed, arbitrary length integers, and for vectors, matrices, and polynomials over the integers and over finite fields.On modern platforms supporting C++11, NTL can be compiled in thread safe and exception safe modes. 
 
@@ -91,4 +91,9 @@ NTL is a high-performance, portable C++ library providing data structures and al
 [http://www.boost.org/](http://www.boost.org/)
 
 Boost provides free peer-reviewed portable C++ source libraries. We emphasize libraries that work well with the C++ Standard Library. Boost libraries are intended to be widely useful, and usable across a broad spectrum of applications
+
+##### KCP
+[https://github.com/skywind3000/kcp/blob/master/README.en.md](https://github.com/skywind3000/kcp/blob/master/README.en.md)
+
+A library for fast and reliable protocol for TCP/UDP.
 

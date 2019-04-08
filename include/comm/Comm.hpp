@@ -115,19 +115,20 @@ public:
 	/**
 	* This method setups a double edge connection with another party.
 	* It connects to the other party, and also accepts connections from it.
-	* The method blocks until boths side are connected to each other.
+	* The method blocks until both side are connected to each other.
 	*/
-	virtual void join(int sleep_between_attempts, int timeout) = 0;
+	virtual int join(int sleep_between_attempts, int timeout, bool first = true) = 0;
 	/**
 	* Write data from @param data to the other party.
 	* Will write exactly @param size bytes
+	*
 	*/
-	virtual void write(const byte* data, int size) = 0;
+	virtual size_t write(const byte* data, int size, int peer = -1, int protocol = -1) = 0;
 	/**
 	* Read exactly @param sizeToRead bytes int @param buffer
 	* Will block until all bytes are read.
 	*/
-	virtual size_t read(byte* buffer, int sizeToRead) = 0;
+	virtual size_t read(byte* buffer, int sizeToRead, int peer = -1, int protocol = -1) = 0;
 	virtual void write(string s) { write((const byte *)s.c_str(), s.size()); };
 	virtual void writeWithSize(const byte* data, int size);
 	virtual int readSize();
@@ -147,10 +148,9 @@ public:
 		this->other = other;
 		this->role = role;
 	};
-	void join(int sleepBetweenAttempts = 500, int timeout = 5000) override;
-
-	void write(const byte* data, int size) override;
-	size_t read(byte* data, int sizeToRead) override {
+	int join(int sleepBetweenAttempts = 500, int timeout = 5000, bool first = true) override;
+    size_t write(const byte* data, int size, int peer = -1, int protocol = -1) override;
+	size_t read(byte* data, int sizeToRead, int peer = -1, int protocol = -1) override {
 		return boost::asio::read(socketForRead(), boost::asio::buffer(data, sizeToRead));
 	}
 	virtual ~CommPartyTCPSynced(); 

@@ -32,6 +32,7 @@ compile-json
 compile-boost
 compile-openssl
 compile-libote
+compile-kcp
 .cproject
 .project
 protocols/GMW/CMakeFiles/*
