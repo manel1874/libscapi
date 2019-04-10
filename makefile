@@ -205,7 +205,7 @@ compile-kcp:
 	@cp -r lib/KCP/ $(builddir)/
 	@$(MAKE) -C $(builddir)/KCP
 	@mkdir -p install/include/KCP
-	@mv $(builddir)/KCP/*.h install/include/KCP
+	@cp -r $(builddir)/KCP/*.h install/include/KCP
 	@mv $(builddir)/KCP/ikcp.a install/lib
 	@touch compile-kcp
 
