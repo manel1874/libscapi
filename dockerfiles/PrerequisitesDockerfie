@@ -20,13 +20,5 @@ RUN apt-get install libssl-dev -y
 RUN apt-get install libgmp3-dev -y 
 RUN apt-get install vim -y
 RUN apt-get install cmake -y
-RUN apt-get install zlib1g-dev -y
+RUN apt-get install zlib1g-dev liblog4cpp5-dev -y
 RUN rm -rf /var/lib/apt/lists/*
-
-# Download and install boost
-WORKDIR /root
-RUN wget -O boost_1_64_0.tar.bz2 http://sourceforge.net/projects/boost/files/boost/1.64.0/boost_1_64_0.tar.bz2/download 
-RUN tar --bzip2 -xf boost_1_64_0.tar.bz2
-WORKDIR boost_1_64_0
-RUN ./bootstrap.sh
-RUN ./b2 -j 8; exit 0 # TODO: boost build fails on some packages - need to fix it
