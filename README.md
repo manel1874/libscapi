@@ -46,7 +46,7 @@ Go to http://biulibscapi.readthedocs.org/ for a detailed explanations of our imp
 
 ## Installing libscapi
 
-Libscapi runs on Linux, MacOS and ARM64 and has been tested on the following version:
+Libscapi runs on Linux (x64 only, 32 bit systems are not supported), MacOS and ARM64 and has been tested on the following version:
 - Ubuntu 14.04/16.04/18.04 LTS
 - CentOS 7.3
 - Mac OS High Sierra 10.13
