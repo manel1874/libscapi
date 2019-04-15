@@ -61,11 +61,11 @@ CmdParser Protocol::getParser()
     return parser;
 }
 
-MPCProtocol::MPCProtocol(string protocolName, int argc, char* argv[]): Protocol (protocolName, argc, argv){
+MPCProtocol::MPCProtocol(string protocolName, int argc, char* argv[], bool initComm):
+             Protocol (protocolName, argc, argv){
 
     vector<string> subTaskNames{"Offline", "Online"};
     timer = new Measurement(*this, subTaskNames);
-
 
     partyID = stoi(this->getParser().getValueByKey(arguments, "partyID"));
     cout<<"ID = "<<partyID<<endl;
@@ -81,7 +81,8 @@ MPCProtocol::MPCProtocol(string protocolName, int argc, char* argv[]): Protocol 
     cout<<"partiesFile = "<<partiesFile<<endl;
 
     times = stoi(this->getParser().getValueByKey(arguments, "internalIterationsNumber"));
-    parties = comm.setCommunication(partyID, numParties, partiesFile);
+    if (initComm)
+        parties = comm.setCommunication(partyID, numParties, partiesFile);
     numThreads = stoi(this->getParser().getValueByKey(arguments, "numThreads"));
 
     //Calculates the number of threads.
@@ -94,6 +95,7 @@ MPCProtocol::MPCProtocol(string protocolName, int argc, char* argv[]): Protocol 
 
 
 }
+
 
 MPCProtocol::~MPCProtocol(){
     delete timer;

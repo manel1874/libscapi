@@ -104,7 +104,7 @@ protected:
     int numThreads, numPartiesForEachThread;
 
 public:
-    MPCProtocol(string protocolName, int argc, char* argv[]);
+    MPCProtocol(string protocolName, int argc, char* argv[], bool initComm = true);
     ~MPCProtocol();
 
     void run();
