@@ -29,13 +29,13 @@ GCC_STANDARD = c++14
 
 ifeq ($(uname_os), Linux)
 	INC            = -Iinstall/include -Iinstall/include/OTExtensionBristol -Iinstall/include/libOTe \
-	 -Iinstall/include/libOTe/cryptoTools -I/usr/local/opt/openssl/include/
-    LIBRARIES_DIR  = -Linstall/lib /usr/local/opt/openssl/lib
+	 -Iinstall/include/libOTe/cryptoTools
+    LIBRARIES_DIR  = -Linstall/lib
 endif
 ifeq ($(uname_os), Darwin)
     INC            = -Iinstall/include -Iinstall/include/OTExtensionBristol -Iinstall/include/libOTe \
-    -Iinstall/include/libOTe/cryptoTools -I/usr/local/opt/openssl/include/
-    LIBRARIES_DIR  = -Linstall/lib /usr/local/opt/openssl/lib
+    -Iinstall/include/libOTe/cryptoTools
+    LIBRARIES_DIR  = -Linstall/lib
 endif
 
 ifeq ($(uname_arch), x86_64)
@@ -201,7 +201,7 @@ endif
 
 compile-kcp:
 	@echo "Compiling the KCP library"
-	@mkdir -p $(builddir)/
+	@mkdir -p $(builddir)/KCP
 	@cp -r lib/KCP/ $(builddir)/
 	@$(MAKE) -C $(builddir)/KCP
 	@mkdir -p install/include/KCP
@@ -219,9 +219,7 @@ compile-blake:
 	@touch compile-blake
 
 compile-openssl:
-	@mkdir -p $(PWD)/install/lib
-	@mkdir -p $(PWD)/install/include
-	@mkdir -p $(builddir)/
+	$(info$(shell mkdir -p install/ install/lib install/include $(builddir)/))
 	echo "Compiling the openssl library"
 	@cp -r lib/openssl/ $(builddir)/openssl
 	export CFLAGS="-fPIC"
@@ -233,24 +231,24 @@ ifeq ($(uname_os), Darwin)
 endif
 	cd $(builddir)/openssl/; make 
 	cd $(builddir)/openssl/; make install
-	@cp $(builddir)/openssl/tmptrgt/lib/*.a $(PWD)/install/lib/
-	@cp -r $(builddir)/openssl/tmptrgt/include/openssl/ $(PWD)/install/include/
+	@cp $(builddir)/openssl/tmptrgt/lib/*.a install/lib/
+	@cp -r $(builddir)/openssl/tmptrgt/include/openssl/ install/include/
 	@touch compile-openssl
 
 compile-boost:
-	@mkdir -p $(PWD)/install/lib
-	@mkdir -p $(PWD)/install/include
+	@mkdir -p install/lib
+	@mkdir -p install/include
 	@mkdir -p $(builddir)/
 	echo "Compiling the boost library"
 	@cp -r lib/boost_1_64_0/ $(builddir)/boost_1_64_0
 	@cd $(builddir)/boost_1_64_0/; bash -c "BOOST_BUILD_PATH='./' ./bootstrap.sh --with-libraries=thread,system,log,serialization \
 	&& ./b2 cxxflags=-fPIC -j4"; # compile boost faster with threads
-	@cp $(builddir)/boost_1_64_0/stage/lib/*.a $(PWD)/install/lib/
+	@cp $(builddir)/boost_1_64_0/stage/lib/*.a install/lib/
 ifeq ($(uname_os), Linux)
-	@cp -r $(builddir)/boost_1_64_0/boost $(PWD)/install/include/
+	@cp -r $(builddir)/boost_1_64_0/boost install/include/
 endif
 ifeq ($(uname_os), Darwin)
-	@cp -R $(builddir)/boost_1_64_0/boost $(PWD)/install/include/
+	@cp -R $(builddir)/boost_1_64_0/boost install/include/
 endif
 	@touch compile-boost
 
@@ -263,9 +261,9 @@ ifeq ($(uname_os), Darwin)
 endif
 	@cmake $(builddir)/libOTe/CMakeLists.txt -DCMAKE_BUILD_TYPE=Release
 	@$(MAKE) -C $(builddir)/libOTe/
-	@cp $(builddir)/libOTe/lib/*.a $(PWD)/install/lib/
-	@mv $(PWD)/install/lib/liblibOTe.a $(PWD)/install/lib/libOTe.a
-	@mkdir -p $(PWD)/install/include/libOTe
+	@cp $(builddir)/libOTe/lib/*.a install/lib/
+	@mv install/lib/liblibOTe.a install/lib/libOTe.a
+	$(info$(shell mkdir -p install/include/libOTe))
 	@cd $(builddir)/libOTe/ && find . -name "*.h" -type f |xargs -I {} cp --parents {} $(PWD)/install/include/libOTe
 ifeq ($(uname_os), Linux)
 	@cp -r $(builddir)/libOTe/cryptoTools/cryptoTools/gsl $(PWD)/install/include/libOTe/cryptoTools/cryptoTools
@@ -273,7 +271,7 @@ endif
 ifeq ($(uname_os), Darwin)
 	@cp -R $(builddir)/libOTe/cryptoTools/cryptoTools/gsl $(PWD)/install/include/libOTe/cryptoTools/cryptoTools
 endif
-	@cp $(builddir)/libOTe/cryptoTools/thirdparty/miracl/source/libmiracl.a $(PWD)/install/lib
+	@cp $(builddir)/libOTe/cryptoTools/thirdparty/miracl/source/libmiracl.a install/lib
 	@touch compile-libote
 
 compile-ntl:
@@ -323,7 +321,7 @@ clean-install:
 	@rm -rf install
 
 clean-tests:
-	@rm -f tests/tests.exe
+	@rm -f tests.exe
 
 clean-boost:
 	@echo "Cleaning boost library"
@@ -345,5 +343,6 @@ clean-kcp:
 	@rm -rf $(builddir)/KCP/
 	@rm -f compile-kcp
 
-clean: clean-libote clean-openssl clean-boost clean-emp clean-otextension-bristol clean-ntl clean-install clean-tests clean-cpp
+clean: clean-install clean-libote clean-openssl clean-boost clean-emp clean-otextension-bristol clean-ntl \
+ clean-kcp clean-blake clean-cpp clean-tests
 
