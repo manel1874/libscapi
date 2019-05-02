@@ -46,6 +46,7 @@
 #include <fstream>
 #include <algorithm>
 #include <iterator>
+#include <iomanip>
 #include <sys/resource.h>
 #include <sys/time.h>
 #include "ConfigFile.hpp"

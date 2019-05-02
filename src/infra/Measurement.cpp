@@ -155,7 +155,11 @@ void Measurement::analyze()
         task["name"] = m_names[taskNameIdx];
 
         for (int iterationIdx = 0; iterationIdx < m_numberOfIterations; iterationIdx++)
-            task["iteration_" + to_string(iterationIdx)] = (*m_cpuEndTimes)[taskNameIdx][iterationIdx];
+        {
+            ostringstream streamObj;
+            streamObj << fixed << setprecision(3) << (*m_cpuEndTimes)[taskNameIdx][iterationIdx];
+            task["iteration_" + to_string(iterationIdx)] = streamObj.str();
+        }
 
         party.insert(party.begin(), task);
     }
