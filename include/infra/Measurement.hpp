@@ -87,8 +87,8 @@ private:
     void analyze(); // create JSON file with cpu times
     void createJsonFile(json j, string fileName);
 
-    vector<vector<long>> *m_cpuStartTimes;
-    vector<vector<long>> *m_cpuEndTimes;
+    vector<vector<double>> *m_cpuStartTimes;
+    vector<vector<double>> *m_cpuEndTimes;
     vector<string> m_names;
     vector<pair<string, string>> m_arguments;
 

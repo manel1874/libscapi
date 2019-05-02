@@ -100,8 +100,8 @@ void Measurement::init(string protocolName, int internalIterationsNumber, int pa
 
 void Measurement::init(vector <string> names)
 {
-    m_cpuStartTimes = new vector<vector<long>>(names.size(), vector<long>(m_numberOfIterations,0));
-    m_cpuEndTimes = new vector<vector<long>>(names.size(), vector<long>(m_numberOfIterations, 0));
+    m_cpuStartTimes = new vector<vector<double>>(names.size(), vector<double>(m_numberOfIterations,0));
+    m_cpuEndTimes = new vector<vector<double>>(names.size(), vector<double>(m_numberOfIterations, 0));
     m_names = move(names);
 }
 
