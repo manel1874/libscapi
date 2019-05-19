@@ -94,9 +94,9 @@ target_link_libraries(cryptoTools ${MIRACL_LIB})
 ## Boost
 ###########################################################################
 
-set(BOOST_ROOT "$ENV{HOME}/libscapi/install/include")
-set(Boost_INCLUDE_DIR "$ENV{HOME}/libscapi/install/include")
-link_directories($ENV{HOME}/libscapi/install/lib/)
+set(BOOST_ROOT "${LIBSCAPI_ROOT}/install/include")
+set(Boost_INCLUDE_DIR "{LIBSCAPI_ROOT}/install/include")
+link_directories({LIBSCAPI_ROOT}/install/lib/)
 
 set(Boost_USE_STATIC_LIBS        ON) # only find static libs
 set(Boost_USE_MULTITHREADED      ON)

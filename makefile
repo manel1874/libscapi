@@ -1,3 +1,4 @@
+export curdir=$(abspath)
 export builddir=$(abspath ./build)
 export prefix=$(abspath ./install)
 CXX=g++
@@ -259,7 +260,7 @@ compile-libote:compile-boost
 ifeq ($(uname_os), Darwin)
 	@cd $(builddir)/libOTe/cryptoTools/thirdparty/miracl/source && bash linux64 && cd ../../../../../../
 endif
-	@cmake $(builddir)/libOTe/CMakeLists.txt -DCMAKE_BUILD_TYPE=Release
+	@cmake $(builddir)/libOTe/CMakeLists.txt -DCMAKE_BUILD_TYPE=Release -DLIBSCAPI_ROOT=$(curdir)
 	@$(MAKE) -C $(builddir)/libOTe/
 	@cp $(builddir)/libOTe/lib/*.a install/lib/
 	@mv install/lib/liblibOTe.a install/lib/libOTe.a
