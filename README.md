@@ -1,6 +1,6 @@
 # LIBSCAPI - The Secure Computation API
 
-[![Build Status](https://travis-ci.org/cryptobiu/libscapi.svg?branch=dev)](https://travis-ci.org/cryptobiu/libscapi)
+[![Build Status](https://travis-ci.org/cryptobiu/libscapi.svg?branch=master)](https://travis-ci.org/cryptobiu/libscapi)
 
 ## Introduction
 libscapi is the Open source C++ library for implementing high performance secure two-party and multiparty computation protocols (SCAPI stands for the "Secure Computation API"). It provides a reliable, efficient, and highly flexible cryptographic infrastructure.
