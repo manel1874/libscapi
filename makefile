@@ -1,3 +1,4 @@
+export curdir=$(abspath)
 export builddir=$(abspath ./build)
 export prefix=$(abspath ./install)
 CXX=g++

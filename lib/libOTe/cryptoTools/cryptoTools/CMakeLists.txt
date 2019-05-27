@@ -102,7 +102,6 @@ set(Boost_USE_STATIC_LIBS        ON) # only find static libs
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_USE_STATIC_RUNTIME     ON)
 
-
 target_include_directories(cryptoTools PUBLIC ${Boost_INCLUDE_DIR})
 target_link_libraries(cryptoTools libboost_system.a libboost_thread.a libssl.a libcrypto.a dl z)
 
