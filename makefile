@@ -54,24 +54,23 @@ endif
 
 $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
 
-LD_FLAGS = 
-SUMO = no
+LD_FLAGS =
 
 all: libs libscapi tests
 
 ifeq ($(GCC_STANDARD), c++11)
 ifeq ($(uname_os), Linux)
 ifeq ($(uname_arch), x86_64)
-    libs: compile-openssl compile-boost compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc \
+    libs:  compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc \
      compile-otextension-bristol compile-kcp
 endif
 ifeq ($(uname_arch), aarch64)
-    libs: compile-openssl compile-boost compile-ntl compile-kcp
+    libs:  compile-ntl compile-kcp
 endif
 endif # Linux c++11
 
 ifeq ($(uname_os), Darwin)
-    libs: compile-openssl compile-boost compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc \
+    libs:  compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc \
     compile-kcp
 endif # Darwin c++11
 endif # c++11
@@ -80,15 +79,15 @@ endif # c++11
 ifeq ($(GCC_STANDARD), c++14)
 ifeq ($(uname_os), Linux)
 ifeq ($(uname_arch), x86_64)
-    libs: compile-openssl compile-boost compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc \
+    libs:  compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc \
     compile-libote compile-otextension-bristol compile-kcp
 endif
 ifeq ($(uname_arch), aarch64)
-    libs: compile-openssl compile-boost compile-ntl compile-kcp
+    libs:  compile-ntl compile-kcp
 endif
 endif # Linux c++14
 ifeq ($(uname_os), Darwin)
-    libs: compile-openssl compile-boost compile-libote compile-ntl compile-blake compile-emp-tool compile-emp-ot \
+    libs:  compile-libote compile-ntl compile-blake compile-emp-tool compile-emp-ot \
      compile-emp-m2pc compile-kcp
 endif # Darwin c++14
 endif
@@ -102,6 +101,9 @@ $(OUT_DIR):
 $(SLib): $(OBJ_FILES)
 	ar ru $@ $^ 
 	ranlib $@
+
+tests: compile-tests
+	cd ./tests; ./tests.exe
 
 obj/circuits_c/%.o: src/circuits_c/%.c
 	gcc -fPIC -mavx -maes -mpclmul -DRDTSC -DTEST=AES128  -O3 -c -o $@ $<
@@ -122,9 +124,105 @@ obj/mid_layer/%.o: src/mid_layer/%.cpp
 obj/cryptoInfra/%.o: src/cryptoInfra/%.cpp
 	g++ -c $(CPP_OPTIONS) -o $@ $<
 
-tests: compile-tests
-	cd ./tests; ./tests.exe
-	
+#### libs compilation ####
+compile-ntl:
+	echo "Compiling the NTL library..."
+	mkdir -p $(builddir)/NTL
+	cp -r lib/NTL/. $(builddir)/NTL
+	chmod 777 $(builddir)/NTL/src/configure
+	cd $(builddir)/NTL/src/ && ./configure CXX=$(CXX)
+	$(MAKE) -C $(builddir)/NTL/src/
+	$(MAKE) -C $(builddir)/NTL/src/ PREFIX=$(prefix) install
+	@touch compile-ntl
+
+compile-blake:
+	@echo "Compiling the BLAKE2 library"
+	@mkdir -p $(builddir)/BLAKE2/
+	@cp -r lib/BLAKE2/sse/. $(builddir)/BLAKE2
+	@$(MAKE) -C $(builddir)/BLAKE2
+	@$(MAKE) -C $(builddir)/BLAKE2 BUILDDIR=$(builddir)  install
+	@touch compile-blake
+
+prepare-emp:
+	@mkdir -p $(builddir)/EMP
+	@cp -r lib/EMP/. $(builddir)/EMP
+	@cmake -DALIGN=16 -DARCH=X64 -DARITH=curve2251-sse -DCHECK=off -DFB_POLYN=251 \
+	-DFB_METHD="INTEG;INTEG;QUICK;QUICK;QUICK;QUICK;LOWER;SLIDE;QUICK" -DFB_PRECO=on -DFB_SQRTF=off \
+	-DEB_METHD="PROJC;LODAH;COMBD;INTER" -DEC_METHD="CHAR2" \
+	-DCOMP="-O3 -funroll-loops -fomit-frame-pointer -march=native -msse4.2 -mpclmul \
+	-Wno-unused-function -Wno-unused-variable -Wno-return-type -Wno-discarded-qualifiers" \
+	-DTIMER=CYCLE -DWITH="MD;DV;BN;FB;EB;EC" -DWSIZE=64 $(builddir)/EMP/relic/CMakeLists.txt \
+	-DCMAKE_INSTALL_PREFIX=$(prefix)
+	@cd $(builddir)/EMP/relic && $(MAKE)
+	@cd $(builddir)/EMP/relic && $(MAKE) install
+	@touch prepare-emp
+
+compile-emp-tool:prepare-emp
+	@cd $(builddir)/EMP/emp-tool
+	@cmake -D CMAKE_CXX_FLAGS="-Wno-unused-function -Wno-unused-variable -Wno-return-type" \
+	$(builddir)/EMP/emp-tool/CMakeLists.txt \
+	-DCMAKE_INSTALL_PREFIX=$(prefix)
+	@cd $(builddir)/EMP/emp-tool/ && $(MAKE)
+	@cd $(builddir)/EMP/emp-tool/ && $(MAKE) install
+	@touch compile-emp-tool
+
+compile-emp-ot:compile-emp-tool
+	@cd $(builddir)/EMP/emp-ot
+	@cmake -D CMAKE_CXX_FLAGS="-Wno-unused-function -Wno-unused-variable -Wno-return-type" \
+	$(builddir)/EMP/emp-ot/CMakeLists.txt \
+	-DCMAKE_INSTALL_PREFIX=$(prefix)
+	@cd $(builddir)/EMP/emp-ot/ && $(MAKE)
+	@cd $(builddir)/EMP/emp-ot/ && $(MAKE) install
+	@touch compile-emp-ot
+
+compile-emp-m2pc:compile-emp-ot
+	@cd $(builddir)/EMP/emp-m2pc
+	@cmake -D CMAKE_CXX_FLAGS="-Wno-unused-function -Wno-unused-variable -Wno-return-type" \
+	$(builddir)/EMP/emp-m2pc/CMakeLists.txt \
+	-DCMAKE_INSTALL_PREFIX=$(prefix)
+	@cd $(builddir)/EMP/emp-m2pc/ && $(MAKE)
+	@touch compile-emp-m2pc
+
+# Support only in c++14
+compile-libote:
+	@echo "Compiling libOTe library..."
+	@cp -r lib/libOTe $(builddir)/libOTe
+ifeq ($(uname_os), Darwin)
+	@cd $(builddir)/libOTe/cryptoTools/thirdparty/miracl/source && bash linux64 && cd ../../../../../../
+endif
+	@cmake $(builddir)/libOTe/CMakeLists.txt -DCMAKE_BUILD_TYPE=Release -DLIBSCAPI_ROOT=$(PWD)
+	@$(MAKE) -C $(builddir)/libOTe/
+	@cp $(builddir)/libOTe/lib/*.a install/lib/
+	@mv install/lib/liblibOTe.a install/lib/libOTe.a
+	$(info$(shell mkdir -p install/include/libOTe))
+	@cd $(builddir)/libOTe/ && find . -name "*.h" -type f |xargs -I {} cp --parents {} $(PWD)/install/include/libOTe
+ifeq ($(uname_os), Linux)
+	@cp -r $(builddir)/libOTe/cryptoTools/cryptoTools/gsl $(PWD)/install/include/libOTe/cryptoTools/cryptoTools
+endif
+ifeq ($(uname_os), Darwin)
+	@cp -R $(builddir)/libOTe/cryptoTools/cryptoTools/gsl $(PWD)/install/include/libOTe/cryptoTools/cryptoTools
+endif
+	@cp $(builddir)/libOTe/cryptoTools/thirdparty/miracl/source/libmiracl.a install/lib
+	@touch compile-libote
+
+compile-otextension-bristol:
+	@echo "Compiling the OtExtension malicious Bristol library..."
+	@cp -r lib/OTExtensionBristol $(builddir)/OTExtensionBristol
+	@$(MAKE) -C $(builddir)/OTExtensionBristol CXX=$(CXX)
+	@$(MAKE) -C $(builddir)/OTExtensionBristol CXX=$(CXX) install
+	@touch compile-otextension-bristol
+
+compile-kcp:
+	@echo "Compiling the KCP library"
+	@mkdir -p $(builddir)/KCP
+	@cp -r lib/KCP/ $(builddir)/
+	@$(MAKE) -C $(builddir)/KCP
+	@mkdir -p install/include/KCP
+	@cp -r $(builddir)/KCP/*.h install/include/KCP
+	@mv $(builddir)/KCP/ikcp.a install/lib
+	@touch compile-kcp
+
+#### Tests compilation ####
 .PHONY: compile-tests
 compile-tests:
 ifeq ($(uname_os), Linux)
@@ -151,152 +249,7 @@ ifeq ($(uname_os), Darwin)
 endif
 	@rm -rf build
 
-	
-prepare-emp:compile-openssl
-ifeq ($(SUMO),yes)
-	@mkdir -p $(builddir)/EMP
-	@cp -r lib/EMP/. $(builddir)/EMP
-	@cmake -DALIGN=16 -DARCH=X64 -DARITH=curve2251-sse -DCHECK=off -DFB_POLYN=251 -DFB_METHD="INTEG;INTEG;QUICK;QUICK;QUICK;QUICK;LOWER;SLIDE;QUICK" -DFB_PRECO=on -DFB_SQRTF=off -DEB_METHD="PROJC;LODAH;COMBD;INTER" -DEC_METHD="CHAR2" -DCOMP="-O3 -funroll-loops -fomit-frame-pointer -march=native -msse4.2 -mpclmul -Wno-unused-function -Wno-unused-variable -Wno-return-type -Wno-discarded-qualifiers" -DTIMER=CYCLE -DWITH="MD;DV;BN;FB;EB;EC" -DWORD=64 $(builddir)/EMP/relic/CMakeLists.txt
-	@cd $(builddir)/EMP/relic && $(MAKE)
-	@cd $(builddir)/EMP/relic && $(MAKE) install
-	@touch prepare-emp
-endif
-
-compile-emp-tool:prepare-emp
-ifeq ($(SUMO),yes)
-	@cd $(builddir)/EMP/emp-tool
-	@cmake -DOPENSSL_ROOT_DIR=$(includedir) -DOPENSSL_INCLUDE_DIR=$(includedir) \
-	-DOPENSSL_LIBRARIES=$(libdir) -DOPENSSL_CRYPTO_LIBRARY=$(libdir)/libcrypto.a \
-	-DOPENSSL_SSL_LIBRARY=$(libdir)/libssl.a \
-	-D CMAKE_CXX_FLAGS="-Wno-unused-function -Wno-unused-variable -Wno-return-type" \
-	$(builddir)/EMP/emp-tool/CMakeLists.txt
-	@cd $(builddir)/EMP/emp-tool/ && $(MAKE)
-	@cd $(builddir)/EMP/emp-tool/ && $(MAKE) install
-	@touch compile-emp-tool
-endif
-
-compile-emp-ot:compile-emp-tool
-ifeq ($(SUMO),yes)
-	@cd $(builddir)/EMP/emp-ot
-	@cmake -DOPENSSL_ROOT_DIR=$(includedir) -DOPENSSL_INCLUDE_DIR=$(includedir) \
-	-DOPENSSL_LIBRARIES=$(libdir) -DOPENSSL_CRYPTO_LIBRARY=$(libdir)/libcrypto.a \
-	-DOPENSSL_SSL_LIBRARY=$(libdir)/libssl.a \
-	-D CMAKE_CXX_FLAGS="-Wno-unused-function -Wno-unused-variable -Wno-return-type" \
-	$(builddir)/EMP/emp-ot/CMakeLists.txt
-	@cd $(builddir)/EMP/emp-ot/ && $(MAKE)
-	@cd $(builddir)/EMP/emp-ot/ && $(MAKE) install
-	@touch compile-emp-ot
-endif
-	
-compile-emp-m2pc:compile-emp-ot
-ifeq ($(SUMO),yes)
-	@cd $(builddir)/EMP/emp-m2pc
-	@cmake -DOPENSSL_ROOT_DIR=$(includedir) -DOPENSSL_INCLUDE_DIR=$(includedir) \
-	-DOPENSSL_LIBRARIES=$(libdir) -DOPENSSL_CRYPTO_LIBRARY=$(libdir)/libcrypto.a \
-	-DOPENSSL_SSL_LIBRARY=$(libdir)/libssl.a \
-	-D CMAKE_CXX_FLAGS="-Wno-unused-function -Wno-unused-variable -Wno-return-type" \
-	$(builddir)/EMP/emp-m2pc/CMakeLists.txt
-	@cd $(builddir)/EMP/emp-m2pc/ && $(MAKE)
-	@touch compile-emp-m2pc
-endif
-
-compile-kcp:
-	@echo "Compiling the KCP library"
-	@mkdir -p $(builddir)/KCP
-	@cp -r lib/KCP/ $(builddir)/
-	@$(MAKE) -C $(builddir)/KCP
-	@mkdir -p install/include/KCP
-	@cp -r $(builddir)/KCP/*.h install/include/KCP
-	@mv $(builddir)/KCP/ikcp.a install/lib
-	@touch compile-kcp
-
-
-compile-blake:
-	@echo "Compiling the BLAKE2 library"
-	@mkdir -p $(builddir)/BLAKE2/
-	@cp -r lib/BLAKE2/sse/. $(builddir)/BLAKE2
-	@$(MAKE) -C $(builddir)/BLAKE2
-	@$(MAKE) -C $(builddir)/BLAKE2 BUILDDIR=$(builddir)  install
-	@touch compile-blake
-
-compile-openssl:
-	$(info$(shell mkdir -p install/ install/lib install/include $(builddir)/))
-	echo "Compiling the openssl library"
-	@cp -r lib/openssl/ $(builddir)/openssl
-	export CFLAGS="-fPIC"
-ifeq ($(uname_os), Linux)
-	    cd $(builddir)/openssl/; ./config --prefix=$(builddir)/openssl/tmptrgt  enable-ec_nistp_64_gcc_128 -no-shared
-endif
-ifeq ($(uname_os), Darwin)
-	cd $(builddir)/openssl/; ./Configure darwin64-x86_64-cc --prefix=$(builddir)/openssl/tmptrgt  enable-ec_nistp_64_gcc_128 -no-shared
-endif
-	cd $(builddir)/openssl/; make 
-	cd $(builddir)/openssl/; make install
-	@cp $(builddir)/openssl/tmptrgt/lib/*.a install/lib/
-	@cp -r $(builddir)/openssl/tmptrgt/include/openssl/ install/include/
-	@touch compile-openssl
-
-compile-boost:
-	@mkdir -p install/lib
-	@mkdir -p install/include
-	@mkdir -p $(builddir)/
-	echo "Compiling the boost library"
-	@cp -r lib/boost_1_64_0/ $(builddir)/boost_1_64_0
-	@cd $(builddir)/boost_1_64_0/; bash -c "BOOST_BUILD_PATH='./' ./bootstrap.sh --with-libraries=thread,system,log,serialization \
-	&& ./b2 cxxflags=-fPIC -j4"; # compile boost faster with threads
-	@cp $(builddir)/boost_1_64_0/stage/lib/*.a install/lib/
-ifeq ($(uname_os), Linux)
-	@cp -r $(builddir)/boost_1_64_0/boost install/include/
-endif
-ifeq ($(uname_os), Darwin)
-	@cp -R $(builddir)/boost_1_64_0/boost install/include/
-endif
-	@touch compile-boost
-
-# Support only in c++14
-compile-libote:compile-boost
-	@echo "Compiling libOTe library..."
-	@cp -r lib/libOTe $(builddir)/libOTe
-ifeq ($(uname_os), Darwin)
-	@cd $(builddir)/libOTe/cryptoTools/thirdparty/miracl/source && bash linux64 && cd ../../../../../../
-endif
-	@cmake $(builddir)/libOTe/CMakeLists.txt -DCMAKE_BUILD_TYPE=Release -DLIBSCAPI_ROOT=$(PWD)
-	@$(MAKE) -C $(builddir)/libOTe/
-	@cp $(builddir)/libOTe/lib/*.a install/lib/
-	@mv install/lib/liblibOTe.a install/lib/libOTe.a
-	$(info$(shell mkdir -p install/include/libOTe))
-	@cd $(builddir)/libOTe/ && find . -name "*.h" -type f |xargs -I {} cp --parents {} $(PWD)/install/include/libOTe
-ifeq ($(uname_os), Linux)
-	@cp -r $(builddir)/libOTe/cryptoTools/cryptoTools/gsl $(PWD)/install/include/libOTe/cryptoTools/cryptoTools
-endif
-ifeq ($(uname_os), Darwin)
-	@cp -R $(builddir)/libOTe/cryptoTools/cryptoTools/gsl $(PWD)/install/include/libOTe/cryptoTools/cryptoTools
-endif
-	@cp $(builddir)/libOTe/cryptoTools/thirdparty/miracl/source/libmiracl.a install/lib
-	@touch compile-libote
-
-compile-ntl:
-	echo "Compiling the NTL library..."
-	mkdir -p $(builddir)/NTL
-	cp -r lib/NTL/. $(builddir)/NTL
-	chmod 777 $(builddir)/NTL/src/configure
-	cd $(builddir)/NTL/src/ && ./configure CXX=$(CXX) 
-	$(MAKE) -C $(builddir)/NTL/src/
-	$(MAKE) -C $(builddir)/NTL/src/ PREFIX=$(prefix) install
-	touch compile-ntl
-
-compile-otextension-bristol: 
-	@echo "Compiling the OtExtension malicious Bristol library..."
-	@cp -r lib/OTExtensionBristol $(builddir)/OTExtensionBristol
-	@$(MAKE) -C $(builddir)/OTExtensionBristol CXX=$(CXX)
-	@$(MAKE) -C $(builddir)/OTExtensionBristol CXX=$(CXX) install
-	@touch compile-otextension-bristol
-
-clean-otextension-bristol:
-	@echo "Cleaning the otextension malicious bristol build dir..."
-	@rm -rf $(builddir)/OTExtensionBristol
-	@rm -f compile-otextension-bristol
-
+#### cleanning objects ####
 clean-ntl:
 	@echo "Cleaning the ntl build dir..."
 	@rm -rf $(builddir)/NTL
@@ -312,6 +265,21 @@ clean-emp:
 	@rm -rf $(builddir)/EMP
 	@rm -f prepare-emp compile-emp-tool compile-emp-ot compile-emp-m2pc
 
+clean-libote:
+	@echo "Cleaning libOTe library"
+	@rm -rf $(builddir)/libOTe/
+	@rm -f compile-libote
+
+clean-otextension-bristol:
+	@echo "Cleaning the otextension malicious bristol build dir..."
+	@rm -rf $(builddir)/OTExtensionBristol
+	@rm -f compile-otextension-bristol
+
+clean-kcp:
+	@echo "Cleaning KCP library"
+	@rm -rf $(builddir)/KCP/
+	@rm -f compile-kcp
+
 clean-cpp:
 	@echo "cleaning .obj files"
 	@rm -rf $(OUT_DIR)
@@ -321,29 +289,5 @@ clean-cpp:
 clean-install:
 	@rm -rf install
 
-clean-tests:
-	@rm -f tests.exe
-
-clean-boost:
-	@echo "Cleaning boost library"
-	@rm -rf $(builddir)/boost_1_64_0
-	@rm -f compile-boost
-	
-clean-openssl:
-	@echo "Cleaning openssl library"
-	@rm -rf $(builddir)/openssl
-	@rm -f compile-openssl
-
-clean-libote:
-	@echo "Cleaning libOTe library"
-	@rm -rf $(builddir)/libOTe/
-	@rm -f compile-libote
-
-clean-kcp:
-	@echo "Cleaning KCP library"
-	@rm -rf $(builddir)/KCP/
-	@rm -f compile-kcp
-
-clean: clean-install clean-libote clean-openssl clean-boost clean-emp clean-otextension-bristol clean-ntl \
- clean-kcp clean-blake clean-cpp clean-tests
+clean: clean-ntl clean-blake clean-emp clean-libote clean-otextension-bristol clean-kcp clean-cpp clean-install
 

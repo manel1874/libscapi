@@ -43,16 +43,28 @@ OpenSSLHash::OpenSSLHash(string hashName) {
 		throw runtime_error("failed to create hash");
 
 	// Create an OpenSSL EVP_MD_CTX struct and initialize it with the created hash.
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	hash = shared_ptr<EVP_MD_CTX>(EVP_MD_CTX_create(), EVP_MD_CTX_destroy);
+
 	if (0 == (EVP_DigestInit(hash.get(), md)))
 		throw runtime_error("failed to create hash");
 
 	hashSize = EVP_MD_CTX_size(hash.get());
+#else
+    hash = EVP_MD_CTX_new();
+    if (0 == (EVP_DigestInit(hash, md)))
+        throw runtime_error("failed to create hash");
+    hashSize = EVP_MD_CTX_size(hash);
+#endif
 }
 
 string OpenSSLHash::getAlgorithmName() {
 	//Return the name of the underlying hash function.
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	int type = EVP_MD_CTX_type(hash.get());
+#else
+	int type = EVP_MD_CTX_type(hash);
+#endif
 	const char* name = OBJ_nid2sn(type);
 	return string(name);
 }
@@ -68,7 +80,11 @@ void OpenSSLHash::update(const vector<byte> &in, int inOffset, int inLen){
 		throw new out_of_range("wrong length for the given input buffer");
 
 	// Update the hash with the message.
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	EVP_DigestUpdate(hash.get(), in.data() + inOffset, inLen);
+#else
+	EVP_DigestUpdate(hash, in.data() + inOffset, inLen);
+#endif
 }
 
 void OpenSSLHash::hashFinal(vector<byte> &out, int outOffset) {
@@ -76,16 +92,26 @@ void OpenSSLHash::hashFinal(vector<byte> &out, int outOffset) {
 	//Checks that the offset and length are correct.
 	if (outOffset<0)
 		throw new out_of_range("wrong offset for the given output buffer");
-
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	int length = EVP_MD_CTX_size(hash.get());
+#else
+	int length = EVP_MD_CTX_size(hash);
+#endif
 	if ((int) out.size() < outOffset + length) {
 		out.resize(outOffset + length);
 	}
 	//Call the underlying hash's final method.
-	EVP_DigestFinal_ex(hash.get(), out.data() + outOffset, NULL);
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+    EVP_DigestFinal_ex(hash.get(), out.data() + outOffset, NULL);
 	
 	//Initialize the hash structure again to enable repeated calls.
 	EVP_DigestInit(hash.get(), EVP_MD_CTX_md(hash.get()));
+#else
+    EVP_DigestFinal_ex(hash, out.data() + outOffset, NULL);
+
+    //Initialize the hash structure again to enable repeated calls.
+    EVP_DigestInit(hash, EVP_MD_CTX_md(hash));
+#endif
 }
 
 shared_ptr<CryptographicHash> CryptographicHash::get_new_cryptographic_hash(string hashName)

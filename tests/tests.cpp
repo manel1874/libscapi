@@ -311,15 +311,26 @@ TEST_CASE("MathAlgorithm", "[crt, sqrt_mod_3_4, math]")
 
 void test_multiply_group_elements(shared_ptr<DlogGroup> dg, bool check_membership=false)
 {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	auto ge = dg->createRandomElement();
 	auto ige = dg->getInverse(ge.get());
 	auto mul = dg->multiplyGroupElements(ge.get(), ige.get());
 	auto identity = dg->getIdentity();
+#else
+    auto ge = dg.get()->createRandomElement();
+    auto ige = dg.get()->getInverse(ge.get());
+    auto mul = dg.get()->multiplyGroupElements(ge.get(), ige.get());
+    auto identity = dg.get()->getIdentity();
+#endif
 
 	vector <shared_ptr<GroupElement>> vs{ ge, ige, mul, identity };
 	if (check_membership)
 		for (auto tge : vs)
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 			REQUIRE(dg->isMember(tge.get()));
+#else
+			REQUIRE(dg.get()->isMember((tge.get())));
+#endif
 
 	REQUIRE(mul->isIdentity());
 }
@@ -811,7 +822,8 @@ TEST_CASE("TrapdoorPermutation", "[OpenSSL]")
 		biginteger public_mod = 55;
 		int public_exponent = 3;
 		int private_exponent = 7;
-		tp.setKey(make_shared<RSAPublicKey>(public_mod, public_exponent), make_shared<RSAPrivateKey>(public_mod, private_exponent));
+		tp.setKey(make_shared<RSAPublicKey>(public_mod, public_exponent),
+		        make_shared<RSAPrivateKey>(public_mod, private_exponent));
 		auto re_src = tp.generateRandomTPElement();
 		auto re_enc = tp.compute(re_src.get());
 		auto re_inv = tp.invert(re_enc.get());

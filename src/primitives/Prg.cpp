@@ -242,7 +242,9 @@ PrgFromOpenSSLAES::~PrgFromOpenSSLAES() {
     //free aes
     if(aes != nullptr) {
         EVP_CIPHER_CTX_cleanup(aes);
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
         delete aes;
+#endif
     }
 }
 
@@ -263,9 +265,12 @@ SecretKey PrgFromOpenSSLAES::generateKey(int keySize) {
 
 void PrgFromOpenSSLAES::setKey(SecretKey & secretKey) {
 
-    if (_isKeySet == false) {
-
+    if (!_isKeySet) {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
         aes = new EVP_CIPHER_CTX;
+#else
+        aes = EVP_CIPHER_CTX_new();
+#endif
 
         //init the aes prp using openssl
         EVP_CIPHER_CTX_init(aes);

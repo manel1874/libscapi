@@ -39,7 +39,11 @@
 */
 class OpenSSLRSAPermutation : public virtual TrapdoorPermutation, public virtual RSAPermutation {
 private:
-	shared_ptr<RSA> rsa; // Pointer to the SSL RSA object.
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+	shared_ptr<RSA> _rsa; // Pointer to the SSL RSA object.
+#else
+    RSA *_rsa;
+#endif
 	shared_ptr<PrgFromOpenSSLAES> random;
 	shared_ptr<RSA> initRSAPublicPrivateCrt(biginteger & pubExp, biginteger & privExp, biginteger & p,
 		biginteger & q, biginteger & dp, biginteger & dq, biginteger & crt);

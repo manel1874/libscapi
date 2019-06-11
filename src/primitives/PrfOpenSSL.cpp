@@ -197,9 +197,14 @@ void OpenSSLAES::setKey(SecretKey & secretKey) {
 /*************************************************/
 OpenSSLHMAC::OpenSSLHMAC(string hashName, const shared_ptr<PrgFromOpenSSLAES> & random) {
 	//Create the underlying Openssl's Hmac object.
-	hmac = new  HMAC_CTX;
-	OpenSSL_add_all_digests();
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+	hmac = new HMAC_CTX;
 	HMAC_CTX_init(hmac);
+#else
+    hmac = HMAC_CTX_new();
+#endif
+    OpenSSL_add_all_digests();
+
 
 	/*
 	* The way we call the hash is not the same as OpenSSL. For example: we call "SHA-1" while OpenSSL calls it "SHA1".
@@ -222,10 +227,15 @@ void OpenSSLHMAC::setKey(SecretKey & secretKey) {
 	auto secVec = secretKey.getEncoded();
 	HMAC_Init_ex(hmac, &secVec[0], secVec.size(), NULL, NULL);
 	_isKeySet = true;
+	_key = secretKey;
 }
 
 string OpenSSLHMAC::getAlgorithmName() {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	int type = EVP_MD_type(hmac->md);
+#else
+    int type = EVP_MD_type(HMAC_CTX_get_md(hmac));
+#endif
 	// Convert the type to a name.
 	const char* name = OBJ_nid2sn(type);
 	return "Hmac/" + string(name);
@@ -259,8 +269,11 @@ void OpenSSLHMAC::computeBlock(const vector<byte> & inBytes, int inOffset, int i
 	
 	// Update the Hmac object.
 	HMAC_Update(hmac, &inBytes[inOffset], inLen);
-
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	int size = EVP_MD_size(hmac->md);	// Get the size of the hash output.
+#else
+    int size = EVP_MD_size(HMAC_CTX_get_md(hmac));
+#endif
 	if ((int)outBytes.size() < outOffset + size)
 		outBytes.resize(outOffset + size);
 
@@ -269,7 +282,13 @@ void OpenSSLHMAC::computeBlock(const vector<byte> & inBytes, int inOffset, int i
 		throw runtime_error("failed to init hmac object");
 
 	// initialize the Hmac again in order to enable repeated calls.
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	if (0 == (HMAC_Init_ex(hmac, hmac->key, hmac->key_length, hmac->md, NULL)))
+#else
+	    SecretKey key = _key;
+	    if (0 == (HMAC_Init_ex(hmac, (const void*)_key.getEncoded().data(), key.getEncoded().size(),
+	            HMAC_CTX_get_md(hmac), NULL)))
+#endif
 		throw runtime_error("failed to init hmac object");
 }
 
@@ -346,15 +365,26 @@ void OpenSSLHMAC::doFinal(vector<byte> & msg, int offset, int msgLength, vector<
 		throw runtime_error("failed to init hmac object");
 
 	//initialize the Hmac again in order to enable repeated calls.
-	if (0 == (HMAC_Init_ex(hmac, hmac->key, hmac->key_length, hmac->md, NULL)))
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+    if (0 == (HMAC_Init_ex(hmac, hmac->key, hmac->key_length, hmac->md, NULL)))
+#else
+    SecretKey key = _key;
+    if (0 == (HMAC_Init_ex(hmac, (const void*)_key.getEncoded().data(), key.getEncoded().size(),
+                           HMAC_CTX_get_md(hmac), NULL)))
+#endif
 		throw runtime_error("failed to init hmac object");
 }
 
 OpenSSLHMAC::~OpenSSLHMAC()
 {
 	//Delete the underlying openssl's object.
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	HMAC_CTX_cleanup(hmac);
 	delete hmac;
+#else
+    HMAC_CTX_free(hmac);
+#endif
+
 }
 
 /*************************************************/

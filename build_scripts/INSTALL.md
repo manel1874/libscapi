@@ -6,7 +6,7 @@
 - sudo apt-get update
 - sudo apt-get install -y git
 - sudo apt-get install -y build-essential
-- sudo apt-get install -y libssl-dev libgmp3-dev cmake liblog4cpp5-dev
+- sudo apt-get install -y libssl-dev libgmp3-dev cmake liblog4cpp5-dev libboost-all-dev
 
 #### CentOS 7.3
 - sudo yum groupinstall -y 'Development Tools'

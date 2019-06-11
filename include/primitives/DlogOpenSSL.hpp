@@ -78,8 +78,13 @@ public:
 */
 class OpenSSLDlogZpSafePrime : public DlogZpSafePrime, public DDH {
 private:
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	shared_ptr<DH> dlog;		// Underlying OpenSSL group object.
 	shared_ptr<BN_CTX> ctx;
+#else
+    DH *dlog;
+    BN_CTX *ctx;
+#endif
 	void createOpenSSLDlogZp(const biginteger & p, const biginteger & q, const biginteger & g);
 	void createRandomOpenSSLDlogZp(int numBits);
 

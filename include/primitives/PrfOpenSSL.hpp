@@ -174,6 +174,7 @@ private:
 	HMAC_CTX * hmac; // Pointer to the OpenSSL hmac object.
 	bool _isKeySet;  // Until setKey is called set to false.
 	shared_ptr<PrgFromOpenSSLAES> random; //source of randomness used in key generation
+	SecretKey _key; //needed for OpenSSL V1.1
 
 public: 
 	/**
@@ -200,7 +201,14 @@ public:
 	void setMacKey(SecretKey & secretKey) override { setKey(secretKey); };
 	bool isKeySet() override { return _isKeySet; };
 	string getAlgorithmName() override;
-	int getBlockSize() override { return EVP_MD_size(hmac->md); };
+	int getBlockSize() override
+	{
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+	    return EVP_MD_size(hmac->md);
+#else
+        return EVP_MD_size(HMAC_CTX_get_md(hmac));
+#endif
+	};
 	
 	/**
 	* Computes the function using the secret key.
