@@ -1,39 +1,25 @@
 cmake_minimum_required (VERSION 2.8.11)
 project (emp-m2pc)
+set(NAME "emp-m2pc")
 
-include_directories(${CMAKE_SOURCE_DIR})
+find_path(CMAKE_FOLDER NAMES cmake/emp-tool-config.cmake)
+include(${CMAKE_FOLDER}/cmake/common.cmake)
+include(${CMAKE_FOLDER}/cmake/source_of_randomness.cmake)
+include(${CMAKE_FOLDER}/cmake/threading.cmake)
 
-set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin )
+FIND_PACKAGE(emp-ot REQUIRED)
+INCLUDE_DIRECTORIES(${EMP-OT_INCLUDE_DIRS})
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} cmake/)
-
-FIND_PACKAGE(emp-ot)
-INCLUDE_DIRECTORIES(/usr/local/include/emp-tool /usr/local/include/emp-ot ${EMP-OT_INCLUDE_DIRS})
-
-set (CMAKE_C_FLAGS "-pthread -Wall -Wno-unused-function -Wno-unused-variable -Wno-unused-result -Wno-return-type -Wno-sign-compare -march=native -O3 -maes")
-#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg -ggdb")
-set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++0x")
-
+# Test cases
 macro (add_test _name)
-	add_executable("test_${_name}" "test/${_name}.cpp" ${basics})
-	target_link_libraries("test_${_name}"  relic  ${OPENSSL_LIBRARIES} gmp ${EMP-TOOL_LIBRARIES})
+	add_test_with_lib(${_name} ${EMP-OT_LIBRARIES})
 endmacro()
 
-macro (add_bench _name)
-	add_executable("bench_${_name}" "bench/${_name}.cpp" ${basics})
-	target_link_libraries("bench_${_name}"  relic  ${OPENSSL_LIBRARIES} gmp ${EMP-TOOL_LIBRARIES})
-endmacro()
-
-macro (add_example _name)
-	add_executable("example_${_name}" "example/${_name}.cpp" ${basics})
-	target_link_libraries("example_${_name}"  relic  ${OPENSSL_LIBRARIES} gmp ${EMP-TOOL_LIBRARIES})
-endmacro()
-
-add_test (mal)
-
-add_bench (mal2pc)
-add_bench (mal2pc_other)
-add_bench (mal_decompose)
-add_bench (mal2pc-comb)
-add_bench (xor-tree)
-add_bench (ot_xor_tree)
+add_test (sha1)
+add_test (sha256)
+add_test (mal2pc)
+add_test (mal2pc_other)
+add_test (mal_decompose)
+add_test (mal2pc-comb)
+add_test (xor-tree)
+add_test (ot_xor_tree)

@@ -1,33 +1,61 @@
-cmake_minimum_required (VERSION 2.8.11)
+cmake_minimum_required (VERSION 3.0)
 project (emp-ot)
 set(NAME "emp-ot")
+set (CMAKE_CXX_STANDARD 11) 
 
-include_directories(${CMAKE_SOURCE_DIR})
-include_directories(${CMAKE_SOURCE_DIR}/ot)
+find_path(CMAKE_FOLDER NAMES cmake/emp-tool-config.cmake)
+include(${CMAKE_FOLDER}/cmake/common.cmake)
+include(${CMAKE_FOLDER}/cmake/source_of_randomness.cmake)
+include(${CMAKE_FOLDER}/cmake/threading.cmake)
+#include_directories(${RELIC_INCLUDE_DIR} ${EMP-TOOL_INCLUDE_DIR})
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin )
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} cmake/)
-FIND_PACKAGE(emp-tool)
-INCLUDE_DIRECTORIES(${EMP-TOOL_INCLUDE_DIRS})
 
-set (CMAKE_C_FLAGS "-pthread -Wall -Wno-unused-function -Wno-unused-variable -Wno-unused-result -Wno-return-type -Wno-sign-compare -march=native -O3 -maes")
-#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg -ggdb")
-set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++0x")
 
-add_executable(shot test/shot.cpp)
-target_link_libraries(shot  relic  ${OPENSSL_LIBRARIES} gmp ${EMP-TOOL_LIBRARIES}) 
+find_package(emp-tool REQUIRED)
+# Requirements for lattice
+if (LATTICEOT)
+  message(STATUS "Building with support for lattice OT")
+  find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+  find_package(Boost REQUIRED COMPONENTS random)
+  include_directories(${EMP-TOOL_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR} ${Boost_INCLUDE_DIRS} ${RELIC_INCLUDE_DIR})
+else (LATTICEOT)
+  include_directories(${EMP-TOOL_INCLUDE_DIR} ${Boost_INCLUDE_DIRS} ${RELIC_INCLUDE_DIR})
+endif (LATTICEOT)
 
-add_executable(mot test/mot.cpp)
-target_link_libraries(mot  relic  ${OPENSSL_LIBRARIES} gmp ${EMP-TOOL_LIBRARIES}) 
+link_directories(${EMP-TOOL_LIBRARIES} ${RELIC_LIBRARY})
 
-add_executable(iter_ot test/iter_ot.cpp)
-target_link_libraries(iter_ot  relic  ${OPENSSL_LIBRARIES} gmp ${EMP-TOOL_LIBRARIES}) 
 
-install(FILES emp-ot-config.cmake DESTINATION cmake/)
+# Installation
+install(FILES cmake/emp-ot-config.cmake DESTINATION cmake/)
+install(DIRECTORY emp-ot DESTINATION include/)
 
-file(GLOB  headers 
-"ot/*.h"
-"emp-ot"
-)
-install(FILES ${headers}  DESTINATION include/${NAME})
+# Test cases
+macro (add_test _name)
+  link_directories(${RELIC_LIBRARY})
+  add_test_with_lib(${_name} ${EMP-TOOL_LIBRARIES})
+  target_link_libraries("${_name}" librelic_s.a  ${OPENSSL_LIBRARIES} gmp ${EMP-TOOL_LIBRARIES})
+
+  if (LATTICEOT AND NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    target_compile_options(${_name} PUBLIC -fext-numeric-literals)
+  endif (LATTICEOT AND NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+
+endmacro()
+
+add_test(shot)
+add_test(mot)
+add_test(deltaot)
+add_test(print_precomputation_table)
+add_test(ideal)
+
+if (LATTICEOT)
+  set(INCLUDE_LATTICE_OT ON)
+  add_test(lattice)
+  target_link_libraries(lattice Eigen3::Eigen)
+  SET_TARGET_PROPERTIES(lattice PROPERTIES COMPILE_DEFINITIONS "EMP_USE_RANDOM_DEVICE")
+else(LATTICEOT)
+  set(INCLUDE_LATTICE_OT OFF)
+
+endif(LATTICEOT)
+
+configure_file(${CMAKE_SOURCE_DIR}/emp-ot/latticeInclude.h.in ${CMAKE_SOURCE_DIR}/emp-ot/latticeInclude.h @ONLY)

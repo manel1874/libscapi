@@ -1,5 +1,9 @@
-# emp-m2pc
+# EMP-m2pc[![Build Status](https://travis-ci.org/emp-toolkit/emp-m2pc.svg?branch=master)](https://travis-ci.org/emp-toolkit/emp-m2pc)
 <img src="https://raw.githubusercontent.com/emp-toolkit/emp-readme/master/art/logo-full.jpg" width=300px/>
+
+## Faster Secure Two-Party Computation in the Single-Execution Setting
+
+More details of the protocol can be found in the [paper](https://eprint.iacr.org/2016/762).
 
 ## Installation
 
@@ -25,3 +29,6 @@
 
 ### Question
 Please send email to wangxiao@cs.umd.edu
+
+## Acknowledgement
+This work was supported in part by the National Science Foundation under Awards #1111599 and #1563722.

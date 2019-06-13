@@ -1,20 +1,21 @@
 #ifndef MALICIOUS_2PC_H__
 #define MALICIOUS_2PC_H__
-#include </usr/local/include/emp-tool/emp-tool>
-#include </usr/local/include/emp-ot/emp-ot>
+#include <emp-ot/emp-ot.h>
+#include <emp-tool/emp-tool.h>
 
-template<RTCktOpt rt = RTCktOpt::off>
+namespace emp {
+template<typename IO, RTCktOpt rt = RTCktOpt::off>
 class Malicious2PC { public:
 	string GC_FILE = "GC_FILE";
-	NetIO * io;
+	IO * io;
 	FileIO * fio;
 	MemIO * mio;
 	int party;
 	int n1, n2, n3;
 	PRG prg, *prgs;
 	PRP prp;
-	MOTExtension * ot;
-	MOTExtension * cot;
+	MOTExtension<IO> * ot;
+	MOTExtension<IO> * cot;
 	Commitment commitment;
 	const int ssp = 40;
 	XorTree<> * xortree;
@@ -23,7 +24,7 @@ class Malicious2PC { public:
 	block * gc_delta, *Delta_ib, Delta;
 	bool * delta_bool;
 	block * B = nullptr, *A = nullptr,* Z_bob = nullptr, *R = nullptr;
-	char (*T_dgst)[20] = nullptr;
+	char (*T_dgst)[Hash::DIGEST_SIZE] = nullptr;
 	block recovered_delta;
 
 	int PRF_A = 1;
@@ -39,8 +40,8 @@ class Malicious2PC { public:
 	bn_t * s, *t;
 	eb_t *C, *D, g1, h1;
 	bn_t bn_r;
-	eb_t g1Tbl[RELIC_EB_TABLE_MAX];
-	Malicious2PC(NetIO * io, int party, int n1, int _n2, int n3) {
+	eb_t g1Tbl[RLC_EB_TABLE_MAX];
+	Malicious2PC(IO * io, int party, int n1, int _n2, int n3) {
 		initialize_relic();
 		this->n1 = n1;
 		this->n3 = n3;
@@ -53,8 +54,8 @@ class Malicious2PC { public:
 		seedB = new block*[2];
 		seedB[0] = new block[n2]; 
 		seedB[1] = new block[n2];
-		ot = new MOTExtension(io);
-		cot = new MOTExtension(io, true);
+		ot = new MOTExtension<IO>(io);
+		cot = new MOTExtension<IO>(io, true);
 		prgs = new PRG[ssp];
 		A = new block[ssp*n1];
 		R = new block[n1*ssp];
@@ -153,7 +154,7 @@ class Malicious2PC { public:
 	}
 	void setupAlice() {
 		eb_t h,tmp;
-		eb_t hTbl[RELIC_EB_TABLE_MAX];
+		eb_t hTbl[RLC_EB_TABLE_MAX];
 		io->recv_eb(&h, 1);
 		eb_mul_pre(hTbl, h);
 		prg.random_block(&Delta, 1);
@@ -175,7 +176,7 @@ class Malicious2PC { public:
 		for(int j = 0; j < ssp; ++j) {
 			prgs[j].reseed(&seed[j], PRF_OTHER);
 			prgs[j].random_block(&gc_delta[j], 1);
-			gc_delta[j] = GarbleCircuit::make_delta(gc_delta[j]);
+			gc_delta[j] = make_delta(gc_delta[j]);
 			prgs[j].reseed(&seed[j], PRF_ST);
 			prgs[j].random_bn(s[j], t[j]);
 			eb_mul_fix_norm(C[j], gTbl, s[j]);
@@ -220,7 +221,7 @@ class Malicious2PC { public:
 		prg.random_bn(w);
 		bn_mod(w,w,q);
 		eb_mul_fix_norm(h, gTbl, w);
-		eb_t hTbl[RELIC_EB_TABLE_MAX];
+		eb_t hTbl[RLC_EB_TABLE_MAX];
 		io->send_eb(&h, 1);
 		eb_mul_pre(hTbl, h);
 		block * bl = new block[ssp+2*ot->l];
@@ -237,7 +238,7 @@ class Malicious2PC { public:
 			if(!E[j]) {
 				prgs[j].reseed(&key[j], PRF_OTHER);
 				prgs[j].random_block(&gc_delta[j], 1);
-				gc_delta[j] = GarbleCircuit::make_delta(gc_delta[j]);
+				gc_delta[j] = make_delta(gc_delta[j]);
 			}
 			io->recv_eb(&C[j], 1);
 			if(!E[j]) {
@@ -246,7 +247,7 @@ class Malicious2PC { public:
 				eb_mul_fix_norm(C2, gTbl, s[j]);
 				eb_mul_fix_norm(tmp, hTbl, t[j]);
 				eb_add_norm(C2, C2, tmp);
-				if(eb_cmp(C2, C[j])!=CMP_EQ)
+				if(eb_cmp(C2, C[j])!=RLC_EQ)
 					cheat = true;
 			}
 		}
@@ -292,13 +293,13 @@ class Malicious2PC { public:
 
 		block (*T)[4] = new block[n3][4];
 		block tmp[4];
-		char dgst[20];
+		char dgst[Hash::DIGEST_SIZE];
 		for(int j = 0; j < ssp; ++j) {
 			for(int i = 0; i < n2; ++i)
 				B_loc[i] = B[i*ssp+j];
-			HalfGateGen<NetIO, rt> gc(io);
+			HalfGateGen<IO, rt> gc(io);
 			gc.set_delta(gc_delta[j]);
-			local_gc = &gc;
+			CircuitExecution::circ_exec = &gc;
 			xortree->circuit(Bp, B_loc);
 			run_function(f, Z, &A[j*n1], Bp);
 
@@ -314,7 +315,7 @@ class Malicious2PC { public:
 			io->send_block_enc((block *)T, 4*n3);
 
 			Hash::hash_once(dgst, T, sizeof(block)*4*n3);
-			io->send_data(dgst, 20);
+			io->send_data(dgst, Hash::DIGEST_SIZE);
 		}
 		delete[] Bp;
 		delete[] B_loc;
@@ -328,8 +329,8 @@ class Malicious2PC { public:
 		block* Z = new block[n3];
 		Z_bob = new block[n3*ssp];
 		bool cheat = false;
-		char dgst[20];
-		T_dgst = new char[ssp][20];
+		char dgst[Hash::DIGEST_SIZE];
+		T_dgst = new char[ssp][Hash::DIGEST_SIZE];
 		block * tmpA = new block[n1];
 		block * tmpB = new block[xortree->input_size()];
 		prg.random_block(tmpA, n1);
@@ -343,7 +344,7 @@ class Malicious2PC { public:
 				CheckIO checkio(io);
 				HalfGateGen<CheckIO, rt> gc(&checkio);
 				gc.set_delta(gc_delta[j]);
-				local_gc = &gc;
+				CircuitExecution::circ_exec= &gc;
 				xortree->circuit(Bp, B_loc);
 				run_function(f, &Z_bob[j*n3], &A[j*n1], Bp);
 				if(!checkio.get_check_result())
@@ -351,20 +352,20 @@ class Malicious2PC { public:
 
 				io->set_key(nullptr);
 				io->recv_block_enc((block*)T, 4*n3);
-				io->recv_data(T_dgst[j], 20);
+				io->recv_data(T_dgst[j], Hash::DIGEST_SIZE);
 			}
 			else {
-				HalfGateEva<NetIO, rt> gc(io);
+				HalfGateEva<IO, rt> gc(io);
 				gc.set_file_io(fio);
-				local_gc = &gc;
+				CircuitExecution::circ_exec = &gc;
 
 				run_function(f, Z, tmpA, tmpB);
 
 				io->set_key(&key[j]);
 				io->recv_block_enc((block*)T, 4*n3);
 				Hash::hash_once(dgst, T, sizeof(block)*4*n3);
-				io->recv_data(T_dgst[j], 20);
-				if(strncmp(dgst, T_dgst[j], 20)!=0)
+				io->recv_data(T_dgst[j], Hash::DIGEST_SIZE);
+				if(strncmp(dgst, T_dgst[j], Hash::DIGEST_SIZE)!=0)
 					cheat = true;
 				fio->send_block((block*)T, 4*n3);
 			}
@@ -396,7 +397,7 @@ class Malicious2PC { public:
 			}
 			else {
 				HalfGateEva<MemIO, rt> gc(mio);
-				local_gc = &gc;
+				CircuitExecution::circ_exec = &gc;
 				xortree->circuit(Bp, B_loc);
 				run_function(f, Z, &A[j*n1], Bp);
 				mio->recv_block((block *)T, 4*n3);
@@ -456,7 +457,7 @@ class Malicious2PC { public:
 				tmp[j] = seedB[1][i];
 			prp.Hn(tmp, tmp, i, ssp, tmp2);
 			xorBlocks_arr(tmp, tmp, &B[i*ssp], ssp);
-			xorBlocks_arr2(tmp, tmp, gc_delta, ssp);
+			xorBlocks_arr(tmp, tmp, gc_delta, ssp);
 			io->send_block(tmp, ssp);
 		}
 
@@ -640,13 +641,13 @@ class Malicious2PC { public:
 
 		block tmp[4];
 		block (*T)[4] = new block[n3][4];
-		char dgst[20];
+		char dgst[Hash::DIGEST_SIZE];
 		for(int j = 0; j < ssp; ++j) {
 			for(int i = 0; i < n2; ++i)
 				B_loc[i] = B[i*ssp+j];
-			HalfGateGen<NetIO, rt> gc(io);
+			HalfGateGen<IO, rt> gc(io);
 			gc.set_delta(gc_delta[j]);
-			local_gc = &gc;
+			CircuitExecution::circ_exec = &gc;
 			xortree->circuit(Bp, B_loc);
 
 			run_function(f, Z, &A[j*n1], Bp);
@@ -662,7 +663,7 @@ class Malicious2PC { public:
 			io->send_block_enc((block *)T, 4*n3);
 
 			Hash::hash_once(dgst, T, sizeof(block)*4*n3);
-			io->send_data(dgst, 20);
+			io->send_data(dgst, Hash::DIGEST_SIZE);
 		}
 		delete[] Bp;
 		delete[] B_loc;
@@ -676,14 +677,14 @@ class Malicious2PC { public:
 		block* Z = new block[n3];
 		Z_bob = new block[n3*ssp];
 		bool cheat = false;
-		T_dgst = new char[ssp][20];
+		T_dgst = new char[ssp][Hash::DIGEST_SIZE];
 
 		block (*T)[4] = new block[n3][4];
 
 		bool * tmp_output = new bool[n3];
 		block * recover_delta = new block[n3];
 		block * tmp_delta = new block[n3];
-		char dgst[20];
+		char dgst[Hash::DIGEST_SIZE];
 		bool output_set = false;
 		for(int j = 0; j < ssp; ++j) {
 			for(int i = 0; i < n2; ++i)
@@ -692,7 +693,7 @@ class Malicious2PC { public:
 				CheckIO checkio(io);
 				HalfGateGen<CheckIO, rt> gc(&checkio);
 				gc.set_delta(gc_delta[j]);
-				local_gc = &gc;
+				CircuitExecution::circ_exec = &gc;
 				xortree->circuit(Bp, B_loc);
 				run_function(f, &Z_bob[j*n3], &A[j*n1], Bp);
 				if(!checkio.get_check_result())
@@ -700,11 +701,11 @@ class Malicious2PC { public:
 
 				io->set_key(nullptr);
 				io->recv_block_enc((block*)T, 4*n3);
-				io->recv_data(T_dgst[j], 20);
+				io->recv_data(T_dgst[j], Hash::DIGEST_SIZE);
 			}
 			else {
-				HalfGateEva<NetIO,rt> gc(io);
-				local_gc = &gc;
+				HalfGateEva<IO,rt> gc(io);
+				CircuitExecution::circ_exec = &gc;
 				xortree->circuit(Bp, B_loc);
 				run_function(f, Z, &A[j*n1], Bp);
 				io->set_key(&key[j]);
@@ -738,8 +739,8 @@ class Malicious2PC { public:
 						}
 				}
 				Hash::hash_once(dgst, T, sizeof(block)*4*n3);
-				io->recv_data(T_dgst[j], 20);
-				if(strncmp(dgst, T_dgst[j], 20)!=0)
+				io->recv_data(T_dgst[j], Hash::DIGEST_SIZE);
+				if(strncmp(dgst, T_dgst[j], Hash::DIGEST_SIZE)!=0)
 					cheat = true;
 			}
 		}
@@ -756,7 +757,7 @@ class Malicious2PC { public:
 
 	void recoverAlice() {
 		eb_t tmp;
-		eb_t h1Tbl[RELIC_EB_TABLE_MAX];
+		eb_t h1Tbl[RLC_EB_TABLE_MAX];
 		io->recv_eb(&h1, 1);
 		io->send_block(&Delta, 1);
 		io->send_block(Delta_ib, n3);
@@ -783,12 +784,12 @@ class Malicious2PC { public:
 		io->recv_block(&Delta, 1);
 		PRG prg_tmp(&Delta);
 		prg_tmp.random_eb(&Delta_eb);
-		eb_t h1Tbl[RELIC_EB_TABLE_MAX];
+		eb_t h1Tbl[RLC_EB_TABLE_MAX];
 		eb_sub_norm(h1,h1,Delta_eb);
 		eb_mul_pre(h1Tbl, h1);
 
 		io->recv_block(Delta_ib, n3);
-		char dgst[20];block tmp2[4];
+		char dgst[Hash::DIGEST_SIZE];block tmp2[4];
 		block (*T)[4] = new block[n3][4];
 		for(int j = 0; j < ssp; ++j) {
 			if(!E[j]) {
@@ -811,7 +812,7 @@ class Malicious2PC { public:
 					T[i][3] = xorBlocks(T[i][3], Delta);
 				}
 				Hash::hash_once(dgst, T, sizeof(block)*4*n3);
-				if(strncmp(T_dgst[j], dgst, 20)!=0)
+				if(strncmp(T_dgst[j], dgst, Hash::DIGEST_SIZE)!=0)
 					cheat = true;
 			} else {
 				eb_mul_norm(C[j], C[j], bn_r);
@@ -823,5 +824,6 @@ class Malicious2PC { public:
 		return cheat;
 	}
 };
+}
 #endif// MALICIOUS_H__
 

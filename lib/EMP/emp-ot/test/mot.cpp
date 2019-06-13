@@ -1,179 +1,57 @@
-//#include "emp-ot.h"
-#include "emp-ot"
-#include <emp-tool>
 #include <iostream>
+#include "test/test.h"
 using namespace std;
 
-template<typename T>
-double test_com_ot(NetIO * io, int party, int length, T* ot = nullptr, int TIME = 10) {
-	block *b0 = new block[length], *b1 = new block[length], *r = new block[length], *op = new block[length];
-	bool *b = new bool[length];
-	PRG prg(fix_key);
-	prg.random_block(b0, length);
-	prg.random_block(b1, length);
-	prg.random_bool(b, length);
-
-	long long t1 = 0, t = 0;
-	io->sync();
-	io->set_nodelay();
-	for(int i = 0; i < TIME; ++i) {
-		t1 = timeStamp();
-		ot = new T(io, true);
-		if (party == ALICE) {
-			ot->send(b0, b1, length);
-			ot->open();
-		} else {
-			ot->recv(r, b, length);
-			ot->open(op, b, length);
-		}
-		t += timeStamp()-t1;
-		delete ot;
-	}
-	if(party == BOB) for(int i = 0; i < length; ++i) {
-		if (b[i]) {
-			assert(block_cmp(&r[i], &b1[i], 1));
-			assert(block_cmp(&op[i], &b0[i], 1));
-		}
-		else {
-			assert(block_cmp(&r[i], &b0[i], 1));
-			assert(block_cmp(&op[i], &b1[i], 1));
-		}
-	}
-	delete[] b0;
-	delete[] b1;
-	delete[] r;
-	delete[] b;
-	delete[] op;
-	return (double)t/TIME;
-}
-
-
-template<typename T>
-double test_ot(NetIO * io, int party, int length, T* ot = nullptr, int TIME = 10) {
-	block *b0 = new block[length], *b1 = new block[length], *r = new block[length];
-	bool *b = new bool[length];
-	PRG prg(fix_key);
-	prg.random_block(b0, length);
-	prg.random_block(b1, length);
-	prg.random_bool(b, length);
-
-	long long t1 = 0, t = 0;
-	io->sync();
-	io->set_nodelay();
-	for(int i = 0; i < TIME; ++i) {
-		t1 = timeStamp();
-		ot = new T(io);
-		if (party == ALICE) {
-			ot->send(b0, b1, length);
-		} else {
-			ot->recv(r, b, length);
-		}
-		t += timeStamp()-t1;
-		delete ot;
-	}
-	if(party == BOB) for(int i = 0; i < length; ++i) {
-		if (b[i]) assert(block_cmp(&r[i], &b1[i], 1));
-		else assert(block_cmp(&r[i], &b0[i], 1));
-	}
-	delete[] b0;
-	delete[] b1;
-	delete[] r;
-	delete[] b;
-	return (double)t/TIME;
-}
-template<typename T>
-double test_cot(NetIO * io, int party, int length, T* ot = nullptr, int TIME = 10) {
+template<typename IO, template<typename>class T>
+double test_cot_mal(NetIO * io, int party, int length) {
 	block *b0 = new block[length], *r = new block[length];
 	bool *b = new bool[length];
-	block delta;
+	block *delta = new block[length];
 	PRG prg(fix_key);
-	prg.random_block(&delta, 1);
-
-	for(int i = 0; i < length; ++i) {
-		b[i] = (rand()%2)==1;
-	}
-
-	long long t1 = 0, t = 0;
+	prg.random_block(delta, length);
+	prg.random_bool(b, length);
+	
 	io->sync();
-	io->set_nodelay();
-	for(int i = 0; i < TIME; ++i) {
-		t1 = timeStamp();
-		ot = new T(io);
-		if (party == ALICE) {
-			ot->send_cot(b0, delta, length);
-		} else {
-			ot->recv_cot(r, b, length);
-		}
-		t += timeStamp()-t1;
-		delete ot;
+	auto start = clock_start();
+	T<IO>* ot = new T<IO>(io);
+	if (party == ALICE) {
+		ot->send_cot(b0, delta, length);
+	} else {
+		ot->recv_cot(r, b, length);
 	}
+	io->flush();
+	long long t = time_from(start);
 	if(party == ALICE)
-		io->send_block(b0, length);
+			io->send_block(b0, length);
 	else if(party == BOB)  {
 		io->recv_block(b0, length);
 		for(int i = 0; i < length; ++i) {
-			block b1 = xorBlocks(b0[i], delta); 
-			if (b[i]) assert(block_cmp(&r[i], &b1, 1));
-			else assert(block_cmp(&r[i], &b0[i], 1));
+			block b1 = xorBlocks(b0[i], delta[i]); 
+			if (b[i]) {
+				if(!block_cmp(&r[i], &b1, 1))
+					error("COT failed!");
+			} else {
+				if(!block_cmp(&r[i], &b0[i], 1))
+					error("COT failed!");
+			}
 		}
 	}
+	io->flush();
+	delete ot;
 	delete[] b0;
 	delete[] r;
 	delete[] b;
-	return (double)t/TIME;
-}
-
-template<typename T>
-double test_rot(NetIO * io, int party, int length, T* ot = nullptr, int TIME = 10) {
-	block *b0 = new block[length], *r = new block[length];
-	block *b1 = new block[length];
-	bool *b = new bool[length];
-
-	for(int i = 0; i < length; ++i) {
-		b[i] = (rand()%2)==1;
-	}
-
-	long long t1 = 0, t = 0;
-	io->sync();
-	io->set_nodelay();
-	for(int i = 0; i < TIME; ++i) {
-		t1 = timeStamp();
-		ot = new T(io);
-		if (party == ALICE) {
-			ot->send_rot(b0, b1, length);
-		} else {
-			ot->recv_rot(r, b, length);
-		}
-		t += timeStamp()-t1;
-		delete ot;
-	}
-	if(party == ALICE) {
-		io->send_block(b0, length);
-		io->send_block(b1, length);
-	} else if(party == BOB)  {
-		io->recv_block(b0, length);
-		io->recv_block(b1, length);
-		for(int i = 0; i < length; ++i) {
-			if (b[i]) assert(block_cmp(&r[i], &b1[i], 1));
-			else assert(block_cmp(&r[i], &b0[i], 1));
-		}
-	}
-	delete[] b0;
-	delete[] b1;
-	delete[] r;
-	delete[] b;
-	return (double)t/TIME;
+	delete[] delta;
+	return t;
 }
 
 int main(int argc, char** argv) {
-	int port, party;
-	parse_party_and_port(argv, &party, &port);
-
-	NetIO * io = new NetIO(party==ALICE ? nullptr:SERVER_IP, port);
-	cout <<"COOT\t"<<test_ot<OTCO>(io, party, 1024)<<endl;
-	cout <<"8M Malicious OT Extension (KOS)\t"<<test_ot<MOTExtension_KOS>(io, party, 1<<23)<<endl;
-	cout <<"8M Malicious OT Extension (ALSZ)\t"<<test_ot<MOTExtension_ALSZ>(io, party, 1<<23)<<endl;
-	cout <<"8M Malicious Committing OT Extension (KOS)\t"<<test_com_ot<MOTExtension_KOS>(io, party, 1<<23)<<endl;
-	cout <<"8M Malicious Committing OT Extension (ALSZ)\t"<<test_com_ot<MOTExtension_ALSZ>(io, party, 1<<23)<<endl;
+	int port, party, length = 1<<24;
+	parse_party_and_port(argv, 2, &party, &port);
+	NetIO * io = new NetIO(party==ALICE ? nullptr:"127.0.0.1", port);
+	cout <<"COOT\t"<<10000.0/test_ot<NetIO, OTCO>(io, party, 10000)*1e6<<" OTps"<<endl;
+	cout <<"Malicious OT Extension\t"<<double(length)/test_ot<NetIO, MOTExtension>(io, party, length)*1e6<<" OTps"<<endl;
+	cout <<"Malicious COT Extension\t"<<double(length)/test_cot_mal<NetIO, MOTExtension>(io, party, length)*1e6<<" OTps"<<endl;
+   cout <<"Malicious ROT Extension\t"<<double(length)/test_rot<NetIO, MOTExtension>(io, party, length)*1e6<<" OTps"<<endl;
 	delete io;
 }
