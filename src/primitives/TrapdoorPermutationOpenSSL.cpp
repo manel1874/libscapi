@@ -117,7 +117,6 @@ shared_ptr<RSA> OpenSSLRSAPermutation::initRSAPublicPrivateCrt(biginteger & pubE
 
 shared_ptr<RSA> OpenSSLRSAPermutation::initRSAPublicPrivate(biginteger & pubExponent, biginteger & privExponent) {
 	//Convert all the parameters to OpenSSL's terminology and set them to the Openssl's rsa object.
-    auto rsa = shared_ptr<RSA>(RSA_new(), RSA_free);
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
     auto rsa = shared_ptr<RSA>(RSA_new(), RSA_free);
 	rsa->n = biginteger_to_opensslbignum(modulus);
@@ -207,6 +206,9 @@ biginteger OpenSSLRSAPermutation::computeRSA(biginteger & elementP) {
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
 	int size = RSA_size(_rsa.get());
 #else
+	cout << "Before RSA Size" << endl;
+    BIO *bio = BIO_new(BIO_s_mem());
+    auto test = PEM_read_bio_RSA_PUBKEY(bio, &_rsa);
 	int size = RSA_size(_rsa);
 	cout << "RSA Size is : " << size << endl;
 #endif
