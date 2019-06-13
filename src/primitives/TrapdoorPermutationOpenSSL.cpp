@@ -117,8 +117,8 @@ shared_ptr<RSA> OpenSSLRSAPermutation::initRSAPublicPrivateCrt(biginteger & pubE
 
 shared_ptr<RSA> OpenSSLRSAPermutation::initRSAPublicPrivate(biginteger & pubExponent, biginteger & privExponent) {
 	//Convert all the parameters to OpenSSL's terminology and set them to the Openssl's rsa object.
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
     auto rsa = shared_ptr<RSA>(RSA_new(), RSA_free);
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	rsa->n = biginteger_to_opensslbignum(modulus);
 	rsa->e = biginteger_to_opensslbignum(pubExponent);
 	rsa->d = biginteger_to_opensslbignum(privExponent);
@@ -137,7 +137,6 @@ shared_ptr<RSA> OpenSSLRSAPermutation::initRSAPublic(biginteger & pubExponent) {
 	//Convert all the parameters to OpenSSL's terminology and set them to the Openssl's rsa object.
     auto rsa = shared_ptr<RSA>(RSA_new(), RSA_free);
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
-    auto rsa = shared_ptr<RSA>(RSA_new(), RSA_free);
 	rsa->n = biginteger_to_opensslbignum(modulus);
 	rsa->e = biginteger_to_opensslbignum(pubExponent);
 	if ((rsa->n == NULL) || (rsa->e == NULL)) {
@@ -208,7 +207,7 @@ biginteger OpenSSLRSAPermutation::computeRSA(biginteger & elementP) {
 #else
 	cout << "Before RSA Size" << endl;
     BIO *bio = BIO_new(BIO_s_mem());
-    auto test = PEM_read_bio_RSA_PUBKEY(bio, &_rsa);
+//    auto test = PEM_read_bio_RSA_PUBKEY(bio, &_rsa);
 	int size = RSA_size(_rsa);
 	cout << "RSA Size is : " << size << endl;
 #endif
