@@ -14,6 +14,8 @@ addons:
       - llvm-toolchain-precise-3.8
     packages:
       - g++-7
+      - libboost-all-dev
+      - libssl-dev
       - clang-3.8
       - build-essential
       - libssl-dev
