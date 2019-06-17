@@ -105,7 +105,7 @@ void OpenSSLDlogZpSafePrime::createRandomOpenSSLDlogZp(int numBits) {
 	_dlog->g = BN_new();
 	while (BN_is_zero(_dlog->g) || BN_is_one(_dlog->g)) {
 		BN_rand_range(_dlog->g, _dlog->p);
-		BN_mod_sqr(_dlog->g, _dlog->g, _dlog->p, ctx.get());
+		BN_mod_sqr(_dlog->g, _dlog->g, _dlog->p, _ctx.get());
 	}
 #else
 	BIGNUM *p = BN_new();
@@ -237,7 +237,7 @@ bool OpenSSLDlogZpSafePrime::validateElement(BIGNUM* el) {
 	if (BN_cmp(el, p) > 0) result = false;
 
 	//Check that the element raised to q is 1 mod p.
-	BN_mod_exp(exp, el, q, p, ctx.get());
+	BN_mod_exp(exp, el, q, p, _ctx.get());
 #else
     //Check that the element is smaller than p.
     if (BN_cmp(el, *p) > 0) result = false;
@@ -363,7 +363,7 @@ shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::getInverse(GroupElement* groupE
 	BIGNUM* result = BN_new();
 	BIGNUM* elem = zp_element->getOpenSSLElement().get();
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
-	BN_mod_inverse(result, elem, _dlog->p, ctx.get());
+	BN_mod_inverse(result, elem, _dlog->p, _ctx.get());
 #else
     BIGNUM *p, *q, *g;
     p = BN_new();
@@ -394,7 +394,7 @@ shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::exponentiate(GroupElement* base
 
 	//Raise the given element and put the result in resultBN.
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
-	BN_mod_exp(resultBN, baseBN.get(), expBN, _dlog->p, ctx.get());
+	BN_mod_exp(resultBN, baseBN.get(), expBN, _dlog->p, _ctx.get());
 #else
     BIGNUM *p, *q, *g;
     p = BN_new();
@@ -428,7 +428,7 @@ shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::multiplyGroupElements(GroupElem
 	//Call the OpenSSL's multiply function
 
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
-    BN_mod_mul(result, elem1, elem2, _dlog->p, ctx.get());
+    BN_mod_mul(result, elem1, elem2, _dlog->p, _ctx.get());
 #else
     BIGNUM *p, *q, *g;
     p = BN_new();
