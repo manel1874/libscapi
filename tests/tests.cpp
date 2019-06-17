@@ -822,12 +822,15 @@ TEST_CASE("TrapdoorPermutation", "[OpenSSL]")
 		biginteger public_mod = 55;
 		int public_exponent = 3;
 		int private_exponent = 7;
-		tp.setKey(make_shared<RSAPublicKey>(public_mod, public_exponent),
-		        make_shared<RSAPrivateKey>(public_mod, private_exponent));
-		auto re_src = tp.generateRandomTPElement();
-		auto re_enc = tp.compute(re_src.get());
+		shared_ptr<RSAPublicKey> pubKey = make_shared<RSAPublicKey>(public_mod, public_exponent);
+		shared_ptr<RSAPrivateKey> prvKey = make_shared<RSAPrivateKey>(public_mod, private_exponent);
+		tp.setKey(pubKey, prvKey);
+
+        auto publicKey = tp.getPubKey().get();
+        auto re_src = tp.generateRandomTPElement();
+        auto re_enc = tp.compute(re_src.get());
 		auto re_inv = tp.invert(re_enc.get());
-		CAPTURE(re_enc->getElement());
+        CAPTURE(re_enc->getElement());
 		REQUIRE(re_inv->getElement() == re_src->getElement());
 	}
 }
@@ -1084,11 +1087,11 @@ TEST_CASE("asymmetric encryption")
 		auto returnedV = elgamal.generateBytesFromPlaintext(plaintext.get());
 		bool equal = true;
 		for (int i = 0; i < plainM.size(); i++)
-			if (returnedV.data()[i] != plainM.data()[i]) 
+			if (returnedV.data()[i] != plainM.data()[i])
 				equal = false;
 		REQUIRE(equal == true);
 
-		
+
 		auto doubleC = elgamal.multiply(cipher.get(), cipher.get(), r);
 		auto p = dynamic_pointer_cast<GroupElementPlaintext>(plaintext);
 		auto c = dlog->multiplyGroupElements(p->getElement().get(), p->getElement().get());
@@ -1149,66 +1152,6 @@ TEST_CASE("asymmetric encryption")
 			if (returnedV.data()[i] != plainM.data()[i])
 				equal = false;
 		REQUIRE(equal == true);
-	}
-
-	SECTION("DamgardJurik")
-	{
-		/*auto random = get_seeded_prg();
-		DamgardJurikEnc dj;
-		auto keys = dj.generateKey(make_shared<DJKeyGenParameterSpec>(DJKeyGenParameterSpec()));
-		dj.setKey(keys.first, keys.second);
-		string message = "I want to encrypt this message!";
-		int len = message.size();
-		if (dj.hasMaxByteArrayLengthForPlaintext()) {
-			REQUIRE(len < dj.getMaxLengthOfByteArrayForPlaintext());
-		}
-		
-		vector<byte> plainM(message.begin(), message.end());
-		auto plaintext = dj.generatePlaintext(plainM);
-		biginteger n = dynamic_pointer_cast<DamgardJurikPublicKey>(keys.first)->getModulus();
-		cout << "modulus = " << n << endl;
-		cout << "number of bits of modulus = " << NumberOfBits(n) << endl;
-		int s = (NumberOfBits(dynamic_pointer_cast<BigIntegerPlainText>(plaintext)->getX()) / (NumberOfBits(n) - 1)) + 1;
-		biginteger Ntag = mp::pow(n, s + 1);
-		//biginteger r = getRandomInRange(0, (Ntag - 1), random.get());
-		biginteger r = Ntag - 1;
-		cout << "number of bits of random = " << NumberOfBits(r) << endl;
-		auto cipher = dj.encrypt(plaintext, r);
-		auto returnedP = dj.decrypt(cipher);
-		REQUIRE(*returnedP == *plaintext);
-
-		auto returnedV = dj.generateBytesFromPlaintext(plaintext);
-		bool equal = true;
-		for (int i = 0; i < plainM.size(); i++)
-			if (returnedV.data()[i] != plainM.data()[i]) {
-				equal = false;
-			}
-		REQUIRE(equal == true);
-		
-		auto doubleC = dj.add(cipher, cipher, r);
-		auto x = dynamic_pointer_cast<BigIntegerPlainText>(plaintext)->getX();
-		biginteger c = x * 2;
-		s = NumberOfBits(c) / NumberOfBits(n);
-		
-		biginteger N = mp::pow(n, s);
-		Ntag = mp::pow(n, s + 1);
-		biginteger r2 = mp::powm(r, 3, Ntag);
-		auto multC = dj.encrypt(make_shared<BigIntegerPlainText>(c), r2);
-		REQUIRE(*doubleC == *multC);
-
-		biginteger rToMult = getRandomInRange(0, Ntag-1, random.get());
-		biginteger con = getRandomInRange(0, N - 1, random.get());
-		auto multconst = dj.multByConst(cipher, con, rToMult);
-		biginteger base = x * con;
-		biginteger exponent = mp::powm(r, con, Ntag);
-		exponent = (exponent * rToMult) % Ntag;
-		multC = dj.encrypt(make_shared<BigIntegerPlainText>(base), exponent);
-		REQUIRE(*multconst == *multC);
-
-		biginteger rToRandom = getRandomInRange(0, Ntag - 1, random.get());
-		auto secondCipher = dj.reRandomize(cipher, rToRandom);
-		auto calcCipher = dj.encrypt(plaintext, (r*rToRandom) % Ntag);
-		REQUIRE(*secondCipher == *calcCipher);*/
 	}
 }
 
