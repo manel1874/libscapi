@@ -61,8 +61,7 @@ all: libs libscapi tests
 ifeq ($(GCC_STANDARD), c++11)
 ifeq ($(uname_os), Linux)
 ifeq ($(uname_arch), x86_64)
-    libs: compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc \
-     compile-otextension-bristol compile-kcp
+    libs: compile-ntl compile-blake compile-otextension-bristol compile-kcp
 endif
 ifeq ($(uname_arch), aarch64)
     libs:  compile-ntl compile-kcp
@@ -70,8 +69,7 @@ endif
 endif # Linux c++11
 
 ifeq ($(uname_os), Darwin)
-    libs:  compile-ntl compile-blake compile-emp-tool compile-emp-ot compile-emp-m2pc \
-    compile-kcp
+    libs:  compile-ntl compile-blake compile-kcp
 endif # Darwin c++11
 endif # c++11
 
@@ -140,50 +138,6 @@ compile-blake:
 	@$(MAKE) -C $(builddir)/BLAKE2
 	@$(MAKE) -C $(builddir)/BLAKE2 BUILDDIR=$(builddir)  install
 	@touch compile-blake
-
-prepare-emp:
-	@mkdir -p $(builddir)/EMP
-	@cp -r lib/EMP/relic $(builddir)/EMP/relic
-	@cmake -DALIGN=16 -DARCH=X64 -DARITH=curve2251-sse -DCHECK=off -DFB_POLYN=251 \
-	-DFB_METHD="INTEG;INTEG;QUICK;QUICK;QUICK;QUICK;LOWER;SLIDE;QUICK" -DFB_PRECO=on -DFB_SQRTF=off \
-	-DEB_METHD="PROJC;LODAH;COMBD;INTER" -DEC_METHD="CHAR2" \
-	-DCOMP="-O3 -funroll-loops -fomit-frame-pointer -march=native -msse4.2 -mpclmul \
-	-Wno-unused-function -Wno-unused-variable -Wno-return-type -Wno-discarded-qualifiers" \
-	-DTIMER=CYCLE -DWITH="MD;DV;BN;FB;EB;EC" -DWSIZE=64 $(builddir)/EMP/relic/CMakeLists.txt \
-	-DCMAKE_INSTALL_PREFIX=$(prefix)
-	@cd $(builddir)/EMP/relic && $(MAKE)
-	@cd $(builddir)/EMP/relic && $(MAKE) install
-	@touch prepare-emp
-
-compile-emp-tool:prepare-emp
-	@cp -r lib/EMP/emp-tool $(builddir)/EMP/emp-tool
-	@cd $(builddir)/EMP/emp-tool
-	@cmake -D CMAKE_CXX_FLAGS="-Wno-unused-function -Wno-unused-variable -Wno-return-type" \
-	$(builddir)/EMP/emp-tool/CMakeLists.txt \
-	-DCMAKE_INSTALL_PREFIX=$(prefix) -DRELIC_INCLUDE_DIR=$(prefix)/include -DRELIC_LIBRARY=$(prefix)/lib
-	@cd $(builddir)/EMP/emp-tool/ && $(MAKE)
-	@cd $(builddir)/EMP/emp-tool/ && $(MAKE) install
-	@touch compile-emp-tool
-
-compile-emp-ot:compile-emp-tool
-	@cp -r lib/EMP/emp-ot $(builddir)/EMP/emp-ot
-	@cd $(builddir)/EMP/emp-ot
-	@cmake -D CMAKE_CXX_FLAGS="-Wno-unused-function -Wno-unused-variable -Wno-return-type" \
-	$(builddir)/EMP/emp-ot/CMakeLists.txt \
-	-DCMAKE_INSTALL_PREFIX=$(prefix) -DRELIC_INCLUDE_DIR=$(prefix)/include -DRELIC_LIBRARY=$(prefix)/lib \
-	-DEMP-TOOL_INCLUDE_DIR=$(prefix)/include -DEMP-TOOL_LIBRARIES=$(prefix)/lib -DCMAKE_INSTALL_PREFIX=$(prefix)
-	@cd $(builddir)/EMP/emp-ot/ && $(MAKE)
-	@cd $(builddir)/EMP/emp-ot/ && $(MAKE) install
-	@touch compile-emp-ot
-
-compile-emp-m2pc:
-	@cp -r lib/EMP/emp-m2pc $(builddir)/EMP/emp-m2pc
-	@cd $(builddir)/EMP/emp-m2pc
-	@cmake -D CMAKE_CXX_FLAGS="-Wno-unused-function -Wno-unused-variable -Wno-return-type" \
-	$(builddir)/EMP/emp-m2pc/CMakeLists.txt \
-	-DCMAKE_INSTALL_PREFIX=$(prefix)
-	@cd $(builddir)/EMP/emp-m2pc/ && $(MAKE)
-	@touch compile-emp-m2pc
 
 # Support only in c++14
 compile-libote:
@@ -260,29 +214,6 @@ clean-blake:
 	@rm -rf $(builddir)/BLAKE2
 	@rm -f compile-blake
 
-clean-emp:
-	@echo "Cleaning EMP library"
-	@rm -rf $(builddir)/EMP/
-	@rm -f prepare-emp compile-emp-tool compile-emp-ot compile-emp-m2pc
-
-clean-emp-tool:
-	@echo "Cleaning EMP tool library"
-	@rm -rf $(builddir)/EMP/emp-tool
-	@rm -rf $(builddir)/EMP/emp-ot
-	@rm -rf $(builddir)/EMP/emp-m2pc
-	@rm -f compile-emp-tool compile-emp-ot compile-emp-m2pc
-
-clean-emp-ot:
-	@echo "Cleaning EMP ot library"
-	@rm -rf $(builddir)/EMP/emp-ot
-	@rm -rf $(builddir)/EMP/emp-m2pc
-	@rm -f compile-emp-ot compile-emp-m2pc
-
-clean-emp-m2pc:
-	@echo "Cleaning EMP m2pc library"
-	@rm -rf $(builddir)/EMP/emp-m2pc
-	@rm -f compile-emp-m2pc
-
 clean-libote:
 	@echo "Cleaning libOTe library"
 	@rm -rf $(builddir)/libOTe/
@@ -307,6 +238,6 @@ clean-cpp:
 clean-install:
 	@rm -rf install
 
-clean: clean-ntl  clean-emp clean-blake clean-emp clean-libote clean-otextension-bristol clean-kcp \
+clean: clean-ntl clean-emp clean-blake clean-libote clean-otextension-bristol clean-kcp \
  clean-cpp clean-install
 
