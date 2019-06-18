@@ -1,6 +1,6 @@
 # LIBSCAPI - The Secure Computation API
 
-[![Build Status](https://travis-ci.org/cryptobiu/libscapi.svg?branch=dev)](https://travis-ci.org/cryptobiu/libscapi)
+[![Build Status](https://travis-ci.org/cryptobiu/libscapi.svg?branch=master)](https://travis-ci.org/cryptobiu/libscapi)
 
 ## Introduction
 libscapi is the Open source C++ library for implementing high performance secure two-party and multiparty computation protocols (SCAPI stands for the "Secure Computation API"). It provides a reliable, efficient, and highly flexible cryptographic infrastructure.
@@ -12,7 +12,7 @@ Libscapi is developed by [Bar Ilan University Cryptography Research Group](http:
 
 ## Publications using libscapi
 - Generalizing the SPDZ Compiler For Other Protocols. Accepted ACM-CCS 18 [ABFKLOT18]()  
-- An End-to-ent System for Large Scale P2P MPC as-a-Service and Low-Bandwidth MPC for Weak Participants. Includes HyperMPC protocol
+- An End-to-end System for Large Scale P2P MPC as-a-Service and Low-Bandwidth MPC for Weak Participants. Includes HyperMPC protocol
   Accepted ACM-CCS 18 [BHKL18]()  
 - TinyKeys: A New Approach to Efficient Multi-Party Computation [HOSSV18](https://eprint.iacr.org/2018/208)  
 - Fast Large-Scale Honest-Majority MPC for Malicious Adversaries [CGHIKLN18](https://eprint.iacr.org/2018/570)
@@ -20,7 +20,7 @@ Libscapi is developed by [Bar Ilan University Cryptography Research Group](http:
 - Low Cost Constant Round MPC Combining BMR and Oblivious Transfer [HSSV17](https://eprint.iacr.org/2017/214.pdf)
 
 ## Benchmarking and Automation
-Libscapi is integrated with [MATRIX](https://github.com/cryptobiu/MATRIX) MPC Test Automation Framework. We use MATRIX to benchmark protocols on AWS cloud, including cross region experiments with up to 500 parties. MATRIX can easily run protocols that do not integrate libscapi as well, including for example the SPDZ-2 protocol implementation by Btistol University.  
+Libscapi is integrated with [MATRIX](https://github.com/cryptobiu/MATRIX) MPC Test Automation Framework. We use MATRIX to benchmark protocols on AWS cloud, including cross region experiments with up to 500 parties. MATRIX can easily run protocols that do not integrate libscapi as well, including for example the SPDZ-2 protocol implementation by Bristol University.  
 
 ## Protocol implementations 
 The [MPC-Benchmark](https://github.com/cryptobiu/MPC-Benchmark) repository includes protocols implemented using libscapi, and integrated with the MATRIX benchmarking and automation platform. This includes implementations of the protocols listed above.
