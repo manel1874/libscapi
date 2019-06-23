@@ -127,10 +127,3 @@ public:
 
 
 };
-
-
-class PartiesNumber {};
-
-class TwoParty : public PartiesNumber {};
-class ThreeParty : public PartiesNumber {};
-class MultiParty : public PartiesNumber {};

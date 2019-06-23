@@ -71,11 +71,11 @@ MPCProtocol::MPCProtocol(string protocolName, int argc, char* argv[], bool initC
     cout<<"ID = "<<partyID<<endl;
     auto partiesNumber = this->getParser().getValueByKey(arguments, "partiesNumber");
 
-    if (partiesNumber == "NotFound"){
+    if (partiesNumber == "NotFound")
         numParties = 2;
-    } else {
+    else
         numParties = stoi(this->getParser().getValueByKey(arguments, "partiesNumber"));
-    }
+
     cout<<"number of parties = "<<numParties<<endl;
     auto partiesFile = this->getParser().getValueByKey(arguments, "partiesFile");
     cout<<"partiesFile = "<<partiesFile<<endl;
@@ -83,6 +83,10 @@ MPCProtocol::MPCProtocol(string protocolName, int argc, char* argv[], bool initC
     times = stoi(this->getParser().getValueByKey(arguments, "internalIterationsNumber"));
     if (initComm)
         parties = comm.setCommunication(partyID, numParties, partiesFile);
+    auto isNumThreads = this->getParser().getValueByKey(arguments, "numThreads");
+    if(isNumThreads == "NotFound")
+        numThreads = 1;
+    else
     numThreads = stoi(this->getParser().getValueByKey(arguments, "numThreads"));
 
     //Calculates the number of threads.

@@ -23,8 +23,13 @@ export libdir=$(prefix)/lib
 
 SLib           = libscapi.a
 CPP_FILES     := $(wildcard src/*/*.cpp)
+CPP_FILES     += $(wildcard tools/circuits/scapiBristolConverter/*.cpp)
+CPP_FILES     += $(wildcard tools/circuits/scapiNecConverter/*.cpp)
+CPP_FILES     += $(wildcard src/*/*.cpp)
 C_FILES       := $(wildcard src/*/*.c)
 OBJ_FILES     := $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES))
+OBJ_FILES     += $(patsubst tools/circuits/scapiBristolConverter/%.cpp,obj/tools/scapiBristolConverter/%.o,$(CPP_FILES))
+OBJ_FILES     += $(patsubst tools/circuits/scapiNecConverter/%.cpp,obj/tools/scapiNecConverter/%.o,$(CPP_FILES))
 OBJ_FILES     += $(patsubst src/%.c,obj/%.o,$(C_FILES))
 GCC_STANDARD = c++14
 
@@ -40,13 +45,15 @@ ifeq ($(uname_os), Darwin)
 endif
 
 ifeq ($(uname_arch), x86_64)
-	OUT_DIR        = obj obj/primitives obj/interactive_mid_protocols obj/mid_layer obj/comm obj/infra obj/cryptoInfra obj/circuits obj/circuits_c
+	OUT_DIR        = obj obj/primitives obj/interactive_mid_protocols obj/mid_layer obj/comm obj/infra obj/cryptoInfra \
+	obj/circuits obj/circuits_c obj/tools/scapiNecConverter obj/tools/scapiBristolConverter
 	CPP_OPTIONS   := -g -std=$(GCC_STANDARD) $(INC) -mavx -maes -msse4.1 -mpclmul -Wall \
 	-Wno-uninitialized -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable -Wno-unused-result \
 	-Wno-sign-compare -Wno-parentheses -Wno-ignored-attributes -O3 -fPIC
 endif
 ifeq ($(uname_arch), aarch64)
-	OUT_DIR        = obj obj/primitives obj/interactive_mid_protocols obj/mid_layer obj/comm obj/infra obj/cryptoInfra
+	OUT_DIR        = obj obj/primitives obj/interactive_mid_protocols obj/mid_layer obj/comm obj/infra obj/cryptoInfra \
+	obj/tools/scapiNecConverter obj/tools/scapiBristolConverter
 	CPP_OPTIONS   := -g -std=$(GCC_STANDARD) $(INC) -Wall -Wno-narrowing -Wno-uninitialized \
 	-Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable -Wno-unused-result \
 	-Wno-sign-compare -Wno-parentheses -Wno-ignored-attributes -O3 -fPIC
@@ -118,6 +125,10 @@ obj/primitives/%.o: src/primitives/%.cpp
 obj/mid_layer/%.o: src/mid_layer/%.cpp
 	g++ -c $(CPP_OPTIONS) -o $@ $<
 obj/cryptoInfra/%.o: src/cryptoInfra/%.cpp
+	g++ -c $(CPP_OPTIONS) -o $@ $<
+obj/tools/scapiNecConverter/%.o: tools/circuits/scapiNecConverter/%.cpp
+	g++ -c $(CPP_OPTIONS) -o $@ $<
+obj/tools/scapiBristolConverter/%.o: tools/circuits/scapiBristolConverter/%.cpp
 	g++ -c $(CPP_OPTIONS) -o $@ $<
 
 #### libs compilation ####
