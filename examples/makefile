@@ -1,7 +1,11 @@
-INC               =  -I../../boost_1_64_0 -I../install/include -I../lib/OTExtensionBristol -I../install/include/libOTe -I../install/include/libOTe/cryptoTools
+INC               =  -I../install/include -I../lib/OTExtensionBristol -I../install/include/libOTe \
+ -I../install/include/libOTe/cryptoTools
 CXX               = g++ 
-LIBS              =  -L../install/lib -L../../boost_1_64_0/stage/lib
-LINKER_OPTIONS    =  ../libscapi.a ../install/lib/libOTExtensionBristol.a ../install/lib/libOTe.a ../install/lib/libcryptoTools.a ../install/lib/libmiracl.a ../install/lib/libsimpleot.a $(LIBS) ../install/lib/libcrypto.a -ldl -lboost_log -lboost_system -lboost_thread -lboost_serialization -lboost_filesystem -lpthread ../install/lib/libssl.a -lgmp -lrt
+LIBS              =  ../install/lib
+LINKER_OPTIONS    =  ../libscapi.a $(LIBS)/libOTExtensionBristol.a $(LIBS)/libOTe.a \
+ $(LIBS)/libcryptoTools.a $(LIBS)/libmiracl.a $(LIBS)/libsimpleot.a \
+  -ldl -lboost_log -lboost_system -lboost_thread -lboost_serialization -lboost_filesystem \
+ -lpthread -lgmp -lrt -lssl -lcrypto
 CPP_OPTIONS       = --std=c++14 $(INC) -O3 -Wall -Wno-unused-function -Wno-unused-variable -Wno-expansion-to-defined -Wno-ignored-attributes -no-pie
 OBJS              = simple_dlog.o simple_sha1.o simple_gmac.o CommitmentExample.o OTExample.o SigmaProtocolExample.o comm_example.o App1.o YaoParties.o OTExtensionBristolExample.o
 
