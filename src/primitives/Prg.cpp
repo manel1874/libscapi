@@ -355,7 +355,7 @@ void PrgFromOpenSSLAES::prepare() {
     if (isStrict == true)
         throw overflow_error("No randoms left for a strict class");
     //set the starting point of the index. We want the ceiling of the division by 16
-    startingIndex = (idxForBytes + 16 - 1) / 16;
+    startingIndex = startingIndex + (idxForBytes + 16 - 1) / 16;
     long *plaintextArray = (long *)indexPlaintext;
     //go over the array and set the long for evey other long, we use only half of the 128 bit variables
     for (long i = 0; i < cachedSize; i++) {
