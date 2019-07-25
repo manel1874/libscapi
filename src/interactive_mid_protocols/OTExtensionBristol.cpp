@@ -136,8 +136,11 @@ shared_ptr<OTBatchSOutput> OTExtensionBristolSender::transfer(OTBatchSInput * in
         } else {
 
             byte * counters = createCountersArray(factor);
-
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
             auto aes = new EVP_CIPHER_CTX();
+#else
+            auto aes = EVP_CIPHER_CTX_new();
+#endif
             auto output = new byte[factor * 16];
             for (int i=0; i < nOTsReal; i++){
                 //Expand the x0[i] to the required size.
@@ -303,7 +306,11 @@ shared_ptr<OTBatchROutput> OTExtensionBristolReceiver::transfer(OTBatchRInput * 
             //Create the array of indices to be the plaintext for the AES
             auto counters = createCountersArray(factor);
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
             auto aes = new EVP_CIPHER_CTX();
+#else
+            auto aes = EVP_CIPHER_CTX_new();
+#endif
             int outLength;
             auto outputArr = new byte[16 * factor];
 

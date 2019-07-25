@@ -1,0 +1,33 @@
+language: cpp
+dist: xenial
+sudo: required
+compiler:
+  - gcc
+  - clang
+os:
+  - linux
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+      - llvm-toolchain-precise-3.8
+    packages:
+      - g++-7
+      - libboost-all-dev
+      - libssl-dev
+      - clang-3.8
+      - build-essential
+      - libssl-dev
+      - libgmp3-dev
+      - cmake
+      - liblog4cpp5-dev
+      - zlib1g-dev
+
+install:
+  - "[ $CXX = g++ ] && export CXX=g++-7 || true"
+  - "[ $CXX = clang++ ] && export CXX=clang++-3.8 || true"
+
+script: make
+
+

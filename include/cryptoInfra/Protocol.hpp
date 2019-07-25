@@ -104,7 +104,7 @@ protected:
     int numThreads, numPartiesForEachThread;
 
 public:
-    MPCProtocol(string protocolName, int argc, char* argv[]);
+    MPCProtocol(string protocolName, int argc, char* argv[], bool initComm = true);
     ~MPCProtocol();
 
     void run();
@@ -127,10 +127,3 @@ public:
 
 
 };
-
-
-class PartiesNumber {};
-
-class TwoParty : public PartiesNumber {};
-class ThreeParty : public PartiesNumber {};
-class MultiParty : public PartiesNumber {};

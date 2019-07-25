@@ -29,8 +29,9 @@
 #include "../../include/primitives/TrapdoorPermutationOpenSSL.hpp"
 
 
-void OpenSSLRSAPermutation::setKey(const shared_ptr<PublicKey> & publicKey, const shared_ptr<PrivateKey> & privateKey) {
-	auto rsaPubKey = dynamic_pointer_cast<RSAPublicKey>(publicKey);
+void OpenSSLRSAPermutation::setKey(const shared_ptr<PublicKey> & publicKey, const shared_ptr<PrivateKey> & privateKey)
+{
+    auto rsaPubKey = dynamic_pointer_cast<RSAPublicKey>(publicKey);
 	auto rsaPrivKey = dynamic_pointer_cast<RSAPrivateKey>(privateKey);
 
 	if (!rsaPubKey || (privateKey != nullptr && !rsaPrivKey))
@@ -40,29 +41,46 @@ void OpenSSLRSAPermutation::setKey(const shared_ptr<PublicKey> & publicKey, cons
 	biginteger pubExponent = rsaPubKey->getPublicExponent();
 	modulus = rsaPubKey->getModulus();
 
-	if (privateKey) { // if there is a privateKey
+	if (privateKey)
+	{ // if there is a privateKey
 		biginteger privExponent = rsaPrivKey->getPrivateExponent();
 		auto crtKey = dynamic_pointer_cast<RSAPrivateCrtKey>(privateKey);
 
-		if (crtKey) { // If private key is CRT private key.
+		if (crtKey)
+		{ // If private key is CRT private key.
 			//Get all the crt parameters
 			biginteger p = crtKey->getPrimeP();
-			biginteger q = crtKey->getPrimeQ();
-			biginteger dp = crtKey->getPrimeExponentP();
-			biginteger dq = crtKey->getPrimeExponentQ();
-			biginteger crt = crtKey->getCrtCoefficient();
+            biginteger q = crtKey->getPrimeQ();
+            biginteger dp = crtKey->getPrimeExponentP();
+            biginteger dq = crtKey->getPrimeExponentQ();
+            biginteger crt = crtKey->getCrtCoefficient();
 
 			//Initialize the Openssl's object with crt key.
-			rsa = initRSAPublicPrivateCrt(pubExponent, privExponent, p, q, dp, dq, crt);
-
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+			_rsa = initRSAPublicPrivateCrt(pubExponent, privExponent, p, q, dp, dq, crt);
+#else
+			_rsa = initRSAPublicPrivateCrt(pubExponent, privExponent, p, q, dp, dq, crt);
+#endif
 		}
-		else { //If private key is key with N, e, d.
+		else
+        {
+		    //If private key is key with N, e, d.
 			//Initialize the openSSL's object with the RSA parameters - n, e, d.
-			rsa = initRSAPublicPrivate(pubExponent, privExponent);
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+			_rsa = initRSAPublicPrivate(pubExponent, privExponent);
+#else
+			_rsa = initRSAPublicPrivate(pubExponent, privExponent);
+#endif
 		}
 	}
-	else { // privateKey == NULL
-		rsa = initRSAPublic(pubExponent);
+	else
+    {
+        // privateKey == NULL
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+		_rsa = initRSAPublic(pubExponent);
+#else
+		_rsa = initRSAPublic(pubExponent);
+#endif
 	}
 	// Call the parent's set key function that sets the keys.
 	TrapdoorPermutation::setKey(publicKey, privateKey);
@@ -70,9 +88,9 @@ void OpenSSLRSAPermutation::setKey(const shared_ptr<PublicKey> & publicKey, cons
 
 shared_ptr<RSA> OpenSSLRSAPermutation::initRSAPublicPrivateCrt(biginteger & pubExp, biginteger & privExp, biginteger & p,
 	biginteger & q, biginteger & dp, biginteger & dq, biginteger & crt) {
-	
+    auto rsa = shared_ptr<RSA>(RSA_new(), RSA_free);
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	//Convert all the parameters to OpenSSL's terminology and set them to the Openssl's rsa object.
-	auto rsa = shared_ptr<RSA>(RSA_new(), RSA_free);
 	rsa->n = biginteger_to_opensslbignum(modulus);
 	rsa->e = biginteger_to_opensslbignum(pubExp);
 	rsa->d = biginteger_to_opensslbignum(privExp);
@@ -87,11 +105,23 @@ shared_ptr<RSA> OpenSSLRSAPermutation::initRSAPublicPrivateCrt(biginteger & pubE
 		return nullptr;
 	}
 	return rsa;
+#else
+	int setKeyRes = RSA_set0_key(rsa.get(), biginteger_to_opensslbignum(modulus), biginteger_to_opensslbignum(pubExp),
+                 biginteger_to_opensslbignum(privExp));
+	int setFactorsRes = RSA_set0_factors(rsa.get(), biginteger_to_opensslbignum(p), biginteger_to_opensslbignum(q));
+	int setCrtRes = RSA_set0_crt_params(rsa.get(), biginteger_to_opensslbignum(dp), biginteger_to_opensslbignum(dq),
+	        biginteger_to_opensslbignum(crt));
+	if (setKeyRes == 0 || setFactorsRes == 0 || setCrtRes ==0) return nullptr;
+
+    return rsa;
+#endif
+
 }
 
 shared_ptr<RSA> OpenSSLRSAPermutation::initRSAPublicPrivate(biginteger & pubExponent, biginteger & privExponent) {
 	//Convert all the parameters to OpenSSL's terminology and set them to the Openssl's rsa object.
-	auto rsa = shared_ptr<RSA>(RSA_new(), RSA_free);
+    auto rsa = shared_ptr<RSA>(RSA_new(), RSA_free);
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	rsa->n = biginteger_to_opensslbignum(modulus);
 	rsa->e = biginteger_to_opensslbignum(pubExponent);
 	rsa->d = biginteger_to_opensslbignum(privExponent);
@@ -99,18 +129,29 @@ shared_ptr<RSA> OpenSSLRSAPermutation::initRSAPublicPrivate(biginteger & pubExpo
 		return nullptr;
 	}
 	return rsa;
+#else
+    int setKeyRes = RSA_set0_key(rsa.get(), biginteger_to_opensslbignum(modulus), biginteger_to_opensslbignum(pubExponent),
+                 biginteger_to_opensslbignum(privExponent));
+    if(setKeyRes == 0) return nullptr;
+    return rsa;
+#endif
 }
 
 shared_ptr<RSA> OpenSSLRSAPermutation::initRSAPublic(biginteger & pubExponent) {
 	//Convert all the parameters to OpenSSL's terminology and set them to the Openssl's rsa object.
-	auto rsa = shared_ptr<RSA>(RSA_new(), RSA_free);
-
+    auto rsa = shared_ptr<RSA>(RSA_new(), RSA_free);
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	rsa->n = biginteger_to_opensslbignum(modulus);
 	rsa->e = biginteger_to_opensslbignum(pubExponent);
 	if ((rsa->n == NULL) || (rsa->e == NULL)) {
 		return nullptr;
 	}
 	return rsa;
+#else
+    int setKeyRes = RSA_set0_key(rsa.get(), biginteger_to_opensslbignum(modulus), biginteger_to_opensslbignum(pubExponent), NULL);
+    if(setKeyRes == 0) return nullptr;
+    return rsa;
+#endif
 }
 
 KeyPair OpenSSLRSAPermutation::generateKey(int keySize) {
@@ -120,11 +161,23 @@ KeyPair OpenSSLRSAPermutation::generateKey(int keySize) {
 	BN_set_word(bne, 65537);
 	//Generate open SSL's RSA key.
 	RSA_generate_key_ex(pair, keySize, bne, NULL);
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	//Convert the key parameters into KeyPair.
 	biginteger mod = opensslbignum_to_biginteger(pair->n);
 	biginteger pubExp = opensslbignum_to_biginteger(pair->e);
 	biginteger privExp = opensslbignum_to_biginteger(pair->d);
-	KeyPair kp(new RSAPublicKey(mod, pubExp), new RSAPrivateKey(mod, privExp));
+
+#else
+	BIGNUM **n, **e, **d;
+	*n = BN_new();
+	*e = BN_new();
+	*d = BN_new();
+	RSA_get0_key(pair,(const BIGNUM**)n, (const BIGNUM**)e, (const BIGNUM**)d);
+    biginteger mod = opensslbignum_to_biginteger(*n);
+    biginteger pubExp = opensslbignum_to_biginteger(*e);
+    biginteger privExp = opensslbignum_to_biginteger(*d);
+#endif
+    KeyPair kp(new RSAPublicKey(mod, pubExp), new RSAPrivateKey(mod, privExp));
 	RSA_free(pair);
 	BN_free(bne);
 	return kp;
@@ -153,13 +206,8 @@ shared_ptr<TPElement> OpenSSLRSAPermutation::compute(TPElement * tpEl) {
 biginteger OpenSSLRSAPermutation::computeRSA(biginteger & elementP) {
 	ERR_load_crypto_strings();
 	// Seed the random geneartor.
-#ifdef _WIN32
-	RAND_screen(); // only defined for windows, reseeds from screen contents
-#else
 	RAND_poll(); // reseeds using hardware state (clock, interrupts, etc).
-#endif
-
-	int size = RSA_size(rsa.get());
+	int size = RSA_size(_rsa.get());
 	vector<byte> ret(size); //will hold the output
 	
 	//convert the element into bytes vector.
@@ -168,7 +216,11 @@ biginteger OpenSSLRSAPermutation::computeRSA(biginteger & elementP) {
 	encodeBigInteger(elementP, encodedBi.data(), encodedSize);
 
 	//Encrypt the array
-	int success = RSA_public_encrypt(encodedSize, encodedBi.data(), ret.data(), rsa.get(), RSA_NO_PADDING);
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+	int success = RSA_public_encrypt(encodedSize, encodedBi.data(), ret.data(), _rsa.get(), RSA_NO_PADDING);
+#else
+	int success = RSA_public_encrypt(encodedSize, encodedBi.data(), ret.data(), _rsa.get(), RSA_NO_PADDING);
+#endif
 	if (-1 == success)
 	{
 		string error(ERR_reason_error_string(ERR_get_error()));
@@ -192,8 +244,11 @@ shared_ptr<TPElement> OpenSSLRSAPermutation::invert(TPElement * tpEl) {
 
 	// Get the underlying biginteger object.
 	biginteger elementP = rsaEl->getElement();
-	
-	int size = RSA_size(rsa.get());
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+	int size = RSA_size(_rsa.get());
+#else
+	int size = RSA_size(_rsa.get());
+#endif
 	vector<byte> ret(size); //Will hold the output
 
 	//Convert the element to bytes vector.
@@ -202,7 +257,11 @@ shared_ptr<TPElement> OpenSSLRSAPermutation::invert(TPElement * tpEl) {
 	encodeBigInteger(elementP, encodedBi.data(), encodedSize);
 	
 	// Invert the RSA permutation on the given bytes.
-	RSA_private_decrypt(encodedSize, encodedBi.data(), ret.data(), rsa.get(), RSA_NO_PADDING);
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+	RSA_private_decrypt(encodedSize, encodedBi.data(), ret.data(), _rsa.get(), RSA_NO_PADDING);
+#else
+	RSA_private_decrypt(encodedSize, encodedBi.data(), ret.data(), _rsa.get(), RSA_NO_PADDING);
+#endif
 	biginteger resValue = decodeBigInteger(ret.data(), size);
 	// Create and initialize a RSAElement with the result.
 	auto returnEl = make_shared<RSAElement>(modulus, resValue, false);

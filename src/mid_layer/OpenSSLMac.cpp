@@ -9,12 +9,15 @@
 
 OpenSSLGMAC::OpenSSLGMAC(const shared_ptr<PrgFromOpenSSLAES> & random): random(random){
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     EVP_CIPHER_CTX_init(&_ctx);
-
-    EVP_EncryptInit_ex(&_ctx, EVP_aes_128_gcm(), NULL, NULL, NULL); //TODO check return value == 1
-
+    EVP_EncryptInit_ex(&_ctx, EVP_aes_128_gcm(), NULL, NULL, NULL);
     EVP_CIPHER_CTX_ctrl(&_ctx, EVP_CTRL_GCM_SET_IVLEN, 12, NULL);
-
+#else
+    EVP_CIPHER_CTX_init(_ctx);
+    EVP_EncryptInit_ex(_ctx, EVP_aes_128_gcm(), NULL, NULL, NULL);
+    EVP_CIPHER_CTX_ctrl(_ctx, EVP_CTRL_GCM_SET_IVLEN, 12, NULL);
+#endif
     iv.resize(12);
 
 }
@@ -41,34 +44,42 @@ vector<byte> OpenSSLGMAC::mac(const vector<byte> &msg, int offset, int msgLen) {
     vector<byte> tag(16);
 
 
-    if (_isIVToSet == true){
-        //generate random iv
-         // Creates a byte vector of size keySize.
+    if (_isIVToSet == true)
+    {
+        //generate random iv. Creates a byte vector of size keySize.
         random->getPRGBytes(iv, 0, 12);    // Generates the bytes using the random.
-
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
         EVP_EncryptInit_ex(&_ctx, NULL, NULL, NULL, iv.data());
-
+#else
+        EVP_EncryptInit_ex(_ctx, NULL, NULL, NULL, iv.data());
+#endif
         _isIVToSet=true;
     }
 
-
-
-    //update
+    // update
     int _unusedOutl;
-    EVP_EncryptUpdate(&_ctx, NULL, &_unusedOutl, msg.data(), msgLen); //TODO check return value == 1
-
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+    EVP_EncryptUpdate(&_ctx, NULL, &_unusedOutl, msg.data(), msgLen);
     //final
-    EVP_EncryptFinal_ex(&_ctx, NULL, &_unusedOutl); //TODO check return value == 1
-
+    EVP_EncryptFinal_ex(&_ctx, NULL, &_unusedOutl);
     EVP_CIPHER_CTX_ctrl(&_ctx, EVP_CTRL_GCM_GET_TAG, 16, tag.data());
-
+#else
+    EVP_EncryptUpdate(_ctx, NULL, &_unusedOutl, msg.data(), msgLen);
+    //final
+    EVP_EncryptFinal_ex(_ctx, NULL, &_unusedOutl);
+    EVP_CIPHER_CTX_ctrl(_ctx, EVP_CTRL_GCM_GET_TAG, 16, tag.data());
+#endif
     //concatenate the iv to the tag, this is part of the final tag
 
     tag.insert( tag.end(), iv.begin(), iv.end() );
 
 
     //initialize the Hmac again in order to enable repeated calls.
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     if (0 == (EVP_EncryptInit_ex(&_ctx, NULL, NULL, keyVec.data(), NULL)))
+#else
+    if (0 == (EVP_EncryptInit_ex(_ctx, NULL, NULL, keyVec.data(), NULL)))
+#endif
     throw runtime_error("failed to init hmac object");
 
     return tag;
@@ -77,28 +88,27 @@ vector<byte> OpenSSLGMAC::mac(const vector<byte> &msg, int offset, int msgLen) {
 bool OpenSSLGMAC::verify(const vector<byte> &msg, int offset, int msgLength, vector<byte>& tag) {
     if (!isKeySet())
         throw IllegalStateException("secret key isn't set");
-    // If the tag size is not the mac size - returns false.
+
+    // if the tag size is not the mac size - returns false.
     if ((int) tag.size() != getMacSize())
         return false;
-    // Calculate the mac on the msg to get the real tag.
+    // calculate the mac on the msg to get the real tag.
 
-    //get the iv from the tag
+    // get the iv from the tag
     memcpy(&iv[0], &tag[16], 12);
 
-
-
-    //set the iv to the one used creating the tag
-
+    // set the iv to the one used creating the tag
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     EVP_EncryptInit_ex(&_ctx, NULL, NULL, NULL, iv.data());
+#else
+    EVP_EncryptInit_ex(_ctx, NULL, NULL, NULL, iv.data());
+#endif
 
     _isIVToSet=false;//do not set the iv, use the current iv for this mac
 
-
     vector<byte> macTag = mac(msg, offset, msgLength);
-
-
     // Compares the real tag to the given tag.
-    // for code-security reasons, the comparison is fully performed. that is, even if we know already after the first few bits
+    // for code-security reasons, the comparison is fully performed. Even if we know already after the first few bits
     // that the tag is not equal to the mac, we continue the checking until the end of the tag bits.
     bool equal = true;
     int length = macTag.size();
@@ -116,7 +126,11 @@ void OpenSSLGMAC::setMacKey(SecretKey & secretKey) {
     // Initialize the Hmac object with the given key.
     keyVec = secretKey.getEncoded();
     //set the key, the iv will be set again after finalizing
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     EVP_EncryptInit_ex(&_ctx, NULL, NULL, keyVec.data(), NULL);
+#else
+    EVP_EncryptInit_ex(_ctx, NULL, NULL, keyVec.data(), NULL);
+#endif
     _isKeySet = true;
 }
 
@@ -127,22 +141,26 @@ void OpenSSLGMAC::update(vector<byte> & msg, int offset, int msgLen) {
 
     //update
     int _unusedOutl;
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     if (0 == (EVP_EncryptUpdate(&_ctx, NULL, &_unusedOutl, &msg[offset], msgLen)))
+#else
+    if (0 == (EVP_EncryptUpdate(_ctx, NULL, &_unusedOutl, &msg[offset], msgLen)))
+#endif
         throw runtime_error("failed to update gmac object");
 
     _isIVToSet=false;
-
 }
 
 
 void OpenSSLGMAC::doFinal(vector<byte> & msg, int offset, int msgLength, vector<byte> & tag_res) {
-
     tag_res = mac(msg, offset, msgLength);
-
 }
 
 
 OpenSSLGMAC::~OpenSSLGMAC(){
-
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     EVP_CIPHER_CTX_cleanup(&_ctx);
+#else
+    EVP_CIPHER_CTX_cleanup(_ctx);
+#endif
 }

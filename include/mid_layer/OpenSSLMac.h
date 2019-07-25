@@ -11,8 +11,11 @@
 class OpenSSLGMAC : public Mac{
 
 private:
-
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     EVP_CIPHER_CTX _ctx;
+#else
+    EVP_CIPHER_CTX *_ctx;
+#endif
     bool _isIVToSet = true;
     vector<byte> keyVec;
     bool _isKeySet = false;  // Until setKey is called set to false.

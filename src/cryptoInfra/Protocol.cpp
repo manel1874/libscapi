@@ -61,27 +61,32 @@ CmdParser Protocol::getParser()
     return parser;
 }
 
-MPCProtocol::MPCProtocol(string protocolName, int argc, char* argv[]): Protocol (protocolName, argc, argv){
+MPCProtocol::MPCProtocol(string protocolName, int argc, char* argv[], bool initComm):
+             Protocol (protocolName, argc, argv){
 
     vector<string> subTaskNames{"Offline", "Online"};
     timer = new Measurement(*this, subTaskNames);
-
 
     partyID = stoi(this->getParser().getValueByKey(arguments, "partyID"));
     cout<<"ID = "<<partyID<<endl;
     auto partiesNumber = this->getParser().getValueByKey(arguments, "partiesNumber");
 
-    if (partiesNumber == "NotFound"){
+    if (partiesNumber == "NotFound")
         numParties = 2;
-    } else {
+    else
         numParties = stoi(this->getParser().getValueByKey(arguments, "partiesNumber"));
-    }
+
     cout<<"number of parties = "<<numParties<<endl;
     auto partiesFile = this->getParser().getValueByKey(arguments, "partiesFile");
     cout<<"partiesFile = "<<partiesFile<<endl;
 
     times = stoi(this->getParser().getValueByKey(arguments, "internalIterationsNumber"));
-    parties = comm.setCommunication(partyID, numParties, partiesFile);
+    if (initComm)
+        parties = comm.setCommunication(partyID, numParties, partiesFile);
+    auto isNumThreads = this->getParser().getValueByKey(arguments, "numThreads");
+    if(isNumThreads == "NotFound")
+        numThreads = 1;
+    else
     numThreads = stoi(this->getParser().getValueByKey(arguments, "numThreads"));
 
     //Calculates the number of threads.
@@ -94,6 +99,7 @@ MPCProtocol::MPCProtocol(string protocolName, int argc, char* argv[]): Protocol 
 
 
 }
+
 
 MPCProtocol::~MPCProtocol(){
     delete timer;

@@ -45,7 +45,11 @@ class OpenSSLHash : public virtual CryptographicHash {
 private:
 	int hashSize;
 protected:
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	shared_ptr<EVP_MD_CTX> hash; //Pointer to the OpenSSL hash object.
+#else
+    EVP_MD_CTX *hash;
+#endif
 public:
 	/**
 	* Constructs the OpenSSL hash object.

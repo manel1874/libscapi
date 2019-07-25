@@ -2,8 +2,8 @@
 // Created by moriya on 01/10/17.
 //
 
-#ifndef LIBSCAPI_MERSSENE_H
-#define LIBSCAPI_MERSSENE_H
+#ifndef LIBSCAPI_MERSENNE_H
+#define LIBSCAPI_MERSENNE_H
 
 #include "NTL/ZZ_p.h"
 #include "NTL/ZZ.h"

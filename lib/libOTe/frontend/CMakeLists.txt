@@ -5,7 +5,7 @@
 file(GLOB_RECURSE SRCS *.cpp)
 
 include_directories(${CMAKE_SOURCE_DIR})
-link_directories($ENV{HOME}/libscapi/install/lib/)
+link_directories(${LIBSCAPI_ROOT}/install/lib/)
 
 
 add_executable(frontend_libOTe  ${SRCS})
