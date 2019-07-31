@@ -114,6 +114,7 @@ void CommPartyTCPSynced::setSocketOptions() {
 
 size_t CommPartyTCPSynced::write(const byte* data, int size, int peer, int protocol) {
 	boost::system::error_code ec;
+	bytesOut += size;
 	return boost::asio::write(socketForWrite(),
 		boost::asio::buffer(data, size),
 		boost::asio::transfer_all(), ec);
@@ -126,5 +127,6 @@ CommPartyTCPSynced::~CommPartyTCPSynced() {
 		serverSocket.close();
 	if (role != 0)
 		clientSocket.close();
+
 }
 

@@ -66,47 +66,110 @@ MPCProtocol::MPCProtocol(string protocolName, int argc, char* argv[], bool initC
 
     vector<string> subTaskNames{"Offline", "Online"};
     timer = new Measurement(*this, subTaskNames);
+    try
+    {
+        partyID = stoi(this->getParser().getValueByKey(arguments, "partyID"));
+    }
+    catch (const invalid_argument& ia)
+    {
+        cout << "Invalid value for party ID: " << ia.what() << endl;
+    }
+    cout << "ID = " << partyID << endl;
 
-    partyID = stoi(this->getParser().getValueByKey(arguments, "partyID"));
-    cout<<"ID = "<<partyID<<endl;
     auto partiesNumber = this->getParser().getValueByKey(arguments, "partiesNumber");
 
     if (partiesNumber == "NotFound")
         numParties = 2;
     else
-        numParties = stoi(this->getParser().getValueByKey(arguments, "partiesNumber"));
+    {
+        try
+        {
+            numParties = stoi(this->getParser().getValueByKey(arguments, "partiesNumber"));
+        }
+        catch (const invalid_argument& ia)
+        {
+            cout << "Invalid value for partiesNumber: " << ia.what() << endl;
+        }
 
+    }
     cout<<"number of parties = "<<numParties<<endl;
+
     auto partiesFile = this->getParser().getValueByKey(arguments, "partiesFile");
     cout<<"partiesFile = "<<partiesFile<<endl;
 
-    times = stoi(this->getParser().getValueByKey(arguments, "internalIterationsNumber"));
+    auto internalIterationsNumber = this->getParser().getValueByKey(arguments, "internalIterationsNumber");
+    if (internalIterationsNumber == "NotFound")
+        times = 1;
+    else
+    {
+        try
+        {
+            times = stoi(internalIterationsNumber);
+        }
+        catch (const invalid_argument& ia)
+        {
+            cout << "Invalid value for internalIterationsNumber: " << ia.what() << endl;
+        }
+    }
+
+
     if (initComm)
         parties = comm.setCommunication(partyID, numParties, partiesFile);
     auto isNumThreads = this->getParser().getValueByKey(arguments, "numThreads");
     if(isNumThreads == "NotFound")
         numThreads = 1;
     else
-    numThreads = stoi(this->getParser().getValueByKey(arguments, "numThreads"));
+    {
+        try
+        {
+            numThreads = stoi(this->getParser().getValueByKey(arguments, "numThreads"));
+        }
+        catch (const invalid_argument& ia)
+        {
+            cout << "Invalid value for numThreads: " << ia.what() << endl;
+        }
+
+    }
 
     //Calculates the number of threads.
     if (numParties <= numThreads){
         this->numThreads = numParties;
         numPartiesForEachThread = 1;
-    } else{
+    } else
         numPartiesForEachThread = (numParties + numThreads - 1)/ numThreads;
-    }
-
-
 }
 
 
-MPCProtocol::~MPCProtocol(){
+MPCProtocol::~MPCProtocol()
+{
     delete timer;
+    long totalSent = 0, totalRecv = 0;
+    json party = json::array();
+    for (size_t idx = 0; idx < parties.size(); idx++)
+    {
+        if(partyID == idx) continue;
+
+        json commData = json::object();
+        commData["partyId"] = idx;
+        commData["bytesSent"] = parties[idx].get()->bytesOut;
+        commData["bytesReceived"] = parties[idx].get()->bytesIn;
+        party.insert(party.end(), commData);
+    }
+
+    // write data to file
+    try
+    {
+        string fileName = "partyCommData" + to_string(partyID) + ".json";
+        ofstream file(fileName, ostream::out);
+        file << party;
+    }
+    catch (exception& e)
+    {
+        cout << "Exception thrown :" << e.what() << endl;
+    }
 }
 
 void MPCProtocol::initTimes(){
-    //cout<<"before sending any data"<<endl;
     byte tmpBytes[20];
     byte allBytes[20*numParties];
     roundFunctionSameMsg(tmpBytes, allBytes, 20);
@@ -135,9 +198,11 @@ void MPCProtocol::roundFunctionSameMsg(byte* sendData, byte* receiveData, int ms
     //Split the work to threads. Each thread gets some parties to work on.
     for (int t=0; t<numThreads; t++) {
         if ((t + 1) * numPartiesForEachThread <= parties.size()) {
-            threads[t] = thread(&MPCProtocol::exchangeDataSameInput, this, sendData, receiveData, t * numPartiesForEachThread, (t + 1) * numPartiesForEachThread, msgSize);
+            threads[t] = thread(&MPCProtocol::exchangeDataSameInput, this, sendData, receiveData,
+                    t * numPartiesForEachThread, (t + 1) * numPartiesForEachThread, msgSize);
         } else {
-            threads[t] = thread(&MPCProtocol::exchangeDataSameInput, this, sendData, receiveData, t * numPartiesForEachThread, numParties, msgSize);
+            threads[t] = thread(&MPCProtocol::exchangeDataSameInput, this, sendData, receiveData,
+                    t * numPartiesForEachThread, numParties, msgSize);
         }
     }
     for (int t=0; t<numThreads; t++){
@@ -151,9 +216,11 @@ void MPCProtocol::roundFunctionDiffMsg(byte* sendData, byte* receiveData, int ms
     //Split the work to threads. Each thread gets some parties to work on.
     for (int t=0; t<numThreads; t++) {
         if ((t + 1) * numPartiesForEachThread <= parties.size()) {
-            threads[t] = thread(&MPCProtocol::exchangeDataDiffInput, this, sendData, receiveData, t * numPartiesForEachThread, (t + 1) * numPartiesForEachThread, msgSize);
+            threads[t] = thread(&MPCProtocol::exchangeDataDiffInput, this, sendData, receiveData,
+                    t * numPartiesForEachThread, (t + 1) * numPartiesForEachThread, msgSize);
         } else {
-            threads[t] = thread(&MPCProtocol::exchangeDataDiffInput, this, sendData, receiveData, t * numPartiesForEachThread, numParties, msgSize);
+            threads[t] = thread(&MPCProtocol::exchangeDataDiffInput, this, sendData, receiveData,
+                    t * numPartiesForEachThread, numParties, msgSize);
         }
     }
     for (int t=0; t<numThreads; t++){

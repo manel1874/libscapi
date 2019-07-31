@@ -135,13 +135,19 @@ public:
 	virtual size_t readWithSizeIntoVector(vector<byte> & targetVector);
 	virtual void writeWithSize(string s) { writeWithSize((const byte*)s.c_str(), s.size()); };
 	virtual ~CommParty() {};
+
+	// accumulate the number of send/receive bytes
+    long bytesIn = 0;
+    long bytesOut = 0;
 };
 
 class CommPartyTCPSynced : public CommParty {
 public:
-	CommPartyTCPSynced(boost::asio::io_service& ioService, SocketPartyData me, SocketPartyData other, int role = 2) : //0 : Server, 1: Client, 2 : Both
+    //0 : Server, 1: Client, 2 : Both
+	CommPartyTCPSynced(boost::asio::io_service& ioService, SocketPartyData me, SocketPartyData other, int role = 2) :
 		ioServiceServer(ioService), ioServiceClient(ioService),
-		acceptor_(ioService, tcp::endpoint(tcp::v4(), (role == 1) ? (10000 + me.getPort()) : me.getPort() )),
+		acceptor_(ioService, tcp::endpoint(tcp::v4(),
+		        (role == 1) ? (10000 + me.getPort()) : me.getPort() )),
 		serverSocket(ioService), clientSocket(ioService)
 	{
 		this->me = me;
@@ -151,9 +157,11 @@ public:
 	int join(int sleepBetweenAttempts = 500, int timeout = 5000, bool first = true) override;
     size_t write(const byte* data, int size, int peer = -1, int protocol = -1) override;
 	size_t read(byte* data, int sizeToRead, int peer = -1, int protocol = -1) override {
+	    bytesIn += sizeToRead;
 		return boost::asio::read(socketForRead(), boost::asio::buffer(data, sizeToRead));
 	}
-	virtual ~CommPartyTCPSynced(); 
+
+    virtual ~CommPartyTCPSynced();
 
 private:
 	boost::asio::io_service& ioServiceServer;

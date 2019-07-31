@@ -31,9 +31,10 @@ private :
 public:
     ~MPCCommunication(){
         io_service.stop();
-    }
-    static vector<shared_ptr<ProtocolPartyData>> setCommunication(boost::asio::io_service & io_service, int id, int numParties, string configFile);
 
+    }
+    static vector<shared_ptr<ProtocolPartyData>> setCommunication(boost::asio::io_service & io_service, int id,
+            int numParties, string configFile);
     vector<shared_ptr<CommParty>> setCommunication(int id, int numParties, string configFile);
 
 };
