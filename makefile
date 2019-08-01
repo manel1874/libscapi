@@ -106,7 +106,6 @@ $(SLib): $(OBJ_FILES)
 	ranlib $@
 
 tests: compile-tests
-	cd ./tests; ./tests.exe
 
 obj/circuits_c/%.o: src/circuits_c/%.c
 	gcc -fPIC -mavx -maes -mpclmul -DRDTSC -DTEST=AES128  -O3 -c -o $@ $<
@@ -192,26 +191,10 @@ compile-kcp:
 #### Tests compilation ####
 .PHONY: compile-tests
 compile-tests:
-ifeq ($(uname_os), Linux)
-ifeq ($(uname_arch), x86_64)
-	g++ -std=c++14 -mavx -maes -msse4.1 -mpclmul -mbmi2 -I/usr/include/openssl  -Iinstall/include -o tests/tests.exe \
-	 tests/tests.cpp tests/interactiveMidProtocolsTests.cpp libscapi.a -lpthread -Linstall/lib \
-	  -lboost_system -lboost_thread -lssl -lntl -lgmp -lcrypto -ldl -lz -Wno-narrowing;
-endif
-ifeq ($(uname_arch), aarch64)
-	g++ -std=c++14 -I/usr/include/openssl  -Iinstall/include -o tests/tests.exe \
-	 tests/tests.cpp tests/interactiveMidProtocolsTests.cpp libscapi.a -lpthread -Linstall/lib \
-	  -lboost_system -lboost_thread -lssl -lntl -lgmp -lcrypto -ldl -lz -Wno-narrowing;
-endif
-endif
-
-ifeq ($(uname_os), Darwin)
-	g++ -std=c++14 -mavx -maes -msse4.1 -mpclmul -mbmi2 $(INC) -o tests/tests.exe \
-	 tests/tests.cpp tests/interactiveMidProtocolsTests.cpp libscapi.a -Linstall/lib \
-	  install/lib/libboost_system.a install/lib/libboost_thread.a install/lib/libssl.a install/lib/libcrypto.a install/lib/libntl.a -lgmp \
-	  -ldl -lz -Wno-inconsistent-missing-override -Wno-expansion-to-defined -Wno-string-plus-int \
-	  -Wno-mismatched-new-delete -Wno-delete-non-virtual-dtor -Wno-tautological-constant-out-of-range-compare
-endif
+	@rm -rf tests/CMakeCache.txt tests/CMakeFiles/ tests/cmake_install.cmake
+	@cmake ./tests/CMakeLists.txt
+	@$(MAKE) -C tests/
+	@cd tests && ./ScapiTests
 	@rm -rf build
 
 #### cleanning objects ####
@@ -245,10 +228,10 @@ clean-cpp:
 	@rm -rf $(OUT_DIR)
 	@echo "cleaning lib"
 	@rm -f $(SLib)
+	@rm -f tests/ScapiTests
 
 clean-install:
 	@rm -rf install
 
-clean: clean-ntl clean-emp clean-blake clean-libote clean-otextension-bristol clean-kcp \
- clean-cpp clean-install
+clean: clean-ntl clean-blake clean-libote clean-otextension-bristol clean-kcp clean-cpp clean-install
 
