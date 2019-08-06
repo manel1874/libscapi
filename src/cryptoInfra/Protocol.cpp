@@ -66,15 +66,6 @@ MPCProtocol::MPCProtocol(string protocolName, int argc, char* argv[], bool initC
 
     vector<string> subTaskNames{"Offline", "Online"};
     timer = new Measurement(*this, subTaskNames);
-    try
-    {
-        partyID = stoi(this->getParser().getValueByKey(arguments, "partyID"));
-    }
-    catch (const invalid_argument& ia)
-    {
-        cout << "Invalid value for party ID: " << ia.what() << endl;
-    }
-    cout << "ID = " << partyID << endl;
 
     auto partiesNumber = this->getParser().getValueByKey(arguments, "partiesNumber");
 
@@ -93,6 +84,18 @@ MPCProtocol::MPCProtocol(string protocolName, int argc, char* argv[], bool initC
 
     }
     cout<<"number of parties = "<<numParties<<endl;
+
+    try
+    {
+        partyID = stoi(this->getParser().getValueByKey(arguments, "partyID"));
+        if(partyID >= numParties)
+            exit(-1);
+    }
+    catch (const invalid_argument& ia)
+    {
+        cout << "Invalid value for party ID: " << ia.what() << endl;
+    }
+    cout << "ID = " << partyID << endl;
 
     auto partiesFile = this->getParser().getValueByKey(arguments, "partiesFile");
     cout<<"partiesFile = "<<partiesFile<<endl;
