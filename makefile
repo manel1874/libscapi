@@ -51,6 +51,13 @@ ifeq ($(uname_arch), x86_64)
 	-Wno-uninitialized -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable -Wno-unused-result \
 	-Wno-sign-compare -Wno-parentheses -Wno-ignored-attributes -O3 -fPIC
 endif
+ifeq ($(uname_arch), armv7l)
+	OUT_DIR        = obj obj/primitives obj/interactive_mid_protocols obj/mid_layer obj/comm obj/infra obj/cryptoInfra \
+	obj/tools/scapiNecConverter obj/tools/scapiBristolConverter
+	CPP_OPTIONS   := -g -std=$(GCC_STANDARD) $(INC) -mfpu=neon -Wall -Wno-narrowing -Wno-uninitialized \
+	-Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable -Wno-unused-result \
+	-Wno-sign-compare -Wno-parentheses -Wno-ignored-attributes -O3 -fPIC
+endif
 ifeq ($(uname_arch), aarch64)
 	OUT_DIR        = obj obj/primitives obj/interactive_mid_protocols obj/mid_layer obj/comm obj/infra obj/cryptoInfra \
 	obj/tools/scapiNecConverter obj/tools/scapiBristolConverter
@@ -69,6 +76,9 @@ ifeq ($(GCC_STANDARD), c++11)
 ifeq ($(uname_os), Linux)
 ifeq ($(uname_arch), x86_64)
     libs: compile-ntl compile-blake compile-otextension-bristol compile-kcp
+endif
+ifeq ($(uname_arch), armv7l)
+    libs:  compile-ntl compile-kcp
 endif
 ifeq ($(uname_arch), aarch64)
     libs:  compile-ntl compile-kcp
