@@ -1,4 +1,4 @@
-export curdir=$(abspath)
+export curdir=$(shell pwd)
 export builddir=$(abspath ./build)
 export prefix=$(abspath ./install)
 CXX=g++
@@ -202,7 +202,7 @@ compile-kcp:
 .PHONY: compile-tests
 compile-tests:
 	@rm -rf tests/CMakeCache.txt tests/CMakeFiles/ tests/cmake_install.cmake
-	@cmake ./tests/CMakeLists.txt
+	@cmake -DSCAPI_BASE_DIR=$(curdir) ./tests/CMakeLists.txt
 	@$(MAKE) -C tests/
 	@cd tests && ./ScapiTests
 	@rm -rf build
