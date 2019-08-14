@@ -216,11 +216,8 @@ biginteger OpenSSLRSAPermutation::computeRSA(biginteger & elementP) {
 	encodeBigInteger(elementP, encodedBi.data(), encodedSize);
 
 	//Encrypt the array
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	int success = RSA_public_encrypt(encodedSize, encodedBi.data(), ret.data(), _rsa.get(), RSA_NO_PADDING);
-#else
-	int success = RSA_public_encrypt(encodedSize, encodedBi.data(), ret.data(), _rsa.get(), RSA_NO_PADDING);
-#endif
+
 	if (-1 == success)
 	{
 		string error(ERR_reason_error_string(ERR_get_error()));

@@ -112,7 +112,7 @@ void OpenSSLDlogZpSafePrime::createRandomOpenSSLDlogZp(int numBits) {
 	if (0 == (BN_generate_prime_ex(p, numBits, 1, NULL, NULL, NULL)))
         throw runtime_error("failed to create OpenSSL Dlog");
 
-	BIGNUM *q = BN_new();
+	BIGNUM *q = BN_new();;
     if (0 == (BN_rshift1(q, p)))
         throw runtime_error("failed to create OpenSSL Dlog");
     BIGNUM *g = BN_new();
@@ -121,7 +121,7 @@ void OpenSSLDlogZpSafePrime::createRandomOpenSSLDlogZp(int numBits) {
         BN_rand_range(g, p);
         BN_mod_sqr(g, g, p, _ctx.get());
     }
-    DH_set0_pqg(_dlog.get(), p, q, g);
+    int success = DH_set0_pqg(_dlog.get(), p, q, g);
 
 #endif
 }
@@ -153,9 +153,6 @@ OpenSSLDlogZpSafePrime::OpenSSLDlogZpSafePrime(const shared_ptr<ZpGroupParams> &
 		throw invalid_argument("generator value is not valid");
 #else
     BIGNUM **p_temp, **q_temp, **g_temp;
-    *p_temp = BN_new();
-    *q_temp = BN_new();
-    *g_temp = BN_new();
     DH_get0_pqg(_dlog.get(), (const BIGNUM**)p_temp, (const BIGNUM**)q_temp, (const BIGNUM**)g_temp);
 
     if(!validateElement(*g_temp))
@@ -184,9 +181,6 @@ OpenSSLDlogZpSafePrime::OpenSSLDlogZpSafePrime(int numBits, const shared_ptr<Prg
     biginteger q = opensslbignum_to_biginteger(_dlog->q);
 #else
     BIGNUM *p_temp, *q_temp, *g_temp;
-    p_temp = BN_new();
-    q_temp = BN_new();
-    g_temp = BN_new();
     DH_get0_pqg(_dlog.get(), (const BIGNUM**)&p_temp, (const BIGNUM**)&q_temp, (const BIGNUM**)&g_temp);
     // Get the generator value.
     biginteger pGenerator = opensslbignum_to_biginteger(g_temp);
@@ -219,11 +213,8 @@ bool OpenSSLDlogZpSafePrime::validateElement(BIGNUM* el) {
 	BIGNUM* p = _dlog->p;
 	BIGNUM* q = _dlog->q;
 #else
-    BIGNUM **p, **q, **g;
-    *p = BN_new();
-    *q = BN_new();
-    *g = BN_new();
-    DH_get0_pqg(_dlog.get(), (const BIGNUM**)p, (const BIGNUM**)q, (const BIGNUM**)g);
+    BIGNUM *p, *q, *g;
+    DH_get0_pqg(_dlog.get(), (const BIGNUM**)&p, (const BIGNUM**)&q, (const BIGNUM**)&g);
 #endif
 
 	BIGNUM* zero = BN_new();
@@ -240,10 +231,10 @@ bool OpenSSLDlogZpSafePrime::validateElement(BIGNUM* el) {
 	BN_mod_exp(exp, el, q, p, _ctx.get());
 #else
     //Check that the element is smaller than p.
-    if (BN_cmp(el, *p) > 0) result = false;
+    if (BN_cmp(el, p) > 0) result = false;
 
     //Check that the element raised to q is 1 mod p.
-    BN_mod_exp(exp, el, *q, *p, _ctx.get());
+    BN_mod_exp(exp, el, q, p, _ctx.get());
 #endif
 
 	if (!BN_is_one(exp)) result = false;
@@ -298,9 +289,6 @@ bool OpenSSLDlogZpSafePrime::isGenerator() {
     return validateElement(_dlog->g);
 #else
     BIGNUM **p, **q, **g;
-    *p = BN_new();
-    *q = BN_new();
-    *g = BN_new();
     DH_get0_pqg(_dlog.get(), (const BIGNUM**)p, (const BIGNUM**)q, (const BIGNUM**)g);
     return validateElement(*g);
 #endif
@@ -323,9 +311,6 @@ bool OpenSSLDlogZpSafePrime::validateGroup() {
 	if (BN_is_word(_dlog->g, DH_GENERATOR_2))
 #else
     BIGNUM **p, **q, **g;
-    *p = BN_new();
-    *q = BN_new();
-    *g = BN_new();
     DH_get0_pqg(_dlog.get(), (const BIGNUM**)p, (const BIGNUM**)q, (const BIGNUM**)g);
     if (BN_is_word(*g, DH_GENERATOR_2))
 #endif
@@ -366,9 +351,6 @@ shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::getInverse(GroupElement* groupE
 	BN_mod_inverse(result, elem, _dlog->p, _ctx.get());
 #else
     BIGNUM *p, *q, *g;
-    p = BN_new();
-    q = BN_new();
-    g = BN_new();
     DH_get0_pqg(_dlog.get(), (const BIGNUM**)&p, (const BIGNUM**)&q, (const BIGNUM**)&g);
     BN_mod_inverse(result, elem, p, _ctx.get());
 #endif
@@ -397,9 +379,6 @@ shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::exponentiate(GroupElement* base
 	BN_mod_exp(resultBN, baseBN.get(), expBN, _dlog->p, _ctx.get());
 #else
     BIGNUM *p, *q, *g;
-    p = BN_new();
-    q = BN_new();
-    g = BN_new();
     DH_get0_pqg(_dlog.get(), (const BIGNUM**)&p, (const BIGNUM**)&q, (const BIGNUM**)&g);
     BN_mod_exp(resultBN, baseBN.get(), expBN, p, _ctx.get());
 #endif
@@ -431,9 +410,6 @@ shared_ptr<GroupElement> OpenSSLDlogZpSafePrime::multiplyGroupElements(GroupElem
     BN_mod_mul(result, elem1, elem2, _dlog->p, _ctx.get());
 #else
     BIGNUM *p, *q, *g;
-    p = BN_new();
-    q = BN_new();
-    g = BN_new();
     DH_get0_pqg(_dlog.get(), (const BIGNUM**)&p, (const BIGNUM**)&q, (const BIGNUM**)&g);
     BN_mod_mul(result, elem1, elem2, p, _ctx.get());
 #endif
