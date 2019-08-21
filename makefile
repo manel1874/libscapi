@@ -35,7 +35,7 @@ GCC_STANDARD = c++14
 
 ifeq ($(uname_os), Linux)
 	INC            = -Iinstall/include -Iinstall/include/OTExtensionBristol -Iinstall/include/libOTe \
-	 -Iinstall/include/libOTe/cryptoTools
+	 -Iinstall/include/libOTe/cryptoTools -I$(HOME) -I$(HOME)/OTExtensionBristol
     LIBRARIES_DIR  = -Linstall/lib
 endif
 ifeq ($(uname_os), Darwin)
@@ -63,7 +63,7 @@ ifeq ($(uname_arch), aarch64)
 	obj/tools/scapiNecConverter obj/tools/scapiBristolConverter
 	CPP_OPTIONS   := -g -std=$(GCC_STANDARD) $(INC) -Wall -Wno-narrowing -Wno-uninitialized \
 	-Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable -Wno-unused-result \
-	-Wno-sign-compare -Wno-parentheses -Wno-ignored-attributes -O3 -fPIC
+	-Wno-sign-compare -Wno-parentheses -Wno-ignored-attributes -O3 -fPIC -march=armv8-a+crypto
 endif
 
 $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<

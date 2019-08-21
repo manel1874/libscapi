@@ -28,7 +28,11 @@
 #pragma once
 #include "../infra/Common.hpp"
 #include "OT.hpp"
+#ifdef __x86_64__
 #include <emmintrin.h>
+#elif __aarch64__
+#include "../infra/SSE2NEON.h"
+#endif
 #ifndef _WIN32
 #include <OTExtensionBristol/OT/BitMatrix.h>
 #include <OTExtensionBristol/OT/BitVector.h>
