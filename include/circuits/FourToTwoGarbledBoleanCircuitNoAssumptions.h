@@ -25,7 +25,7 @@
 * 
 */
 
-
+#ifdef __x86_64__
 #pragma once
 #include "GarbledBooleanCircuitNoFixedKey.h"
 #include <vector>
@@ -111,3 +111,4 @@ private:
 	void initAesEncryptionsAndInputKeys(block* emptyBothInputKeys);
 };
 
+#endif

@@ -25,6 +25,7 @@
 * 
 */
 
+#ifdef __x86_64__
 #pragma once
 #include "GarbledBooleanCircuitFixedKey.h"
 #include <vector>
@@ -100,3 +101,4 @@ private:
 
 };
 
+#endif

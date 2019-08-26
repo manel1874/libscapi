@@ -25,6 +25,7 @@
 * 
 */
 
+#ifdef __x86_64__
 #pragma once
 #include "GarbledBooleanCircuitNoFixedKey.h"
 
@@ -33,7 +34,10 @@
 * The HalfGatesGarbledBoleanCircuitNoFixedKey uses the Free XOR technique that is explained in depth in "Free XOR Gates and
 * Applications" by Validimir Kolesnikov and Thomas Schneider. This class does not use the Fixed key assumption, unlike in the original paper. Instead, 
 * it used a fast optimized teqniche written by Shay Gueron from Intel to set keys and encrypt utilizing the pipline.
-* This class is based on the paper "Two Halves Make a Whole Reducing Data Transfer in Garbled Circuits using Half Gates" where each AND gate* uses only 2 rows in the garbled table. It is better than the Row reduction technique where each non Xor gate uses 3 rows.* This class only accept AND, XOR, XORNOT and NOT gates and does not deal with other general gates.* Unlike the previous techniques, this class also assumes circuilarity in addition to fixed key and free xor.
+* This class is based on the paper "Two Halves Make a Whole Reducing Data Transfer in Garbled Circuits using Half Gates" where each AND gate
+* uses only 2 rows in the garbled table. It is better than the Row reduction technique where each non Xor gate uses 3 rows.
+* This class only accept AND, XOR, XORNOT and NOT gates and does not deal with other general gates.
+* Unlike the previous techniques, this class also assumes circuilarity in addition to fixed key and free xor.
 * It uses the optimization of XOR and NON_XOR gates that can be computed without an encryption due to the way the
 * wire's keys were chosen. See the above papers also for a proof of security of this method. 
 * This class implements the virtual functions garble and internalVerify since the diffrences with other circuits are fundemental and thus
@@ -119,3 +123,4 @@ private:
 
 };
 
+#endif

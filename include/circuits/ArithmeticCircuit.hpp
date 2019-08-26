@@ -1,3 +1,4 @@
+#ifdef __x86_64__
 #ifndef CIRCUIT_H_
 #define CIRCUIT_H_
 
@@ -82,3 +83,4 @@ public:
 };
 
 #endif /* CIRCUIT_H_ */
+#endif

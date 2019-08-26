@@ -25,6 +25,7 @@
 * 
 */
 
+#ifdef __x86_64__
 #pragma once
 
 #include "Config.h"
@@ -149,3 +150,4 @@ protected:
 		
 };
 
+#endif

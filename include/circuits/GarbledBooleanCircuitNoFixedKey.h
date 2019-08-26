@@ -26,6 +26,7 @@
 */
 
 
+#ifdef __x86_64__
 #pragma once
 #include "GarbledBooleanCircuit.h"
 class GarbledBooleanCircuitNoFixedKey :
@@ -38,3 +39,4 @@ public:
 	int getGarbledTableSize() override;
 };
 
+#endif

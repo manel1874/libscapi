@@ -24,8 +24,13 @@
 * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 * 
 */
-
+#ifdef __x86_64__
 #include <emmintrin.h>
+typedef __m128i block;
+#elif __arch64__
+#include "../infra/SSE2NEON.h"
+#endif
+
 
 /**
 * A configuration file that uses defines used by other files in the project.

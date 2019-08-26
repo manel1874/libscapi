@@ -25,7 +25,7 @@
 * 
 */
 
-
+#ifdef __x86_64__
 #pragma once
 #include "../infra/Common.hpp"
 #include "../infra/Scanner.hpp"
@@ -385,5 +385,4 @@ private:
 
 };
 
-
-
+#endif

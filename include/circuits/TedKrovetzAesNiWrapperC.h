@@ -25,12 +25,17 @@
 * 
 */
 
-
+#ifdef __x86_64__
 #ifndef TED_FILE
 #define TED_FILE
 
-#include <wmmintrin.h>
 #include "Config.h"
+
+#ifdef __x86_64__
+#include <wmmintrin.h>
+#elif __aarch64__
+#include "../infra/SSE2NEON.h"
+#endif
 
 
 
@@ -80,4 +85,5 @@ void AES_ecb_encrypt_blks_4_in_out(block *in, block *out, AES_KEY *aesKey);
 void AES_ecb_encrypt_blks_2_in_out(block *in, block *out, AES_KEY *aesKey);
 void AES_ecb_encrypt_chunk_in_out(block *in, block *out, unsigned nblks, AES_KEY *aesKey);
 
+#endif
 #endif

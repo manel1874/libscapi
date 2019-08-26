@@ -25,7 +25,7 @@
 * 
 */
 
-
+#ifdef __x86_64__
 #pragma once
 
 #include <string>
@@ -49,3 +49,5 @@ public:
 	static GarbledBooleanCircuit* createCircuit(std::string fileName, CircuitType type, bool isNonXorOutputsRequired = false);
 
 };
+
+#endif

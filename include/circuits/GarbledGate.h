@@ -25,6 +25,7 @@
 * 
 */
 
+#ifdef __x86_64__
 #pragma once
 
 
@@ -44,3 +45,4 @@ struct GarbledGate
 	unsigned char truthTableBits[4];//We keep this duplicate information to increase performance
 };
 
+#endif

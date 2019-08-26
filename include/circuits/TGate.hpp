@@ -2,6 +2,7 @@
 // Created by hila on 15/09/16.
 //
 
+#ifdef __x86_64__
 #ifndef TGATE_H_
 #define TGATE_H_
 
@@ -38,3 +39,4 @@ struct TGate
 };
 
 #endif /* TGATE_H_ */
+#endif
