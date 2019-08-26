@@ -25,23 +25,12 @@
 * 
 */
 
-
-#include "../../include/circuits/GarbledBooleanCircuitFixedKey.h"
-#include "../../include/circuits/GarbledGate.h"
-#include "../../include/circuits/Config.h"
-#include <ctime>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include "mmintrin.h"
-#include "../../include/circuits/TedKrovetzAesNiWrapperC.h"
-
-#ifdef _WIN32
-//#include "StdAfx.h"
-#else
-#include <string.h>
+#ifdef __x86_64__
 #include "../../include/circuits/Compat.h"
-#endif
+#include "../../include/circuits/Config.h"
+#include "../../include/circuits/GarbledGate.h"
+#include "../../include/circuits/TedKrovetzAesNiWrapperC.h"
+#include "../../include/circuits/GarbledBooleanCircuitFixedKey.h"
 
 using namespace std;
 
@@ -318,3 +307,5 @@ void GarbledBooleanCircuitFixedKey::garbleOutputWiresToNoFixedDelta(block *delta
 	}
 
 }
+
+#endif

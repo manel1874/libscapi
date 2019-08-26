@@ -1,20 +1,12 @@
+#ifdef __x86_64__
+
+#include <fstream>
 #include "../../include/circuits/ArithmeticCircuit.hpp"
 
-#include <fstream>      // std::ifstream
 
+ArithmeticCircuit::ArithmeticCircuit(){}
 
-
-
-ArithmeticCircuit::ArithmeticCircuit()
-{
-}
-
-
-
-
-ArithmeticCircuit::~ArithmeticCircuit()
-{
-}
+ArithmeticCircuit::~ArithmeticCircuit(){}
 
 void ArithmeticCircuit::readCircuit(const char* fileName)
 {
@@ -395,5 +387,4 @@ void ArithmeticCircuit::reArrangeCircuit() {
 
 }
 
-
-
+#endif

@@ -25,20 +25,13 @@
 * 
 */
 
-
-#include "../../include/circuits/FourToTwoGarbledBoleanCircuitNoAssumptions.h"
-#include "../../include/circuits/GarbledGate.h"
+#ifdef __x86_64__
 #include <string.h>
 #include <iostream>
-#include <time.h>
-//#include "TedKrovetzAesNiWrapperC.h"
-#include "../../include/circuits/intrinsic.h"
-//#include "ecb.h"
-#ifdef _WIN32
-//#include "StdAfx.h"
-#else
 #include "../../include/circuits/Compat.h"
-#endif
+#include "../../include/circuits/intrinsic.h"
+#include "../../include/circuits/GarbledGate.h"
+#include "../../include/circuits/FourToTwoGarbledBoleanCircuitNoAssumptions.h"
 
 using namespace std;
 
@@ -799,3 +792,5 @@ bool FourToTwoGarbledBoleanCircuitNoAssumptions::internalVerify(block *bothInput
 
 	return true;
 }
+
+#endif

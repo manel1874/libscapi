@@ -25,28 +25,20 @@
 * 
 */
 
-
-#include "../../include/circuits/StandardGarbledBooleanCircuit.h"
-#include "../../include/circuits/GarbledBooleanCircuitFixedKey.h"
-#include "../../include/circuits/GarbledGate.h"
-#include <stdio.h>
+#ifdef __x86_64__
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>
-#include "../../include/circuits/TedKrovetzAesNiWrapperC.h"
-
-#ifdef _WIN32
-//#include "StdAfx.h"
-#else
 #include "../../include/circuits/Compat.h"
-#endif
+#include "../../include/circuits/GarbledGate.h"
+#include "../../include/circuits/TedKrovetzAesNiWrapperC.h"
+#include "../../include/circuits/StandardGarbledBooleanCircuit.h"
+#include "../../include/circuits/GarbledBooleanCircuitFixedKey.h"
 
 
 using namespace std;
 
-StandardGarbledBooleanCircuit::StandardGarbledBooleanCircuit()
-{
-}
+StandardGarbledBooleanCircuit::StandardGarbledBooleanCircuit(){}
 
 
 StandardGarbledBooleanCircuit::~StandardGarbledBooleanCircuit()
@@ -96,12 +88,8 @@ void StandardGarbledBooleanCircuit::createCircuitMemory(const char* fileName, bo
 		exit(0);
 	}
 
-	for (int i = 0; i < (lastWireIndex + 1) * 2 + 2; i++){
-
+	for (int i = 0; i < (lastWireIndex + 1) * 2 + 2; i++)
 		indexArray[i] = _mm_set_epi32(0, 0, 0, i);
-
-
-	}
 
 }
 
@@ -409,4 +397,4 @@ bool StandardGarbledBooleanCircuit::internalVerify(block *bothInputKeys, block *
 
 }
 
-
+#endif

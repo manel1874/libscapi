@@ -25,19 +25,13 @@
 * 
 */
 
-
-#include "../../include/circuits/HalfGatesGarbledBoleanCircuitNoFixedKey.h"
-#include "../../include/circuits/GarbledGate.h"
+#ifdef __x86_64__
 #include <string.h>
 #include <iostream>
-//#include "TedKrovetzAesNiWrapperC.h"
-#include "../../include/circuits/intrinsic.h"
-//#include "ecb.h"
-#ifdef _WIN32
-//#include "StdAfx.h"
-#else
 #include "../../include/circuits/Compat.h"
-#endif
+#include "../../include/circuits/intrinsic.h"
+#include "../../include/circuits/GarbledGate.h"
+#include "../../include/circuits/HalfGatesGarbledBoleanCircuitNoFixedKey.h"
 
 using namespace std;
 
@@ -119,11 +113,8 @@ void HalfGatesGarbledBoleanCircuitNoFixedKey::createCircuitMemory(const char* fi
 }
 
 
-
-
-
-
-void HalfGatesGarbledBoleanCircuitNoFixedKey::garble(block *emptyBothInputKeys, block *emptyBothOutputKeys, vector<byte> & emptyTranslationTable, block seed){
+void HalfGatesGarbledBoleanCircuitNoFixedKey::garble(block *emptyBothInputKeys, block *emptyBothOutputKeys,
+        vector<byte> & emptyTranslationTable, block seed){
 
 	this->seed = seed;
 
@@ -221,7 +212,6 @@ void HalfGatesGarbledBoleanCircuitNoFixedKey::garble(block *emptyBothInputKeys, 
 	}
 
 	_aligned_free(KEY);
-
 
 }
 
@@ -450,3 +440,5 @@ bool HalfGatesGarbledBoleanCircuitNoFixedKey::internalVerify(block *bothInputKey
 	return true;
 
 }
+
+#endif

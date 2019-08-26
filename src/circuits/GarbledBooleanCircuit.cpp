@@ -25,31 +25,20 @@
 * 
 */
 
-
-#include "../../include/circuits/GarbledBooleanCircuit.h"
-#include "../../include/circuits/GarbledGate.h"
-#include "../../include/circuits/Config.h"
-#include <ctime>
+#ifdef __x86_64__
 #include <iostream>
-#include <fstream>
-#include <sstream>
-#include "mmintrin.h"
-#include "../../include/circuits/TedKrovetzAesNiWrapperC.h"
 #include <string.h>
 #include <memory>
 #include <openssl/rand.h>
-
-#ifdef _WIN32
-//#include "StdAfx.h"
-#else
+#include "../../include/circuits/Config.h"
 #include "../../include/circuits/Compat.h"
-#endif
+#include "../../include/circuits/GarbledGate.h"
+#include "../../include/circuits/GarbledBooleanCircuit.h"
+#include "../../include/circuits/TedKrovetzAesNiWrapperC.h"
 
 using namespace std;
 
-GarbledBooleanCircuit::GarbledBooleanCircuit(void)
-{
-}
+GarbledBooleanCircuit::GarbledBooleanCircuit(void){}
 
 
 GarbledBooleanCircuit::~GarbledBooleanCircuit(void)
@@ -475,3 +464,5 @@ void GarbledBooleanCircuit::readCircuitFromFile(const char* fileName)
 	}
 	myfile.close();
 }
+
+#endif

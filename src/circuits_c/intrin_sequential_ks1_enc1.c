@@ -5,6 +5,8 @@
 /* (2) Intel, Israel                                                */
 /* IPG, Architecture, Israel Development Center, Haifa, Israel      */
 /********************************************************************/
+
+#ifdef __x86_64__
 #include <stdint.h>
 #include <stdio.h>
 #include <wmmintrin.h>
@@ -12,7 +14,7 @@
 #if defined(__INTEL_COMPILER)
 # include <ia32intrin.h> 
 #elif defined(__GNUC__)
-	# include <emmintrin.h>
+# include <emmintrin.h>
 # include <smmintrin.h>
 #endif
 
@@ -133,3 +135,4 @@ void intrin_sequential_ks1_enc1(const unsigned char* PT, unsigned char* CT, int 
 	}
 }
 
+#endif

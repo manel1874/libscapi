@@ -26,25 +26,18 @@
 */
 
 
-#include "../../include/circuits/FreeXorGarbledBooleanCircuit.h"
-#include "../../include/circuits/GarbledGate.h"
-#include <stdio.h>
+#ifdef __x86_64__
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>
-#include "../../include/circuits/TedKrovetzAesNiWrapperC.h"
-
-#ifdef _WIN32
-//#include "StdAfx.h"
-#else
 #include "../../include/circuits/Compat.h"
-#endif
+#include "../../include/circuits/GarbledGate.h"
+#include "../../include/circuits/TedKrovetzAesNiWrapperC.h"
+#include "../../include/circuits/FreeXorGarbledBooleanCircuit.h"
 
 using namespace std;
 
-FreeXorGarbledBooleanCircuit::FreeXorGarbledBooleanCircuit(void)
-{
-}
+FreeXorGarbledBooleanCircuit::FreeXorGarbledBooleanCircuit(void){}
 
 FreeXorGarbledBooleanCircuit::FreeXorGarbledBooleanCircuit(const char* fileName, bool isNonXorOutputsRequired){
 
@@ -473,3 +466,5 @@ bool FreeXorGarbledBooleanCircuit::internalVerify(block *bothInputKeys, block *e
 	return isVerified;
 
 }
+
+#endif

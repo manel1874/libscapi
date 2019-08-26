@@ -60,7 +60,7 @@ ifeq ($(uname_arch), armv7l)
 endif
 ifeq ($(uname_arch), aarch64)
 	OUT_DIR        = obj obj/primitives obj/interactive_mid_protocols obj/mid_layer obj/comm obj/infra obj/cryptoInfra \
-	obj/tools/scapiNecConverter obj/tools/scapiBristolConverter obj/tools/scapiBristolConverter obj/circuits
+	obj/tools/scapiNecConverter obj/tools/scapiBristolConverter obj/circuits
 	CPP_OPTIONS   := -g -std=$(GCC_STANDARD) $(INC) -Wall -Wno-narrowing -Wno-uninitialized \
 	-Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable -Wno-unused-result \
 	-Wno-sign-compare -Wno-parentheses -Wno-ignored-attributes -Wno-return-type -O3 -fPIC -march=armv8-a+crypto

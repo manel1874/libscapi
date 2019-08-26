@@ -25,26 +25,18 @@
 * 
 */
 
-
-#include "../../include/circuits/RowReductionGarbledBooleanCircuit.h"
-#include "../../include/circuits/GarbledGate.h"
+#ifdef __x86_64__
 #include <string.h>
 #include <iostream>
-#include "../../include/circuits/TedKrovetzAesNiWrapperC.h"
-#
-
-#ifdef _WIN32
-//#include "StdAfx.h"
-#else
 #include "../../include/circuits/Compat.h"
-#endif
+#include "../../include/circuits/GarbledGate.h"
+#include "../../include/circuits/TedKrovetzAesNiWrapperC.h"
+#include "../../include/circuits/RowReductionGarbledBooleanCircuit.h"
 
 using namespace std;
 
 
-RowReductionGarbledBooleanCircuit::RowReductionGarbledBooleanCircuit(void)
-{
-}
+RowReductionGarbledBooleanCircuit::RowReductionGarbledBooleanCircuit(void){}
 
 
 RowReductionGarbledBooleanCircuit::~RowReductionGarbledBooleanCircuit(void)
@@ -530,3 +522,5 @@ bool RowReductionGarbledBooleanCircuit::internalVerify(block *bothInputKeys, blo
 	return isVerified;
 
 }
+
+#endif

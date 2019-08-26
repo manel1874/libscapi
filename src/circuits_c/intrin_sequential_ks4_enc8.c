@@ -5,6 +5,8 @@
 /* (2) Intel, Israel                                                */
 /* IPG, Architecture, Israel Development Center, Haifa, Israel      */
 /********************************************************************/
+
+#ifdef __x86_64__
 #include <stdint.h>
 #include <stdio.h>
 #include <wmmintrin.h>
@@ -210,3 +212,4 @@ void intrin_sequential_ks4_enc8(const unsigned char* PT, unsigned char* CT, int 
 	}
 }
 
+#endif
