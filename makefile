@@ -63,7 +63,8 @@ ifeq ($(uname_arch), aarch64)
 	obj/tools/scapiNecConverter obj/tools/scapiBristolConverter obj/circuits
 	CPP_OPTIONS   := -g -std=$(GCC_STANDARD) $(INC) -Wall -Wno-narrowing -Wno-uninitialized \
 	-Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable -Wno-unused-result \
-	-Wno-sign-compare -Wno-parentheses -Wno-ignored-attributes -Wno-return-type -O3 -fPIC -march=armv8-a+crypto
+	-Wno-sign-compare -Wno-parentheses -Wno-ignored-attributes -Wno-return-type \
+	 -O3 -fPIC -march=armv8-a+crypto -flax-vector-conversions
 endif
 
 $(COMPILE.cpp) = g++ -c $(CPP_OPTIONS) -o $@ $<
