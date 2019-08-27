@@ -26,11 +26,14 @@ CPP_FILES     := $(wildcard src/*/*.cpp)
 CPP_FILES     += $(wildcard tools/circuits/scapiBristolConverter/*.cpp)
 CPP_FILES     += $(wildcard tools/circuits/scapiNecConverter/*.cpp)
 CPP_FILES     += $(wildcard src/*/*.cpp)
+ifeq ($(uname_arch), x86_64)
 C_FILES       := $(wildcard src/*/*.c)
+OBJ_FILES     += $(patsubst src/%.c,obj/%.o,$(C_FILES))
+endif
 OBJ_FILES     := $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES))
 OBJ_FILES     += $(patsubst tools/circuits/scapiBristolConverter/%.cpp,obj/tools/scapiBristolConverter/%.o,$(CPP_FILES))
 OBJ_FILES     += $(patsubst tools/circuits/scapiNecConverter/%.cpp,obj/tools/scapiNecConverter/%.o,$(CPP_FILES))
-OBJ_FILES     += $(patsubst src/%.c,obj/%.o,$(C_FILES))
+
 GCC_STANDARD = c++14
 
 ifeq ($(uname_os), Linux)
