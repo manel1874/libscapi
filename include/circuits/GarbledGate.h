@@ -25,7 +25,6 @@
 * 
 */
 
-#ifdef __x86_64__
 #pragma once
 
 
@@ -44,5 +43,3 @@ struct GarbledGate
 	unsigned char truthTable; //the truth table of this gate. This will be a number from 0 to 15.
 	unsigned char truthTableBits[4];//We keep this duplicate information to increase performance
 };
-
-#endif
