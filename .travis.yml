@@ -8,7 +8,7 @@ os:
   - linux
 
 before_install:
-  - sudo add-apt-repository ppa:mhier/libboost-latest
+  - sudo add-apt-repository ppa:mhier/libboost-latest -y
   - sudo apt update -q
   - sudo apt install libboost1.68 libboost1.68-dev -y
 
