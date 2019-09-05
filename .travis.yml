@@ -10,11 +10,13 @@ os:
 addons:
   apt:
     sources:
+      - mhier/libboost-latest
       - ubuntu-toolchain-r-test
       - llvm-toolchain-precise-3.8
     packages:
       - g++-7
-      - libboost-all-dev
+      - libboost1.68
+      - libboost1.68-dev
       - libssl-dev
       - clang-3.8
       - build-essential
