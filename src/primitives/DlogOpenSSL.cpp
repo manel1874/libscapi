@@ -517,7 +517,7 @@ const vector<byte> OpenSSLDlogZpSafePrime::mapAnyGroupElementToByteArray(GroupEl
 	OpenSSLZpSafePrimeElement * zp_element = dynamic_cast<OpenSSLZpSafePrimeElement *>(groupElement);
 	if (!(zp_element))
 		throw invalid_argument("element type doesn't match the group type");
-	string res = string(zp_element->getElementValue());
+	string res = zp_element->getElementValue().str();
 	return vector<unsigned char>(res.begin(), res.end());
 }
 

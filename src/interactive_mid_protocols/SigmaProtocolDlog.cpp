@@ -50,7 +50,7 @@ SigmaDlogSimulator::SigmaDlogSimulator(const shared_ptr<DlogGroup> & dlog, int t
 	this->t = t;
 	if (!checkSoundnessParam()) // check the soundness validity.
 		throw invalid_argument("soundness parameter t does not satisfy 2^t<q. q=" +
-			(string)dlog->getOrder() + " t=" + to_string(t) + "\n");
+			dlog->getOrder().str() + " t=" + to_string(t) + "\n");
 	this->random = random;
 	qMinusOne = dlog->getOrder() - 1;
 }

@@ -458,7 +458,7 @@ public:
 	*/
 	biginteger getXg() { return xG; }
 	
-	string toString() { return "ZpGroupParams [p=" + (string) p + ", g=" + (string) xG + ", q=" + (string) q + "]"; }
+	string toString() { return "ZpGroupParams [p=" +  p.str() + ", g=" +  xG.str() + ", q=" +  q.str() + "]"; }
 };
 
 /**
@@ -524,7 +524,7 @@ public:
 	};
 
 	biginteger getX() { return x; }
-	string toString() override { return (string) x; }
+	string toString() override { return  x.str(); }
 	void initFromString(const string & row) override { x = biginteger(row); }
 	
 };
@@ -590,8 +590,8 @@ public:
 	}
 
 	string toString() override {	
-		return "ECFpGroupParams [p=" + (string) p + ", a=" + (string) a + ", b=" + (string)b + ", xG="
-			+ (string)xG + ", yG=" + (string)yG + ", h=" + (string)h + ", q=" + (string)q + "]";
+		return "ECFpGroupParams [p=" +  p.str() + ", a=" +  a.str() + ", b=" + b.str() + ", xG="
+			+ xG.str() + ", yG=" + yG.str() + ", h=" + h.str() + ", q=" + q.str() + "]";
 	}
 
 	biginteger getP() { return p; }
@@ -602,7 +602,8 @@ class ECF2mGroupParams :public ECGroupParams {
 protected:
 	int m; //specifying the finite field F2m
 public:
-	ECF2mGroupParams(const biginteger & q, const biginteger & xG, const biginteger & yG, int m, const biginteger & a, const biginteger & b, const biginteger & h) :
+	ECF2mGroupParams(const biginteger & q, const biginteger & xG, const biginteger & yG, int m, const biginteger & a,
+	        const biginteger & b, const biginteger & h) :
 		ECGroupParams(q, a, b, xG, yG, h) {
 		this->m = m;
 	}
@@ -640,9 +641,10 @@ public:
 	int getK1() override { return k; }
 
 	string toString() override {
-		string s = "ECF2mTrinomialBasis [k=" + k;
-		s += ", m=" + m;
-		s+= ", a=" + (string)a + ", b="	+ (string) b + ", xG=" + (string) xG + ", yG=" + (string) yG + ", h=" + (string) h + ", q=" + (string) q + "]";
+		string s = "ECF2mTrinomialBasis [k=" + to_string(k);
+		s += ", m=" + to_string(m);
+		s+= ", a=" + a.str() + ", b="	+  b.str() + ", xG=" +  xG.str() + ", yG=" +  yG.str() + ", h=" +
+		        h.str() + ", q=" +  q.str() + "]";
 		return s;
 	}
 };

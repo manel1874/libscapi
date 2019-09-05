@@ -96,7 +96,7 @@ SigmaDJProductProverInput::SigmaDJProductProverInput(DamgardJurikPublicKey publi
 }
 
 string SigmaDJProductFirstMsg::toString() {
-	return string(a1) + ":" + string(a2);
+	return a1.str() + ":" + a2.str();
 }
 void SigmaDJProductFirstMsg::initFromString(const string & row) {
 	auto str_vec = explode(row, ':');
@@ -106,7 +106,7 @@ void SigmaDJProductFirstMsg::initFromString(const string & row) {
 }
 
 string SigmaDJProductSecondMsg::toString() {
-	return string(z1) + ":" + string(z2) + ":" + string(z3);
+	return z1.str() + ":" + z2.str() + ":" + z3.str();
 }
 
 void SigmaDJProductSecondMsg::initFromString(const string & row) {

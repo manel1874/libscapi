@@ -1,7 +1,7 @@
 #include "IknpOtExtReceiver.h"
 #include "libOTe/Tools/Tools.h"
 #include <cryptoTools/Common/Log.h>
-#include <cryptoTools/Common/ByteStream.h>
+
 #include <cryptoTools/Common/BitVector.h>
 #include <cryptoTools/Crypto/PRNG.h>
 #include <cryptoTools/Crypto/Commit.h>
@@ -25,6 +25,22 @@ namespace osuCrypto
 
         mHasBase = true;
     }
+
+
+    IknpOtExtReceiver IknpOtExtReceiver::splitBase()
+    {
+        std::array<std::array<block, 2>, gOtExtBaseOtCount>baseRecvOts;
+
+        for (u64 i = 0; i < mGens.size(); ++i)
+        {
+            baseRecvOts[i][0] = mGens[i][0].get<block>();
+            baseRecvOts[i][1] = mGens[i][1].get<block>();
+        }
+
+        return IknpOtExtReceiver(baseRecvOts);
+    }
+
+
     std::unique_ptr<OtExtReceiver> IknpOtExtReceiver::split()
     {
         std::array<std::array<block, 2>, gOtExtBaseOtCount>baseRecvOts;
@@ -35,11 +51,7 @@ namespace osuCrypto
             baseRecvOts[i][1] = mGens[i][1].get<block>();
         }
 
-        std::unique_ptr<OtExtReceiver> ret(new IknpOtExtReceiver());
-
-        ret->setBaseOts(baseRecvOts);
-
-        return std::move(ret);
+        return std::make_unique<IknpOtExtReceiver>(baseRecvOts);
     }
 
 
@@ -74,11 +86,11 @@ namespace osuCrypto
         auto mIter = messages.begin();
 
         u64 step = std::min<u64>(numSuperBlocks, (u64)commStepSize);
-        std::unique_ptr<ByteStream> uBuff(new ByteStream(step * 128 * superBlkSize * sizeof(block)));
+        std::vector<block> uBuff(step * 128 * superBlkSize);
 
         // get an array of blocks that we will fill. 
-        auto uIter = (block*)uBuff->data();
-        auto uEnd = uIter + step * 128 * superBlkSize;
+        auto uIter = (block*)uBuff.data();
+        auto uEnd = uIter + uBuff.size();
 
         // NOTE: We do not transpose a bit-matrix of size numCol * numCol.
         //   Instead we break it down into smaller chunks. We do 128 columns 
@@ -139,10 +151,9 @@ namespace osuCrypto
 
                 if (step)
                 {
-                    uBuff.reset(new ByteStream(step * 128 * superBlkSize * sizeof(block)));
-
-                    uIter = (block*)uBuff->data();
-                    uEnd = uIter + step * 128 * superBlkSize;
+                    uBuff.resize(step * 128 * superBlkSize);
+                    uIter = (block*)uBuff.data();
+                    uEnd = uIter + uBuff.size();
                 }
             }
 
@@ -184,7 +195,7 @@ namespace osuCrypto
 
 
 #ifdef IKNP_SHA_HASH
-        SHA1 sha;
+        RandomOracle sha;
         u8 hashBuff[20];
 #else
         std::array<block, 8> aesHashTemp;

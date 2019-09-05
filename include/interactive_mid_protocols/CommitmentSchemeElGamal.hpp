@@ -161,7 +161,7 @@ public:
 		} 
 	}
 
-	string toString() override { return *x + ":" + (string) r->getR(); };
+	string toString() override { return *x + ":" + r->getR().str(); };
 };
 
 /**

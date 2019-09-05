@@ -19,19 +19,24 @@ namespace tests_cryptoTools
             InitDebugPrinting();
             CuckooIndex_many_Test_Impl();
         }
-        
+
         TEST_METHOD(CuckooIndex_paramSweep_Test)
         {
             InitDebugPrinting();
             CuckooIndex_paramSweep_Test_Impl();
         }
 
-        TEST_METHOD(CuckooIndex_parallel_Test)
-        {
-            InitDebugPrinting();
-            CuckooIndex_parallel_Test_Impl();
-        }
+		TEST_METHOD(CuckooIndex_parallel_Test)
+		{
+			InitDebugPrinting();
+			CuckooIndex_parallel_Test_Impl();
+		}
 
+		//TEST_METHOD(CuckooIndexVsCuckooHasherVS)
+		//{
+		//	InitDebugPrinting();
+		//	CuckooIndexVsCuckooHasher();
+		//}
     };
 }
 #endif

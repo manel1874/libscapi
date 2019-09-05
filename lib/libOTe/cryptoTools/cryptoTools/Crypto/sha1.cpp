@@ -26,6 +26,7 @@
 #include <cryptoTools/Common/Defines.h>
 #include <stdint.h>
 #include <string>
+#include <cstring>
 
 
 
@@ -34,7 +35,7 @@ extern "C" void sha1_update_intel(int *hash, const char* input);
 void sha1_compress(uint32_t state[5], const uint8_t block[64])
 {
 
-#ifndef NO_INTEL_ASM_SHA1
+#ifdef ENABLE_NASM
 
     // disable this if you dont want the assembly version.
     sha1_update_intel((int*)state, (const char*)block);
@@ -173,69 +174,6 @@ namespace osuCrypto
 {
     const u64    SHA1::HashSize;
 
-
-    SHA1::SHA1() { Reset(); }
-    void SHA1::Reset()
-    {
-        state.fill(0);
-        buffer.fill(0);
-        //mSha.Restart();
-        //memset(state, 0, sizeof(u32) * 5);
-        //memset(block, 0,sizeof(u8) * 64);
-        idx = 0;
-    }
-    void SHA1::Update(const u8 * dataIn, u64 length)
-    {
-        //sha1_compress(nullptr, nullptr);
-        //mSha.Update(dataIn, length);
-        while (length)
-        {
-            u64 step = std::min<u64>(length, u64(64) - idx);
-
-            memcpy(buffer.data() + idx, dataIn, step);
-
-            idx += step;
-            dataIn += step;
-            length -= step;
-
-
-            if (idx == 64)
-            {
-                sha1_compress(state.data(), buffer.data());
-                idx = 0;
-            }
-
-        }
-    }
-
-    //void SHA1::Update(const block & blk)
-    void SHA1::Update(const osuCrypto::block & blk)
-    {
-        Update(ByteArray(blk), sizeof(block));
-    }
-
-    void SHA1::Final(u8 * DataOut)
-    {
-        if (idx)
-            sha1_compress(state.data(), buffer.data());
-
-        idx = 0;
-
-        //std::cout << "final " << state[0] << " " << state[1] << " " << state[2] << " " << state[3] << " " << state[4] << std::endl;
-
-        memcpy(DataOut, state.data(), sizeof(u32) * 5);
-        //mSha.Final(DataOut);
-    }
-
-    void SHA1::Final(block&  dataOut)
-    {
-        if (idx)
-            sha1_compress(state.data(), buffer.data());
-
-        idx = 0;
-
-        dataOut = *(block*)state.data();
-    }
 
     const SHA1& SHA1::operator=(const SHA1& src)
     {

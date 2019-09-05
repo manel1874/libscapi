@@ -182,7 +182,6 @@ endif
 ifeq ($(uname_os), Darwin)
 	@cp -R $(builddir)/libOTe/cryptoTools/cryptoTools/gsl $(PWD)/install/include/libOTe/cryptoTools/cryptoTools
 endif
-	@cp $(builddir)/libOTe/cryptoTools/thirdparty/miracl/source/libmiracl.a install/lib
 	@touch compile-libote
 
 compile-otextension-bristol:

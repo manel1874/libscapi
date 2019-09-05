@@ -70,7 +70,7 @@ CramerShoupPrivateKey::CramerShoupPrivateKey(const biginteger & x1, const bigint
 }
 
 string CramerShoupPrivateKey::toString() {
-	return string(x1) + ":" + string(x2) + ":" + string(y1) + ":" + string(y2) + ":" + string(z);
+	return x1.str() + ":" + x2.str() + ":" + y1.str() + ":" + y2.str() + ":" + z.str();
 }
 
 void CramerShoupPrivateKey::initFromString(const string & row) {
@@ -83,7 +83,8 @@ void CramerShoupPrivateKey::initFromString(const string & row) {
 	z = biginteger(str_vec[4]);
 }
 
-CrShOnGroupElSendableData::CrShOnGroupElSendableData(const shared_ptr<GroupElementSendableData> & u1, const shared_ptr<GroupElementSendableData> & u2,
+CrShOnGroupElSendableData::CrShOnGroupElSendableData(const shared_ptr<GroupElementSendableData> & u1,
+        const shared_ptr<GroupElementSendableData> & u2,
 	const shared_ptr<GroupElementSendableData> & v, const shared_ptr<GroupElementSendableData> & e) {
 	this->u1 = u1;
 	this->u2 = u2;

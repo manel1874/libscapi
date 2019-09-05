@@ -40,10 +40,12 @@ ZpSafePrimeElement::ZpSafePrimeElement(const biginteger & x, const biginteger & 
 			if (boost::multiprecision::powm(x, q, p) == 1) // x^q mod p == 1
 				element = x;
 			else
-				throw invalid_argument("Cannot create Zp element. Requested value " + (string)x + " is not in the range of this group.");
+				throw invalid_argument("Cannot create Zp element. Requested value " + x.str() +
+				" is not in the range of this group.");
 		}
 		else
-			throw invalid_argument("Cannot create Zp element. Requested value " + (string)x + " is not in the range of this group.");
+			throw invalid_argument("Cannot create Zp element. Requested value " + x.str() +
+			" is not in the range of this group.");
 	}
 	else element = x;
 		
@@ -330,11 +332,12 @@ shared_ptr<GroupElement> DlogGroup::computeLL(
 /**************************************/
 
 string ECF2mPentanomialBasis::toString() {
-	string s = "ECF2mPentanomialBasis [k1=" + k1;
-	s += ", k2=" + k2;
-	s += ", k3=" + k3;
-	s += ", m=" + m;
-	s += ", a=" + (string)a + ", b=" + (string)b + ", xG=" + (string)xG + ", yG=" + (string)yG + ", h=" + (string)h + ", q=" + (string)q + "]";
+	string s = "ECF2mPentanomialBasis [k1=" + to_string(k1);
+	s += ", k2=" + to_string(k2);
+	s += ", k3=" + to_string(k3);
+	s += ", m=" + to_string(m);
+	s += ", a=" + a.str() + ", b=" + b.str() + ", xG=" + xG.str() +
+	        ", yG=" + yG.str() + ", h=" + h.str() + ", q=" + q.str() + "]";
 	return s;
 }
 
@@ -357,15 +360,15 @@ int ECF2mKoblitz::getK3() {
 }
 
 string ECF2mKoblitz::toString() {
-	string s = "ECF2mKoblitz [getM()=" + getM();
-	s += ", getK1()=" + getK1();
-	s += ", getK2()=" + getK2();
-	s += ", getK3()=" + getK3();
-	s += ", getQ()=" + (string)getQ() + ", getXg()=" + (string)getXg() + ", getYg()=" + (string)getYg()
-		+ ", getA()=" + (string)getA() + ", getB()=" + (string)getB()
-		+ ", getSubGroupOrder()=" + (string)getSubGroupOrder()
+	string s = "ECF2mKoblitz [getM()=" + to_string(getM());
+	s += ", getK1()=" + to_string(getK1());
+	s += ", getK2()=" + to_string(getK2());
+	s += ", getK3()=" + to_string(getK3());
+	s += ", getQ()=" + getQ().str() + ", getXg()=" + getXg().str() + ", getYg()=" + getYg().str()
+		+ ", getA()=" + getA().str() + ", getB()=" + getB().str()
+		+ ", getSubGroupOrder()=" + getSubGroupOrder().str()
 		+ ", getCurve()=[" + getCurve()->toString() + "], getCofactor()="
-		+ (string)getCofactor() + "]";
+		+ getCofactor().str() + "]";
 	return s;
 }
 
@@ -394,7 +397,7 @@ shared_ptr<GroupElementSendableData> ECElement::generateSendableData() {
 }
 
 string ECElementSendableData::toString() {
-	return string(x) + ":" + string(y);
+	return x.str() + ":" + y.str();
 }
 
 void ECElementSendableData::initFromString(const string & raw) {

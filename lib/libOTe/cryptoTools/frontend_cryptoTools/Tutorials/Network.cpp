@@ -1,10 +1,12 @@
 #include "Network.h"
 #include <cryptoTools/Common/Defines.h>
 #include <cryptoTools/Network/Channel.h>
+#include <cryptoTools/Network/Session.h>
 #include <cryptoTools/Network/IOService.h>
 
 
 using namespace osuCrypto;
+
 
 void networkTutorial()
 {
@@ -18,45 +20,99 @@ void networkTutorial()
     ##                      Setup                        ##
     #####################################################*/
 
-    // create network I/O service with 4 background threads. 
+
+	/*  --------------- Introduction --------------------\
+	|  													 |
+	|  The general framework is to have pairs of parties |
+	|    establish a "session," which in turn can have   |
+	|           several channels (sockets). 			 |
+	| 													 |
+	\ --------------------------------------------------*/
+
+
+    // create network I/O service with 4 background threads.
     // This object must stay in scope until everything is cleaned up.
     IOService ios(4);
 
     std::string serversIpAddress = "127.0.0.1:1212";
 
+    // Optional: Session names can be used to help the network 
+	// identify which sessions should be paired up. 
+    std::string sessionHint = "party0_party1";
 
-    // Network fully supports the multi party setting. A single
-    // server can connect to many clients with a single port.
-    // This is mannaged with connection names.
-    std::string connectionName = "party0_party1";
-
-
-    // connectionName denotes an identifier that both people on either side 
-    // of this connection will use. If a server connects to several clients,
-    // they should all use different connection names.
-    Endpoint server(ios, serversIpAddress, EpMode::Server, connectionName);
-    Endpoint client(ios, serversIpAddress, EpMode::Client, connectionName);
-
-
-    // Two endpoints with the same connectionName can have many channels, each independent.
-    // To support that, each channel pair will have a unique name.
-    std::string channelName = "channelName";
+	// create a pair of sessions that connect to eachother. The optional
+	// sessionHint can be used if several sessions are being constructed 
+	// at the same time. Only sessions with matching hints will be paired.
+    Session server(ios, serversIpAddress, SessionMode::Server, sessionHint);
+    Session client(ios, serversIpAddress, SessionMode::Client, sessionHint);
 
     // Actually get the channel that can be used to communicate on.
-    Channel chl0 = client.addChannel(channelName);
+    Channel chl0 = client.addChannel();
+    Channel chl1 = server.addChannel();
 
-    Channel chl1 = server.addChannel(channelName);
+    // Two sessions can have many channels, each independent.
+	{
+		Channel chl0b = client.addChannel();
+		Channel chl1b = server.addChannel();
+	}
+	
+	// Above, the channels are connected in the order that they are declared. Alternatively
+	// explicit names can be provided. This channel pair are connected regardless of order.
+	{
+		std::string channelName = "channelName";
+		Channel namedChl0 = client.addChannel(channelName);
+		Channel namedChl1 = server.addChannel(channelName);
+	}
 
     // we now have a pair of channels, but it is possible that they have yet
-    // to actually connect to each other in the background. To test that the 
+    // to actually connect to each other in the background. To test that the
     // channel has a completed the connection, we can do
     std::cout << "Channel connected = " << chl0.isConnected() << std::endl;
 
-    // To block until we know for sure the channel is open, we can call
-    chl0.waitForConnection();
+
+	// To block until for 100 milliseconds for the connection to actually open.
+	std::chrono::milliseconds timeout(100);
+	bool open = chl0.waitForConnection(timeout);
+
+	if (open == false)
+	{
+	    // Wait until the channel is open.
+		chl0.waitForConnection();
+	}
 
     // This call will now always return true.
     std::cout << "Channel connected = " << chl0.isConnected() << std::endl;
+
+
+	/*#####################################################
+	##                   Server Mode                     ##
+	#####################################################*/
+
+	// It is also possible to dynamically accept connection. 
+	// This is done by having the server set up several session.
+	// Each will correspond to a single party.
+
+	u64 numSession = 10;
+
+	for (u64 i = 0; i < numSession; ++i)
+	{
+		// The server will create many sessions, each will find one 
+		// of the clients. 
+		Session perPartySession(ios, serversIpAddress, SessionMode::Server);
+		
+		// On some other thread/program/computer, a client can complete the
+		// session and add a channel.
+		{
+			Channel clientChl = Session(ios, serversIpAddress, SessionMode::Client).addChannel();
+			clientChl.send(std::string("message"));
+		}
+
+		// Create a channel for this session, even before the client has connected.
+		Channel serverChl = perPartySession.addChannel();
+
+		std::string msg;
+		serverChl.recv(msg);
+	}
 
 
     /*#####################################################
@@ -64,7 +120,7 @@ void networkTutorial()
     #####################################################*/
 
     // There are several ways and modes to send and receive data.
-    // The simplest mode is block, i.e. when data is sent, the caller
+    // The simplest mode is blocking, i.e. when data is sent, the caller
     // blocks until all data is sent.
 
     // For example:
@@ -80,9 +136,9 @@ void networkTutorial()
 
     // It is now the case that data == dest. When data is received,
     // the Channel will call dest.resize(8)
-    
-    // In the example above, 
-    // the Channel can tell that data is an STL like container. 
+
+    // In the example above,
+    // the Channel can tell that data is an STL like container.
     // That is, it has member functions and types:
     //
     //   Container<T>::data() -> Container<T>::pointer
@@ -110,12 +166,12 @@ void networkTutorial()
         chl1.recv(dest.data(), dest.size()); // may throw
     }
 
-    // One issue with this approach is that the call 
+    // One issue with this approach is that the call
     //
     //        chl0.send(...);
     //
-    // blocks until all of the data has been sent over the network. If data 
-    // is large, or if we send amny things, then this may take awhile.
+    // blocks until all of the data has been sent over the network. If data
+    // is large, or if we send many things, then this may take awhile.
 
 
 
@@ -140,16 +196,16 @@ void networkTutorial()
     //
     // does not block. Instead, it "steals" the data contained inside
     // the vector. As a result, data is empty after this call.
-    
+
     // When move semantics are not supported by Container or if you want to
-    // share ownership of the data, we can use a unique/shared pointer. 
+    // share ownership of the data, we can use a unique/shared pointer.
     {
-        std::unique_ptr<std::array<int, 8>> unique{ new std::array<int,8>{0,1,2,3,4,5,6,7 } };
+        std::unique_ptr<std::vector<int>> unique{ new std::vector<int>{0,1,2,3,4,5,6,7 } };
         chl0.asyncSend(std::move(unique)); // will not block.
 
         // unique = empty
 
-        std::shared_ptr<std::array<int, 8>> shared{ new std::array<int,8>{0,1,2,3,4,5,6,7 } };
+        std::shared_ptr<std::vector<int>> shared{ new std::vector<int>{0,1,2,3,4,5,6,7 } };
         chl0.asyncSend(std::move(shared)); // will not block.
 
         // shared's refernce counter = 2.
@@ -160,8 +216,8 @@ void networkTutorial()
 
         // shared's refernce counter = 1.
     }
-    
-    
+
+
     // We can also perform asynchronous receive. In this case, we will tell the channel
     // where to store data in the future...
     {
@@ -180,14 +236,14 @@ void networkTutorial()
 
         // dest == {0,1,...,7}
     }
-    // The above asyncRecv(...) is not often used, but it has at least one  
-    // advantage. The implementation of Channel is optimize to store the 
-    // data directly into dest. As opposed to buffering it interally, and 
+    // The above asyncRecv(...) is not often used, but it has at least one
+    // advantage. The implementation of Channel is optimize to store the
+    // data directly into dest. As opposed to buffering it interally, and
     // the later copying it to dest when Channel::recv(...) is called.
 
 
     // Channel::asyncSend(...) also support the pointer length interface.
-    // In this case, it is up to the user to ensure that the lifetime 
+    // In this case, it is up to the user to ensure that the lifetime
     // of data is larger than the time required to send. In this case, we are
     // ok since chl1.recv(...) will block until this condition is true.
     {
@@ -196,16 +252,16 @@ void networkTutorial()
 
 
         std::vector<int> dest;
-        chl1.recv(dest); 
+        chl1.recv(dest);
     }
 
 
-    // As an additional option for this interface, a call back 
+    // As an additional option for this interface, a call back
     // function can be provided. This call back will be called
     // once the data has been sent.
     {
         int size = 4;
-        int* data = new int[size]();
+        u8* data = new u8[size]();
 
         chl0.asyncSend(data, size, [data]()
         {
@@ -214,7 +270,7 @@ void networkTutorial()
         });
 
 
-        std::vector<int> dest;
+        std::vector<u8> dest;
         chl1.recv(dest);
     }
 
@@ -231,32 +287,128 @@ void networkTutorial()
 
 
 
+	/*#####################################################
+	##                   Cancelation                     ##
+	#####################################################*/
+
+	// If a connection is never established when the channel
+	// is destructed it will block. This can also happen if the
+	// client tries to connect to a server that does not exists.
+	// For example,
+	{
+		Session session(ios, "127.0.0.1:1515", SessionMode::Server);
+		Channel emptyChannel = session.addChannel();
+
+		// no corresponding client channel
+
+		// If we then call
+		//     emptyChannel.recv(...);
+		//     emptyChannel.waitForConnection();
+		// or a similar call, the program will block forever.
+
+		// if we fail to get a connection, cancel() should be called to prevent the channel 
+		// from blocking when it is destructed.
+		if (emptyChannel.isConnected() == false) 
+			emptyChannel.cancel();
+	}
+
+	// We can also cancel pending operations. However, this will also
+	// close the channel making it unusable. 
+	{
+		Channel tempChl0 = Session(ios, "127.0.0.1:1515", SessionMode::Server).addChannel();
+		Channel tempChl1 = Session(ios, "127.0.0.1:1515", SessionMode::Client).addChannel();
+
+		// schedule a recv operation what will never complete.
+		std::vector<u8> buff;
+		auto asyncOp = tempChl0.asyncRecv(buff);
+
+		// Would block forever.
+		//    asyncOp.get();
+		
+		// We can cancel this operation by calling
+		tempChl0.cancel();
+
+		// This will now throw...
+		//    asyncOp.get();
+	}
+
+
     /*#####################################################
     ##                 Error Handling                    ##
     #####################################################*/
 
-    // While not required, it is possible to recover from errors that 
-    // are thrown when the receive buffer does not match the incoming 
+    // While not required, it is possible to recover from errors that
+    // are thrown when the receive buffer does not match the incoming
     // data and can not be resized. Consider the following example
     {
         std::array<int, 4> data{ 0,1,2,3 };
         chl0.send(data);
 
         std::array<int, 2> dest;
-        try 
+        try
         {
             // will throw, dest.size() != dat.size(); and no resize() member.
             chl1.recv(dest);
         }
-        catch (BadReceiveBufferSize b)
+        catch (BadReceiveBufferSize& b)
         {
             // catch the error, creat a new dest in bytes.
             std::vector<u8> backup(b.mSize);
 
-            // tell the 
+            // tell the
             b.mRescheduler(backup.data());
         }
     }
+
+
+	/*#####################################################
+	##              Using your own socket                ##
+	#####################################################*/
+
+	// It is also possible to use your own socket implementation
+	// with Channel. There are two methods for doing this. First,
+	// the osuCrypto::SocketAdapter<T> class can be used with your
+	// socket and then provided to a Channel with an osuCrypto::IOService
+	//
+	// SocketAdapter<T> requires that T implements
+	//
+	//    void send(const char* data, u64 size);
+	//    void recv(      char* data, u64 size);
+	//
+	// Or a signature that is convertable from those parameter.
+
+	{
+		// Lets say you have a socket type that implements send(...),
+		// recv(...) and that is called YourSocketType
+		typedef Channel YourSocketType;
+
+		// Assuming your socket meets these rquirements, then a Channel
+		// can be constructed as follows. These Channels will function
+		// equivolently to the original ones.
+		//
+		// WARNING: The lifetime of the SocketAdapter<T> is managed by
+		//	        the Channel.
+		Channel aChl0(ios, new SocketAdapter<YourSocketType>(chl0));
+		Channel aChl1(ios, new SocketAdapter<YourSocketType>(chl1));
+
+		// We can now use the new channels
+		std::array<int, 4> data{ 0,1,2,3 };
+		aChl0.send(data);
+		aChl1.recv(data);
+	}
+
+	// If your Socket type does not have these methods a custom adapter
+	// will be required. The template SocketAdapter<T> implements the
+	// interface SocketInterface in the <cryptoTools/Network/SocketAdapter.h>
+	// file. You will also have to define a class that inherits the
+	// SocketInterface class and implements:
+	//
+	//    void send(ArrayView<boost::asio::mutable_buffer> buffers, bool& error, u64& bytesTransfered) override;
+	//    void recv(ArrayView<boost::asio::mutable_buffer> buffers, bool& error, u64& bytesTransfered) override;
+	//
+	// For an example on how to implement these functions, see the
+	// defintion of SocketAdapter<T> in <cryptoTools/Network/SocketAdapter.h>
+
 
 
     /*#####################################################
@@ -265,9 +417,9 @@ void networkTutorial()
 
     // Print interesting information.
     std::cout
-        << "Connection: " << chl0.getEndpoint().getName() << std::endl
+        << "   Session: " << chl0.getSession().getName() << std::endl
         << "   Channel: " << chl0.getName() << std::endl
-        << "      Send: " << chl0.getTotalDataSent() << std::endl
+        << "      Sent: " << chl0.getTotalDataSent() << std::endl
         << "  received: " << chl0.getTotalDataRecv() << std::endl;
 
     // Reset the data sent coutners.
@@ -276,18 +428,18 @@ void networkTutorial()
 
 
     /*#####################################################
-    ##                   Clean up                        ##
+    ##               OPTIONAL: Clean up                  ##
     #####################################################*/
 
 
-    // close everything down in this order. Must be done.
+    // close everything down in this order.
     chl0.close();
     chl1.close();
 
     server.stop();
     client.stop();
 
-
     ios.stop();
-
 }
+
+

@@ -66,7 +66,7 @@ private:
 	OpenSSLZpSafePrimeElement(const biginteger & elementValue) : ZpSafePrimeElement(elementValue) { createOpenSSLElement(); };
 public:
 	virtual string toString() {
-		return "OpenSSLZpSafePrimeElement  [element value=" + string(element) + "]";
+		return "OpenSSLZpSafePrimeElement  [element value=" + element.str() + "]";
 	};
 	shared_ptr<BIGNUM> getOpenSSLElement() { return openSSLElement; }
 

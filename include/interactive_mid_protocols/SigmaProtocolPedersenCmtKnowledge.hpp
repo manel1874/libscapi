@@ -147,7 +147,7 @@ public:
 	biginteger getV() {	return v; }
 
 	void initFromString(const string & s) override;
-	string toString() override { return string(u) + ":" + string(v); };
+	string toString() override { return u.str() + ":" + v.str(); };
 };
 
 /**********************************************************/
