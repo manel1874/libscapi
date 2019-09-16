@@ -375,7 +375,7 @@ public:
 
 	string toString() override {
 		const byte * uc = &(iv[0]);
-		return cipher->toString() + string(reinterpret_cast<char const*>(uc), iv.size());
+		return cipher->toString() + ":" + string(reinterpret_cast<char const*>(uc), iv.size());
 	};
 
 	void initFromString(const string & s) override {
