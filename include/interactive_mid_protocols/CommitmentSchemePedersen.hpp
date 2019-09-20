@@ -280,9 +280,17 @@ private:
 
 public:
 	/**
-	* Runs the following lines of the commitment scheme: 
-	* "SAMPLE a random value r <- Zq
+	* Runs the following line of the commitment scheme: 
 	* 	COMPUTE  c = g^r * h^x". 
+	* with predetermined randomness r
+	*/
+	shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(const shared_ptr<CmtCommitValue> & input, biginteger r, long id) override;
+
+
+	/**
+	* Runs the following lines of the commitment scheme:
+	* "SAMPLE a random value r <- Zq
+	* 	COMPUTE  c = g^r * h^x".
 	*/
 	shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(const shared_ptr<CmtCommitValue> & input, long id) override;
 	
