@@ -169,18 +169,19 @@ shared_ptr<GroupElementSendableData> CmtPedersenCommitterCore::waitForMessageFro
 	return dummySendableData;
 }
 
-shared_ptr<CmtCCommitmentMsg> CmtPedersenCommitterCore::generateCommitmentMsg(const shared_ptr<CmtCommitValue> & input, long id) {
+shared_ptr<CmtCCommitmentMsg> CmtPedersenCommitterCore::generateCommitmentMsg(const shared_ptr<CmtCommitValue> & input, biginteger r, long id) {
 	auto biCmt = dynamic_pointer_cast<CmtBigIntegerCommitValue>(input);
 	if (!biCmt)
 		throw invalid_argument("The input must be of type CmtBigIntegerCommitValue");
 
 	shared_ptr<biginteger> x = static_pointer_cast<biginteger>(biCmt->getX());
 	// check that the input is in Zq.
-	if(*x < 0 || *x > dlog->getOrder())
+	if (*x < 0 || *x > dlog->getOrder())
 		throw invalid_argument("The input must be in Zq");
 
-	// sample a random value r <- Zq
-	biginteger r = getRandomInRange(0, qMinusOne, random.get());
+	// check that the randomness r is in Zq
+	if (r < 0 || r > dlog->getOrder())
+		throw invalid_argument("The randomness must be in Zq");
 
 	// compute  c = g^r * h^x
 	auto gToR = dlog->exponentiate(dlog->getGenerator().get(), r);
@@ -194,6 +195,13 @@ shared_ptr<CmtCCommitmentMsg> CmtPedersenCommitterCore::generateCommitmentMsg(co
 
 	// send c
 	return make_shared<CmtPedersenCommitmentMessage>(c->generateSendableData(), id);
+}
+
+shared_ptr<CmtCCommitmentMsg> CmtPedersenCommitterCore::generateCommitmentMsg(const shared_ptr<CmtCommitValue> & input, long id) {
+	// sample a random value r <- Zq
+	biginteger r = getRandomInRange(0, qMinusOne, random.get());
+
+	return generateCommitmentMsg(input, r, id);
 }
 
 shared_ptr<CmtCDecommitmentMessage> CmtPedersenCommitterCore::generateDecommitmentMsg(long id) {

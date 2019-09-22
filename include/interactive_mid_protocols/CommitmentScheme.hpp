@@ -351,9 +351,17 @@ public:
 	* channel.write(msg3);
 	*
 	* @param input The value that the committer commits about.
+	* @param r	The randomness used for the commitment on input
 	* @param id Unique value attached to the input to keep track of the commitments in the case
 	* that many commitments are performed one after the other without decommiting them yet.
 	* @return the generated commitment object.
+	*/
+
+	virtual shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(const shared_ptr<CmtCommitValue> & input, biginteger r, long id) = 0;
+
+	/*
+	* This function returns the previous function with the randomness r randomly generated
+	* @return the generated commitment object
 	*/
 	virtual shared_ptr<CmtCCommitmentMsg> generateCommitmentMsg(const shared_ptr<CmtCommitValue> & input, long id) = 0;
 
