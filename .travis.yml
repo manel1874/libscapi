@@ -1,5 +1,5 @@
 language: cpp
-dist: xenial
+dist: bionic
 sudo: required
 compiler:
   - gcc
@@ -7,14 +7,19 @@ compiler:
 os:
   - linux
 
+before_install:
+  - sudo add-apt-repository ppa:mhier/libboost-latest -y
+  - sudo apt update -q
+  - sudo apt install libboost1.68 libboost1.68-dev -y
+
 addons:
   apt:
     sources:
+      - mhier/libboost-latest
       - ubuntu-toolchain-r-test
       - llvm-toolchain-precise-3.8
     packages:
       - g++-7
-      - libboost-all-dev
       - libssl-dev
       - clang-3.8
       - build-essential

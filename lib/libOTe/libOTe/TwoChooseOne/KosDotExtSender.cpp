@@ -1,10 +1,10 @@
 #include "KosDotExtSender.h"
 
 #include "libOTe/Tools/Tools.h"
-#include <cryptoTools/Common/Log.h>
-#include <cryptoTools/Common/ByteStream.h>
 #include <cryptoTools/Common/Matrix.h>
+#include <cryptoTools/Common/Timer.h>
 #include <cryptoTools/Crypto/Commit.h>
+#include <cryptoTools/Network/Channel.h>
 #include "TcoOtDefines.h"
 
 
@@ -14,55 +14,50 @@ namespace osuCrypto
 
     using namespace std;
 
+    KosDotExtSender KosDotExtSender::splitBase()
+    {
+        std::vector<block> baseRecvOts(mGens.size());
+        for (u64 i = 0; i < mGens.size(); ++i)
+            baseRecvOts[i] = mGens[i].get<block>();
+
+        return KosDotExtSender(baseRecvOts, mBaseChoiceBits);
+    }
 
     std::unique_ptr<OtExtSender> KosDotExtSender::split()
     {
-        auto dot = new KosDotExtSender();
-        dot->mCode = mCode;
-        std::unique_ptr<OtExtSender> ret(dot);
-
         std::vector<block> baseRecvOts(mGens.size());
-
         for (u64 i = 0; i < mGens.size(); ++i)
-        {
             baseRecvOts[i] = mGens[i].get<block>();
-        }
 
-        ret->setBaseOts(baseRecvOts, mBaseChoiceBits);
-
-        return std::move(ret);
+        return std::make_unique<KosDotExtSender>(baseRecvOts, mBaseChoiceBits);
     }
 
     void KosDotExtSender::setBaseOts(span<block> baseRecvOts, const BitVector & choices)
     {
-
-
-        PRNG prng(ZeroBlock);
-        mCode.random(prng, choices.size(), 128);
-
         mBaseChoiceBits = choices;
         mGens.resize(choices.size());
-
         mBaseChoiceBits.resize(roundUpTo(mBaseChoiceBits.size(), 8));
-
         for (u64 i = mBaseChoiceBits.size() - 1; i >= choices.size(); --i)
-        {
             mBaseChoiceBits[i] = 0;
-        }
-        mBaseChoiceBits.resize(choices.size());
 
+		mBaseChoiceBits.resize(choices.size());
         for (u64 i = 0; i < mGens.size(); i++)
-        {
             mGens[i].SetSeed(baseRecvOts[i]);
-        }
     }
+
+	void KosDotExtSender::setDelta(const block & delta)
+	{
+		mDelta = delta;
+	}
 
     void KosDotExtSender::send(
         span<std::array<block, 2>> messages,
         PRNG& prng,
         Channel& chl)
     {
-        // round up 
+        setTimePoint("KosDot.send.start");
+
+        // round up
         u64 numOtExt = roundUpTo(messages.size(), 128);
         u64 numSuperBlocks = (numOtExt / 128 + superBlkSize) / superBlkSize;
 
@@ -103,7 +98,7 @@ namespace osuCrypto
             if (uIter == uEnd)
             {
                 u64 step = std::min<u64>(numSuperBlocks - superBlkIdx, (u64)commStepSize);
-                chl.recv(u.data(), step * superBlkSize * mGens.size() * sizeof(block));
+                chl.recv((u8*)u.data(), step * superBlkSize * mGens.size() * sizeof(block));
                 uIter = (block*)u.data();
             }
 
@@ -146,7 +141,7 @@ namespace osuCrypto
             {
                 Matrix<u8> tOut(128 * superBlkSize, sizeof(block) * 2);
 
-                // transpose our 128 columns of 1024 bits. We will have 1024 rows, 
+                // transpose our 128 columns of 1024 bits. We will have 1024 rows,
                 // each 128 bits wide.
                 sse_transpose(t, tOut);
 
@@ -171,23 +166,37 @@ namespace osuCrypto
 
                 mIter += std::min<u64>(128 * superBlkSize, messages.end() - mIter);
 
-                // transpose our 128 columns of 1024 bits. We will have 1024 rows, 
+                // transpose our 128 columns of 1024 bits. We will have 1024 rows,
                 // each 128 bits wide.
                 sse_transpose(t, tOut);
             }
 
         }
 
-        gTimer.setTimePoint("send.transposeDone");
+        setTimePoint("KosDot.send.transposeDone");
 
         block seed = prng.get<block>();
-        chl.asyncSend(&seed, sizeof(block));
+        chl.asyncSend((u8*)&seed, sizeof(block));
+
+		PRNG codePrng(seed);
+        LinearCode code;
+        code.random(codePrng, mBaseChoiceBits.size(), 128);
+		block curDelta;
+		code.encode((u8*)delta.data(), (u8*)&curDelta);
+
+		if (eq(mDelta, ZeroBlock))
+			mDelta = prng.get<block>();
+
+		block offset = curDelta ^ mDelta;
+		chl.asyncSend(offset);
+
         block theirSeed;
-        chl.recv(&theirSeed, sizeof(block));
-        gTimer.setTimePoint("send.cncSeed");
+        chl.recv((u8*)&theirSeed, sizeof(block));
+        setTimePoint("KosDot.send.cncSeed");
 
         if (Commit(theirSeed) != theirSeedComm)
             throw std::runtime_error("bad commit " LOCATION);
+
 
 
         PRNG commonPrng(seed ^ theirSeed);
@@ -199,9 +208,14 @@ namespace osuCrypto
 
         std::array<block, 128> challenges, challenges2;
 
-        gTimer.setTimePoint("send.checkStart");
+        setTimePoint("KosDot.send.checkStart");
 
         //std::cout << IoStream::lock;
+		//std::array<block, 2> small{ delta[0], delta[1] };
+		
+
+		
+
 
         u64 xx = 0;
         u64 bb = (messages.size() + 127 + 128) / 128;
@@ -223,10 +237,10 @@ namespace osuCrypto
                 q3 = q3 ^ qi3;
                 q4 = q4 ^ qi4;
 
-                std::array<block, 2> messages1 { messages[dd][0] ^ delta[0], messages[dd][1] ^ delta[1]};
 
-                mCode.encode((u8*)messages[dd].data(), (u8*)&messages[dd][0]);
-                mCode.encode((u8*)messages1.data(), (u8*)&messages[dd][1]);
+                code.encode((u8*)messages[dd].data(), (u8*)&messages[dd][0]);
+				messages[dd][1] = messages[dd][0] ^ mDelta;
+                //code.encode((u8*)messages1.data(), (u8*)&messages[dd][1]);
             }
 
 
@@ -243,23 +257,23 @@ namespace osuCrypto
         }
 
 
-        gTimer.setTimePoint("send.checkSummed");
+        setTimePoint("KosDot.send.checkSummed");
 
         block t1, t2, t3, t4;
-        std::vector<char> data(sizeof(block) * 8);
+        std::vector<u8> data(sizeof(block) * 8);
 
         chl.recv(data.data(), data.size());
 
 
         //std::cout << IoStream::unlock;
-        
-        gTimer.setTimePoint("send.proofReceived");
+
+        setTimePoint("KosDot.send.proofReceived");
 
         auto& received_x = ((std::array<block, 4>*)data.data())[0];
         auto& received_t = ((std::array<block, 4>*)data.data())[1];
 
 
-        // check t = x * Delta + q 
+        // check t = x * Delta + q
         mul256(received_x[0], received_x[1], delta[0], delta[1], t1, t2, t3, t4);
         t1 = t1 ^ q1;
         t2 = t2 ^ q2;
@@ -287,7 +301,7 @@ namespace osuCrypto
              throw std::runtime_error("Exit");;
         }
 
-        gTimer.setTimePoint("send.done");
+        setTimePoint("KosDot.send.done");
 
         static_assert(gOtExtBaseOtCount == 128, "expecting 128");
     }

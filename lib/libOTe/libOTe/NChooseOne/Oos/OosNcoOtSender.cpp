@@ -1,59 +1,82 @@
 #include "OosNcoOtSender.h"
 #include "libOTe/Tools/Tools.h"
-#include <cryptoTools/Common/Log.h>
+#include "libOTe/Tools/bch511.h"
+#include <cryptoTools/Crypto/RandomOracle.h>
+#include <cryptoTools/Network/Channel.h>
 #include "OosDefines.h"
-#include <cryptoTools/Common/ByteStream.h>
+
 namespace osuCrypto
 {
 
-    OosNcoOtSender::~OosNcoOtSender()
+    u64 OosNcoOtSender::getBaseOTCount() const
     {
+        if (mGens.size())
+            return mGens.size();
+        else
+            throw std::runtime_error("must call configure(...) before getBaseOTCount() " LOCATION);
     }
 
     void OosNcoOtSender::setBaseOts(
         span<block> baseRecvOts,
-        const BitVector & choices)
+        const BitVector & choices, Channel& chl)
     {
-        if (choices.size() != baseRecvOts.size())
+        BitVector delta(choices.size());
+        chl.recv(delta);
+
+        setUniformBaseOts(baseRecvOts, choices ^ delta);
+    }
+
+    void OosNcoOtSender::setUniformBaseOts(span<block> baseRecvOts, const BitVector& uniformChoices)
+    {
+        if (uniformChoices.size() != u64(baseRecvOts.size()))
             throw std::runtime_error("size mismatch");
 
-        if (choices.size() % (sizeof(block) * 8) != 0)
+        if (uniformChoices.size() % (sizeof(block) * 8) != 0)
             throw std::runtime_error("only multiples of 128 are supported");
 
+        mBaseChoiceBits = uniformChoices;
+        mGens.resize(uniformChoices.size());
 
-        mBaseChoiceBits = choices;
-        mGens.resize(choices.size());
-
-        for (u64 i = 0; i < baseRecvOts.size(); i++)
+        for (u64 i = 0; i < u64(baseRecvOts.size()); i++)
         {
             mGens[i].SetSeed(baseRecvOts[i]);
         }
 
-        mChoiceBlks.resize(choices.size() / (sizeof(block) * 8));
+        mChoiceBlks.resize(uniformChoices.size() / (sizeof(block) * 8));
         for (u64 i = 0; i < mChoiceBlks.size(); ++i)
         {
             mChoiceBlks[i] = toBlock(mBaseChoiceBits.data() + (i * sizeof(block)));
         }
     }
 
-    std::unique_ptr<NcoOtExtSender> OosNcoOtSender::split()
+    OosNcoOtSender OosNcoOtSender::splitBase()
     {
-        auto* raw = new OosNcoOtSender(mCode, mStatSecParm);
+        OosNcoOtSender raw ;
+        raw.mCode = mCode;
+        raw.mInputByteCount = mInputByteCount;
+        raw.mStatSecParam = mStatSecParam;
+        raw.mGens.resize(mGens.size());
+        raw.mMalicious = mMalicious;
+        //raw->mChoiceBlks = mChoiceBlks;
 
-        std::vector<block> base(mGens.size());
-
-        // use some of the OT extension PRNG to new base OTs
-        for (u64 i = 0; i < base.size(); ++i)
+        if (hasBaseOts())
         {
-            base[i] = mGens[i].get<block>();
+            std::vector<block> base(mGens.size());
+            // use some of the OT extension PRNG to new base OTs
+            for (u64 i = 0; i < base.size(); ++i)
+            {
+                base[i] = mGens[i].get<block>();
+            }
+            raw.setUniformBaseOts(base, mBaseChoiceBits);
         }
-        raw->setBaseOts(base, mBaseChoiceBits);
-
-        return std::unique_ptr<NcoOtExtSender>(raw);
+        return std::move(raw);
     }
 
 
-
+    std::unique_ptr<NcoOtExtSender> OosNcoOtSender::split()
+    {
+        return std::make_unique<OosNcoOtSender>(std::move(splitBase()));
+    }
 
 
     void OosNcoOtSender::init(
@@ -61,14 +84,18 @@ namespace osuCrypto
     {
         const u8 superBlkSize(8);
 
+        if (mInputByteCount == 0)
+            throw std::runtime_error("configure must be called first" LOCATION);
 
         // round up
-        numOTExt = ((numOTExt + 127 + mStatSecParm) / 128) * 128;
+        numOTExt = ((numOTExt + 127 + mStatSecParam) / 128) * 128;
 
-        // We need two matrices, one for the senders matrix T^i_{b_i} and 
-        // one to hold the the correction values. This is sometimes called 
+        // We need two matrices, one for the senders matrix T^i_{b_i} and
+        // one to hold the the correction values. This is sometimes called
         // the u = T0 + T1 + C matrix in the papers.
+        mCorrectionVals = Matrix<block>();
         mCorrectionVals.resize(numOTExt, mGens.size() / 128);
+        mT = Matrix<block>();
         mT.resize(numOTExt, mGens.size() / 128);
 
         // The receiver will send us correction values, this is the index of
@@ -107,21 +134,21 @@ namespace osuCrypto
                     mGens[colIdx].mBlockIdx += superBlkSize;
                 }
 
-                // transpose our 128 columns of 1024 bits. We will have 1024 rows, 
+                // transpose our 128 columns of 1024 bits. We will have 1024 rows,
                 // each 128 bits wide.
                 sse_transpose128x1024(t);
 
                 // This is the index of where we will store the matrix long term.
                 // doneIdx is the starting row. l is the offset into the blocks of 128 bits.
                 // __restrict isn't crucial, it just tells the compiler that this pointer
-                // is unique and it shouldn't worry about pointer aliasing. 
+                // is unique and it shouldn't worry about pointer aliasing.
                 block* __restrict mTIter = mT.data() + doneIdx * mT.stride() + i;
 
                 for (u64 rowIdx = doneIdx, j = 0; rowIdx < stopIdx; ++j)
                 {
                     // because we transposed 1024 rows, the indexing gets a bit weird. But this
                     // is the location of the next row that we want. Keep in mind that we had long
-                    // **contiguous** columns. 
+                    // **contiguous** columns.
                     block* __restrict tIter = (((block*)t.data()) + j);
 
                     // do the copy!
@@ -143,25 +170,26 @@ namespace osuCrypto
 
     void OosNcoOtSender::encode(
         u64 otIdx,
-        const block* plaintext,
-        u8* dest,
+        const void* plaintext,
+        void* dest,
         u64 destSize)
     {
 
-//#ifndef NDEBUG
-//        if (plaintext.size() != mCode.plaintextBlkSize())
-//            throw std::invalid_argument("");
-//#endif // !NDEBUG
+#ifndef NDEBUG
+        if (mInputByteCount == 0)
+            throw std::runtime_error("configure must be called first" LOCATION);
+#endif // !NDEBUG
 
         // compute the codeword. We assume the
         // the codeword is less that 10 block = 1280 bits.
-        std::array<block, 10> codeword;
-        mCode.encode((u8*)plaintext, (u8*)codeword.data());
+        std::array<block, 10> codeword = { ZeroBlock, ZeroBlock, ZeroBlock, ZeroBlock, ZeroBlock, ZeroBlock, ZeroBlock, ZeroBlock, ZeroBlock, ZeroBlock };
+        memcpy(codeword.data(), plaintext, mInputByteCount);
+        mCode.encode((u8*)codeword.data(), (u8*)codeword.data());
 
 #ifdef OOS_SHA_HASH
-        SHA1  sha1;
-        u8 hashBuff[SHA1::HashSize];
+        //RandomOracle  sha1(destSize);
 #else
+#error "NOT ALLOWED"
         std::array<block, 10> aesBuff;
 #endif
         // the index of the otIdx'th correction value u = t1 + t0 + c(w)
@@ -171,7 +199,7 @@ namespace osuCrypto
 
 
         // This is the hashing phase. Here we are using
-        //  codewords that we computed above. 
+        //  codewords that we computed above.
         if (mT.stride() == 4)
         {
             // use vector instructions if we can. You can optimize this
@@ -193,25 +221,31 @@ namespace osuCrypto
 
 #ifdef OOS_SHA_HASH
             // hash it all to get rid of the correlation.
+            RandomOracle  sha1(destSize);
+            sha1.Update(otIdx);
             sha1.Update((u8*)codeword.data(), sizeof(block) * mT.stride());
-            sha1.Final(hashBuff);
-            memcpy(dest, hashBuff, std::min<u64>(SHA1::HashSize, destSize));
-            //val = toBlock(hashBuff);
+            sha1.Final((u8*)dest);
+
+            //std::array<u32, 5> out{ 0,0,0,0,0 };
+            //sha1_compress(out.data(), (u8*)&codeword[0]);
+            //memcpy(dest, out.data(), destSize);
+
 #else
-            //H(x) = AES_f(H'(x)) + H'(x),     where  H'(x) = AES_f(x_0) + x_0 + ... +  AES_f(x_n) + x_n. 
+            //H(x) = AES_f(H'(x)) + H'(x),     where  H'(x) = AES_f(x_0) + x_0 + ... +  AES_f(x_n) + x_n.
             mAesFixedKey.ecbEncFourBlocks(codeword.data(), aesBuff.data());
             codeword[0] = codeword[0] ^ aesBuff[0];
             codeword[1] = codeword[1] ^ aesBuff[1];
             codeword[2] = codeword[2] ^ aesBuff[2];
             codeword[3] = codeword[3] ^ aesBuff[3];
 
-            val =         codeword[0] ^ codeword[1];
+            block val = codeword[0] ^ codeword[1];
             codeword[2] = codeword[2] ^ codeword[3];
 
             val = val ^ codeword[2];
 
             mAesFixedKey.ecbEncBlock(val, codeword[0]);
             val = val ^ codeword[0];
+            memcpy(dest, &val, std::min<u64>(RandomOracle::HashSize, destSize));
 #endif
         }
         else
@@ -228,40 +262,56 @@ namespace osuCrypto
             }
 #ifdef OOS_SHA_HASH
             // hash it all to get rid of the correlation.
+            RandomOracle  sha1(destSize);
             sha1.Update((u8*)codeword.data(), sizeof(block) * mT.stride());
-            sha1.Final(hashBuff);
-            memcpy(dest, hashBuff, std::min<u64>(SHA1::HashSize, destSize));
-            //val = toBlock(hashBuff);
+            sha1.Final((u8*)dest);
 #else
-            //H(x) = AES_f(H'(x)) + H'(x),     where  H'(x) = AES_f(x_0) + x_0 + ... +  AES_f(x_n) + x_n. 
+            //H(x) = AES_f(H'(x)) + H'(x),     where  H'(x) = AES_f(x_0) + x_0 + ... +  AES_f(x_n) + x_n.
             mAesFixedKey.ecbEncBlocks(codeword.data(), mT.stride(), aesBuff.data());
 
-            val = ZeroBlock;
+            block val = ZeroBlock;
             for (u64 i = 0; i < mT.stride(); ++i)
                 val = val ^ codeword[i] ^ aesBuff[i];
 
 
             mAesFixedKey.ecbEncBlock(val, codeword[0]);
             val = val ^ codeword[0];
+            memcpy(dest, &val, std::min<u64>(RandomOracle::HashSize, destSize));
 #endif
         }
     }
 
-    void OosNcoOtSender::getParams(
+    void OosNcoOtSender::configure(
         bool maliciousSecure,
-        u64 compSecParm,
         u64 statSecParam,
-        u64 inputBitCount,
-        u64 inputCount,
-        u64 & inputBlkSize,
-        u64 & baseOtCount)
+        u64 inputBitCount)
     {
-        if (inputBitCount > mCode.plaintextBitSize())
+        if (inputBitCount <= 76)
+        {
+            mCode.load(bch511_binary, sizeof(bch511_binary));
+            //mCode.loadTxtFile("C:/Users/peter/repo/libOTe/libOTe/Tools/bch511.txt");
+        }
+        else
             throw std::runtime_error(LOCATION);
 
-        inputBlkSize = mCode.plaintextBlkSize();
 
-        baseOtCount = mCode.codewordBlkSize() * 128;
+
+        mInputByteCount = (inputBitCount + 7) / 8;
+        mStatSecParam = statSecParam;
+        mMalicious = maliciousSecure;
+        mGens.resize(roundUpTo(mCode.codewordBitSize(), 128));
+    }
+
+    std::future<void> OosNcoOtSender::asyncRecvCorrection(Channel & chl, u64 recvCount)
+    {
+        // receive the next OT correction values. This will be several rows of the form u = T0 + T1 + C(w)
+        // there c(w) is a pseudo-random code.
+        auto dest = &mCorrectionVals(mCorrectionIdx,0);
+
+        // update the index of there we should store the next set of correction values.
+        mCorrectionIdx += recvCount;
+
+        return chl.asyncRecv(dest, recvCount * mCorrectionVals.stride());
     }
 
     void OosNcoOtSender::recvCorrection(Channel & chl, u64 recvCount)
@@ -271,54 +321,121 @@ namespace osuCrypto
         if (recvCount > mCorrectionVals.bounds()[0] - mCorrectionIdx)
             throw std::runtime_error("bad receiver, will overwrite the end of our buffer" LOCATION);
 
-#endif // !NDEBUG        
+#endif // !NDEBUG
 
+        asyncRecvCorrection(chl, recvCount).get();
+
+        //// receive the next OT correction values. This will be several rows of the form u = T0 + T1 + C(w)
+        //// there c(w) is a pseudo-random code.
+        //auto dest = mCorrectionVals.data() + i32(mCorrectionIdx * mCorrectionVals.stride());
+        //chl.recv(dest,
+        //    recvCount * mCorrectionVals.stride());
+
+        //// update the index of there we should store the next set of correction values.
+        //mCorrectionIdx += recvCount;
+    }
+
+    u64 OosNcoOtSender::recvCorrection(Channel & chl)
+    {
 
         // receive the next OT correction values. This will be several rows of the form u = T0 + T1 + C(w)
         // there c(w) is a pseudo-random code.
-        auto dest = mCorrectionVals.begin() + i32(mCorrectionIdx * mCorrectionVals.stride());
-        chl.recv(&*dest,
-            recvCount * sizeof(block) * mCorrectionVals.stride());
+        auto dest = mCorrectionVals.data() + i32(mCorrectionIdx * mCorrectionVals.stride());
+        auto maxReceiveCount = (mCorrectionVals.rows() - mCorrectionIdx) * mCorrectionVals.stride();
+
+        ReceiveAtMost<block> reciever(dest, maxReceiveCount);
+        chl.recv(reciever);
+
+        // check that the number of blocks received is ok.
+        if (reciever.receivedSize() % mCorrectionVals.stride())
+            throw std::runtime_error("An even number of correction blocks were not sent. " LOCATION);
+
+        // compute how many corrections were received.
+        auto numCorrections = reciever.receivedSize() / mCorrectionVals.stride();
 
         // update the index of there we should store the next set of correction values.
-        mCorrectionIdx += recvCount;
+        mCorrectionIdx += numCorrections;
+
+        return numCorrections;
     }
 
     void OosNcoOtSender::check(Channel & chl, block seed)
     {
-        u64 statSecParam(40);
+        if (mMalicious)
+        {
+            //char c;
+            //chl.recv((u8*)&c, 1);
+            //std::cout << IoStream::lock << "sender " << std::endl;;
 
-        if (statSecParam % 8) throw std::runtime_error("Must be a multiple of 8. " LOCATION);
+            //for (u64 i = 0; i < mCorrectionIdx; ++i)
+            //{
+            //    for (u64 j = 0; j < mCorrectionVals.stride(); ++j)
+            //    {
+            //        std::cout << mCorrectionVals[i][j] << " ";
+            //    }
+            //    std::cout << std::endl;
+            //}
 
-        // first we need to receive the extra statSecParam number of correction
+            //std::cout << IoStream::unlock;
+
+            if (mStatSecParam % 8) throw std::runtime_error("Must be a multiple of 8. " LOCATION);
+
+            // first we need to receive the extra mStatSecParam number of correction
+            // values. This will just be for random inputs and are used to mask
+            // their true choices that were used in the remaining correction values.
+            recvFinalization(chl);
+
+            // now send them out challenge seed.
+            sendChallenge(chl, seed);
+            computeProof();
+            recvProof(chl);
+            //std::cout << "pass" << std::endl;
+        }
+
+    }
+
+    void OosNcoOtSender::recvFinalization(Channel & chl)
+    {
+        // first we need to receive the extra mStatSecParam number of correction
         // values. This will just be for random inputs and are used to mask
         // their true choices that were used in the remaining correction values.
-        recvCorrection(chl, statSecParam);
+        recvCorrection(chl, mStatSecParam);
+    }
 
-        // now send them out challenge seed.
-        chl.asyncSend(&seed, sizeof(block));
+
+    void OosNcoOtSender::sendChallenge(Channel & chl, block seed)
+    {
+        mChallengeSeed = seed;
+        chl.asyncSend(mChallengeSeed);
+    }
+
+    void OosNcoOtSender::computeProof()
+    {
+
+        if (eq(mChallengeSeed, ZeroBlock))
+            throw RTE_LOC;
 
         // This AES will work as a PRNG, using AES-NI in counter mode.
-        AES aes(seed);
+        AES aes(mChallengeSeed);
         // the index of the AES counter.
         u64 aesIdx(0);
 
         // the index of the row that we are doing.
         u64 k = 0;
 
-        // qSum will hold the summation over all the rows. We need 
-        // statSecParam number of them. First initialize them, each 
-        // with one of the dummy values that were just send. 
-        std::vector<block> qSum(statSecParam * mT.stride());
-        for (u64 i = 0; i < statSecParam; ++i)
+        // qSum will hold the summation over all the rows. We need
+        // mStatSecParam number of them. First initialize them, each
+        // with one of the dummy values that were just send.
+        qSum.resize(mStatSecParam * mT.stride());
+        for (u64 i = 0; i < mStatSecParam; ++i)
         {
             // The rows are most likely several blocks wide.
             for (u64 j = 0; j < mT.stride(); ++j)
             {
                 qSum[i * mT.stride() + j]
-                    = (mCorrectionVals[mCorrectionIdx - statSecParam + i][j]
+                    = (mCorrectionVals[mCorrectionIdx - mStatSecParam + i][j]
                         & mChoiceBlks[j])
-                    ^ mT[mCorrectionIdx - statSecParam + i][j];
+                    ^ mT[mCorrectionIdx - mStatSecParam + i][j];
             }
         }
 
@@ -326,11 +443,31 @@ namespace osuCrypto
         // and the complete T0 matrix. For DEBUG only
 #ifdef OOS_CHECK_DEBUG
         Buff mT0Buff, mWBuff;
+        std::vector<std::array<block, 2>> baseOTs;
+        std::vector<u64> mBlockIdxs(mGens.size());
         chl.recv(mT0Buff);
         chl.recv(mWBuff);
 
-        auto mT0 = mT0Buff.getMatrixView<block>(mCode.codewordBlkSize());
-        auto mW = mWBuff.getMatrixView<block>(mCode.plaintextBlkSize());
+        chl.recv(baseOTs);
+        chl.recv(mBlockIdxs);
+        for (u64 i = 0; i < mGens.size(); ++i)
+        {
+            if (neq(mGens[i].getSeed(), baseOTs[i][mBaseChoiceBits[i]]))
+            {
+                throw std::runtime_error(LOCATION);
+            }
+
+            if (mGens[i].mBlockIdx != mBlockIdxs[i])
+            {
+                throw std::runtime_error(LOCATION);
+            }
+        }
+
+        // the matrix generated by the zero messages
+        auto mT0_DEBUG = mT0Buff.getMatrixView<block>(mCode.codewordBlkSize());
+
+        // the input words used by the receiver
+        auto mW_DEBUG = mWBuff.getMatrixView<block>(mCode.plaintextBlkSize());
 #endif
 
         u64 codeSize = mT.stride();
@@ -350,13 +487,13 @@ namespace osuCrypto
         if (codeSize < zeroAndQ.size()) throw std::runtime_error("Make this bigger. " LOCATION);
 
 
-        // this will hold out random x^(l)_i values that we compute from the seed. 
-        std::vector<block> challengeBuff(statSecParam);
+        // this will hold out random x^(l)_i values that we compute from the seed.
+        std::vector<block> challengeBuff(mStatSecParam);
 
         // since we don't want to do bit shifting, this larger array
         // will be used to hold each bit of challengeBuff as a whole
         // byte. See below for how we do this efficiently.
-        std::vector<block> expandedBuff(statSecParam * 8);
+        std::vector<block> expandedBuff(mStatSecParam * 8);
         u8* byteView = (u8*)expandedBuff.data();
 
         // This will be used to compute expandedBuff
@@ -367,17 +504,17 @@ namespace osuCrypto
         auto tIter = mT.data();
 
         // compute the index that we should stop at. We process 128 rows at a time.
-        u64 blkStopIdx = (mCorrectionIdx - statSecParam + 127) / 128;
+        u64 blkStopIdx = (mCorrectionIdx - mStatSecParam + 127) / 128;
         for (u64 blkIdx = 0; blkIdx < blkStopIdx; ++blkIdx)
         {
-            // generate statSecParam * 128 bits using AES-NI in counter mode.
-            aes.ecbEncCounterMode(aesIdx, statSecParam, challengeBuff.data());
-            aesIdx += statSecParam;
+            // generate mStatSecParam * 128 bits using AES-NI in counter mode.
+            aes.ecbEncCounterMode(aesIdx, mStatSecParam, challengeBuff.data());
+            aesIdx += mStatSecParam;
 
-            // now expand each of these bits into its own byte. This is done with the 
+            // now expand each of these bits into its own byte. This is done with the
             // right shift instruction _mm_srai_epi16. and then we mask to get only
             // the bottom bit. Doing the 8 times gets us each bit in its own byte.
-            for (u64 i = 0; i < statSecParam; ++i)
+            for (u64 i = 0; i < mStatSecParam; ++i)
             {
                 expandedBuff[i * 8 + 0] = mask & _mm_srai_epi16(challengeBuff[i], 0);
                 expandedBuff[i * 8 + 1] = mask & _mm_srai_epi16(challengeBuff[i], 1);
@@ -390,7 +527,7 @@ namespace osuCrypto
             }
 
             // compute when we should stop of this set.
-            u64 stopIdx = std::min<u64>(mCorrectionIdx - statSecParam - k, u64(128));
+            u64 stopIdx = std::min<u64>(mCorrectionIdx - mStatSecParam - k, u64(128));
             k += 128;
 
             // get an integrator to the challenge bit
@@ -420,34 +557,46 @@ namespace osuCrypto
                     // the receiver will have sent it's T0 and W matrix.
                     // This will let us identify the row that things go wrong...
 #ifdef OOS_CHECK_DEBUG
-                    u64 kk = k - 128;
+                    u64 kk = k - 128 + i;
                     std::vector<block> cw(mCode.codewordBlkSize());
-                    mCode.encode(mW[kk], cw);
+                    mCode.encode(mW_DEBUG[kk], cw);
 
                     for (u64 j = 0; j < 4; ++j)
                     {
-                        block tq = mT0[kk][j] ^ zeroAndQ[j][1];
+                        //block t = tIter[j];
+                        auto cor = corIter[j];
+                        //block tc = cor & mChoiceBlks[j];
+
+                        block tq = mT0_DEBUG[kk][j] ^ zeroAndQ[1][j];
                         block cb = cw[j] & mChoiceBlks[j];
 
                         if (neq(tq, cb))
                         {
-                            throw std::runtime_error("");
+                            std::cout << "row " << (kk) << " " << j << std::endl;
+                            std::cout <<
+                                "tq " << tq << " = " << mT0_DEBUG[kk][j] << " ^ " << zeroAndQ[1][j] << "\n" <<
+                                "cb " << cb << " = (" << cw[j] << "} & " << mChoiceBlks[j] << "\n" <<
+                                "w = " << mW_DEBUG[kk][0] << " ->  " << cw[0] << std::endl <<
+                                "diff " << (tq ^ cb) << std::endl;
+
+                            throw std::runtime_error(LOCATION);
                         }
+                        //std::cout << "tq " << tq << " cb " << cb << " = c(" << mW_DEBUG[kk][0] << "} & " << mChoiceBlks[j] << " diff " << (tq ^ cb) << std::endl;
                     }
 #endif
 
                     // get a raw pointer into the first summation
                     auto qSumIter = qSum.data();
 
-                    // iterate over the statSecParam of challenges. Process
-                    // two of the value per loop. 
-                    for (u64 j = 0; j < statSecParam / 2; ++j, qSumIter += 8)
+                    // iterate over the mStatSecParam of challenges. Process
+                    // two of the value per loop.
+                    for (u64 j = 0; j < mStatSecParam / 2; ++j, qSumIter += 8)
                     {
                         u8 x0 = *xIter++;
                         u8 x1 = *xIter++;
 
-                        // This is where the bit multiplication of 
-                        // x^(l)_i * q_i happens. Its done with a single 
+                        // This is where the bit multiplication of
+                        // x^(l)_i * q_i happens. Its done with a single
                         // array index instruction. If x is zero, then mask
                         // will hold the all zero string. Otherwise it holds
                         // the row q_i.
@@ -488,29 +637,29 @@ namespace osuCrypto
 #ifdef OOS_CHECK_DEBUG
                     u64 kk = k - 128;
                     std::vector<block> cw(mCode.codewordBlkSize());
-                    mCode.encode(mW[kk], cw);
+                    mCode.encode(mW_DEBUG[kk], cw);
 
                     for (u64 j = 0; j < codeSize; ++j)
                     {
-                        block tq = mT0[kk][j] ^ zeroAndQ[j][1];
+                        block tq = mT0_DEBUG[kk][j] ^ zeroAndQ[1][j];
                         block cb = cw[j] & mChoiceBlks[j];
 
                         if (neq(tq, cb))
                         {
-                            throw std::runtime_error("");
+                            throw std::runtime_error(LOCATION);
                         }
                     }
 #endif
                     // get a raw pointer into the first summation
                     auto qSumIter = qSum.data();
 
-                    // iterate over the statSecParam of challenges. Process
-                    // two of the value per loop. 
-                    for (u64 j = 0; j < statSecParam; ++j, qSumIter += codeSize)
+                    // iterate over the mStatSecParam of challenges. Process
+                    // two of the value per loop.
+                    for (u64 j = 0; j < mStatSecParam; ++j, qSumIter += codeSize)
                     {
 
-                        // This is where the bit multiplication of 
-                        // x^(l)_i * q_i happens. Its done with a single 
+                        // This is where the bit multiplication of
+                        // x^(l)_i * q_i happens. Its done with a single
                         // array index instruction. If x is zero, then mask
                         // will hold the all zero string. Otherwise it holds
                         // the row q_i.
@@ -527,21 +676,25 @@ namespace osuCrypto
                 //  ^^^^^^^^^^^^^      general codeword size        ^^^^^^^^^^^^^
             }
         }
+    }
 
-        std::vector<block> tSum(statSecParam * mT.stride());
-        std::vector<block> wSum(statSecParam * mCode.plaintextBlkSize());
+    void OosNcoOtSender::recvProof(Channel & chl)
+    {
+
+        std::vector<block> tSum(mStatSecParam * mT.stride());
+        std::vector<block> wSum(mStatSecParam * mCode.plaintextBlkSize());
 
         // now wait for the receiver's challenge answer.
-        chl.recv(tSum.data(), tSum.size() * sizeof(block));
-        chl.recv(wSum.data(), wSum.size() * sizeof(block));
+        chl.recv((u8*)tSum.data(), tSum.size() * sizeof(block));
+        chl.recv((u8*)wSum.data(), wSum.size() * sizeof(block));
 
         // a buffer to store codewords
         std::vector<block> cw(mCode.codewordBlkSize());
 
-        // check each of the statSecParam number of challenges
-        for (u64 l = 0; l < statSecParam; ++l)
+        // check each of the mStatSecParam number of challenges
+        for (u64 l = 0; l < mStatSecParam; ++l)
         {
-            
+
             span<block> word(
                 wSum.data() + l * mCode.plaintextBlkSize(),
                 mCode.plaintextBlkSize());

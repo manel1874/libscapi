@@ -57,7 +57,7 @@ public:
     * @throws InvalidParameterSpecException if the given keyParams does not match this mac algoithm.
     */
     SecretKey generateKey(AlgorithmParameterSpec & keyParams) override {
-        //throw NotImplementedException("To generate a key for this GMAC object use the generateKey(int keySize) function");
+        throw NotImplementedException("To generate a key for this GMAC object use the generateKey(int keySize) function");
     };
 
     /**

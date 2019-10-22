@@ -8,9 +8,10 @@
 
 namespace osuCrypto
 {
+    std::chrono::time_point<std::chrono::system_clock> gStart = std::chrono::system_clock::now();
 
 
-
+	ostreamLocker lout(std::cout);
     std::mutex gIoStreamMtx;
 
     void setThreadName(const std::string name)
@@ -107,9 +108,12 @@ namespace osuCrypto
 
     std::ostream& operator<<(std::ostream& out, Color tag)
     {
+        if (tag == Color::Default)
+            tag = ColorDefault;
 #ifdef _MSC_VER
         SetConsoleTextAttribute(__m_hConsole, (WORD)tag | (240 & (WORD)ColorDefault) );
 #else
+
         out << colorMap[15 & (char)tag];
 #endif
         return out;

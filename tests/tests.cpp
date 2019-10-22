@@ -248,7 +248,6 @@ TEST_CASE("boosts multiprecision", "[boost, multiprecision]") {
 	{
 		string s = "12345678910123456789123456789123456789123456789123456789123456789123456789123456789";
 		biginteger bi(s);
-		REQUIRE((string)bi == s);
 		REQUIRE(bi.str()  == s);
 		biginteger b2 = bi - 3;
 		auto st_res = s.substr(0, s.size() - 1)+"6";

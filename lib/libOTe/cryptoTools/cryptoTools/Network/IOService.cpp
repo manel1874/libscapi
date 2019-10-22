@@ -1,11 +1,12 @@
 #include <cryptoTools/Network/IOService.h>
-#include <cryptoTools/Common/ByteStream.h>
 #include <cryptoTools/Common/Defines.h>
+#include <cryptoTools/Common/Finally.h>
 #include <cryptoTools/Common/Log.h>
-#include <cryptoTools/Network/Acceptor.h>
-#include <cryptoTools/Network/Endpoint.h>
+#include <cryptoTools/Common/Timer.h>
+#include <cryptoTools/Network/Session.h>
 #include <cryptoTools/Network/IoBuffer.h>
 #include <cryptoTools/Network/Channel.h>
+#include <cryptoTools/Network/SocketAdapter.h>
 
 #include <stdio.h>
 #include <algorithm>
@@ -13,16 +14,702 @@
 
 namespace osuCrypto
 {
+#ifdef ENABLE_NET_LOG
+#define LOG_MSG(m) mLog.push(m);
+#else
+#define LOG_MSG(m)
+#endif
 
-    extern void split(const std::string &s, char delim, std::vector<std::string> &elems);
-    extern std::vector<std::string> split(const std::string &s, char delim);
+    Acceptor::Acceptor(IOService& ioService)
+        :
+        //mSocketChannelPairsRemovedFuture(mSocketChannelPairsRemovedProm.get_future()),
+        mPendingSocketsEmptyFuture(mPendingSocketsEmptyProm.get_future()),
+        mStoppedFuture(mStoppedPromise.get_future()),
+        mIOService(ioService),
+        mStrand(ioService.mIoService.get_executor()),
+        mHandle(ioService.mIoService),
+        mStopped(false),
+        mPort(0)
+    {
+    }
+
+    Acceptor::~Acceptor()
+    {
+        stop();
+    }
+
+    void Acceptor::bind(u32 port, std::string ip, boost::system::error_code& ec)
+    {
+        auto pStr = std::to_string(port);
+        mPort = port;
+
+        boost::asio::ip::tcp::resolver resolver(mIOService.mIoService);
+        //boost::asio::ip::tcp::resolver::query query(ip, pStr);
+
+        auto addrIter = resolver.resolve(ip, pStr, ec);
+
+        if (ec)
+        {
+            return;
+        }
+
+        mAddress = *addrIter;
+
+        mHandle.open(mAddress.protocol());
+        mHandle.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
+
+        mHandle.bind(mAddress, ec);
+
+        if (mAddress.port() != port)
+            throw std::runtime_error("rt error at " LOCATION);
+
+        if (ec)
+        {
+            return;
+            //std::cout << "network address bind error: " << ec.message() << std::endl;
+
+            //throw std::runtime_error(ec.message());
+        }
+
+
+        //std::promise<void> mStoppedListeningPromise, mSocketChannelPairsRemovedProm;
+        //std::future<void> mStoppedListeningFuture, mSocketChannelPairsRemovedFuture;
+        mHandle.listen(boost::asio::socket_base::max_connections);
+    }
+
+    void Acceptor::start()
+    {
+        boost::asio::dispatch(mStrand, [&]()
+            {
+                if (isListening())
+                {
+                    mPendingSockets.emplace_back(mIOService.mIoService);
+                    auto sockIter = mPendingSockets.end(); --sockIter;
+
+                    //#ifdef ENABLE_NET_LOG
+                    sockIter->mIdx = mPendingSocketIdx++;
+                    //#endif
+                    LOG_MSG("listening with socket#" + std::to_string(sockIter->mIdx) +
+                        " at " + mAddress.address().to_string() + " : " + std::to_string(mAddress.port()));
+
+                    //BoostSocketInterface* newSocket = new BoostSocketInterface(mIOService.mIoService);
+                    mHandle.async_accept(sockIter->mSock, [sockIter, this](const boost::system::error_code& ec)
+                        {
+                            //std::cout << "async_accept cb socket#" + std::to_string(sockIter->mIdx) << " " << ec.message() <<  std::endl;
+
+                            start();
+
+                            if (!ec)
+                            {
+                                LOG_MSG("Connected with socket#" + std::to_string(sockIter->mIdx));
+
+                                boost::asio::ip::tcp::no_delay option(true);
+                                sockIter->mSock.set_option(option);
+                                sockIter->mBuff.resize(sizeof(u32));
+
+                                sockIter->mSock.async_receive(boost::asio::buffer((char*)sockIter->mBuff.data(), sockIter->mBuff.size()),
+                                    [sockIter, this](const boost::system::error_code& ec2, u64 bytesTransferred)
+                                    {
+                                        if (!ec2)
+                                        {
+                                            LOG_MSG("Recv header with socket#" + std::to_string(sockIter->mIdx));
+
+                                            auto size = *(u32*)sockIter->mBuff.data();
+                                            sockIter->mBuff.resize(size);
+
+                                            sockIter->mSock.async_receive(boost::asio::buffer((char*)sockIter->mBuff.data(), sockIter->mBuff.size()),
+
+                                                bind_executor(mStrand, [sockIter, this](const boost::system::error_code& ec3, u64 bytesTransferred2)
+                                                    {
+                                                        if (!ec3)
+                                                        {
+                                                            LOG_MSG("Recv boby with socket#" + std::to_string(sockIter->mIdx) + " ~ " + sockIter->mBuff);
+
+                                                            asyncSetSocket(
+                                                                std::move(sockIter->mBuff),
+                                                                std::move(std::unique_ptr<BoostSocketInterface>(
+                                                                    new BoostSocketInterface(std::move(sockIter->mSock)))));
+                                                        }
+                                                        else
+                                                        {
+                                                            std::cout << "socket header body failed: " << ec3.message() << std::endl;
+                                                            LOG_MSG("Recv body failed with socket#" + std::to_string(sockIter->mIdx) + " ~ " + ec3.message());
+                                                        }
+
+                                                        mPendingSockets.erase(sockIter);
+                                                        if (stopped() && mPendingSockets.size() == 0)
+                                                            mPendingSocketsEmptyProm.set_value();
+                                                    }));
+
+                                        }
+                                        else
+                                        {
+                                            if (ec2.value() != boost::asio::error::operation_aborted)
+                                                std::cout << "async_accept error, failed to receive first header on connection handshake."
+                                                    << " Other party may have closed the connection. Error code:"
+                                                    << ec2.message() << "  " << LOCATION << std::endl;
+
+
+                                            LOG_MSG("Recv header failed with socket#" + std::to_string(sockIter->mIdx) + " ~ " + ec2.message());
+
+
+                                            //if(ec2.value() !=)
+
+                                            boost::asio::dispatch(mStrand, [&, sockIter]()
+                                                {
+                                                    boost::system::error_code ec3;
+                                                    sockIter->mSock.close(ec3);
+                                                    mPendingSockets.erase(sockIter);
+                                                    if (stopped() && mPendingSockets.size() == 0)
+                                                        mPendingSocketsEmptyProm.set_value();
+                                                });
+                                        }
+
+                                    });
+                            }
+                            else
+                            {
+                                LOG_MSG("Failed with socket#" + std::to_string(sockIter->mIdx) + " ~ " + ec.message());
+
+                                // if the error code is not for operation canceled, print it to the terminal.
+                                if (ec.value() != boost::asio::error::operation_aborted)
+                                    std::cout << "Acceptor.listen failed for socket#" << std::to_string(sockIter->mIdx)
+                                    << " ~~ " << ec.message() << " " << ec.value() << std::endl;
+
+                                if (ec.value() == boost::asio::error::no_descriptors)
+                                    std::cout << "Too many sockets have been opened and the OS is refusing to give more. Increase the maximum number of file descriptors or use fewer sockets" << std::endl;
+
+                                boost::asio::dispatch(mStrand, [&, sockIter]()
+                                    {
+                                        mPendingSockets.erase(sockIter);
+                                        if (stopped() && mPendingSockets.size() == 0)
+                                            mPendingSocketsEmptyProm.set_value();
+                                    });
+                            }
+                        });
+                }
+                else
+                {
+                    LOG_MSG("Stopped listening");
+                }
+            });
+
+    }
+
+    void Acceptor::stop()
+    {
+        if (mStopped == false)
+        {
+            boost::asio::dispatch(mStrand, [&]() {
+                if (mStopped == false)
+                {
+                    mStopped = true;
+                    mListening = false;
+
+                    LOG_MSG("accepter Stopped");
+
+
+                    // stop listening.
+
+                    //std::cout << IoStream::lock << " accepter stop() " << mPort << std::endl << IoStream::unlock;
+
+                    mHandle.close();
+
+                    // cancel any sockets which have not completed the handshake.
+                    for (auto& pendingSocket : mPendingSockets)
+                        pendingSocket.mSock.close();
+
+                    // if there were no pending sockets, set the promise
+                    if (mPendingSockets.size() == 0)
+                        mPendingSocketsEmptyProm.set_value();
+
+                    // no subscribers, we can set the promise now.
+                    if (hasSubscriptions() == false)
+                        mStoppedPromise.set_value();
+                }
+                });
+
+            // wait for the pending events.
+            std::chrono::seconds timeout(4);
+            std::future_status status = mPendingSocketsEmptyFuture.wait_for(timeout);
+
+            while (status == std::future_status::timeout)
+            {
+                status = mPendingSocketsEmptyFuture.wait_for(timeout);
+                std::cout << "waiting on acceptor to close " << mPendingSockets.size() << " pending socket" << std::endl;
+            }
+
+            status = mStoppedFuture.wait_for(timeout);
+            while (status == std::future_status::timeout)
+            {
+                status = mStoppedFuture.wait_for(timeout);
+                std::cout << "waiting on acceptor to close. hasSubsciptions() = " << hasSubscriptions() << std::endl;
+#ifdef ENABLE_NET_LOG
+                std::cout << mLog << std::endl;
+                std::cout << mIOService.mLog << std::endl;
+#endif
+            }
+
+
+            mPendingSocketsEmptyFuture.get();
+            mStoppedFuture.get();
+
+        }
+    }
+
+
+    bool Acceptor::hasSubscriptions() const
+    {
+        for (auto& a : mGroups)
+            if (a.hasSubscriptions())
+                return true;
+
+        return false;
+    }
+    void Acceptor::stopListening()
+    {
+
+        boost::asio::dispatch(mStrand, [&]() {
+            if (hasSubscriptions() == false)
+            {
+
+                mListening = false;
+
+                //std::cout << IoStream::lock << "stop listening " << std::endl << IoStream::unlock;
+                mHandle.close();
+
+                if (stopped())
+                {
+                    LOG_MSG("stopping prom funfilled");
+                    mStoppedPromise.set_value();
+                }
+                else
+                {
+                    LOG_MSG("stopped listening but not prom funfilled");
+                }
+            }
+            else
+            {
+                LOG_MSG("stopped listening called but deferred..");
+            }
+        });
+
+    }
+
+    void Acceptor::unsubscribe(SessionBase* session)
+    {
+        std::promise<void> p;
+        std::future<void> f(p.get_future());
+        auto iter = session->mGroup;
+
+        boost::asio::dispatch(mStrand, [&, iter]() {
+            iter->mBase.reset();
+
+            if (iter->hasSubscriptions() == false)
+            {
+                iter->removeMapping();
+                mGroups.erase(iter);
+            }
+
+            // if no one else wants us to listen, stop listening
+            if (hasSubscriptions() == false)
+                stopListening();
+
+            p.set_value();
+            });
+
+        f.get();
+    }
+
+    void Acceptor::subscribe(std::shared_ptr<SessionBase>& session)
+    {
+        std::promise<void> p;
+        std::future<void> f = p.get_future();
+
+        session->mAcceptor = this;
+
+        boost::asio::dispatch(mStrand, [&]() {
+
+            if (mStopped)
+            {
+                auto ePtr = std::make_exception_ptr(
+                    std::runtime_error("can not subscribe to a stopped Acceptor."));
+                p.set_exception(ePtr);
+            }
+            else
+            {
+                mGroups.emplace_back();
+                auto iter = mGroups.end(); --iter;
+
+                iter->mBase = session;
+                session->mGroup = iter;
+
+                auto key = session->mName;
+                auto& collection = mUnclaimedGroups[key];
+                collection.emplace_back(iter);
+                auto deleteIter = collection.end(); --deleteIter;
+
+                iter->removeMapping = [&, deleteIter, key]()
+                {
+                    collection.erase(deleteIter);
+                    if (collection.size() == 0)
+                        mUnclaimedGroups.erase(mUnclaimedGroups.find(key));
+                };
+
+                if (mListening == false)
+                {
+                    mListening = true;
+                    boost::system::error_code ec;
+                    bind(session->mPort, session->mIP, ec);
+
+                    if (ec) {
+                        auto ePtr = std::make_exception_ptr(
+                            std::runtime_error("network bind error: " + ec.message()));
+                        p.set_exception(ePtr);
+                        return;
+                    }
+
+                    start();
+                }
+
+                p.set_value();
+
+            }
+            });
+
+        // may throw
+        f.get();
+    }
+
+    Acceptor::SocketGroupList::iterator Acceptor::getSocketGroup(const std::string & sessionName, u64 sessionID)
+    {
+
+        auto unclaimedSocketIter = mUnclaimedSockets.find(sessionName);
+        if (unclaimedSocketIter != mUnclaimedSockets.end())
+        {
+            auto& sockets = unclaimedSocketIter->second;
+            auto matchIter = std::find_if(sockets.begin(), sockets.end(),
+                [&](const SocketGroupList::iterator& g) { return g->mSessionID == sessionID; });
+
+            if (matchIter != sockets.end())
+                return *matchIter;
+        }
+
+        // there is no socket group for this session. lets create one.
+        mSockets.emplace_back();
+        auto socketIter = mSockets.end(); --socketIter;
+
+        socketIter->mName = sessionName;
+        socketIter->mSessionID = sessionID;
+
+        // add a mapping to indicate that this group is unclaimed
+        auto& group = mUnclaimedSockets[sessionName];
+        group.emplace_back(socketIter);
+        auto deleteIter = group.end(); --deleteIter;
+
+        socketIter->removeMapping = [&group, &socketIter, this, sessionName, deleteIter]() {
+            group.erase(deleteIter);
+            if (group.size() == 0) mUnclaimedSockets.erase(mUnclaimedSockets.find(sessionName));
+        };
+
+        return socketIter;
+
+    }
+
+    void Acceptor::cancelPendingChannel(ChannelBase* chl)
+    {
+        std::promise<void> prom;
+
+        boost::asio::dispatch(mStrand, [this, chl, &prom]() {
+            auto iter = chl->mSession->mGroup;
+
+            auto chlIter = std::find_if(iter->mChannels.begin(), iter->mChannels.end(),
+                [&](const std::shared_ptr<ChannelBase>& c) { return c.get() == chl; });
+
+            if (chlIter != iter->mChannels.end())
+            {
+                auto ePtr = std::make_exception_ptr(SocketConnectError("Acceptor canceled the socket request. " LOCATION));
+                (*chlIter)->mOpenProm.set_exception(ePtr);
+
+                iter->mChannels.erase(chlIter);
+
+
+                if (iter->hasSubscriptions() == false)
+                {
+                    iter->removeMapping();
+                    mGroups.erase(iter);
+
+                    if (hasSubscriptions() == false)
+                        stopListening();
+                }
+            }
+
+            prom.set_value();
+            });
+
+        prom.get_future().get();
+    }
+
+
+    bool Acceptor::stopped() const
+    {
+        return mStopped;
+    }
+    std::string Acceptor::print() const
+    {
+        return std::string();
+    }
+
+    void Acceptor::asyncGetSocket(std::shared_ptr<ChannelBase> chl)
+    {
+        if (stopped()) throw std::runtime_error(LOCATION);
+        LOG_MSG("queuing getSocket(...) Channel "
+            + chl->mSession->mName + " "
+            + chl->mLocalName + " "
+            + chl->mRemoteName + " matched = " + std::to_string(chl->mHandle == nullptr));
+
+        boost::asio::dispatch(mStrand, [&, chl]() {
+
+            auto& sessionGroup = chl->mSession->mGroup;
+            auto& sessionName = chl->mSession->mName;
+            auto& sessionID = chl->mSession->mSessionID;
+
+            // check if this session has already been paired up with
+            // sockets. When this happens the client gives the session
+            // a unqiue ID.
+            if (sessionID)
+            {
+                // add this channel to the list of channels in this session
+                // that are looking for a matching socket. If a existing socket 
+                // is a match, they are paired up. Otherwise the acceptor 
+                // will pair them up once the matching socket is connected                
+                sessionGroup->add(chl, this);
+                LOG_MSG("getSocket(...) Channel " + sessionName + " " + chl->mLocalName + " " + chl->mRemoteName + " matched = " + std::to_string(chl->mHandle == nullptr));
+
+                // remove this session group if it is no longer active.
+                if (sessionGroup->hasSubscriptions() == false)
+                {
+                    sessionGroup->removeMapping();
+                    mGroups.erase(sessionGroup);
+
+                    if (hasSubscriptions() == false)
+                        stopListening();
+                }
+                return;
+            }
+
+            auto socketGroup = mSockets.end();
+
+            // check to see if there is a socket group with the same session name
+            // and has a socket with the same name as this channel.
+            auto unclaimedSocketIter = mUnclaimedSockets.find(sessionName);
+            if (unclaimedSocketIter != mUnclaimedSockets.end())
+            {
+                auto& groups = unclaimedSocketIter->second;
+                auto matchIter = std::find_if(groups.begin(), groups.end(),
+                    [&](const SocketGroupList::iterator& g) { return g->hasMatchingSocket(chl); });
+
+                if (matchIter != groups.end())
+                    socketGroup = *matchIter;
+            }
+
+            // add this channel to this session group. 
+            sessionGroup->add(chl, this);
+
+            // check if we have matching sockets.
+            if (socketGroup != mSockets.end())
+            {
+                // merge the group of sockets into the SessionGroup.
+                sessionGroup->merge(*socketGroup, this);
+
+
+                LOG_MSG("Session group " + sessionName + " " + std::to_string(sessionID)
+                    + " matched up with a socket group on channel " + chl->mLocalName + " " + chl->mRemoteName);
+
+                // erase the mapping for these sockets being unclaimed.
+                socketGroup->removeMapping();
+                sessionGroup->removeMapping();
+
+                // erase the sockets.
+                mSockets.erase(socketGroup);
+
+                // check if we can erase this session group (session closed).
+                if (sessionGroup->hasSubscriptions() == false)
+                {
+                    mGroups.erase(sessionGroup);
+                    if (hasSubscriptions() == false)
+                        stopListening();
+                }
+                else
+                {
+                    // If not then add this SessionGroup to the list of claimed
+                    // sessions. Remove the unclaimed channel mapping
+                    auto fullKey = sessionName + std::to_string(sessionID);
+
+                    auto pair = mClaimedGroups.insert({ fullKey, sessionGroup });
+                    auto s = pair.second;
+                    auto location = pair.first;
+                    if (s == false)
+                        throw std::runtime_error(LOCATION);
+
+                    sessionGroup->removeMapping = [&, location]() { mClaimedGroups.erase(location); };
+                }
+            }
+            });
+    }
+
+
+
+    void Acceptor::asyncSetSocket(
+        std::string name,
+        std::unique_ptr<BoostSocketInterface> s)
+    {
+        auto ss = s.release();
+        boost::asio::dispatch(mStrand, [this, name, ss]() {
+            std::unique_ptr<BoostSocketInterface> sock(ss);
+
+            auto names = split(name, '`');
+
+            if (names.size() != 4)
+            {
+                std::cout << "bad channel name: " << name << "\nDropping the connection" << std::endl;
+                LOG_MSG("socket " + name + " has a bad name. Connection dropped");
+                return;
+            }
+
+            auto& sessionName = names[0];
+            auto sessionID = std::stoull(names[1]);
+            auto& remoteName = names[2];
+            auto& localName = names[3];
+
+            details::NamedSocket socket;
+            socket.mLocalName = localName;
+            socket.mRemoteName = remoteName;
+            socket.mSocket = std::move(sock);
+
+            // first check if we have already paired this sessionName || sessionID
+            // up with a local session. If so then we can give this new socket
+            // to that session group and it will figure out what Channel should get the socket.
+            auto fullKey = sessionName + std::to_string(sessionID);
+            auto claimedIter = mClaimedGroups.find(fullKey);
+            if (claimedIter != mClaimedGroups.end())
+            {
+                LOG_MSG("socket " + name + " matched with existing session: " + fullKey);
+
+                // add this socket to the group. It will be matched with a Channel
+                // if there is one waiting for the socket or the socket be stored 
+                // in the group to wait for a matching Channel.
+                auto group = claimedIter->second;
+                group->add(std::move(socket), this);
+
+                // check to is if this group is empty. If so the Session has been destroyed
+                // and all Channels have gotten a socket. We can therefore safely remove
+                // this group.
+                if (group->hasSubscriptions() == false)
+                {
+                    LOG_MSG("SessionGroup " + fullKey + " is empty. Removing it.")
+                        group->removeMapping();
+                    mGroups.erase(group);
+
+                    // check if the Acceptor in general has no more objects
+                    // wanting sockets. If so, then stop listening for sockets
+                    if (hasSubscriptions() == false)
+                        stopListening();
+                }
+                return;
+            }
+
+            // This means we do not have an existing session group to put this
+            // socket in. Lets first put this socket into a socket group which
+            // has the same session ID as the new socket. If no such socket group
+            // exists then this will make one.
+            auto socketGroup = getSocketGroup(sessionName, sessionID);
+
+            GroupList::iterator sessionGroup = mGroups.end();
+
+            // In the event that this is the first socket with this session Name/ID,
+            // see if there is a matching unclaimed session group that has a matching 
+            // name and has a channel with the same name as this socket. If so, set
+            // the sessionGroup pointer to point at it.
+            auto unclaimedLocalIter = mUnclaimedGroups.find(sessionName);
+            if (unclaimedLocalIter != mUnclaimedGroups.end())
+            {
+                auto& groups = unclaimedLocalIter->second;
+                auto matchIter = std::find_if(groups.begin(), groups.end(),
+                    [&](const GroupList::iterator& g) { return g->hasMatchingChannel(socket); });
+
+                if (matchIter != groups.end())
+                    sessionGroup = *matchIter;
+            }
+
+            // add the socket to the SocketGroup.
+            socketGroup->mSockets.emplace_back(std::move(socket));
+
+            // Check if we found a matching session group. If so, we can merge
+            // the socket group with the session group
+            if (sessionGroup != mGroups.end())
+            {
+                LOG_MSG("Socket group " + fullKey + " matched up with a session group on channel " + localName + " " + remoteName);
+
+                // merge the sockets into the group of cahnnels.
+                sessionGroup->merge(*socketGroup, this);
+
+                // mark these sockets as claimed and remove them from the list of 
+                // unclaimed groups. The session group will be added as a claimed group.
+                socketGroup->removeMapping();
+                sessionGroup->removeMapping();
+
+                // remove the actual socket group since it has been merged 
+                // into the session group.
+                mSockets.erase(socketGroup);
+
+                // check if we can erase this session group (session closed and all channels have socket).
+                if (sessionGroup->hasSubscriptions() == false)
+                {
+                    LOG_MSG("Session Group " + fullKey + " is empty via merge. Removing it.")
+                        mGroups.erase(sessionGroup);
+
+                    // check if the accept in general has no more objects
+                    // wanting sockets. If so, stop listening.
+                    if (hasSubscriptions() == false)
+                    {
+                        LOG_MSG("Session Group " + fullKey + " stopping listening... ")
+                            stopListening();
+                    }
+                    else
+                    {
+                        LOG_MSG("Session Group " + fullKey + " NOT stopping listening... ")
+
+                    }
+                }
+                else
+                {
+                    // If not then add this SessionGroup to the list of claimed
+                    // sessions. Remove the unclaimed channel mapping
+                    auto pair = mClaimedGroups.insert({ fullKey, sessionGroup });
+                    auto s = pair.second;
+                    auto location = pair.first;
+                    if (s == false)
+                        throw std::runtime_error(LOCATION);
+
+                    // update how to remove this session group from the list of claimed groups.
+                    // Will be called when its time to remove this session.
+                    sessionGroup->removeMapping = [&, location]() { mClaimedGroups.erase(location); };
+                }
+            }
+            });
+
+    }
+
+
+    //extern void split(const std::string &s, char delim, std::vector<std::string> &elems);
+    //extern std::vector<std::string> split(const std::string &s, char delim);
 
     IOService::IOService(u64 numThreads)
         :
         mIoService(),
-        mWorker(new boost::asio::io_service::work(mIoService)),
-        mStopped(false),
-        mPrint(true)
+        mStrand(mIoService.get_executor()),
+        mWorker(new boost::asio::io_service::work(mIoService))
     {
 
 
@@ -40,12 +727,12 @@ namespace osuCrypto
         {
             // Create a server worker thread and pass the completion port to the thread
             thrd = std::thread([&, i]()
-            {
-                setThreadName("io_Thrd_" + std::to_string(i));
-                mIoService.run();
+                {
+                    setThreadName("io_Thrd_" + std::to_string(i));
+                    mIoService.run();
 
-                //std::cout << "io_Thrd_" + std::to_string(i) << " closed" << std::endl;
-            });
+                    //std::cout << "io_Thrd_" + std::to_string(i) << " closed" << std::endl;
+                });
             ++i;
         }
     }
@@ -58,23 +745,11 @@ namespace osuCrypto
 
     void IOService::stop()
     {
-        //WaitCallback wait();
-        //boost::asio::deadline_timer timer(mIoService, boost::posix_time::seconds(5));
-        //timer.async_wait([&](boost::system::error_code ec) {
 
-        //    if (!ec)
-        //    {
-        //        std::cerr << "waiting for endpoint/channel to close " << std::endl;;
-        //    }
-        //});
-         
-
-        std::lock_guard<std::mutex> lock(mMtx);
 
         // Skip if its already shutdown.
         if (mStopped == false)
         {
-            mWorker.reset(nullptr);
             mStopped = true;
 
             // tell all the acceptor threads to stop accepting new connections.
@@ -86,492 +761,161 @@ namespace osuCrypto
             // delete all of their state.
             mAcceptors.clear();
 
-            // wait for all the endpoints that use this IO service to finish.
-            for (auto future : mEndpointStopFutures)
-            {
-                future.get();
-            }
+
+            mWorker.reset(nullptr);
 
             // we can now join on them.
             for (auto& thrd : mWorkerThrds)
             {
                 thrd.join();
             }
-
             // clean their state.
             mWorkerThrds.clear();
-            // close the completion port since no more IO operations will be queued.
-
         }
-
-        //timer.cancel();
     }
 
-    void IOService::printErrorMessages(bool v)
+    void IOService::printError(std::string msg)
+    {
+        if (mPrint)
+            std::cerr << msg << std::endl;
+    }
+
+    void IOService::showErrorMessages(bool v)
     {
         mPrint = v;
     }
 
-    void IOService::receiveOne(ChannelBase* channel)
+
+    void IOService::aquireAcceptor(std::shared_ptr<SessionBase>& session)
     {
-        ////////////////////////////////////////////////////////////////////////////////
-        //// THis is within the stand. We have sequential access to the recv queue. ////
-        ////////////////////////////////////////////////////////////////////////////////
-
-        IOOperation& op = channel->mRecvQueue.front();
-
-#ifdef CHANNEL_LOGGING
-        channel->mLog.push("starting recv #" + ToString(op.mIdx) + ", size = " + ToString(op.mSize));
-#endif
-        if (op.mType == IOOperation::Type::RecvData)
-        {
-            op.mBuffs[0] = boost::asio::buffer(&op.mSize, sizeof(u32));
-
-            boost::asio::async_read(*channel->mHandle,
-                std::array<boost::asio::mutable_buffer, 1>{ op.mBuffs[0] },
-                [&op, channel, this](const boost::system::error_code& ec, u64 bytesTransfered)
+        //std::atomic<bool> flag(false);
+        std::list<Acceptor>::iterator acceptorIter;
+        std::promise<void> p;
+        //std::future<std::list<Acceptor>::iterator> f = p.get_future();
+        //boost::asio::post
+        boost::asio::dispatch(mStrand, [&]()
             {
-                //////////////////////////////////////////////////////////////////////////
-                //// This is *** NOT *** within the stand. Dont touch the recv queue! ////
-                //////////////////////////////////////////////////////////////////////////
-
-
-                if (bytesTransfered != boost::asio::buffer_size(op.mBuffs[0]) || ec)
-                {
-                    auto reason = ("rt error at " LOCATION "\n  ec=" + ec.message() + ". else bytesTransfered != " + std::to_string(boost::asio::buffer_size(op.mBuffs[0]))) 
-                        + "\nThis could be from the other end closing too early or the connection being dropped.";
-                    
-                    if(mPrint) std::cout << reason << std::endl;
-                    channel->setRecvFatalError(reason);
-                    return;
-                }
-
-                std::string msg;
-
-                // We support two types of receives. One where we provide the expected size of the message and one
-                // where we allow for variable length messages. op->other will be non null in the resize case and allow
-                // us to resize the ChannelBuffer which will hold the data.
-                if (op.mContainer != nullptr)
-                {
-                    // resize it. This could throw is the channel buffer chooses to.
-                    if (op.mSize != op.mContainer->size() && op.mContainer->resize(op.mSize) == false)
+                // see if there already exists an acceptor that this endpoint can use.
+                acceptorIter = std::find_if(
+                    mAcceptors.begin(),
+                    mAcceptors.end(), [&](const Acceptor& acptr)
                     {
-                        msg = std::string() + "The provided buffer does not fit the received message. \n" +
-                            "   Expected: Container::size() * sizeof(Container::value_type) = " +
-                            std::to_string(op.mContainer->size()) + " bytes\n"
-                            "   Actual: " + std::to_string(op.mSize) + " bytes\n\n" +
-                            "If sizeof(Container::value_type) % Actual != 0, this will throw or ResizableChannelBuffRef<Container>::resize(...) returned false.";
-                    }
-
-                    // set the buffer to point into the channel buffer storage location.
-                    op.mBuffs[1] = boost::asio::buffer(op.mContainer->data(), op.mSize);
-                }
-                else
-                {
-                    // OK, this is the other type of recv where an expected size was provided.  op->mWSABufs[1].len
-                    // will contain the expected size and op->mSize contains the size reported in the header.
-                    if (boost::asio::buffer_size(op.mBuffs[1]) != op.mSize)
-                    {
-                        msg = "The provided buffer does not fit the received message. Expected: "
-                            + std::to_string(boost::asio::buffer_size(op.mBuffs[1])) + " bytes, actual: " + std::to_string(op.mSize);
-                    }
-                }
-
-
-                auto recvMain = [&op, channel, this](const boost::system::error_code& ec, u64 bytesTransfered)
-                {
-                    //////////////////////////////////////////////////////////////////////////
-                    //// This is *** NOT *** within the stand. Dont touch the recv queue! ////
-                    //////////////////////////////////////////////////////////////////////////
-
-
-                    if (bytesTransfered != boost::asio::buffer_size(op.mBuffs[1]) || ec)
-                    {
-                        auto reason = ("Network error: " + ec.message() +"\nOther end may have crashed. Received incomplete message. at " LOCATION);
-                        if (mPrint) std::cout << reason << std::endl;
-                        channel->setRecvFatalError(reason);
-                        return;
-                    }
-
-                    channel->mTotalRecvData += boost::asio::buffer_size(op.mBuffs[1]);
-
-                    //// signal that the recv has completed.
-                    //if (op.mException)
-                    //    op.mPromise->set_exception(op.mException);
-                    //else
-
-                    if (op.mPromise)
-                        op.mPromise->set_value(channel->mId);
-
-                    delete op.mPromise;
-                    delete op.mContainer;
-
-                    channel->mRecvStrand.dispatch([channel, this, &op]()
-                    {
-                        ////////////////////////////////////////////////////////////////////////////////
-                        //// This is within the stand. We have sequential access to the recv queue. ////
-                        ////////////////////////////////////////////////////////////////////////////////
-#ifdef CHANNEL_LOGGING
-                        channel->mLog.push("completed recv #" + ToString(op.mIdx) + ", size = " + ToString(op.mSize));
-#endif
-                        channel->mRecvQueue.pop_front();
-
-                        // is there more messages to recv?
-                        bool sendMore = (channel->mRecvQueue.size() != 0);
-
-                        if (sendMore)
-                        {
-                            receiveOne(channel);
-                        }
+                        return acptr.mPort == session->mPort;
                     });
-                };
 
-
-
-                if (msg.size())
+                if (acceptorIter == mAcceptors.end())
                 {
-                    if (mPrint) std::cout << msg << std::endl;
-                    channel->setBadRecvErrorState(msg);
+                    // an acceptor does not exist for this port. Lets create one.
+                    mAcceptors.emplace_back(*this);
+                    acceptorIter = mAcceptors.end(); --acceptorIter;
+                    acceptorIter->mPort = session->mPort;
 
-                    // give the user a chance to give us another location.
-                    auto e_ptr = std::make_exception_ptr(BadReceiveBufferSize(msg, op.mSize, [&, channel, recvMain](u8* dest)
-                    {
-                        channel->clearBadRecvErrorState();
-
-                        op.mBuffs[1] = boost::asio::buffer(dest, op.mSize);
-
-                        boost::system::error_code ec;
-
-                        auto ss  = boost::asio::read(*channel->mHandle,
-                            std::array<boost::asio::mutable_buffer, 1>{ op.mBuffs[1] }, ec);
-
-                        recvMain(ec, ss);
-                    }));
-
-                    op.mPromise->set_exception(e_ptr);
-                    delete op.mPromise;
-                    op.mPromise = nullptr;
-                }
-                else
-                {
-                    boost::asio::async_read(*channel->mHandle,
-                        std::array<boost::asio::mutable_buffer, 1>{ op.mBuffs[1] }, recvMain);
+                    //std::cout << "creating acceptor on " + std::to_string(session->mPort) << std::endl;
                 }
 
-
+                //flag = true;
+                p.set_value();
             });
-        }
-        else if (op.mType == IOOperation::Type::CloseRecv)
-        {
-#ifdef CHANNEL_LOGGING
-            channel->mLog.push("recvClosed #" + ToString(op.mIdx));
-#endif
-            auto prom = op.mPromise;
-            channel->mRecvQueue.pop_front();
-            prom->set_value(0);
 
+        auto f = p.get_future();
+        // contribute this thread to running the dispatch. Sometimes needed.
+        while (f.wait_for(std::chrono::microseconds(1)) != std::future_status::ready)
+            mIoService.poll_one();
+
+        f.get();
+        //auto acceptorIter = f.get();
+        acceptorIter->subscribe(session);
+
+    }
+
+
+
+    void details::SessionGroup::add(NamedSocket s, Acceptor* a)
+    {
+        auto iter = std::find_if(mChannels.begin(), mChannels.end(),
+            [&](const std::shared_ptr<ChannelBase>& chl)
+            {
+                return chl->mLocalName == s.mLocalName &&
+                    chl->mRemoteName == s.mRemoteName;
+            });
+
+        if (iter != mChannels.end())
+        {
+#ifdef ENABLE_NET_LOG
+            a->mLog.push("handing Channel the socket -> " + s.mLocalName + "`"+s.mRemoteName);
+#endif
+            (*iter)->startSocket(std::move(s.mSocket));
+            mChannels.erase(iter);
         }
         else
         {
-            std::cout << "error, unknown operation " << int(u8(op.mType) ) << std::endl;
-            std::terminate();
+#ifdef ENABLE_NET_LOG
+            a->mLog.push("storing in group the socket -> " + s.mLocalName + "`" + s.mRemoteName);
+#endif
+            mSockets.emplace_back(std::move(s));
         }
     }
 
-    void IOService::sendOne(ChannelBase* socket)
+    void details::SessionGroup::add(const std::shared_ptr<ChannelBase>& chl, Acceptor* a)
     {
-        ////////////////////////////////////////////////////////////////////////////////
-        //// This is within the stand. We have sequential access to the send queue. ////
-        ////////////////////////////////////////////////////////////////////////////////
-
-        IOOperation& op = socket->mSendQueue.front();
-
-#ifdef CHANNEL_LOGGING
-        socket->mLog.push("starting send #" + ToString(op.mIdx) + ", size = " + ToString(op.mSize));
-#endif
-
-        if (op.mType == IOOperation::Type::SendData)
-        {
-            op.mBuffs[0] = boost::asio::buffer(&op.mSize, 4);
-
-            boost::asio::async_write(*socket->mHandle, op.mBuffs, [&op, socket, this](boost::system::error_code ec, u64 bytesTransferred)
+        auto iter = std::find_if(mSockets.begin(), mSockets.end(),
+            [&](const NamedSocket& s)
             {
-                //////////////////////////////////////////////////////////////////////////
-                //// This is *** NOT *** within the stand. Dont touch the send queue! ////
-                //////////////////////////////////////////////////////////////////////////
-
-
-                if (ec)
-                {
-                    auto reason  = std::string("network send error: ") + ec.message() + "\n at  " + LOCATION;
-                    if (mPrint) std::cout << reason << std::endl;
-
-                    socket->setSendFatalError(reason);
-                    return;
-                }
-
-                // lets delete the other pointer as its either nullptr or a buffer that was allocated
-                //delete (ChannelBuffer*)op.mOther;
-
-                // make sure all the data sent. If this fails, look up whether WSASend guarantees that all the data in the buffers will be send.
-                if (bytesTransferred !=
-                    boost::asio::buffer_size(op.mBuffs[0]) + boost::asio::buffer_size(op.mBuffs[1]))
-                {
-                    auto reason  = std::string("failed to send all data. Expected to send ")
-                        + ToString(boost::asio::buffer_size(op.mBuffs[0]) + boost::asio::buffer_size(op.mBuffs[1]))
-                        + " bytes but transfered "  + ToString(bytesTransferred) + "\n"
-                        + "  at  " + LOCATION;
-
-                    if (mPrint) std::cout << reason << std::endl;
-
-                    socket->setSendFatalError(reason);
-                    return;
-                }
-
-                socket->mOutstandingSendData -= op.mSize;
-
-                // if this was a synchronous send, fulfill the promise that the message was sent.
-                if (op.mPromise != nullptr)
-                    op.mPromise->set_value(socket->mId);
-
-                // if they provided a callback, execute it.
-                if (op.mCallback)
-                    op.mCallback();
-
-                delete op.mContainer;
-
-                socket->mSendStrand.dispatch([&op,socket, this]()
-                {
-                    ////////////////////////////////////////////////////////////////////////////////
-                    //// This is within the stand. We have sequential access to the send queue. ////
-                    ////////////////////////////////////////////////////////////////////////////////
-#ifdef CHANNEL_LOGGING
-                    socket->mLog.push("completed send #" + ToString(op.mIdx) + ", size = " + ToString(op.mSize));
-#endif
-
-                    socket->mSendQueue.pop_front();
-
-                    // Do we have more messages to be sent?
-                    auto sendMore = socket->mSendQueue.size();
-
-
-                    if (sendMore)
-                    {
-                        sendOne(socket);
-                    }
-                });
+                return chl->mLocalName == s.mLocalName &&
+                    chl->mRemoteName == s.mRemoteName;
             });
 
-        }
-        else if (op.mType == IOOperation::Type::CloseSend)
+        if (iter != mSockets.end())
         {
-            // This is a special case which may happen if the channel calls stop() 
-            // with async sends still queued up, we will get here after they get completes. fulfill the 
-            // promise that all async send operations have been completed.
-#ifdef CHANNEL_LOGGING
-            socket->mLog.push("sendClosed #" + ToString(op.mIdx));
-#endif
-            auto prom = op.mPromise;
-            socket->mSendQueue.pop_front();
-            prom->set_value(0);
+            chl->startSocket(std::move(iter->mSocket));
+            mSockets.erase(iter);
         }
         else
         {
-            std::cout << "error, unknown operation " << std::endl;
-            std::terminate();
+            mChannels.emplace_back(chl);
         }
     }
 
-    void IOService::dispatch(ChannelBase* socket, IOOperation& op)
+    bool details::SessionGroup::hasMatchingChannel(const NamedSocket & s) const
     {
-#ifdef CHANNEL_LOGGING
-        op.mIdx = socket->mOpIdx++;
-#endif
-
-        switch (op.mType)
-        {
-        case IOOperation::Type::RecvData:
-        case IOOperation::Type::CloseRecv:
-        {
-
-            // a strand is like a lock. Stuff posted (or dispatched) to a strand will be executed sequentially
-            socket->mRecvStrand.post([this, socket, op]()
+        return mChannels.end() != std::find_if(mChannels.begin(), mChannels.end(),
+            [&](const std::shared_ptr<ChannelBase>& chl)
             {
-                // the queue must be guarded from concurrent access, so add the op within the strand
-                // queue up the operation.
-                socket->mRecvQueue.push_back(op);
-
-                // check to see if we should kick off a new set of recv operations. If the size > 1, then there
-                // is already a set of recv operations that will kick off the newly queued recv when its turn comes around.
-                bool startRecving = (socket->mRecvQueue.size() == 1) && (socket->mRecvSocketSet || op.mType == IOOperation::Type::CloseRecv);
-
-#ifdef CHANNEL_LOGGING
-                if(op.mType == IOOperation::Type::RecvData)
-                    socket->mLog.push("queuing recv #"+ToString(op.mIdx )+ " " + ToString(socket->mRecvQueue.back().mIdx)+", size = " + ToString(op.mSize) + ", start = " + ToString(startRecving));
-                else
-                    socket->mLog.push("queuing recvClosing #" + ToString(op.mIdx) + ", start = " + ToString(startRecving));
-#endif
-
-                if (startRecving)
-                {
-                    // ok, so there isn't any recv operations currently underway. Lets kick off the first one. Subsequent recvs
-                    // will be kicked off at the completion of this operation.
-                    receiveOne(socket);
-                }
+                return chl->mLocalName == s.mLocalName &&
+                    chl->mRemoteName == s.mRemoteName;
             });
-        }
-        break;
-        case IOOperation::Type::SendData:
-        case IOOperation::Type::CloseSend:
-        {
-            //std::cout << " dis " << (op.mType == IOOperation::Type::SendData ? "SendData" : "CloseSend") << std::endl;
-
-            // a strand is like a lock. Stuff posted (or dispatched) to a strand will be executed sequentially
-            socket->mSendStrand.post([this, socket, op]()
-            {
-                // the queue must be guarded from concurrent access, so add the op within the strand
-
-                // add the operation to the queue.
-                socket->mSendQueue.push_back(op);
-
-                socket->mTotalSentData += op.mSize;
-                socket->mOutstandingSendData += op.mSize;
-                socket->mMaxOutstandingSendData = std::max((u64)socket->mOutstandingSendData, (u64)socket->mMaxOutstandingSendData);
-
-                // check to see if we should kick off a new set of send operations. If the size > 1, then there
-                // is already a set of send operations that will kick off the newly queued send when its turn comes around.
-                auto startSending = (socket->mSendQueue.size() == 1) && (socket->mSendSocketSet || op.mType == IOOperation::Type::CloseSend);
-
-#ifdef CHANNEL_LOGGING
-                if (op.mType == IOOperation::Type::SendData)
-                    socket->mLog.push("queuing send #" + ToString(op.mIdx) + " " + ToString(socket->mSendQueue.back().mIdx) +
-                        ", size = " + ToString(op.mSize) + ", start = " + ToString(startSending));
-                else
-                    socket->mLog.push("queuing sendClosing #" + ToString(op.mIdx) + ", start = " + ToString(startSending));
-#endif
-                if (startSending)
-                {
-
-                    // ok, so there isn't any send operations currently underway. Lets kick off the first one. Subsequent sends
-                    // will be kicked off at the completion of this operation.
-                    sendOne(socket);
-
-                }
-            });
-        }
-        break;
-        default:
-
-            std::cout << ("unknown IOOperation::Type") << std::endl;
-            std::terminate();
-            break;
-        }
     }
 
-
-    Acceptor* IOService::getAcceptor(Endpoint& endpoint)
+    bool details::SocketGroup::hasMatchingSocket(const std::shared_ptr<ChannelBase>& chl) const
     {
-
-        if (endpoint.isHost())
-        {
-            std::lock_guard<std::mutex> lock(mMtx);
-
-            // see if there already exists an acceptor that this endpoint can use.
-            auto acceptorIter = std::find_if(
-                mAcceptors.begin(),
-                mAcceptors.end(), [&](const Acceptor& acptr)
+        return mSockets.end() != std::find_if(mSockets.begin(), mSockets.end(),
+            [&](const NamedSocket& s)
             {
-                return acptr.mPort == endpoint.port();
+                return chl->mLocalName == s.mLocalName &&
+                    chl->mRemoteName == s.mRemoteName;
             });
-
-            if (acceptorIter == mAcceptors.end())
-            {
-                // an acceptor does not exist for this port. Lets create one.
-                mAcceptors.emplace_back(*this);
-                auto& acceptor = mAcceptors.back();
-
-
-                auto port = endpoint.port();
-                auto ip = endpoint.IP();
-
-                acceptor.bind(port, ip);
-
-                acceptor.start();
-
-                return &acceptor;
-            }
-            else
-            {
-                // there is an acceptor already accepting sockets on the desired port. So return it.
-                return &(*acceptorIter);
-            }
-        }
-        else
-        {
-            // client end points dont need acceptors since they initiate the connection. 
-            throw std::runtime_error("rt error at " LOCATION);
-        }
     }
 
-    void IOService::startSocket(ChannelBase * socket)
+    void details::SessionGroup::merge(details::SocketGroup& merge, Acceptor* a)
     {
+        if (mSockets.size())
+            throw std::runtime_error(LOCATION);
 
-        // a strand is like a lock. Stuff posted (or dispatched) to a strand will be executed sequentially
-        socket->mRecvStrand.post([this, socket]()
+        for (auto& s : merge.mSockets) add(std::move(s), a);
+        merge.mSockets.clear();
+
+        auto session = mBase.lock();
+        if (session)
         {
+            if (merge.mSessionID == 0 ||
+                session->mName != merge.mName ||
+                session->mSessionID)
+                throw std::runtime_error(LOCATION);
 
-
-#ifdef CHANNEL_LOGGING
-            socket->mLog.push("initRecv , start = " + ToString(socket->mRecvQueue.size()));
-#endif
-
-            // check to see if we should kick off a new set of recv operations. Since we are just now
-            // starting the channel, its possible that the async connect call returned and the caller scheduled a receive 
-            // operation. But since the channel handshake just finished, those operations didn't start. So if 
-            // the queue has anything in it, we should actually start the operation now...
-
-            if (socket->mRecvQueue.size())
-            {
-                // ok, so there isn't any recv operations currently underway. Lets kick off the first one. Subsequent recvs
-                // will be kicked off at the completion of this operation.
-                receiveOne(socket);
-            }
-
-
-            socket->mRecvSocketSet = true;
-
-            auto ii = ++socket->mOpenCount;
-            if (ii == 2) socket->mOpenProm.set_value();
-        });
-
-
-        // a strand is like a lock. Stuff posted (or dispatched) to a strand will be executed sequentially
-        socket->mSendStrand.post([this, socket]()
-        {
-            // the queue must be guarded from concurrent access, so add the op within the strand
-
-            auto start = socket->mSendQueue.size();
-#ifdef CHANNEL_LOGGING
-            socket->mLog.push("initSend , start = " + ToString(start) );
-#endif
-            // check to see if we should kick off a new set of send operations. Since we are just now
-            // starting the channel, its possible that the async connect call returned and the caller scheduled a send 
-            // operation. But since the channel handshake just finished, those operations didn't start. So if 
-            // the queue has anything in it, we should actually start the operation now...
-
-            if (start)
-            {
-                // ok, so there isn't any send operations currently underway. Lets kick off the first one. Subsequent sends
-                // will be kicked off at the completion of this operation.
-                sendOne(socket);
-            }
-
-            socket->mSendSocketSet = true;
-
-            auto ii = ++socket->mOpenCount;
-            if (ii == 2) socket->mOpenProm.set_value();
-
-        });
+            session->mName = std::move(merge.mName);
+            session->mSessionID = merge.mSessionID;
+        }
     }
+
 
 }

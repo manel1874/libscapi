@@ -82,7 +82,7 @@ public:
 		return res;
 	}
 
-	string toString() override { return (string)x; };
+	string toString() override { return x.str(); };
 	void initFromString(const string & raw) override { x = biginteger(raw); }
 };
 
@@ -234,7 +234,7 @@ public:
 		return cipher == temp->cipher;
 	}
 
-	string toString() override { return string(cipher);	};
+	string toString() override { return cipher.str();	};
 
 	void initFromString(const string & row) override { cipher = biginteger(row); }
 };

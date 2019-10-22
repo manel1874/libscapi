@@ -5,185 +5,154 @@
 #include "cryptoTools/Network/IOService.h"
 #include <cryptoTools/Common/Matrix.h>
 #include "cryptoTools/Common/CuckooIndex.h"
+#include "cryptoTools/Common/CLP.h"
 using namespace osuCrypto;
 #include <sstream>
+#include <fstream>
 
+//#include <cryptoTools/Common/Backtrace.h>
 
+#ifdef ENABLE_CIRCUITS
+#include <cryptoTools/Circuit/BetaLibrary.h>
+//#include <cryptoTools/Crypto/Blake2/blake2.h>
 
-template<typename T>
-std::string diff(T prior, T latter, i64 digits = 3)
+void print_aes_bristol()
 {
-    std::stringstream out;
-    namespace sc = std::chrono;
-    out << sc::duration_cast<sc::milliseconds>(latter - prior).count();
-/*
-    auto const usecs = diff % 1000;
-    diff /= 1000;
-    auto const msecs = diff % 1000;
-    diff /= 1000;
-    auto const secs = diff % 60;
-    diff /= 60;
-    auto const mins = diff % 60;
-    diff /= 60;
-    auto const hours = diff % 24;
-    diff /= 24;
-    auto const days = diff;
 
+    //{
+    //    auto name = "./AES-expanded.txt";
 
-    bool printed_earlier = false;
-    if (days >= 1) {
-        printed_earlier = true;
-        out << days << "d ";
-        persion -= std::log10(days);
-    }
-    
-    if (persion > 0 && hours >= 1) {
-        printed_earlier = true;
-        out << hours << "h ";
+    //    std::ifstream file(name);
 
-        persion -= std::log10(hours);
-    }
-    
-    if (persion > 0 && mins >= 1) {
-        printed_earlier = true;
-        out << mins << "m ";
-        persion -= std::log10(mins);
-    }
-    
-    
-    if (persion > 0 && secs >= 1) {
-        printed_earlier = true;
-        out << secs << "s ";
-        persion -= std::log10(secs);
-    }
-    
-    if (persion > 0 && msecs >= 1) {
-        printed_earlier = true;
-        out << msecs << "ms ";
-        persion -= std::log10(msecs);
-    }
-
-    if (persion > 0 ) {
-        printed_earlier = true;
-        out << usecs << "us ";
-        persion -= std::log10(usecs);
-    }
-*/
-    return out.str();
-}
-
-
-
-void cuckoo(u64 nn, u64 tt)
-{
-    CuckooIndex ci;
-    ci.init(nn, 40);
-    std::vector<u64> idx(nn);
-    std::vector<block> hashes(nn);
-    PRNG prng(ZeroBlock);
-    
-
-    Timer t;
-    auto s = t.setTimePoint("s");
-    prng.mAes.ecbEncCounterMode(0, nn, hashes.data());
-    for (u64 i = 0; i < nn; ++i)
+    //    BetaCircuit cir2;
+    //    cir2.readBristol(file);
+    //    std::cout << "and " << cir2.mNonlinearGateCount << std::endl;
+    //}
+    for (auto rounds : { 10, /*12, */14 })//
     {
-        idx[i] = i;
-    }
+        BetaLibrary lib;
+        BetaCircuit cir;
 
-    std::vector<std::thread> thrds(tt);
-    for (u64 t = 0; t < tt; ++t)
-    {
-        thrds[t] = std::thread([&,t]()
+
+        BetaBundle input1(256);
+        BetaBundle k(128 * rounds + 128);
+        BetaBundle c(128);
+
+
+        cir.addInputBundle(k);
+        cir.addInputBundle(input1);
+        cir.addOutputBundle(c);
+
+
+        // m is the fist 128 bits and cMask is the second of input1.
+        BetaBundle m, cMask;
+        m.mWires.insert(
+            m.mWires.end(),
+            input1.mWires.begin(),
+            input1.mWires.begin() + 128);
+        cMask.mWires.insert(
+            cMask.mWires.end(),
+            input1.mWires.begin() + 128,
+            input1.mWires.begin() + 256);
+
+
+        // c = AES_k(m)
+        lib.aes_exapnded_build(cir, m, k, c);
+
+        // c = c ^ cMask
+        lib.int_int_bitwiseXor_build(cir, c, cMask, c);
+
+        auto name = "./aes_r_" + std::to_string(rounds) + ".txt";
+
         {
-            auto s = nn * t / tt;
-            auto e = nn * (t+1) / tt;
-            ArrayView<u64> range(idx.data() + s, idx.data() + e);
-            ArrayView<block> rangeh(hashes.data() + s, hashes.data() + e);
+            std::ofstream ofile(name);
+            cir.writeBristol(ofile);
+        }
 
-            ci.insert(range, rangeh);
-        });
+
+        std::ifstream file(name);
+
+        BetaCircuit cir2;
+        cir2.readBristol(file);
+
+        std::vector<BitVector> in(2), out1(1), out2(1);
+        in[0].resize(k.size());
+        in[1].resize(input1.size());
+        out1[0].resize(128);
+        out2[0].resize(128);
+
+        PRNG prng(ZeroBlock);
+        AES aes(prng.get<block>());
+
+        for (u64 i = 0; i < 3; ++i)
+        {
+
+            in[1].randomize(prng);
+            if (rounds == 10)
+            {
+                memcpy(in[0].data(), aes.mRoundKey, 11 * 16);
+            }
+            else
+            {
+                in[0].randomize(prng);
+            }
+
+
+            cir.evaluate(in, out1);
+            cir2.evaluate(in, out2);
+
+            if (out1[0] != out2[0])
+            {
+                std::cout << "failed \n";
+                std::cout << out1[0] << std::endl;
+                std::cout << out2[0] << std::endl;
+            }
+            else
+            {
+                if (rounds == 10)
+                {
+                    block message = in[1].getSpan<block>()[0];
+                    block mask = in[1].getSpan<block>()[1];
+                    block ctxt = aes.ecbEncBlock(message) ^ mask;
+
+                    if (neq(ctxt, out1[0].getSpan<block>()[0]))
+                    {
+                        std::cout << "failed bad val" << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << "passed! " << cir.mNonlinearGateCount << std::endl;
+                    }
+                }
+                else
+                {
+                    std::cout << "passed " << std::endl;
+                }
+            }
+
+            std::cout
+                << "k  " << in[0] << "\n"
+                << "m  " << in[1] << "\n"
+                << "c  " << out1[0] << std::endl;
+        }
+
     }
-    for (u64 t = 0; t < tt; ++t)
-    {
-        thrds[t].join();
-    }
-
-    auto e = t.setTimePoint("s");
-
-
-    std::cout << "n" << nn << "  t" << tt <<"  "<< diff(s, e) << std::endl;
 }
-
+#endif
 
 int main(int argc, char** argv)
 {
-    //for (auto p : { 16, 20, 24 })
-    //{
-    //    for (auto t : { 1,4,16,64 })
-    //    {
-    //        auto n = 1 << p;
-    //        cuckoo(n, t);
-    //    }
-    //}
+    CLP cmd(argc, argv);
+    cmd.set("u");
 
-
-
-/*
-    IOService ios;
-    Endpoint ep0(ios, "localhost", EpMode::Server, "s");
-    Endpoint ep1(ios, "localhost", EpMode::Client, "s");
-
-    Channel c0 = ep0.addChannel("c");
-    Channel c1 = ep1.addChannel("c");
-
-    std::vector<std::pair<double, double>> comms
+#ifdef ENABLE_CIRCUITS
+    if (cmd.isSet("aes"))
     {
-        {6804 ,9216  },
-        {7935 ,4608  },
-        {3402 ,9216  },
-        {1890 ,18432 },
-        {3016 ,18432 },
-        {750  ,8704  },
-        {1250 ,4352  },
-        {464  ,9216  },
-        {928  ,4608  },
-        {1856 ,2304  },
-        {3712 ,1152  },
-        {232  ,2304  },
-        {464  ,1152  },
-        {928  ,576   }
-
-    };
-
-
-
-    std::vector<u8> data(18432 * 1024);
-
-
-
-
-
-
-
-    c0.send(data.data(), 1);
-    c1.recv(data.data(), 1);
-
-
-    for (auto com : comms)
-    {
-        Timer t;
-        auto s = t.setTimePoint("s");
-        c0.asyncSend(data.data(), com.first * 1024);
-        c1.recv(data.data(), com.first * 1024);
-        c0.asyncSend(data.data(), com.second * 1024);
-        c1.recv(data.data(), com.second * 1024);
-        auto e = t.setTimePoint("e");
-
-        std::cout << "comm " << com.first << " " << com.second << "  " << diff(s, e) << std::endl;
+        print_aes_bristol();
+        return 0;
     }
-*/
-       
-    tests_cryptoTools::tests_all();
+#endif
 
+
+    tests_cryptoTools::Tests.runIf(cmd);
 }

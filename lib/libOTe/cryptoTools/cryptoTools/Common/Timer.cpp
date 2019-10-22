@@ -3,58 +3,71 @@
 #include <cryptoTools/Common/Log.h>
 #include <ostream>
 #include <string>
+#include <iomanip>
+#include <cmath>
+
 namespace osuCrypto
 {
-    //const Timer::timeUnit  Timer::mStart(Timer::timeUnit::clock::now());
-
     const Timer::timeUnit& Timer::setTimePoint(const std::string& msg)
     {
-        //if (mLocking) mMtx.lock();
         mTimes.push_back(std::make_pair(timeUnit::clock::now(), msg));
-        auto& ret = mTimes.back().first;
-        //if (mLocking) mMtx.unlock();
-        //std::cout << msg << "     " << std::chrono::duration_cast<std::chrono::milliseconds>(mTimes.back().first - mStart).count() << std::endl;
-
-        return ret;
-        //return mStart;
+        return  mTimes.back().first;
     }
 
     void Timer::reset()
     {
-        mStart = Timer::timeUnit::clock::now();
+        setTimePoint("__Begin__");
         mTimes.clear();
     }
 
     std::ostream& operator<<(std::ostream& out, const Timer& timer)
     {
-        if (timer.mTimes.size())
+        if (timer.mTimes.size() > 1)
         {
-            auto iter = timer.mTimes.begin();
-            out << iter->second;
+            u64 maxStars = 10;
+            u64 p = 9;
+            u64 width = 0;
+            auto maxLog = 1.0;
 
-            u64 tabs = std::min<u64>((u64)4, (u64)4 - (iter->second.size() / 8));
-
-            for (u64 i = 0; i < tabs; ++i)
-                out << "\t";
-
-            out << "  " << std::chrono::duration_cast<std::chrono::milliseconds>(iter->first - timer.mStart).count() << std::endl;
-
-            auto prev = iter;
-            while (++iter != timer.mTimes.end())
             {
-                out << iter->second;
+                auto prev = timer.mTimes.begin();
+                auto iter = timer.mTimes.begin(); ++iter;
 
-                tabs = std::min<u64>((u64)4,  (u64)4 - (iter->second.size() / 8));
+                while (iter != timer.mTimes.end())
+                {
+                    width = std::max<u64>(width, iter->second.size());
+                    auto diff = std::chrono::duration_cast<std::chrono::microseconds>(iter->first - prev->first).count() / 1000.0;
+                    maxLog = std::max(maxLog, std::log2(diff));
+                    ++iter;
+                    ++prev;
+                }
+            }
+            width += 3;
 
-                for (u64 i = 0; i < tabs ; ++i)
-                    out << "\t";
 
-                out << "  " << std::chrono::duration_cast<std::chrono::milliseconds>(iter->first - timer.mStart).count() <<
-                    "  "<< std::chrono::duration_cast<std::chrono::microseconds>(iter->first - prev->first).count()  << std::endl;
+            out << std::left << std::setw(width) << "Label  " << "  " << std::setw(p) << "Time (ms)" << "  " << std::setw(p) << "diff (ms)\n__________________________________"  << std::endl;
+
+            auto prev = timer.mTimes.begin();
+            auto iter = timer.mTimes.begin(); ++iter;
+
+            while (iter != timer.mTimes.end())
+            {
+                auto time = std::chrono::duration_cast<std::chrono::microseconds>(iter->first - timer.mTimes.front().first).count() / 1000.0;
+                auto diff = std::chrono::duration_cast<std::chrono::microseconds>(iter->first - prev->first).count() / 1000.0;
+                u64 numStars = static_cast<u64>(std::round(std::max(0.1, std::log2(diff)) * maxStars / maxLog));
+
+                out << std::setw(width) << std::left << iter->second
+                    << "  " << std::right << std::fixed << std::setprecision(1) << std::setw(p) << time
+                    << "  " << std::right << std::fixed << std::setprecision(3) << std::setw(p) << diff
+                    << "  " << std::string(numStars, '*') << std::endl;;
 
                 ++prev;
+                ++iter;
             }
         }
         return out;
     }
+
+	Timer gTimer(true);
+
 }

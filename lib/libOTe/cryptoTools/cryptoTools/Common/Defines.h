@@ -2,56 +2,44 @@
 // This file and the associated implementation has been placed in the public domain, waiving all copyright. No restrictions are placed on its use.
 
 #include <cinttypes>
-#include <iomanip>
-#include <vector>
+#include <iostream>
+#include <memory>
+
 #include <emmintrin.h>
 #include <smmintrin.h>
-#include <sstream>
-#include <iostream>
-#include <boost/lexical_cast.hpp>
-#include <memory>
-#include <cryptoTools/Common/Timer.h>
 
-#ifdef GetMessage
-#undef GetMessage
-#endif
+#include "config.h"
 
-#ifndef _MSC_VER
-#pragma GCC diagnostic ignored "-Wignored-attributes"
-#endif
 
-#ifdef _MSC_VER
-#define __STR2__(x) #x
-#define __STR1__(x) __STR2__(x)
-#define TODO(x) __pragma(message (__FILE__ ":"__STR1__(__LINE__) " Warning:TODO - " #x))
-#define ALIGNED(__Declaration, __alignment) __declspec(align(__alignment)) __Declaration
+#ifdef ENABLE_FULL_GSL
+#include <cryptoTools/gsl/span>
 #else
-#define TODO(x)
-#define ALIGNED(__Declaration, __alignment) __Declaration __attribute__((aligned (16)))
+#include <cryptoTools/gsl/gls-lite.hpp>
 #endif
 
 #define STRINGIZE_DETAIL(x) #x
 #define STRINGIZE(x) STRINGIZE_DETAIL(x)
 #define LOCATION __FILE__ ":" STRINGIZE(__LINE__)
-#include <cryptoTools/gsl/span>
-#include <cryptoTools/gsl/multi_span>
+#define RTE_LOC std::runtime_error(LOCATION)
+
+#ifdef _MSC_VER
+	#pragma warning( disable : 4018) // signed unsigned comparison warning
+	#define TODO(x) __pragma(message (__FILE__ ":" STRINGIZE(__LINE__) " Warning:TODO - " #x))
+#else
+	#define TODO(x)
+#endif
+
+// add instrinsics names that intel knows but clang doesn't…
+#ifdef __clang__
+#define _mm_cvtsi128_si64x _mm_cvtsi128_si64
+#endif
+
 
 namespace osuCrypto {
     template<typename T> using ptr = T*;
     template<typename T> using uPtr = std::unique_ptr<T>;
     template<typename T> using sPtr = std::shared_ptr<T>;
     template<typename T> using span = gsl::span<T>;
-
-    //template<typename T, std::ptrdiff_t FirstDimension, std::ptrdiff_t... RestDimensions>
-    //using multi_span = gsl::multi_span<T, FirstDimension, RestDimensions...>;
-
-    const std::ptrdiff_t dyn = gsl::dynamic_range;
-
-    //template <typename T>
-    //using MatrixSpan = multi_span<T, dyn, dyn>;
-
-    //template <typename T>
-    //using MatrixSpan = multi_span<T, dyn, dyn>;
 
     typedef uint64_t u64;
     typedef int64_t i64;
@@ -62,122 +50,34 @@ namespace osuCrypto {
     typedef uint8_t u8;
     typedef int8_t i8;
 
-    enum Role
-    {
-        First = 0,
-        Second = 1
-    };
 
-    extern Timer gTimer;
-
-    template<typename T>
-    static std::string ToString(const T& t)
-    {
-        return boost::lexical_cast<std::string>(t);
-    }
+ //   template<typename T>
+	//static std::string ToString(const T& t) { return boost::lexical_cast<std::string>(t); }
 
     typedef  __m128i block;
-
     inline block toBlock(u8*data) { return _mm_set_epi64x(((u64*)data)[1], ((u64*)data)[0]);}
-
-    inline block toBlock(u64 x)        { return _mm_set_epi64x(0,x); }
-    inline block toBlock(u64 x, u64 y) { return _mm_set_epi64x(x,y); }
-
-    template <size_t N>
-    using  MultiBlock = std::array<block, N>;
-
-#ifdef _MSC_VER
-    inline block operator^(const block& lhs, const block& rhs)
-    {
-        return _mm_xor_si128(lhs, rhs);
-    }
-    inline block operator&(const block& lhs, const block& rhs)
-    {
-        return _mm_and_si128(lhs, rhs);
-    }
-
-    inline block operator<<(const block& lhs, const u8& rhs)
-    {
-        return _mm_slli_epi64(lhs, rhs);
-    }
-    inline block operator>>(const block& lhs, const u8& rhs)
-    {
-        return _mm_srli_epi64(lhs, rhs);
-    }
-    inline block operator+(const block& lhs, const block& rhs)
-    {
-        return _mm_add_epi64(lhs, rhs);
-    }
-
-
-#endif
-
-    template <size_t N>
-    inline MultiBlock<N> operator^(const MultiBlock<N>& lhs, const MultiBlock<N>& rhs)
-    {
-        MultiBlock<N> rs;
-
-        for (u64 i = 0; i < N; ++i)
-        {
-            rs[i] = lhs[i] ^ rhs[i];
-        }
-        return rs;
-    }
-    template <size_t N>
-    inline MultiBlock<N> operator&(const MultiBlock<N>& lhs, const MultiBlock<N>& rhs)
-    {
-        MultiBlock<N> rs;
-
-        for (u64 i = 0; i < N; ++i)
-        {
-            rs[i] = lhs[i] & rhs[i];
-        }
-        return rs;
-    }
+    inline block toBlock(u64 low_u64)        { return _mm_set_epi64x(0, low_u64); }
+    inline block toBlock(u64 high_u64, u64 low_u64) { return _mm_set_epi64x(high_u64, low_u64); }
 
     extern const block ZeroBlock;
     extern const block OneBlock;
     extern const block AllOneBlock;
     extern const block CCBlock;
+    extern const std::array<block, 2> zeroAndAllOne;
 
-    inline u64 roundUpTo(u64 val, u64 step)
-    {
-        return ((val + step - 1) / step) * step;
-    }
-
-    inline u8* ByteArray(const block& b)
-    {
-        return ((u8 *)(&b));
-    }
-
-    template <size_t N>
-    inline u8* ByteArray(const MultiBlock<N>& b)
-    {
-        return ((u8 *)(&b));
-    }
-
-    std::ostream& operator<<(std::ostream& out, const block& block);
-
-    template <size_t N>
-    std::ostream& operator<<(std::ostream& out, const MultiBlock<N>& block);
-
-    class Commit;
-    class BitVector;
-
-    std::ostream& operator<<(std::ostream& out, const Commit& comm);
-    //std::ostream& operator<<(std::ostream& out, const BitVector& vec);
-    //typedef block block;
-
-    block PRF(const block& b, u64 i);
-
-    void split(const std::string &s, char delim, std::vector<std::string> &elems);
-    std::vector<std::string> split(const std::string &s, char delim);
-
+    inline u64 roundUpTo(u64 val, u64 step) { return ((val + step - 1) / step) * step; }
 
     u64 log2ceil(u64);
     u64 log2floor(u64);
 
     block sysRandomSeed();
+}
+
+
+std::ostream& operator<<(std::ostream& out, const osuCrypto::block& block);
+namespace osuCrypto
+{
+	using ::operator<<;
 }
 
 inline bool eq(const osuCrypto::block& lhs, const osuCrypto::block& rhs)
@@ -192,57 +92,47 @@ inline bool neq(const osuCrypto::block& lhs, const osuCrypto::block& rhs)
     return _mm_test_all_zeros(neq, neq) == 0;
 }
 
-template<size_t N>
-inline bool neq(const osuCrypto::MultiBlock<N>& lhs, const osuCrypto::MultiBlock<N>& rhs)
-{
-    osuCrypto::MultiBlock<N> neq = lhs^ rhs;
-
-    using namespace osuCrypto;
-
-    int ret = 0;
-    for (u64 i = 0; i < N; ++i)
-    {
-        ret |= _mm_test_all_zeros(neq[i], neq[i]);
-    }
-    return ret;
-}
-
-
 #ifdef _MSC_VER
-inline bool operator==(const osuCrypto::block& lhs, const osuCrypto::block& rhs)
-{
-    return eq(lhs, rhs);
-}
-
-inline bool operator!=(const osuCrypto::block& lhs, const osuCrypto::block& rhs)
-{
-    return neq(lhs, rhs);
-}
 inline bool operator<(const osuCrypto::block& lhs, const osuCrypto::block& rhs)
 {
     return lhs.m128i_u64[1] < rhs.m128i_u64[1] || (eq(lhs, rhs) && lhs.m128i_u64[0] < rhs.m128i_u64[0]);
 }
 
+inline osuCrypto::block operator^(const osuCrypto::block& lhs, const osuCrypto::block& rhs)
+{
+	return _mm_xor_si128(lhs, rhs);
+}
+inline osuCrypto::block operator&(const osuCrypto::block& lhs, const osuCrypto::block& rhs)
+{
+	return _mm_and_si128(lhs, rhs);
+}
+
+inline osuCrypto::block operator|(const osuCrypto::block& lhs, const osuCrypto::block& rhs)
+{
+	return _mm_or_si128(lhs, rhs);
+}
+inline osuCrypto::block operator<<(const osuCrypto::block& lhs, const osuCrypto::u8& rhs)
+{
+	return _mm_slli_epi64(lhs, rhs);
+}
+inline osuCrypto::block operator>>(const osuCrypto::block& lhs, const osuCrypto::u8& rhs)
+{
+	return _mm_srli_epi64(lhs, rhs);
+}
+inline osuCrypto::block operator+(const osuCrypto::block& lhs, const osuCrypto::block& rhs)
+{
+	return _mm_add_epi64(lhs, rhs);
+}
+
+
+#ifdef ENABLE_RELIC
+#pragma comment(lib, "relic_s.lib")
+#endif
+
+#ifdef ENABLE_MIRACL
+#pragma comment(lib, "miracl.lib")
+#endif
 
 #endif
 
-
 namespace oc = osuCrypto;
-
-//typedef struct largeBlock {
-//
-//} largeBlock;
-//typedef  std::array<block, 4>  blockRIOT;
-
-//
-//#ifdef _MSC_VER // if Visual C/C++
-//__inline __m64 _mm_set_pi64x(const __int64 i) {
-//    union {
-//        __int64 i;
-//        __m64 v;
-//    } u;
-//
-//    u.i = i;
-//    return u.v;
-//}
-//#endif

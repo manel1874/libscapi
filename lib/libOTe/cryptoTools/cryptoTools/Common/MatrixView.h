@@ -2,23 +2,23 @@
 // This file and the associated implementation has been placed in the public domain, waiving all copyright. No restrictions are placed on its use. 
 #include <cryptoTools/Common/Defines.h>
 #include <array>
-#include <cryptoTools/Common/ArrayView.h>
 
-//#include "cryptoTools/gsl/multi_span.h"
 namespace osuCrypto
 {
-
 
     template<class T>
     class MatrixView
     {
     public:
-
+#ifdef ENABLE_FULL_GSL
         using iterator = gsl::details::span_iterator<gsl::span<T>, false>;
         using const_iterator = gsl::details::span_iterator<gsl::span<T>, true>;
-        using reverse_iterator = std::reverse_iterator<iterator>;
+#else
+		typedef T* iterator;
+		typedef T const*  const_iterator;
+#endif
+		using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
-        //using iterator = gsl::span<T>::iterator;
 
         typedef T value_type;
         typedef value_type* pointer;
@@ -74,39 +74,76 @@ namespace osuCrypto
             if (rows * columns != size())
                 throw std::runtime_error(LOCATION);
 
-            mView = ArrayView<T>(mView.data(), rows * columns);
+            mView = span<T>(mView.data(), rows * columns);
             mStride = columns;
         }
 
         const size_type size() const { return mView.size(); }
         const size_type stride() const { return mStride; }
 
-        std::array<size_type, 2> bounds() const { return {size() / stride() , stride() }; }
+        // returns the number of rows followed by the stride.
+        std::array<size_type, 2> bounds() const { return { rows(), stride() }; }
+
+        u64 rows() const {
+            return stride() ? size() / stride() : 0;
+        }
+        u64 cols() const { return stride(); }
 
         pointer data() const { return mView.data(); };
+        pointer data(u64 rowIdx) const 
+        { 
+#ifndef NDEBUG
+            if (rowIdx >= rows()) throw std::runtime_error(LOCATION);
+#endif
+            return mView.data() + rowIdx * stride(); 
+        };
 
         iterator begin() const { return mView.begin(); };
         iterator end() const { return mView.end(); }
+
+        T& operator()(size_type idx)
+        {
+            return mView[idx];
+        }
+
+        const T& operator()(size_type idx) const
+        {
+            return mView[idx];
+        }
 
         T& operator()(size_type rowIdx, size_type colIdx)
         {
             return mView[rowIdx * stride() + colIdx];
         }
 
-        ArrayView<T> operator[](size_type rowIdx) const
+		const T& operator()(size_type rowIdx, size_type colIdx) const
+		{
+			return mView[rowIdx * stride() + colIdx];
+		}
+
+        const span<T> operator[](size_type rowIdx) const
         {
 #ifndef NDEBUG
-            if (rowIdx >= mView.size() / stride()) throw std::runtime_error(LOCATION);
+            if (rowIdx >= rows()) throw std::runtime_error(LOCATION);
 #endif
 
-            return ArrayView<T>(mView.data() + rowIdx * stride(), stride());
+            return span<T>(mView.data() + rowIdx * stride(), stride());
         }
 
 
 
+        template<typename TT = T>
+        typename std::enable_if<std::is_pod<TT>::value>::type setZero()
+        {
+            static_assert(std::is_same<TT, T>::value, "");
+
+            if (mView.size())
+                memset(mView.data(), 0, mView.size() * sizeof(T));
+        }
+
     protected:
-        ArrayView<T> mView;
-        size_type mStride;
+        span<T> mView;
+        size_type mStride = 0;
 
 
     };

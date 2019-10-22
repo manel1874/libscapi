@@ -88,7 +88,7 @@ public:
 
 	biginteger getX() {	return x; }
 
-	string toString() override { return string(x); }
+	string toString() override { return x.str(); }
 	void initFromString(const string & row) override {	x = biginteger(row); }
 	string getAlgorithm() override { return "ElGamal"; }
 	vector<byte> getEncoded() override { throw NotImplementedException(""); }

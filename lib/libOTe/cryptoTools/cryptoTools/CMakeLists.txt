@@ -3,20 +3,13 @@ project(cryptoTools)
 get_directory_property(hasParent PARENT_DIRECTORY)
 
 
-find_program(NASM nasm)
 
-
-if(NOT NASM OR NOT ("$ENV{cryptoTools_NO_NASM}" STREQUAL ""))
-  message(WARNING "\nnasm is not in the PATH or cryptoTools_NO_NASM is defined!!!! This means the fast SHA1 function will not be used.")
-  MESSAGE(STATUS "ENV{cryptoTools_NO_NASM} = $ENV{cryptoTools_NO_NASM}")
-
-  # define this so that the asm is disabled.
-  add_definitions(-DNO_INTEL_ASM_SHA1=1)
-  set(shaNasmOutput )
-  add_custom_target(sha_asm)
+if(ENABLE_NASM)
   
-else()
-  
+    if(NOT NASM)
+        message(FATAL_ERROR "Can not find nasm. Disable it with:    cmake . -DENABLE_NASM=OFF")
+    endif()
+
     set(shaNasm "${CMAKE_CURRENT_SOURCE_DIR}/Crypto/asm/sha_lnx.S")
     set(shaNasmOutput "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/cryptoTools.dir/Crypto/sha_lnx.S.o")
 
@@ -26,8 +19,8 @@ else()
 
     #OSX nasm flags
     IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    set(shaNasmComment ${NASM} --prefix _ -f macho64 ${shaNasm} -o ${shaNasmOutput})
-    set(shaNasmCommand ${NASM} --prefix _ -f macho64 ${shaNasm} -o ${shaNasmOutput})
+        set(shaNasmComment ${NASM} --prefix _ -f macho64 ${shaNasm} -o ${shaNasmOutput})
+        set(shaNasmCommand ${NASM} --prefix _ -f macho64 ${shaNasm} -o ${shaNasmOutput})
     ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
     add_custom_command(
@@ -39,12 +32,15 @@ else()
 
   # mark this asm output input to everything.
   add_custom_target(sha_asm DEPENDS ${shaNasmOutput})
-endif()
+else(ENABLE_NASM)
+  set(shaNasmOutput )
+  add_custom_target(sha_asm)
+endif(ENABLE_NASM)
 
 
 
 # add the source files 
-file(GLOB_RECURSE SRCS *.cpp)
+file(GLOB_RECURSE SRCS *.cpp *.c)
 add_library(cryptoTools STATIC ${SRCS} ${shaNasmOutput})
 
 # make projects that include cryptoTools use this as an include folder
@@ -74,39 +70,72 @@ install(TARGETS cryptoTools DESTINATION lib)
 ## Miracl
 ###########################################################################
 
-set(Miracl_Dirs "${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/")
+if (ENABLE_MIRACL)
 
-set(Miracl_Lib_Dirs "${Miracl_Dirs}/miracl/source/")
-find_library(MIRACL_LIB NAMES miracl  HINTS "${Miracl_Lib_Dirs}")
+  set(Miracl_Dirs "${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/linux/miracl/")
 
-# if we cant fint it, throw an error
-if(NOT MIRACL_LIB)
-    message(FATAL_ERROR "Failed to find miracl at " ${Miracl_Lib_Dirs})
-endif()
-message(STATUS "MIRACL_LIB:  ${MIRACL_LIB}")
+  set(Miracl_Lib_Dirs "${Miracl_Dirs}/miracl/source/")
+  find_library(MIRACL_LIB NAMES miracl  HINTS "${Miracl_Lib_Dirs}")
 
-#include_directories("${Miracl_Dirs}") 
+  # if we cant fint it, throw an error
+  if(NOT MIRACL_LIB)
+      message(FATAL_ERROR "Failed to find miracl at " ${Miracl_Lib_Dirs})
+  endif()
+  message(STATUS "MIRACL_LIB:  ${MIRACL_LIB}")
 
-target_include_directories(cryptoTools PUBLIC "${Miracl_Dirs}") 
-target_link_libraries(cryptoTools ${MIRACL_LIB})
+  #include_directories("${Miracl_Dirs}") 
 
+  target_include_directories(cryptoTools PUBLIC "${Miracl_Dirs}") 
+  target_link_libraries(cryptoTools ${MIRACL_LIB})
+
+
+  INSTALL(DIRECTORY "${Miracl_Dirs}/miracl/include/" DESTINATION include)
+  INSTALL(FILES ${MIRACL_LIB} DESTINATION lib)
+
+  #copy miracl to the lib directory for others to use/find
+  #file(COPY ${MIRACL_LIB}  DESTINATION ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY})
+  #file(GLOB_RECURSE miracl_headers "${Miracl_Dirs}/miracl/include/*.h")
+  #file(COPY ${miracl_headers}  DESTINATION "${CMAKE_SOURCE_DIR}/include/")
+  #MESSAGE(STATUS  " headers ${miracl_headers}")
+
+endif(ENABLE_MIRACL)
+
+
+## Relic
+###########################################################################
+
+
+if (ENABLE_RELIC)
+  find_package(Relic REQUIRED)
+
+  if (NOT Relic_FOUND)
+    message(FATAL_ERROR "Failed to find Relic")
+  endif (NOT Relic_FOUND)
+
+  message(STATUS "Relic_LIB:  ${RELIC_LIBRARIES}")
+
+  target_include_directories(cryptoTools PUBLIC ${RELIC_INCLUDE_DIR}) 
+  target_link_libraries(cryptoTools ${RELIC_LIBRARIES})
+
+endif (ENABLE_RELIC)
 
 ## Boost
 ###########################################################################
-
-set(BOOST_ROOT "${LIBSCAPI_ROOT}/install/include")
-set(Boost_INCLUDE_DIR "${LIBSCAPI_ROOT}/install/include")
-link_directories("${LIBSCAPI_ROOT}/install/lib/")
 
 set(Boost_USE_STATIC_LIBS        ON) # only find static libs
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_USE_STATIC_RUNTIME     ON)
 
-target_include_directories(cryptoTools PUBLIC ${Boost_INCLUDE_DIR})
-target_link_libraries(cryptoTools libboost_system.a libboost_thread.a libssl.a libcrypto.a dl z)
+find_package(Boost COMPONENTS system thread)
+
+
+target_include_directories(cryptoTools PUBLIC ${Boost_INCLUDE_DIR}) 
+target_link_libraries(cryptoTools ${Boost_LIBRARIES})
 
 
 IF(INSTALL_BOOST)
-  INSTALL(DIRECTORY "${Boost_INCLUDE_DIR}/boost" DESTINATION include)
-  INSTALL(FILES ${Boost_LIBRARIES} DESTINATION lib)
+    INSTALL(DIRECTORY "${Boost_INCLUDE_DIR}/boost" DESTINATION include)
+    INSTALL(FILES ${Boost_LIBRARIES} DESTINATION lib)
 ENDIF(INSTALL_BOOST)
+
+message(STATUS "Boost_include  ${Boost_INCLUDE_DIR}" )

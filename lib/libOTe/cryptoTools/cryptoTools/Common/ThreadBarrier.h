@@ -11,13 +11,13 @@ namespace osuCrypto
         std::shared_future<void> mFuture;
         std::atomic<u64> mCount;
     public:
-        ThreadBarrier(u64 count)
+        ThreadBarrier(u64 count = 0)
             : mFuture(mProm.get_future())
             , mCount(count)
         {
         }
 
-        void decremenetWait()
+        void decrementWait()
         {
             if (--mCount)
             {
@@ -32,7 +32,7 @@ namespace osuCrypto
 
         ThreadBarrier& operator--()
         {
-            decremenetWait();
+            decrementWait();
             return *this;
         }
 

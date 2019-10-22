@@ -5,12 +5,13 @@
 #include <cryptoTools/Crypto/PRNG.h>
 #include "libOTe/TwoChooseOne/OTExtInterface.h"
 #include <cryptoTools/Common/BitVector.h>
+#include <cryptoTools/Common/Timer.h>
 
 
 namespace osuCrypto
 {
 
-class AknOtReceiver
+class AknOtReceiver : public TimerAdapter
 {
 public:
     AknOtReceiver();
@@ -27,7 +28,7 @@ public:
 
 
     void init(u64 totalOTCount, u64 numberOfOnes, double p,
-        OtExtReceiver& ots, ArrayView<Channel> chls, PRNG& prng);
+        OtExtReceiver& ots, span<Channel> chls, PRNG& prng);
 
     std::vector<u64> mOnes, mZeros;
     std::vector<block> mMessages;

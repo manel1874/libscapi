@@ -222,7 +222,7 @@ public:
 		return *x == *temp->x;
 	}
 
-	string toString() override { return (string) *x; }
+	string toString() override { return  (*x).str(); }
 };
 
 /**

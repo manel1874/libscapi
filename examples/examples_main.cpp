@@ -61,17 +61,11 @@ int main(int argc, char* argv[]) {
 		return mainGmac();
 	if (argc == 2)
 		return exampleUsage();
-//#ifndef _WIN32
-//	if (exampleName == "OTExtensionBristol")
-//		return mainBristol(argv[2]);
-//#endif
 
 	if (argc != 4)
 		return exampleUsage();
 	if (exampleName == "comm") 
 		return mainComm(argv[2], argv[3]);
-//	if (exampleName == "yao")
-//		return mainYao(argv[2], argv[3]);
 	if (exampleName == "sigma")
 		return mainSigma(argv[2], argv[3]);
 	if (exampleName == "commitment")

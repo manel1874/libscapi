@@ -1,45 +1,58 @@
 #include "KosOtExtSender.h"
 
+#include "libOTe/config.h"
 #include "libOTe/Tools/Tools.h"
-#include <cryptoTools/Common/Log.h>
-#include <cryptoTools/Common/ByteStream.h>
 #include <cryptoTools/Crypto/Commit.h>
+#include <cryptoTools/Network/Channel.h>
+#include <cryptoTools/Common/Timer.h>
 #include "TcoOtDefines.h"
-
 
 namespace osuCrypto
 {
-    //#define KOS_DEBUG
+    KosOtExtSender::KosOtExtSender(SetUniformOts, span<block> baseRecvOts, const BitVector & choices)
+    {
+        setUniformBaseOts(baseRecvOts, choices);
+    }
 
-    using namespace std;
+    void KosOtExtSender::setUniformBaseOts(span<block> baseRecvOts, const BitVector & choices)
+    {
+        mBaseChoiceBits = choices;
 
+        for (u64 i = 0; i < gOtExtBaseOtCount; i++)
+        {
+            mGens[i].SetSeed(baseRecvOts[i]);
+        }
+    }
 
-
+    KosOtExtSender KosOtExtSender::splitBase()
+    {
+        std::array<block, gOtExtBaseOtCount> baseRecvOts;
+        for (u64 i = 0; i < mGens.size(); ++i)
+            baseRecvOts[i] = mGens[i].get<block>();
+        return KosOtExtSender(SetUniformOts{}, baseRecvOts, mBaseChoiceBits);
+    }
 
     std::unique_ptr<OtExtSender> KosOtExtSender::split()
     {
-
-        std::unique_ptr<OtExtSender> ret(new KosOtExtSender());
-
         std::array<block, gOtExtBaseOtCount> baseRecvOts;
 
         for (u64 i = 0; i < mGens.size(); ++i)
-        {
             baseRecvOts[i] = mGens[i].get<block>();
-        }
 
-        ret->setBaseOts(baseRecvOts, mBaseChoiceBits);
-
-        return std::move(ret);
+        return std::make_unique<KosOtExtSender>(SetUniformOts{}, baseRecvOts, mBaseChoiceBits);
     }
 
-    void KosOtExtSender::setBaseOts(span<block> baseRecvOts, const BitVector & choices)
+    void KosOtExtSender::setBaseOts(span<block> baseRecvOts, const BitVector & choices, Channel& chl)
     {
         if (baseRecvOts.size() != gOtExtBaseOtCount || choices.size() != gOtExtBaseOtCount)
             throw std::runtime_error("not supported/implemented");
 
+        BitVector delta(128);
+        chl.recv(delta);
 
         mBaseChoiceBits = choices;
+        mBaseChoiceBits ^= delta;
+
         for (u64 i = 0; i < gOtExtBaseOtCount; i++)
         {
             mGens[i].SetSeed(baseRecvOts[i]);
@@ -51,7 +64,9 @@ namespace osuCrypto
         PRNG& prng,
         Channel& chl)
     {
-        // round up 
+        setTimePoint("Kos.send.start");
+
+        // round up
         u64 numOtExt = roundUpTo(messages.size(), 128);
         u64 numSuperBlocks = (numOtExt / 128 + superBlkSize) / superBlkSize;
         //u64 numBlocks = numSuperBlocks * superBlkSize;
@@ -73,13 +88,17 @@ namespace osuCrypto
         block* xIter = extraBlocks.data();
 
 
-        Commit theirSeedComm;
-        chl.recv(theirSeedComm.data(), theirSeedComm.size());
-
         auto mIter = messages.begin();
 
         block * uIter = (block*)u.data() + superBlkSize * 128 * commStepSize;
         block * uEnd = uIter;
+
+#ifdef OTE_KOS_FIAT_SHAMIR
+        RandomOracle fs(sizeof(block));
+#else
+        Commit theirSeedComm;
+        chl.recv(theirSeedComm.data(), theirSeedComm.size());
+#endif
 
         for (u64 superBlkIdx = 0; superBlkIdx < numSuperBlocks; ++superBlkIdx)
         {
@@ -90,9 +109,13 @@ namespace osuCrypto
             if (uIter == uEnd)
             {
                 u64 step = std::min<u64>(numSuperBlocks - superBlkIdx,(u64) commStepSize);
+                u64 size = step * superBlkSize * 128 * sizeof(block);
 
-                chl.recv(u.data(), step * superBlkSize * 128 * sizeof(block));
+                chl.recv((u8*)u.data(), size);
                 uIter = (block*)u.data();
+#ifdef OTE_KOS_FIAT_SHAMIR
+                fs.Update((u8*)u.data(), size);
+#endif
             }
 
             // transpose 128 columns at at time. Each column will be 128 * superBlkSize = 1024 bits long.
@@ -125,7 +148,7 @@ namespace osuCrypto
                 tIter += 8;
             }
 
-            // transpose our 128 columns of 1024 bits. We will have 1024 rows, 
+            // transpose our 128 columns of 1024 bits. We will have 1024 rows,
             // each 128 bits wide.
             sse_transpose128x1024(t);
 
@@ -136,8 +159,8 @@ namespace osuCrypto
             // compute how many rows are unused.
             u64 unusedCount = (mIter - mEnd + 128 * superBlkSize);
 
-            // compute the begin and end index of the extra rows that 
-            // we will compute in this iters. These are taken from the 
+            // compute the begin and end index of the extra rows that
+            // we will compute in this iters. These are taken from the
             // unused rows what we computed above.
             block* xEnd = std::min(xIter + unusedCount, extraBlocks.data() + 128);
 
@@ -228,34 +251,40 @@ namespace osuCrypto
             }
         }
 #endif
-        gTimer.setTimePoint("send.transposeDone");
-
+        setTimePoint("Kos.send.transposeDone");
+#ifdef OTE_KOS_FIAT_SHAMIR
+        block seed;
+        fs.Final(seed);
+        PRNG commonPrng(seed);
+#else
         block seed = prng.get<block>();
-        chl.asyncSend(&seed, sizeof(block));
+        chl.asyncSend((u8*)&seed, sizeof(block));
         block theirSeed;
-        chl.recv(&theirSeed, sizeof(block));
-        gTimer.setTimePoint("send.cncSeed");
-
+        chl.recv((u8*)&theirSeed, sizeof(block));
+        setTimePoint("Kos.send.cncSeed");
         if (Commit(theirSeed) != theirSeedComm)
             throw std::runtime_error("bad commit " LOCATION);
-
-
         PRNG commonPrng(seed ^ theirSeed);
+#endif
+
+
 
         block  qi, qi2;
         block q2 = ZeroBlock;
         block q1 = ZeroBlock;
 
-#ifdef KOS_SHA_HASH
-        SHA1 sha;
+#if (OTE_KOS_HASH == OTE_RANDOM_ORACLE)
+        RandomOracle sha;
         u8 hashBuff[20];
-#else
+#elif (OTE_KOS_HASH == OTE_DAVIE_MEYER_AES)
         std::array<block, 8> aesHashTemp;
+#else
+#error "OTE_KOS_HASH" must be defined
 #endif
         u64 doneIdx = 0;
         std::array<block, 128> challenges;
 
-        gTimer.setTimePoint("send.checkStart");
+        setTimePoint("Kos.send.checkStart");
 
         u64 bb = (messages.size() + 127) / 128;
         for (u64 blockIdx = 0; blockIdx < bb; ++blockIdx)
@@ -271,21 +300,23 @@ namespace osuCrypto
                 mul128(messages[dd][0], challenges[i], qi, qi2);
                 q1 = q1  ^ qi;
                 q2 = q2 ^ qi2;
-#ifdef KOS_SHA_HASH
+#if (OTE_KOS_HASH == OTE_RANDOM_ORACLE)
                 // hash the message without delta
                 sha.Reset();
+                sha.Update(dd);
                 sha.Update((u8*)&messages[dd][0], sizeof(block));
                 sha.Final(hashBuff);
                 messages[dd][0] = *(block*)hashBuff;
 
                 // hash the message with delta
                 sha.Reset();
+                sha.Update(dd);
                 sha.Update((u8*)&messages[dd][1], sizeof(block));
                 sha.Final(hashBuff);
                 messages[dd][1] = *(block*)hashBuff;
 #endif
             }
-#ifndef KOS_SHA_HASH 
+#if (OTE_KOS_HASH == OTE_DAVIE_MEYER_AES)
             auto length = 2 *(stop - doneIdx);
             auto steps = length / 8;
             block* mIter = messages[doneIdx].data();
@@ -302,7 +333,7 @@ namespace osuCrypto
                 mIter[7] = mIter[7] ^ aesHashTemp[7];
 
                 mIter += 8;
-            }                     
+            }
 
             auto rem = length - steps * 8;
             mAesFixedKey.ecbEncBlocks(mIter, rem, aesHashTemp.data());
@@ -326,22 +357,22 @@ namespace osuCrypto
             q2 = q2 ^ qi2;
         }
 
-        gTimer.setTimePoint("send.checkSummed");
+        setTimePoint("Kos.send.checkSummed");
 
 
         //std::cout << IoStream::unlock;
 
         block t1, t2;
-        std::vector<char> data(sizeof(block) * 3);
+        std::vector<u8> data(sizeof(block) * 3);
 
         chl.recv(data.data(), data.size());
-        gTimer.setTimePoint("send.proofReceived");
+        setTimePoint("Kos.send.proofReceived");
 
         block& received_x = ((block*)data.data())[0];
         block& received_t = ((block*)data.data())[1];
         block& received_t2 = ((block*)data.data())[2];
 
-        // check t = x * Delta + q 
+        // check t = x * Delta + q
         mul128(received_x, delta, t1, t2);
         t1 = t1 ^ q1;
         t2 = t2 ^ q2;
@@ -358,7 +389,7 @@ namespace osuCrypto
             std::cout << "q  = " << q1 << std::endl;
             throw std::runtime_error("Exit");;
         }
-        gTimer.setTimePoint("send.done");
+        setTimePoint("Kos.send.done");
 
         static_assert(gOtExtBaseOtCount == 128, "expecting 128");
     }

@@ -29,7 +29,7 @@
 #include "../../include/interactive_mid_protocols/SigmaProtocolPedersenCommittedValue.hpp"
 
 string SigmaPedersenCommittedValueCommonInput::toString() {
-	string output = string(x);
+	string output = x.str();
 	output += ":";
 	output += h->generateSendableData()->toString();
 	output += ":";
@@ -44,14 +44,16 @@ string SigmaPedersenCommittedValueCommonInput::toString() {
 * @param t Soundness parameter in BITS.
 * @param random
 */
-SigmaPedersenCommittedValueSimulator::SigmaPedersenCommittedValueSimulator(const shared_ptr<DlogGroup> & dlog, int t, const shared_ptr<PrgFromOpenSSLAES> & prg)
+SigmaPedersenCommittedValueSimulator::SigmaPedersenCommittedValueSimulator(const shared_ptr<DlogGroup> & dlog,
+        int t, const shared_ptr<PrgFromOpenSSLAES> & prg)
 	: dlogSim(dlog, t, prg) {
 
 	//Creates the underlying SigmaDlogSimulator object with the given parameters.
 	this->dlog = dlog.get();
 }
 
-shared_ptr<SigmaSimulatorOutput> SigmaPedersenCommittedValueSimulator::simulate(SigmaCommonInput* input, const vector<byte> & challenge) {
+shared_ptr<SigmaSimulatorOutput> SigmaPedersenCommittedValueSimulator::simulate(SigmaCommonInput* input,
+        const vector<byte> & challenge) {
 	
 	//Delegate the computation to the underlying Sigma Dlog simulator.
 	return dlogSim.simulate(convertInput(input).get(), challenge);

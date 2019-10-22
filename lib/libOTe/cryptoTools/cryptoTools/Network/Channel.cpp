@@ -1,61 +1,244 @@
 #include <cryptoTools/Network/Channel.h>
-#include <cryptoTools/Network/Channel.h>
-#include <cryptoTools/Network/IoBuffer.h>
-#include <cryptoTools/Network/Endpoint.h>
-#include <cryptoTools/Common/Defines.h>
+#include <cryptoTools/Network/Session.h>
+#include <cryptoTools/Network/SocketAdapter.h>
 #include <cryptoTools/Common/Log.h>
-#include <cryptoTools/Common/ByteStream.h>
+#include <cryptoTools/Common/Timer.h>
+#include <cryptoTools/Network/IOService.h>
+#include <thread>
+#include <chrono>
 
 namespace osuCrypto {
 
     Channel::Channel(
-        Endpoint& endpoint,
+        Session& endpoint,
         std::string localName,
         std::string remoteName)
         :
         mBase(new ChannelBase(endpoint, localName, remoteName))
     {}
 
+    Channel::Channel(IOService& ios, SocketInterface * sock)
+        : mBase(new ChannelBase(ios, sock))
+    {}
+
 
     ChannelBase::ChannelBase(
-        Endpoint& endpoint,
+        Session& endpoint,
         std::string localName,
         std::string remoteName)
         :
-        mEndpoint(endpoint),
+        mIos(endpoint.getIOService()),
+        mWork(new boost::asio::io_service::work(endpoint.getIOService().mIoService)),
+        mSession(endpoint.mBase),
         mRemoteName(remoteName),
         mLocalName(localName),
-        mId(0),
-        mRecvStatus(Channel::Status::Normal),
-        mSendStatus(Channel::Status::Normal),
-        mHandle(nullptr),
-        mSendStrand(endpoint.getIOService().mIoService),
-        mRecvStrand(endpoint.getIOService().mIoService),
+        mTimer(endpoint.getIOService().mIoService),
+	    mSendStrand(endpoint.getIOService().mIoService.get_executor()),
+        mRecvStrand(endpoint.getIOService().mIoService.get_executor()),
         mOpenProm(),
         mOpenFut(mOpenProm.get_future()),
         mOpenCount(0),
-        mRecvSocketSet(false),
-        mSendSocketSet(false),
-        mOutstandingSendData(0),
-        mMaxOutstandingSendData(0),
-        mTotalSentData(0),
         mSendQueueEmptyFuture(mSendQueueEmptyProm.get_future()),
         mRecvQueueEmptyFuture(mRecvQueueEmptyProm.get_future())
-#ifdef CHANNEL_LOGGING
-        , mOpIdx(0)
-#endif
     {
+//#ifdef ENABLE_NET_LOG
+//        std::stringstream ss;
+//        ss << "created socket base " << std::hex << u64(this) << " " << mLocalName << "`" << mRemoteName;
+//        mIos.mLog.push(ss.str());
+//#endif
+    }
 
+    ChannelBase::ChannelBase(IOService& ios, SocketInterface * sock)
+        :
+        mIos(ios),
+        mWork(new boost::asio::io_service::work(ios.mIoService)),
+        mHandle(sock),
+        mTimer(ios.mIoService),
+        mSendStrand(ios.mIoService.get_executor()),
+        mRecvStrand(ios.mIoService.get_executor()),
+        mOpenProm(),
+        mOpenFut(mOpenProm.get_future()),
+        mOpenCount(0),
+        mRecvSocketAvailable(true),
+        mSendSocketAvailable(true),
+        mSendQueueEmptyFuture(mSendQueueEmptyProm.get_future()),
+        mRecvQueueEmptyFuture(mRecvQueueEmptyProm.get_future())
+    {
+        mOpenProm.set_value();
+//#ifdef ENABLE_NET_LOG
+//        std::stringstream ss;
+//        ss << "created socket base " << std::hex << u64(this) << " " << mLocalName << "`" << mRemoteName << " with socket.";
+//        mIos.mLog.push(ss.str());
+//#endif
     }
 
     Channel::~Channel()
     {
     }
 
-    Endpoint & Channel::getEndpoint()
+
+#ifdef ENABLE_NET_LOG
+#define LOG_MSG(m) mLog.push(m);
+#else
+#define LOG_MSG(m)
+#endif
+
+    void ChannelBase::asyncConnectToServer(const boost::asio::ip::tcp::endpoint& address)
     {
-        return mBase->mEndpoint;
+        LOG_MSG("start async connect to server at " +
+            address.address().to_string() + " : "+std::to_string(address.port()));
+
+        mHandle.reset(new BoostSocketInterface(
+            boost::asio::ip::tcp::socket(getIOService().mIoService)));
+
+        mConnectCallback = [this, address](const boost::system::error_code& ec)
+        {
+            auto& sock = ((BoostSocketInterface*)mHandle.get())->mSock;
+
+            if (ec)
+            {
+                //std::cout << "connect failed, " << this->mLocalName << " " << ec.value() << " " << ec.message() << ".  " << address.address().to_string() << std::endl;
+                // try to connect again...
+                if (stopped() == false)
+                {
+                    LOG_MSG("retry async connect to server");
+                    mTimer.expires_from_now(boost::posix_time::millisec(10));
+                    mTimer.async_wait([&](const boost::system::error_code& ec)
+                    {
+                        if (ec)
+                        {
+                            std::cout << "unknown timeout error: " << ec.message() << std::endl;
+                        }
+                        sock.close();
+                        sock.async_connect(address, mConnectCallback);
+                    });
+                }
+                else
+                {
+                    LOG_MSG("failed async connect to server. Channel stopped by user.");
+                    mOpenProm.set_exception(std::make_exception_ptr(
+                        SocketConnectError("Session tried to connect but the channel has stopped. "  LOCATION)));
+                }
+            }
+            else
+            {
+                boost::asio::ip::tcp::no_delay option(true);
+                error_code ec2;
+                sock.set_option(option, ec2);
+
+                if (ec2 && stopped() == false)
+                {
+                    auto msg = "async connect. Failed to set option ~ ec=" + ec.message() + "\n"
+                        + " isOpen=" + std::to_string(sock.is_open())
+                        + " stopped=" + std::to_string(stopped());
+
+                    LOG_MSG(msg);
+
+                    sock.close();
+                    sock.async_connect(address, mConnectCallback);
+                }
+
+                std::stringstream sss;
+                sss << mSession->mName << '`'
+                    << mSession->mSessionID << '`'
+                    << mLocalName << '`'
+                    << mRemoteName;
+                auto str = sss.str();
+
+
+                LOG_MSG("Success: async connect to server. ConnectionString = " + str);
+#ifdef ENABLE_NET_LOG
+                mIos.mLog.push("connectionString = " + str);
+#endif
+                using namespace details;
+                auto op = std::make_shared<MoveSendBuff<std::string>>(std::move(str));
+
+                boost::asio::dispatch(mSendStrand,[this, op,address]() mutable
+                {
+                    LOG_MSG("async connect. Sending ConnectionString");
+                    
+
+                    op->asyncPerform(this, [this, op, address](error_code ec, u64 bytesTransferred) {
+
+                        if (ec)
+                        {
+                            auto& sock = ((BoostSocketInterface*)mHandle.get())->mSock;
+
+                            auto msg = "async connect. Failed to send ConnectionString ~ ec=" + ec.message() + "\n"
+                                + " isOpen=" + std::to_string(sock.is_open()) 
+                                + " stopped=" +std::to_string(stopped());
+                            
+                            LOG_MSG(msg);
+
+                            // Unknown issue where we connect but then the pipe is broken. 
+                            // Simply retrying seems to be a workaround.
+                            if (stopped() == false)
+                            {
+                                sock.close();
+                                sock.async_connect(address, mConnectCallback);
+                            }
+                        }
+                        else
+                        {
+
+                            LOG_MSG("async connect. ConnectionString sent.");
+
+                            boost::asio::dispatch(mSendStrand, [this]()
+                            {
+                                auto ii = ++mOpenCount;
+                                if (ii == 2) mOpenProm.set_value();
+                                mSendSocketAvailable = true;
+
+
+                                if (mSendQueue.isEmpty() == false)
+                                {
+                                    asyncPerformSend();
+                                }
+                                else
+                                {
+                                    LOG_MSG("async connect. queue is empty.");
+
+                                    if (mSendStatus == Channel::Status::Stopped && 
+                                        mSendQueueEmpty == false)
+                                    {
+                                        mSendQueueEmpty = true;
+                                        mSendQueueEmptyProm.set_value();
+                                        mSendQueueEmptyProm = std::promise<void>();
+                                    }
+                                }
+                            });
+
+
+
+
+                            boost::asio::dispatch(mRecvStrand, [this]()
+                            {
+                                auto ii = ++mOpenCount;
+                                if (ii == 2) mOpenProm.set_value();
+                                mRecvSocketAvailable = true;
+
+                                if (!mRecvQueue.isEmpty())
+                                {
+                                    LOG_MSG("async connect. Recv Strand, start.");
+                                    asyncPerformRecv();
+                                }
+                                else
+                                {
+                                    LOG_MSG("async connect. Recv Strand, queue empty.");
+                                }
+                            });
+                        }
+                    });
+                });
+
+            }
+        };
+
+
+        ((BoostSocketInterface*)mHandle.get())->mSock.async_connect(address, mConnectCallback);
     }
+
+
 
     std::string Channel::getName() const
     {
@@ -74,353 +257,531 @@ namespace osuCrypto {
         return *this;
     }
 
-    void Channel::asyncSend(const void * buff, u64 size)
-    {
-        if (mBase->mSendStatus != Status::Normal || size == 0 || size > u32(-1))
-            throw std::runtime_error("rt error at " LOCATION);
-
-        IOOperation op;
-
-        op.mSize = (u32)size;
-        op.mBuffs[1] = boost::asio::buffer((char*)buff, (u32)size);
-
-        op.mType = IOOperation::Type::SendData;
-
-        mBase->mEndpoint.getIOService().dispatch(mBase.get(), op);
-    }
-
-    void Channel::asyncSend(const void * buff, u64 size, std::function<void()> callback)
-    {
-        if (mBase->mSendStatus != Status::Normal || size == 0 || size > u32(-1))
-            throw std::runtime_error("rt error at " LOCATION);
-
-        IOOperation op;
-
-        op.mSize = u32(size);
-        op.mBuffs[1] = boost::asio::buffer((char*)buff, size);
-
-        op.mType = IOOperation::Type::SendData;
-        op.mCallback = callback;
-
-        dispatch(op);
-    }
-
-    void Channel::send(const void * buff, u64 size)
-    {
-        if (mBase->mSendStatus != Status::Normal || size == 0 || size > u32(-1))
-            throw std::runtime_error("rt error at " LOCATION);
-
-        IOOperation op;
-
-        op.mSize = (u32)size;
-        op.mBuffs[1] = boost::asio::buffer((char*)buff, (u32)size);
-
-
-        op.mType = IOOperation::Type::SendData;
-
-        std::promise<u64> prom;
-        op.mPromise = &prom;
-
-        mBase->mEndpoint.getIOService().dispatch(mBase.get(), op);
-
-        prom.get_future().get();
-    }
-
-    std::future<u64> Channel::asyncRecv(void * buff, u64 size)
-    {
-        if (mBase->mSendStatus != Status::Normal || size == 0 || size > u32(-1))
-            throw std::runtime_error("rt error at " LOCATION);
-
-        IOOperation op;
-
-        op.mSize = (u32)size;
-        op.mBuffs[1] = boost::asio::buffer((char*)buff, (u32)size);
-
-        op.mType = IOOperation::Type::RecvData;
-
-        op.mContainer = nullptr;
-
-        op.mPromise = new std::promise<u64>();
-        auto future = op.mPromise->get_future();
-
-        mBase->mEndpoint.getIOService().dispatch(mBase.get(), op);
-
-        return future;
-    }
-
-    u64 Channel::recv(void * dest, u64 length)
-    {
-        try {
-            // schedule the recv.
-            auto request = asyncRecv(dest, length);
-
-            // block until the receive has been completed. 
-            // Could throw if the length is wrong.
-            return request.get();
-        }
-        catch (BadReceiveBufferSize& bad)
-        {
-            std::cout << bad.mWhat << std::endl;
-            throw;
-        }
-    }
-
     bool Channel::isConnected()
     {
-        return mBase->mSendSocketSet  && mBase->mRecvSocketSet;
+        return mBase->mOpenCount == 2;
     }
+
+    bool Channel::waitForConnection(std::chrono::milliseconds timeout)
+    {
+        auto status = mBase->mOpenFut.wait_for(timeout);
+        if (status != std::future_status::ready)
+            return false;
+        mBase->mOpenFut.get();
+        return true;
+    }
+
     void Channel::waitForConnection()
     {
-        return mBase->mOpenFut.get();
+        mBase->mOpenFut.get();
     }
 
     void Channel::close()
     {
-        // indicate that no more messages should be queued and to fulfill
-        // the mSocket->mDone* promised.
-        if (mBase)
+        if (mBase) mBase->close();
+        //mBase = nullptr;
+    }
+
+    void Channel::cancel()
+    {
+        if (mBase) mBase->cancel();
+    }
+
+    void ChannelBase::cancel()
+    {
+        LOG_MSG("cancel()");
+
+
+        if (stopped() == false)
+        {
+            mSendStatus = Channel::Status::Stopped;
+            mRecvStatus = Channel::Status::Stopped;
+            bool isClient = mSession->mMode == SessionMode::Client;
+
+            if (isClient) mHandle->close();
+            if (mSession && mSession->mAcceptor) mSession->mAcceptor->cancelPendingChannel(this);
+
+            try { mOpenFut.get(); }
+            catch (SocketConnectError&)
+            {
+                // The socket has never started.
+                // We can simply remove all the queued items.
+                cancelRecvQueuedOperations();
+                cancelSendQueuedOperations();
+            }
+
+            if (!isClient && mHandle)
+                mHandle->close();
+
+            std::promise<void> checkSendQueue, checkRecvQueue;
+            std::future<void> 
+                checkSendQueueFut(checkSendQueue.get_future()), 
+                checkRecvQueueFut(checkRecvQueue.get_future());
+
+            boost::asio::dispatch(mSendStrand, [&]() {
+                if (mSendQueue.isEmpty() && mSendQueueEmpty == false)
+                {
+                    mSendQueueEmpty = true;
+                    mSendQueueEmptyProm.set_value();
+                }
+                checkSendQueue.set_value();
+            });
+
+            boost::asio::dispatch(mRecvStrand, [&]() {
+                if (mRecvQueue.isEmpty() && mRecvQueueEmpty == false)
+                {
+                    mRecvQueueEmpty = true;
+                    mRecvQueueEmptyProm.set_value();
+                }
+                else if (activeRecvSizeError())
+                    cancelRecvQueuedOperations();
+
+                checkRecvQueue.set_value();
+
+            });
+
+            checkSendQueueFut.get();
+            checkRecvQueueFut.get();
+            mSendQueueEmptyFuture.get();
+            mRecvQueueEmptyFuture.get();
+
+            mHandle.reset(nullptr);
+            mWork.reset(nullptr);
+        }
+
+    }
+
+
+    void ChannelBase::recvEnque(SBO_ptr<details::RecvOperation>&& op)
+    {
+#ifdef ENABLE_NET_LOG
+        op->mIdx = mRecvIdx++;
+#endif
+
+        LOG_MSG("queuing Recv op " + op->toString());
+
+        mRecvQueue.push_back(std::move(op));
+
+        // a strand is like a lock. Stuff posted (or dispatched) to a strand will be executed sequentially
+        boost::asio::post(mRecvStrand, [this]()
         {
 
-            mBase->close();
-        }
+
+            // check to see if we should kick off a new set of recv operations. If the size >= 1, then there
+            // is already a set of recv operations that will kick off the newly queued recv when its turn comes around.
+            bool hasItems = (mRecvQueue.isEmpty() == false);
+            bool startRecving = hasItems && mRecvSocketAvailable;
+
+            LOG_MSG("queuing* Recv, start = " + std::to_string(startRecving) + " = " + std::to_string(hasItems) + " & " + std::to_string(mRecvSocketAvailable));
+            // the queue must be guarded from concurrent access, so add the op within the strand
+            // queue up the operation.
+            if (startRecving)
+            {
+                // ok, so there isn't any recv operations currently underway. Lets kick off the first one. Subsequent recvs
+                // will be kicked off at the completion of this operation.
+                asyncPerformRecv();
+            }
+
+
+
+        });
     }
-    void ChannelBase::close()
+
+    void ChannelBase::sendEnque(SBO_ptr<details::SendOperation>&& op)
     {
 
-
-        mOpenFut.get();
-
-        if (mSendStatus != Channel::Status::Stopped)
-        {
-#ifdef CHANNEL_LOGGING
-            mLog.push("Closing send");
+#ifdef ENABLE_NET_LOG
+        op->mIdx = mSendIdx++;
 #endif
+        LOG_MSG("queuing Send op " + op->toString());
 
-            if (mSendStatus == Channel::Status::Normal)
-            {
-                IOOperation closeSend;
-                closeSend.mType = IOOperation::Type::CloseSend;
-                closeSend.mPromise = &mSendQueueEmptyProm;
-                mEndpoint.getIOService().dispatch(this, closeSend);
-            }
-            
-            mSendQueueEmptyFuture.get();
-            mSendStatus = Channel::Status::Stopped;
-        }
+        mSendQueue.push_back(std::move(op));
 
-        if (mRecvStatus != Channel::Status::Stopped)
+        // a strand is like a lock. Stuff posted (or dispatched) to a strand will be executed sequentially
+        boost::asio::post(mSendStrand, [this]()
         {
-#ifdef CHANNEL_LOGGING
-            mLog.push("Closing recv");
-#endif
+            auto hasItems = (mSendQueue.isEmpty() == false);
+            auto startSending = hasItems && mSendSocketAvailable;
 
-            if (mRecvStatus == Channel::Status::Normal)
+            LOG_MSG("queuing* Send, start = " + std::to_string(startSending) + " = " + std::to_string(hasItems)
+                + " & " + std::to_string(mSendSocketAvailable));
+
+            if (startSending)
             {
-                IOOperation closeRecv;
-                closeRecv.mType = IOOperation::Type::CloseRecv;
-                closeRecv.mPromise = &mRecvQueueEmptyProm;
-                mEndpoint.getIOService().dispatch(this, closeRecv);
+                asyncPerformSend();
             }
-            else if (mRecvStatus == Channel::Status::RecvSizeError)
-            {
-                cancelRecvQueuedOperations();
-            }
-
-            mRecvQueueEmptyFuture.get();
-            mRecvStatus = Channel::Status::Stopped;
-        }
-
-        // ok, the send and recv queues are empty. Lets close the socket
-        if (mHandle)
-        {
-            mEndpoint.removeChannel(this);
-            mHandle->close();
-            mHandle = nullptr;
-        }
-
-#ifdef CHANNEL_LOGGING
-        mLog.push("Closed");
-#endif
+        });
     }
+
+
+    void ChannelBase::asyncPerformRecv()
+    {
+        LOG_MSG("starting asyncPerformRecv()");
+
+        if (mRecvSocketAvailable == false)
+            throw std::runtime_error(LOCATION);
+
+        mRecvSocketAvailable = false;
+        mIos.mIoService.dispatch([this] {
+
+#ifdef ENABLE_NET_LOG
+            mRecvQueue.front()->mLog = &mLog;
+#endif
+            mRecvQueue.front()->asyncPerform(this, [this](error_code ec, u64 bytesTransferred) {
+
+                mTotalRecvData += bytesTransferred;
+
+                if (ec)
+                {
+                    auto reason = std::string("network receive error (") +
+                        mSession->mName + " "  +  mRemoteName + " -> " + mLocalName + " ): "
+                    + ec.message() + "\n at  " + LOCATION;
+                    LOG_MSG(reason);
+                    setRecvFatalError(reason);
+                }
+                else
+                {
+                    boost::asio::dispatch(mRecvStrand, [this]()
+                    {
+                        LOG_MSG("completed recv: " + mRecvQueue.front()->toString());
+
+                        mRecvSocketAvailable = true;
+                        mRecvQueue.pop_front();
+
+                        // is there more messages to recv?
+                        if (!mRecvQueue.isEmpty())
+                        {
+                            asyncPerformRecv();
+                        }
+                        else if (mRecvStatus == Channel::Status::Stopped && 
+                            mRecvQueueEmpty == false)
+                        {
+                            LOG_MSG("Recv queue stopped.");
+                            mRecvQueueEmpty = true;
+                            mRecvQueueEmptyProm.set_value();
+                            //mRecvQueueEmptyProm = std::promise<void>();
+                        }
+                    });
+                }
+            });
+        });
+    }
+
+    void ChannelBase::asyncPerformSend()
+    {
+        LOG_MSG("Starting asyncPerformSend()");
+
+        if (mSendSocketAvailable == false)
+        {
+#ifdef ENABLE_NET_LOG
+            std::cout << mLog << std::endl;
+#endif
+            throw std::runtime_error(LOCATION);
+        }
+
+        mSendSocketAvailable = false;
+        boost::asio::dispatch(mSendStrand, [this] {
+#ifdef ENABLE_NET_LOG
+            mSendQueue.front()->mLog = &mLog;
+#endif
+            mSendQueue.front()->asyncPerform(this, [this](error_code ec, u64 bytesTransferred) {
+
+                mTotalSentData += bytesTransferred;
+
+                if (ec)
+                {
+                    auto reason = std::string("network send error: ") + ec.message() + "\n at  " + LOCATION;
+                    LOG_MSG(reason);
+                    setSendFatalError(reason);
+                }
+                else
+                {
+                    boost::asio::dispatch(mSendStrand, [this]()
+                    {
+                        LOG_MSG("completed send #" + mSendQueue.front()->toString());
+                         
+                        mSendSocketAvailable = true;
+                        mSendQueue.pop_front();
+
+                        if (!mSendQueue.isEmpty())
+                        {
+                            asyncPerformSend();
+                        }
+                        else if (mSendStatus == Channel::Status::Stopped && mSendQueueEmpty == false)
+                        {
+                            LOG_MSG("Send queue stopped");
+                            mSendQueueEmpty = true;
+                            mSendQueueEmptyProm.set_value();
+                            mSendQueueEmptyProm = std::promise<void>();
+                        }
+                    });
+                }
+            });
+        });
+    }
+
+    void ChannelBase::printError(std::string s)
+    {
+        LOG_MSG(s);
+        mIos.printError(s);
+    }
+
+
+    void ChannelBase::close()
+    {
+        LOG_MSG("Closing...");
+
+        if (stopped() == false)
+        {
+            mOpenFut.get();
+            std::atomic<u8> c(2);
+            std::promise<void> checkProm;
+            boost::asio::dispatch(mSendStrand, [&]() {
+                mSendStatus = Channel::Status::Stopped;
+                if (mSendQueue.isEmpty() && mSendQueueEmpty == false)
+                {
+                    mSendQueueEmpty = true;
+                    mSendQueueEmptyProm.set_value();
+                }
+
+                if (--c == 0) checkProm.set_value();
+            });
+
+            boost::asio::dispatch(mRecvStrand, [&]() {
+                mRecvStatus = Channel::Status::Stopped;
+                if (mRecvQueue.isEmpty() && mRecvQueueEmpty == false)
+                {
+                    mRecvQueueEmpty = true;
+                    mRecvQueueEmptyProm.set_value();
+                }
+                else if (activeRecvSizeError())
+                {
+                    cancelRecvQueuedOperations();
+                }
+
+                if (--c == 0) checkProm.set_value();
+            });
+
+            mSendQueueEmptyFuture.get();
+            mRecvQueueEmptyFuture.get();
+            checkProm.get_future().get();
+
+            // ok, the send and recv queues are empty. Lets close the socket
+            if (mHandle)mHandle->close();
+
+            mHandle.reset(nullptr);
+            mWork.reset(nullptr);
+
+        }
+        LOG_MSG("Closed");
+    }
+
+
 
 
     void ChannelBase::cancelSendQueuedOperations()
     {
-
-        mHandle->close();
-
-        while (mSendQueue.size())
+        boost::asio::dispatch(mSendStrand, [this]()
         {
-            auto& front = mSendQueue.front();
-
-#ifdef CHANNEL_LOGGING
-            mLog.push("cancel send #" + ToString(front.mIdx));
-#endif
-            delete front.mContainer;
-
-            if (front.mPromise)
+            if (mSendQueueEmpty == false)
             {
-                auto e_ptr = std::make_exception_ptr(NetworkError("Channel Error: " + mSendErrorMessage));
-                front.mPromise->set_exception(e_ptr);
+                while (!mSendQueue.isEmpty())
+                {
+                    auto& front = mSendQueue.front();
+                    LOG_MSG("cancel send #" + std::to_string(front->mIdx));
+                    front->cancel(mSendErrorMessage);
+                    mSendQueue.pop_front();
+                }
+
+                LOG_MSG("send queue empty");
+                mSendQueueEmpty = true;
+                mSendQueueEmptyProm.set_value();
             }
-
-            mSendQueue.pop_front();
-        }
-
-#ifdef CHANNEL_LOGGING
-        mLog.push("send queue empty");
-#endif
-        mSendQueueEmptyProm.set_value(0);
-
-
-
-//        mRecvStrand.post([this]
-//        {
-//            if (mRecvQueue.size() == 0)
-//            {
-//
-//#ifdef CHANNEL_LOGGING
-//                mLog.push("recv queue empty");
-//#endif
-//                mRecvQueueEmptyProm.set_value(0);
-//            }
-//            else
-//            {
-//#ifdef CHANNEL_LOGGING
-//                mLog.push("recv queue size " + ToString(mRecvQueue.size()));
-//#endif
-//            }
-//
-//        });
+        });
     }
+
 
     void ChannelBase::cancelRecvQueuedOperations()
     {
-        mHandle->close();
-
-        while (mRecvQueue.size())
+        boost::asio::dispatch(mRecvStrand, [this]()
         {
-            auto& front = mRecvQueue.front();
-
-#ifdef CHANNEL_LOGGING
-            mLog.push("cancel recv #" + ToString(front.mIdx));
-#endif
-            delete front.mContainer;
-
-            if (front.mPromise)
+            if (mRecvQueueEmpty == false)
             {
-                auto e_ptr = std::make_exception_ptr(NetworkError("Channel Error: " + mRecvErrorMessage));
-                front.mPromise->set_exception(e_ptr);
+                while (!mRecvQueue.isEmpty())
+                {
+                    auto& front = mRecvQueue.front();
+                    LOG_MSG("cancel recv #" + std::to_string(front->mIdx));
+                    front->cancel(mRecvErrorMessage);
+                    mRecvQueue.pop_front();
+                }
+
+                LOG_MSG("recv queue empty");
+                mRecvQueueEmpty = true;
+                mRecvQueueEmptyProm.set_value();
             }
-
-            mRecvQueue.pop_front();
-        }
-
-
-#ifdef CHANNEL_LOGGING
-        mLog.push("recv queue empty");
-#endif
-        mRecvQueueEmptyProm.set_value(0);
-
-//        mSendStrand.post([this]
-//        {
-//            if (mSendQueue.size() == 0)
-//            {
-//
-//#ifdef CHANNEL_LOGGING
-//                mLog.push("send queue empty");
-//#endif
-//                mSendQueueEmptyProm.set_value(0);
-//            }
-//            else
-//            {
-//#ifdef CHANNEL_LOGGING
-//                mLog.push("send queue size " + ToString(mSendQueue.size()));
-//#endif
-//            }
-//        });
-
+        });
     }
+
+
+    void ChannelBase::startSocket(std::unique_ptr<SocketInterface> socket)
+    {
+        LOG_MSG("Recved socket, starting up the queues...");
+
+        mHandle = std::move(socket);
+        // a strand is like a lock. Stuff posted (or dispatched) to a strand will be executed sequentially
+        boost::asio::post(mRecvStrand, [this]()
+        {
+            auto ii = ++mOpenCount;
+            if (ii == 2)
+                mOpenProm.set_value();
+            
+            mRecvSocketAvailable = true;
+
+            bool isEmpty = mRecvQueue.isEmpty();
+            LOG_MSG("startSocket Recv, queue is isEmpty = " + std::to_string(isEmpty));
+
+            if (!isEmpty)
+            {
+                asyncPerformRecv();
+            }
+        });
+
+
+        // a strand is like a lock. Stuff posted (or dispatched) to a strand will be executed sequentially
+        boost::asio::post(mSendStrand, [this]()
+        {
+            auto ii = ++mOpenCount;
+            if (ii == 2)
+                mOpenProm.set_value();
+            mSendSocketAvailable = true;
+
+            bool isEmpty = mSendQueue.isEmpty();
+            LOG_MSG("startSocket Send, queue is isEmpty = " + std::to_string(isEmpty));
+
+            if (!isEmpty)
+            {
+                // ok, so there isn't any send operations currently underway. Lets kick off the first one. Subsequent sends
+                // will be kicked off at the completion of this operation.
+                asyncPerformSend();
+            }
+        });
+    }
+
+
 
     std::string Channel::getRemoteName() const
     {
         return mBase->mRemoteName;
     }
 
+    Session Channel::getSession() const
+    {
+        if (mBase->mSession)
+            return mBase->mSession;
+        else
+            throw std::runtime_error("no session. " LOCATION);
+    }
+
+
     void Channel::resetStats()
     {
         mBase->mTotalSentData = 0;
-        mBase->mMaxOutstandingSendData = 0;
-        mBase->mOutstandingSendData = 0;
+        mBase->mTotalRecvData = 0;
     }
 
     u64 Channel::getTotalDataSent() const
     {
-        return mBase->mTotalSentData;
+        std::promise<u64> prom;
+        boost::asio::dispatch(mBase->mSendStrand, [&]() {
+            prom.set_value(mBase->mTotalSentData);
+            }
+        );
+        return prom.get_future().get();
     }
 
     u64 Channel::getTotalDataRecv() const
     {
-        return mBase->mTotalRecvData;
+        std::promise<u64> prom;
+        boost::asio::dispatch(mBase->mRecvStrand, [&]() {
+            prom.set_value(mBase->mTotalRecvData);
+            }
+        );
+        return prom.get_future().get();
     }
 
-    u64 Channel::getMaxOutstandingSendData() const
-    {
-        return (u64)mBase->mMaxOutstandingSendData;
-    }
+    //u64 Channel::getMaxOutstandingSendData() const
+    //{
+    //    return (u64)mBase->mMaxOutstandingSendData;
+    //}
 
-    void Channel::asyncSendCopy(const void * bufferPtr, u64 length)
-    {
-        ByteStream bs((u8*)bufferPtr, length);
-        asyncSend(std::move(bs));
-    }
-
-    void Channel::dispatch(IOOperation & op)
-    {
-        mBase->mEndpoint.getIOService().dispatch(mBase.get(), op);
-    }
+    //void Channel::dispatch(std::unique_ptr<IOOperation> op)
+    //{
+    //    mBase->getIOService().dispatch(mBase.get(), std::move(op));
+    //}
 
     void ChannelBase::setRecvFatalError(std::string reason)
     {
-#ifdef CHANNEL_LOGGING
-        mLog.push("Recv error: " + reason);
+
+        if (mIos.mPrint)
+        {
+            lout << reason << std::endl;
+#ifdef ENABLE_NET_LOG
+            lout << mLog << std::endl;
 #endif
-        mRecvErrorMessage += (reason + "\n");
-        mRecvStatus = Channel::Status::FatalError;
-        cancelRecvQueuedOperations();
+        }
+        boost::asio::dispatch(mRecvStrand, [&, reason]() {
+
+            LOG_MSG("Recv error: " + reason);
+            mRecvErrorMessage += (reason + "\n");
+            mRecvStatus = Channel::Status::Stopped;
+            cancelRecvQueuedOperations();
+        });
     }
 
     void ChannelBase::setSendFatalError(std::string reason)
     {
-#ifdef CHANNEL_LOGGING
-        mLog.push("Send error: " + reason);
+        if (mIos.mPrint)
+        {
+            std::cout << reason << std::endl;
+#ifdef ENABLE_NET_LOG
+            lout << mLog << std::endl;
 #endif
-        mSendErrorMessage = reason;
-        mSendStatus = Channel::Status::FatalError;
-        cancelSendQueuedOperations();
+        }
+        
+
+        boost::asio::dispatch(mSendStrand, [&, reason]() {
+
+            LOG_MSG("Send error: " + reason);
+            mSendErrorMessage = reason;
+            mSendStatus = Channel::Status::Stopped;
+            cancelSendQueuedOperations();
+        });
     }
 
     void ChannelBase::setBadRecvErrorState(std::string reason)
     {
-        if (mRecvStatus != Channel::Status::Normal)
-        {
-            std::cout << "Double Error in Channel::setBadRecvErrorState, Channel: " << mLocalName << "\n   " << LOCATION << "\n error set twice." << std::endl;
-            std::terminate();
-        }
-        mRecvErrorMessage = reason;
-        mRecvStatus = Channel::Status::RecvSizeError;
+        if (mIos.mPrint)
+            std::cout << reason << std::endl;
+
+        boost::asio::dispatch(mRecvStrand, [&, reason]() {
+
+            LOG_MSG("Recv bad buff size: " + reason);
+            if (mRecvStatus == Channel::Status::Normal)
+            {
+                mRecvErrorMessage = reason;
+            }
+        });
     }
 
     void ChannelBase::clearBadRecvErrorState()
     {
+        boost::asio::dispatch(mRecvStrand, [&]() {
+            LOG_MSG("Recv clear bad buff size: ");
 
-        if (mRecvStatus != Channel::Status::RecvSizeError)
-        {
-            std::cout << "Error in Channel::clearBadRecvErrorState, Channel: " << mLocalName << "\n   " << LOCATION << "\n Was not in Status::RecvSizeError." << std::endl;
-            std::terminate();
-        }
-
-        mSendErrorMessage = "";
-        mRecvStatus = Channel::Status::Normal;
+            if (activeRecvSizeError() && mRecvStatus == Channel::Status::Normal)
+            {
+                mRecvErrorMessage = {};
+            }
+        });
     }
 }

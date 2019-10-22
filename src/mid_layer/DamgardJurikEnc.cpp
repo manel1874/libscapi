@@ -29,7 +29,7 @@
 #include "../../include/mid_layer/DamgardJurikEnc.hpp"
 
 string DamgardJurikPublicKey::toString() {
-	return string(modulus);
+	return modulus.str();
 }
 
 void DamgardJurikPublicKey::initFromString(const string & row) {
@@ -63,7 +63,7 @@ string DamgardJurikPrivateKey::toString() {
 	biginteger dForS1; //Pre-calculated d in the case the s == 1
 	biginteger p;
 	biginteger q;
-	return string(t) + ":" + string(dForS1) + ":" + string(p) + ":" + string(q);
+	return t.str() + ":" + dForS1.str() + ":" + p.str() + ":" + q.str();
 }
 
 void DamgardJurikPrivateKey::initFromString(const string & row) {

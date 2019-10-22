@@ -37,7 +37,7 @@ void CmtPedersenHashDecommitmentMessage::initFromString(const string & s) {
 }
 
 string CmtPedersenHashDecommitmentMessage::toString() {
-	string output = (string) r->getR();
+	string output = r->getR().str();
 	const byte * xBytes = &((*x)[0]);
 	output += ":";
 	output += string(reinterpret_cast<char const*>(xBytes), x->size());

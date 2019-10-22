@@ -2,8 +2,9 @@
 
 #include "libOTe/Tools/Tools.h"
 #include <cryptoTools/Common/Log.h>
-#include <cryptoTools/Common/ByteStream.h>
 #include <cryptoTools/Crypto/Commit.h>
+#include <cryptoTools/Network/Channel.h>
+
 #include "TcoOtDefines.h"
 
 namespace osuCrypto
@@ -11,30 +12,30 @@ namespace osuCrypto
     using namespace std;
 
 
-
-
-    std::unique_ptr<OtExtSender> IknpOtExtSender::split()
+    IknpOtExtSender IknpOtExtSender::splitBase()
     {
-
-        std::unique_ptr<OtExtSender> ret(new IknpOtExtSender());
-
         std::array<block, gOtExtBaseOtCount> baseRecvOts;
 
         for (u64 i = 0; i < mGens.size(); ++i)
-        {
             baseRecvOts[i] = mGens[i].get<block>();
-        }
 
-        ret->setBaseOts(baseRecvOts, mBaseChoiceBits);
+        return IknpOtExtSender(baseRecvOts, mBaseChoiceBits);
+    }
 
-        return std::move(ret);
+    std::unique_ptr<OtExtSender> IknpOtExtSender::split()
+    {
+        std::array<block, gOtExtBaseOtCount> baseRecvOts;
+
+        for (u64 i = 0; i < mGens.size(); ++i)
+            baseRecvOts[i] = mGens[i].get<block>();
+
+        return std::make_unique<IknpOtExtSender>(baseRecvOts, mBaseChoiceBits);
     }
 
     void IknpOtExtSender::setBaseOts(span<block> baseRecvOts, const BitVector & choices)
     {
         if (baseRecvOts.size() != gOtExtBaseOtCount || choices.size() != gOtExtBaseOtCount)
             throw std::runtime_error("not supported/implemented");
-
 
         mBaseChoiceBits = choices;
         for (u64 i = 0; i < gOtExtBaseOtCount; i++)
@@ -83,9 +84,9 @@ namespace osuCrypto
             {
                 u64 step = std::min<u64>(numSuperBlocks - superBlkIdx, (u64)commStepSize);
 
-                chl.recv(u.data(), step * superBlkSize * 128 * sizeof(block));
+                chl.recv((u8*)u.data(), step * superBlkSize * 128 * sizeof(block));
                 uIter = (block*)u.data();
-            } 
+            }
 
             // transpose 128 columns at at time. Each column will be 128 * superBlkSize = 1024 bits long.
             for (u64 colIdx = 0; colIdx < 128; ++colIdx)
@@ -117,7 +118,7 @@ namespace osuCrypto
                 tIter += 8;
             }
 
-            // transpose our 128 columns of 1024 bits. We will have 1024 rows, 
+            // transpose our 128 columns of 1024 bits. We will have 1024 rows,
             // each 128 bits wide.
             sse_transpose128x1024(t);
 
@@ -162,7 +163,7 @@ namespace osuCrypto
         }
 
 #ifdef IKNP_SHA_HASH
-        SHA1 sha;
+        RandomOracle sha;
         u8 hashBuff[20];
         u64 doneIdx = 0;
 

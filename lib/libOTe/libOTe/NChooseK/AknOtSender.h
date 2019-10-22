@@ -5,11 +5,12 @@
 #include <cryptoTools/Crypto/PRNG.h>
 #include "libOTe/TwoChooseOne/OTExtInterface.h"
 #include <cryptoTools/Common/BitVector.h>
+#include <cryptoTools/Common/Timer.h>
 
 namespace osuCrypto
 {
 
-    class AknOtSender
+    class AknOtSender : public TimerAdapter
     {
     public:
         AknOtSender();
@@ -27,7 +28,7 @@ namespace osuCrypto
         }
 
         void init(u64 totalOTCount, u64 cutAndChooseThreshold, double p,
-            OtExtSender& ots, ArrayView<Channel> chls, PRNG& prng);
+            OtExtSender& ots, span<Channel> chls, PRNG& prng);
 
         //std::vector<BitVector> mTheirPermutes;
 
