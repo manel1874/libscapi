@@ -34,6 +34,7 @@
 #include <wmmintrin.h>
 #elif __aarch64__
 #include "../infra/SSE2NEON.h"
+#include "../infra/aes_arm.h"
 #endif
 
 

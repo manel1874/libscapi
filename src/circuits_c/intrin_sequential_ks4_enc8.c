@@ -9,14 +9,14 @@
 
 #include <stdint.h>
 #include <stdio.h>
-#include <wmmintrin.h>
 #include <inttypes.h>
-
-#if defined(__INTEL_COMPILER)
-# include <ia32intrin.h> 
-#elif defined(__GNUC__)
+#ifdef __x86_64__
+#include <wmmintrin.h>
 # include <emmintrin.h>
 # include <smmintrin.h>
+#elif __aarch64__
+#include "../../include/infra/sse2neon.h"
+#include "../../include/infra/aes_arm.h"
 #endif
 
 

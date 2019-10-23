@@ -26,9 +26,8 @@
 */
 #ifdef __x86_64__
 #include <emmintrin.h>
-typedef __m128i block;
-#elif __arch64__
-#include "../infra/SSE2NEON.h"
+#elif __aarch64__
+#include "../infra/sse2neon.h"
 #endif
 
 

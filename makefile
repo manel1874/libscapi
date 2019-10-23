@@ -26,11 +26,9 @@ CPP_FILES     := $(wildcard src/*/*.cpp)
 CPP_FILES     += $(wildcard tools/circuits/scapiBristolConverter/*.cpp)
 CPP_FILES     += $(wildcard tools/circuits/scapiNecConverter/*.cpp)
 CPP_FILES     += $(wildcard src/*/*.cpp)
-ifeq ($(uname_arch), x86_64)
 C_FILES       := $(wildcard src/*/*.c)
-OBJ_FILES     += $(patsubst src/%.c,obj/%.o,$(C_FILES))
-endif
 OBJ_FILES     := $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES))
+OBJ_FILES     += $(patsubst src/%.c,obj/%.o,$(C_FILES))
 OBJ_FILES     += $(patsubst tools/circuits/scapiBristolConverter/%.cpp,obj/tools/scapiBristolConverter/%.o,$(CPP_FILES))
 OBJ_FILES     += $(patsubst tools/circuits/scapiNecConverter/%.cpp,obj/tools/scapiNecConverter/%.o,$(CPP_FILES))
 
@@ -63,7 +61,7 @@ ifeq ($(uname_arch), armv7l)
 endif
 ifeq ($(uname_arch), aarch64)
 	OUT_DIR        = obj obj/primitives obj/interactive_mid_protocols obj/mid_layer obj/comm obj/infra obj/cryptoInfra \
-	obj/tools/scapiNecConverter obj/tools/scapiBristolConverter obj/circuits
+	obj/circuits obj/tools/scapiNecConverter obj/tools/scapiBristolConverter
 	CPP_OPTIONS   := -g -std=$(GCC_STANDARD) $(INC) -Wall -Wno-narrowing -Wno-uninitialized \
 	-Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable -Wno-unused-result \
 	-Wno-sign-compare -Wno-parentheses -Wno-ignored-attributes -Wno-return-type \
@@ -122,7 +120,12 @@ $(SLib): $(OBJ_FILES)
 tests: compile-tests
 
 obj/circuits_c/%.o: src/circuits_c/%.c
+ifeq ($(uname_arch), x86_64)
 	gcc -fPIC -mavx -maes -mpclmul -DRDTSC -DTEST=AES128  -O3 -c -o $@ $<
+endif
+ifeq ($(uname_arch), aarch64)
+	gcc -fPIC -march=armv8-a+crypto -flax-vector-conversions -O3 -c -o $@ $<
+endif
 obj/circuits/%.o: src/circuits/%.cpp
 	g++ -c $(CPP_OPTIONS) -o $@ $<
 obj/comm/%.o: src/comm/%.cpp
