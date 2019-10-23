@@ -1,3 +1,4 @@
+#ifdef __aarch64
 #include "../../include/infra/aes_arm.h"
 
 inline void aes_schedule( uint* RK, octet* K )
@@ -181,3 +182,5 @@ inline __mi128 octetTomi128(octet* data)
     
     return res;
 }
+
+#endif
