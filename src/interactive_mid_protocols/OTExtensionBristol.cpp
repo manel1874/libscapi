@@ -1,4 +1,4 @@
-#ifndef _WIN32
+#ifdef __x86_64__
 #include "../../include/interactive_mid_protocols/OTExtensionBristol.hpp"
 
 
