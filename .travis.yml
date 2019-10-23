@@ -21,7 +21,6 @@ addons:
     packages:
       - g++-7
       - libssl-dev
-      - clang-3.8
       - build-essential
       - libssl-dev
       - libgmp3-dev
