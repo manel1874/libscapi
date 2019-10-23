@@ -25,7 +25,6 @@
 * 
 */
 
-#ifdef __x86_64__
 #include <string.h>
 #include <iostream>
 #include "../../include/circuits/Compat.h"
@@ -522,5 +521,3 @@ bool RowReductionGarbledBooleanCircuit::internalVerify(block *bothInputKeys, blo
 	return isVerified;
 
 }
-
-#endif

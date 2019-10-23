@@ -26,7 +26,6 @@
 */
 
 
-#ifdef __x86_64__
 #include "../../include/circuits/GarbledBooleanCircuitNoFixedKey.h"
 
 
@@ -45,5 +44,3 @@ int GarbledBooleanCircuitNoFixedKey::getGarbledTableSize()
 		return sizeof(block) * (numberOfGates - numOfXorGates - numOfNotGates) * 2;
 
 }
-
-#endif

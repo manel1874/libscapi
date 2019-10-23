@@ -25,7 +25,6 @@
 * 
 */
 
-#ifdef __x86_64__
 #ifndef AES_KS4X_KS_Y_H
 #define AES_KS4X_KS_Y_H
 
@@ -50,6 +49,5 @@ extern "C" {
 
 #ifdef __cplusplus
 };
-#endif
 #endif
 #endif

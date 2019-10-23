@@ -25,7 +25,6 @@
 * 
 */
 
-#ifdef __x86_64__
 #pragma once
 
 #include "Config.h"
@@ -329,5 +328,3 @@ public:
 		virtual void garble(block * emptyBothInputKeys, block * emptyBothOutputKeys, std::vector<unsigned char> & emptyTranslationTable, block seed) = 0;
 		
 };
-
-#endif

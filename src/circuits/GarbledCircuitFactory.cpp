@@ -25,7 +25,7 @@
 * 
 */
 
-#ifdef __x86_64__
+
 #include "../../include/circuits/GarbledCircuitFactory.hpp"
 #include "../../include/circuits/RowReductionGarbledBooleanCircuit.h"
 #include "../../include/circuits/StandardGarbledBooleanCircuit.h"
@@ -63,5 +63,3 @@ GarbledBooleanCircuit* GarbledCircuitFactory::createCircuit(std::string fileName
 		break;
 	}
 }
-
-#endif

@@ -16,7 +16,6 @@ struct GarbledGate;
 #include <tuple>
 #include <openssl/rand.h>
 #include "../primitives/PrfOpenSSL.hpp"
-//#include "TedKrovetzAesNiWrapperC.h"
 
 /*
  * GarbledBooleanCircuitNoIntrinsics is a general abstract class for garbled circuits.

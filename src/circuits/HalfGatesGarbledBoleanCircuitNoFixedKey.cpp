@@ -25,7 +25,6 @@
 * 
 */
 
-#ifdef __x86_64__
 #include <string.h>
 #include <iostream>
 #include "../../include/circuits/Compat.h"
@@ -163,7 +162,8 @@ void HalfGatesGarbledBoleanCircuitNoFixedKey::garble(block *emptyBothInputKeys, 
 			plainText[3] = _mm_set_epi32(0, 0, 0, i + numberOfGates);
 
 			//create the plaintext which is the ks4_ec4
-			intrin_sequential_ks4_enc4((const unsigned char*)plainText, (unsigned char*)cipherText, 4, (unsigned char*) KEY, (unsigned char*)keys, nullptr);
+			intrin_sequential_ks4_enc4((const unsigned char*)plainText, (unsigned char*)cipherText,
+			        4, (unsigned char*) KEY, (unsigned char*)keys, nullptr);
 
 			//for more information, go to the pseudocode of the paper, page 9
 			if (wire1SignalBit == 0){
@@ -182,13 +182,15 @@ void HalfGatesGarbledBoleanCircuitNoFixedKey::garble(block *emptyBothInputKeys, 
 				tempK0 = _mm_xor_si128(cipherText[0], garbledTables[2 * nonXorIndex]);
 			}
 
-			garbledTables[2 * nonXorIndex + 1] = _mm_xor_si128(_mm_xor_si128(cipherText[2], cipherText[3]), keys[0]);
+			garbledTables[2 * nonXorIndex + 1] = _mm_xor_si128(_mm_xor_si128(cipherText[2], cipherText[3]),
+			        keys[0]);
 
 			if (wire1SignalBit == 0){
 				tempK1 = cipherText[2];
 			}
 			else{
-				tempK1 = _mm_xor_si128(_mm_xor_si128(cipherText[2], garbledTables[2 * nonXorIndex + 1]), keys[0]);
+				tempK1 = _mm_xor_si128(_mm_xor_si128(cipherText[2], garbledTables[2 * nonXorIndex + 1]),
+				        keys[0]);
 			}
 
 			//set the garbled output to be the XOR of the two temp keys
@@ -292,7 +294,8 @@ void  HalfGatesGarbledBoleanCircuitNoFixedKey::compute(block * singleWiresInputK
 			plaintext[1] = _mm_set_epi32(0, 0, 0, i + numberOfGates);
 
 
-			intrin_sequential_ks2_enc2((const unsigned char*)plaintext, (unsigned char*)ciphertext, 2, (unsigned char*)KEY, (unsigned char*)keys, nullptr);
+			intrin_sequential_ks2_enc2((const unsigned char*)plaintext, (unsigned char*)ciphertext, 2,
+			        (unsigned char*)KEY, (unsigned char*)keys, nullptr);
 
 			
 			//check the pseudo code of the paper, page 9.
@@ -309,7 +312,8 @@ void  HalfGatesGarbledBoleanCircuitNoFixedKey::compute(block * singleWiresInputK
 				tempK1 = ciphertext[1];
 			}
 			else{
-				tempK1 = _mm_xor_si128(_mm_xor_si128(ciphertext[1], garbledTables[2 * nonXorIndex + 1]), keys[0]);
+				tempK1 = _mm_xor_si128(_mm_xor_si128(ciphertext[1], garbledTables[2 * nonXorIndex + 1]),
+				        keys[0]);
 			}
 
 			computedWires[garbledGates[i].output] = _mm_xor_si128(tempK0, tempK1);
@@ -345,17 +349,18 @@ bool HalfGatesGarbledBoleanCircuitNoFixedKey::internalVerify(block *bothInputKey
 
 		if (garbledGates[i].truthTable == XOR_GATE){
 			//create the 0-key by xoring the two 0-keys of the input
-			garbledWires[garbledGates[i].output] = _mm_xor_si128(garbledWires[garbledGates[i].input0], garbledWires[garbledGates[i].input1]);
+			garbledWires[garbledGates[i].output] = _mm_xor_si128(garbledWires[garbledGates[i].input0],
+			        garbledWires[garbledGates[i].input1]);
 			continue;
 		}
 		else if (garbledGates[i].truthTable == XOR_NOT_GATE){
 			//create the 0-key by xoring the two 0-keys of the input and xoring that with the delta.
-			garbledWires[garbledGates[i].output] = _mm_xor_si128(_mm_xor_si128(garbledWires[garbledGates[i].input0], garbledWires[garbledGates[i].input1]), *deltaFreeXor);
+			garbledWires[garbledGates[i].output] = _mm_xor_si128(_mm_xor_si128(garbledWires[
+			        garbledGates[i].input0], garbledWires[garbledGates[i].input1]), *deltaFreeXor);
 
 
 		}
 		else{
-
 
 			//get the keys from the input wires of the gate
 			block keys[4];
@@ -390,7 +395,8 @@ bool HalfGatesGarbledBoleanCircuitNoFixedKey::internalVerify(block *bothInputKey
 			plainText[3] = _mm_set_epi32(0, 0, 0, i + numberOfGates);
 
 			//create the plaintext which is the ks4_ec4
-			intrin_sequential_ks4_enc4((const unsigned char*)plainText, (unsigned char*)cipherText, 4, (unsigned char*)KEY, (unsigned char*)keys, nullptr);
+			intrin_sequential_ks4_enc4((const unsigned char*)plainText,(unsigned char*)cipherText, 4,
+			        (unsigned char*)KEY, (unsigned char*)keys, nullptr);
 
 			//T0 = AES(a0, i) XOR AES(a0, i) XOR lsb(a0)deltaFreeXor
 
@@ -399,7 +405,8 @@ bool HalfGatesGarbledBoleanCircuitNoFixedKey::internalVerify(block *bothInputKey
 					return false;
 			}
 			else{//signal bit is 1
-				if (!equalBlocks(garbledTables[2 * nonXorIndex], _mm_xor_si128(_mm_xor_si128(cipherText[0], cipherText[1]), *deltaFreeXor)))
+				if (!equalBlocks(garbledTables[2 * nonXorIndex], _mm_xor_si128(_mm_xor_si128(cipherText[0],
+				        cipherText[1]), *deltaFreeXor)))
 					return false;
 			}
 
@@ -412,14 +419,16 @@ bool HalfGatesGarbledBoleanCircuitNoFixedKey::internalVerify(block *bothInputKey
 				tempK0 = _mm_xor_si128(cipherText[0], garbledTables[2 * nonXorIndex]);
 			}
 
-			if (!equalBlocks(garbledTables[2 * nonXorIndex + 1], _mm_xor_si128(_mm_xor_si128(cipherText[2], cipherText[3]), keys[0])))
+			if (!equalBlocks(garbledTables[2 * nonXorIndex + 1], _mm_xor_si128(_mm_xor_si128(cipherText[2],
+			        cipherText[3]), keys[0])))
 				return false;
 
 			if (wire1signalBitsArray[0] == 0){
 				tempK1 = cipherText[2];
 			}
 			else{
-				tempK1 = _mm_xor_si128(_mm_xor_si128(cipherText[2], garbledTables[2 * nonXorIndex + 1]), keys[0]);
+				tempK1 = _mm_xor_si128(_mm_xor_si128(cipherText[2], garbledTables[2 * nonXorIndex + 1]),
+				        keys[0]);
 			}
 
 			//set the garbled output to be the XOR of the two temp keys
@@ -440,5 +449,3 @@ bool HalfGatesGarbledBoleanCircuitNoFixedKey::internalVerify(block *bothInputKey
 	return true;
 
 }
-
-#endif

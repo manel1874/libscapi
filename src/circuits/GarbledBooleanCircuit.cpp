@@ -25,7 +25,6 @@
 * 
 */
 
-#ifdef __x86_64__
 #include <iostream>
 #include <string.h>
 #include <memory>
@@ -465,4 +464,3 @@ void GarbledBooleanCircuit::readCircuitFromFile(const char* fileName)
 	myfile.close();
 }
 
-#endif

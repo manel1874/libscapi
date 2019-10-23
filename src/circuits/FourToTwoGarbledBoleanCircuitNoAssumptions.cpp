@@ -25,7 +25,6 @@
 * 
 */
 
-#ifdef __x86_64__
 #include <string.h>
 #include <iostream>
 #include "../../include/circuits/Compat.h"
@@ -792,5 +791,3 @@ bool FourToTwoGarbledBoleanCircuitNoAssumptions::internalVerify(block *bothInput
 
 	return true;
 }
-
-#endif

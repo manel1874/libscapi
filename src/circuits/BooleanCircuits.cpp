@@ -25,7 +25,6 @@
 * 
 */
 
-#ifdef __x86_64__
 #include "../../include/circuits/BooleanCircuits.hpp"
 
 /****************************************************/
@@ -394,5 +393,3 @@ void BooleanCircuit::write(string outputFileName){
 	}
 	outputFile.close();
 }
-
-#endif

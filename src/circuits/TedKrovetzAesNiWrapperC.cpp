@@ -25,7 +25,6 @@
 * 
 */
 
-#ifdef __x86_64__
 #include "../../include/circuits/TedKrovetzAesNiWrapperC.h"
 
 void AES_128_Key_Expansion(const unsigned char *userkey, AES_KEY *aesKey)
@@ -239,5 +238,3 @@ void AES_ecb_encrypt_chunk_in_out(block *in, block *out, unsigned nblks, AES_KEY
 	}
 	
 }
-
-#endif

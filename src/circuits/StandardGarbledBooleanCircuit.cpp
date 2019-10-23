@@ -25,7 +25,6 @@
 * 
 */
 
-#ifdef __x86_64__
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>
@@ -396,5 +395,3 @@ bool StandardGarbledBooleanCircuit::internalVerify(block *bothInputKeys, block *
 	return isVerified;
 
 }
-
-#endif

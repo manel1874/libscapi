@@ -26,7 +26,6 @@
 */
 
 
-#ifdef __x86_64__
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>
@@ -466,5 +465,3 @@ bool FreeXorGarbledBooleanCircuit::internalVerify(block *bothInputKeys, block *e
 	return isVerified;
 
 }
-
-#endif

@@ -25,7 +25,6 @@
 * 
 */
 
-#ifdef __x86_64__
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>
@@ -53,14 +52,17 @@ void HalfGatesGarbledBooleanCircuit::createCircuitMemory(const char* fileName, b
 	numOfRows = 2;
 
 	if (isNonXorOutputsRequired == true){
-		garbledTables = (block *)_aligned_malloc(sizeof(block) * ((numberOfGates - numOfXorGates - numOfNotGates) * 2 + 2 * numberOfOutputs), 16);
+		garbledTables = (block *)_aligned_malloc(sizeof(block) * ((numberOfGates - numOfXorGates - numOfNotGates)
+		        * 2 + 2 * numberOfOutputs), 16);
 		if (garbledTables == nullptr) {
 			cout << "garbledTables could not be allocated";
 			exit(0);
 		}
-		memset(garbledTables, 0, (sizeof(block) * ((numberOfGates - numOfXorGates - numOfNotGates) * 2 + 2 * numberOfOutputs)));
+		memset(garbledTables, 0, (sizeof(block) * ((numberOfGates - numOfXorGates - numOfNotGates)
+		* 2 + 2 * numberOfOutputs)));
 
-        garbledWires = (block *)_aligned_malloc(sizeof(block) * ((lastWireIndex + 1) + 1 + 2 * numberOfOutputs), 16);
+        garbledWires = (block *)_aligned_malloc(sizeof(block) * ((lastWireIndex + 1) + 1 + 2 * numberOfOutputs),
+                16);
 
 		if (garbledWires == nullptr) {
 			cout << "garbledWires could not be allocated";
@@ -70,7 +72,8 @@ void HalfGatesGarbledBooleanCircuit::createCircuitMemory(const char* fileName, b
 		garbledWires++;
 	}
 	else{
-		garbledTables = (block *)_aligned_malloc(sizeof(block) * (numberOfGates - numOfXorGates - numOfNotGates) * 2, 16);
+		garbledTables = (block *)_aligned_malloc(sizeof(block) *
+		        (numberOfGates - numOfXorGates - numOfNotGates) * 2, 16);
 
 		if (garbledTables == nullptr) {
 			cout << "garbled tables could not be allocated";
@@ -102,18 +105,13 @@ void HalfGatesGarbledBooleanCircuit::createCircuitMemory(const char* fileName, b
 	}
 
 	//we put the indices ahead of time to encrypt the whole chunk in one call.
-	for (int i = 0; i < numberOfInputs; i++){
-
+	for (int i = 0; i < numberOfInputs; i++)
 		indexArray[i] = _mm_set_epi32(0, 0, 0, i);
-
-	}
-
 }
 
 
 HalfGatesGarbledBooleanCircuit::~HalfGatesGarbledBooleanCircuit(void)
 {
-
 	//free memory allocated in this class
 	if (indexArray!=nullptr)
 		_aligned_free(indexArray);
@@ -128,7 +126,8 @@ HalfGatesGarbledBooleanCircuit::~HalfGatesGarbledBooleanCircuit(void)
 
 }
 
-void HalfGatesGarbledBooleanCircuit::garble(block *emptyBothInputKeys, block *emptyBothOutputKeys, vector<unsigned char> & emptyTranslationTable, block seed){
+void HalfGatesGarbledBooleanCircuit::garble(block *emptyBothInputKeys, block *emptyBothOutputKeys,
+        vector<unsigned char> & emptyTranslationTable, block seed){
 
 	this->seed = seed;
 
@@ -148,12 +147,14 @@ void HalfGatesGarbledBooleanCircuit::garble(block *emptyBothInputKeys, block *em
 
 		if (garbledGates[i].truthTable == XOR_GATE){
 			//create the 0-key by xoring the two 0-keys of the input
-			garbledWires[garbledGates[i].output] = _mm_xor_si128(garbledWires[garbledGates[i].input0], garbledWires[garbledGates[i].input1]);
+			garbledWires[garbledGates[i].output] = _mm_xor_si128(garbledWires[garbledGates[i].input0],
+			        garbledWires[garbledGates[i].input1]);
 			continue;
 		}
 		else if (garbledGates[i].truthTable == XOR_NOT_GATE){
 			//create the 0-key by xoring the two 0-keys of the input and xoring that with the delta.
-			garbledWires[garbledGates[i].output] = _mm_xor_si128(_mm_xor_si128(garbledWires[garbledGates[i].input0], garbledWires[garbledGates[i].input1]), deltaFreeXor);
+			garbledWires[garbledGates[i].output] = _mm_xor_si128(_mm_xor_si128(
+			        garbledWires[garbledGates[i].input0], garbledWires[garbledGates[i].input1]), deltaFreeXor);
 
 		}
 
@@ -195,10 +196,12 @@ void HalfGatesGarbledBooleanCircuit::garble(block *emptyBothInputKeys, block *em
 
 			if (wire1signalBitsArray == 0){//signal bit of wire 0 of input1 is zero
 
-				garbledTables[2 * nonXorIndex] = _mm_xor_si128(_mm_xor_si128(encryptedKeys[0], keys[0]), _mm_xor_si128(encryptedKeys[1], keys[1]));
+				garbledTables[2 * nonXorIndex] = _mm_xor_si128(_mm_xor_si128(encryptedKeys[0], keys[0]),
+				        _mm_xor_si128(encryptedKeys[1], keys[1]));
 			}
 			else{//signal bit of wire 0 of input1 is one
-				garbledTables[2 * nonXorIndex] = _mm_xor_si128(_mm_xor_si128(_mm_xor_si128(encryptedKeys[0], keys[0]), _mm_xor_si128(encryptedKeys[1], keys[1])), deltaFreeXor);
+				garbledTables[2 * nonXorIndex] = _mm_xor_si128(_mm_xor_si128(_mm_xor_si128(encryptedKeys[0],
+				        keys[0]), _mm_xor_si128(encryptedKeys[1], keys[1])), deltaFreeXor);
 			}
 
 			//two temporary values that will eventually be XORed together to calculate the output0 zero wire
@@ -209,16 +212,19 @@ void HalfGatesGarbledBooleanCircuit::garble(block *emptyBothInputKeys, block *em
 				tempK0 = _mm_xor_si128(encryptedKeys[0], keys[0]);
 			}
 			else{//signal bit of wire 0 of input0 is one
-				tempK0 = _mm_xor_si128(_mm_xor_si128(encryptedKeys[0],keys[0]), garbledTables[2 * nonXorIndex]);
+				tempK0 = _mm_xor_si128(_mm_xor_si128(encryptedKeys[0],keys[0]),
+				        garbledTables[2 * nonXorIndex]);
 			}
 
-			garbledTables[2 * nonXorIndex + 1] = _mm_xor_si128(_mm_xor_si128(_mm_xor_si128(encryptedKeys[2], keys[2]), _mm_xor_si128(encryptedKeys[3], keys[3])), inputs[0]);
+			garbledTables[2 * nonXorIndex + 1] = _mm_xor_si128(_mm_xor_si128(_mm_xor_si128(encryptedKeys[2],
+			        keys[2]), _mm_xor_si128(encryptedKeys[3], keys[3])), inputs[0]);
 
 			if (wire1signalBitsArray == 0){
 				tempK1 = _mm_xor_si128(encryptedKeys[2], keys[2]);
 			}
 			else{
-				tempK1 = _mm_xor_si128(_mm_xor_si128(_mm_xor_si128(encryptedKeys[2], keys[2]), garbledTables[2 * nonXorIndex + 1]), inputs[0]);
+				tempK1 = _mm_xor_si128(_mm_xor_si128(_mm_xor_si128(encryptedKeys[2], keys[2]),
+				        garbledTables[2 * nonXorIndex + 1]), inputs[0]);
 			}
 
 			//set the garbled output to be the XOR of the two temp keys
@@ -304,7 +310,8 @@ void  HalfGatesGarbledBooleanCircuit::compute(block * singleWiresInputKeys, bloc
 
 		if (garbledGates[i].truthTable == XOR_GATE || garbledGates[i].truthTable == XOR_NOT_GATE){
 			//create the output key by xoring the computed keys if the first input wire and the second input wire
-			computedWires[garbledGates[i].output] = _mm_xor_si128(computedWires[garbledGates[i].input0], computedWires[garbledGates[i].input1]);
+			computedWires[garbledGates[i].output] = _mm_xor_si128(computedWires[garbledGates[i].input0],
+			        computedWires[garbledGates[i].input1]);
 			continue;
 
 		}
@@ -336,19 +343,22 @@ void  HalfGatesGarbledBooleanCircuit::compute(block * singleWiresInputKeys, bloc
 			AES_ecb_encrypt_blks_2_in_out(keys2, encryptedKeys, &aesFixedKey);
 
 			block tempK0, tempK1;
-			//for more information look at the pseudo-code of "Two Halves Make a Whole Reducing Data Transfer in Garbled Circuits using Half Gates" page 9
+			//for more information look at the pseudo-code of "Two Halves Make a Whole Reducing Data Transfer in
+			// Garbled Circuits using Half Gates" page 9
 			if (wire0SignalBit == 0){
 				tempK0 = _mm_xor_si128(encryptedKeys[0], keys2[0]);
 			}
 			else{
-				tempK0 = _mm_xor_si128(_mm_xor_si128(encryptedKeys[0], keys2[0]), garbledTables[2 * nonXorIndex]);
+				tempK0 = _mm_xor_si128(_mm_xor_si128(encryptedKeys[0], keys2[0]),
+				        garbledTables[2 * nonXorIndex]);
 			}
 
 			if (wire1SignalBit == 0){
 				tempK1 = _mm_xor_si128(encryptedKeys[1], keys2[1]);
 			}
 			else{
-				tempK1 = _mm_xor_si128(_mm_xor_si128(_mm_xor_si128(encryptedKeys[1], keys2[1]), garbledTables[2 * nonXorIndex + 1]), keys[0]);
+				tempK1 = _mm_xor_si128(_mm_xor_si128(_mm_xor_si128(encryptedKeys[1], keys2[1]),
+				        garbledTables[2 * nonXorIndex + 1]), keys[0]);
 			}
 
 			computedWires[garbledGates[i].output] = _mm_xor_si128(tempK0, tempK1);
@@ -361,9 +371,10 @@ void  HalfGatesGarbledBooleanCircuit::compute(block * singleWiresInputKeys, bloc
 
 	}
 
-	if (isNonXorOutputsRequired){//check if the user requires that the output keys will not have a fixed delta xor between pair of keys of a wire.
-
-		//call the function that returns the Output where xoring with the other wire key will not have fixed delta for all the outputs
+	if (isNonXorOutputsRequired){
+	    //check if the user requires that the output keys will not have a fixed delta xor between pair of keys of a wire.
+		//call the function that returns the Output where xoring
+		// with the other wire key will not have fixed delta for all the outputs
 		computeOutputWiresToNoFixedDelta(nonXorIndex, Output);
 	}
 
@@ -506,5 +517,3 @@ bool HalfGatesGarbledBooleanCircuit::internalVerify(block *bothInputKeys, block 
 	return true;
 
 }
-
-#endif

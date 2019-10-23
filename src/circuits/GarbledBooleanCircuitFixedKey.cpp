@@ -25,7 +25,6 @@
 * 
 */
 
-#ifdef __x86_64__
 #include "../../include/circuits/Compat.h"
 #include "../../include/circuits/Config.h"
 #include "../../include/circuits/GarbledGate.h"
@@ -307,5 +306,3 @@ void GarbledBooleanCircuitFixedKey::garbleOutputWiresToNoFixedDelta(block *delta
 	}
 
 }
-
-#endif

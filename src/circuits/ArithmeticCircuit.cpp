@@ -1,4 +1,3 @@
-#ifdef __x86_64__
 
 #include <fstream>
 #include "../../include/circuits/ArithmeticCircuit.hpp"
@@ -386,5 +385,3 @@ void ArithmeticCircuit::reArrangeCircuit() {
     gates = move(arrangedGates);
 
 }
-
-#endif
