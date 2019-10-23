@@ -25,6 +25,7 @@
 *
 */
 
+#ifdef __x86_64__
 #pragma once
 
 #include "../cryptoInfra/SecurityLevel.hpp"
@@ -144,3 +145,5 @@ public:
 	virtual shared_ptr<OTBatchSOutput> transfer(OTBatchSInput * input) override;
 
 };
+
+#endif
