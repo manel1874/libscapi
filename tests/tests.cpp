@@ -50,7 +50,11 @@
 #include "../include/interactive_mid_protocols/SigmaProtocol.hpp"
 #include "../include/primitives/Mersenne.hpp"
 #include <ctype.h>
+#ifdef __x86_64__
 #include <smmintrin.h>
+#elif __aarch64__
+#include "../include/infra/sse2neon.h"
+#endif
 
 
 biginteger endcode_decode(biginteger bi) {
@@ -900,22 +904,13 @@ TEST_CASE("Gates and Wires", "") {
 	}
 
 	SECTION("Boolean Circuit From file") {
-#ifdef _WIN32
-		BooleanCircuit bc(new scannerpp::File("../../../../test/testCircuit.txt"));
-		bc.write("../../../../test/testCircuitOutput.txt");
-#else
-
 		BooleanCircuit bc(new scannerpp::File("testCircuit.txt"));
 		bc.write("testCircuitOutput.txt");
-
 		BooleanCircuit aesbc(new scannerpp::File("NigelAes.txt"));
 		aesbc.write("NigelAesOutput.txt");
-#endif
 		REQUIRE(bc.getNumberOfInputs(1) == 4);
 		REQUIRE(bc.getNumberOfInputs(2) == 1);
 		REQUIRE(bc.getOutputWireIndices().size() == 1);
-
-
 	}
 }
 
