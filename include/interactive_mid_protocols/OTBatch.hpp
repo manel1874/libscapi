@@ -31,7 +31,7 @@
 #ifdef __x86_64__
 #include <emmintrin.h>
 #elif __aarch64__
-#include "../infra/SSE2NEON.h"
+#include "../infra/sse2neon.h"
 #endif
 #ifndef _WIN32
 #include <OTExtensionBristol/OT/BitMatrix.h>

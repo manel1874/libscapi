@@ -10,7 +10,7 @@
 #ifdef __x86_64__
 #include <x86intrin.h>
 #elif __aarch64__
-#include "../infra/SSE2NEON.h"
+#include "../infra/sse2neon.h"
 #endif
 #include <gmp.h>
 #include "Prg.hpp"

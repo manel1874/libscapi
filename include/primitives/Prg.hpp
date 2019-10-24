@@ -37,7 +37,7 @@
 #ifdef __x86_64__
 #include <emmintrin.h>
 #elif __aarch64__
-#include "../infra/SSE2NEON.h"
+#include "../infra/sse2neon.h"
 #include <stdlib.h>
 #include <malloc.h>
 #endif
