@@ -25,8 +25,10 @@
 * 
 */
 
+#ifndef INTERACTIVE_MID_TEST
+#define INTERACTIVE_MID_TEST
 
-# include"catch.hpp"
+#include "catch.hpp"
 #include "../include/interactive_mid_protocols/SigmaProtocol.hpp"
 #include "../include/interactive_mid_protocols/SigmaProtocolDlog.hpp"
 #include "../include/interactive_mid_protocols/SigmaProtocolDH.hpp"
@@ -538,3 +540,5 @@ TEST_CASE("SigmaProtocols", "[SigmaProtocolDlog, SigmaProtocolDH]")
 		
 	}
 }
+
+#endif
