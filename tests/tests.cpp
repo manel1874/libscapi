@@ -481,17 +481,13 @@ TEST_CASE("field operations", "[ZpMersenneIntElement, ZpMersenneLongElement, ZpM
 	SECTION("testing ZpMersenneIntElement") {
 
         ZpMersenneIntElement elem1;
-
-
         test_field(elem1);
 
 	}
-
+#ifdef __x86_64__
 	SECTION("testing ZpMersenneLongElement") {
 
         ZpMersenneLongElement elem1;
-
-
         test_field(elem1);
 
 	}
@@ -499,12 +495,10 @@ TEST_CASE("field operations", "[ZpMersenneIntElement, ZpMersenneLongElement, ZpM
 	SECTION("testing ZpMersenne127Element") {
 
         ZpMersenne127Element elem1;
-
-
         test_field(elem1);
 
 	}
-
+#endif
 
 }
 
