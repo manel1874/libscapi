@@ -2636,7 +2636,7 @@ __m128i _mm_clmulepi64_si128 (__m128i a, __m128i b, const int imm8)
         return (__m128i) (vmull_p64(vgetq_lane_u64(a, 1), vgetq_lane_u64(b, 0)));
     if (imm8 == 0x10)
         return (__m128i) (vmull_p64(vgetq_lane_u64(a, 0), vgetq_lane_u64(b, 1)));
-    if (imm8 == 0x11)
+//    if (imm8 == 0x11)
         return (__m128i) (vmull_p64(vgetq_lane_u64(a, 1), vgetq_lane_u64(b, 1)));
 }
 
