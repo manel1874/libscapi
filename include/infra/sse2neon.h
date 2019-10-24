@@ -2628,7 +2628,7 @@ FORCE_INLINE void _mm_stream_si128(__m128i *p, __m128i a)
     vst1q_s32((int32_t *) p, a);
 }
 
-__m128i _mm_clmulepi64_si128 (__m128i a, __m128i b, const int imm8)
+FORCE_INLINE __m128i _mm_clmulepi64_si128 (__m128i a, __m128i b, const int imm8)
 {
     if (imm8 == 0x00)
         return (__m128i) (vmull_p64(vgetq_lane_u64(a, 0), vgetq_lane_u64(b, 0)));
