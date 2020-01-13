@@ -69,6 +69,7 @@ public:
     ~Measurement();
     void startSubTask(string taskName, int currentIterationNum);
     void endSubTask(string taskName, int currentIterationNum);
+    void writeData(string key, string value);
 
 
 private:
@@ -91,6 +92,7 @@ private:
     vector<vector<double>> *m_cpuEndTimes;
     vector<string> m_names;
     vector<pair<string, string>> m_arguments;
+    map<string, string> m_auxiliaryData;
 
     string m_protocolName;
     int m_partyId = 0;

@@ -132,6 +132,14 @@ void Measurement::endSubTask(string taskName, int currentIterationNum)
     (*m_cpuEndTimes)[taskIdx][currentIterationNum] = ms - (*m_cpuStartTimes)[taskIdx][currentIterationNum];
 }
 
+void Measurement::writeData(string key, string value)
+{
+    if (m_auxiliaryData.find(key) == m_auxiliaryData.end ())
+        m_auxiliaryData[key] = value;
+    else
+        m_auxiliaryData[key] += " " +  value;
+}
+
 
 void Measurement::analyze()
 {
@@ -145,8 +153,7 @@ void Measurement::analyze()
     }
     fileName += ".json";
 
-    //party is the root of the json objects
-    json party = json::array();
+    json partyTimes = json::array();
 
     for (int taskNameIdx = 0; taskNameIdx < m_names.size(); taskNameIdx++)
     {
@@ -161,8 +168,16 @@ void Measurement::analyze()
             task["iteration_" + to_string(iterationIdx)] = streamObj.str();
         }
 
-        party.insert(party.begin(), task);
+        partyTimes.insert(partyTimes.begin(), task);
     }
+
+    //party is the root of the json objects
+    json party;
+    party["times"] = partyTimes;
+
+    //read auxiliary data
+    party["auxiliaryData"] = m_auxiliaryData;
+    
 
     //send json object to create file
     createJsonFile(party, fileName);
