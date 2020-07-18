@@ -5,15 +5,7 @@
 
 int convert_usage()
 {
-    auto usage = R"(
-To run the circuit converter:
-./ScapiBristolConverter <convert_type> [args...]
-
-convert_type can be one of the following:
-	* scapi_to_bristol <scapi_file_path> <bristol_file_name> <is_multiparty>
-	* bristol_to_scapi <bristol_file_path> <scapi_file_name> <parties_number> <is_multiparty>
-				)";
-    cerr << usage << endl;
+    cerr << "(To run the circuit converter: ./ScapiBristolConverter <convert_type>[args...] convert_type can be one of the following: * scapi_to_bristol <scapi_file_path> <bristol_file_name> <is_multiparty> * bristol_to_scapi <bristol_file_path> <scapi_file_name> <parties_number> <is_multiparty>)" << endl;
     return 1;
 }
 

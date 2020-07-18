@@ -22,8 +22,8 @@
     {
 
         bristolfile >> numberOfGates;//get the gates
-        scapiFile << numberOfGates << " "; //print number of gates
-        scapiFile << numParties << endl; //print number of parties
+        scapiFile << numberOfGates << "\n\n"; //print number of gates
+        scapiFile << numParties << "\n\n"; //print number of parties
 
         bristolfile >> numberOfWires; //number of wires
 
@@ -35,6 +35,7 @@
                 scapiFile << index + j << endl;
             }
             index += numInputsPerParty[i];
+            scapiFile << "\n";
         }
 
         //get the number of outputs
@@ -46,14 +47,14 @@
                 scapiFile << numberOfWires - numberOfOutputs + j << endl;
             }
 
-        } else{
-            for (int i=0; i<numParties; i++){
-                scapiFile << i+1 << " " << numberOfOutputs << endl;
+        } else {
+	        scapiFile << numberOfOutputs << "\n\n";
 
-                for (int j=0; j<numberOfOutputs; j++){
-                    scapiFile << numberOfWires - numberOfOutputs + j << endl;
-                }
+            for (int j=0; j<numberOfOutputs; j++){
+                scapiFile << numberOfWires - numberOfOutputs + j << endl;
             }
+            
+	        scapiFile << "\n";
 
         }
 
