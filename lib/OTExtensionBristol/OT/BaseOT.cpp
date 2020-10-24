@@ -11,8 +11,10 @@
 
 extern "C"
 {
-    #include "SimpleOT/ot_sender.h"
-    #include "SimpleOT/ot_receiver.h"
+    //#include "SimpleOT/ot_sender.h"
+    //#include "SimpleOT/ot_receiver.h"
+    #include "quantum_random_oblivious_transfer/qot_receiver.h"
+    #include "quantum_random_oblivious_transfer/qot_sender.h"
 }
 
 using namespace std;
@@ -77,8 +79,11 @@ void send_if_ot_receiver(const TwoPartyPlayer* P, vector<octetStream>& os, OT_RO
     }
 }
 
-void BaseOT::exec_base()
+void BaseOT::exec_base(bool new_receiver_inputs)
 {
+    if (not cpu_has_avx())
+        throw runtime_error("SimpleOT needs AVX support");
+
     int i, j, k, len;
     PRNG G;
     G.ReSeed();
