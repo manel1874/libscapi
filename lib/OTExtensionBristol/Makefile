@@ -16,8 +16,9 @@ LIBQOKDOT = quantum_random_oblivious_transfer/libqokdot.a
 all: lib 
 
 lib: $(COMPLETE) $(OT) $(COMMON)
-	@echo "compling simple ot..........................."
-	cd SimpleOT && make
+	#@echo "compling simple ot..........................."
+	#cd SimpleOT && make
+	cd quantum_random_oblivious_transfer && make	
 	@echo "compling .a ...................."
 	$(AR) -crs libOTExtensionBristol.a $^ 
 
