@@ -7,13 +7,31 @@ void sender_okd (OKDOT_SENDER * s)
 	/*opening key file and storing the key in the sender structure*/
 
 	FILE *senderfile;
+	//char * line = NULL;
+	//size_t len = 0;
+	//ssize_t read;
+
 	int i = 0;
 
-	if ((senderfile = fopen("../quantum_oblivious_key_distribution_linux/signals/AliceObliviousKeys.sgn","r")))
+	if ((senderfile = fopen("AliceObliviousKeys.sgn","r")))
 	{
+		for(int j = 0; j < 4; j++)
+		{// skip first 4 lines
+			if(fscanf(senderfile, "%*[^\n]\n")){}
+		}
+		/**
+		 * 
+		for(int j=0; j<4; j++)
+		{
+			read = getline(&line, &len, senderfile);
+			printf("Retrieved line of length %zu:\n", read);
+			printf("%s", line);
+		}**/
+
 		while (i<KEY_LENGTH)
 		{
-			if(fscanf (senderfile, "%u", &s->sender_OTkey[i]))
+			//if(fscanf (senderfile, "%c", &s->sender_OTkey[i]))
+			if (fread(&s->sender_OTkey[i], 4, 1, senderfile) > 0)
 				i++;
 			else
 				printf ("QOT ERROR: failed to read oblivious keys.\n");
@@ -22,6 +40,8 @@ void sender_okd (OKDOT_SENDER * s)
 	else
 		printf ("QOT ERROR: failed to open oblivious key file: sender's key file .\n");
 
+	//if (line)
+    //    free(line);
 	fclose (senderfile);
 
 }
@@ -36,6 +56,7 @@ void sender_output (OKDOT_SENDER * s, unsigned long long int * v0 , unsigned lon
 	unsigned long int input32b[KEY_LENGTH/(2*32)] = {0};
 	unsigned long int input32b1[KEY_LENGTH/(2*32)] = {0};
 
+
 	/*converts the binary hash inputs into 32bit ints*/
 	for (int i = 0; i < 32; i++)
 	{
@@ -48,7 +69,6 @@ void sender_output (OKDOT_SENDER * s, unsigned long long int * v0 , unsigned lon
 			input32b1[j] += s->sender_OTkey[indexb1[i+j*32]] - '0';
 		}
 	}
-
 
 
 	/*hashes pairs of ints from the input32b and intput32b1 arrays into another 32bit value, which is then stored in the output array*/

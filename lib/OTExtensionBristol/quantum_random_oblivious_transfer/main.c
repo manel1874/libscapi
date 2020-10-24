@@ -49,17 +49,19 @@ int main()
 
 	/*execute OKD and read receiver's key and aux key from file*/
 	receiver_okd (&r);
-	//printf ("Receiver's key: %s\n\n", r.receiver_OTkey);
+	printf ("Receiver's key: %u\n\n", r.receiver_OTkey[0]);
 	//printf ("Receiver's aux key: %s\n\n", r.receiver_OTauxkey);	
 
 	/*execute OKD and read sender's key from file*/
 	sender_okd (&s);
+	printf ("Receiver's key: %u\n\n", r.receiver_OTkey[0]);
 	//printf ("Sender's key: %s\n\n", s.sender_OTkey);
 
 	/*use receiver's aux key to generate two index listes (I0 and I1)*/
 	receiver_indexlist (&r);
 	//printf ("list 0: %d\n", r.indexlist[0][9]);
 	//printf ("list 1: %d\n", r.indexlist[1][9]);
+
 
 	/*use the (supposedly random) numbers stored in array v, as well as the index listes received from the receiver, to generate the output */
 	sender_output (&s, v[0], v[1], r.indexlist[receiver_in], r.indexlist[(receiver_in)^0x1], sender_out);
@@ -78,11 +80,6 @@ int main()
 	printf ("\n\n");
 
 
-
-
-
-
-
 	/*new execution of the protocol with a different choice bit*/
 
 	receiver_in = 0;
@@ -96,7 +93,7 @@ int main()
 		printf ("Sender's output 0: %x   Sender's output 1: %x  \n", sender_out[0][i], sender_out[1][i]);
 	printf ("\n\n");
 
-	receiver_output (&r, v[0], receiver_out);
+	receiver_output (&r, v[receiver_in], receiver_out);
 	for (int i=0; i<OUTPUT_LENGTH/32; i++)
 		printf ("Receiver's output %x  \n", receiver_out[i]);
 	printf ("\n\n");

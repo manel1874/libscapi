@@ -204,8 +204,6 @@ compile-kcp:
 	@mv $(builddir)/KCP/ikcp.a install/lib
 	@touch compile-kcp
 
-LIBQOKDOT = quantum_random_oblivious_transfer/libqokdot.a
-
 #### Tests compilation ####
 .PHONY: compile-tests
 compile-tests:

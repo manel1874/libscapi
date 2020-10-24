@@ -9,8 +9,7 @@ NETWORK = $(patsubst %.cpp,%.o,$(wildcard Networking/*.cpp))
 OT = $(patsubst %.cpp,%.o,$(wildcard OT/*.cpp))
 COMMON = $(TOOLS) $(NETWORK)
 
-#LIBSIMPLEOT = SimpleOT/libsimpleot.a
-LIBQOKDOT = quantum_random_oblivious_transfer/libqokdot.a
+LIBSIMPLEOT = SimpleOT/libsimpleot.a
 
 
 all: lib 
@@ -29,7 +28,7 @@ install:
 	install -d $(includedir)/OTExtensionBristol/Networking
 	install -d $(includedir)/OTExtensionBristol/Exceptions
 	install -m 0644 libOTExtensionBristol.a $(libdir)
-	install -m 0644 ${LIBQOKDOT} $(libdir)
+	install -m 0644 ${LIBSIMPLEOT} $(libdir)
 	install -m 0644 OT/*.h $(includedir)/OTExtensionBristol/OT
 	install -m 0644 Tools/*.h $(includedir)/OTExtensionBristol/Tools
 	install -m 0644 Networking/*.h $(includedir)/OTExtensionBristol/Networking

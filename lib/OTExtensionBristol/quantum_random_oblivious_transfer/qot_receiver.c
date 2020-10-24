@@ -8,13 +8,31 @@ void receiver_okd (OKDOT_RECEIVER * r)
 	/*opening key files and storing the keys in the receiver structure*/
 
 	FILE *receiverfile;
+	//char * line = NULL;
+	//size_t len = 0;
+	//ssize_t read;
+
 	int i = 0;
 
-	if ((receiverfile = fopen("../quantum_oblivious_key_distribution_linux/signals/BobObliviousKeys.sgn","r")))
+	if((receiverfile = fopen("BobObliviousKeys.sgn","r")))
 	{
+		for(int j = 0; j < 4; j++)
+		{// skip first 4 lines
+			if(fscanf(receiverfile, "%*[^\n]\n")){}
+		}
+			
+		/**
+		for(int j=0; j<4; j++)
+		{ // skip first four lines
+			read = getline(&line, &len, receiverfile);
+			printf("Retrieved line of length %zu:\n", read);
+			printf("%s", line);
+		}**/
+
 		while (i<KEY_LENGTH)
 		{
-			if (fscanf(receiverfile, "%u", &r->receiver_OTkey[i]))
+			//if (fscanf(receiverfile, "%4c", &r->receiver_OTkey[i]))
+			if (fread(&r->receiver_OTkey[i], 4, 1, receiverfile) > 0)
 				i++;
 			else
 				printf ("QOT ERROR: failed to read oblivious keys.\n");
@@ -23,22 +41,43 @@ void receiver_okd (OKDOT_RECEIVER * r)
 	else
 		printf ("QOT ERROR: failed to open oblivious key file: receiver's key file.\n");
 
+    //free(line);
 	fclose (receiverfile);
+	
+	//len = 0;
 	i=0;
 
-	if ((receiverfile = fopen("../quantum_oblivious_key_distribution_linux/signals/BobControlSignal.sgn","r")))
+	if ((receiverfile = fopen("ControlSignal.sgn","r")))
 	{
+		for(int j = 0; j < 4; j++)
+		{// skip first 4 lines
+			if(fscanf(receiverfile, "%*[^\n]\n")){}
+		}
+
+		/**
+		for(int j=0; j<4; j++)
+		{
+			read = getline(&line, &len, receiverfile);
+			printf("Retrieved line of length %zu:\n", read);
+			//printf("%s", line);
+		}**/
+			
 		while (i<KEY_LENGTH)
 		{
-			if (fscanf(receiverfile,"%u", &r->receiver_OTauxkey[i]))
+			//if (fscanf(receiverfile,"%4c", &r->receiver_OTauxkey[i]))
+			if (fread(&r->receiver_OTauxkey[i], 4, 1, receiverfile) > 0)
+			{
 				i++;
-			else
+			} else 
+			{
 				printf ("QOT ERROR: failed to read oblivious keys.\n");
+			}
 		}
 	}
 	else
 		printf ("QOT ERROR: failed to open oblivious key file: receiver's auxkey file.\n");
 
+    //free(line);
 	fclose (receiverfile);
 
 }
@@ -56,16 +95,14 @@ void receiver_indexlist (OKDOT_RECEIVER * r)
 	/*generate I0 and I1 index lists from the receiver aux key*/
 	for (int i = 0; i<KEY_LENGTH; i++)
 	{	
-
+		
 		if (r->receiver_OTauxkey[i] == 0)
 		{
-			printf ("OT SUCCESS: valid key 0 character found.\n");
 			r->indexlist[0][j] = i;
 			j++;
 		}
 		else if (r->receiver_OTauxkey[i] == 1)
 		{
-			printf ("OT SUCCESS: valid key 1 character found.\n");
 			r->indexlist[1][k] = i;
 			k++;
 		}
