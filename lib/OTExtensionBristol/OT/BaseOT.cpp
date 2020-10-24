@@ -81,11 +81,13 @@ void send_if_ot_receiver(const TwoPartyPlayer* P, vector<octetStream>& os, OT_RO
 
 void BaseOT::exec_base(bool new_receiver_inputs)
 {
+    /** Taken from MP_SPDZ (MASCOT)
     if (not cpu_has_avx())
         throw runtime_error("SimpleOT needs AVX support");
+    **/
 
     int i, j; // k, 
-    size_t len;
+    int len;
     PRNG G;
     G.ReSeed();
     vector<octetStream> os(2), os1(2), os2(2);  //object for sending information between the players
@@ -132,18 +134,18 @@ void BaseOT::exec_base(bool new_receiver_inputs)
 			    receiver_char_indexlist[1][2*j+1] = qreceiver.indexlist[1][j] & 0xFF; 	
 		    }
 
-
+            
 		    if (new_receiver_inputs) //generates a random receiver input if new_receiver_inputs = true
 		    	receiver_inputs[i] = G.get_uchar()&1;
 		    //printf ("\nReceiver's input: %d\n", receiver_inputs[i].get());
 		    
 
-		    if (receiver_inputs[i].get() == 0) //the receiver sends the indexlists to the sender in a different order according to the receiver input
+		    if (receiver_inputs[i] == 0) //the receiver sends the indexlists to the sender in a different order according to the receiver input
 		    {
 			    os1[0].store_bytes(receiver_char_indexlist[0], sizeof(receiver_char_indexlist[0]));
 			    os2[0].store_bytes(receiver_char_indexlist[1], sizeof(receiver_char_indexlist[1]));
 		    }
-		    else if (receiver_inputs[i].get() == 1)
+		    else if (receiver_inputs[i] == 1)
 		    {
 			    os1[0].store_bytes(receiver_char_indexlist[1], sizeof(receiver_char_indexlist[1]));
 			    os2[0].store_bytes(receiver_char_indexlist[0], sizeof(receiver_char_indexlist[0]));
@@ -236,7 +238,7 @@ void BaseOT::exec_base(bool new_receiver_inputs)
 				    | ((unsigned long long int)u_char[1][8*j+6]<<8) | (unsigned long long int)u_char[1][8*j+7];
 		    }
 
-		    receiver_output(&qreceiver, u_receiver[receiver_inputs[i].get()], receiver_out); //generate receiver output
+		    receiver_output(&qreceiver, u_receiver[receiver_inputs[i]], receiver_out); //generate receiver output
 		    //for (j=0; j<16; j++)
 			    //printf ("Receiver's output: %x  \n",receiver_out[j]);
 		    //printf ("\n\n");
