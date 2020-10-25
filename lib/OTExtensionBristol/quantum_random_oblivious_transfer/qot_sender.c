@@ -13,8 +13,13 @@ void sender_okd (OKDOT_SENDER * s)
 
 	int i = 0;
 
-	if ((senderfile = fopen("AliceObliviousKeys.sgn","r")))
+	char cwd[1024];
+    getcwd(cwd, sizeof(cwd));
+    printf("Current working dir: %s\n", cwd);
+
+	if ((senderfile = fopen("quantum_oblivious_key_distribution/signals/AliceObliviousKeys.sgn","r")))
 	{
+		printf("QOT SUCCESS: oblivious key file successfully opened.");
 		for(int j = 0; j < 4; j++)
 		{// skip first 4 lines
 			if(fscanf(senderfile, "%*[^\n]\n")){}
@@ -38,7 +43,7 @@ void sender_okd (OKDOT_SENDER * s)
 		}
 	}
 	else
-		printf ("QOT ERROR: failed to open oblivious key file: sender's key file .\n");
+		printf ("QOT ERROR: failed to open oblivious key file: sender's key file DOES THIS CHANGE?? .\n");
 
 	//if (line)
     //    free(line);

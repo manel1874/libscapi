@@ -14,7 +14,11 @@ void receiver_okd (OKDOT_RECEIVER * r)
 
 	int i = 0;
 
-	if((receiverfile = fopen("BobObliviousKeys.sgn","r")))
+	char cwd[1024];
+    getcwd(cwd, sizeof(cwd));
+    printf("Current working dir: %s\n", cwd);
+
+	if((receiverfile = fopen("quantum_oblivious_key_distribution/signals/BobObliviousKeys.sgn","r")))
 	{
 		for(int j = 0; j < 4; j++)
 		{// skip first 4 lines
@@ -47,7 +51,7 @@ void receiver_okd (OKDOT_RECEIVER * r)
 	//len = 0;
 	i=0;
 
-	if ((receiverfile = fopen("ControlSignal.sgn","r")))
+	if ((receiverfile = fopen("quantum_oblivious_key_distribution/signals/BobControlSignal.sgn","r")))
 	{
 		for(int j = 0; j < 4; j++)
 		{// skip first 4 lines
