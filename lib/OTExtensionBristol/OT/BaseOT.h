@@ -56,7 +56,7 @@ public:
 	int length() { return ot_length; }
 
 	// do the OTs
-	virtual void exec_base(bool new_receiver_inputs);
+	virtual void exec_base(bool new_receiver_inputs=true);
 	// use PRG to get the next ot_length bits
 	void extend_length();
 	void check();
