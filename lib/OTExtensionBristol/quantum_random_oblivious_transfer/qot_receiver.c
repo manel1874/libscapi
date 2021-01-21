@@ -1,6 +1,7 @@
 #include "qot_receiver.h"
 #include <stdlib.h>
 //#include <process.h>
+#include <string.h>
 
 void receiver_okd (OKDOT_RECEIVER * r)
 {
@@ -18,7 +19,12 @@ void receiver_okd (OKDOT_RECEIVER * r)
     getcwd(cwd, sizeof(cwd));
     printf("Current working dir: %s\n", cwd);
 
-	if((receiverfile = fopen("quantum_oblivious_key_distribution/signals/BobObliviousKeys.sgn","r")))
+    char bobOKPath[1024];
+    strncpy(bobOKPath, cwd, 1024);
+    strcat(bobOKPath, "/quantum_oblivious_key_distribution/signals/BobObliviousKeys.sgn");
+	printf("Bob Oblivious Key path: %s\n", bobOKPath);
+
+	if((receiverfile = fopen(bobOKPath,"r")))
 	{
 		for(int j = 0; j < 4; j++)
 		{// skip first 4 lines
