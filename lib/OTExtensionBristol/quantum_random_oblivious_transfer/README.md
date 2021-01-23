@@ -61,25 +61,28 @@ To use this implementation together with the libscapi implementation, please fol
 2. Update `Makefile` in `libscapi/lib/OTExtensionBristol`
 
 	- Change lines 12-13 to create `LIBQOKDOT` path variable to `libqokdot.a` library.
-```
+
+	```
 	12	#LIBSIMPLEOT = SimpleOT/libsimpleot.a
 	13	LIBQOKDOT = quantum_random_oblivious_transfer/libqokdot.a
-```
+	```
+	
 	- Change lines 19-22 to `make` `quantum_random_oblivious_transfer` project
 
-```
+	
+	```
 	19	#@echo "compling simple ot..........................."
 	20	#cd SimpleOT && make
 	21	cd quantum_random_oblivious_transfer && make	
 	22	@echo "compling .a ...................."
-```
+	```
 
 	- Change line 33-34 to install `libqokdot.a` instead of `libsimpleot.a`
 
-```
+	```
 	33 	install -m 0644 ${LIBQOKDOT} $(libdir)
 	34	#install -m 0644 ${LIBSIMPLEOT} $(libdir)
-```
+	```
 
 
 libscapi/lib/OTExtensionBristol/
