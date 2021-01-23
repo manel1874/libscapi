@@ -1,8 +1,6 @@
 (C) University of Lisbon - IST
 
-Mariana Gama
-
-Manuel B Santos
+Mariana Gama and Manuel B Santos
 
 =========== Quantum OT ==========
 
