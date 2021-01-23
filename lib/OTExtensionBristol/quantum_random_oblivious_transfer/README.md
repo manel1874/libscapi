@@ -58,16 +58,16 @@ To use this implementation together with the libscapi implementation, please fol
 
 1. Insert the folder `quantum_random_oblivious_transfer` inside `libscapi/lib/OTExtensionBristol`
 
-2. Update `Makefile` in `libscapi/lib/OTExtensionBristol`
+2. Update `Makefile` in `libscapi/lib/OTExtensionBristol`:
 
-	- Change lines 12-13 to create `LIBQOKDOT` path variable to `libqokdot.a` library.
+	- Create `LIBQOKDOT` path variable to `libqokdot.a` library:
 
 	```
 	12	#LIBSIMPLEOT = SimpleOT/libsimpleot.a
 	13	LIBQOKDOT = quantum_random_oblivious_transfer/libqokdot.a
 	```
 	
-	- Change lines 19-22 to `make` `quantum_random_oblivious_transfer` project
+	- Make `quantum_random_oblivious_transfer` project
 
 	
 	```
@@ -77,38 +77,43 @@ To use this implementation together with the libscapi implementation, please fol
 	22	@echo "compling .a ...................."
 	```
 
-	- Change line 33-34 to install `libqokdot.a` instead of `libsimpleot.a`
+	- Install `libqokdot.a` instead of `libsimpleot.a`
 
 	```
 	33 	install -m 0644 ${LIBQOKDOT} $(libdir)
 	34	#install -m 0644 ${LIBSIMPLEOT} $(libdir)
 	```
 
+3. Update `BaseOT.cpp` in `libscapi/lib/OTExtensionBristol/OT`:
 
-libscapi/lib/OTExtensionBristol/
-	|
-	|
-	|---> OT/BaseOT.cpp :: adapt to qot_receiver.h and qot_sender.h
-	|		    :: change lines 14 - 17
-	|		    :: adapt function BaseOT::exec_base
-	|			|
-	|			|---> insert 'bool new_receiver_inputs' variable
-	|			|---> SIMPLEOT_SENDER/RECEIVER -> QKDOT_SENDER/RECEIVER
-	|			|---> Reformulate the rest of the function as shown in the doc
-	|
-	|---> OT/BaseOT.h :: change line 59 
-	|
-	|		from 'virtual void exec_base()' 
-	|		to 'virtual void exec_base(bool new_receiver_inputs=true)'
+	- Adapt to `qot_receiver.h` and `qot_sender.h`:
 
+	```
+	14	//#include "SimpleOT/ot_sender.h"
+	15	//#include "SimpleOT/ot_receiver.h"
+	16	#include "quantum_random_oblivious_transfer/qot_receiver.h"
+	17	#include "quantum_random_oblivious_transfer/qot_sender.h"
+	```
 
-MPC-Benchmark/SemiHonestYao/
-	|
-	|
-	|---> CMakeList.txt :: change line 22-23
-	|
-	|	22	#OTExtensionBristol libsimpleot.a libOTe.a libcryptoTools.a libmiracl.a
-        |	23	OTExtensionBristol libqokdot.a libOTe.a libcryptoTools.a libmiracl.a
+	- Adapt function `BaseOT::exec_base`:
+		- Insert 'bool new_receiver_inputs' variable
+		- Change object `SIMPLEOT_SENDER/RECEIVER` to `QKDOT_SENDER/RECEIVER`
+		- Reformulate the function as shown in the doc
+
+4. Update `BaseOT.h` in `libscapi/lib/OTExtensionBristol/OT`:
+
+	- Add 'bool new_receiver_inputs' variable inside `virtual void exec_base` function:
+
+	```
+	59	virtual void exec_base(bool new_receiver_inputs=true)
+	```
+
+5. Update `CMakeList.txt` in `MPC-Benchmark/SemiHonestYao`:
+
+```
+	22	#OTExtensionBristol libsimpleot.a libOTe.a libcryptoTools.a libmiracl.a
+	23	OTExtensionBristol libqokdot.a libOTe.a libcryptoTools.a libmiracl.a
+```
 
 
 
