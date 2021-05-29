@@ -102,6 +102,20 @@ To use this implementation together with the libscapi implementation, please fol
 
 5. Update `CMakeList.txt` in `MPC-Benchmark/SemiHonestYao`:
 
+	- Change libscapi to qlibscapi:
+
+```
+	6	INCLUDE_DIRECTORIES($ENV{HOME} $ENV{HOME}/qlibscapi/install/include
+	7		$ENV{HOME}/qlibscapi/lib/OTExtensionBristol
+	8		$ENV{HOME}/qlibscapi/install/include
+	9		$ENV{HOME}/qlibscapi/install/include/libOTe/cryptoTools/
+	10		$ENV{HOME}/qlibscapi/install/include/libOTe)
+```
+
+```
+	15	link_directories($ENV{HOME}/qlibscapi/install/lib)
+```
+
 ```
 	22	#OTExtensionBristol libsimpleot.a libOTe.a libcryptoTools.a libmiracl.a
 	23	OTExtensionBristol libqokdot.a libOTe.a libcryptoTools.a libmiracl.a

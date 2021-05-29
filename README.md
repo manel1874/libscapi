@@ -97,3 +97,9 @@ Boost provides free peer-reviewed portable C++ source libraries. We emphasize li
 
 A library for fast and reliable protocol for TCP/UDP.
 
+## Quantum integration
+
+In order to run MPC-Benchmark/SemiHonest with libscapi this folder should be called qlibscapi. 
+
+Also, read qREADME.md to understand how this qdev branch differs from the original classical branch (dev). This is the exact same file that is in lib/OTExtensionBristol/quantum_random_oblivious_transfer/README.md.
+
