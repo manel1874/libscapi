@@ -121,6 +121,15 @@ To use this implementation together with the libscapi implementation, please fol
 	23	OTExtensionBristol libqokdot.a libOTe.a libcryptoTools.a libmiracl.a
 ```
 
+6. Update `YaoParties.hpp` in `MPC-Benchmark/SemiHonestYao`
+
+```
+	60	#include <qlibscapi/include/infra/Scanner.hpp>
+	61	#include <qlibscapi/include/infra/ConfigFile.hpp>
+	62	//#include <libscapi/include/infra/Scanner.hpp>
+	63	//#include <libscapi/include/infra/ConfigFile.hpp>
+```
+
 
 
 
