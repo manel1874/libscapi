@@ -17,7 +17,7 @@ void sender_okd (OKDOT_SENDER * s)
     getcwd(cwd, sizeof(cwd));
     printf("Current working dir: %s\n", cwd);
 
-	if ((senderfile = fopen("quantum_oblivious_key_distribution/signals/oblivious_keys.txt","r")))
+	if ((senderfile = fopen("quantum_oblivious_key_distribution/signals/AliceObliviousKeys.sgn","r")))
 	{
 		printf("QOT SUCCESS: oblivious key file successfully opened.");
 		for(int j = 0; j < 4; j++)
@@ -32,23 +32,15 @@ void sender_okd (OKDOT_SENDER * s)
 			printf("Retrieved line of length %zu:\n", read);
 			printf("%s", line);
 		}**/
-		//if(fscanf (senderfile, "%c", &s->sender_OTkey[i]))
-		
-		char okey[KEY_LENGTH];
-		if (fscanf(senderfile, "%[^\n]", okey) > 0)
+
+		while (i<KEY_LENGTH)
 		{
-			//(&s->sender_OTkey[i], 4, 1, senderfile)
-			while(i<KEY_LENGTH)
-			{
-				unsigned int okey_uint = (unsigned int)okey[i];
-				s->sender_OTkey[i] = okey_uint - 48;
+			//if(fscanf (senderfile, "%c", &s->sender_OTkey[i]))
+			if (fread(&s->sender_OTkey[i], 4, 1, senderfile) > 0)
 				i++;
-			}
-		}else
-		{
-			printf ("QOT ERROR: No more oblivious.\n");
+			else
+				printf ("QOT ERROR: failed to read oblivious keys.\n");
 		}
-			
 	}
 	else
 		printf ("QOT ERROR: failed to open oblivious key file: sender's key file DOES THIS CHANGE?? .\n");
