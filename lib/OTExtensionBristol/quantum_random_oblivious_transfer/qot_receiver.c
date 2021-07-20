@@ -9,86 +9,86 @@ void receiver_okd (OKDOT_RECEIVER * r)
 	/*opening key files and storing the keys in the receiver structure*/
 
 	FILE *receiverfile;
+	FILE *tempFile;
 	//char * line = NULL;
 	//size_t len = 0;
 	//ssize_t read;
 
 	int i = 0;
 
-	char cwd[1024];
-    getcwd(cwd, sizeof(cwd));
-    printf("Current working dir: %s\n", cwd);
+	//char cwd[1024];
+    //getcwd(cwd, sizeof(cwd));
+    //printf("Current working dir: %s\n", cwd);
 
-    char bobOKPath[1024];
-    strncpy(bobOKPath, cwd, 1024);
-    strcat(bobOKPath, "/quantum_oblivious_key_distribution/signals/BobObliviousKeys.sgn");
-	printf("Bob Oblivious Key path: %s\n", bobOKPath);
+    //char bobOKPath[1024];
+    //strncpy(bobOKPath, cwd, 1024);
+    //strcat(bobOKPath, "quantum_oblivious_key_distribution/signals/oblivious_keys.txt");
+	//printf("Bob Oblivious Key path: %s\n", bobOKPath);
 
-	if((receiverfile = fopen(bobOKPath,"r")))
-	{
-		for(int j = 0; j < 4; j++)
-		{// skip first 4 lines
-			if(fscanf(receiverfile, "%*[^\n]\n")){}
-		}
-			
-		/**
-		for(int j=0; j<4; j++)
-		{ // skip first four lines
-			read = getline(&line, &len, receiverfile);
-			printf("Retrieved line of length %zu:\n", read);
-			printf("%s", line);
-		}**/
 
-		while (i<KEY_LENGTH)
-		{
-			//if (fscanf(receiverfile, "%4c", &r->receiver_OTkey[i]))
-			if (fread(&r->receiver_OTkey[i], 4, 1, receiverfile) > 0)
-				i++;
-			else
-				printf ("QOT ERROR: failed to read oblivious keys.\n");
-		}
-	}	
-	else
-		printf ("QOT ERROR: failed to open oblivious key file: receiver's key file.\n");
-
-    //free(line);
-	fclose (receiverfile);
-	
-	//len = 0;
-	i=0;
-
-	if ((receiverfile = fopen("quantum_oblivious_key_distribution/signals/BobControlSignal.sgn","r")))
+	if ((receiverfile = fopen("quantum_oblivious_key_distribution/signals/oblivious_keys.txt","r")))
 	{
 		for(int j = 0; j < 4; j++)
 		{// skip first 4 lines
 			if(fscanf(receiverfile, "%*[^\n]\n")){}
 		}
 
-		/**
-		for(int j=0; j<4; j++)
+		char aux_okey[KEY_LENGTH];
+		if (fscanf(receiverfile, "%[^\n]", aux_okey) > 0)
 		{
-			read = getline(&line, &len, receiverfile);
-			printf("Retrieved line of length %zu:\n", read);
-			//printf("%s", line);
-		}**/
-			
-		while (i<KEY_LENGTH)
-		{
-			//if (fscanf(receiverfile,"%4c", &r->receiver_OTauxkey[i]))
-			if (fread(&r->receiver_OTauxkey[i], 4, 1, receiverfile) > 0)
+			while(i<KEY_LENGTH/2)
 			{
+				unsigned int aux_okey_uint = (unsigned int)aux_okey[2*i];
+				unsigned int okey_uint = (unsigned int)aux_okey[2*i + 1];
+				if(aux_okey_uint == 48) // If aux_key is zero
+				{
+					r->receiver_OTauxkey[2*i] = 0; // The first element is known
+					r->receiver_OTauxkey[2*i + 1] = 1; // The second element is unkown
+
+					r->receiver_OTkey[2*i] = okey_uint - 48; //Saves the value known by the receiver
+					r->receiver_OTkey[2*i + 1] = 1; // Saves 1: meaning it is unkown
+
+				}else{
+					r->receiver_OTauxkey[2*i] = 1; // The first element is unknown
+					r->receiver_OTauxkey[2*i + 1] = 0; // The second element is known
+
+					r->receiver_OTkey[2*i] = 1; // Saves 1: meaning it is unkown 
+					r->receiver_OTkey[2*i + 1] = okey_uint - 48; // Saves the value known by the receiver
+				}
 				i++;
-			} else 
-			{
-				printf ("QOT ERROR: failed to read oblivious keys.\n");
 			}
+		}else
+		{
+			printf ("QOT ERROR: No more oblivious.\n");
 		}
 	}
 	else
 		printf ("QOT ERROR: failed to open oblivious key file: receiver's auxkey file.\n");
 
-    //free(line);
-	fclose (receiverfile);
+
+	// Delete one line
+	tempFile = fopen("delete-line.tmp", "w");
+
+	if(tempFile == NULL)
+	{
+		printf("Unnable to create temporary file.\n");
+		printf("Please check you have read/write previleges.\n");
+		exit(EXIT_FAILURE);
+	}
+
+	// Move src file pointer to beginning
+	rewind(receiverfile);
+	// Delete given line from file
+	deleteLine(receiverfile, tempFile, 5);
+
+	// Close all open files
+	fclose(tempFile);
+	fclose(receiverfile);
+
+	// Delete src file and rename temp file as src
+	remove("quantum_oblivious_key_distribution/signals/oblivious_keys.txt");
+	rename("delete-line.tmp", "quantum_oblivious_key_distribution/signals/oblivious_keys.txt");
+
 
 }
 
@@ -106,12 +106,12 @@ void receiver_indexlist (OKDOT_RECEIVER * r)
 	for (int i = 0; i<KEY_LENGTH; i++)
 	{	
 		
-		if (r->receiver_OTauxkey[i] == 0)
+		if (r->receiver_OTauxkey[i] == 0) // known bit
 		{
 			r->indexlist[0][j] = i;
 			j++;
 		}
-		else if (r->receiver_OTauxkey[i] == 1)
+		else if (r->receiver_OTauxkey[i] == 1) // unkown bit
 		{
 			r->indexlist[1][k] = i;
 			k++;
